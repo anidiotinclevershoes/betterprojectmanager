@@ -153,6 +153,9 @@ export interface CaptureResult {
   insights: string[];
   assumptions: string[];
   recommendations: Recommendation[];
+  rawContent?: string;
+  tidied?: boolean;
+  provider?: "openai" | "local";
 }
 
 export interface MissionState {

@@ -18,35 +18,41 @@ Every recommendation is generated as if by an exceptional Programme Manager aski
 
 ## What it does
 
-- **Overview dashboard** — cross-project KPIs and the most pertinent coaching moves
+- **Quick capture on Overview** — type or speak from the top of the main dashboard
+- **Voice notes** — record → Whisper transcription → ChatGPT tidy-up → coaching updates
+- **Overview dashboard** — KPIs and the most pertinent coaching moves
 - **Project tabs** — ATLAS, HORIZON (and more) each with a focused leadership dashboard
-- **Capture** — notes, conversations and voice scraps analysed immediately
 - **Meeting strategy** — before / during / after prep so you lead the room
 - **Institutional memory** — answer questions months later (“Why did we delay Release 8?”)
 - **Release playbook** — monthly lifecycle coaching from merge window through hypercare and closure
-
-## Principles baked into the product
-
-| Principle | Behaviour |
-| --- | --- |
-| Never passive | New information triggers continuous analysis |
-| Coach, don’t display | Every recommendation explains *why* it matters |
-| Imperfect information | Reasons from conversations and notes; labels assumptions instead of blocking |
-| Leadership presence | Scripts, challenges and ownership moments — not ticket creation |
-| Daily test | “How can I make this PM look calm, prepared, proactive and trusted today?” |
-
-Core mission source of truth: [`src/lib/mission.ts`](src/lib/mission.ts)
 
 ## Quick start
 
 ```bash
 npm install
+cp .env.local.example .env.local
+# Put your OpenAI API key in .env.local
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Demo projects (Atlas Release 9, Horizon roadmap) and institutional memory load automatically. State persists in `localStorage`.
+### Connect your ChatGPT / OpenAI account
+
+1. Create an API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+2. Add it to `.env.local`:
+
+```bash
+OPENAI_API_KEY=sk-...
+# optional
+# OPENAI_MODEL=gpt-4o-mini
+```
+
+3. Restart `npm run dev`
+
+**Note:** ChatGPT Plus and the OpenAI API are billed separately. Same OpenAI login can use both; the app needs an **API key**, not your ChatGPT password.
+
+Without a key, typed capture still works with the local coaching engine. Voice transcription requires the key (Whisper).
 
 ```bash
 npm run build   # production build
@@ -57,7 +63,8 @@ npm run verify  # coaching engine smoke checks
 ## Stack
 
 - Next.js App Router · React 19 · TypeScript · Tailwind CSS 4
-- Rule-based coaching engine in `src/lib/coach.ts` (AI-provider ready via `COACHING_SYSTEM_PROMPT` in `src/lib/mission.ts`)
+- OpenAI Whisper (voice) + Chat Completions (tidy + coach)
+- Local fallback coaching in `src/lib/coach.ts`
 
 ## Product north star
 

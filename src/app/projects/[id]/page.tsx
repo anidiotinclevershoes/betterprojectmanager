@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { CaptureBar } from "@/components/CaptureBar";
 import {
   PageHeader,
   Panel,
@@ -21,6 +20,8 @@ import {
   upcomingMeetings,
 } from "@/lib/selectors";
 import { useMission } from "@/lib/store";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function ProjectDashboardPage() {
   const params = useParams<{ id: string }>();
@@ -55,18 +56,10 @@ export default function ProjectDashboardPage() {
         eyebrow={project.code}
         title={project.name}
         description={project.summary}
-        actions={
-          <>
-            <StatusPill status={project.status} />
-            <Link
-              href="/capture"
-              className="rounded-lg bg-ink px-3.5 py-2 text-sm font-medium text-paper"
-            >
-              Capture
-            </Link>
-          </>
-        }
+        actions={<StatusPill status={project.status} />}
       />
+
+      <CaptureBar defaultProjectId={project.id} compact />
 
       <div className="mb-5 panel px-4 py-3 md:px-5">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">

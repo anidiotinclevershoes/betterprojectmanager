@@ -6,7 +6,6 @@ import type { ReactNode } from "react";
 import { useMission } from "@/lib/store";
 
 const TOOL_NAV = [
-  { href: "/capture", label: "Capture" },
   { href: "/meetings", label: "Meetings" },
   { href: "/memory", label: "Memory" },
   { href: "/releases", label: "Releases" },

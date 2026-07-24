@@ -7,6 +7,7 @@ import {
   StatTile,
   StatusPill,
 } from "@/components/DashboardChrome";
+import { CaptureBar } from "@/components/CaptureBar";
 import {
   RecommendationItem,
   RecommendationLink,
@@ -44,16 +45,10 @@ export default function OverviewPage() {
       <PageHeader
         eyebrow="Overview"
         title="What needs your leadership today"
-        description="Cross-project brief — the moves, meetings and risks that keep you looking calm, prepared and trusted."
-        actions={
-          <Link
-            href="/capture"
-            className="rounded-lg bg-ink px-3.5 py-2 text-sm font-medium text-paper transition hover:bg-ink/90"
-          >
-            Capture update
-          </Link>
-        }
+        description="Capture anything at the top — type or speak. AI tidies the ramble and updates your brief."
       />
+
+      <CaptureBar />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile
@@ -279,9 +274,7 @@ export default function OverviewPage() {
           {moves.slice(4).map((rec) => (
             <RecommendationLink
               key={rec.id}
-              href={
-                rec.projectId ? `/projects/${rec.projectId}` : "/capture"
-              }
+              href={rec.projectId ? `/projects/${rec.projectId}` : "/"}
               recommendation={rec}
             />
           ))}
