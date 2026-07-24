@@ -18,8 +18,9 @@ Every recommendation is generated as if by an exceptional Programme Manager aski
 
 ## What it does
 
-- **Today's brief** — proactive coaching moves (not a task backlog)
-- **Capture** — notes, conversations and voice scraps analysed immediately for risks, waits, decisions and leadership actions
+- **Overview dashboard** — cross-project KPIs and the most pertinent coaching moves
+- **Project tabs** — ATLAS, HORIZON (and more) each with a focused leadership dashboard
+- **Capture** — notes, conversations and voice scraps analysed immediately
 - **Meeting strategy** — before / during / after prep so you lead the room
 - **Institutional memory** — answer questions months later (“Why did we delay Release 8?”)
 - **Release playbook** — monthly lifecycle coaching from merge window through hypercare and closure

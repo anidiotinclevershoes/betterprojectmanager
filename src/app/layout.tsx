@@ -37,7 +37,7 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${syne.variable} ${sourceSerif.variable} h-full antialiased`}
     >
-      <body className="min-h-full atmosphere text-ink">
+      <body className="min-h-full bg-canvas text-ink">
         <MissionProvider>
           <AppShell>{children}</AppShell>
         </MissionProvider>

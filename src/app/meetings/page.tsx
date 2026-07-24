@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { PageHeader, Panel } from "@/components/DashboardChrome";
+import { formatWhen } from "@/lib/selectors";
 import { useMission } from "@/lib/store";
 
 export default function MeetingsPage() {
@@ -11,56 +13,49 @@ export default function MeetingsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-5xl px-5 py-12 md:px-8 md:py-16">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal">
-        Meeting strategy
-      </p>
-      <h1 className="brand-mark mt-3 max-w-3xl text-4xl font-extrabold tracking-tight md:text-5xl">
-        Prepare to lead every room
-      </h1>
-      <p className="coach-voice mt-4 max-w-2xl text-xl leading-relaxed text-ink-soft">
-        Objectives, opening script, decisions to obtain, risks to surface, and
-        the leadership moments that make you the person running the project.
-      </p>
+    <div>
+      <PageHeader
+        eyebrow="Meetings"
+        title="Prepare to lead every room"
+        description="Objectives, opening scripts, decisions to obtain and the leadership moments that make you the person running the project."
+      />
 
-      <div className="mt-12 space-y-0 divide-y divide-line border-t border-line">
-        {meetings.map((meeting) => {
-          const project = state.projects.find((p) => p.id === meeting.projectId);
-          return (
-            <Link
-              key={meeting.id}
-              href={`/meetings/${meeting.id}`}
-              className="block py-8 transition hover:bg-mist/40"
-            >
-              <div className="flex flex-wrap items-baseline justify-between gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.14em] text-ink-soft">
-                    {project?.code ?? "Project"} · {meeting.phase.replaceAll("_", " ")}
+      <Panel title={`${meetings.length} meetings`}>
+        <div className="divide-y divide-line">
+          {meetings.map((meeting) => {
+            const project = state.projects.find(
+              (p) => p.id === meeting.projectId,
+            );
+            return (
+              <Link
+                key={meeting.id}
+                href={`/meetings/${meeting.id}`}
+                className="block py-4 first:pt-0 last:pb-0 transition hover:bg-mist/30 -mx-1 rounded-md px-1"
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-ink-soft">
+                      {project?.code} · {meeting.phase.replaceAll("_", " ")}
+                    </p>
+                    <h2 className="brand-mark mt-1 text-xl font-bold">
+                      {meeting.title}
+                    </h2>
+                  </div>
+                  <p className="text-sm text-ink-soft">
+                    {formatWhen(meeting.startsAt)}
                   </p>
-                  <h2 className="brand-mark mt-2 text-2xl font-bold md:text-3xl">
-                    {meeting.title}
-                  </h2>
                 </div>
-                <p className="text-sm text-ink-soft">
-                  {new Date(meeting.startsAt).toLocaleString(undefined, {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                <p className="mt-2 text-sm text-ink">
+                  Obtain: {meeting.prep.decisionsToObtain[0]}
                 </p>
-              </div>
-              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-ink">
-                Obtain: {meeting.prep.decisionsToObtain[0]}
-              </p>
-              <p className="mt-2 text-sm text-teal">
-                Watch for: {meeting.prep.risksToDiscuss[0]}
-              </p>
-            </Link>
-          );
-        })}
-      </div>
+                <p className="mt-1 text-sm text-signal">
+                  Watch: {meeting.prep.risksToDiscuss[0]}
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+      </Panel>
     </div>
   );
 }

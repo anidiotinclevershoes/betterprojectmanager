@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { Recommendation, RecommendationUrgency } from "@/lib/types";
 
 const URGENCY_LABEL: Record<RecommendationUrgency, string> = {
@@ -20,59 +21,102 @@ export function RecommendationItem({
   recommendation,
   onDone,
   onDismiss,
+  compact = false,
 }: {
   recommendation: Recommendation;
   onDone: () => void;
   onDismiss: () => void;
+  compact?: boolean;
 }) {
   return (
-    <article className="border-t border-line py-6 first:border-t-0 first:pt-0">
+    <article
+      className={`border-t border-line first:border-t-0 ${compact ? "py-4" : "py-5"}`}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <span
-          className={`text-[11px] font-semibold uppercase tracking-[0.14em] ${URGENCY_CLASS[recommendation.urgency]} rounded px-2 py-1`}
+          className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${URGENCY_CLASS[recommendation.urgency]}`}
         >
           {URGENCY_LABEL[recommendation.urgency]}
         </span>
-        <span className="text-[11px] uppercase tracking-[0.14em] text-ink-soft">
+        <span className="text-[10px] uppercase tracking-[0.12em] text-ink-soft">
           {recommendation.kind.replaceAll("_", " ")}
         </span>
       </div>
-      <h3 className="brand-mark mt-3 text-2xl font-700 tracking-tight text-ink md:text-[1.7rem]">
+      <h3
+        className={`brand-mark mt-2 font-bold tracking-tight text-ink ${compact ? "text-base" : "text-lg"}`}
+      >
         {recommendation.title}
       </h3>
-      <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-ink">
+      <p className="mt-1.5 text-sm leading-relaxed text-ink">
         {recommendation.action}
       </p>
-      <p className="coach-voice mt-4 max-w-3xl text-[17px] leading-relaxed text-ink-soft">
-        {recommendation.why}
-      </p>
-      <p className="mt-3 max-w-3xl text-sm text-teal">
-        Leadership impact: {recommendation.leadershipImpact}
-      </p>
-      {recommendation.suggestedScript ? (
-        <blockquote className="mt-4 max-w-3xl border-l-2 border-teal pl-4 text-sm leading-relaxed text-ink-soft">
-          <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.14em] text-teal">
+      {!compact ? (
+        <>
+          <p className="coach-voice mt-3 text-[15px] leading-relaxed text-ink-soft">
+            {recommendation.why}
+          </p>
+          <p className="mt-2 text-sm text-teal">
+            Leadership impact: {recommendation.leadershipImpact}
+          </p>
+        </>
+      ) : (
+        <p className="mt-2 text-xs leading-relaxed text-ink-soft line-clamp-2">
+          {recommendation.why}
+        </p>
+      )}
+      {recommendation.suggestedScript && !compact ? (
+        <blockquote className="mt-3 border-l-2 border-teal pl-3 text-sm leading-relaxed text-ink-soft">
+          <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.12em] text-teal">
             Suggested opening
           </span>
           {recommendation.suggestedScript}
         </blockquote>
       ) : null}
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={onDone}
-          className="rounded-md bg-ink px-3.5 py-2 text-sm text-paper transition hover:bg-ink/90"
+          className="rounded-md bg-ink px-3 py-1.5 text-xs font-medium text-paper transition hover:bg-ink/90"
         >
-          Done — I led this
+          Done
         </button>
         <button
           type="button"
           onClick={onDismiss}
-          className="rounded-md px-3.5 py-2 text-sm text-ink-soft transition hover:bg-mist"
+          className="rounded-md px-3 py-1.5 text-xs text-ink-soft transition hover:bg-mist"
         >
           Not now
         </button>
       </div>
     </article>
+  );
+}
+
+export function RecommendationLink({
+  href,
+  recommendation,
+}: {
+  href: string;
+  recommendation: Recommendation;
+}) {
+  return (
+    <Link
+      href={href}
+      className="block border-t border-line py-3 first:border-t-0 first:pt-0 hover:bg-mist/40 -mx-1 rounded-md px-1"
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] ${URGENCY_CLASS[recommendation.urgency]}`}
+        >
+          {URGENCY_LABEL[recommendation.urgency]}
+        </span>
+        <span className="truncate text-sm font-medium text-ink">
+          {recommendation.title}
+        </span>
+      </div>
+      <p className="mt-1 line-clamp-1 text-xs text-ink-soft">
+        {recommendation.why}
+      </p>
+    </Link>
   );
 }
