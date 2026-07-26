@@ -20,14 +20,22 @@ import type {
   CaptureResult,
   MissionState,
   Recommendation,
+  TodoItem,
 } from "./types";
 
-const STORAGE_KEY = "mission-control-state-v1";
+const STORAGE_KEY = "mission-control-state-v2";
+
+type OpenAIDiagnostics = {
+  keyPrefix: string | null;
+  keyLength: number;
+  reason: string | null;
+};
 
 type MissionContextValue = {
   state: MissionState;
   hydrated: boolean;
   openaiConfigured: boolean | null;
+  openaiDiagnostics: OpenAIDiagnostics | null;
   capture: (input: CaptureInput) => CaptureResult;
   captureWithAI: (input: CaptureInput) => Promise<CaptureResult>;
   applyCaptureResult: (result: CaptureResult) => void;
@@ -35,17 +43,28 @@ type MissionContextValue = {
     id: string,
     status: Recommendation["status"],
   ) => void;
+  acceptSuggestion: (recommendationId: string) => void;
+  dismissSuggestion: (recommendationId: string) => void;
+  toggleTodo: (todoId: string) => void;
+  removeTodo: (todoId: string) => void;
   refreshCoaching: () => void;
   resetDemo: () => void;
 };
 
 const MissionContext = createContext<MissionContextValue | null>(null);
 
+function normaliseState(raw: MissionState): MissionState {
+  return {
+    ...raw,
+    todos: raw.todos ?? [],
+  };
+}
+
 function readStoredState(): MissionState {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return createSeedState();
-    return JSON.parse(raw) as MissionState;
+    return normaliseState(JSON.parse(raw) as MissionState);
   } catch {
     return createSeedState();
   }
@@ -55,6 +74,7 @@ function withProactiveCoaching(state: MissionState): MissionState {
   const extras = generateProactiveRecommendations(state);
   return {
     ...state,
+    todos: state.todos ?? [],
     recommendations: [...extras, ...state.recommendations],
     lastAnalyzedAt: new Date().toISOString(),
   };
@@ -67,11 +87,16 @@ function persist(state: MissionState) {
 function mergeCapture(prev: MissionState, result: CaptureResult): MissionState {
   const next: MissionState = {
     ...prev,
+    todos: prev.todos ?? [],
     memories: [result.memory, ...prev.memories],
     recommendations: [...result.recommendations, ...prev.recommendations],
     lastAnalyzedAt: new Date().toISOString(),
   };
   return withProactiveCoaching(next);
+}
+
+function id(prefix: string) {
+  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export function MissionProvider({ children }: { children: ReactNode }) {
@@ -80,6 +105,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   const [openaiConfigured, setOpenaiConfigured] = useState<boolean | null>(
     null,
   );
+  const [openaiDiagnostics, setOpenaiDiagnostics] =
+    useState<OpenAIDiagnostics | null>(null);
   const stateRef = useRef(state);
 
   useEffect(() => {
@@ -103,11 +130,31 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     fetch("/api/capture")
       .then((res) => res.json())
-      .then((data: { openaiConfigured?: boolean }) => {
-        if (!cancelled) setOpenaiConfigured(Boolean(data.openaiConfigured));
-      })
+      .then(
+        (data: {
+          openaiConfigured?: boolean;
+          keyPrefix?: string | null;
+          keyLength?: number;
+          reason?: string | null;
+        }) => {
+          if (cancelled) return;
+          setOpenaiConfigured(Boolean(data.openaiConfigured));
+          setOpenaiDiagnostics({
+            keyPrefix: data.keyPrefix ?? null,
+            keyLength: data.keyLength ?? 0,
+            reason: data.reason ?? null,
+          });
+        },
+      )
       .catch(() => {
-        if (!cancelled) setOpenaiConfigured(false);
+        if (!cancelled) {
+          setOpenaiConfigured(false);
+          setOpenaiDiagnostics({
+            keyPrefix: null,
+            keyLength: 0,
+            reason: "Could not reach /api/capture",
+          });
+        }
       });
     return () => {
       cancelled = true;
@@ -172,16 +219,64 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setRecommendationStatus = useCallback(
-    (id: string, status: Recommendation["status"]) => {
+    (recId: string, status: Recommendation["status"]) => {
       setState((prev) => ({
         ...prev,
         recommendations: prev.recommendations.map((r) =>
-          r.id === id ? { ...r, status } : r,
+          r.id === recId ? { ...r, status } : r,
         ),
       }));
     },
     [],
   );
+
+  const acceptSuggestion = useCallback((recommendationId: string) => {
+    setState((prev) => {
+      const rec = prev.recommendations.find((r) => r.id === recommendationId);
+      if (!rec || !rec.projectId) return prev;
+      const todo: TodoItem = {
+        id: id("todo"),
+        projectId: rec.projectId,
+        title: rec.title,
+        detail: rec.action,
+        done: false,
+        createdAt: new Date().toISOString(),
+        sourceRecommendationId: rec.id,
+      };
+      return {
+        ...prev,
+        todos: [todo, ...(prev.todos ?? [])],
+        recommendations: prev.recommendations.map((r) =>
+          r.id === recommendationId ? { ...r, status: "done" } : r,
+        ),
+      };
+    });
+  }, []);
+
+  const dismissSuggestion = useCallback((recommendationId: string) => {
+    setState((prev) => ({
+      ...prev,
+      recommendations: prev.recommendations.map((r) =>
+        r.id === recommendationId ? { ...r, status: "dismissed" } : r,
+      ),
+    }));
+  }, []);
+
+  const toggleTodo = useCallback((todoId: string) => {
+    setState((prev) => ({
+      ...prev,
+      todos: (prev.todos ?? []).map((t) =>
+        t.id === todoId ? { ...t, done: !t.done } : t,
+      ),
+    }));
+  }, []);
+
+  const removeTodo = useCallback((todoId: string) => {
+    setState((prev) => ({
+      ...prev,
+      todos: (prev.todos ?? []).filter((t) => t.id !== todoId),
+    }));
+  }, []);
 
   const refreshCoaching = useCallback(() => {
     setState((prev) => withProactiveCoaching(prev));
@@ -198,10 +293,15 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       state,
       hydrated,
       openaiConfigured,
+      openaiDiagnostics,
       capture,
       captureWithAI,
       applyCaptureResult,
       setRecommendationStatus,
+      acceptSuggestion,
+      dismissSuggestion,
+      toggleTodo,
+      removeTodo,
       refreshCoaching,
       resetDemo,
     }),
@@ -209,10 +309,15 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       state,
       hydrated,
       openaiConfigured,
+      openaiDiagnostics,
       capture,
       captureWithAI,
       applyCaptureResult,
       setRecommendationStatus,
+      acceptSuggestion,
+      dismissSuggestion,
+      toggleTodo,
+      removeTodo,
       refreshCoaching,
       resetDemo,
     ],

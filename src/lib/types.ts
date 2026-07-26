@@ -158,11 +158,34 @@ export interface CaptureResult {
   provider?: "openai" | "local";
 }
 
+/** Owned checklist item — accepted from suggestions or added manually. */
+export interface TodoItem {
+  id: string;
+  projectId: string;
+  title: string;
+  detail?: string;
+  done: boolean;
+  createdAt: string;
+  sourceRecommendationId?: string;
+}
+
+/** AI-proposed meeting the user can later expand into agenda/script. */
+export interface SuggestedMeeting {
+  id: string;
+  projectId: string;
+  title: string;
+  why: string;
+  withWhom: string[];
+  urgency: RecommendationUrgency;
+  recommendationId?: string;
+}
+
 export interface MissionState {
   projects: Project[];
   memories: MemoryEntry[];
   recommendations: Recommendation[];
   meetings: Meeting[];
   releases: Release[];
+  todos: TodoItem[];
   lastAnalyzedAt?: string;
 }

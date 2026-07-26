@@ -13,13 +13,13 @@ export function Panel({
 }) {
   return (
     <section className={`panel flex flex-col ${className}`}>
-      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 md:px-5">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+      <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2">
+        <h2 className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-ink-soft">
           {title}
         </h2>
         {action ? <div className="shrink-0">{action}</div> : null}
       </div>
-      <div className="flex-1 p-4 md:p-5">{children}</div>
+      <div className="flex-1 p-2.5 md:p-3">{children}</div>
     </section>
   );
 }

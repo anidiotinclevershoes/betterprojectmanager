@@ -10,12 +10,61 @@ import type {
 } from "./types";
 import { analyseCapture } from "./coach";
 
+/**
+ * Normalise API keys copied from dashboards/password managers.
+ * Strips BOM, wrapping quotes, and accidental whitespace/newlines that cause 401s.
+ */
 export function getOpenAIKey() {
-  return process.env.OPENAI_API_KEY?.trim() || "";
+  const raw = process.env.OPENAI_API_KEY ?? "";
+  let key = raw.replace(/^\uFEFF/, "").trim();
+  if (
+    (key.startsWith('"') && key.endsWith('"')) ||
+    (key.startsWith("'") && key.endsWith("'"))
+  ) {
+    key = key.slice(1, -1).trim();
+  }
+  // Collapse accidental newlines/spaces inside a pasted key
+  key = key.replace(/\s+/g, "");
+  return key;
 }
 
 export function isOpenAIConfigured() {
-  return Boolean(getOpenAIKey());
+  const key = getOpenAIKey();
+  return key.startsWith("sk-") && key.length > 20;
+}
+
+export function getOpenAIKeyDiagnostics() {
+  const key = getOpenAIKey();
+  if (!key) {
+    return {
+      openaiConfigured: false,
+      reason: "OPENAI_API_KEY is missing from .env.local",
+      prefix: null as string | null,
+      length: 0,
+    };
+  }
+  if (!key.startsWith("sk-")) {
+    return {
+      openaiConfigured: false,
+      reason: "Key does not start with sk- — use an API key from platform.openai.com/api-keys",
+      prefix: key.slice(0, 6),
+      length: key.length,
+    };
+  }
+  if (key === "sk-..." || key.includes("your-real-key") || key.endsWith("...")) {
+    return {
+      openaiConfigured: false,
+      reason: "Placeholder key detected — replace sk-... with your real secret key",
+      prefix: key.slice(0, 7),
+      length: key.length,
+    };
+  }
+  return {
+    openaiConfigured: true,
+    reason: null as string | null,
+    prefix: key.startsWith("sk-proj-") ? "sk-proj-…" : "sk-…",
+    length: key.length,
+  };
 }
 
 function id(prefix: string) {
@@ -161,6 +210,11 @@ export async function transcribeWithWhisper(file: File | Blob, filename: string)
 
   if (!response.ok) {
     const detail = await response.text();
+    if (response.status === 401) {
+      throw new Error(
+        "Whisper failed (401): OpenAI rejected your API key. Create a new key at platform.openai.com/api-keys, put it in .env.local as OPENAI_API_KEY=sk-... with no quotes, then fully restart npm run dev.",
+      );
+    }
     throw new Error(`Whisper failed (${response.status}): ${detail}`);
   }
 

@@ -20,6 +20,7 @@ export function CaptureBar({
     captureWithAI,
     setRecommendationStatus,
     openaiConfigured,
+    openaiDiagnostics,
   } = useMission();
 
   const [content, setContent] = useState("");
@@ -161,30 +162,30 @@ export function CaptureBar({
       action={
         <span className="text-[11px] text-ink-soft">
           {openaiConfigured
-            ? "OpenAI connected"
+            ? `OpenAI connected${openaiDiagnostics?.keyLength ? ` · key ${openaiDiagnostics.keyLength} chars` : ""}`
             : openaiConfigured === false
               ? "Local mode — add OPENAI_API_KEY"
               : "Checking AI…"}
         </span>
       }
-      className="mb-5"
+      className={compact ? "mb-2" : "mb-4"}
     >
-      <form onSubmit={onSubmit} className="space-y-3">
+      <form onSubmit={onSubmit} className={compact ? "space-y-2" : "space-y-3"}>
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          rows={compact ? 3 : 4}
+          rows={compact ? 2 : 4}
           disabled={busy !== "idle" || recording}
-          placeholder="Type a scrap, or hold the mic and ramble — AI will tidy it and update your brief…"
-          className="w-full resize-y rounded-lg border border-line bg-canvas/50 px-3 py-2.5 text-sm leading-relaxed outline-none ring-teal/30 placeholder:text-ink-soft/55 focus:ring-2 disabled:opacity-60"
+          placeholder="Type or voice-capture — AI tidies and updates your widgets…"
+          className={`w-full resize-y rounded-md border border-line bg-canvas/50 px-2.5 leading-relaxed outline-none ring-teal/30 placeholder:text-ink-soft/55 focus:ring-2 disabled:opacity-60 ${compact ? "py-1.5 text-xs" : "py-2.5 text-sm"}`}
         />
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <select
             value={effectiveProjectId}
             onChange={(e) => setProjectId(e.target.value)}
             disabled={busy !== "idle"}
-            className="rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal/30"
+            className={`rounded-md border border-line bg-paper outline-none focus:ring-2 focus:ring-teal/30 ${compact ? "px-2 py-1 text-xs" : "px-3 py-2 text-sm"}`}
           >
             <option value="">All / unlinked</option>
             {state.projects.map((p) => (
@@ -197,7 +198,7 @@ export function CaptureBar({
           <button
             type="submit"
             disabled={busy !== "idle" || recording || !content.trim()}
-            className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-paper disabled:opacity-50"
+            className={`rounded-md bg-ink font-medium text-paper disabled:opacity-50 ${compact ? "px-2.5 py-1 text-xs" : "px-4 py-2 text-sm"}`}
           >
             Capture
           </button>
@@ -207,7 +208,7 @@ export function CaptureBar({
               type="button"
               onClick={() => void startRecording()}
               disabled={busy !== "idle"}
-              className="inline-flex items-center gap-2 rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium text-ink hover:bg-mist disabled:opacity-50"
+              className={`inline-flex items-center gap-1.5 rounded-md border border-line bg-paper font-medium text-ink hover:bg-mist disabled:opacity-50 ${compact ? "px-2 py-1 text-xs" : "px-3 py-2 text-sm"}`}
             >
               <MicIcon />
               Voice
@@ -216,7 +217,7 @@ export function CaptureBar({
             <button
               type="button"
               onClick={stopRecording}
-              className="inline-flex items-center gap-2 rounded-lg bg-signal px-3 py-2 text-sm font-medium text-paper"
+              className={`inline-flex items-center gap-1.5 rounded-md bg-signal font-medium text-paper ${compact ? "px-2 py-1 text-xs" : "px-3 py-2 text-sm"}`}
             >
               <span className="h-2 w-2 animate-pulse rounded-full bg-paper" />
               Stop · {seconds}s
@@ -237,11 +238,17 @@ export function CaptureBar({
 
       {openaiConfigured === false ? (
         <p className="mt-3 text-xs leading-relaxed text-ink-soft">
+          {openaiDiagnostics?.reason ? (
+            <>
+              {openaiDiagnostics.reason}.{" "}
+            </>
+          ) : null}
           Add your OpenAI API key to{" "}
           <code className="rounded bg-mist px-1">.env.local</code> as{" "}
-          <code className="rounded bg-mist px-1">OPENAI_API_KEY=…</code> then
-          restart <code className="rounded bg-mist px-1">npm run dev</code>.
-          Get a key at{" "}
+          <code className="rounded bg-mist px-1">OPENAI_API_KEY=sk-...</code>{" "}
+          (no quotes), then restart{" "}
+          <code className="rounded bg-mist px-1">npm run dev</code>. Get a key
+          at{" "}
           <a
             href="https://platform.openai.com/api-keys"
             target="_blank"
@@ -250,7 +257,17 @@ export function CaptureBar({
           >
             platform.openai.com/api-keys
           </a>
-          . Voice uses Whisper; tidy-up uses ChatGPT.
+          .
+        </p>
+      ) : null}
+
+      {error?.includes("401") || error?.toLowerCase().includes("incorrect api key") ? (
+        <p className="mt-2 text-xs leading-relaxed text-ink-soft">
+          OpenAI rejected the key. Recreate a fresh secret key, paste it with no
+          quotes into <code className="rounded bg-mist px-1">.env.local</code>,
+          fully stop the server (<code className="rounded bg-mist px-1">Ctrl+C</code>),
+          then run <code className="rounded bg-mist px-1">npm run dev</code> again.
+          A valid key is usually 50+ characters.
         </p>
       ) : null}
 

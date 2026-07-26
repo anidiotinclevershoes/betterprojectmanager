@@ -5,6 +5,7 @@ import type {
   Project,
   Recommendation,
   Release,
+  TodoItem,
 } from "./types";
 
 const now = Date.now();
@@ -485,6 +486,32 @@ export const DEMO_RELEASES: Release[] = [
   },
 ];
 
+export const DEMO_TODOS: TodoItem[] = [
+  {
+    id: "todo-cab-pack",
+    projectId: "proj-atlas",
+    title: "Finalise Release 9 CAB pack artefacts",
+    detail: "Change record, regression evidence, rollback plan, hypercare roster",
+    done: false,
+    createdAt: daysAgo(1),
+  },
+  {
+    id: "todo-billing-signoff",
+    projectId: "proj-atlas",
+    title: "Chase billing regression sign-off",
+    done: false,
+    createdAt: daysAgo(1),
+  },
+  {
+    id: "todo-horizon-tradeoffs",
+    projectId: "proj-horizon",
+    title: "Draft brand-date trade-off options for Jordan",
+    detail: "2–3 options with a clear recommendation",
+    done: false,
+    createdAt: daysAgo(0),
+  },
+];
+
 export function createSeedState(): MissionState {
   return {
     projects: DEMO_PROJECTS,
@@ -492,6 +519,7 @@ export function createSeedState(): MissionState {
     recommendations: DEMO_RECOMMENDATIONS,
     meetings: DEMO_MEETINGS,
     releases: DEMO_RELEASES,
+    todos: DEMO_TODOS,
     lastAnalyzedAt: new Date().toISOString(),
   };
 }

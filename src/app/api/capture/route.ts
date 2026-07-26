@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   buildCaptureResultFromAi,
+  getOpenAIKeyDiagnostics,
   isOpenAIConfigured,
   localCaptureFallback,
   tidyAndCoachWithOpenAI,
@@ -17,9 +18,13 @@ type Body = {
 };
 
 export async function GET() {
+  const diagnostics = getOpenAIKeyDiagnostics();
   return NextResponse.json({
-    openaiConfigured: isOpenAIConfigured(),
+    openaiConfigured: diagnostics.openaiConfigured,
     model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    keyPrefix: diagnostics.prefix,
+    keyLength: diagnostics.length,
+    reason: diagnostics.reason,
   });
 }
 
@@ -48,6 +53,7 @@ export async function POST(request: Request) {
         recommendations: body.state?.recommendations ?? [],
         meetings: body.state?.meetings ?? [],
         releases: body.state?.releases ?? [],
+        todos: [],
       };
       const result = localCaptureFallback(input, fallbackState);
       return NextResponse.json({
