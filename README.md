@@ -60,10 +60,43 @@ npm run lint    # eslint
 npm run verify  # coaching engine smoke checks
 ```
 
+## Demo login (for private previews)
+
+Mission Control has a **simple sign-in gate** so you can share a cloud URL with a few testers.
+
+Add to `.env.local` (and to your host’s environment variables):
+
+```bash
+# email:password:Display Name  (comma-separated)
+DEMO_USERS=tom@example.com:try-mission-1:Tom,alice@example.com:preview-42:Alice
+
+# 16+ random characters — e.g. openssl rand -base64 32
+AUTH_SECRET=replace-with-a-long-random-secret
+```
+
+- When `DEMO_USERS` is set, unauthenticated visitors are redirected to `/login`.
+- Locally, leave `DEMO_USERS` empty to keep the app open while developing.
+- This is a lightweight demo gate, not a full account system. Project data still lives in each browser’s `localStorage`.
+
+## Deploy to the cloud (Vercel)
+
+1. Push this branch (or merge to `main`).
+2. Import the GitHub repo at [vercel.com/new](https://vercel.com/new).
+3. Set environment variables in the Vercel project:
+   - `OPENAI_API_KEY`
+   - `AUTH_SECRET`
+   - `DEMO_USERS` (one entry per tester)
+   - optional: `OPENAI_MODEL`
+4. Deploy. Share the URL + each person’s email/password.
+5. Testers open the URL → **Demo sign-in** → use the app.
+
+Framework preset: **Next.js**. Build command / output defaults are fine.
+
 ## Stack
 
 - Next.js App Router · React 19 · TypeScript · Tailwind CSS 4
 - OpenAI Whisper (voice) + Chat Completions (tidy + coach)
+- Simple cookie session login (`jose`) for private demos
 - Local fallback coaching in `src/lib/coach.ts`
 
 ## Product north star

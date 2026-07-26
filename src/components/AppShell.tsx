@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, type ReactNode } from "react";
 import { CoachBanner, CoachButton } from "@/components/CoachButton";
 import { useMission } from "@/lib/store";
 
@@ -14,8 +14,45 @@ const TOOL_NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { state } = useMission();
   const [coachOpen, setCoachOpen] = useState(false);
+  const [user, setUser] = useState<{ email: string; name: string } | null>(
+    null,
+  );
+
+  const onLogin = pathname === "/login";
+
+  useEffect(() => {
+    if (onLogin) return;
+    let cancelled = false;
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then(
+        (data: {
+          user?: { email: string; name: string } | null;
+        }) => {
+          if (!cancelled) setUser(data.user ?? null);
+        },
+      )
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [onLogin, pathname]);
+
+  async function signOut() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUser(null);
+    router.replace("/login");
+    router.refresh();
+  }
+
+  if (onLogin) {
+    return <>{children}</>;
+  }
 
   const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
   const routeProjectId = projectMatch?.[1] ?? null;
@@ -57,6 +94,20 @@ export function AppShell({ children }: { children: ReactNode }) {
                 );
               })}
             </nav>
+            {user ? (
+              <div className="flex items-center gap-2 border-l border-line pl-2">
+                <span className="hidden max-w-[10rem] truncate text-xs text-ink-soft sm:inline">
+                  {user.name}
+                </span>
+                <button
+                  type="button"
+                  className="muted-btn"
+                  onClick={() => void signOut()}
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
 
