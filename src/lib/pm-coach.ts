@@ -269,6 +269,114 @@ ${JSON.stringify(context, null, 2)}`;
   return { title, markdown, provider: "openai", scope };
 }
 
+export type CoachStreamEvent =
+  | { type: "meta"; title: string; provider: "openai" | "local"; scope: CoachScope }
+  | { type: "delta"; text: string }
+  | { type: "done"; markdown: string }
+  | { type: "error"; error: string };
+
+/** Async generator that streams coach markdown (OpenAI stream or chunked local). */
+export async function* streamPmCoaching(
+  state: MissionState,
+  scope: CoachScope,
+): AsyncGenerator<CoachStreamEvent> {
+  const { title, context } = buildCoachContext(state, scope);
+
+  if (!isOpenAIConfigured()) {
+    const markdown = localCoachFallback(state, scope);
+    yield { type: "meta", title, provider: "local", scope };
+    for (const chunk of chunkText(markdown, 48)) {
+      yield { type: "delta", text: chunk };
+      await sleep(18);
+    }
+    yield { type: "done", markdown };
+    return;
+  }
+
+  const key = getOpenAIKey();
+  const userPrompt = `${title}
+
+Use ONLY the project context JSON below. Do not invent missing facts. If something critical is missing, say what Tom should confirm.
+
+Respond in the required coaching sections.
+In section 2, put each action on its own numbered line.
+In section 3, put each risk/gap on its own bullet.
+In section 5, use checklist lines like "- [ ] …".
+
+CONTEXT JSON:
+${JSON.stringify(context, null, 2)}`;
+
+  yield { type: "meta", title, provider: "openai", scope };
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      temperature: 0.35,
+      stream: true,
+      messages: [
+        { role: "system", content: PM_COACH_SYSTEM_PROMPT },
+        { role: "user", content: userPrompt },
+      ],
+    }),
+  });
+
+  if (!response.ok || !response.body) {
+    const detail = await response.text();
+    throw new Error(`Coach request failed (${response.status}): ${detail}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let markdown = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("data:")) continue;
+      const payload = trimmed.slice(5).trim();
+      if (payload === "[DONE]") continue;
+      try {
+        const json = JSON.parse(payload) as {
+          choices?: Array<{ delta?: { content?: string } }>;
+        };
+        const delta = json.choices?.[0]?.delta?.content;
+        if (delta) {
+          markdown += delta;
+          yield { type: "delta", text: delta };
+        }
+      } catch {
+        // ignore partial JSON
+      }
+    }
+  }
+
+  if (!markdown.trim()) {
+    throw new Error("Coach returned an empty response");
+  }
+  yield { type: "done", markdown };
+}
+
+function chunkText(text: string, size: number) {
+  const out: string[] = [];
+  for (let i = 0; i < text.length; i += size) out.push(text.slice(i, i + size));
+  return out;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function localCoachFallback(state: MissionState, scope: CoachScope): string {
   const projects =
     scope.mode === "project" && scope.projectId

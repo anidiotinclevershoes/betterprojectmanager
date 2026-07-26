@@ -81,6 +81,7 @@ export function ProjectWidgetGrid({
     dismissSuggestion,
     toggleTodo,
     removeTodo,
+    updateTodo,
     updateTodoDueDate,
     refreshSuggestions,
   } = useMission();
@@ -396,34 +397,13 @@ export function ProjectWidgetGrid({
               </button>
             </div>
           ) : detail?.type === "todo" ? (
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <label className="field mb-0 min-w-[10rem] flex-1">
-                <span>Due date</span>
-                <input
-                  type="date"
-                  value={toDateInputValue(detail.todo.dueAt)}
-                  min={dueMin || undefined}
-                  max={dueMax || undefined}
-                  onChange={(e) => {
-                    updateTodoDueDate(detail.todo.id, e.target.value || undefined);
-                    setDetail({
-                      type: "todo",
-                      todo: {
-                        ...detail.todo,
-                        dueAt: e.target.value
-                          ? new Date(`${e.target.value}T09:00:00`).toISOString()
-                          : undefined,
-                      },
-                    });
-                  }}
-                />
-              </label>
+            <div className="flex justify-end gap-2">
               <button
                 type="button"
                 className="muted-btn"
                 onClick={() => setDetail(null)}
               >
-                Close
+                Done
               </button>
             </div>
           ) : detail?.type === "script" ? (
@@ -445,21 +425,71 @@ export function ProjectWidgetGrid({
         }
       >
         {detail?.type === "todo" ? (
-          <>
-            {detail.todo.detail ? (
-              <p className="text-sm leading-relaxed text-ink">{detail.todo.detail}</p>
-            ) : (
-              <p className="text-sm text-ink-soft">No extra detail.</p>
-            )}
-            {formatDue(detail.todo.dueAt) ? (
-              <p className="mt-3 text-xs text-ink-soft">
-                {formatDue(detail.todo.dueAt)}
-                {dueMin && dueMax
-                  ? ` · window ${dueMin} → ${dueMax}`
-                  : ""}
+          <div className="space-y-3">
+            <label className="field">
+              <span>Title</span>
+              <input
+                value={detail.todo.title}
+                onChange={(e) => {
+                  const title = e.target.value;
+                  updateTodo(detail.todo.id, { title });
+                  setDetail({
+                    type: "todo",
+                    todo: { ...detail.todo, title },
+                  });
+                }}
+              />
+            </label>
+            <label className="field">
+              <span>Detail</span>
+              <textarea
+                className="todo-edit-area"
+                rows={4}
+                value={detail.todo.detail ?? ""}
+                placeholder="Add anything that was missed…"
+                onChange={(e) => {
+                  const detailText = e.target.value;
+                  updateTodo(detail.todo.id, { detail: detailText });
+                  setDetail({
+                    type: "todo",
+                    todo: {
+                      ...detail.todo,
+                      detail: detailText || undefined,
+                    },
+                  });
+                }}
+              />
+            </label>
+            <label className="field">
+              <span>Due date</span>
+              <input
+                type="date"
+                value={toDateInputValue(detail.todo.dueAt)}
+                min={dueMin || undefined}
+                max={dueMax || undefined}
+                onChange={(e) => {
+                  updateTodoDueDate(
+                    detail.todo.id,
+                    e.target.value || undefined,
+                  );
+                  setDetail({
+                    type: "todo",
+                    todo: {
+                      ...detail.todo,
+                      dueAt: e.target.value
+                        ? new Date(`${e.target.value}T09:00:00`).toISOString()
+                        : undefined,
+                    },
+                  });
+                }}
+              />
+            </label>
+            {dueMin && dueMax ? (
+              <p className="text-xs text-ink-soft">
+                Window {dueMin} → {dueMax}
               </p>
             ) : null}
-          </>
+          </div>
         ) : null}
         {detail?.type === "suggestion" ? (
           <div className="space-y-3 text-sm">
@@ -523,7 +553,7 @@ export function ProjectWidgetGrid({
 
 function detailTitle(detail: DetailTarget | null) {
   if (!detail) return "";
-  if (detail.type === "todo") return detail.todo.title;
+  if (detail.type === "todo") return "Edit to-do";
   if (detail.type === "suggestion") return detail.rec.title;
   return detail.meeting.title;
 }

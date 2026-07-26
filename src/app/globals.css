@@ -919,3 +919,210 @@ body {
   background: var(--paper);
   color: var(--ink-soft);
 }
+
+.coach-banner {
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, #f7fafb 0%, var(--paper) 100%);
+  max-height: min(52vh, 28rem);
+  overflow: hidden;
+  animation: coach-slide 180ms ease-out;
+}
+
+@keyframes coach-slide {
+  from { opacity: 0.4; max-height: 0; }
+  to { opacity: 1; max-height: min(52vh, 28rem); }
+}
+
+.coach-banner-inner {
+  margin: 0 auto;
+  max-width: 80rem;
+  padding: 0.75rem 1rem 0.9rem;
+}
+
+.coach-banner-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.55rem;
+}
+
+.coach-banner-header .eyebrow {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.coach-banner-header h2 {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.coach-banner-header .meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.65rem;
+  color: var(--ink-soft);
+}
+
+.coach-banner-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: 1.4fr 1fr;
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .coach-banner-grid { grid-template-columns: 1fr; }
+}
+
+.coach-banner-stream,
+.coach-banner-actions {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  min-height: 10rem;
+  max-height: min(38vh, 20rem);
+  overflow: auto;
+}
+
+.coach-banner-stream { padding: 0.7rem 0.8rem; }
+
+.coach-banner-stream .error {
+  margin: 0 0 0.6rem;
+  background: var(--signal-soft);
+  border-radius: 6px;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.78rem;
+}
+
+.coach-banner-stream .empty {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.coach-banner-actions { padding: 0.65rem 0.75rem; }
+
+.coach-banner-actions > header h3 {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.coach-banner-actions > header p {
+  margin: 0.2rem 0 0.55rem;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+
+.coach-banner-actions .empty {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.coach-action-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.coach-action-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(18, 32, 51, 0.06);
+}
+
+.coach-action-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.coach-action-row .kind {
+  margin: 0;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.coach-action-row .text {
+  margin: 0.1rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.coach-action-row .accepted {
+  margin: 0.15rem 0 0;
+  font-size: 0.62rem;
+  font-weight: 650;
+  color: var(--teal);
+}
+
+.coach-action-row .btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.coach-action-row .btns button {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 5px;
+  font-size: 0.62rem;
+  font-weight: 650;
+  padding: 0.18rem 0.4rem;
+  cursor: pointer;
+}
+
+.coach-action-row .btns button:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.coach-action-row .btns button.muted {
+  color: var(--ink-soft);
+  background: transparent;
+}
+
+.coach-cursor {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.9em;
+  margin-left: 0.15rem;
+  background: var(--teal);
+  animation: coach-blink 0.9s step-end infinite;
+  vertical-align: text-bottom;
+}
+
+@keyframes coach-blink {
+  50% { opacity: 0; }
+}
+
+.todo-edit-area {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.82rem;
+  padding: 0.45rem 0.55rem;
+  resize: vertical;
+  min-height: 5rem;
+  font-family: inherit;
+  width: 100%;
+}

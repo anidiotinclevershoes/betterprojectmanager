@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import { CaptureBar } from "@/components/CaptureBar";
 import { CloneRelOpsButton } from "@/components/CloneRelOpsButton";
 import { StatusPill } from "@/components/DashboardChrome";
@@ -146,19 +147,50 @@ export default function ProjectDashboardPage() {
                 Silent: {silent.map((s) => s.name).join(", ")}
               </p>
             ) : null}
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {memories.map((m) => (
-                <li key={m.id}>
-                  <p className="text-[0.72rem] font-semibold">{m.title}</p>
-                  <p className="line-clamp-2 text-[0.65rem] text-ink-soft">
-                    {m.content}
-                  </p>
-                </li>
+                <MemoryExpandRow
+                  key={m.id}
+                  title={m.title}
+                  content={m.content}
+                />
               ))}
             </ul>
           </div>
         </section>
       </div>
     </div>
+  );
+}
+
+function MemoryExpandRow({
+  title,
+  content,
+}: {
+  title: string;
+  content: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <li>
+      <button
+        type="button"
+        className="w-full text-left"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+      >
+        <p className="text-[0.72rem] font-semibold hover:text-teal">{title}</p>
+        <p
+          className={`text-[0.65rem] leading-relaxed text-ink-soft ${
+            open ? "" : "line-clamp-2"
+          }`}
+        >
+          {content}
+        </p>
+        <span className="mt-0.5 inline-block text-[0.58rem] font-semibold uppercase tracking-[0.06em] text-teal">
+          {open ? "Show less" : "Expand"}
+        </span>
+      </button>
+    </li>
   );
 }

@@ -1,21 +1,27 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import {
+  parseCoachActions,
+  resolveProjectId,
+  type CoachAction,
+} from "@/lib/coach-actions";
 import { useMission } from "@/lib/store";
 
-export function CoachButton() {
-  const pathname = usePathname();
-  const { state, openaiConfigured } = useMission();
-  const [open, setOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [title, setTitle] = useState("");
-  const [markdown, setMarkdown] = useState("");
-  const [provider, setProvider] = useState<"openai" | "local" | null>(null);
+type AcceptedMap = Record<string, string>;
 
+export function CoachButton({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const pathname = usePathname();
   const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
   const projectId = projectMatch?.[1];
+  const { state, openaiConfigured } = useMission();
   const project = projectId
     ? state.projects.find((p) => p.id === projectId)
     : null;
@@ -24,10 +30,72 @@ export function CoachButton() {
     ? `Coach me · ${project.code}`
     : "Coach me · all projects";
 
+  return (
+    <button
+      type="button"
+      onClick={() => onOpenChange(!open)}
+      className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+        open
+          ? "bg-ink text-paper"
+          : "bg-teal text-paper hover:bg-teal/90"
+      }`}
+      title={
+        openaiConfigured === false
+          ? "Works in local mode without OpenAI; fuller coaching with API key"
+          : "Ask your Assistant PM Coach"
+      }
+      aria-expanded={open}
+    >
+      {label}
+    </button>
+  );
+}
+
+export function CoachBanner({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const pathname = usePathname();
+  const {
+    state,
+    addTodo,
+    addSuggestion,
+    addKnowledgeBullet,
+  } = useMission();
+
+  const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
+  const projectId = projectMatch?.[1] ?? null;
+  const project = projectId
+    ? state.projects.find((p) => p.id === projectId)
+    : null;
+
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+  const [markdown, setMarkdown] = useState("");
+  const [provider, setProvider] = useState<"openai" | "local" | null>(null);
+  const [accepted, setAccepted] = useState<AcceptedMap>({});
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const autoRanForOpen = useRef(false);
+
+  const actions = useMemo(() => parseCoachActions(markdown), [markdown]);
+
   const runCoach = useCallback(async () => {
-    setOpen(true);
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setBusy(true);
     setError(null);
+    setMarkdown("");
+    setTitle("");
+    setProvider(null);
+    setAccepted({});
+
     const scope = projectId
       ? { mode: "project" as const, projectId }
       : { mode: "overview" as const };
@@ -36,6 +104,7 @@ export function CoachButton() {
       const response = await fetch("/api/coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           scope,
           state: {
@@ -52,97 +121,282 @@ export function CoachButton() {
           },
         }),
       });
-      const data = (await response.json()) as {
-        title?: string;
-        markdown?: string;
-        provider?: "openai" | "local";
-        error?: string;
-      };
-      if (!response.ok || !data.markdown) {
-        throw new Error(data.error || "Coach request failed");
+
+      if (!response.ok || !response.body) {
+        const data = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(data?.error || "Coach request failed");
       }
-      setTitle(data.title || "Coaching");
-      setMarkdown(data.markdown);
-      setProvider(data.provider ?? null);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() ?? "";
+        for (const part of parts) {
+          const line = part
+            .split("\n")
+            .map((l) => l.trim())
+            .find((l) => l.startsWith("data:"));
+          if (!line) continue;
+          const payload = line.slice(5).trim();
+          if (!payload) continue;
+          try {
+            const event = JSON.parse(payload) as {
+              type: string;
+              title?: string;
+              provider?: "openai" | "local";
+              text?: string;
+              markdown?: string;
+              error?: string;
+            };
+            if (event.type === "meta") {
+              setTitle(event.title || "Coaching");
+              setProvider(event.provider ?? null);
+            } else if (event.type === "delta" && event.text) {
+              setMarkdown((prev) => prev + event.text);
+            } else if (event.type === "done" && event.markdown) {
+              setMarkdown(event.markdown);
+            } else if (event.type === "error") {
+              throw new Error(event.error || "Coach failed");
+            }
+          } catch (err) {
+            if (err instanceof SyntaxError) continue;
+            throw err;
+          }
+        }
+      }
     } catch (err) {
+      if ((err as Error).name === "AbortError") return;
       setError(err instanceof Error ? err.message : "Coach failed");
     } finally {
       setBusy(false);
     }
   }, [projectId, state]);
 
+  useEffect(() => {
+    if (!open) {
+      autoRanForOpen.current = false;
+      abortRef.current?.abort();
+      return;
+    }
+    // Re-run when opening, or when project scope changes while open
+    autoRanForOpen.current = true;
+    void runCoach();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: projectId/open trigger
+  }, [open, projectId]);
+
+  useEffect(() => {
+    if (!bodyRef.current) return;
+    bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+  }, [markdown]);
+
+  const acceptAction = (action: CoachAction, mode: "todo" | "suggestion" | "knowledge") => {
+    const resolvedProjectId = resolveProjectId(
+      state.projects,
+      projectId,
+      action.projectCode,
+    );
+
+    if (mode === "todo") {
+      addTodo({
+        title: action.title,
+        detail: action.text !== action.title ? action.text : undefined,
+        projectId: resolvedProjectId,
+      });
+      setAccepted((prev) => ({ ...prev, [action.id]: "Added to To do" }));
+      return;
+    }
+
+    if (mode === "suggestion") {
+      if (!resolvedProjectId) {
+        setError("Pick a project tab first, or include a project code in the action.");
+        return;
+      }
+      addSuggestion({
+        projectId: resolvedProjectId,
+        title: action.title,
+        action: action.text,
+        why: "Accepted from Assistant PM Coach.",
+        kind: action.section === "risk" ? "risk" : "leadership",
+        urgency: action.section === "do_now" ? "now" : "today",
+      });
+      setAccepted((prev) => ({ ...prev, [action.id]: "Added to Suggestions" }));
+      return;
+    }
+
+    if (!resolvedProjectId) {
+      setError("Pick a project tab first to add into Knowledge.");
+      return;
+    }
+    const section =
+      action.section === "risk" ? "risks" : "openLoops";
+    addKnowledgeBullet(resolvedProjectId, section, action.title);
+    setAccepted((prev) => ({
+      ...prev,
+      [action.id]: section === "risks" ? "Added to Knowledge · Risks" : "Added to Knowledge · Open loops",
+    }));
+  };
+
+  if (!open) return null;
+
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => void runCoach()}
-        className="rounded-lg bg-teal px-3 py-1.5 text-sm font-semibold text-paper transition hover:bg-teal/90"
-        title={
-          openaiConfigured === false
-            ? "Works in local mode without OpenAI; fuller coaching with API key"
-            : "Ask your Assistant PM Coach"
-        }
-      >
-        {label}
-      </button>
-
-      {open ? (
-        <div className="coach-overlay" role="dialog" aria-modal="true">
-          <div className="coach-panel">
-            <header className="coach-panel-header">
-              <div>
-                <p className="eyebrow">Assistant PM Coach</p>
-                <h2>{busy ? "Thinking…" : title || "Coaching"}</h2>
-                {provider ? (
-                  <p className="meta">
-                    {provider === "openai" ? "OpenAI" : "Local fallback"}
-                    {project ? ` · ${project.code}` : " · Overview"}
-                  </p>
-                ) : null}
-              </div>
-              <div className="coach-panel-actions">
-                <button
-                  type="button"
-                  className="muted"
-                  disabled={busy}
-                  onClick={() => void runCoach()}
-                >
-                  Refresh
-                </button>
-                <button
-                  type="button"
-                  className="muted"
-                  onClick={() => setOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </header>
-
-            <div className="coach-panel-body">
-              {busy ? (
-                <p className="empty">
-                  Evaluating situation, gaps, risks, and what Tom should do
-                  next…
-                </p>
-              ) : null}
-              {error ? <p className="error">{error}</p> : null}
-              {!busy && markdown ? (
-                <CoachMarkdown markdown={markdown} />
-              ) : null}
-            </div>
+    <section className="coach-banner" aria-live="polite">
+      <div className="coach-banner-inner">
+        <header className="coach-banner-header">
+          <div className="min-w-0">
+            <p className="eyebrow">Assistant PM Coach</p>
+            <h2>{busy && !markdown ? "Writing…" : title || "Coaching"}</h2>
+            <p className="meta">
+              {provider
+                ? provider === "openai"
+                  ? "OpenAI"
+                  : "Local fallback"
+                : busy
+                  ? "Connecting…"
+                  : "—"}
+              {project ? ` · ${project.code}` : " · Overview"}
+              {busy ? " · streaming" : ""}
+            </p>
           </div>
+          <div className="coach-panel-actions">
+            <button
+              type="button"
+              className="muted"
+              disabled={busy}
+              onClick={() => void runCoach()}
+            >
+              Refresh
+            </button>
+            <button
+              type="button"
+              className="muted"
+              onClick={() => onOpenChange(false)}
+            >
+              Collapse
+            </button>
+          </div>
+        </header>
+
+        <div className="coach-banner-grid">
+          <div className="coach-banner-stream" ref={bodyRef}>
+            {error ? <p className="error">{error}</p> : null}
+            {busy && !markdown ? (
+              <p className="empty">
+                Evaluating situation, gaps, risks, and what Tom should do next…
+              </p>
+            ) : null}
+            {markdown ? (
+              <CoachMarkdown markdown={markdown} streaming={busy} />
+            ) : null}
+          </div>
+
+          <aside className="coach-banner-actions">
+            <header>
+              <h3>Accept into Mission Control</h3>
+              <p>Add coaching lines into To do, Suggestions, or Knowledge.</p>
+            </header>
+            {actions.length === 0 ? (
+              <p className="empty">
+                {busy
+                  ? "Actions appear as the coach writes…"
+                  : "No actionable lines parsed yet."}
+              </p>
+            ) : (
+              <ul className="coach-action-list">
+                {actions.map((action) => (
+                  <li key={action.id} className="coach-action-row">
+                    <div className="min-w-0">
+                      <p className="kind">{labelForSection(action.section)}</p>
+                      <p className="text">{action.title}</p>
+                      {accepted[action.id] ? (
+                        <p className="accepted">{accepted[action.id]}</p>
+                      ) : null}
+                    </div>
+                    {!accepted[action.id] ? (
+                      <div className="btns">
+                        {(action.section === "do_now" ||
+                          action.section === "checklist") && (
+                          <button
+                            type="button"
+                            onClick={() => acceptAction(action, "todo")}
+                          >
+                            To do
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => acceptAction(action, "suggestion")}
+                        >
+                          Suggestions
+                        </button>
+                        {(action.section === "risk" ||
+                          action.section === "do_now") && (
+                          <button
+                            type="button"
+                            className="muted"
+                            onClick={() => acceptAction(action, "knowledge")}
+                          >
+                            Knowledge
+                          </button>
+                        )}
+                        {action.section === "script" ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void navigator.clipboard.writeText(action.text);
+                              setAccepted((prev) => ({
+                                ...prev,
+                                [action.id]: "Copied script",
+                              }));
+                            }}
+                          >
+                            Copy
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </aside>
         </div>
-      ) : null}
-    </>
+      </div>
+    </section>
   );
 }
 
-function CoachMarkdown({ markdown }: { markdown: string }) {
+function labelForSection(section: CoachAction["section"]) {
+  switch (section) {
+    case "do_now":
+      return "Do now";
+    case "risk":
+      return "Risk / gap";
+    case "script":
+      return "Script";
+    case "checklist":
+      return "Checklist";
+  }
+}
+
+function CoachMarkdown({
+  markdown,
+  streaming,
+}: {
+  markdown: string;
+  streaming?: boolean;
+}) {
   const blocks = markdown.split(/\n(?=##\s+)/);
 
   return (
-    <div className="coach-markdown">
+    <div className={`coach-markdown ${streaming ? "is-streaming" : ""}`}>
       {blocks.map((block, blockIdx) => {
         const lines = block.trim().split("\n");
         const heading = lines[0]?.startsWith("##")
@@ -150,7 +404,10 @@ function CoachMarkdown({ markdown }: { markdown: string }) {
           : null;
         const body = heading ? lines.slice(1).join("\n").trim() : block.trim();
         return (
-          <section key={`${blockIdx}-${heading ?? "body"}`} className="coach-section">
+          <section
+            key={`${blockIdx}-${heading ?? "body"}`}
+            className="coach-section"
+          >
             {heading ? <h3>{heading}</h3> : null}
             <div className="coach-section-body">
               {body.split("\n").map((line, idx) => {
@@ -176,6 +433,7 @@ function CoachMarkdown({ markdown }: { markdown: string }) {
           </section>
         );
       })}
+      {streaming ? <span className="coach-cursor" aria-hidden /> : null}
     </div>
   );
 }

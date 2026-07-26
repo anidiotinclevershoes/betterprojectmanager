@@ -28,6 +28,7 @@ export default function OverviewPage() {
     toggleTodo,
     removeTodo,
     addTodo,
+    updateTodo,
     updateTodoDueDate,
     acceptSuggestion,
     dismissSuggestion,
@@ -383,17 +384,51 @@ export default function OverviewPage() {
 
       <DetailModal
         open={Boolean(detailTodo)}
-        title={detailTodo?.title ?? ""}
+        title="Edit to-do"
         onClose={() => setDetailTodo(null)}
+        footer={
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className="muted-btn"
+              onClick={() => setDetailTodo(null)}
+            >
+              Done
+            </button>
+          </div>
+        }
       >
         {detailTodo ? (
-          <>
-            {detailTodo.detail ? (
-              <p className="text-sm leading-relaxed">{detailTodo.detail}</p>
-            ) : (
-              <p className="text-sm text-ink-soft">No extra detail.</p>
-            )}
-            <label className="field mt-3">
+          <div className="space-y-3">
+            <label className="field">
+              <span>Title</span>
+              <input
+                value={detailTodo.title}
+                onChange={(e) => {
+                  const title = e.target.value;
+                  updateTodo(detailTodo.id, { title });
+                  setDetailTodo({ ...detailTodo, title });
+                }}
+              />
+            </label>
+            <label className="field">
+              <span>Detail</span>
+              <textarea
+                className="todo-edit-area"
+                rows={4}
+                value={detailTodo.detail ?? ""}
+                placeholder="Add anything that was missed…"
+                onChange={(e) => {
+                  const detail = e.target.value;
+                  updateTodo(detailTodo.id, { detail });
+                  setDetailTodo({
+                    ...detailTodo,
+                    detail: detail || undefined,
+                  });
+                }}
+              />
+            </label>
+            <label className="field">
               <span>Due date</span>
               <input
                 type="date"
@@ -412,7 +447,7 @@ export default function OverviewPage() {
                 }}
               />
             </label>
-          </>
+          </div>
         ) : null}
       </DetailModal>
     </div>

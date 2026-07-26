@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
-import { CoachButton } from "@/components/CoachButton";
+import { useState, type ReactNode } from "react";
+import { CoachBanner, CoachButton } from "@/components/CoachButton";
 import { useMission } from "@/lib/store";
 
 const TOOL_NAV = [
@@ -15,6 +15,7 @@ const TOOL_NAV = [
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { state } = useMission();
+  const [coachOpen, setCoachOpen] = useState(false);
 
   const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
   const activeProjectId = projectMatch?.[1] ?? null;
@@ -34,7 +35,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
 
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <CoachButton />
+            <CoachButton open={coachOpen} onOpenChange={setCoachOpen} />
             <nav className="flex flex-wrap items-center justify-end gap-1 text-sm">
               {TOOL_NAV.map((item) => {
                 const active = pathname.startsWith(item.href);
@@ -71,6 +72,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </div>
         </div>
+
+        <CoachBanner open={coachOpen} onOpenChange={setCoachOpen} />
       </header>
 
       <main className="mx-auto max-w-7xl px-3 py-3 md:px-5 md:py-4">

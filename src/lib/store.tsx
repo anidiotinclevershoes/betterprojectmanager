@@ -53,6 +53,23 @@ type AddTodoInput = {
   dueAt?: string;
 };
 
+type UpdateTodoInput = {
+  title?: string;
+  detail?: string | null;
+  dueAt?: string | null;
+  done?: boolean;
+  projectId?: string | null;
+};
+
+type AddSuggestionInput = {
+  projectId: string;
+  title: string;
+  action?: string;
+  why?: string;
+  kind?: Recommendation["kind"];
+  urgency?: Recommendation["urgency"];
+};
+
 type MissionContextValue = {
   state: MissionState;
   hydrated: boolean;
@@ -70,7 +87,9 @@ type MissionContextValue = {
   toggleTodo: (todoId: string) => void;
   removeTodo: (todoId: string) => void;
   addTodo: (input: AddTodoInput) => void;
+  updateTodo: (todoId: string, patch: UpdateTodoInput) => void;
   updateTodoDueDate: (todoId: string, dueAt: string | undefined) => void;
+  addSuggestion: (input: AddSuggestionInput) => string | null;
   cloneRelOps: (input: CloneRelOpsInput) => void;
   refreshSuggestions: (projectId: string) => void;
   updateKnowledgeSection: (
@@ -377,7 +396,12 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         ? prev.projects.find((p) => p.id === input.projectId)
         : undefined;
       const dueAt = input.dueAt
-        ? clampDueToWindow(project, new Date(`${input.dueAt}T09:00:00`).toISOString())
+        ? clampDueToWindow(
+            project,
+            input.dueAt.includes("T")
+              ? input.dueAt
+              : new Date(`${input.dueAt}T09:00:00`).toISOString(),
+          )
         : undefined;
       const todo: TodoItem = {
         id: id("todo"),
@@ -390,6 +414,41 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       };
       return { ...prev, todos: [todo, ...(prev.todos ?? [])] };
     });
+  }, []);
+
+  const updateTodo = useCallback((todoId: string, patch: UpdateTodoInput) => {
+    setState((prev) => ({
+      ...prev,
+      todos: (prev.todos ?? []).map((t) => {
+        if (t.id !== todoId) return t;
+        const projectId =
+          patch.projectId !== undefined ? patch.projectId : t.projectId;
+        const project = projectId
+          ? prev.projects.find((p) => p.id === projectId)
+          : undefined;
+        let dueAt = t.dueAt;
+        if (patch.dueAt === null) dueAt = undefined;
+        else if (typeof patch.dueAt === "string") {
+          const iso = patch.dueAt.includes("T")
+            ? patch.dueAt
+            : new Date(`${patch.dueAt}T09:00:00`).toISOString();
+          dueAt = clampDueToWindow(project, iso);
+        }
+        return {
+          ...t,
+          title: patch.title !== undefined ? patch.title.trim() || t.title : t.title,
+          detail:
+            patch.detail === null
+              ? undefined
+              : patch.detail !== undefined
+                ? patch.detail.trim() || undefined
+                : t.detail,
+          done: patch.done ?? t.done,
+          projectId,
+          dueAt,
+        };
+      }),
+    }));
   }, []);
 
   const updateTodoDueDate = useCallback(
@@ -411,6 +470,34 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  const addSuggestion = useCallback((input: AddSuggestionInput) => {
+    const title = input.title.trim();
+    if (!title || !input.projectId) return null;
+    const recId = id("rec");
+    setState((prev) => ({
+      ...prev,
+      recommendations: [
+        {
+          id: recId,
+          kind: input.kind ?? "leadership",
+          urgency: input.urgency ?? "today",
+          title,
+          action: input.action?.trim() || title,
+          why:
+            input.why?.trim() ||
+            "Accepted from Assistant PM Coach into Suggestions.",
+          leadershipImpact:
+            "You convert coaching into owned follow-through instead of leaving advice unused.",
+          projectId: input.projectId,
+          createdAt: new Date().toISOString(),
+          status: "active" as const,
+        },
+        ...prev.recommendations,
+      ],
+    }));
+    return recId;
+  }, []);
 
   const cloneRelOps = useCallback((input: CloneRelOpsInput) => {
     setState((prev) => cloneRelOpsProject(prev, input));
@@ -531,7 +618,9 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       toggleTodo,
       removeTodo,
       addTodo,
+      updateTodo,
       updateTodoDueDate,
+      addSuggestion,
       cloneRelOps,
       refreshSuggestions,
       updateKnowledgeSection,
@@ -555,7 +644,9 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       toggleTodo,
       removeTodo,
       addTodo,
+      updateTodo,
       updateTodoDueDate,
+      addSuggestion,
       cloneRelOps,
       refreshSuggestions,
       updateKnowledgeSection,
