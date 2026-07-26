@@ -16,6 +16,10 @@ import {
 } from "./coach";
 import { extractKnowledgePatchFromText, emptyKnowledge, mergeKnowledge } from "./knowledge";
 import {
+  buildNewProject,
+  type CreateProjectInput,
+} from "./create-project";
+import {
   clampDueToWindow,
   cloneRelOpsProject,
   refreshProjectSuggestions,
@@ -90,6 +94,7 @@ type MissionContextValue = {
   updateTodo: (todoId: string, patch: UpdateTodoInput) => void;
   updateTodoDueDate: (todoId: string, dueAt: string | undefined) => void;
   addSuggestion: (input: AddSuggestionInput) => string | null;
+  createProject: (input: CreateProjectInput) => string;
   cloneRelOps: (input: CloneRelOpsInput) => void;
   refreshSuggestions: (projectId: string) => void;
   updateKnowledgeSection: (
@@ -499,6 +504,22 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     return recId;
   }, []);
 
+  const createProject = useCallback((input: CreateProjectInput) => {
+    const bundle = buildNewProject(input);
+    setState((prev) => ({
+      ...prev,
+      projects: [...prev.projects, bundle.project],
+      knowledge: [...(prev.knowledge ?? []), bundle.knowledge],
+      recommendations: [
+        ...bundle.recommendations,
+        ...prev.recommendations,
+      ],
+      todos: [...bundle.todos, ...(prev.todos ?? [])],
+      lastAnalyzedAt: new Date().toISOString(),
+    }));
+    return bundle.project.id;
+  }, []);
+
   const cloneRelOps = useCallback((input: CloneRelOpsInput) => {
     setState((prev) => cloneRelOpsProject(prev, input));
   }, []);
@@ -621,6 +642,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateTodo,
       updateTodoDueDate,
       addSuggestion,
+      createProject,
       cloneRelOps,
       refreshSuggestions,
       updateKnowledgeSection,
@@ -647,6 +669,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateTodo,
       updateTodoDueDate,
       addSuggestion,
+      createProject,
       cloneRelOps,
       refreshSuggestions,
       updateKnowledgeSection,

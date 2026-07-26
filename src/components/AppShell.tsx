@@ -18,7 +18,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [coachOpen, setCoachOpen] = useState(false);
 
   const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
-  const activeProjectId = projectMatch?.[1] ?? null;
+  const routeProjectId = projectMatch?.[1] ?? null;
+  const onNewProject = routeProjectId === "new";
+  const activeProjectId =
+    routeProjectId && routeProjectId !== "new" ? routeProjectId : null;
   const onOverview = pathname === "/";
 
   return (
@@ -70,6 +73,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 status={project.status}
               />
             ))}
+            <ProjectTab
+              href="/projects/new"
+              label="+ New"
+              subtitle="Create a project"
+              active={onNewProject}
+            />
           </div>
         </div>
 
