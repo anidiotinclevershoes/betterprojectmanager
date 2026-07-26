@@ -1,5 +1,3 @@
-import { SignJWT, jwtVerify } from "jose";
-
 export const SESSION_COOKIE = "mc_session";
 export const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 14; // 14 days
 
@@ -48,35 +46,92 @@ function getSecret() {
   return secret;
 }
 
-function secretKey() {
+function bytesToBase64Url(bytes: Uint8Array) {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]!);
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function base64UrlToBytes(value: string) {
+  const padded = value.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = padded.length % 4 === 0 ? "" : "=".repeat(4 - (padded.length % 4));
+  const binary = atob(padded + pad);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+function textToBytes(value: string) {
+  return new TextEncoder().encode(value);
+}
+
+async function hmacKey(secret: string) {
+  return crypto.subtle.importKey(
+    "raw",
+    textToBytes(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"],
+  );
+}
+
+async function sign(payloadB64: string, secret: string) {
+  const key = await hmacKey(secret);
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    textToBytes(payloadB64),
+  );
+  return bytesToBase64Url(new Uint8Array(signature));
+}
+
+export async function createSessionToken(user: SessionPayload) {
   const secret = getSecret();
   if (!secret) {
     throw new Error(
       "AUTH_SECRET is missing or too short (use 16+ random characters).",
     );
   }
-  return new TextEncoder().encode(secret);
-}
-
-export async function createSessionToken(user: SessionPayload) {
-  return new SignJWT({
+  const body = {
     email: user.email,
     name: user.name,
-  })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(`${SESSION_MAX_AGE_SEC}s`)
-    .sign(secretKey());
+    exp: Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SEC,
+  };
+  const payloadB64 = bytesToBase64Url(textToBytes(JSON.stringify(body)));
+  const signature = await sign(payloadB64, secret);
+  return `${payloadB64}.${signature}`;
 }
 
 export async function verifySessionToken(
   token: string | undefined | null,
 ): Promise<SessionPayload | null> {
   if (!token || !getSecret()) return null;
+  const [payloadB64, signature] = token.split(".");
+  if (!payloadB64 || !signature) return null;
+
+  const expected = await sign(payloadB64, getSecret()!);
+  if (expected.length !== signature.length) return null;
+  // Constant-time-ish compare
+  let mismatch = 0;
+  for (let i = 0; i < expected.length; i += 1) {
+    mismatch |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
+  }
+  if (mismatch !== 0) return null;
+
   try {
-    const { payload } = await jwtVerify(token, secretKey());
-    const email = String(payload.email ?? "").toLowerCase();
-    const name = String(payload.name ?? email);
+    const json = new TextDecoder().decode(base64UrlToBytes(payloadB64));
+    const body = JSON.parse(json) as {
+      email?: string;
+      name?: string;
+      exp?: number;
+    };
+    if (!body.exp || body.exp * 1000 < Date.now()) return null;
+    const email = String(body.email ?? "").toLowerCase();
+    const name = String(body.name ?? email);
     if (!email) return null;
     return { email, name };
   } catch {

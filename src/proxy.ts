@@ -5,7 +5,7 @@ import {
   verifySessionToken,
 } from "@/lib/auth";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Always allow auth endpoints + login page
@@ -25,7 +25,6 @@ export async function middleware(request: NextRequest) {
   const session = await verifySessionToken(token);
 
   if (session) {
-    // Logged-in users don't need the login page
     if (pathname === "/login") {
       return NextResponse.redirect(new URL("/", request.url));
     }
