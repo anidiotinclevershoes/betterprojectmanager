@@ -1,6 +1,7 @@
 import { analyseCapture } from "./coach";
 import { extractKnowledgePatchFromText } from "./knowledge";
 import { COACHING_SYSTEM_PROMPT, MEMORY_TYPES } from "./mission";
+import { extractTimelinePatchFromText } from "./timeline";
 import type {
   CaptureInput,
   CaptureResult,
@@ -10,6 +11,8 @@ import type {
   Recommendation,
   RecommendationKind,
   RecommendationUrgency,
+  TimelineItem,
+  TimelineItemInput,
 } from "./types";
 
 /**
@@ -97,6 +100,7 @@ export type AiCapturePayload = {
   }>;
   suggestedProjectId?: string | null;
   knowledgePatch?: Partial<ProjectKnowledge["sections"]>;
+  timelinePatch?: TimelineItemInput[];
 };
 
 const CAPTURE_JSON_SCHEMA_HINT = `{
@@ -125,7 +129,16 @@ const CAPTURE_JSON_SCHEMA_HINT = `{
     "risks": ["0-3 short bullets: risks / blockers only if relevant"],
     "people": ["0-2 short bullets: stakeholder prefs/concerns only if relevant"],
     "openLoops": ["0-3 short bullets: waiting on / unconfirmed only if relevant"]
-  }
+  },
+  "timelinePatch": [
+    {
+      "label": "short milestone/meeting/deadline label",
+      "type": "phase|milestone|meeting|deadline|submission",
+      "startAt": "ISO date if explicitly stated or clearly implied",
+      "endAt": "optional ISO end for phases",
+      "notes": "optional short note"
+    }
+  ]
 }`;
 
 export async function tidyAndCoachWithOpenAI(args: {
@@ -134,6 +147,7 @@ export async function tidyAndCoachWithOpenAI(args: {
   sourceType?: CaptureInput["sourceType"];
   projects: Project[];
   existingKnowledge?: ProjectKnowledge | null;
+  existingTimeline?: TimelineItem[];
 }): Promise<AiCapturePayload> {
   const key = getOpenAIKey();
   if (!key) {
@@ -159,6 +173,19 @@ ${JSON.stringify(projectContext, null, 2)}
 Existing knowledge brief for this project (do not repeat these; only add genuinely new or changed facts):
 ${JSON.stringify(args.existingKnowledge?.sections ?? {}, null, 2)}
 
+Existing timeline items (APPEND only — never rebuild or delete the calendar):
+${JSON.stringify(
+  (args.existingTimeline ?? []).map((t) => ({
+    id: t.id,
+    label: t.label,
+    type: t.type,
+    startAt: t.startAt,
+    endAt: t.endAt,
+  })),
+  null,
+  2,
+)}
+
 Raw capture:
 """
 ${args.rawText}
@@ -173,7 +200,8 @@ Rules:
 - Produce 1–4 high-signal recommendations, not a task dump.
 - Prefer leadership moves over administrative chores.
 - knowledgePatch must stay sparse: max a few short bullets total, only facts relevant to running the project. Skip trivia, filler and duplicates of existing knowledge.
-- Use empty arrays for sections with nothing new.`;
+- timelinePatch: ONLY add dates explicitly stated or clearly implied. Do not invent a full calendar. Prefer 0–3 new items. Never remove existing timeline items.
+- Use empty arrays for sections / timelinePatch when nothing new.`;
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -308,6 +336,7 @@ export function buildCaptureResultFromAi(args: {
     provider: "openai",
     knowledgePatch: args.ai.knowledgePatch,
     knowledgeProjectId: projectId,
+    timelinePatch: args.ai.timelinePatch,
   };
 }
 
@@ -326,5 +355,8 @@ export function localCaptureFallback(
       ? extractKnowledgePatchFromText(input.content)
       : undefined,
     knowledgeProjectId: projectId,
+    timelinePatch: projectId
+      ? extractTimelinePatchFromText(input.content)
+      : undefined,
   };
 }

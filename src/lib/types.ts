@@ -48,6 +48,8 @@ export interface Project {
   code: string;
   summary: string;
   status: "healthy" | "watch" | "at_risk";
+  /** delivery = change programmes; release_ops = monthly process/release train */
+  kind?: "delivery" | "release_ops";
   currentFocus: string;
   nextMilestone?: string;
   nextMilestoneAt?: string;
@@ -195,6 +197,37 @@ export interface CaptureResult {
   /** Relevant bullets to merge into the project knowledge brief. */
   knowledgePatch?: Partial<ProjectKnowledge["sections"]>;
   knowledgeProjectId?: string;
+  /** Dates/milestones for the project timeline — AI appends, does not rebuild. */
+  timelinePatch?: TimelineItemInput[];
+}
+
+/** Lightweight timeline entry the UI renders; AI only adds/updates these. */
+export type TimelineItemType =
+  | "phase"
+  | "milestone"
+  | "meeting"
+  | "deadline"
+  | "submission";
+
+export interface TimelineItem {
+  id: string;
+  projectId: string;
+  label: string;
+  type: TimelineItemType;
+  startAt: string;
+  endAt?: string;
+  notes?: string;
+  source?: "seed" | "capture" | "manual";
+}
+
+/** Patch shape used by AI / local capture — id optional for new items. */
+export interface TimelineItemInput {
+  id?: string;
+  label: string;
+  type: TimelineItemType;
+  startAt: string;
+  endAt?: string;
+  notes?: string;
 }
 
 export interface MissionState {
@@ -205,5 +238,6 @@ export interface MissionState {
   releases: Release[];
   todos: TodoItem[];
   knowledge: ProjectKnowledge[];
+  timeline: TimelineItem[];
   lastAnalyzedAt?: string;
 }

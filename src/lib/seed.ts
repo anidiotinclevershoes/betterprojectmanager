@@ -6,6 +6,7 @@ import type {
   ProjectKnowledge,
   Recommendation,
   Release,
+  TimelineItem,
   TodoItem,
 } from "./types";
 
@@ -18,6 +19,7 @@ export const DEMO_PROJECTS: Project[] = [
     id: "proj-atlas",
     name: "Atlas Platform Modernisation",
     code: "ATLAS",
+    kind: "delivery",
     summary:
       "Multi-year platform modernisation delivering monthly releases into production. Finance and Operations are the primary stakeholders; Development Lead owns build stability.",
     status: "watch",
@@ -61,6 +63,7 @@ export const DEMO_PROJECTS: Project[] = [
     id: "proj-horizon",
     name: "Horizon Customer Portal",
     code: "HORIZON",
+    kind: "delivery",
     summary:
       "Customer-facing portal rebrand and SSO migration. Roadmap priorities have shifted three times since the last stakeholder workshop.",
     status: "at_risk",
@@ -75,6 +78,47 @@ export const DEMO_PROJECTS: Project[] = [
         preferences: ["Needs visual demos, not status slides"],
         concerns: ["Brand launch date is publicly committed"],
         lastContactAt: daysAgo(21),
+      },
+    ],
+  },
+  {
+    id: "proj-relops",
+    name: "Monthly Release Operations",
+    code: "RELOPS",
+    kind: "release_ops",
+    summary:
+      "Repeatable monthly release train: collect evidence, chase artefacts, run the process forums, and submit a complete CAB pack. Success is preparedness and clean handoffs — not feature delivery.",
+    status: "watch",
+    currentFocus: "March release train — CAB pack completeness and evidence chase",
+    nextMilestone: "CAB board submission",
+    nextMilestoneAt: daysFromNow(5),
+    stakeholders: [
+      {
+        id: "st-cab",
+        name: "CAB Secretariat",
+        role: "Change Advisory Board",
+        preferences: [
+          "Pack must be complete 24h before board",
+          "No verbal-only risk statements",
+        ],
+        concerns: ["Late artefact submissions"],
+        lastContactAt: daysAgo(8),
+      },
+      {
+        id: "st-qa",
+        name: "Sam Okonkwo",
+        role: "QA Lead",
+        preferences: ["Wants evidence logged in the shared tracker"],
+        concerns: ["Regression sign-off owners still unclear on two modules"],
+        lastContactAt: daysAgo(2),
+      },
+      {
+        id: "st-rm",
+        name: "Nina Patel",
+        role: "Release Manager peer",
+        preferences: ["Prefers checklist updates in the release channel"],
+        concerns: ["Rollback plan still in draft"],
+        lastContactAt: daysAgo(1),
       },
     ],
   },
@@ -255,6 +299,34 @@ export const DEMO_RECOMMENDATIONS: Recommendation[] = [
     createdAt: daysAgo(0),
     status: "active",
   },
+  {
+    id: "rec-relops-tracker",
+    kind: "release",
+    urgency: "now",
+    title: "Close unsigned modules in the evidence tracker",
+    action:
+      "Chase Sam for the two unsigned modules and require tracker links — not verbal confirmation — before CAB pack walkthrough.",
+    why: "RELOPS succeeds on pack completeness. Verbal sign-off is how submissions get rejected.",
+    leadershipImpact:
+      "You look process-tight and dependable in front of CAB Secretariat.",
+    projectId: "proj-relops",
+    createdAt: daysAgo(0),
+    status: "active",
+  },
+  {
+    id: "rec-relops-rollback",
+    kind: "risk",
+    urgency: "today",
+    title: "Convert rollback plan from draft to CAB-ready",
+    action:
+      "Sit with Nina, close draft gaps, and attach the final rollback plan to the pack today.",
+    why: "A draft rollback plan is one of the fastest CAB rejection reasons on a monthly train.",
+    leadershipImpact:
+      "You remove a predictable board embarrassment before it happens.",
+    projectId: "proj-relops",
+    createdAt: daysAgo(0),
+    status: "active",
+  },
 ];
 
 export const DEMO_MEETINGS: Meeting[] = [
@@ -399,6 +471,257 @@ export const DEMO_MEETINGS: Meeting[] = [
       },
     ],
   },
+  {
+    id: "mtg-rel-freeze",
+    projectId: "proj-relops",
+    title: "Merge freeze / change window kickoff",
+    startsAt: daysFromNow(0.5),
+    attendees: ["Nina Patel", "Sam Okonkwo", "Dev leads", "You"],
+    phase: "upcoming",
+    prep: {
+      objectives: [
+        "Confirm what is in / deferred for this month's train",
+        "Publish freeze rules and late-change escalation path",
+      ],
+      openingScript:
+        "Purpose: lock the March release contents. I need a clear in/out list, owners for late-change pressure, and confirmation freeze communications go out today.",
+      talkingPoints: [
+        "Candidate change list vs deferred items",
+        "Freeze notice and channel for exceptions",
+        "Evidence tracker owners by module",
+      ],
+      questionsToAsk: [
+        "Which changes are still lobbying to get in — and who is asking?",
+        "Who owns updating the shared evidence tracker after freeze?",
+      ],
+      decisionsToObtain: [
+        "Final in-scope change list",
+        "Exception approval path for post-freeze requests",
+      ],
+      risksToDiscuss: ["Late merges that break the evidence timeline"],
+      peopleToEngage: ["Nina on freeze comms", "Sam on evidence expectations"],
+      leadershipOpportunities: [
+        "State the freeze as a leadership decision, not a technical preference",
+      ],
+      stakeholderConcerns: ["Teams surprised by deferred items"],
+      ownershipMoments: ["You own the published freeze notice"],
+    },
+    duringPrompts: [
+      {
+        id: "dp-rf1",
+        prompt: "Confirm the decision",
+        context: "Restate the in/out list and get verbal agreement.",
+      },
+      {
+        id: "dp-rf2",
+        prompt: "Capture an action",
+        context: "Name the evidence tracker owner per module.",
+      },
+    ],
+  },
+  {
+    id: "mtg-rel-build",
+    projectId: "proj-relops",
+    title: "Build validation review",
+    startsAt: daysFromNow(2),
+    attendees: ["Dev leads", "Nina Patel", "You"],
+    phase: "upcoming",
+    prep: {
+      objectives: [
+        "Confirm green-build evidence exists for CAB",
+        "Surface flaky gates with owners and dates",
+      ],
+      openingScript:
+        "We're here to validate build health for the March train. I need consecutive green evidence we can put in the CAB pack — not optimism.",
+      talkingPoints: [
+        "Gate results since freeze",
+        "Known flake list and fix dates",
+        "What CAB will see as proof",
+      ],
+      questionsToAsk: [
+        "Which builds are CAB-ready today?",
+        "What is still red and who owns the fix date?",
+      ],
+      decisionsToObtain: ["Whether build evidence is sufficient to proceed"],
+      risksToDiscuss: ["Hidden flake debt discovered late"],
+      peopleToEngage: ["Dev leads with specific gate results"],
+      leadershipOpportunities: [
+        "Refuse vague 'looking better' language — ask for artefacts",
+      ],
+      stakeholderConcerns: ["CAB rejecting incomplete build proof"],
+      ownershipMoments: ["You own what goes into the pack as build evidence"],
+    },
+    duringPrompts: [
+      {
+        id: "dp-rb1",
+        prompt: "Challenge the timeline",
+        context: "Can fix dates land before CAB pack submission?",
+      },
+    ],
+  },
+  {
+    id: "mtg-rel-regression",
+    projectId: "proj-relops",
+    title: "Regression & evidence sync",
+    startsAt: daysFromNow(3),
+    attendees: ["Sam Okonkwo", "Module owners", "You"],
+    phase: "upcoming",
+    prep: {
+      objectives: [
+        "Close missing regression sign-offs",
+        "Confirm evidence is filed in the shared tracker",
+      ],
+      openingScript:
+        "This is an evidence chase, not a status tour. I need named sign-offs and tracker links for every critical module before CAB pack freeze.",
+      talkingPoints: [
+        "Modules still unsigned",
+        "Tracker gaps",
+        "Business-critical paths CAB cares about",
+      ],
+      questionsToAsk: [
+        "Sam — which two modules are still blocking sign-off?",
+        "Where is the evidence link if I open the tracker now?",
+      ],
+      decisionsToObtain: ["Deadline for remaining sign-offs"],
+      risksToDiscuss: ["Verbal sign-off without artefacts"],
+      peopleToEngage: ["Sam and unsigned module owners"],
+      leadershipOpportunities: [
+        "Make the tracker the source of truth in the room",
+      ],
+      stakeholderConcerns: ["CAB Secretariat rejecting incomplete packs"],
+      ownershipMoments: ["You own pack completeness, not just chasing"],
+    },
+    duringPrompts: [
+      {
+        id: "dp-rr1",
+        prompt: "Clarify ownership",
+        context: "Each unsigned module needs a name and time.",
+      },
+    ],
+  },
+  {
+    id: "mtg-rel-cab-pack",
+    projectId: "proj-relops",
+    title: "CAB pack walkthrough",
+    startsAt: daysFromNow(4),
+    attendees: ["Nina Patel", "Sam Okonkwo", "You"],
+    phase: "upcoming",
+    prep: {
+      objectives: [
+        "Walk the full CAB pack end-to-end",
+        "List residual gaps before submission",
+      ],
+      openingScript:
+        "We'll walk the pack page by page. Goal: leave with a gap list and owners — not a hope that it's 'mostly done'.",
+      talkingPoints: [
+        "Change record",
+        "Regression evidence",
+        "Rollback plan",
+        "Hypercare roster",
+        "Residual risks",
+      ],
+      questionsToAsk: [
+        "What is still draft?",
+        "What would CAB Secretariat reject tomorrow morning?",
+      ],
+      decisionsToObtain: ["Go/no-go to submit the pack"],
+      risksToDiscuss: ["Draft rollback plan", "Missing hypercare names"],
+      peopleToEngage: ["Nina on rollback", "Sam on evidence annex"],
+      leadershipOpportunities: [
+        "Be the person who finds gaps before CAB does",
+      ],
+      stakeholderConcerns: ["Incomplete submission embarrassing the train"],
+      ownershipMoments: ["You own the submission decision"],
+    },
+    duringPrompts: [
+      {
+        id: "dp-rcp1",
+        prompt: "Capture an action",
+        context: "Every gap needs owner + time before board.",
+      },
+    ],
+  },
+  {
+    id: "mtg-rel-cab-board",
+    projectId: "proj-relops",
+    title: "CAB board",
+    startsAt: daysFromNow(5),
+    attendees: ["CAB Secretariat", "Approvers", "You"],
+    phase: "upcoming",
+    prep: {
+      objectives: [
+        "Present a complete, calm release narrative",
+        "Answer conditions without scrambling",
+      ],
+      openingScript:
+        "Thank you. March release train: scope frozen, build evidence attached, regression sign-offs logged, residual risks with owners. Happy to take conditions.",
+      talkingPoints: [
+        "What changed since last month",
+        "Evidence highlights",
+        "Residual risks and mitigations",
+        "Rollback and hypercare readiness",
+      ],
+      questionsToAsk: [
+        "Any conditions we should capture explicitly before leaving?",
+      ],
+      decisionsToObtain: ["CAB approval or conditional approval"],
+      risksToDiscuss: ["Known residual risks already in the pack"],
+      peopleToEngage: ["CAB Secretariat on process completeness"],
+      leadershipOpportunities: [
+        "Lead with evidence, not reassurance",
+      ],
+      stakeholderConcerns: ["Surprise gaps in the pack"],
+      ownershipMoments: ["You own the board narrative"],
+    },
+    duringPrompts: [
+      {
+        id: "dp-rcb1",
+        prompt: "Confirm the decision",
+        context: "Restate approval/conditions before the meeting closes.",
+      },
+    ],
+  },
+  {
+    id: "mtg-rel-golive",
+    projectId: "proj-relops",
+    title: "Go-live & hypercare readiness",
+    startsAt: daysFromNow(7),
+    attendees: ["Nina Patel", "Ops", "You"],
+    phase: "upcoming",
+    prep: {
+      objectives: [
+        "Confirm go/no-go criteria and named hypercare cover",
+        "Agree rollback triggers before deployment",
+      ],
+      openingScript:
+        "Final readiness check: named hypercare roster, rollback triggers, and the go/no-go call. If anything is still assumed, we surface it now.",
+      talkingPoints: [
+        "Hypercare roster",
+        "Rollback triggers",
+        "Comms plan",
+        "Smoke paths",
+      ],
+      questionsToAsk: [
+        "Is every hypercare shift named in writing?",
+        "Who makes the rollback call and at what threshold?",
+      ],
+      decisionsToObtain: ["Go/no-go for production"],
+      risksToDiscuss: ["Unnamed cover", "Unclear rollback authority"],
+      peopleToEngage: ["Ops leads on cover", "Nina on runbook"],
+      leadershipOpportunities: [
+        "Prefer an early no-go you own over a late incident narrative",
+      ],
+      stakeholderConcerns: ["Production surprises after CAB approval"],
+      ownershipMoments: ["You own the go/no-go recommendation"],
+    },
+    duringPrompts: [
+      {
+        id: "dp-rg1",
+        prompt: "Ask about release readiness",
+        context: "Roster, rollback, smoke — say each aloud.",
+      },
+    ],
+  },
 ];
 
 export const DEMO_RELEASES: Release[] = [
@@ -511,6 +834,53 @@ export const DEMO_TODOS: TodoItem[] = [
     done: false,
     createdAt: daysAgo(0),
   },
+  {
+    id: "todo-rel-freeze-notice",
+    projectId: "proj-relops",
+    title: "Publish March merge freeze notice",
+    detail: "In/out list + exception path in release channel",
+    done: false,
+    createdAt: daysAgo(0),
+  },
+  {
+    id: "todo-rel-tracker",
+    projectId: "proj-relops",
+    title: "Chase two unsigned modules into evidence tracker",
+    detail: "Require links from Sam — no verbal sign-off",
+    done: false,
+    createdAt: daysAgo(0),
+  },
+  {
+    id: "todo-rel-rollback",
+    projectId: "proj-relops",
+    title: "Finalise rollback plan with Nina",
+    detail: "Move from draft to CAB-ready attachment",
+    done: false,
+    createdAt: daysAgo(0),
+  },
+  {
+    id: "todo-rel-hypercare",
+    projectId: "proj-relops",
+    title: "Collect named hypercare roster",
+    detail: "Every shift named in writing before go-live forum",
+    done: false,
+    createdAt: daysAgo(0),
+  },
+  {
+    id: "todo-rel-pack-submit",
+    projectId: "proj-relops",
+    title: "Submit complete CAB pack 24h before board",
+    detail: "Change record, evidence, rollback, roster, residual risks",
+    done: false,
+    createdAt: daysAgo(0),
+  },
+  {
+    id: "todo-rel-smoke",
+    projectId: "proj-relops",
+    title: "Confirm smoke checklist owners for go-live",
+    done: false,
+    createdAt: daysAgo(1),
+  },
 ];
 
 export const DEMO_KNOWLEDGE: ProjectKnowledge[] = [
@@ -563,6 +933,149 @@ export const DEMO_KNOWLEDGE: ProjectKnowledge[] = [
       ],
     },
   },
+  {
+    projectId: "proj-relops",
+    updatedAt: daysAgo(0),
+    sections: {
+      now: [
+        "March release train in evidence-collection mode; CAB pack submission in 5 days",
+        "Process success = complete artefacts in the tracker, not feature narratives",
+      ],
+      decisions: [
+        "CAB pack must be complete 24h before board — no verbal-only risks",
+        "Evidence tracker is the source of truth for regression sign-off",
+      ],
+      risks: [
+        "Two modules still unsigned in the tracker",
+        "Rollback plan still draft",
+      ],
+      people: [
+        "CAB Secretariat: rejects incomplete packs",
+        "Sam Okonkwo: needs owners logged in the shared tracker",
+      ],
+      openLoops: [
+        "Named hypercare roster not yet complete",
+        "Unsigned module chase still open with Sam",
+      ],
+    },
+  },
+];
+
+export const DEMO_TIMELINE: TimelineItem[] = [
+  // ATLAS
+  {
+    id: "tl-atlas-merge",
+    projectId: "proj-atlas",
+    label: "Merge window closed",
+    type: "phase",
+    startAt: daysAgo(10),
+    endAt: daysAgo(7),
+    source: "seed",
+  },
+  {
+    id: "tl-atlas-cab",
+    projectId: "proj-atlas",
+    label: "CAB approval",
+    type: "milestone",
+    startAt: daysFromNow(4),
+    source: "seed",
+  },
+  {
+    id: "tl-atlas-prod",
+    projectId: "proj-atlas",
+    label: "Production deployment",
+    type: "deadline",
+    startAt: daysFromNow(8),
+    source: "seed",
+  },
+  // HORIZON
+  {
+    id: "tl-hor-workshop",
+    projectId: "proj-horizon",
+    label: "Roadmap workshop",
+    type: "meeting",
+    startAt: daysAgo(30),
+    source: "seed",
+  },
+  {
+    id: "tl-hor-review",
+    projectId: "proj-horizon",
+    label: "Roadmap Review with Jordan",
+    type: "meeting",
+    startAt: daysFromNow(7),
+    source: "seed",
+  },
+  {
+    id: "tl-hor-brand",
+    projectId: "proj-horizon",
+    label: "Public brand launch date",
+    type: "deadline",
+    startAt: daysFromNow(45),
+    notes: "Fixed publicly — protect with trade-offs",
+    source: "seed",
+  },
+  // RELOPS monthly train
+  {
+    id: "tl-rel-freeze",
+    projectId: "proj-relops",
+    label: "Merge freeze",
+    type: "phase",
+    startAt: daysFromNow(0),
+    endAt: daysFromNow(1),
+    source: "seed",
+  },
+  {
+    id: "tl-rel-build",
+    projectId: "proj-relops",
+    label: "Build validation window",
+    type: "phase",
+    startAt: daysFromNow(1),
+    endAt: daysFromNow(3),
+    source: "seed",
+  },
+  {
+    id: "tl-rel-regression",
+    projectId: "proj-relops",
+    label: "Regression evidence collection",
+    type: "phase",
+    startAt: daysFromNow(2),
+    endAt: daysFromNow(4),
+    source: "seed",
+  },
+  {
+    id: "tl-rel-pack-due",
+    projectId: "proj-relops",
+    label: "CAB pack submission due",
+    type: "submission",
+    startAt: daysFromNow(4),
+    notes: "24h before board",
+    source: "seed",
+  },
+  {
+    id: "tl-rel-cab",
+    projectId: "proj-relops",
+    label: "CAB board",
+    type: "meeting",
+    startAt: daysFromNow(5),
+    source: "seed",
+  },
+  {
+    id: "tl-rel-golive",
+    projectId: "proj-relops",
+    label: "Production go-live",
+    type: "deadline",
+    startAt: daysFromNow(8),
+    source: "seed",
+  },
+  {
+    id: "tl-rel-hypercare",
+    projectId: "proj-relops",
+    label: "Hypercare",
+    type: "phase",
+    startAt: daysFromNow(8),
+    endAt: daysFromNow(15),
+    source: "seed",
+  },
 ];
 
 export function createSeedState(): MissionState {
@@ -574,6 +1087,7 @@ export function createSeedState(): MissionState {
     releases: DEMO_RELEASES,
     todos: DEMO_TODOS,
     knowledge: DEMO_KNOWLEDGE,
+    timeline: DEMO_TIMELINE,
     lastAnalyzedAt: new Date().toISOString(),
   };
 }

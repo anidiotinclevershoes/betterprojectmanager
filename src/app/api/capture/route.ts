@@ -22,6 +22,7 @@ type Body = {
     | "meetings"
     | "releases"
     | "knowledge"
+    | "timeline"
   >;
 };
 
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
 
     const projects = body.state?.projects ?? [];
     const knowledge = body.state?.knowledge ?? [];
+    const timeline = body.state?.timeline ?? [];
     const input: CaptureInput = {
       content,
       projectId: body.projectId,
@@ -64,6 +66,7 @@ export async function POST(request: Request) {
         releases: body.state?.releases ?? [],
         todos: [],
         knowledge,
+        timeline,
       };
       const result = localCaptureFallback(input, fallbackState);
       return NextResponse.json({
@@ -83,6 +86,7 @@ export async function POST(request: Request) {
       sourceType: body.sourceType,
       projects,
       existingKnowledge,
+      existingTimeline: timeline.filter((t) => t.projectId === body.projectId),
     });
 
     const result = buildCaptureResultFromAi({

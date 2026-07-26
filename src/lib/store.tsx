@@ -16,6 +16,10 @@ import {
 } from "./coach";
 import { extractKnowledgePatchFromText, emptyKnowledge, mergeKnowledge } from "./knowledge";
 import { createSeedState } from "./seed";
+import {
+  extractTimelinePatchFromText,
+  mergeTimelineItems,
+} from "./timeline";
 import type {
   CaptureInput,
   CaptureResult,
@@ -23,10 +27,12 @@ import type {
   MissionState,
   ProjectKnowledge,
   Recommendation,
+  TimelineItem,
+  TimelineItemInput,
   TodoItem,
 } from "./types";
 
-const STORAGE_KEY = "mission-control-state-v3";
+const STORAGE_KEY = "mission-control-state-v4";
 
 type OpenAIDiagnostics = {
   keyPrefix: string | null;
@@ -61,6 +67,10 @@ type MissionContextValue = {
     bullet: string,
   ) => void;
   replaceKnowledge: (knowledge: ProjectKnowledge) => void;
+  addTimelineItem: (
+    projectId: string,
+    item: TimelineItemInput & { source?: TimelineItem["source"] },
+  ) => void;
   refreshCoaching: () => void;
   resetDemo: () => void;
 };
@@ -72,6 +82,7 @@ function normaliseState(raw: MissionState): MissionState {
     ...raw,
     todos: raw.todos ?? [],
     knowledge: raw.knowledge ?? [],
+    timeline: raw.timeline ?? [],
   };
 }
 
@@ -91,6 +102,7 @@ function withProactiveCoaching(state: MissionState): MissionState {
     ...state,
     todos: state.todos ?? [],
     knowledge: state.knowledge ?? [],
+    timeline: state.timeline ?? [],
     recommendations: [...extras, ...state.recommendations],
     lastAnalyzedAt: new Date().toISOString(),
   };
@@ -114,6 +126,15 @@ function applyKnowledgePatch(
 
 function mergeCapture(prev: MissionState, result: CaptureResult): MissionState {
   const projectId = result.knowledgeProjectId || result.memory.projectId;
+  let timeline = prev.timeline ?? [];
+  if (projectId && result.timelinePatch?.length) {
+    timeline = mergeTimelineItems(
+      timeline,
+      projectId,
+      result.timelinePatch,
+      "capture",
+    );
+  }
   const next: MissionState = {
     ...prev,
     todos: prev.todos ?? [],
@@ -122,6 +143,7 @@ function mergeCapture(prev: MissionState, result: CaptureResult): MissionState {
       projectId ?? "",
       result.knowledgePatch,
     ),
+    timeline,
     memories: [result.memory, ...prev.memories],
     recommendations: [...result.recommendations, ...prev.recommendations],
     lastAnalyzedAt: new Date().toISOString(),
@@ -213,6 +235,9 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           ? extractKnowledgePatchFromText(input.content)
           : undefined,
         knowledgeProjectId: projectId,
+        timelinePatch: projectId
+          ? extractTimelinePatchFromText(input.content)
+          : undefined,
       };
       return mergeCapture(prev, result);
     });
@@ -237,6 +262,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           meetings: latest.meetings,
           releases: latest.releases,
           knowledge: latest.knowledge ?? [],
+          timeline: latest.timeline ?? [],
         },
       }),
     });
@@ -383,6 +409,24 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const addTimelineItem = useCallback(
+    (
+      projectId: string,
+      item: TimelineItemInput & { source?: TimelineItem["source"] },
+    ) => {
+      setState((prev) => ({
+        ...prev,
+        timeline: mergeTimelineItems(
+          prev.timeline ?? [],
+          projectId,
+          [item],
+          item.source ?? "manual",
+        ),
+      }));
+    },
+    [],
+  );
+
   const refreshCoaching = useCallback(() => {
     setState((prev) => withProactiveCoaching(prev));
   }, []);
@@ -410,6 +454,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateKnowledgeSection,
       addKnowledgeBullet,
       replaceKnowledge,
+      addTimelineItem,
       refreshCoaching,
       resetDemo,
     }),
@@ -429,6 +474,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateKnowledgeSection,
       addKnowledgeBullet,
       replaceKnowledge,
+      addTimelineItem,
       refreshCoaching,
       resetDemo,
     ],
