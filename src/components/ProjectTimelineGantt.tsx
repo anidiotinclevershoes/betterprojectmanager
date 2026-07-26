@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
+import { formatDayMonth } from "@/lib/selectors";
 import {
   projectTimeline,
   timelineBounds,
@@ -130,12 +131,7 @@ function GanttRow({
       <div className="gantt-label">
         <span className={`tl-dot ${TYPE_CLASS[item.type]}`} />
         <span className="gantt-label-text">{item.label}</span>
-        <span className="gantt-date">
-          {new Date(item.startAt).toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
-          })}
-        </span>
+        <span className="gantt-date">{formatDayMonth(item.startAt)}</span>
       </div>
       <div className="gantt-track">
         <div
@@ -161,10 +157,7 @@ function buildTicks(start: number, end: number) {
   while (cursor <= end && ticks.length < 10) {
     ticks.push({
       ms: cursor,
-      label: new Date(cursor).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-      }),
+      label: formatDayMonth(cursor),
     });
     cursor += step;
   }

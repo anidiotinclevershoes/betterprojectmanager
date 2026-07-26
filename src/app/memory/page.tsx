@@ -3,6 +3,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { PageHeader, Panel } from "@/components/DashboardChrome";
 import { answerMemoryQuestion, searchMemory } from "@/lib/coach";
+import { formatDate } from "@/lib/selectors";
 import { useMission } from "@/lib/store";
 import type { MemoryEntry } from "@/lib/types";
 
@@ -90,13 +91,7 @@ export default function MemoryPage() {
                 <span className="rounded bg-mist-deep px-1.5 py-0.5 text-ink">
                   {memory.type.replaceAll("_", " ")}
                 </span>
-                <span>
-                  {new Date(memory.occurredAt).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
+                <span>{formatDate(memory.occurredAt)}</span>
               </div>
               <h2 className="brand-mark mt-2 text-lg font-bold">
                 {memory.title}

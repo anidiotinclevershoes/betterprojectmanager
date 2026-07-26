@@ -187,14 +187,48 @@ export function daysUntil(iso?: string) {
   return Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000);
 }
 
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+/**
+ * Deterministic datetime label (no locale APIs).
+ * Avoids SSR/client hydration mismatches from toLocaleString().
+ */
 export function formatWhen(iso: string) {
-  return new Date(iso).toLocaleString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return `${WEEKDAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}, ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+
+/** Deterministic date-only label for timeline / memory rows. */
+export function formatDate(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+/** Short day+month label, e.g. "27 Jul". */
+export function formatDayMonth(isoOrMs: string | number) {
+  const d = new Date(isoOrMs);
+  if (Number.isNaN(d.getTime())) return String(isoOrMs);
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
 }
 
 export function formatDue(iso?: string) {

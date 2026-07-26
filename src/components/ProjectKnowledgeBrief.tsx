@@ -7,6 +7,7 @@ import {
   knowledgeHasContent,
   normaliseBullet,
 } from "@/lib/knowledge";
+import { formatWhen } from "@/lib/selectors";
 import { useMission } from "@/lib/store";
 import type { KnowledgeSectionId, ProjectKnowledge } from "@/lib/types";
 
@@ -163,13 +164,7 @@ export function ProjectKnowledgeBrief({ projectId }: { projectId: string }) {
 
       {knowledge.updatedAt ? (
         <p className="knowledge-updated">
-          Updated{" "}
-          {new Date(knowledge.updatedAt).toLocaleString(undefined, {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          Updated {formatWhen(knowledge.updatedAt)}
         </p>
       ) : null}
     </section>
