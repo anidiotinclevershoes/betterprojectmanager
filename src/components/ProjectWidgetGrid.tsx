@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { StatusPill } from "@/components/DashboardChrome";
+import { ProjectKnowledgeBrief } from "@/components/ProjectKnowledgeBrief";
 import {
   formatWhen,
   meetingOpeningScripts,
@@ -240,6 +241,8 @@ export function ProjectWidgetGrid({
           )}
         </Widget>
       </div>
+
+      <ProjectKnowledgeBrief projectId={project.id} />
     </section>
   );
 }

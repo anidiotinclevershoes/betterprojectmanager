@@ -148,16 +148,6 @@ export interface CaptureInput {
   occurredAt?: string;
 }
 
-export interface CaptureResult {
-  memory: MemoryEntry;
-  insights: string[];
-  assumptions: string[];
-  recommendations: Recommendation[];
-  rawContent?: string;
-  tidied?: boolean;
-  provider?: "openai" | "local";
-}
-
 /** Owned checklist item — accepted from suggestions or added manually. */
 export interface TodoItem {
   id: string;
@@ -180,6 +170,33 @@ export interface SuggestedMeeting {
   recommendationId?: string;
 }
 
+/** Fixed, limited knowledge sections — avoid wall-of-text sprawl. */
+export type KnowledgeSectionId =
+  | "now"
+  | "decisions"
+  | "risks"
+  | "people"
+  | "openLoops";
+
+export interface ProjectKnowledge {
+  projectId: string;
+  updatedAt: string;
+  sections: Record<KnowledgeSectionId, string[]>;
+}
+
+export interface CaptureResult {
+  memory: MemoryEntry;
+  insights: string[];
+  assumptions: string[];
+  recommendations: Recommendation[];
+  rawContent?: string;
+  tidied?: boolean;
+  provider?: "openai" | "local";
+  /** Relevant bullets to merge into the project knowledge brief. */
+  knowledgePatch?: Partial<ProjectKnowledge["sections"]>;
+  knowledgeProjectId?: string;
+}
+
 export interface MissionState {
   projects: Project[];
   memories: MemoryEntry[];
@@ -187,5 +204,6 @@ export interface MissionState {
   meetings: Meeting[];
   releases: Release[];
   todos: TodoItem[];
+  knowledge: ProjectKnowledge[];
   lastAnalyzedAt?: string;
 }

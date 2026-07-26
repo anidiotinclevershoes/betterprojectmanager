@@ -6,7 +6,7 @@ import {
   localCaptureFallback,
   tidyAndCoachWithOpenAI,
 } from "@/lib/openai";
-import type { CaptureInput, MissionState } from "@/lib/types";
+import type { CaptureInput, MissionState, ProjectKnowledge } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -14,7 +14,15 @@ type Body = {
   content: string;
   projectId?: string;
   sourceType?: CaptureInput["sourceType"];
-  state?: Pick<MissionState, "projects" | "memories" | "recommendations" | "meetings" | "releases">;
+  state?: Pick<
+    MissionState,
+    | "projects"
+    | "memories"
+    | "recommendations"
+    | "meetings"
+    | "releases"
+    | "knowledge"
+  >;
 };
 
 export async function GET() {
@@ -40,6 +48,7 @@ export async function POST(request: Request) {
     }
 
     const projects = body.state?.projects ?? [];
+    const knowledge = body.state?.knowledge ?? [];
     const input: CaptureInput = {
       content,
       projectId: body.projectId,
@@ -54,6 +63,7 @@ export async function POST(request: Request) {
         meetings: body.state?.meetings ?? [],
         releases: body.state?.releases ?? [],
         todos: [],
+        knowledge,
       };
       const result = localCaptureFallback(input, fallbackState);
       return NextResponse.json({
@@ -64,11 +74,15 @@ export async function POST(request: Request) {
       });
     }
 
+    const existingKnowledge: ProjectKnowledge | null =
+      knowledge.find((k) => k.projectId === body.projectId) ?? null;
+
     const ai = await tidyAndCoachWithOpenAI({
       rawText: content,
       projectId: body.projectId,
       sourceType: body.sourceType,
       projects,
+      existingKnowledge,
     });
 
     const result = buildCaptureResultFromAi({

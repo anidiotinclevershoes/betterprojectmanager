@@ -3,6 +3,7 @@ import type {
   MemoryEntry,
   MissionState,
   Project,
+  ProjectKnowledge,
   Recommendation,
   Release,
   TodoItem,
@@ -512,6 +513,58 @@ export const DEMO_TODOS: TodoItem[] = [
   },
 ];
 
+export const DEMO_KNOWLEDGE: ProjectKnowledge[] = [
+  {
+    projectId: "proj-atlas",
+    updatedAt: daysAgo(0),
+    sections: {
+      now: [
+        "Release 9 in CAB preparation; regression and build evidence still the critical path",
+        "Payments pipeline flakiness remains the main technical watch item after Release 8",
+      ],
+      decisions: [
+        "Harden build gates before Release 9 merge window closes (post Release 8 delay)",
+        "CAB pack must include billing regression evidence Finance will recognise",
+      ],
+      risks: [
+        "Build stability mentioned in three consecutive meetings without a dated plan",
+        "Hypercare roster not confirmed in writing for leave week",
+      ],
+      people: [
+        "Priya Shah (Finance): prefers written brief 24h before verbal; still sensitive after Release 8 delay",
+        "Elena Rostova: responds to specific evidence, not vague pressure on pipeline flakiness",
+      ],
+      openLoops: [
+        "Named hypercare cover from Marcus still unconfirmed",
+        "Consecutive green payments builds needed before CAB narrative is safe",
+      ],
+    },
+  },
+  {
+    projectId: "proj-horizon",
+    updatedAt: daysAgo(1),
+    sections: {
+      now: [
+        "SSO vendor delay is on the critical path; brand launch date remains fixed publicly",
+        "Five priority shifts since last sponsor update have not been walked through with Jordan",
+      ],
+      decisions: [
+        "SSO migration is critical path; password reset deprioritised",
+        "No further scope without sponsor trade-off against brand date",
+      ],
+      risks: [
+        "Sponsor surprise if priority changes land without a formal Roadmap Review",
+      ],
+      people: [
+        "Jordan Lee: needs visual demos; brand launch date is publicly committed",
+      ],
+      openLoops: [
+        "Roadmap Review with Jordan still to be arranged this week",
+      ],
+    },
+  },
+];
+
 export function createSeedState(): MissionState {
   return {
     projects: DEMO_PROJECTS,
@@ -520,6 +573,7 @@ export function createSeedState(): MissionState {
     meetings: DEMO_MEETINGS,
     releases: DEMO_RELEASES,
     todos: DEMO_TODOS,
+    knowledge: DEMO_KNOWLEDGE,
     lastAnalyzedAt: new Date().toISOString(),
   };
 }

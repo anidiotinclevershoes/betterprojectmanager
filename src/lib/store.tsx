@@ -14,16 +14,19 @@ import {
   analyseCapture,
   generateProactiveRecommendations,
 } from "./coach";
+import { extractKnowledgePatchFromText, emptyKnowledge, mergeKnowledge } from "./knowledge";
 import { createSeedState } from "./seed";
 import type {
   CaptureInput,
   CaptureResult,
+  KnowledgeSectionId,
   MissionState,
+  ProjectKnowledge,
   Recommendation,
   TodoItem,
 } from "./types";
 
-const STORAGE_KEY = "mission-control-state-v2";
+const STORAGE_KEY = "mission-control-state-v3";
 
 type OpenAIDiagnostics = {
   keyPrefix: string | null;
@@ -47,6 +50,17 @@ type MissionContextValue = {
   dismissSuggestion: (recommendationId: string) => void;
   toggleTodo: (todoId: string) => void;
   removeTodo: (todoId: string) => void;
+  updateKnowledgeSection: (
+    projectId: string,
+    sectionId: KnowledgeSectionId,
+    bullets: string[],
+  ) => void;
+  addKnowledgeBullet: (
+    projectId: string,
+    sectionId: KnowledgeSectionId,
+    bullet: string,
+  ) => void;
+  replaceKnowledge: (knowledge: ProjectKnowledge) => void;
   refreshCoaching: () => void;
   resetDemo: () => void;
 };
@@ -57,6 +71,7 @@ function normaliseState(raw: MissionState): MissionState {
   return {
     ...raw,
     todos: raw.todos ?? [],
+    knowledge: raw.knowledge ?? [],
   };
 }
 
@@ -75,6 +90,7 @@ function withProactiveCoaching(state: MissionState): MissionState {
   return {
     ...state,
     todos: state.todos ?? [],
+    knowledge: state.knowledge ?? [],
     recommendations: [...extras, ...state.recommendations],
     lastAnalyzedAt: new Date().toISOString(),
   };
@@ -84,10 +100,28 @@ function persist(state: MissionState) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
+function applyKnowledgePatch(
+  knowledge: ProjectKnowledge[],
+  projectId: string,
+  patch?: Partial<ProjectKnowledge["sections"]>,
+): ProjectKnowledge[] {
+  if (!patch || !projectId) return knowledge;
+  const current = knowledge.find((k) => k.projectId === projectId);
+  const merged = mergeKnowledge(current, projectId, patch);
+  const others = knowledge.filter((k) => k.projectId !== projectId);
+  return [...others, merged];
+}
+
 function mergeCapture(prev: MissionState, result: CaptureResult): MissionState {
+  const projectId = result.knowledgeProjectId || result.memory.projectId;
   const next: MissionState = {
     ...prev,
     todos: prev.todos ?? [],
+    knowledge: applyKnowledgePatch(
+      prev.knowledge ?? [],
+      projectId ?? "",
+      result.knowledgePatch,
+    ),
     memories: [result.memory, ...prev.memories],
     recommendations: [...result.recommendations, ...prev.recommendations],
     lastAnalyzedAt: new Date().toISOString(),
@@ -168,11 +202,17 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   const capture = useCallback((input: CaptureInput) => {
     let result!: CaptureResult;
     setState((prev) => {
+      const analysed = analyseCapture(input, prev);
+      const projectId = analysed.memory.projectId || input.projectId;
       result = {
-        ...analyseCapture(input, prev),
+        ...analysed,
         rawContent: input.content,
         tidied: false,
         provider: "local",
+        knowledgePatch: projectId
+          ? extractKnowledgePatchFromText(input.content)
+          : undefined,
+        knowledgeProjectId: projectId,
       };
       return mergeCapture(prev, result);
     });
@@ -196,6 +236,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
             .slice(0, 20),
           meetings: latest.meetings,
           releases: latest.releases,
+          knowledge: latest.knowledge ?? [],
         },
       }),
     });
@@ -278,6 +319,70 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const updateKnowledgeSection = useCallback(
+    (
+      projectId: string,
+      sectionId: KnowledgeSectionId,
+      bullets: string[],
+    ) => {
+      setState((prev) => {
+        const current =
+          (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
+          emptyKnowledge(projectId);
+        const cleaned = bullets
+          .map((b) => b.trim())
+          .filter(Boolean)
+          .slice(0, 8);
+        const next: ProjectKnowledge = {
+          ...current,
+          updatedAt: new Date().toISOString(),
+          sections: { ...current.sections, [sectionId]: cleaned },
+        };
+        return {
+          ...prev,
+          knowledge: [
+            ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
+            next,
+          ],
+        };
+      });
+    },
+    [],
+  );
+
+  const addKnowledgeBullet = useCallback(
+    (projectId: string, sectionId: KnowledgeSectionId, bullet: string) => {
+      setState((prev) => {
+        const current =
+          (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
+          emptyKnowledge(projectId);
+        const merged = mergeKnowledge(current, projectId, {
+          [sectionId]: [bullet],
+        });
+        return {
+          ...prev,
+          knowledge: [
+            ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
+            merged,
+          ],
+        };
+      });
+    },
+    [],
+  );
+
+  const replaceKnowledge = useCallback((knowledge: ProjectKnowledge) => {
+    setState((prev) => ({
+      ...prev,
+      knowledge: [
+        ...(prev.knowledge ?? []).filter(
+          (k) => k.projectId !== knowledge.projectId,
+        ),
+        { ...knowledge, updatedAt: new Date().toISOString() },
+      ],
+    }));
+  }, []);
+
   const refreshCoaching = useCallback(() => {
     setState((prev) => withProactiveCoaching(prev));
   }, []);
@@ -302,6 +407,9 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       dismissSuggestion,
       toggleTodo,
       removeTodo,
+      updateKnowledgeSection,
+      addKnowledgeBullet,
+      replaceKnowledge,
       refreshCoaching,
       resetDemo,
     }),
@@ -318,6 +426,9 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       dismissSuggestion,
       toggleTodo,
       removeTodo,
+      updateKnowledgeSection,
+      addKnowledgeBullet,
+      replaceKnowledge,
       refreshCoaching,
       resetDemo,
     ],

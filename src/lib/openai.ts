@@ -1,14 +1,16 @@
+import { analyseCapture } from "./coach";
+import { extractKnowledgePatchFromText } from "./knowledge";
 import { COACHING_SYSTEM_PROMPT, MEMORY_TYPES } from "./mission";
 import type {
   CaptureInput,
   CaptureResult,
   MissionState,
   Project,
+  ProjectKnowledge,
   Recommendation,
   RecommendationKind,
   RecommendationUrgency,
 } from "./types";
-import { analyseCapture } from "./coach";
 
 /**
  * Normalise API keys copied from dashboards/password managers.
@@ -23,7 +25,6 @@ export function getOpenAIKey() {
   ) {
     key = key.slice(1, -1).trim();
   }
-  // Collapse accidental newlines/spaces inside a pasted key
   key = key.replace(/\s+/g, "");
   return key;
 }
@@ -46,15 +47,21 @@ export function getOpenAIKeyDiagnostics() {
   if (!key.startsWith("sk-")) {
     return {
       openaiConfigured: false,
-      reason: "Key does not start with sk- — use an API key from platform.openai.com/api-keys",
+      reason:
+        "Key does not start with sk- — use an API key from platform.openai.com/api-keys",
       prefix: key.slice(0, 6),
       length: key.length,
     };
   }
-  if (key === "sk-..." || key.includes("your-real-key") || key.endsWith("...")) {
+  if (
+    key === "sk-..." ||
+    key.includes("your-real-key") ||
+    key.endsWith("...")
+  ) {
     return {
       openaiConfigured: false,
-      reason: "Placeholder key detected — replace sk-... with your real secret key",
+      reason:
+        "Placeholder key detected — replace sk-... with your real secret key",
       prefix: key.slice(0, 7),
       length: key.length,
     };
@@ -89,6 +96,7 @@ export type AiCapturePayload = {
     suggestedScript?: string;
   }>;
   suggestedProjectId?: string | null;
+  knowledgePatch?: Partial<ProjectKnowledge["sections"]>;
 };
 
 const CAPTURE_JSON_SCHEMA_HINT = `{
@@ -110,7 +118,14 @@ const CAPTURE_JSON_SCHEMA_HINT = `{
       "suggestedScript": "optional short script"
     }
   ],
-  "suggestedProjectId": "project id if clear, else null"
+  "suggestedProjectId": "project id if clear, else null",
+  "knowledgePatch": {
+    "now": ["0-3 short bullets: what is newly true"],
+    "decisions": ["0-2 short bullets: decisions / trade-offs only if stated"],
+    "risks": ["0-3 short bullets: risks / blockers only if relevant"],
+    "people": ["0-2 short bullets: stakeholder prefs/concerns only if relevant"],
+    "openLoops": ["0-3 short bullets: waiting on / unconfirmed only if relevant"]
+  }
 }`;
 
 export async function tidyAndCoachWithOpenAI(args: {
@@ -118,6 +133,7 @@ export async function tidyAndCoachWithOpenAI(args: {
   projectId?: string;
   sourceType?: CaptureInput["sourceType"];
   projects: Project[];
+  existingKnowledge?: ProjectKnowledge | null;
 }): Promise<AiCapturePayload> {
   const key = getOpenAIKey();
   if (!key) {
@@ -133,12 +149,15 @@ export async function tidyAndCoachWithOpenAI(args: {
     stakeholders: p.stakeholders.map((s) => `${s.name} (${s.role})`),
   }));
 
-  const userPrompt = `The user captured a raw note (possibly a voice ramble). Tidy it into institutional memory and produce proactive coaching recommendations.
+  const userPrompt = `The user captured a raw note (possibly a voice ramble). Tidy it into institutional memory, produce proactive coaching recommendations, and extract ONLY project-relevant bullets for the knowledge brief.
 
 Source type: ${args.sourceType ?? "note"}
 Preferred project id (may be empty): ${args.projectId ?? ""}
 Projects:
 ${JSON.stringify(projectContext, null, 2)}
+
+Existing knowledge brief for this project (do not repeat these; only add genuinely new or changed facts):
+${JSON.stringify(args.existingKnowledge?.sections ?? {}, null, 2)}
 
 Raw capture:
 """
@@ -152,7 +171,9 @@ Rules:
 - Preserve all factual content; do not invent meetings, dates or approvals.
 - If uncertain, put uncertainty in assumptions.
 - Produce 1–4 high-signal recommendations, not a task dump.
-- Prefer leadership moves over administrative chores.`;
+- Prefer leadership moves over administrative chores.
+- knowledgePatch must stay sparse: max a few short bullets total, only facts relevant to running the project. Skip trivia, filler and duplicates of existing knowledge.
+- Use empty arrays for sections with nothing new.`;
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -187,7 +208,10 @@ Rules:
   return JSON.parse(content) as AiCapturePayload;
 }
 
-export async function transcribeWithWhisper(file: File | Blob, filename: string) {
+export async function transcribeWithWhisper(
+  file: File | Blob,
+  filename: string,
+) {
   const key = getOpenAIKey();
   if (!key) {
     throw new Error("OPENAI_API_KEY is not configured");
@@ -231,7 +255,9 @@ export function buildCaptureResultFromAi(args: {
   sourceType?: CaptureInput["sourceType"];
   ai: AiCapturePayload;
 }): CaptureResult {
-  const memoryType = (MEMORY_TYPES as readonly string[]).includes(args.ai.memoryType)
+  const memoryType = (MEMORY_TYPES as readonly string[]).includes(
+    args.ai.memoryType,
+  )
     ? (args.ai.memoryType as CaptureResult["memory"]["type"])
     : args.sourceType === "voice_note"
       ? "voice_note"
@@ -239,29 +265,30 @@ export function buildCaptureResultFromAi(args: {
 
   const memoryId = id("mem");
   const now = new Date().toISOString();
+  const projectId = args.ai.suggestedProjectId || args.projectId || undefined;
 
-  const recommendations: Recommendation[] = (args.ai.recommendations ?? []).map(
-    (rec) => ({
-      id: id("rec"),
-      kind: rec.kind,
-      urgency: rec.urgency,
-      title: rec.title,
-      action: rec.action,
-      why: rec.why,
-      leadershipImpact: rec.leadershipImpact,
-      suggestedScript: rec.suggestedScript,
-      projectId: args.ai.suggestedProjectId || args.projectId || undefined,
-      relatedMemoryIds: [memoryId],
-      createdAt: now,
-      status: "active",
-    }),
-  );
+  const recommendations: Recommendation[] = (
+    args.ai.recommendations ?? []
+  ).map((rec) => ({
+    id: id("rec"),
+    kind: rec.kind,
+    urgency: rec.urgency,
+    title: rec.title,
+    action: rec.action,
+    why: rec.why,
+    leadershipImpact: rec.leadershipImpact,
+    suggestedScript: rec.suggestedScript,
+    projectId,
+    relatedMemoryIds: [memoryId],
+    createdAt: now,
+    status: "active",
+  }));
 
   return {
     memory: {
       id: memoryId,
       type: memoryType,
-      projectId: args.ai.suggestedProjectId || args.projectId || undefined,
+      projectId,
       title: args.ai.title || args.ai.tidiedContent.slice(0, 72),
       content: args.ai.tidiedContent,
       tags: args.ai.tags ?? [],
@@ -279,6 +306,8 @@ export function buildCaptureResultFromAi(args: {
     rawContent: args.rawText,
     tidied: true,
     provider: "openai",
+    knowledgePatch: args.ai.knowledgePatch,
+    knowledgeProjectId: projectId,
   };
 }
 
@@ -287,10 +316,15 @@ export function localCaptureFallback(
   state: MissionState,
 ): CaptureResult {
   const result = analyseCapture(input, state);
+  const projectId = result.memory.projectId || input.projectId;
   return {
     ...result,
     rawContent: input.content,
     tidied: false,
     provider: "local",
+    knowledgePatch: projectId
+      ? extractKnowledgePatchFromText(input.content)
+      : undefined,
+    knowledgeProjectId: projectId,
   };
 }
