@@ -96,7 +96,7 @@ Framework preset: **Next.js**. Build command / output defaults are fine.
 
 - Next.js App Router · React 19 · TypeScript · Tailwind CSS 4
 - OpenAI Whisper (voice) + Chat Completions (tidy + coach)
-- Simple cookie session login (`jose`) for private demos
+- Simple cookie session login for private demos
 - Local fallback coaching in `src/lib/coach.ts`
 
 ## Product north star
