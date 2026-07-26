@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type ReactNode,
 } from "react";
 import {
   assembleFromInterview,
@@ -113,14 +114,6 @@ export default function NewProjectPage() {
         /wait|confirm|unsigned|chase|unconfirmed/i.test(r),
       ),
     });
-  }
-
-  function saveInterviewAnswer(nextStep?: number) {
-    const q = PROJECT_INTERVIEW[step];
-    if (!q) return;
-    setAnswers((prev) => ({ ...prev, [q.id]: answerDraft.trim() }));
-    setAnswerDraft("");
-    if (typeof nextStep === "number") setStep(nextStep);
   }
 
   async function finishInterview() {
@@ -691,7 +684,7 @@ export default function NewProjectPage() {
   );
 }
 
-function Tip({ children }: { children: React.ReactNode }) {
+function Tip({ children }: { children: ReactNode }) {
   return <p className="new-project-callout">{children}</p>;
 }
 
