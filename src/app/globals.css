@@ -613,3 +613,128 @@ body {
   color: var(--ink-soft);
 }
 
+
+.coach-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(18, 32, 51, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.25rem;
+  overflow: auto;
+}
+
+.coach-panel {
+  width: min(760px, 100%);
+  margin-top: 2rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(18, 32, 51, 0.18);
+  max-height: calc(100vh - 3rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.coach-panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.coach-panel-header .eyebrow {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.coach-panel-header h2 {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-syne), sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+
+.coach-panel-header .meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+}
+
+.coach-panel-actions {
+  display: flex;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
+.coach-panel-actions button {
+  border: 1px solid var(--line);
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.3rem 0.55rem;
+  cursor: pointer;
+  color: var(--ink-soft);
+}
+
+.coach-panel-body {
+  padding: 0.9rem 1rem 1.1rem;
+  overflow: auto;
+}
+
+.coach-panel-body .empty {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.coach-panel-body .error {
+  color: var(--signal);
+  background: var(--signal-soft);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.coach-section {
+  margin-bottom: 1rem;
+}
+
+.coach-section h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.coach-section-body p {
+  margin: 0 0 0.35rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.coach-section-body .list-line {
+  padding-left: 0.1rem;
+}
+
+.coach-section-body blockquote {
+  margin: 0.4rem 0;
+  padding: 0.55rem 0.7rem;
+  border-left: 3px solid var(--teal);
+  background: var(--canvas);
+  border-radius: 0 8px 8px 0;
+  font-family: var(--font-source-serif), Georgia, serif;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--ink);
+}

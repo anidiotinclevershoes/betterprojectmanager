@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { CoachButton } from "@/components/CoachButton";
 import { useMission } from "@/lib/store";
 
 const TOOL_NAV = [
@@ -22,8 +23,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <header className="sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-6">
-          <Link href="/" className="flex items-baseline gap-2 shrink-0">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 md:px-6">
+          <Link href="/" className="flex shrink-0 items-baseline gap-2">
             <span className="brand-mark text-lg font-extrabold tracking-tight md:text-xl">
               Mission Control
             </span>
@@ -32,24 +33,27 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
           </Link>
 
-          <nav className="flex flex-wrap items-center justify-end gap-1 text-sm">
-            {TOOL_NAV.map((item) => {
-              const active = pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`rounded-lg px-2.5 py-1.5 transition-colors md:px-3 ${
-                    active
-                      ? "bg-ink text-paper"
-                      : "text-ink-soft hover:bg-mist hover:text-ink"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <CoachButton />
+            <nav className="flex flex-wrap items-center justify-end gap-1 text-sm">
+              {TOOL_NAV.map((item) => {
+                const active = pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`rounded-lg px-2.5 py-1.5 transition-colors md:px-3 ${
+                      active
+                        ? "bg-ink text-paper"
+                        : "text-ink-soft hover:bg-mist hover:text-ink"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
         </div>
 
         <div className="border-t border-line bg-paper">
@@ -111,7 +115,9 @@ function ProjectTab({
           aria-hidden
         />
       ) : null}
-      <span className={`font-semibold ${active ? "text-ink" : ""}`}>{label}</span>
+      <span className={`font-semibold ${active ? "text-ink" : ""}`}>
+        {label}
+      </span>
     </Link>
   );
 }
