@@ -54,6 +54,15 @@ export interface Project {
   nextMilestone?: string;
   nextMilestoneAt?: string;
   stakeholders: Stakeholder[];
+  /** RELOPS: human month label, e.g. "August 2026" */
+  releaseMonth?: string;
+  /** RELOPS: merge / code freeze (ISO) */
+  mergeDate?: string;
+  /** RELOPS: go-live / release (ISO) */
+  releaseDate?: string;
+  /** Mark the seed/template month used when cloning a new train */
+  isTemplate?: boolean;
+  clonedFromId?: string;
 }
 
 export interface MemoryEntry {
@@ -153,11 +162,14 @@ export interface CaptureInput {
 /** Owned checklist item — accepted from suggestions or added manually. */
 export interface TodoItem {
   id: string;
-  projectId: string;
+  /** null / undefined = personal / generic (not tied to a project) */
+  projectId?: string | null;
   title: string;
   detail?: string;
   done: boolean;
   createdAt: string;
+  /** ISO datetime — editable; for RELOPS prefer within merge→release window */
+  dueAt?: string;
   sourceRecommendationId?: string;
 }
 

@@ -31,13 +31,45 @@ export function suggestedTodos(
   );
 }
 
+/** Unified Suggestions list: action + meeting proposals for a project. */
+export function projectSuggestions(
+  state: MissionState,
+  projectId: string,
+): Recommendation[] {
+  return activeRecommendations(state, projectId);
+}
+
 export function projectTodos(
   state: MissionState,
   projectId: string,
 ): TodoItem[] {
   return (state.todos ?? [])
     .filter((t) => t.projectId === projectId)
-    .sort((a, b) => Number(a.done) - Number(b.done) || b.createdAt.localeCompare(a.createdAt));
+    .sort(
+      (a, b) =>
+        Number(a.done) - Number(b.done) ||
+        compareDue(a.dueAt, b.dueAt) ||
+        b.createdAt.localeCompare(a.createdAt),
+    );
+}
+
+/** Personal / generic todos not tied to a project. */
+export function genericTodos(state: MissionState): TodoItem[] {
+  return (state.todos ?? [])
+    .filter((t) => !t.projectId)
+    .sort(
+      (a, b) =>
+        Number(a.done) - Number(b.done) ||
+        compareDue(a.dueAt, b.dueAt) ||
+        b.createdAt.localeCompare(a.createdAt),
+    );
+}
+
+function compareDue(a?: string, b?: string) {
+  if (!a && !b) return 0;
+  if (!a) return 1;
+  if (!b) return -1;
+  return new Date(a).getTime() - new Date(b).getTime();
 }
 
 /**
@@ -163,6 +195,65 @@ export function formatWhen(iso: string) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+export function formatDue(iso?: string) {
+  if (!iso) return null;
+  const d = daysUntil(iso);
+  if (d === null) return null;
+  if (d < 0) return `${Math.abs(d)}d overdue`;
+  if (d === 0) return "due today";
+  if (d === 1) return "due tomorrow";
+  return `due in ${d}d`;
+}
+
+export function toDateInputValue(iso?: string) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 10);
+}
+
+/** Portfolio overview: nearest-deadline / highest-urgency items only. */
+export function portfolioPertinent(state: MissionState) {
+  const projectById = new Map(state.projects.map((p) => [p.id, p]));
+
+  const dueSoon = (state.todos ?? [])
+    .filter((t) => !t.done && t.dueAt)
+    .filter((t) => {
+      const d = daysUntil(t.dueAt);
+      return d !== null && d <= 7;
+    })
+    .sort((a, b) => compareDue(a.dueAt, b.dueAt))
+    .slice(0, 10)
+    .map((todo) => ({
+      todo,
+      project: todo.projectId ? projectById.get(todo.projectId) : undefined,
+    }));
+
+  const urgentSuggestions = activeRecommendations(state)
+    .filter((r) => r.urgency === "now" || r.urgency === "today")
+    .slice(0, 8);
+
+  const meetingsSoon = upcomingMeetings(state)
+    .filter((m) => {
+      const d = daysUntil(m.startsAt);
+      return d !== null && d <= 5;
+    })
+    .slice(0, 6);
+
+  const milestones = state.projects
+    .filter((p) => p.nextMilestoneAt)
+    .map((p) => ({
+      project: p,
+      days: daysUntil(p.nextMilestoneAt),
+      label: p.nextMilestone ?? "Next milestone",
+    }))
+    .filter((m) => m.days !== null && m.days! <= 10)
+    .sort((a, b) => (a.days ?? 99) - (b.days ?? 99))
+    .slice(0, 6);
+
+  return { dueSoon, urgentSuggestions, meetingsSoon, milestones };
 }
 
 function extractPeople(rec: Recommendation): string[] {

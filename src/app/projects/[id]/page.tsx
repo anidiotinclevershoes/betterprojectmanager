@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { CaptureBar } from "@/components/CaptureBar";
+import { CloneRelOpsButton } from "@/components/CloneRelOpsButton";
 import { StatusPill } from "@/components/DashboardChrome";
 import { ProjectWidgetGrid } from "@/components/ProjectWidgetGrid";
 import { getPlaybookStage } from "@/lib/release-playbook";
@@ -12,6 +13,7 @@ import {
   projectMemories,
   projectReleases,
   silentStakeholders,
+  toDateInputValue,
   upcomingMeetings,
 } from "@/lib/selectors";
 import { useMission } from "@/lib/store";
@@ -38,6 +40,7 @@ export default function ProjectDashboardPage() {
   const silent = silentStakeholders(project);
   const due = daysUntil(project.nextMilestoneAt);
   const stage = release ? getPlaybookStage(release.currentStage) : null;
+  const isReleaseOps = project.kind === "release_ops";
 
   return (
     <div>
@@ -48,6 +51,11 @@ export default function ProjectDashboardPage() {
               {project.code}
             </h1>
             <StatusPill status={project.status} />
+            {isReleaseOps ? (
+              <span className="rounded bg-mist-deep px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-soft">
+                Release ops
+              </span>
+            ) : null}
           </div>
           <p className="text-sm text-ink-soft">{project.name}</p>
           <p className="mt-1 text-xs text-ink-soft">
@@ -55,8 +63,12 @@ export default function ProjectDashboardPage() {
             {project.nextMilestone
               ? ` · ${project.nextMilestone}${due !== null ? ` (${due >= 0 ? `${due}d` : "overdue"})` : ""}`
               : ""}
+            {isReleaseOps && project.mergeDate && project.releaseDate
+              ? ` · merge ${toDateInputValue(project.mergeDate)} → release ${toDateInputValue(project.releaseDate)}`
+              : ""}
           </p>
         </div>
+        {isReleaseOps ? <CloneRelOpsButton projectId={project.id} /> : null}
       </div>
 
       <CaptureBar defaultProjectId={project.id} compact />

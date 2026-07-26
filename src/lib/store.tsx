@@ -15,6 +15,12 @@ import {
   generateProactiveRecommendations,
 } from "./coach";
 import { extractKnowledgePatchFromText, emptyKnowledge, mergeKnowledge } from "./knowledge";
+import {
+  clampDueToWindow,
+  cloneRelOpsProject,
+  refreshProjectSuggestions,
+  type CloneRelOpsInput,
+} from "./relops-clone";
 import { createSeedState } from "./seed";
 import {
   extractTimelinePatchFromText,
@@ -32,12 +38,19 @@ import type {
   TodoItem,
 } from "./types";
 
-const STORAGE_KEY = "mission-control-state-v4";
+const STORAGE_KEY = "mission-control-state-v5";
 
 type OpenAIDiagnostics = {
   keyPrefix: string | null;
   keyLength: number;
   reason: string | null;
+};
+
+type AddTodoInput = {
+  title: string;
+  detail?: string;
+  projectId?: string | null;
+  dueAt?: string;
 };
 
 type MissionContextValue = {
@@ -56,6 +69,10 @@ type MissionContextValue = {
   dismissSuggestion: (recommendationId: string) => void;
   toggleTodo: (todoId: string) => void;
   removeTodo: (todoId: string) => void;
+  addTodo: (input: AddTodoInput) => void;
+  updateTodoDueDate: (todoId: string, dueAt: string | undefined) => void;
+  cloneRelOps: (input: CloneRelOpsInput) => void;
+  refreshSuggestions: (projectId: string) => void;
   updateKnowledgeSection: (
     projectId: string,
     sectionId: KnowledgeSectionId,
@@ -300,14 +317,21 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   const acceptSuggestion = useCallback((recommendationId: string) => {
     setState((prev) => {
       const rec = prev.recommendations.find((r) => r.id === recommendationId);
-      if (!rec || !rec.projectId) return prev;
+      if (!rec) return prev;
+      const project = rec.projectId
+        ? prev.projects.find((p) => p.id === rec.projectId)
+        : undefined;
+      const dueAt = project?.releaseDate
+        ? clampDueToWindow(project, project.nextMilestoneAt ?? project.releaseDate)
+        : project?.nextMilestoneAt;
       const todo: TodoItem = {
         id: id("todo"),
-        projectId: rec.projectId,
+        projectId: rec.projectId ?? null,
         title: rec.title,
         detail: rec.action,
         done: false,
         createdAt: new Date().toISOString(),
+        dueAt,
         sourceRecommendationId: rec.id,
       };
       return {
@@ -342,6 +366,61 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({
       ...prev,
       todos: (prev.todos ?? []).filter((t) => t.id !== todoId),
+    }));
+  }, []);
+
+  const addTodo = useCallback((input: AddTodoInput) => {
+    const title = input.title.trim();
+    if (!title) return;
+    setState((prev) => {
+      const project = input.projectId
+        ? prev.projects.find((p) => p.id === input.projectId)
+        : undefined;
+      const dueAt = input.dueAt
+        ? clampDueToWindow(project, new Date(`${input.dueAt}T09:00:00`).toISOString())
+        : undefined;
+      const todo: TodoItem = {
+        id: id("todo"),
+        projectId: input.projectId ?? null,
+        title,
+        detail: input.detail?.trim() || undefined,
+        done: false,
+        createdAt: new Date().toISOString(),
+        dueAt,
+      };
+      return { ...prev, todos: [todo, ...(prev.todos ?? [])] };
+    });
+  }, []);
+
+  const updateTodoDueDate = useCallback(
+    (todoId: string, dueAt: string | undefined) => {
+      setState((prev) => ({
+        ...prev,
+        todos: (prev.todos ?? []).map((t) => {
+          if (t.id !== todoId) return t;
+          if (!dueAt) return { ...t, dueAt: undefined };
+          const project = t.projectId
+            ? prev.projects.find((p) => p.id === t.projectId)
+            : undefined;
+          const iso = dueAt.includes("T")
+            ? dueAt
+            : new Date(`${dueAt}T09:00:00`).toISOString();
+          return { ...t, dueAt: clampDueToWindow(project, iso) };
+        }),
+      }));
+    },
+    [],
+  );
+
+  const cloneRelOps = useCallback((input: CloneRelOpsInput) => {
+    setState((prev) => cloneRelOpsProject(prev, input));
+  }, []);
+
+  const refreshSuggestions = useCallback((projectId: string) => {
+    setState((prev) => ({
+      ...prev,
+      recommendations: refreshProjectSuggestions(prev, projectId),
+      lastAnalyzedAt: new Date().toISOString(),
     }));
   }, []);
 
@@ -451,6 +530,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       dismissSuggestion,
       toggleTodo,
       removeTodo,
+      addTodo,
+      updateTodoDueDate,
+      cloneRelOps,
+      refreshSuggestions,
       updateKnowledgeSection,
       addKnowledgeBullet,
       replaceKnowledge,
@@ -471,6 +554,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       dismissSuggestion,
       toggleTodo,
       removeTodo,
+      addTodo,
+      updateTodoDueDate,
+      cloneRelOps,
+      refreshSuggestions,
       updateKnowledgeSection,
       addKnowledgeBullet,
       replaceKnowledge,

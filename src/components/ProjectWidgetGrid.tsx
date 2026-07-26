@@ -1,21 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { CloneRelOpsButton } from "@/components/CloneRelOpsButton";
+import { DetailModal } from "@/components/DetailModal";
 import { StatusPill } from "@/components/DashboardChrome";
 import { ProjectKnowledgeBrief } from "@/components/ProjectKnowledgeBrief";
 import { ProjectTimelineGantt } from "@/components/ProjectTimelineGantt";
 import {
+  formatDue,
   formatWhen,
   meetingOpeningScripts,
   projectReleases,
+  projectSuggestions,
   projectTodos,
-  suggestedMeetings,
-  suggestedTodos,
+  toDateInputValue,
   upcomingMeetings,
 } from "@/lib/selectors";
 import { useMission } from "@/lib/store";
-import type { Project, RecommendationUrgency } from "@/lib/types";
+import type {
+  Meeting,
+  Project,
+  Recommendation,
+  RecommendationUrgency,
+  TodoItem,
+} from "@/lib/types";
 
 const URGENCY: Record<RecommendationUrgency, string> = {
   now: "bg-signal text-paper",
@@ -24,24 +33,35 @@ const URGENCY: Record<RecommendationUrgency, string> = {
   watch: "bg-mist-deep text-ink-soft",
 };
 
+type DetailTarget =
+  | { type: "todo"; todo: TodoItem }
+  | { type: "suggestion"; rec: Recommendation }
+  | { type: "script"; meeting: Meeting; script: string }
+  | { type: "meeting"; meeting: Meeting };
+
 function Widget({
   title,
   count,
   children,
   className = "",
+  actions,
 }: {
   title: string;
   count?: number;
   children: ReactNode;
   className?: string;
+  actions?: ReactNode;
 }) {
   return (
     <section className={`widget ${className}`}>
       <header className="widget-header">
         <h3>{title}</h3>
-        {typeof count === "number" ? (
-          <span className="widget-count">{count}</span>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {actions}
+          {typeof count === "number" ? (
+            <span className="widget-count">{count}</span>
+          ) : null}
+        </div>
       </header>
       <div className="widget-body">{children}</div>
     </section>
@@ -61,15 +81,21 @@ export function ProjectWidgetGrid({
     dismissSuggestion,
     toggleTodo,
     removeTodo,
+    updateTodoDueDate,
+    refreshSuggestions,
   } = useMission();
 
+  const [detail, setDetail] = useState<DetailTarget | null>(null);
+
   const todos = projectTodos(state, project.id);
-  const suggestions = suggestedTodos(state, project.id);
-  const meetings = suggestedMeetings(state, project.id);
+  const suggestions = projectSuggestions(state, project.id);
   const scripts = meetingOpeningScripts(state, project.id);
   const scheduled = upcomingMeetings(state, project.id);
   const release = projectReleases(state, project.id)[0];
   const isReleaseOps = project.kind === "release_ops";
+
+  const dueMin = toDateInputValue(project.mergeDate);
+  const dueMax = toDateInputValue(project.releaseDate);
 
   return (
     <section className="project-block">
@@ -87,6 +113,7 @@ export function ProjectWidgetGrid({
             {isReleaseOps ? (
               <span className="rounded bg-mist-deep px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-soft">
                 Release ops
+                {project.releaseMonth ? ` · ${project.releaseMonth}` : ""}
               </span>
             ) : null}
           </div>
@@ -98,19 +125,22 @@ export function ProjectWidgetGrid({
               : ""}
           </p>
         </div>
-        <Link
-          href={`/projects/${project.id}`}
-          className="shrink-0 text-xs font-medium text-teal hover:underline"
-        >
-          Open
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          {isReleaseOps ? <CloneRelOpsButton projectId={project.id} /> : null}
+          <Link
+            href={`/projects/${project.id}`}
+            className="text-xs font-medium text-teal hover:underline"
+          >
+            Open
+          </Link>
+        </div>
       </div>
 
       <div
         className={`grid gap-2 ${
           isReleaseOps
-            ? "md:grid-cols-2 xl:grid-cols-[1.35fr_0.9fr_0.9fr_0.9fr]"
-            : "md:grid-cols-2 xl:grid-cols-4"
+            ? "md:grid-cols-2 xl:grid-cols-[1.2fr_1.2fr_0.9fr]"
+            : "md:grid-cols-2 xl:grid-cols-3"
         }`}
       >
         <Widget
@@ -124,20 +154,48 @@ export function ProjectWidgetGrid({
             <ul className="space-y-1">
               {todos.map((todo) => (
                 <li key={todo.id} className="todo-row">
-                  <label className="flex min-w-0 flex-1 items-start gap-2">
+                  <div className="flex min-w-0 flex-1 items-start gap-2">
                     <input
                       type="checkbox"
                       checked={todo.done}
                       onChange={() => toggleTodo(todo.id)}
                       className="mt-0.5"
+                      aria-label={`Mark ${todo.title} done`}
                     />
                     <span className={todo.done ? "done" : ""}>
-                      <span className="title">{todo.title}</span>
+                      <button
+                        type="button"
+                        className="title title-btn"
+                        onClick={() => setDetail({ type: "todo", todo })}
+                      >
+                        {todo.title}
+                      </button>
                       {todo.detail ? (
                         <span className="detail">{todo.detail}</span>
                       ) : null}
+                      <span className="due-row">
+                        <input
+                          type="date"
+                          className="due-input"
+                          value={toDateInputValue(todo.dueAt)}
+                          min={dueMin || undefined}
+                          max={dueMax || undefined}
+                          onChange={(e) =>
+                            updateTodoDueDate(
+                              todo.id,
+                              e.target.value || undefined,
+                            )
+                          }
+                          aria-label="Due date"
+                        />
+                        {formatDue(todo.dueAt) ? (
+                          <span className="due-label">
+                            {formatDue(todo.dueAt)}
+                          </span>
+                        ) : null}
+                      </span>
                     </span>
-                  </label>
+                  </div>
                   <button
                     type="button"
                     className="ghost"
@@ -152,21 +210,47 @@ export function ProjectWidgetGrid({
           )}
         </Widget>
 
-        <Widget title="Suggested to do" count={suggestions.length}>
+        <Widget
+          title="Suggestions"
+          count={suggestions.length}
+          actions={
+            <button
+              type="button"
+              className="widget-action"
+              onClick={() => refreshSuggestions(project.id)}
+            >
+              Refresh
+            </button>
+          }
+        >
           {suggestions.length === 0 ? (
-            <p className="empty">No suggestions right now.</p>
+            <p className="empty">
+              No suggestions — refresh after updating knowledge.
+            </p>
           ) : (
             <ul className="space-y-2">
               {suggestions
-                .slice(0, isReleaseOps || dense ? 6 : 4)
+                .slice(0, isReleaseOps || dense ? 8 : 6)
                 .map((rec) => (
                   <li key={rec.id} className="suggest-row">
                     <div className="flex items-center gap-1.5">
                       <span className={`pill ${URGENCY[rec.urgency]}`}>
                         {rec.urgency.replaceAll("_", " ")}
                       </span>
+                      {(rec.kind === "meeting" ||
+                        rec.kind === "meeting_prep") && (
+                        <span className="pill bg-mist-deep text-ink-soft">
+                          meeting
+                        </span>
+                      )}
                     </div>
-                    <p className="title">{rec.title}</p>
+                    <button
+                      type="button"
+                      className="title title-btn"
+                      onClick={() => setDetail({ type: "suggestion", rec })}
+                    >
+                      {rec.title}
+                    </button>
                     <p className="why">{rec.why}</p>
                     <div className="actions">
                       <button
@@ -190,8 +274,8 @@ export function ProjectWidgetGrid({
         </Widget>
 
         <Widget
-          title={isReleaseOps ? "Process meetings" : "Suggested meetings"}
-          count={isReleaseOps ? scheduled.length : meetings.length}
+          title={isReleaseOps ? "Process meetings / scripts" : "Opening scripts"}
+          count={isReleaseOps ? scheduled.length : scripts.length}
         >
           {isReleaseOps ? (
             scheduled.length === 0 ? (
@@ -199,77 +283,66 @@ export function ProjectWidgetGrid({
             ) : (
               <ul className="space-y-2">
                 {scheduled.map((m) => (
-                  <li key={m.id} className="suggest-row">
-                    <Link
-                      href={`/meetings/${m.id}`}
-                      className="title hover:text-teal"
-                    >
-                      {m.title}
-                    </Link>
-                    <p className="meta">{formatWhen(m.startsAt)}</p>
-                    <p className="why">
-                      Bring:{" "}
-                      {m.prep.decisionsToObtain[0] ?? m.prep.objectives[0]}
-                    </p>
+                  <li key={m.id} className="script-row">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <button
+                        type="button"
+                        className="title title-btn"
+                        onClick={() =>
+                          setDetail({
+                            type: "script",
+                            meeting: m,
+                            script: m.prep.openingScript,
+                          })
+                        }
+                      >
+                        {m.title}
+                      </button>
+                      <span className="meta shrink-0">
+                        {formatWhen(m.startsAt)}
+                      </span>
+                    </div>
+                    <p className="script">{m.prep.openingScript}</p>
+                    <div className="flex gap-2">
+                      <Link href={`/meetings/${m.id}`} className="copy">
+                        Open meeting
+                      </Link>
+                      <button
+                        type="button"
+                        className="copy"
+                        onClick={() =>
+                          void navigator.clipboard.writeText(
+                            m.prep.openingScript,
+                          )
+                        }
+                      >
+                        Copy opening
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
             )
-          ) : meetings.length === 0 ? (
-            <p className="empty">No meeting suggestions.</p>
-          ) : (
-            <ul className="space-y-2">
-              {meetings.map((m) => (
-                <li key={m.id} className="suggest-row">
-                  <div className="flex items-center gap-1.5">
-                    <span className={`pill ${URGENCY[m.urgency]}`}>
-                      {m.urgency.replaceAll("_", " ")}
-                    </span>
-                  </div>
-                  <p className="title">{m.title}</p>
-                  {m.withWhom.length ? (
-                    <p className="meta">With {m.withWhom.join(", ")}</p>
-                  ) : null}
-                  <p className="why">{m.why}</p>
-                  {m.recommendationId ? (
-                    <div className="actions">
-                      <button
-                        type="button"
-                        onClick={() => acceptSuggestion(m.recommendationId!)}
-                      >
-                        Add to to-do
-                      </button>
-                      <button
-                        type="button"
-                        className="muted"
-                        onClick={() =>
-                          dismissSuggestion(m.recommendationId!)
-                        }
-                      >
-                        Dismiss
-                      </button>
-                    </div>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          )}
-        </Widget>
-
-        <Widget title="Opening scripts" count={scripts.length}>
-          {scripts.length === 0 ? (
+          ) : scripts.length === 0 ? (
             <p className="empty">No upcoming meetings with scripts.</p>
           ) : (
             <ul className="space-y-2">
               {scripts.map(({ meeting, openingScript }) => (
                 <li key={meeting.id} className="script-row">
                   <div className="flex items-baseline justify-between gap-2">
-                    <Link
-                      href={`/meetings/${meeting.id}`}
-                      className="title hover:text-teal"
+                    <button
+                      type="button"
+                      className="title title-btn"
+                      onClick={() =>
+                        setDetail({
+                          type: "script",
+                          meeting,
+                          script: openingScript,
+                        })
+                      }
                     >
                       {meeting.title}
-                    </Link>
+                    </button>
                     <span className="meta shrink-0">
                       {formatWhen(meeting.startsAt)}
                     </span>
@@ -293,6 +366,164 @@ export function ProjectWidgetGrid({
 
       <ProjectTimelineGantt projectId={project.id} />
       <ProjectKnowledgeBrief projectId={project.id} />
+
+      <DetailModal
+        open={Boolean(detail)}
+        title={detailTitle(detail)}
+        onClose={() => setDetail(null)}
+        footer={
+          detail?.type === "suggestion" ? (
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="muted-btn"
+                onClick={() => {
+                  dismissSuggestion(detail.rec.id);
+                  setDetail(null);
+                }}
+              >
+                Dismiss
+              </button>
+              <button
+                type="button"
+                className="primary-btn"
+                onClick={() => {
+                  acceptSuggestion(detail.rec.id);
+                  setDetail(null);
+                }}
+              >
+                Accept to to-do
+              </button>
+            </div>
+          ) : detail?.type === "todo" ? (
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <label className="field mb-0 min-w-[10rem] flex-1">
+                <span>Due date</span>
+                <input
+                  type="date"
+                  value={toDateInputValue(detail.todo.dueAt)}
+                  min={dueMin || undefined}
+                  max={dueMax || undefined}
+                  onChange={(e) => {
+                    updateTodoDueDate(detail.todo.id, e.target.value || undefined);
+                    setDetail({
+                      type: "todo",
+                      todo: {
+                        ...detail.todo,
+                        dueAt: e.target.value
+                          ? new Date(`${e.target.value}T09:00:00`).toISOString()
+                          : undefined,
+                      },
+                    });
+                  }}
+                />
+              </label>
+              <button
+                type="button"
+                className="muted-btn"
+                onClick={() => setDetail(null)}
+              >
+                Close
+              </button>
+            </div>
+          ) : detail?.type === "script" ? (
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="primary-btn"
+                onClick={() =>
+                  void navigator.clipboard.writeText(detail.script)
+                }
+              >
+                Copy opening
+              </button>
+              <Link href={`/meetings/${detail.meeting.id}`} className="primary-btn">
+                Open meeting
+              </Link>
+            </div>
+          ) : null
+        }
+      >
+        {detail?.type === "todo" ? (
+          <>
+            {detail.todo.detail ? (
+              <p className="text-sm leading-relaxed text-ink">{detail.todo.detail}</p>
+            ) : (
+              <p className="text-sm text-ink-soft">No extra detail.</p>
+            )}
+            {formatDue(detail.todo.dueAt) ? (
+              <p className="mt-3 text-xs text-ink-soft">
+                {formatDue(detail.todo.dueAt)}
+                {dueMin && dueMax
+                  ? ` · window ${dueMin} → ${dueMax}`
+                  : ""}
+              </p>
+            ) : null}
+          </>
+        ) : null}
+        {detail?.type === "suggestion" ? (
+          <div className="space-y-3 text-sm">
+            <p>
+              <span className={`pill ${URGENCY[detail.rec.urgency]}`}>
+                {detail.rec.urgency.replaceAll("_", " ")}
+              </span>
+            </p>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-soft">
+                Action
+              </p>
+              <p className="mt-1 leading-relaxed">{detail.rec.action}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-soft">
+                Why
+              </p>
+              <p className="mt-1 leading-relaxed text-ink-soft">{detail.rec.why}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-soft">
+                Leadership impact
+              </p>
+              <p className="mt-1 leading-relaxed">{detail.rec.leadershipImpact}</p>
+            </div>
+            {detail.rec.suggestedScript ? (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-soft">
+                  Suggested script
+                </p>
+                <p className="mt-1 font-[family-name:var(--font-source-serif)] leading-relaxed">
+                  {detail.rec.suggestedScript}
+                </p>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        {detail?.type === "script" ? (
+          <div className="space-y-3 text-sm">
+            <p className="text-xs text-ink-soft">
+              {formatWhen(detail.meeting.startsAt)}
+              {detail.meeting.attendees.length
+                ? ` · ${detail.meeting.attendees.join(", ")}`
+                : ""}
+            </p>
+            <p className="font-[family-name:var(--font-source-serif)] leading-relaxed">
+              {detail.script}
+            </p>
+            {detail.meeting.prep.objectives[0] ? (
+              <p className="text-xs text-ink-soft">
+                Objective: {detail.meeting.prep.objectives[0]}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </DetailModal>
     </section>
   );
+}
+
+function detailTitle(detail: DetailTarget | null) {
+  if (!detail) return "";
+  if (detail.type === "todo") return detail.todo.title;
+  if (detail.type === "suggestion") return detail.rec.title;
+  return detail.meeting.title;
 }

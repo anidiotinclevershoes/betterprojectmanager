@@ -86,6 +86,10 @@ export const DEMO_PROJECTS: Project[] = [
     name: "Monthly Release Operations",
     code: "RELOPS",
     kind: "release_ops",
+    isTemplate: true,
+    releaseMonth: "March 2026",
+    mergeDate: daysFromNow(0),
+    releaseDate: daysFromNow(8),
     summary:
       "Repeatable monthly release train: collect evidence, chase artefacts, run the process forums, and submit a complete CAB pack. Success is preparedness and clean handoffs — not feature delivery.",
     status: "watch",
@@ -818,6 +822,7 @@ export const DEMO_TODOS: TodoItem[] = [
     detail: "Change record, regression evidence, rollback plan, hypercare roster",
     done: false,
     createdAt: daysAgo(1),
+    dueAt: daysFromNow(3),
   },
   {
     id: "todo-billing-signoff",
@@ -825,6 +830,7 @@ export const DEMO_TODOS: TodoItem[] = [
     title: "Chase billing regression sign-off",
     done: false,
     createdAt: daysAgo(1),
+    dueAt: daysFromNow(2),
   },
   {
     id: "todo-horizon-tradeoffs",
@@ -833,6 +839,7 @@ export const DEMO_TODOS: TodoItem[] = [
     detail: "2–3 options with a clear recommendation",
     done: false,
     createdAt: daysAgo(0),
+    dueAt: daysFromNow(5),
   },
   {
     id: "todo-rel-freeze-notice",
@@ -841,6 +848,7 @@ export const DEMO_TODOS: TodoItem[] = [
     detail: "In/out list + exception path in release channel",
     done: false,
     createdAt: daysAgo(0),
+    dueAt: daysFromNow(0),
   },
   {
     id: "todo-rel-tracker",
@@ -849,6 +857,7 @@ export const DEMO_TODOS: TodoItem[] = [
     detail: "Require links from Sam — no verbal sign-off",
     done: false,
     createdAt: daysAgo(0),
+    dueAt: daysFromNow(2),
   },
   {
     id: "todo-rel-rollback",
@@ -857,6 +866,7 @@ export const DEMO_TODOS: TodoItem[] = [
     detail: "Move from draft to CAB-ready attachment",
     done: false,
     createdAt: daysAgo(0),
+    dueAt: daysFromNow(3),
   },
   {
     id: "todo-rel-hypercare",
@@ -865,6 +875,7 @@ export const DEMO_TODOS: TodoItem[] = [
     detail: "Every shift named in writing before go-live forum",
     done: false,
     createdAt: daysAgo(0),
+    dueAt: daysFromNow(6),
   },
   {
     id: "todo-rel-pack-submit",
@@ -873,6 +884,7 @@ export const DEMO_TODOS: TodoItem[] = [
     detail: "Change record, evidence, rollback, roster, residual risks",
     done: false,
     createdAt: daysAgo(0),
+    dueAt: daysFromNow(4),
   },
   {
     id: "todo-rel-smoke",
@@ -880,6 +892,25 @@ export const DEMO_TODOS: TodoItem[] = [
     title: "Confirm smoke checklist owners for go-live",
     done: false,
     createdAt: daysAgo(1),
+    dueAt: daysFromNow(7),
+  },
+  {
+    id: "todo-generic-timesheet",
+    projectId: null,
+    title: "Update timesheet",
+    detail: "Log hours before Friday cut-off",
+    done: false,
+    createdAt: daysAgo(0),
+    dueAt: daysFromNow(1),
+  },
+  {
+    id: "todo-generic-onetrust",
+    projectId: null,
+    title: "Contact OneTrust",
+    detail: "Confirm privacy assessment status for portal changes",
+    done: false,
+    createdAt: daysAgo(0),
+    dueAt: daysFromNow(3),
   },
 ];
 
