@@ -21,14 +21,10 @@ export function CoachButton({
   const pathname = usePathname();
   const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
   const projectId = projectMatch?.[1];
-  const { state, openaiConfigured } = useMission();
+  const { state } = useMission();
   const project = projectId
     ? state.projects.find((p) => p.id === projectId)
     : null;
-
-  const label = project
-    ? `Coach me · ${project.code}`
-    : "Coach me · all projects";
 
   return (
     <button
@@ -40,13 +36,16 @@ export function CoachButton({
           : "bg-teal text-paper hover:bg-teal/90"
       }`}
       title={
-        openaiConfigured === false
-          ? "Works in local mode without OpenAI; fuller coaching with API key"
-          : "Ask your Assistant PM Coach"
+        open
+          ? "Collapse coach panel"
+          : "Open coach panel (does not run coaching yet)"
       }
       aria-expanded={open}
     >
-      {label}
+      Coach{project ? ` · ${project.code}` : ""}
+      <span className="ml-1 opacity-80" aria-hidden>
+        {open ? "▴" : "▾"}
+      </span>
     </button>
   );
 }
@@ -59,12 +58,7 @@ export function CoachBanner({
   onOpenChange: (open: boolean) => void;
 }) {
   const pathname = usePathname();
-  const {
-    state,
-    addTodo,
-    addSuggestion,
-    addKnowledgeBullet,
-  } = useMission();
+  const { state, addTodo, addSuggestion, addKnowledgeBullet } = useMission();
 
   const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
   const projectId = projectMatch?.[1] ?? null;
@@ -78,11 +72,12 @@ export function CoachBanner({
   const [markdown, setMarkdown] = useState("");
   const [provider, setProvider] = useState<"openai" | "local" | null>(null);
   const [accepted, setAccepted] = useState<AcceptedMap>({});
+  const [lastScopeLabel, setLastScopeLabel] = useState<string | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const autoRanForOpen = useRef(false);
 
   const actions = useMemo(() => parseCoachActions(markdown), [markdown]);
+  const hasResponse = Boolean(markdown.trim());
 
   const runCoach = useCallback(async () => {
     abortRef.current?.abort();
@@ -99,6 +94,7 @@ export function CoachBanner({
     const scope = projectId
       ? { mode: "project" as const, projectId }
       : { mode: "overview" as const };
+    setLastScopeLabel(project ? project.code : "All projects");
 
     try {
       const response = await fetch("/api/coach", {
@@ -178,26 +174,17 @@ export function CoachBanner({
     } finally {
       setBusy(false);
     }
-  }, [projectId, state]);
+  }, [project, projectId, state]);
 
   useEffect(() => {
-    if (!open) {
-      autoRanForOpen.current = false;
-      abortRef.current?.abort();
-      return;
-    }
-    // Re-run when opening, or when project scope changes while open
-    autoRanForOpen.current = true;
-    void runCoach();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: projectId/open trigger
-  }, [open, projectId]);
-
-  useEffect(() => {
-    if (!bodyRef.current) return;
+    if (!open || !bodyRef.current || !busy) return;
     bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
-  }, [markdown]);
+  }, [markdown, open, busy]);
 
-  const acceptAction = (action: CoachAction, mode: "todo" | "suggestion" | "knowledge") => {
+  const acceptAction = (
+    action: CoachAction,
+    mode: "todo" | "suggestion" | "knowledge",
+  ) => {
     const resolvedProjectId = resolveProjectId(
       state.projects,
       projectId,
@@ -216,7 +203,9 @@ export function CoachBanner({
 
     if (mode === "suggestion") {
       if (!resolvedProjectId) {
-        setError("Pick a project tab first, or include a project code in the action.");
+        setError(
+          "Pick a project tab first, or include a project code in the action.",
+        );
         return;
       }
       addSuggestion({
@@ -235,44 +224,61 @@ export function CoachBanner({
       setError("Pick a project tab first to add into Knowledge.");
       return;
     }
-    const section =
-      action.section === "risk" ? "risks" : "openLoops";
+    const section = action.section === "risk" ? "risks" : "openLoops";
     addKnowledgeBullet(resolvedProjectId, section, action.title);
     setAccepted((prev) => ({
       ...prev,
-      [action.id]: section === "risks" ? "Added to Knowledge · Risks" : "Added to Knowledge · Open loops",
+      [action.id]:
+        section === "risks"
+          ? "Added to Knowledge · Risks"
+          : "Added to Knowledge · Open loops",
     }));
   };
 
-  if (!open) return null;
-
+  // Stay mounted when collapsed so the last response is preserved.
   return (
-    <section className="coach-banner" aria-live="polite">
+    <section
+      className={`coach-banner ${open ? "is-open" : "is-collapsed"}`}
+      aria-hidden={!open}
+      aria-live="polite"
+    >
       <div className="coach-banner-inner">
         <header className="coach-banner-header">
           <div className="min-w-0">
             <p className="eyebrow">Assistant PM Coach</p>
-            <h2>{busy && !markdown ? "Writing…" : title || "Coaching"}</h2>
+            <h2>
+              {busy && !markdown
+                ? "Writing…"
+                : title || (hasResponse ? "Last coaching" : "Ready when you are")}
+            </h2>
             <p className="meta">
               {provider
                 ? provider === "openai"
                   ? "OpenAI"
                   : "Local fallback"
-                : busy
-                  ? "Connecting…"
-                  : "—"}
-              {project ? ` · ${project.code}` : " · Overview"}
+                : hasResponse
+                  ? "Saved in this session"
+                  : "Panel open — coaching not started"}
+              {lastScopeLabel
+                ? ` · last run: ${lastScopeLabel}`
+                : project
+                  ? ` · will use ${project.code}`
+                  : " · will use Overview"}
               {busy ? " · streaming" : ""}
             </p>
           </div>
           <div className="coach-panel-actions">
             <button
               type="button"
-              className="muted"
+              className="primary"
               disabled={busy}
               onClick={() => void runCoach()}
             >
-              Refresh
+              {busy
+                ? "Coaching…"
+                : hasResponse
+                  ? "Run again"
+                  : "Run coaching"}
             </button>
             <button
               type="button"
@@ -287,6 +293,22 @@ export function CoachBanner({
         <div className="coach-banner-grid">
           <div className="coach-banner-stream" ref={bodyRef}>
             {error ? <p className="error">{error}</p> : null}
+            {!hasResponse && !busy ? (
+              <div className="coach-empty-state">
+                <p>
+                  Open this panel anytime. Collapse and reopen to keep reading
+                  the last coaching — nothing re-runs until you ask.
+                </p>
+                <button
+                  type="button"
+                  className="primary-btn"
+                  onClick={() => void runCoach()}
+                >
+                  Run coaching
+                  {project ? ` for ${project.code}` : " for all projects"}
+                </button>
+              </div>
+            ) : null}
             {busy && !markdown ? (
               <p className="empty">
                 Evaluating situation, gaps, risks, and what Tom should do next…
@@ -306,7 +328,9 @@ export function CoachBanner({
               <p className="empty">
                 {busy
                   ? "Actions appear as the coach writes…"
-                  : "No actionable lines parsed yet."}
+                  : hasResponse
+                    ? "No actionable lines parsed from this response."
+                    : "Run coaching to generate actions you can accept."}
               </p>
             ) : (
               <ul className="coach-action-list">
