@@ -4,9 +4,12 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { CloneRelOpsButton } from "@/components/CloneRelOpsButton";
 import { DetailModal } from "@/components/DetailModal";
+import { FocusLenses, FocusSection } from "@/components/FocusLenses";
 import { StatusPill } from "@/components/DashboardChrome";
 import { ProjectKnowledgeBrief } from "@/components/ProjectKnowledgeBrief";
 import { ProjectTimelineGantt } from "@/components/ProjectTimelineGantt";
+import { TodayBrief } from "@/components/TodayBrief";
+import { buildAttentionNudges, type FocusLens } from "@/lib/focus";
 import {
   formatDue,
   formatWhen,
@@ -53,13 +56,13 @@ function Widget({
   actions?: ReactNode;
 }) {
   return (
-    <section className={`widget ${className}`}>
-      <header className="widget-header">
+    <section className={`widget command-section ${className}`}>
+      <header className="widget-header command-section-header">
         <h3>{title}</h3>
         <div className="flex items-center gap-2">
           {actions}
           {typeof count === "number" ? (
-            <span className="widget-count">{count}</span>
+            <span className="widget-count command-count">{count}</span>
           ) : null}
         </div>
       </header>
@@ -87,6 +90,7 @@ export function ProjectWidgetGrid({
   } = useMission();
 
   const [detail, setDetail] = useState<DetailTarget | null>(null);
+  const [lens, setLens] = useState<FocusLens>("everything");
 
   const todos = projectTodos(state, project.id);
   const suggestions = projectSuggestions(state, project.id);
@@ -94,12 +98,15 @@ export function ProjectWidgetGrid({
   const scheduled = upcomingMeetings(state, project.id);
   const release = projectReleases(state, project.id)[0];
   const isReleaseOps = project.kind === "release_ops";
+  const nudges = buildAttentionNudges(state).filter(
+    (n) => n.projectCode === project.code || n.href?.includes(project.id),
+  );
 
   const dueMin = toDateInputValue(project.mergeDate);
   const dueMax = toDateInputValue(project.releaseDate);
 
   return (
-    <section className="project-block">
+    <section className="project-block command-centre">
       <div className="project-block-header">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -109,21 +116,18 @@ export function ProjectWidgetGrid({
             >
               {project.code}
             </Link>
-            <span className="truncate text-sm text-ink-soft">{project.name}</span>
+            <span className="truncate text-sm text-muted">{project.name}</span>
             <StatusPill status={project.status} />
             {isReleaseOps ? (
-              <span className="rounded bg-mist-deep px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-soft">
+              <span className="rounded bg-mist-deep px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
                 Release ops
                 {project.releaseMonth ? ` · ${project.releaseMonth}` : ""}
               </span>
             ) : null}
           </div>
-          <p className="mt-1 truncate text-xs text-ink-soft md:text-sm">
+          <p className="mt-1 truncate text-xs text-muted md:text-sm">
             {project.currentFocus}
             {release ? ` · ${release.name}` : ""}
-            {isReleaseOps && scheduled.length
-              ? ` · ${scheduled.length} process meetings`
-              : ""}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -137,6 +141,12 @@ export function ProjectWidgetGrid({
         </div>
       </div>
 
+      <FocusLenses value={lens} onChange={setLens} />
+
+      <FocusSection lens="today" active={lens}>
+        <TodayBrief nudges={nudges} projectId={project.id} />
+      </FocusSection>
+
       <div
         className={`grid gap-2 ${
           isReleaseOps
@@ -144,8 +154,9 @@ export function ProjectWidgetGrid({
             : "md:grid-cols-2 xl:grid-cols-3"
         }`}
       >
+        <FocusSection lens="todo" active={lens}>
         <Widget
-          title={isReleaseOps ? "Process to do" : "To do"}
+          title="What needs doing?"
           count={todos.filter((t) => !t.done).length}
           className={isReleaseOps ? "widget-emphasis" : ""}
         >
@@ -210,9 +221,11 @@ export function ProjectWidgetGrid({
             </ul>
           )}
         </Widget>
+        </FocusSection>
 
+        <FocusSection lens="risks" active={lens}>
         <Widget
-          title="Suggestions"
+          title="What might surprise me?"
           count={suggestions.length}
           actions={
             <button
@@ -273,9 +286,11 @@ export function ProjectWidgetGrid({
             </ul>
           )}
         </Widget>
+        </FocusSection>
 
+        <FocusSection lens="meetings" active={lens}>
         <Widget
-          title={isReleaseOps ? "Process meetings / scripts" : "Opening scripts"}
+          title="What am I walking into?"
           count={isReleaseOps ? scheduled.length : scripts.length}
         >
           {isReleaseOps ? (
@@ -363,10 +378,15 @@ export function ProjectWidgetGrid({
             </ul>
           )}
         </Widget>
+        </FocusSection>
       </div>
 
+      <FocusSection lens="release" active={lens}>
       <ProjectTimelineGantt projectId={project.id} />
+      </FocusSection>
+      <FocusSection lens="stakeholders" active={lens}>
       <ProjectKnowledgeBrief projectId={project.id} />
+      </FocusSection>
 
       <DetailModal
         open={Boolean(detail)}

@@ -69,9 +69,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="brand-mark text-lg font-extrabold tracking-tight md:text-xl">
               Mission Control
             </span>
-            <span className="hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft sm:inline">
-              CPO
-            </span>
           </Link>
 
           <div className="flex flex-wrap items-center justify-end gap-2">

@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { CaptureBar } from "@/components/CaptureBar";
 import { DetailModal } from "@/components/DetailModal";
+import { FocusLenses, FocusSection } from "@/components/FocusLenses";
+import { TodayBrief } from "@/components/TodayBrief";
+import { buildTodayStrip, type FocusLens } from "@/lib/focus";
 import {
   formatDue,
   formatWhen,
@@ -12,14 +15,7 @@ import {
   toDateInputValue,
 } from "@/lib/selectors";
 import { useMission } from "@/lib/store";
-import type { Recommendation, RecommendationUrgency, TodoItem } from "@/lib/types";
-
-const URGENCY: Record<RecommendationUrgency, string> = {
-  now: "bg-signal text-paper",
-  today: "bg-signal-soft text-signal",
-  this_week: "bg-teal-soft text-teal",
-  watch: "bg-mist-deep text-ink-soft",
-};
+import type { Recommendation, TodoItem } from "@/lib/types";
 
 export default function OverviewPage() {
   const {
@@ -34,6 +30,7 @@ export default function OverviewPage() {
     dismissSuggestion,
   } = useMission();
 
+  const [lens, setLens] = useState<FocusLens>("everything");
   const [genericTitle, setGenericTitle] = useState("");
   const [genericDue, setGenericDue] = useState("");
   const [detailRec, setDetailRec] = useState<Recommendation | null>(null);
@@ -41,6 +38,10 @@ export default function OverviewPage() {
 
   const board = hydrated ? portfolioPertinent(state) : null;
   const personal = hydrated ? genericTodos(state) : [];
+  const strip = useMemo(
+    () => (hydrated ? buildTodayStrip(state) : null),
+    [hydrated, state],
+  );
 
   const submitGeneric = () => {
     if (!genericTitle.trim()) return;
@@ -54,292 +55,287 @@ export default function OverviewPage() {
   };
 
   return (
-    <div>
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+    <div className="command-centre">
+      <div className="today-bar">
         <div>
-          <h1 className="brand-mark text-xl font-extrabold tracking-tight md:text-2xl">
-            Overview
+          <p className="today-greeting">{strip?.greeting ?? "Welcome"}</p>
+          <h1 className="today-headline">
+            {strip
+              ? strip.attentionCount === 0
+                ? "Nothing is shouting today."
+                : `${strip.attentionCount} thing${strip.attentionCount === 1 ? "" : "s"} need attention.`
+              : "Loading…"}
           </h1>
-          <p className="text-xs text-ink-soft md:text-sm">
-            Closest deadlines and highest-urgency items across the portfolio —
-            not every project board.
-          </p>
+          <p className="today-summary">{strip?.summaryLine}</p>
         </div>
+        <FocusLenses value={lens} onChange={setLens} />
       </div>
 
       <CaptureBar compact />
 
-      {!hydrated || !board ? (
-        <p className="text-sm text-ink-soft">Loading…</p>
+      {!hydrated || !board || !strip ? (
+        <p className="text-sm text-muted">Loading…</p>
       ) : (
-        <div className="mt-3 grid gap-2 lg:grid-cols-2">
-          <section className="widget">
-            <header className="widget-header">
-              <h3>Due soon</h3>
-              <span className="widget-count">{board.dueSoon.length}</span>
-            </header>
-            <div className="widget-body">
-              {board.dueSoon.length === 0 ? (
-                <p className="empty">Nothing due in the next 7 days.</p>
-              ) : (
-                <ul className="space-y-1">
-                  {board.dueSoon.map(({ todo, project }) => (
-                    <li key={todo.id} className="todo-row">
-                      <label className="flex min-w-0 flex-1 items-start gap-2">
+        <>
+          <FocusSection lens="today" active={lens}>
+            <TodayBrief nudges={strip.nudges} />
+          </FocusSection>
+
+          <div className="command-grid">
+            <FocusSection lens="today" active={lens} className="command-span">
+              <Section
+                question="What needs my attention?"
+                count={strip.nudges.length}
+              >
+                {strip.nudges.length === 0 ? (
+                  <p className="empty">No loud nudges right now.</p>
+                ) : (
+                  <ul className="nudge-list dense">
+                    {strip.nudges.map((n) => (
+                      <li key={n.id} className={`nudge-item accent-${n.accent}`}>
+                        <span className="nudge-dot" aria-hidden />
+                        <div className="min-w-0 flex-1">
+                          <p className="nudge-text">
+                            {n.projectCode ? (
+                              <span className="nudge-code">{n.projectCode}</span>
+                            ) : null}
+                            {n.text}
+                          </p>
+                        </div>
+                        {n.href ? (
+                          <Link href={n.href} className="nudge-link">
+                            Open
+                          </Link>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+            </FocusSection>
+
+            <FocusSection lens="todo" active={lens}>
+              <Section
+                question="What needs doing?"
+                count={board.dueSoon.filter((x) => !x.todo.done).length}
+              >
+                {board.dueSoon.length === 0 ? (
+                  <p className="empty">Nothing due in the next 7 days.</p>
+                ) : (
+                  <ul className="dense-list">
+                    {board.dueSoon.map(({ todo, project }) => (
+                      <li key={todo.id} className="dense-row">
                         <input
                           type="checkbox"
                           checked={todo.done}
                           onChange={() => toggleTodo(todo.id)}
-                          className="mt-0.5"
+                          aria-label={todo.title}
                         />
-                        <span>
-                          <button
-                            type="button"
-                            className="title title-btn"
-                            onClick={() => setDetailTodo(todo)}
-                          >
-                            {todo.title}
-                          </button>
-                          <span className="detail">
-                            {project ? project.code : "Personal"}
-                            {formatDue(todo.dueAt)
-                              ? ` · ${formatDue(todo.dueAt)}`
-                              : ""}
-                          </span>
-                        </span>
-                      </label>
-                      {project ? (
-                        <Link
-                          href={`/projects/${project.id}`}
-                          className="text-[10px] font-semibold text-teal"
-                        >
-                          Open
-                        </Link>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </section>
-
-          <section className="widget">
-            <header className="widget-header">
-              <h3>Urgent suggestions</h3>
-              <span className="widget-count">
-                {board.urgentSuggestions.length}
-              </span>
-            </header>
-            <div className="widget-body">
-              {board.urgentSuggestions.length === 0 ? (
-                <p className="empty">No now/today suggestions.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {board.urgentSuggestions.map((rec) => {
-                    const project = state.projects.find(
-                      (p) => p.id === rec.projectId,
-                    );
-                    return (
-                      <li key={rec.id} className="suggest-row">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`pill ${URGENCY[rec.urgency]}`}>
-                            {rec.urgency.replaceAll("_", " ")}
-                          </span>
-                          {project ? (
-                            <span className="meta">{project.code}</span>
-                          ) : null}
-                        </div>
                         <button
                           type="button"
-                          className="title title-btn"
-                          onClick={() => setDetailRec(rec)}
+                          className="dense-title"
+                          onClick={() => setDetailTodo(todo)}
                         >
-                          {rec.title}
+                          {todo.title}
                         </button>
-                        <p className="why">{rec.why}</p>
-                        <div className="actions">
-                          <button
-                            type="button"
-                            onClick={() => acceptSuggestion(rec.id)}
-                          >
-                            Accept
-                          </button>
-                          <button
-                            type="button"
-                            className="muted"
-                            onClick={() => dismissSuggestion(rec.id)}
-                          >
-                            Dismiss
-                          </button>
-                        </div>
+                        <span className="dense-meta">
+                          {project?.code ?? "Personal"}
+                          {formatDue(todo.dueAt)
+                            ? ` · ${formatDue(todo.dueAt)}`
+                            : ""}
+                        </span>
                       </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          </section>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+            </FocusSection>
 
-          <section className="widget">
-            <header className="widget-header">
-              <h3>Meetings this week</h3>
-              <span className="widget-count">{board.meetingsSoon.length}</span>
-            </header>
-            <div className="widget-body">
-              {board.meetingsSoon.length === 0 ? (
-                <p className="empty">No meetings in the next 5 days.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {board.meetingsSoon.map((m) => {
-                    const project = state.projects.find(
-                      (p) => p.id === m.projectId,
-                    );
-                    return (
-                      <li key={m.id} className="suggest-row">
+            <FocusSection lens="meetings" active={lens}>
+              <Section
+                question="What am I walking into?"
+                count={board.meetingsSoon.length}
+              >
+                {board.meetingsSoon.length === 0 ? (
+                  <p className="empty">No meetings in the next 5 days.</p>
+                ) : (
+                  <ul className="dense-list">
+                    {board.meetingsSoon.map((m) => {
+                      const project = state.projects.find(
+                        (p) => p.id === m.projectId,
+                      );
+                      return (
+                        <li key={m.id} className="dense-row">
+                          <Link
+                            href={`/meetings/${m.id}`}
+                            className="dense-title"
+                          >
+                            {m.title}
+                          </Link>
+                          <span className="dense-meta">
+                            {project?.code ?? "—"} · {formatWhen(m.startsAt)}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </Section>
+            </FocusSection>
+
+            <FocusSection lens="risks" active={lens}>
+              <Section
+                question="What might surprise me?"
+                count={board.urgentSuggestions.length}
+              >
+                {board.urgentSuggestions.length === 0 ? (
+                  <p className="empty">No urgent suggestions.</p>
+                ) : (
+                  <ul className="dense-list">
+                    {board.urgentSuggestions.map((rec) => {
+                      const project = state.projects.find(
+                        (p) => p.id === rec.projectId,
+                      );
+                      return (
+                        <li key={rec.id} className="dense-row stack">
+                          <button
+                            type="button"
+                            className="dense-title"
+                            onClick={() => setDetailRec(rec)}
+                          >
+                            {rec.title}
+                          </button>
+                          <span className="dense-meta">
+                            {project?.code ?? "—"} · {rec.urgency.replaceAll("_", " ")}
+                          </span>
+                          <div className="dense-actions">
+                            <button
+                              type="button"
+                              onClick={() => acceptSuggestion(rec.id)}
+                            >
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              className="muted"
+                              onClick={() => dismissSuggestion(rec.id)}
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </Section>
+            </FocusSection>
+
+            <FocusSection lens="release" active={lens}>
+              <Section
+                question="What milestones are close?"
+                count={board.milestones.length}
+              >
+                {board.milestones.length === 0 ? (
+                  <p className="empty">No milestones in the next 10 days.</p>
+                ) : (
+                  <ul className="dense-list">
+                    {board.milestones.map(({ project, days, label }) => (
+                      <li key={project.id} className="dense-row">
                         <Link
-                          href={`/meetings/${m.id}`}
-                          className="title hover:text-teal"
+                          href={`/projects/${project.id}`}
+                          className="dense-title"
                         >
-                          {m.title}
+                          {project.code} — {label}
                         </Link>
-                        <p className="meta">
-                          {project?.code ?? "—"} · {formatWhen(m.startsAt)}
-                        </p>
+                        <span className="dense-meta">
+                          {days !== null && days < 0
+                            ? `${Math.abs(days)}d overdue`
+                            : days === 0
+                              ? "today"
+                              : `in ${days}d`}
+                        </span>
                       </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          </section>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+            </FocusSection>
 
-          <section className="widget">
-            <header className="widget-header">
-              <h3>Near milestones</h3>
-              <span className="widget-count">{board.milestones.length}</span>
-            </header>
-            <div className="widget-body">
-              {board.milestones.length === 0 ? (
-                <p className="empty">No milestones in the next 10 days.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {board.milestones.map(({ project, days, label }) => (
-                    <li key={project.id} className="suggest-row">
-                      <Link
-                        href={`/projects/${project.id}`}
-                        className="title hover:text-teal"
-                      >
-                        {project.code} — {label}
-                      </Link>
-                      <p className="meta">
-                        {days !== null && days < 0
-                          ? `${Math.abs(days)}d overdue`
-                          : days === 0
-                            ? "today"
-                            : `in ${days}d`}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </section>
-
-          <section className="widget lg:col-span-2">
-            <header className="widget-header">
-              <h3>Personal / generic</h3>
-              <span className="widget-count">
-                {personal.filter((t) => !t.done).length}
-              </span>
-            </header>
-            <div className="widget-body">
-              <div className="mb-3 flex flex-wrap gap-2">
-                <input
-                  className="generic-input"
-                  value={genericTitle}
-                  onChange={(e) => setGenericTitle(e.target.value)}
-                  placeholder="e.g. Update timesheet, Contact OneTrust"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") submitGeneric();
-                  }}
-                />
-                <input
-                  type="date"
-                  className="due-input"
-                  value={genericDue}
-                  onChange={(e) => setGenericDue(e.target.value)}
-                  aria-label="Due date"
-                />
-                <button
-                  type="button"
-                  className="primary-btn"
-                  onClick={submitGeneric}
-                >
-                  Add
-                </button>
-              </div>
-              {personal.length === 0 ? (
-                <p className="empty">
-                  Add items that are not tied to a project.
-                </p>
-              ) : (
-                <ul className="space-y-1">
-                  {personal.map((todo) => (
-                    <li key={todo.id} className="todo-row">
-                      <div className="flex min-w-0 flex-1 items-start gap-2">
+            <FocusSection lens="todo" active={lens} className="command-span">
+              <Section
+                question="Personal — what else?"
+                count={personal.filter((t) => !t.done).length}
+              >
+                <div className="personal-add">
+                  <input
+                    className="generic-input"
+                    value={genericTitle}
+                    onChange={(e) => setGenericTitle(e.target.value)}
+                    placeholder="e.g. Update timesheet"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") submitGeneric();
+                    }}
+                  />
+                  <input
+                    type="date"
+                    className="due-input"
+                    value={genericDue}
+                    onChange={(e) => setGenericDue(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="primary-btn"
+                    onClick={submitGeneric}
+                  >
+                    Add
+                  </button>
+                </div>
+                {personal.length === 0 ? (
+                  <p className="empty">No personal items yet.</p>
+                ) : (
+                  <ul className="dense-list">
+                    {personal.map((todo) => (
+                      <li key={todo.id} className="dense-row">
                         <input
                           type="checkbox"
                           checked={todo.done}
                           onChange={() => toggleTodo(todo.id)}
-                          className="mt-0.5"
-                          aria-label={`Mark ${todo.title} done`}
                         />
-                        <span className={todo.done ? "done" : ""}>
-                          <button
-                            type="button"
-                            className="title title-btn"
-                            onClick={() => setDetailTodo(todo)}
-                          >
-                            {todo.title}
-                          </button>
-                          {todo.detail ? (
-                            <span className="detail">{todo.detail}</span>
-                          ) : null}
-                          <span className="due-row">
-                            <input
-                              type="date"
-                              className="due-input"
-                              value={toDateInputValue(todo.dueAt)}
-                              onChange={(e) =>
-                                updateTodoDueDate(
-                                  todo.id,
-                                  e.target.value || undefined,
-                                )
-                              }
-                            />
-                            {formatDue(todo.dueAt) ? (
-                              <span className="due-label">
-                                {formatDue(todo.dueAt)}
-                              </span>
-                            ) : null}
-                          </span>
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        className="ghost"
-                        onClick={() => removeTodo(todo.id)}
-                        aria-label="Remove"
-                      >
-                        ×
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </section>
-        </div>
+                        <button
+                          type="button"
+                          className="dense-title"
+                          onClick={() => setDetailTodo(todo)}
+                        >
+                          {todo.title}
+                        </button>
+                        <input
+                          type="date"
+                          className="due-input"
+                          value={toDateInputValue(todo.dueAt)}
+                          onChange={(e) =>
+                            updateTodoDueDate(
+                              todo.id,
+                              e.target.value || undefined,
+                            )
+                          }
+                        />
+                        <button
+                          type="button"
+                          className="ghost"
+                          onClick={() => removeTodo(todo.id)}
+                          aria-label="Remove"
+                        >
+                          ×
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+            </FocusSection>
+          </div>
+        </>
       )}
 
       <DetailModal
@@ -376,8 +372,7 @@ export default function OverviewPage() {
         {detailRec ? (
           <div className="space-y-3 text-sm">
             <p className="leading-relaxed">{detailRec.action}</p>
-            <p className="leading-relaxed text-ink-soft">{detailRec.why}</p>
-            <p className="leading-relaxed">{detailRec.leadershipImpact}</p>
+            <p className="leading-relaxed text-muted">{detailRec.why}</p>
           </div>
         ) : null}
       </DetailModal>
@@ -417,7 +412,6 @@ export default function OverviewPage() {
                 className="todo-edit-area"
                 rows={4}
                 value={detailTodo.detail ?? ""}
-                placeholder="Add anything that was missed…"
                 onChange={(e) => {
                   const detail = e.target.value;
                   updateTodo(detailTodo.id, { detail });
@@ -428,28 +422,31 @@ export default function OverviewPage() {
                 }}
               />
             </label>
-            <label className="field">
-              <span>Due date</span>
-              <input
-                type="date"
-                value={toDateInputValue(detailTodo.dueAt)}
-                onChange={(e) => {
-                  updateTodoDueDate(
-                    detailTodo.id,
-                    e.target.value || undefined,
-                  );
-                  setDetailTodo({
-                    ...detailTodo,
-                    dueAt: e.target.value
-                      ? new Date(`${e.target.value}T09:00:00`).toISOString()
-                      : undefined,
-                  });
-                }}
-              />
-            </label>
           </div>
         ) : null}
       </DetailModal>
     </div>
+  );
+}
+
+function Section({
+  question,
+  count,
+  children,
+}: {
+  question: string;
+  count?: number;
+  children: ReactNode;
+}) {
+  return (
+    <section className="command-section">
+      <header className="command-section-header">
+        <h2>{question}</h2>
+        {typeof count === "number" ? (
+          <span className="command-count">{count}</span>
+        ) : null}
+      </header>
+      <div className="command-section-body">{children}</div>
+    </section>
   );
 }
