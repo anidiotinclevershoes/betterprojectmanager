@@ -59,7 +59,7 @@ export function Sidebar({
             <span className="sidebar-ico" aria-hidden>
               ⌂
             </span>
-            {!collapsed ? <span>Overview</span> : null}
+            {!collapsed ? <span>Mission Control</span> : null}
           </Link>
 
           <p className="sidebar-label">{collapsed ? "P" : "Projects"}</p>
