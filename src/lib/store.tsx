@@ -81,6 +81,8 @@ type MissionContextValue = {
   openaiDiagnostics: OpenAIDiagnostics | null;
   capture: (input: CaptureInput) => CaptureResult;
   captureWithAI: (input: CaptureInput) => Promise<CaptureResult>;
+  /** Analyse without writing — user confirms additions in Capture review. */
+  analyzeCaptureWithAI: (input: CaptureInput) => Promise<CaptureResult>;
   applyCaptureResult: (result: CaptureResult) => void;
   setRecommendationStatus: (
     id: string,
@@ -285,7 +287,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     return result;
   }, []);
 
-  const captureWithAI = useCallback(async (input: CaptureInput) => {
+  const requestCaptureAnalysis = useCallback(async (input: CaptureInput) => {
     const latest = stateRef.current;
     const response = await fetch("/api/capture", {
       method: "POST",
@@ -322,9 +324,22 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error || "Capture failed");
     }
 
-    setState((prev) => mergeCapture(prev, data.result!));
     return data.result;
   }, []);
+
+  const analyzeCaptureWithAI = useCallback(
+    async (input: CaptureInput) => requestCaptureAnalysis(input),
+    [requestCaptureAnalysis],
+  );
+
+  const captureWithAI = useCallback(
+    async (input: CaptureInput) => {
+      const result = await requestCaptureAnalysis(input);
+      setState((prev) => mergeCapture(prev, result));
+      return result;
+    },
+    [requestCaptureAnalysis],
+  );
 
   const setRecommendationStatus = useCallback(
     (recId: string, status: Recommendation["status"]) => {
@@ -632,6 +647,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       openaiDiagnostics,
       capture,
       captureWithAI,
+      analyzeCaptureWithAI,
       applyCaptureResult,
       setRecommendationStatus,
       acceptSuggestion,
@@ -659,6 +675,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       openaiDiagnostics,
       capture,
       captureWithAI,
+      analyzeCaptureWithAI,
       applyCaptureResult,
       setRecommendationStatus,
       acceptSuggestion,
