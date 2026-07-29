@@ -3,7 +3,6 @@
 import { CaptureWorkspace } from "@/components/capture/CaptureWorkspace";
 import { useCaptureSession } from "@/components/capture/CaptureSessionContext";
 import { CoachPreview } from "@/components/coach/CoachPreview";
-import { CoachResultsCard } from "@/components/coach/CoachResultsCard";
 
 export function CaptureCoachRow({
   defaultProjectId,
@@ -14,16 +13,13 @@ export function CaptureCoachRow({
   const showCoachTeaser = !isExpandedSession || collapsed;
 
   return (
-    <div className="space-y-4">
-      <div
-        className={`capture-coach-row ${showCoachTeaser ? "" : "is-capture-full"}`}
-      >
-        <div className="capture-coach-main">
-          <CaptureWorkspace defaultProjectId={defaultProjectId} />
-        </div>
-        {showCoachTeaser ? <CoachPreview /> : null}
+    <div
+      className={`capture-coach-row ${showCoachTeaser ? "" : "is-capture-full"}`}
+    >
+      <div className="capture-coach-main">
+        <CaptureWorkspace defaultProjectId={defaultProjectId} />
       </div>
-      <CoachResultsCard />
+      {showCoachTeaser ? <CoachPreview /> : null}
     </div>
   );
 }
