@@ -52,7 +52,7 @@ export const DEFAULT_OVERVIEW_LAYOUT: WorkspaceLayout = {
   ],
 };
 
-const LAYOUT_KEY = "mc-workspace-layout-v1";
+const LAYOUT_KEY = "mc-workspace-layout-v2";
 
 export function readWorkspaceLayout(scope = "overview"): WorkspaceLayout {
   if (typeof window === "undefined") return DEFAULT_OVERVIEW_LAYOUT;

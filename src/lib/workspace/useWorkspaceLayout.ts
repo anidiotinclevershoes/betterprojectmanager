@@ -22,7 +22,7 @@ export function useWorkspaceLayout(scope = "overview") {
       setLayout(readWorkspaceLayout("overview"));
     } else {
       try {
-        const raw = window.localStorage.getItem(`mc-workspace-layout-v1:${scope}`);
+        const raw = window.localStorage.getItem(`mc-workspace-layout-v2:${scope}`);
         setLayout(raw ? readWorkspaceLayout(scope) : defaultProjectLayout(scope));
       } catch {
         setLayout(defaultProjectLayout(scope));
