@@ -1,9 +1,11 @@
 "use client";
 
 import { LumeLogo } from "@/components/brand/LumeLogo";
-import { openCoachDrawer } from "@/components/AppShell";
+import { useCoachSession } from "@/components/coach/CoachSessionContext";
 
 export function CoachPreview() {
+  const { openDrawer } = useCoachSession();
+
   return (
     <aside className="coach-preview" aria-label="Lume Coach">
       <div className="coach-preview-brand">
@@ -23,7 +25,7 @@ export function CoachPreview() {
       <button
         type="button"
         className="primary-btn coach-preview-cta"
-        onClick={() => openCoachDrawer()}
+        onClick={openDrawer}
       >
         Open Coach →
       </button>

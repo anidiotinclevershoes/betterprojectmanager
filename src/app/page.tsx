@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CaptureWorkspace } from "@/components/capture/CaptureWorkspace";
-import { CoachPreview } from "@/components/coach/CoachPreview";
+import { CaptureCoachRow } from "@/components/capture/CaptureCoachRow";
 import { WorkspaceCustomiser } from "@/components/workspace/WorkspaceCustomiser";
 import { WorkspaceFrameRow } from "@/components/workspace/WorkspaceGrid";
 import { useWorkspaceLayout } from "@/lib/workspace/useWorkspaceLayout";
@@ -21,12 +20,7 @@ export default function OverviewPage() {
 
   return (
     <div className="workspace-page">
-      <div className="capture-coach-row">
-        <div className="capture-coach-main">
-          <CaptureWorkspace />
-        </div>
-        <CoachPreview />
-      </div>
+      <CaptureCoachRow />
 
       <div className="workspace-toolbar">
         <p className="meta">Workspace frames</p>

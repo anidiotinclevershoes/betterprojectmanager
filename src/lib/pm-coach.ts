@@ -64,20 +64,20 @@ Then you tell Tom exactly what to do.
 OUTPUT FORMAT
 Your responses MUST follow this structure exactly:
 
-## 1. Situational Assessment
-A concise summary of what’s going on based on the provided context.
+## Leadership
+What an exceptional PM would do to lead with confidence now — framing, stakeholder presence, ownership moments.
 
-## 2. What Tom Should Do Now
-A clear numbered list of actions Tom should take immediately.
+## Risks
+Emerging or under-tracked risks grounded in the provided project knowledge. Prefer evidence over speculation.
 
-## 3. Risks / Gaps to Address
-Anything Tom might be missing or overlooking.
+## Strategic Actions
+Proactive moves that advance the programme, not merely overdue tasks.
 
-## 4. Communication Guidance
-Scripts or phrasing Tom can use with stakeholders or teams.
+## Disruptive Opportunity
+Always include this section. Highlight one non-obvious, high-leverage opportunity grounded in existing project knowledge (patterns, stakeholder preferences, release history, open loops). Explain why it is disruptive and what concrete first step unlocks it. Never leave this section empty.
 
-## 5. Optional: Checklist
-If relevant, provide a short checklist Tom can follow. If not relevant, write "None needed right now."
+## Recommended Actions
+A short numbered list of concrete next actions the user can accept into To Do / Knowledge.
 
 PRIMARY GOAL
 Make Tom look like:
@@ -233,6 +233,7 @@ export async function requestPmCoaching(
 Use ONLY the project context JSON below. Do not invent missing facts. If something critical is missing, say what Tom should confirm.
 
 Respond in the required coaching sections.
+Always include a highlighted ## Disruptive Opportunity section grounded in project knowledge.
 
 CONTEXT JSON:
 ${JSON.stringify(context, null, 2)}`;
@@ -299,9 +300,8 @@ export async function* streamPmCoaching(
 Use ONLY the project context JSON below. Do not invent missing facts. If something critical is missing, say what Tom should confirm.
 
 Respond in the required coaching sections.
-In section 2, put each action on its own numbered line.
-In section 3, put each risk/gap on its own bullet.
-In section 5, use checklist lines like "- [ ] …".
+Always include a highlighted ## Disruptive Opportunity section grounded in project knowledge.
+Under ## Recommended Actions, put each action on its own numbered line.
 
 CONTEXT JSON:
 ${JSON.stringify(context, null, 2)}`;
@@ -384,21 +384,28 @@ function localCoachFallback(state: MissionState, scope: CoachScope): string {
       : state.projects;
 
   const lines: string[] = [];
-  lines.push("## 1. Situational Assessment");
+  lines.push("## Leadership");
   for (const p of projects) {
-    const openTodos = (state.todos ?? []).filter(
-      (t) => t.projectId === p.id && !t.done,
-    ).length;
-    const recs = state.recommendations.filter(
-      (r) => r.status === "active" && r.projectId === p.id,
-    ).length;
     lines.push(
-      `- **${p.code}**: ${p.currentFocus}. Status ${p.status}. ${openTodos} open to-dos, ${recs} active coaching suggestions.`,
+      `- **${p.code}**: Lead with a crisp narrative on “${p.currentFocus}”. Own the next conversation before stakeholders ask.`,
     );
   }
 
   lines.push("");
-  lines.push("## 2. What Tom Should Do Now");
+  lines.push("## Risks");
+  for (const p of projects) {
+    const knowledge = state.knowledge.find((k) => k.projectId === p.id);
+    const risks = knowledge?.sections.risks ?? [];
+    const loops = knowledge?.sections.openLoops ?? [];
+    if (risks[0]) lines.push(`- (${p.code}) ${risks[0]}`);
+    if (loops[0]) lines.push(`- (${p.code}) Open loop: ${loops[0]}`);
+  }
+  if (lines[lines.length - 1] === "## Risks") {
+    lines.push("- No explicit risks in knowledge yet — confirm testing/release evidence is current.");
+  }
+
+  lines.push("");
+  lines.push("## Strategic Actions");
   let n = 1;
   for (const p of projects) {
     const top = state.recommendations.find(
@@ -420,39 +427,30 @@ function localCoachFallback(state: MissionState, scope: CoachScope): string {
   }
 
   lines.push("");
-  lines.push("## 3. Risks / Gaps to Address");
-  for (const p of projects) {
-    const knowledge = state.knowledge.find((k) => k.projectId === p.id);
-    const risks = knowledge?.sections.risks ?? [];
-    const loops = knowledge?.sections.openLoops ?? [];
-    if (risks[0]) lines.push(`- (${p.code}) ${risks[0]}`);
-    if (loops[0]) lines.push(`- (${p.code}) Open loop: ${loops[0]}`);
-  }
-  if (lines[lines.length - 1] === "## 3. Risks / Gaps to Address") {
-    lines.push("- No explicit risks in knowledge yet — confirm testing/release evidence is current.");
-  }
-
-  lines.push("");
-  lines.push("## 4. Communication Guidance");
-  const meeting = state.meetings.find(
-    (m) =>
-      m.phase === "upcoming" &&
-      (!scope.projectId || m.projectId === scope.projectId),
-  );
-  if (meeting) {
-    lines.push(`Use this opening for **${meeting.title}**:`);
-    lines.push(`> ${meeting.prep.openingScript}`);
+  lines.push("## Disruptive Opportunity");
+  const disruptProject = projects[0];
+  const knowledge = disruptProject
+    ? state.knowledge.find((k) => k.projectId === disruptProject.id)
+    : undefined;
+  const preference =
+    disruptProject?.stakeholders.find((s) => s.preferences?.[0])?.preferences?.[0] ??
+    knowledge?.sections.people?.[0] ??
+    knowledge?.sections.decisions?.[0];
+  if (disruptProject && preference) {
+    lines.push(
+      `Use ${disruptProject.code} knowledge (“${preference}”) to pre-empt the next difficult conversation — send a short written brief before the meeting so you set the frame instead of reacting to it.`,
+    );
   } else {
     lines.push(
-      '> "I want to align on evidence, owners, and dates — not status. What is still unsigned, who owns it, and when will it be in the tracker?"',
+      "Turn silent stakeholders into an early-warning system: schedule a 15-minute pre-brief with the least-contacted sponsor and ask what would surprise them in the next steering conversation.",
     );
   }
 
   lines.push("");
-  lines.push("## 5. Optional: Checklist");
-  lines.push("- [ ] Open to-dos reviewed and dated");
-  lines.push("- [ ] Next meeting opening script ready");
-  lines.push("- [ ] Risks/open loops confirmed with owners");
+  lines.push("## Recommended Actions");
+  lines.push("1. Draft the disruptive brief and add it to To Do");
+  lines.push("2. Confirm owners for the top risk in Knowledge");
+  lines.push("3. Rehearse the next meeting opening out loud once");
   lines.push("");
   lines.push(
     "_Local coach mode — add OPENAI_API_KEY for full Assistant PM Coach responses._",

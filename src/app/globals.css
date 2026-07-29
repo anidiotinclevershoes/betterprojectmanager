@@ -2755,3 +2755,117 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ——— Sprint 1 Capture / Coach ——— */
+
+.capture-coach-row.is-capture-full {
+  grid-template-columns: 1fr;
+}
+
+.capture-collapsed {
+  padding: 12px 16px;
+}
+
+.capture-collapsed-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.suggestion-controls {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.suggestion-controls select {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.coach-results-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.coach-results-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.coach-results-header h2 {
+  margin: 2px 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.coach-results-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.coach-results-section {
+  grid-column: span 6;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--bg-surface-raised);
+}
+
+.coach-results-section h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.coach-results-section.is-disruptive {
+  grid-column: span 12;
+  border-color: var(--brand-yellow);
+  background: var(--brand-yellow-soft);
+}
+
+.coach-results-section.is-disruptive h3 {
+  color: var(--brand-yellow);
+}
+
+.coach-results-actions {
+  margin-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+}
+
+.coach-results-actions h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.coach-results-actions ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coach-results-actions li p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 899px) {
+  .coach-results-section {
+    grid-column: span 12;
+  }
+}

@@ -1,0 +1,464 @@
+"use client";
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import { useMission } from "@/lib/store";
+import {
+  buildSuggestions,
+  CAPTURE_SESSION_KEY,
+  destinationFor,
+  type CapturePersistSlice,
+  type PendingSuggestion,
+  type SuggestionKind,
+  type SuggestionOp,
+} from "@/lib/capture/suggestions";
+import type { CaptureResult } from "@/lib/types";
+
+type Busy = "idle" | "transcribing" | "analysing";
+
+type CaptureSessionValue = {
+  content: string;
+  setContent: (value: string) => void;
+  projectId: string;
+  setProjectId: (value: string) => void;
+  fileNames: string[];
+  addFileName: (name: string) => void;
+  result: CaptureResult | null;
+  suggestions: PendingSuggestion[];
+  dismissed: Record<string, boolean>;
+  added: Record<string, boolean>;
+  editing: Record<string, string>;
+  setEditingContent: (id: string, value: string | null) => void;
+  updateSuggestion: (
+    id: string,
+    patch: Partial<Pick<PendingSuggestion, "kind" | "op" | "content" | "date">>,
+  ) => void;
+  collapsed: boolean;
+  setCollapsed: (value: boolean) => void;
+  busy: Busy;
+  setBusy: (value: Busy) => void;
+  error: string | null;
+  setError: (value: string | null) => void;
+  statusMessage: string | null;
+  announce: (message: string) => void;
+  analyse: (
+    raw: string,
+    sourceType: "conversation" | "voice_note",
+    scopedProjectId?: string,
+  ) => Promise<void>;
+  applyOne: (item: PendingSuggestion, scopedProjectId?: string) => void;
+  dismissOne: (id: string) => void;
+  clearSession: () => void;
+  /** True when capture has in-progress work and is not collapsed. */
+  isExpandedSession: boolean;
+  pendingCount: number;
+  hasTranscript: boolean;
+};
+
+const CaptureSessionContext = createContext<CaptureSessionValue | null>(null);
+
+function readPersisted(): CapturePersistSlice | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(CAPTURE_SESSION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as CapturePersistSlice;
+  } catch {
+    return null;
+  }
+}
+
+function emptySlice(): CapturePersistSlice {
+  return {
+    content: "",
+    projectId: "",
+    fileNames: [],
+    result: null,
+    suggestions: [],
+    dismissed: {},
+    added: {},
+    editing: {},
+    collapsed: false,
+    error: null,
+  };
+}
+
+export function CaptureSessionProvider({ children }: { children: ReactNode }) {
+  const {
+    state,
+    analyzeCaptureWithAI,
+    applyCaptureResult,
+    addTodo,
+    addSuggestion,
+    addKnowledgeBullet,
+    addTimelineItem,
+    toggleTodo,
+    removeTodo,
+    updateTodo,
+    updateTodoDueDate,
+  } = useMission();
+
+  const [slice, setSlice] = useState<CapturePersistSlice>(emptySlice);
+  const [hydrated, setHydrated] = useState(false);
+  const [busy, setBusy] = useState<Busy>("idle");
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const persisted = readPersisted();
+    if (persisted) setSlice(persisted);
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.sessionStorage.setItem(CAPTURE_SESSION_KEY, JSON.stringify(slice));
+    } catch {
+      /* ignore */
+    }
+  }, [slice, hydrated]);
+
+  const announce = useCallback((message: string) => {
+    setStatusMessage(message);
+  }, []);
+
+  const setContent = useCallback((value: string) => {
+    setSlice((prev) => ({ ...prev, content: value, collapsed: false }));
+  }, []);
+
+  const setProjectId = useCallback((value: string) => {
+    setSlice((prev) => ({ ...prev, projectId: value }));
+  }, []);
+
+  const addFileName = useCallback((name: string) => {
+    setSlice((prev) => ({
+      ...prev,
+      fileNames: prev.fileNames.includes(name)
+        ? prev.fileNames
+        : [...prev.fileNames, name],
+      collapsed: false,
+    }));
+  }, []);
+
+  const setCollapsed = useCallback((value: boolean) => {
+    setSlice((prev) => ({ ...prev, collapsed: value }));
+  }, []);
+
+  const setError = useCallback((value: string | null) => {
+    setSlice((prev) => ({ ...prev, error: value }));
+  }, []);
+
+  const setEditingContent = useCallback((id: string, value: string | null) => {
+    setSlice((prev) => {
+      const editing = { ...prev.editing };
+      if (value === null) delete editing[id];
+      else editing[id] = value;
+      return { ...prev, editing };
+    });
+  }, []);
+
+  const updateSuggestion = useCallback(
+    (
+      id: string,
+      patch: Partial<Pick<PendingSuggestion, "kind" | "op" | "content" | "date">>,
+    ) => {
+      setSlice((prev) => ({
+        ...prev,
+        suggestions: prev.suggestions.map((s) => {
+          if (s.id !== id) return s;
+          const next = { ...s, ...patch };
+          if (patch.kind) next.destination = destinationFor(patch.kind);
+          return next;
+        }),
+      }));
+    },
+    [],
+  );
+
+  const clearSession = useCallback(() => {
+    setSlice(emptySlice());
+    setBusy("idle");
+    setStatusMessage(null);
+    try {
+      window.sessionStorage.removeItem(CAPTURE_SESSION_KEY);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const analyse = useCallback(
+    async (
+      raw: string,
+      sourceType: "conversation" | "voice_note",
+      scopedProjectId?: string,
+    ) => {
+      const trimmed = raw.trim();
+      if (!trimmed) return;
+      setBusy("analysing");
+      setSlice((prev) => ({
+        ...prev,
+        error: null,
+        result: null,
+        suggestions: [],
+        dismissed: {},
+        added: {},
+        editing: {},
+        collapsed: false,
+      }));
+      try {
+        const effective =
+          scopedProjectId || slice.projectId || undefined;
+        const next = await analyzeCaptureWithAI({
+          content: trimmed,
+          projectId: effective,
+          sourceType,
+        });
+        const openTodos = (state.todos ?? [])
+          .filter((t) => !t.done)
+          .map((t) => ({
+            id: t.id,
+            title: t.title,
+            projectId: t.projectId,
+            dueAt: t.dueAt,
+          }));
+        setSlice((prev) => ({
+          ...prev,
+          result: next,
+          suggestions: buildSuggestions(next, openTodos),
+          content: trimmed,
+          collapsed: false,
+        }));
+        announce("Capture analysis complete. Review suggested actions.");
+      } catch (err) {
+        setSlice((prev) => ({
+          ...prev,
+          error: err instanceof Error ? err.message : "Capture failed",
+        }));
+      } finally {
+        setBusy("idle");
+      }
+    },
+    [analyzeCaptureWithAI, announce, slice.projectId, state.todos],
+  );
+
+  const applyOne = useCallback(
+    (item: PendingSuggestion, scopedProjectId?: string) => {
+      const text = (slice.editing[item.id] ?? item.content).trim();
+      if (!text) return;
+      const pid =
+        item.projectId ?? scopedProjectId ?? (slice.projectId || null);
+
+      const finish = () => {
+        setSlice((prev) => ({
+          ...prev,
+          added: { ...prev.added, [item.id]: true },
+        }));
+        announce(
+          item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
+        );
+      };
+
+      if (item.op === "complete" && item.targetTodoId) {
+        const todo = state.todos.find((t) => t.id === item.targetTodoId);
+        if (todo && !todo.done) toggleTodo(item.targetTodoId);
+        finish();
+        return;
+      }
+      if (
+        (item.op === "delete" || item.op === "remove" || item.op === "archive") &&
+        item.targetTodoId
+      ) {
+        if (item.op === "archive") {
+          const todo = state.todos.find((t) => t.id === item.targetTodoId);
+          if (todo && !todo.done) toggleTodo(item.targetTodoId!);
+        } else {
+          removeTodo(item.targetTodoId);
+        }
+        finish();
+        return;
+      }
+      if (item.op === "rename" && item.targetTodoId) {
+        updateTodo(item.targetTodoId, { title: text });
+        finish();
+        return;
+      }
+      if (item.op === "change_due" && item.targetTodoId) {
+        updateTodoDueDate(item.targetTodoId, item.date || undefined);
+        finish();
+        return;
+      }
+      if (item.op === "update" && item.targetTodoId) {
+        updateTodo(item.targetTodoId, {
+          title: text,
+          detail: item.recommendation?.action,
+        });
+        finish();
+        return;
+      }
+
+      // create (default)
+      if (item.kind === "memory" && slice.result) {
+        applyCaptureResult({
+          ...slice.result,
+          recommendations: [],
+          knowledgePatch: undefined,
+          timelinePatch: undefined,
+          memory: { ...slice.result.memory, title: text },
+        });
+      } else if (item.kind === "action" || item.kind === "nudge") {
+        addTodo({
+          title: text,
+          detail: item.recommendation?.action,
+          projectId: pid,
+          dueAt: item.date,
+        });
+      } else if (item.timelineItem && pid) {
+        addTimelineItem(pid, {
+          ...item.timelineItem,
+          label: text,
+          source: "capture",
+        });
+      } else if (item.knowledgeSection && pid) {
+        addKnowledgeBullet(pid, item.knowledgeSection, text);
+      } else if (pid && item.recommendation) {
+        addSuggestion({
+          projectId: pid,
+          title: text,
+          action: item.recommendation.action,
+          why: item.recommendation.why,
+          kind: item.recommendation.kind,
+          urgency: item.recommendation.urgency,
+        });
+      } else if (
+        pid &&
+        (item.kind === "knowledge" ||
+          item.kind === "decision" ||
+          item.kind === "risk" ||
+          item.kind === "stakeholder")
+      ) {
+        const section =
+          item.kind === "risk"
+            ? "risks"
+            : item.kind === "decision"
+              ? "decisions"
+              : item.kind === "stakeholder"
+                ? "people"
+                : "now";
+        addKnowledgeBullet(pid, section, text);
+      } else {
+        addTodo({ title: text, projectId: pid });
+      }
+      finish();
+    },
+    [
+      addKnowledgeBullet,
+      addSuggestion,
+      addTimelineItem,
+      addTodo,
+      announce,
+      applyCaptureResult,
+      removeTodo,
+      slice.editing,
+      slice.projectId,
+      slice.result,
+      state.todos,
+      toggleTodo,
+      updateTodo,
+      updateTodoDueDate,
+    ],
+  );
+
+  const dismissOne = useCallback((id: string) => {
+    setSlice((prev) => ({
+      ...prev,
+      dismissed: { ...prev.dismissed, [id]: true },
+    }));
+    announce("Item dismissed");
+  }, [announce]);
+
+  const pendingCount = slice.suggestions.filter(
+    (s) => !slice.dismissed[s.id] && !slice.added[s.id],
+  ).length;
+
+  const hasTranscript = Boolean(slice.content.trim());
+  const isExpandedSession =
+    !slice.collapsed &&
+    (hasTranscript ||
+      Boolean(slice.result) ||
+      busy !== "idle" ||
+      slice.fileNames.length > 0);
+
+  const value = useMemo<CaptureSessionValue>(
+    () => ({
+      content: slice.content,
+      setContent,
+      projectId: slice.projectId,
+      setProjectId,
+      fileNames: slice.fileNames,
+      addFileName,
+      result: slice.result,
+      suggestions: slice.suggestions,
+      dismissed: slice.dismissed,
+      added: slice.added,
+      editing: slice.editing,
+      setEditingContent,
+      updateSuggestion,
+      collapsed: slice.collapsed,
+      setCollapsed,
+      busy,
+      setBusy,
+      error: slice.error,
+      setError,
+      statusMessage,
+      announce,
+      analyse,
+      applyOne,
+      dismissOne,
+      clearSession,
+      isExpandedSession,
+      pendingCount,
+      hasTranscript,
+    }),
+    [
+      addFileName,
+      analyse,
+      announce,
+      applyOne,
+      busy,
+      clearSession,
+      dismissOne,
+      hasTranscript,
+      isExpandedSession,
+      pendingCount,
+      setCollapsed,
+      setContent,
+      setEditingContent,
+      setError,
+      setProjectId,
+      slice,
+      statusMessage,
+      updateSuggestion,
+    ],
+  );
+
+  return (
+    <CaptureSessionContext.Provider value={value}>
+      {children}
+    </CaptureSessionContext.Provider>
+  );
+}
+
+export function useCaptureSession() {
+  const ctx = useContext(CaptureSessionContext);
+  if (!ctx) {
+    throw new Error("useCaptureSession must be used within CaptureSessionProvider");
+  }
+  return ctx;
+}

@@ -4,17 +4,33 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/app-shell/Sidebar";
 import { TopHeader } from "@/components/app-shell/TopHeader";
+import { CaptureSessionProvider } from "@/components/capture/CaptureSessionContext";
 import { CoachDrawer } from "@/components/coach/CoachDrawer";
+import { CoachResultsCard } from "@/components/coach/CoachResultsCard";
+import {
+  CoachSessionProvider,
+  useCoachSession,
+} from "@/components/coach/CoachSessionContext";
 import { useMission } from "@/lib/store";
 import { MISSION_MESSAGE } from "@/lib/mission";
 
 const SIDEBAR_KEY = "mc-sidebar-collapsed-v1";
 
 export function AppShell({ children }: { children: ReactNode }) {
+  return (
+    <CaptureSessionProvider>
+      <CoachSessionProvider>
+        <AppShellInner>{children}</AppShellInner>
+      </CoachSessionProvider>
+    </CaptureSessionProvider>
+  );
+}
+
+function AppShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { state } = useMission();
-  const [coachOpen, setCoachOpen] = useState(false);
+  const { drawerOpen, openDrawer } = useCoachSession();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<{ email: string; name: string } | null>(
@@ -56,10 +72,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    const open = () => setCoachOpen(true);
+    const open = () => openDrawer();
     window.addEventListener("lume:open-coach", open);
     return () => window.removeEventListener("lume:open-coach", open);
-  }, []);
+  }, [openDrawer]);
 
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -121,7 +137,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className={`app-shell ${collapsed ? "sidebar-collapsed" : ""} ${coachOpen ? "coach-open" : ""}`}
+      className={`app-shell ${collapsed ? "sidebar-collapsed" : ""} ${drawerOpen ? "coach-open" : ""}`}
     >
       <Sidebar
         collapsed={collapsed}
@@ -139,10 +155,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           userName={user?.name}
           onSignOut={() => void signOut()}
         />
-        <main className="app-content">{children}</main>
+        <main className="app-content">
+          <div className="mb-4">
+            <CoachResultsCard />
+          </div>
+          {children}
+        </main>
       </div>
 
-      <CoachDrawer open={coachOpen} onClose={() => setCoachOpen(false)} />
+      <CoachDrawer />
     </div>
   );
 }

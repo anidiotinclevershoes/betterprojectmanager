@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { CaptureWorkspace } from "@/components/capture/CaptureWorkspace";
-import { CoachPreview } from "@/components/coach/CoachPreview";
+import { CaptureCoachRow } from "@/components/capture/CaptureCoachRow";
 import { CloneRelOpsButton } from "@/components/CloneRelOpsButton";
 import { StatusPill } from "@/components/DashboardChrome";
 import { ProjectKnowledgeBrief } from "@/components/ProjectKnowledgeBrief";
@@ -71,12 +70,7 @@ export default function ProjectDashboardPage() {
         {isReleaseOps ? <CloneRelOpsButton projectId={project.id} /> : null}
       </div>
 
-      <div className="capture-coach-row">
-        <div className="capture-coach-main">
-          <CaptureWorkspace defaultProjectId={project.id} />
-        </div>
-        <CoachPreview />
-      </div>
+      <CaptureCoachRow defaultProjectId={project.id} />
 
       <div className="workspace-toolbar">
         <p className="meta">Project workspace</p>
