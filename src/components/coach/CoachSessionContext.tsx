@@ -16,8 +16,14 @@ import {
   type CoachAction,
 } from "@/lib/coach-actions";
 import { useMission } from "@/lib/store";
+import {
+  createCoachingSessionId,
+  upsertCoachingSession,
+  type CoachingSessionRecord,
+} from "@/lib/sessions/history";
 
 type AcceptedMap = Record<string, string>;
+type RecState = "pending" | "accepted" | "dismissed";
 
 type CoachSessionValue = {
   drawerOpen: boolean;
@@ -45,6 +51,23 @@ type CoachSessionValue = {
 
 const CoachSessionContext = createContext<CoachSessionValue | null>(null);
 
+function buildRecommendationStates(
+  actions: CoachAction[],
+  accepted: AcceptedMap,
+): Record<string, RecState> {
+  const states: Record<string, RecState> = {};
+  for (const action of actions) {
+    states[action.id] = accepted[action.id] ? "accepted" : "pending";
+  }
+  return states;
+}
+
+function persistCoach(
+  partial: Omit<CoachingSessionRecord, "updatedAt"> & { updatedAt?: string },
+) {
+  upsertCoachingSession(partial);
+}
+
 export function CoachSessionProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { state, addTodo, addSuggestion, addKnowledgeBullet } = useMission();
@@ -64,6 +87,8 @@ export function CoachSessionProvider({ children }: { children: ReactNode }) {
   const [accepted, setAccepted] = useState<AcceptedMap>({});
   const [lastRunAt, setLastRunAt] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const historyIdRef = useRef<string | null>(null);
+  const createdAtRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const openDrawer = useCallback(() => {
@@ -74,8 +99,31 @@ export function CoachSessionProvider({ children }: { children: ReactNode }) {
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   const dismissResults = useCallback(() => {
+    const id = historyIdRef.current;
+    const createdAt = createdAtRef.current;
+    if (id && createdAt && markdown) {
+      const actions = parseCoachActions(markdown);
+      const recommendationStates = buildRecommendationStates(actions, accepted);
+      for (const action of actions) {
+        if (recommendationStates[action.id] === "pending") {
+          recommendationStates[action.id] = "dismissed";
+        }
+      }
+      persistCoach({
+        id,
+        createdAt,
+        scope:
+          scope === "project" && projectId ? "project" : "all_projects",
+        projectId: scope === "project" ? projectId : null,
+        title: title || "Coaching",
+        markdown,
+        provider,
+        recommendationStates,
+        status: "dismissed",
+      });
+    }
     setShowResults(false);
-  }, []);
+  }, [accepted, markdown, projectId, provider, scope, title]);
 
   const runCoach = useCallback(async () => {
     abortRef.current?.abort();
@@ -89,11 +137,17 @@ export function CoachSessionProvider({ children }: { children: ReactNode }) {
     setTitle("");
     setProvider(null);
     setAccepted({});
+    historyIdRef.current = createCoachingSessionId();
+    createdAtRef.current = new Date().toISOString();
 
     const effectiveScope =
       scope === "project" && projectId
         ? { mode: "project" as const, projectId }
         : { mode: "overview" as const };
+
+    let finalMarkdown = "";
+    let finalTitle = "Coaching";
+    let finalProvider: "openai" | "local" | null = null;
 
     try {
       const response = await fetch("/api/coach", {
@@ -150,11 +204,15 @@ export function CoachSessionProvider({ children }: { children: ReactNode }) {
               error?: string;
             };
             if (event.type === "meta") {
-              setTitle(event.title || "Coaching");
-              setProvider(event.provider ?? null);
+              finalTitle = event.title || "Coaching";
+              finalProvider = event.provider ?? null;
+              setTitle(finalTitle);
+              setProvider(finalProvider);
             } else if (event.type === "delta" && event.text) {
+              finalMarkdown += event.text;
               setMarkdown((prev) => prev + event.text);
             } else if (event.type === "done" && event.markdown) {
+              finalMarkdown = event.markdown;
               setMarkdown(event.markdown);
             } else if (event.type === "error") {
               throw new Error(event.error || "Coach failed");
@@ -165,7 +223,25 @@ export function CoachSessionProvider({ children }: { children: ReactNode }) {
           }
         }
       }
-      setLastRunAt(new Date().toISOString());
+      const runAt = new Date().toISOString();
+      setLastRunAt(runAt);
+      const id = historyIdRef.current;
+      const createdAt = createdAtRef.current ?? runAt;
+      if (id && finalMarkdown.trim()) {
+        const actions = parseCoachActions(finalMarkdown);
+        persistCoach({
+          id,
+          createdAt,
+          scope:
+            scope === "project" && projectId ? "project" : "all_projects",
+          projectId: scope === "project" ? projectId : null,
+          title: finalTitle,
+          markdown: finalMarkdown,
+          provider: finalProvider,
+          recommendationStates: buildRecommendationStates(actions, {}),
+          status: "active",
+        });
+      }
     } catch (err) {
       if ((err as Error).name === "AbortError") return;
       setError(err instanceof Error ? err.message : "Coach failed");
@@ -181,16 +257,15 @@ export function CoachSessionProvider({ children }: { children: ReactNode }) {
         scope === "project" ? projectId : null,
         action.projectCode,
       );
+      let label = "";
       if (mode === "todo") {
         addTodo({
           title: action.title,
           detail: action.text !== action.title ? action.text : undefined,
           projectId: resolvedProjectId,
         });
-        setAccepted((prev) => ({ ...prev, [action.id]: "Added to To Do" }));
-        return;
-      }
-      if (mode === "suggestion") {
+        label = "Added to To Do";
+      } else if (mode === "suggestion") {
         if (!resolvedProjectId) {
           setError("Pick a project scope, or include a project code.");
           return;
@@ -202,24 +277,53 @@ export function CoachSessionProvider({ children }: { children: ReactNode }) {
           why: "Accepted from Coach.",
           kind: action.section === "risk" ? "risk" : "leadership",
         });
-        setAccepted((prev) => ({
-          ...prev,
-          [action.id]: "Added to Suggestions",
-        }));
-        return;
+        label = "Added to Suggestions";
+      } else {
+        if (!resolvedProjectId) {
+          setError("Pick a project scope to add into Knowledge.");
+          return;
+        }
+        addKnowledgeBullet(
+          resolvedProjectId,
+          action.section === "risk" ? "risks" : "openLoops",
+          action.title,
+        );
+        label = "Added to Knowledge";
       }
-      if (!resolvedProjectId) {
-        setError("Pick a project scope to add into Knowledge.");
-        return;
-      }
-      addKnowledgeBullet(
-        resolvedProjectId,
-        action.section === "risk" ? "risks" : "openLoops",
-        action.title,
-      );
-      setAccepted((prev) => ({ ...prev, [action.id]: "Added to Knowledge" }));
+
+      setAccepted((prev) => {
+        const next = { ...prev, [action.id]: label };
+        const id = historyIdRef.current;
+        const createdAt = createdAtRef.current;
+        if (id && createdAt && markdown) {
+          const allActions = parseCoachActions(markdown);
+          persistCoach({
+            id,
+            createdAt,
+            scope:
+              scope === "project" && projectId ? "project" : "all_projects",
+            projectId: scope === "project" ? projectId : null,
+            title: title || "Coaching",
+            markdown,
+            provider,
+            recommendationStates: buildRecommendationStates(allActions, next),
+            status: "active",
+          });
+        }
+        return next;
+      });
     },
-    [addKnowledgeBullet, addSuggestion, addTodo, projectId, scope, state.projects],
+    [
+      addKnowledgeBullet,
+      addSuggestion,
+      addTodo,
+      markdown,
+      projectId,
+      provider,
+      scope,
+      state.projects,
+      title,
+    ],
   );
 
   const actions = useMemo(() => parseCoachActions(markdown), [markdown]);

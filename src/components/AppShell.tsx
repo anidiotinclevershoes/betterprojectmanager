@@ -109,6 +109,18 @@ function AppShellInner({ children }: { children: ReactNode }) {
     if (pathname.startsWith("/history")) {
       return { title: "History", subtitle: "Everything that happened in Lume" };
     }
+    if (pathname.startsWith("/captures")) {
+      return {
+        title: "Captures",
+        subtitle: "Previous Capture sessions",
+      };
+    }
+    if (pathname.startsWith("/coaching")) {
+      return {
+        title: "Coaching",
+        subtitle: "Previous Coach sessions",
+      };
+    }
     if (pathname.startsWith("/meetings")) {
       return { title: "Meetings", subtitle: "Briefs and preparation" };
     }

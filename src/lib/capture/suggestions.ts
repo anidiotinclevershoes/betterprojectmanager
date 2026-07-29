@@ -338,6 +338,15 @@ export type CapturePersistSlice = {
   editing: Record<string, string>;
   collapsed: boolean;
   error: string | null;
+  source: "typed" | "recorded" | "uploaded";
+  historyId: string | null;
+  analysedAt: string | null;
 };
 
 export const CAPTURE_SESSION_KEY = "lume-capture-session-v1";
+
+/**
+ * Deferred: improve suggested-operation inference using existing-record
+ * matching and explicit operation evidence.
+ * Do not expand prompt/schema complexity until that backlog item is scheduled.
+ */

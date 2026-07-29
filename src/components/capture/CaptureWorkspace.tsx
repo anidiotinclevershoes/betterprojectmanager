@@ -18,6 +18,18 @@ function projectCode(
   return projects.find((p) => p.id === projectId)?.code ?? "—";
 }
 
+function formatAnalysedAt(iso: string | null) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
 export function CaptureWorkspace({
   defaultProjectId,
 }: {
@@ -51,7 +63,11 @@ export function CaptureWorkspace({
     applyOne,
     dismissOne,
     clearSession,
+    expandAnalysis,
     pendingCount,
+    isAnalysed,
+    setSource,
+    analysedAt,
   } = session;
 
   const effectiveProjectId = projectId || defaultProjectId || "";
@@ -61,6 +77,8 @@ export function CaptureWorkspace({
     setBusy,
     setError,
     announce,
+    locked: isAnalysed,
+    onRecorded: () => setSource("recorded"),
   });
 
   const liveRef = useRef<HTMLDivElement>(null);
@@ -78,6 +96,10 @@ export function CaptureWorkspace({
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (isAnalysed) {
+      if (collapsed) expandAnalysis();
+      return;
+    }
     await analyse(content, "conversation", defaultProjectId);
   }
 
@@ -86,6 +108,7 @@ export function CaptureWorkspace({
     (s) => !dismissed[s.id] && !added[s.id],
   );
   const showSessionActions = Boolean(result);
+  const analysedLabel = formatAnalysedAt(analysedAt);
 
   return (
     <section className="capture-workspace capture-compact" aria-labelledby={titleId}>
@@ -98,19 +121,23 @@ export function CaptureWorkspace({
             <p className="capture-support">
               Paste notes, type an update, upload a file or record your thoughts.
             </p>
+          ) : analysedLabel ? (
+            <p className="capture-support meta">Last analysed {analysedLabel}</p>
           ) : null}
         </div>
         {showSessionActions ? (
           <div className="capture-header-actions">
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={() => setCollapsed(!collapsed)}
-              aria-label={collapsed ? "Expand capture review" : "Collapse capture review"}
-              title={collapsed ? "Expand" : "Collapse"}
-            >
-              {collapsed ? "▾" : "▴"}
-            </button>
+            {!collapsed ? (
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setCollapsed(true)}
+                aria-label="Collapse capture review"
+                title="Collapse"
+              >
+                ▴
+              </button>
+            ) : null}
             <button
               type="button"
               className="ghost-btn capture-new-btn"
@@ -122,128 +149,129 @@ export function CaptureWorkspace({
         ) : null}
       </div>
 
-      {!reviewOpen ? (
-        <form onSubmit={onSubmit} className="capture-form">
-          <label className="sr-only" htmlFor="capture-input">
-            Capture notes
-          </label>
-          <textarea
-            id="capture-input"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={3}
-            disabled={busy === "analysing"}
-            placeholder="What happened? Add notes, paste text or drop files here…"
-            className="capture-textarea capture-textarea-idle"
-          />
-          {fileNames.length ? (
-            <p className="meta mt-1">Files: {fileNames.join(", ")}</p>
-          ) : null}
-          {result && collapsed ? (
-            <p className="meta mt-1">
-              Review collapsed
-              {pendingCount > 0
-                ? ` · ${pendingCount} suggested action${pendingCount === 1 ? "" : "s"} pending`
-                : " · suggestions reviewed"}
-              . Expand to continue reviewing without re-analysing.
-            </p>
-          ) : null}
+      {/* Transcript stays visible after analysis (read-only), including when collapsed. */}
+      <form onSubmit={onSubmit} className="capture-form">
+        <label className="sr-only" htmlFor="capture-input">
+          Capture notes
+        </label>
+        <textarea
+          id="capture-input"
+          value={content}
+          onChange={(e) => {
+            if (!isAnalysed) setContent(e.target.value);
+          }}
+          rows={3}
+          readOnly={isAnalysed}
+          disabled={busy === "analysing"}
+          placeholder="What happened? Add notes, paste text or drop files here…"
+          className={`capture-textarea capture-textarea-idle ${isAnalysed ? "is-readonly" : ""}`}
+          aria-readonly={isAnalysed || undefined}
+        />
+        {fileNames.length && !isAnalysed ? (
+          <p className="meta mt-1">Files: {fileNames.join(", ")}</p>
+        ) : null}
 
-          <div className="capture-toolbar">
-            <div className="capture-toolbar-left">
-              {!defaultProjectId ? (
-                <select
-                  value={effectiveProjectId}
-                  onChange={(e) => setProjectId(e.target.value)}
-                  disabled={busy !== "idle" || recording.active}
-                  aria-label="Project"
-                >
-                  <option value="">All / unlinked</option>
-                  {state.projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.code}
-                    </option>
-                  ))}
-                </select>
-              ) : null}
+        <div className="capture-toolbar">
+          <div className="capture-toolbar-left">
+            {!defaultProjectId && !isAnalysed ? (
+              <select
+                value={effectiveProjectId}
+                onChange={(e) => setProjectId(e.target.value)}
+                disabled={busy !== "idle" || recording.active}
+                aria-label="Project"
+              >
+                <option value="">All / unlinked</option>
+                {state.projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.code}
+                  </option>
+                ))}
+              </select>
+            ) : null}
 
-              {!recording.active ? (
+            {!isAnalysed ? (
+              <>
+                {!recording.active ? (
+                  <button
+                    type="button"
+                    className="ghost-btn"
+                    onClick={() => void recording.start()}
+                    disabled={busy === "analysing" || busy === "transcribing"}
+                  >
+                    Record
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="danger-btn"
+                    onClick={recording.stop}
+                  >
+                    Stop · {recording.seconds}s
+                  </button>
+                )}
+
                 <button
                   type="button"
                   className="ghost-btn"
-                  onClick={() => void recording.start()}
-                  disabled={busy === "analysing" || busy === "transcribing"}
-                >
-                  Record
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="danger-btn"
-                  onClick={recording.stop}
-                >
-                  Stop · {recording.seconds}s
-                </button>
-              )}
-
-              <button
-                type="button"
-                className="ghost-btn"
-                onClick={() => {
-                  void navigator.clipboard
-                    .readText()
-                    .then((text) => {
-                      if (text) setContent(content ? `${content}\n${text}` : text);
-                    })
-                    .catch(() =>
-                      setError(
-                        "Clipboard access blocked — paste with Ctrl/Cmd+V instead.",
-                      ),
-                    );
-                }}
-                disabled={busy === "analysing"}
-              >
-                Paste text
-              </button>
-
-              <label className="ghost-btn file-btn">
-                Upload file
-                <input
-                  type="file"
-                  accept=".txt,.md,.csv,.json"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    addFileName(file.name);
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      const text = String(reader.result ?? "");
-                      setContent(content ? `${content}\n${text}` : text);
-                    };
-                    reader.readAsText(file);
-                    e.target.value = "";
+                  onClick={() => {
+                    void navigator.clipboard
+                      .readText()
+                      .then((text) => {
+                        if (text)
+                          setContent(content ? `${content}\n${text}` : text);
+                      })
+                      .catch(() =>
+                        setError(
+                          "Clipboard access blocked — paste with Ctrl/Cmd+V instead.",
+                        ),
+                      );
                   }}
-                />
-              </label>
+                  disabled={busy === "analysing"}
+                >
+                  Paste text
+                </button>
 
-              {recording.active || busy !== "idle" ? (
-                <span className="capture-status" role="status">
-                  {recording.active ? (
-                    <>
-                      <span className="live-dot" aria-hidden />
-                      {recording.hint ?? `Recording… ${recording.seconds}s`}
-                    </>
-                  ) : busy === "transcribing" ? (
-                    "Transcribing…"
-                  ) : (
-                    "Analysing your update…"
-                  )}
-                </span>
-              ) : null}
-            </div>
+                <label className="ghost-btn file-btn">
+                  Upload file
+                  <input
+                    type="file"
+                    accept=".txt,.md,.csv,.json"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || isAnalysed) return;
+                      addFileName(file.name);
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const text = String(reader.result ?? "");
+                        setContent(content ? `${content}\n${text}` : text);
+                      };
+                      reader.readAsText(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </>
+            ) : null}
 
-            <div className="capture-toolbar-right">
+            {recording.active || busy !== "idle" ? (
+              <span className="capture-status" role="status">
+                {recording.active ? (
+                  <>
+                    <span className="live-dot" aria-hidden />
+                    {recording.hint ?? `Recording… ${recording.seconds}s`}
+                  </>
+                ) : busy === "transcribing" ? (
+                  "Transcribing…"
+                ) : (
+                  "Analysing your update…"
+                )}
+              </span>
+            ) : null}
+          </div>
+
+          <div className="capture-toolbar-right">
+            {!isAnalysed ? (
               <span className="usage-meter" title="Analyses this month">
                 <span className="usage-label">
                   {usage.remaining} analyses remaining
@@ -256,6 +284,9 @@ export function CaptureWorkspace({
                   />
                 </span>
               </span>
+            ) : null}
+
+            {!isAnalysed ? (
               <button
                 type="submit"
                 className="primary-btn analyse-btn"
@@ -263,21 +294,25 @@ export function CaptureWorkspace({
                   busy !== "idle" ||
                   recording.active ||
                   !content.trim() ||
-                  usage.remaining <= 0 ||
-                  Boolean(result)
-                }
-                title={
-                  result
-                    ? "Expand the review or start a new capture to analyse again"
-                    : undefined
+                  usage.remaining <= 0
                 }
               >
                 Analyse
               </button>
-            </div>
+            ) : collapsed ? (
+              <button
+                type="button"
+                className="primary-btn analyse-btn"
+                onClick={expandAnalysis}
+              >
+                Expand analysis
+              </button>
+            ) : null}
           </div>
-        </form>
-      ) : (
+        </div>
+      </form>
+
+      {reviewOpen ? (
         <div className="capture-review">
           <div className="capture-review-feedback">
             <h3>Interpretation</h3>
@@ -389,9 +424,9 @@ export function CaptureWorkspace({
             ) : null}
           </div>
         </div>
-      )}
+      ) : null}
 
-      {error ? (
+      {error && !isAnalysed ? (
         <div className="error-banner capture-error" role="alert">
           <p>{error}</p>
           <div className="row-actions">
@@ -430,12 +465,16 @@ function useRecordingBridge({
   setBusy,
   setError,
   announce,
+  locked,
+  onRecorded,
 }: {
   content: string;
   setContent: (v: string) => void;
   setBusy: (v: "idle" | "transcribing" | "analysing") => void;
   setError: (v: string | null) => void;
   announce: (v: string) => void;
+  locked: boolean;
+  onRecorded: () => void;
 }) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -443,6 +482,7 @@ function useRecordingBridge({
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
   const liveBaseRef = useRef("");
   const contentRef = useRef(content);
+  const lockedRef = useRef(locked);
   const [active, setActive] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [hint, setHint] = useState<string | null>(null);
@@ -450,6 +490,10 @@ function useRecordingBridge({
   useEffect(() => {
     contentRef.current = content;
   }, [content]);
+
+  useEffect(() => {
+    lockedRef.current = locked;
+  }, [locked]);
 
   useEffect(() => {
     return () => {
@@ -460,6 +504,7 @@ function useRecordingBridge({
   }, []);
 
   async function start() {
+    if (lockedRef.current) return;
     setError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -479,6 +524,7 @@ function useRecordingBridge({
       setActive(true);
       setSeconds(0);
       timerRef.current = window.setInterval(() => setSeconds((s) => s + 1), 1000);
+      onRecorded();
 
       const w = window as Window & {
         SpeechRecognition?: new () => {
@@ -508,6 +554,7 @@ function useRecordingBridge({
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.onresult = (rawEvent: unknown) => {
+        if (lockedRef.current) return;
         const event = rawEvent as {
           resultIndex: number;
           results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }>;
@@ -554,6 +601,10 @@ function useRecordingBridge({
   }
 
   async function finish(mimeType: string) {
+    if (lockedRef.current) {
+      setBusy("idle");
+      return;
+    }
     if (contentRef.current.trim()) {
       setBusy("idle");
       announce("Recording saved. Edit the transcript, then press Analyse.");
@@ -574,7 +625,7 @@ function useRecordingBridge({
       if (!response.ok || !data.text) {
         throw new Error(data.error || "Transcription failed");
       }
-      setContent(data.text);
+      if (!lockedRef.current) setContent(data.text);
       announce("Transcript ready. Edit if needed, then press Analyse.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Voice capture failed");

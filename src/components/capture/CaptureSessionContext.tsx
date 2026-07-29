@@ -16,10 +16,14 @@ import {
   destinationFor,
   type CapturePersistSlice,
   type PendingSuggestion,
-  type SuggestionKind,
-  type SuggestionOp,
 } from "@/lib/capture/suggestions";
 import type { CaptureResult } from "@/lib/types";
+import {
+  computeCaptureStatus,
+  createCaptureSessionId,
+  upsertCaptureSession,
+  type CaptureSource,
+} from "@/lib/sessions/history";
 
 type Busy = "idle" | "transcribing" | "analysing";
 
@@ -56,20 +60,43 @@ type CaptureSessionValue = {
   applyOne: (item: PendingSuggestion, scopedProjectId?: string) => void;
   dismissOne: (id: string) => void;
   clearSession: () => void;
+  expandAnalysis: () => void;
   /** True when capture has in-progress work and is not collapsed. */
   isExpandedSession: boolean;
   pendingCount: number;
   hasTranscript: boolean;
+  /** True after a successful Analyse — transcript is locked. */
+  isAnalysed: boolean;
+  source: CaptureSource;
+  setSource: (value: CaptureSource) => void;
+  analysedAt: string | null;
 };
 
 const CaptureSessionContext = createContext<CaptureSessionValue | null>(null);
+
+function normalizeSlice(raw: CapturePersistSlice | null): CapturePersistSlice {
+  const base = emptySlice();
+  if (!raw) return base;
+  return {
+    ...base,
+    ...raw,
+    source: raw.source ?? "typed",
+    historyId: raw.historyId ?? null,
+    analysedAt: raw.analysedAt ?? null,
+    dismissed: raw.dismissed ?? {},
+    added: raw.added ?? {},
+    editing: raw.editing ?? {},
+    fileNames: raw.fileNames ?? [],
+    suggestions: raw.suggestions ?? [],
+  };
+}
 
 function readPersisted(): CapturePersistSlice | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.sessionStorage.getItem(CAPTURE_SESSION_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as CapturePersistSlice;
+    return normalizeSlice(JSON.parse(raw) as CapturePersistSlice);
   } catch {
     return null;
   }
@@ -87,7 +114,31 @@ function emptySlice(): CapturePersistSlice {
     editing: {},
     collapsed: false,
     error: null,
+    source: "typed",
+    historyId: null,
+    analysedAt: null,
   };
+}
+
+function persistHistory(slice: CapturePersistSlice) {
+  if (!slice.result || !slice.historyId || !slice.analysedAt) return;
+  upsertCaptureSession({
+    id: slice.historyId,
+    createdAt: slice.analysedAt,
+    analysedAt: slice.analysedAt,
+    projectId: slice.projectId || null,
+    source: slice.source,
+    transcript: slice.content,
+    result: slice.result,
+    suggestions: slice.suggestions,
+    dismissed: slice.dismissed,
+    added: slice.added,
+    status: computeCaptureStatus(
+      slice.suggestions,
+      slice.added,
+      slice.dismissed,
+    ),
+  });
 }
 
 export function CaptureSessionProvider({ children }: { children: ReactNode }) {
@@ -128,8 +179,21 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     setStatusMessage(message);
   }, []);
 
+  const isAnalysed = Boolean(slice.result);
+
   const setContent = useCallback((value: string) => {
-    setSlice((prev) => ({ ...prev, content: value, collapsed: false }));
+    setSlice((prev) => {
+      // Lock transcript once analysed — New capture is the only clear path.
+      if (prev.result) return prev;
+      return { ...prev, content: value, collapsed: false };
+    });
+  }, []);
+
+  const setSource = useCallback((value: CaptureSource) => {
+    setSlice((prev) => {
+      if (prev.result) return prev;
+      return { ...prev, source: value };
+    });
   }, []);
 
   const setProjectId = useCallback((value: string) => {
@@ -137,17 +201,28 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addFileName = useCallback((name: string) => {
-    setSlice((prev) => ({
-      ...prev,
-      fileNames: prev.fileNames.includes(name)
-        ? prev.fileNames
-        : [...prev.fileNames, name],
-      collapsed: false,
-    }));
+    setSlice((prev) => {
+      if (prev.result) return prev;
+      return {
+        ...prev,
+        fileNames: prev.fileNames.includes(name)
+          ? prev.fileNames
+          : [...prev.fileNames, name],
+        source: "uploaded",
+        collapsed: false,
+      };
+    });
   }, []);
 
   const setCollapsed = useCallback((value: boolean) => {
     setSlice((prev) => ({ ...prev, collapsed: value }));
+  }, []);
+
+  const expandAnalysis = useCallback(() => {
+    setSlice((prev) => {
+      if (!prev.result) return prev;
+      return { ...prev, collapsed: false };
+    });
   }, []);
 
   const setError = useCallback((value: string | null) => {
@@ -182,7 +257,13 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
   );
 
   const clearSession = useCallback(() => {
-    setSlice(emptySlice());
+    setSlice((prev) => {
+      // Finalize history status; do not delete the persisted record.
+      if (prev.result && prev.historyId && prev.analysedAt) {
+        persistHistory(prev);
+      }
+      return emptySlice();
+    });
     setBusy("idle");
     setStatusMessage(null);
     try {
@@ -200,6 +281,8 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     ) => {
       const trimmed = raw.trim();
       if (!trimmed) return;
+      // Do not re-analyse an already analysed Capture.
+      if (slice.result) return;
       setBusy("analysing");
       setSlice((prev) => ({
         ...prev,
@@ -212,8 +295,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         collapsed: false,
       }));
       try {
-        const effective =
-          scopedProjectId || slice.projectId || undefined;
+        const effective = scopedProjectId || slice.projectId || undefined;
         const next = await analyzeCaptureWithAI({
           content: trimmed,
           projectId: effective,
@@ -227,13 +309,29 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
             projectId: t.projectId,
             dueAt: t.dueAt,
           }));
-        setSlice((prev) => ({
-          ...prev,
-          result: next,
-          suggestions: buildSuggestions(next, openTodos),
-          content: trimmed,
-          collapsed: false,
-        }));
+        const analysedAt = new Date().toISOString();
+        const historyId = createCaptureSessionId();
+        const suggestions = buildSuggestions(next, openTodos);
+        const source: CaptureSource =
+          sourceType === "voice_note"
+            ? "recorded"
+            : slice.source === "uploaded"
+              ? "uploaded"
+              : "typed";
+        setSlice((prev) => {
+          const nextSlice: CapturePersistSlice = {
+            ...prev,
+            result: next,
+            suggestions,
+            content: trimmed,
+            collapsed: false,
+            historyId,
+            analysedAt,
+            source,
+          };
+          persistHistory(nextSlice);
+          return nextSlice;
+        });
         announce("Capture analysis complete. Review suggested actions.");
       } catch (err) {
         setSlice((prev) => ({
@@ -244,7 +342,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         setBusy("idle");
       }
     },
-    [analyzeCaptureWithAI, announce, slice.projectId, state.todos],
+    [analyzeCaptureWithAI, announce, slice.projectId, slice.result, slice.source, state.todos],
   );
 
   const applyOne = useCallback(
@@ -255,10 +353,14 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         item.projectId ?? scopedProjectId ?? (slice.projectId || null);
 
       const finish = () => {
-        setSlice((prev) => ({
-          ...prev,
-          added: { ...prev.added, [item.id]: true },
-        }));
+        setSlice((prev) => {
+          const next = {
+            ...prev,
+            added: { ...prev.added, [item.id]: true },
+          };
+          persistHistory(next);
+          return next;
+        });
         announce(
           item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
         );
@@ -364,13 +466,20 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     ],
   );
 
-  const dismissOne = useCallback((id: string) => {
-    setSlice((prev) => ({
-      ...prev,
-      dismissed: { ...prev.dismissed, [id]: true },
-    }));
-    announce("Item dismissed");
-  }, [announce]);
+  const dismissOne = useCallback(
+    (id: string) => {
+      setSlice((prev) => {
+        const next = {
+          ...prev,
+          dismissed: { ...prev.dismissed, [id]: true },
+        };
+        persistHistory(next);
+        return next;
+      });
+      announce("Item dismissed");
+    },
+    [announce],
+  );
 
   const pendingCount = slice.suggestions.filter(
     (s) => !slice.dismissed[s.id] && !slice.added[s.id],
@@ -411,9 +520,14 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       applyOne,
       dismissOne,
       clearSession,
+      expandAnalysis,
       isExpandedSession,
       pendingCount,
       hasTranscript,
+      isAnalysed,
+      source: slice.source,
+      setSource,
+      analysedAt: slice.analysedAt,
     }),
     [
       addFileName,
@@ -423,7 +537,9 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       busy,
       clearSession,
       dismissOne,
+      expandAnalysis,
       hasTranscript,
+      isAnalysed,
       isExpandedSession,
       pendingCount,
       setCollapsed,
@@ -431,6 +547,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       setEditingContent,
       setError,
       setProjectId,
+      setSource,
       slice,
       statusMessage,
       updateSuggestion,

@@ -130,6 +130,28 @@ export function Sidebar({
             </span>
             {!collapsed ? <span>History</span> : null}
           </Link>
+          <Link
+            href="/captures"
+            className={`sidebar-link ${pathname.startsWith("/captures") ? "is-active" : ""}`}
+            onClick={onCloseMobile}
+            title="Capture sessions"
+          >
+            <span className="sidebar-ico" aria-hidden>
+              ⎚
+            </span>
+            {!collapsed ? <span>Captures</span> : null}
+          </Link>
+          <Link
+            href="/coaching"
+            className={`sidebar-link ${pathname.startsWith("/coaching") ? "is-active" : ""}`}
+            onClick={onCloseMobile}
+            title="Coach sessions"
+          >
+            <span className="sidebar-ico" aria-hidden>
+              ✶
+            </span>
+            {!collapsed ? <span>Coaching</span> : null}
+          </Link>
         </nav>
 
         <div className="sidebar-bottom">
