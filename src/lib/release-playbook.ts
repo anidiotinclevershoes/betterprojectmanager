@@ -9,7 +9,7 @@ export interface PlaybookStageDefinition {
 }
 
 /**
- * Monthly release lifecycle Mission Control understands and coaches through.
+ * Monthly release lifecycle Lume understands and coaches through.
  */
 export const RELEASE_PLAYBOOK: PlaybookStageDefinition[] = [
   {

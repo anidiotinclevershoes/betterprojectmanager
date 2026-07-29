@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LumeLogo } from "@/components/brand/LumeLogo";
+import {
+  attentionLabel,
+  projectAttentionCount,
+} from "@/lib/workspace/attention";
 import { useMission } from "@/lib/store";
 
 export function Sidebar({
@@ -9,11 +14,13 @@ export function Sidebar({
   onToggleCollapse,
   mobileOpen,
   onCloseMobile,
+  userName,
 }: {
   collapsed: boolean;
   onToggleCollapse: () => void;
   mobileOpen: boolean;
   onCloseMobile: () => void;
+  userName?: string | null;
 }) {
   const pathname = usePathname();
   const { state } = useMission();
@@ -43,10 +50,15 @@ export function Sidebar({
             href="/"
             className="sidebar-brand"
             onClick={onCloseMobile}
-            title="Mission Control"
+            title="Lume Overview"
           >
-            <span className="brand-mark">MC</span>
-            {!collapsed ? <span className="sidebar-brand-text">Mission Control</span> : null}
+            <LumeLogo size={22} className="lume-logo" />
+            {!collapsed ? (
+              <span className="sidebar-brand-text-wrap">
+                <span className="sidebar-brand-text">Lume</span>
+                <span className="sidebar-tagline">Lighting your way.</span>
+              </span>
+            ) : null}
           </Link>
         </div>
 
@@ -59,25 +71,33 @@ export function Sidebar({
             <span className="sidebar-ico" aria-hidden>
               ⌂
             </span>
-            {!collapsed ? <span>Mission Control</span> : null}
+            {!collapsed ? <span>Lume Overview</span> : null}
           </Link>
 
           <p className="sidebar-label">{collapsed ? "P" : "Projects"}</p>
-          {state.projects.map((project) => (
-            <Link
-              key={project.id}
-              href={`/projects/${project.id}`}
-              title={project.name}
-              className={`sidebar-link ${activeProjectId === project.id ? "is-active" : ""}`}
-              onClick={onCloseMobile}
-            >
-              <span
-                className={`status-dot status-${project.status}`}
-                aria-hidden
-              />
-              {!collapsed ? <span className="truncate">{project.code}</span> : null}
-            </Link>
-          ))}
+          {state.projects.map((project) => {
+            const count = projectAttentionCount(state, project.id);
+            return (
+              <Link
+                key={project.id}
+                href={`/projects/${project.id}`}
+                title={`${project.name} — ${attentionLabel(count)}`}
+                className={`sidebar-link sidebar-project ${activeProjectId === project.id ? "is-active" : ""}`}
+                onClick={onCloseMobile}
+              >
+                {!collapsed ? (
+                  <span className="sidebar-project-meta">
+                    <span className="truncate font-semibold">{project.code}</span>
+                    <span className="sidebar-attention">
+                      {attentionLabel(count)}
+                    </span>
+                  </span>
+                ) : (
+                  <span className="sidebar-ico truncate">{project.code.slice(0, 1)}</span>
+                )}
+              </Link>
+            );
+          })}
           <Link
             href="/projects/new"
             className={`sidebar-link ${onNew ? "is-active" : ""}`}
@@ -96,24 +116,26 @@ export function Sidebar({
             onClick={onCloseMobile}
           >
             <span className="sidebar-ico" aria-hidden>
-              ⌗
+              #
             </span>
             {!collapsed ? <span>Knowledge</span> : null}
           </Link>
           <Link
-            href="/releases"
-            className={`sidebar-link ${pathname.startsWith("/releases") ? "is-active" : ""}`}
+            href="/history"
+            className={`sidebar-link ${pathname.startsWith("/history") ? "is-active" : ""}`}
             onClick={onCloseMobile}
-            title="Timeline & releases"
           >
             <span className="sidebar-ico" aria-hidden>
-              ⧉
+              ⏱
             </span>
-            {!collapsed ? <span>Timeline</span> : null}
+            {!collapsed ? <span>History</span> : null}
           </Link>
         </nav>
 
         <div className="sidebar-bottom">
+          {userName && !collapsed ? (
+            <p className="sidebar-user">{userName}</p>
+          ) : null}
           <button
             type="button"
             className="sidebar-link sidebar-btn"

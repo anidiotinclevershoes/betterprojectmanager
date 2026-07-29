@@ -39,7 +39,7 @@ function LoginForm() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <p className="eyebrow">Mission Control</p>
+        <p className="eyebrow">Lume</p>
         <h1>Demo sign-in</h1>
         <p className="lede">
           Private preview for testers. Use the demo email and password you were

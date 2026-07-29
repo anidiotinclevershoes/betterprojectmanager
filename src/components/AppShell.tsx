@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/app-shell/Sidebar";
 import { TopHeader } from "@/components/app-shell/TopHeader";
 import { CoachDrawer } from "@/components/coach/CoachDrawer";
 import { useMission } from "@/lib/store";
+import { MISSION_MESSAGE } from "@/lib/mission";
 
 const SIDEBAR_KEY = "mc-sidebar-collapsed-v1";
 
@@ -54,6 +55,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     setMobileOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    const open = () => setCoachOpen(true);
+    window.addEventListener("lume:open-coach", open);
+    return () => window.removeEventListener("lume:open-coach", open);
+  }, []);
+
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null);
@@ -76,21 +83,24 @@ export function AppShell({ children }: { children: ReactNode }) {
   const header = useMemo(() => {
     if (pathname === "/") {
       return {
-        title: "Mission Control",
-        subtitle: "What needs attention across your projects",
+        title: "Lume Overview",
+        subtitle: MISSION_MESSAGE,
       };
     }
     if (pathname.startsWith("/memory")) {
       return { title: "Knowledge", subtitle: "Organisational and project memory" };
     }
-    if (pathname.startsWith("/releases")) {
-      return { title: "Timeline", subtitle: "Milestones, releases and dated work" };
+    if (pathname.startsWith("/history")) {
+      return { title: "History", subtitle: "Everything that happened in Lume" };
     }
     if (pathname.startsWith("/meetings")) {
       return { title: "Meetings", subtitle: "Briefs and preparation" };
     }
     if (pathname === "/projects/new") {
-      return { title: "New project", subtitle: "Create a workspace" };
+      return { title: "New project", subtitle: "Guided setup or interview wizard" };
+    }
+    if (pathname.startsWith("/releases")) {
+      return { title: "Release playbook", subtitle: "Release stages and risks" };
     }
     const match = pathname.match(/^\/projects\/([^/]+)/);
     if (match?.[1]) {
@@ -102,7 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         };
       }
     }
-    return { title: "Mission Control", subtitle: undefined };
+    return { title: "Lume", subtitle: undefined };
   }, [pathname, state.projects]);
 
   if (onLogin) {
@@ -118,13 +128,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         onToggleCollapse={toggleCollapse}
         mobileOpen={mobileOpen}
         onCloseMobile={() => setMobileOpen(false)}
+        userName={user?.name}
       />
 
       <div className="app-main">
         <TopHeader
           title={header.title}
           subtitle={header.subtitle}
-          onOpenCoach={() => setCoachOpen(true)}
           onOpenMobileNav={() => setMobileOpen(true)}
           userName={user?.name}
           onSignOut={() => void signOut()}
@@ -135,4 +145,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <CoachDrawer open={coachOpen} onClose={() => setCoachOpen(false)} />
     </div>
   );
+}
+
+export function openCoachDrawer() {
+  window.dispatchEvent(new Event("lume:open-coach"));
 }

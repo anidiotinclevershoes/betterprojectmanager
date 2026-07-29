@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { useMission } from "@/lib/store";
+import { analysesRemaining } from "@/lib/workspace/history";
 import type {
   CaptureResult,
   KnowledgeSectionId,
@@ -16,6 +17,8 @@ type SuggestionKind =
   | "risk"
   | "stakeholder"
   | "knowledge"
+  | "nudge"
+  | "meeting"
   | "memory";
 
 type PendingSuggestion = {
@@ -23,7 +26,6 @@ type PendingSuggestion = {
   kind: SuggestionKind;
   content: string;
   projectId?: string | null;
-  owner?: string;
   date?: string;
   destination: string;
   recommendation?: Recommendation;
@@ -40,10 +42,7 @@ function projectCode(
   return projects.find((p) => p.id === projectId)?.code ?? "—";
 }
 
-function buildSuggestions(
-  result: CaptureResult,
-  projects: { id: string; code: string }[],
-): PendingSuggestion[] {
+function buildSuggestions(result: CaptureResult): PendingSuggestion[] {
   const items: PendingSuggestion[] = [];
   const projectId = result.knowledgeProjectId || result.memory.projectId;
 
@@ -52,7 +51,7 @@ function buildSuggestions(
     kind: "memory",
     content: result.memory.title,
     projectId: result.memory.projectId,
-    destination: "Knowledge / Memory",
+    destination: "Knowledge",
   });
 
   for (const rec of result.recommendations) {
@@ -61,14 +60,24 @@ function buildSuggestions(
         ? "risk"
         : rec.kind === "decision"
           ? "decision"
-          : "action";
+          : rec.kind === "meeting" || rec.kind === "meeting_prep"
+            ? "meeting"
+            : rec.kind === "stakeholder_update"
+              ? "nudge"
+              : "action";
     items.push({
       id: `rec-${rec.id}`,
       kind,
       content: rec.title,
       projectId: rec.projectId ?? projectId,
-      date: undefined,
-      destination: kind === "action" ? "To Do" : "Suggestions",
+      destination:
+        kind === "action"
+          ? "To Do"
+          : kind === "nudge"
+            ? "Nudge"
+            : kind === "meeting"
+              ? "Meeting"
+              : "Suggestions",
       recommendation: rec,
     });
   }
@@ -80,7 +89,7 @@ function buildSuggestions(
       content: item.label,
       projectId,
       date: item.startAt?.slice(0, 10),
-      destination: "Timeline",
+      destination: "Milestone",
       timelineItem: item,
     });
   }
@@ -111,23 +120,21 @@ function buildSuggestions(
     }
   }
 
-  // ensure unique ids
-  return items.map((item, i) => ({
-    ...item,
-    id: `${item.id}-${i}`,
-    content: item.content,
-    projectId: item.projectId,
-  })).filter((item) => item.content.trim());
+  return items
+    .map((item, i) => ({ ...item, id: `${item.id}-${i}` }))
+    .filter((item) => item.content.trim());
 }
 
 const KIND_LABEL: Record<SuggestionKind, string> = {
-  action: "Action",
+  action: "To Do",
   milestone: "Milestone",
   decision: "Decision",
   risk: "Risk",
   stakeholder: "Stakeholder",
   knowledge: "Knowledge",
-  memory: "Memory",
+  nudge: "Nudge",
+  meeting: "Meeting",
+  memory: "Knowledge",
 };
 
 export function CaptureWorkspace({
@@ -146,6 +153,7 @@ export function CaptureWorkspace({
     openaiConfigured,
   } = useMission();
 
+  const usage = analysesRemaining(state);
   const [content, setContent] = useState("");
   const [projectId, setProjectId] = useState(() => defaultProjectId ?? "");
   const effectiveProjectId = projectId || defaultProjectId || "";
@@ -161,11 +169,13 @@ export function CaptureWorkspace({
   const [editing, setEditing] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
-  const [lastUndo, setLastUndo] = useState<CaptureResult | null>(null);
+  const [liveHint, setLiveHint] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<number | null>(null);
+  const recognitionRef = useRef<{ stop: () => void } | null>(null);
+  const liveBaseRef = useRef("");
   const liveRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
@@ -175,6 +185,7 @@ export function CaptureWorkspace({
       mediaRecorderRef.current?.stream
         .getTracks()
         .forEach((track) => track.stop());
+      recognitionRef.current?.stop();
     };
   }, []);
 
@@ -204,8 +215,7 @@ export function CaptureWorkspace({
         sourceType,
       });
       setResult(next);
-      setSuggestions(buildSuggestions(next, state.projects));
-      setContent("");
+      setSuggestions(buildSuggestions(next));
       announce("Capture analysis complete. Review suggested additions.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Capture failed");
@@ -219,8 +229,49 @@ export function CaptureWorkspace({
     await analyse(content, "conversation");
   }
 
+  function startLiveSpeech() {
+    const w = window as Window & {
+      SpeechRecognition?: new () => SpeechRecognitionLike;
+      webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+    };
+    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
+    if (!SR) {
+      setLiveHint("Recording… live transcription unavailable in this browser");
+      return;
+    }
+    liveBaseRef.current = content;
+    const recognition = new SR();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.onresult = (rawEvent: unknown) => {
+      const event = rawEvent as {
+        resultIndex: number;
+        results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }>;
+      };
+      let interim = "";
+      let finalChunk = "";
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        const transcript = event.results[i][0]?.transcript ?? "";
+        if (event.results[i].isFinal) finalChunk += transcript;
+        else interim += transcript;
+      }
+      if (finalChunk) {
+        liveBaseRef.current = `${liveBaseRef.current} ${finalChunk}`.trim();
+      }
+      setContent(`${liveBaseRef.current}${interim ? ` ${interim}` : ""}`.trim());
+      setLiveHint("Live transcription");
+    };
+    recognition.onerror = () => {
+      setLiveHint("Recording…");
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
+    setLiveHint("Live transcription");
+  }
+
   async function startRecording() {
     setError(null);
+    setResult(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mimeType = MediaRecorder.isTypeSupported("audio/webm")
@@ -241,6 +292,7 @@ export function CaptureWorkspace({
       timerRef.current = window.setInterval(() => {
         setSeconds((s) => s + 1);
       }, 1000);
+      startLiveSpeech();
     } catch {
       setError(
         "Microphone permission denied. Allow mic access or type your note instead.",
@@ -251,9 +303,12 @@ export function CaptureWorkspace({
   function stopRecording() {
     const recorder = mediaRecorderRef.current;
     if (!recorder) return;
+    recognitionRef.current?.stop();
+    recognitionRef.current = null;
     recorder.stop();
     recorder.stream.getTracks().forEach((track) => track.stop());
     setRecording(false);
+    setLiveHint(null);
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
       timerRef.current = null;
@@ -261,6 +316,14 @@ export function CaptureWorkspace({
   }
 
   async function finishRecording(mimeType: string) {
+    // If live speech already produced text, keep it editable — do not auto-analyse.
+    if (content.trim()) {
+      setBusy("idle");
+      announce("Recording saved. Edit the transcript, then press Analyse.");
+      return;
+    }
+
+    // Fallback: Whisper transcription only fills the textarea.
     setBusy("transcribing");
     setError(null);
     try {
@@ -279,9 +342,10 @@ export function CaptureWorkspace({
       }
 
       setContent(data.text);
-      await analyse(data.text, "voice_note");
+      announce("Transcript ready. Edit if needed, then press Analyse.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Voice capture failed");
+    } finally {
       setBusy("idle");
     }
   }
@@ -311,7 +375,7 @@ export function CaptureWorkspace({
         memory: { ...result.memory, title: text },
       });
     } else if (item.recommendation) {
-      if (item.kind === "action") {
+      if (item.kind === "action" || item.kind === "nudge") {
         addTodo({
           title: text,
           detail: item.recommendation.action,
@@ -348,14 +412,12 @@ export function CaptureWorkspace({
     announce("Item dismissed");
   }
 
-  function addAllReviewed() {
-    if (!result) return;
+  function acceptAll() {
     const remaining = suggestions.filter(
       (s) => !dismissed[s.id] && !added[s.id],
     );
     for (const item of remaining) applyOne(item);
-    setLastUndo(result);
-    announce("Reviewed items added");
+    announce("Accepted reviewed items");
   }
 
   function dismissAll() {
@@ -363,16 +425,6 @@ export function CaptureWorkspace({
     for (const s of suggestions) map[s.id] = true;
     setDismissed(map);
     announce("All suggestions dismissed");
-  }
-
-  function addEverythingFromResult() {
-    if (!result) return;
-    applyCaptureResult(result);
-    setLastUndo(result);
-    setAdded(
-      Object.fromEntries(suggestions.map((s) => [s.id, true])),
-    );
-    announce("All suggested additions committed");
   }
 
   const visibleSuggestions = suggestions.filter((s) => !dismissed[s.id]);
@@ -384,31 +436,22 @@ export function CaptureWorkspace({
       : busy === "analysing"
         ? "Analysing your update…"
         : recording
-          ? `Recording… ${seconds}s`
+          ? liveHint
+            ? `${liveHint} · ${seconds}s`
+            : `Recording… ${seconds}s`
           : null;
 
-  const lastAnalyzed = state.lastAnalyzedAt
-    ? new Date(state.lastAnalyzedAt)
-        .toISOString()
-        .slice(0, 16)
-        .replace("T", " ")
-    : null;
-
   return (
-    <section className="capture-workspace" aria-labelledby={titleId}>
+    <section className="capture-workspace capture-compact" aria-labelledby={titleId}>
       <div className="capture-workspace-head">
         <div>
           <h2 id={titleId} className="capture-title">
             Capture anything
           </h2>
           <p className="capture-support">
-            Paste meeting notes, type an update, upload a file or record your
-            thoughts.
+            Paste notes, type an update, upload a file or record your thoughts.
           </p>
         </div>
-        <p className="meta">
-          {lastAnalyzed ? `Last analysed ${lastAnalyzed}` : "Nothing analysed yet"}
-        </p>
       </div>
 
       {!reviewOpen ? (
@@ -420,103 +463,134 @@ export function CaptureWorkspace({
             id="capture-input"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            rows={5}
-            disabled={busy !== "idle" || recording}
+            rows={3}
+            disabled={busy === "analysing"}
             placeholder="What happened? Add notes, paste text or drop files here…"
-            className="capture-textarea"
+            className="capture-textarea capture-textarea-idle"
           />
 
           <div className="capture-toolbar">
-            {!defaultProjectId ? (
-              <select
-                value={effectiveProjectId}
-                onChange={(e) => setProjectId(e.target.value)}
-                disabled={busy !== "idle"}
-                aria-label="Project"
-              >
-                <option value="">All / unlinked</option>
-                {state.projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.code}
-                  </option>
-                ))}
-              </select>
-            ) : null}
+            <div className="capture-toolbar-left">
+              {!defaultProjectId ? (
+                <select
+                  value={effectiveProjectId}
+                  onChange={(e) => setProjectId(e.target.value)}
+                  disabled={busy !== "idle" || recording}
+                  aria-label="Project"
+                >
+                  <option value="">All / unlinked</option>
+                  {state.projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.code}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
 
-            <button
-              type="submit"
-              className="primary-btn"
-              disabled={busy !== "idle" || recording || !content.trim()}
-            >
-              Analyse
-            </button>
+              {!recording ? (
+                <button
+                  type="button"
+                  className="ghost-btn"
+                  onClick={() => void startRecording()}
+                  disabled={busy === "analysing" || busy === "transcribing"}
+                >
+                  Record
+                </button>
+              ) : (
+                <button type="button" className="danger-btn" onClick={stopRecording}>
+                  Stop · {seconds}s
+                </button>
+              )}
 
-            {!recording ? (
               <button
                 type="button"
                 className="ghost-btn"
-                onClick={() => void startRecording()}
-                disabled={busy !== "idle"}
+                onClick={pasteFromClipboard}
+                disabled={busy === "analysing"}
               >
-                Record
+                Paste text
               </button>
-            ) : (
-              <button type="button" className="danger-btn" onClick={stopRecording}>
-                Stop · {seconds}s
-              </button>
-            )}
 
-            <button
-              type="button"
-              className="ghost-btn"
-              onClick={pasteFromClipboard}
-              disabled={busy !== "idle"}
-            >
-              Paste text
-            </button>
+              <label className="ghost-btn file-btn">
+                Upload file
+                <input
+                  type="file"
+                  accept=".txt,.md,.csv,.json"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      const text = String(reader.result ?? "");
+                      setContent((prev) => (prev ? `${prev}\n${text}` : text));
+                    };
+                    reader.readAsText(file);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
 
-            <label className="ghost-btn file-btn">
-              Upload file
-              <input
-                type="file"
-                accept=".txt,.md,.csv,.json"
-                className="sr-only"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    const text = String(reader.result ?? "");
-                    setContent((prev) => (prev ? `${prev}\n${text}` : text));
-                  };
-                  reader.readAsText(file);
-                  e.target.value = "";
-                }}
-              />
-            </label>
+              {statusLabel ? (
+                <span className="capture-status" role="status">
+                  {recording ? (
+                    <span className="live-dot" aria-hidden />
+                  ) : null}
+                  {statusLabel}
+                </span>
+              ) : null}
+            </div>
 
-            {statusLabel ? (
-              <span className="capture-status" role="status">
-                {statusLabel}
+            <div className="capture-toolbar-right">
+              <span className="usage-meter" title="Analyses this month">
+                <span className="usage-label">
+                  {usage.remaining} analyses remaining
+                </span>
+                <span className="usage-bar" aria-hidden>
+                  <span
+                    style={{
+                      width: `${Math.min(100, (usage.used / usage.limit) * 100)}%`,
+                    }}
+                  />
+                </span>
+                <span className="meta">
+                  {usage.used} / {usage.limit}
+                </span>
               </span>
-            ) : null}
+              <button
+                type="submit"
+                className="primary-btn analyse-btn"
+                disabled={
+                  busy !== "idle" ||
+                  recording ||
+                  !content.trim() ||
+                  usage.remaining <= 0
+                }
+              >
+                Analyse
+              </button>
+            </div>
           </div>
         </form>
       ) : (
         <div className="capture-review">
           <div className="capture-review-feedback">
-            <h3>Feedback</h3>
+            <h3>Interpretation</h3>
+            <h4>Summary</h4>
             <p className="capture-summary">{result?.memory.content}</p>
             {result?.insights?.length ? (
-              <ul>
-                {result.insights.map((insight) => (
-                  <li key={insight}>{insight}</li>
-                ))}
-              </ul>
+              <>
+                <h4>Observations</h4>
+                <ul>
+                  {result.insights.map((insight) => (
+                    <li key={insight}>{insight}</li>
+                  ))}
+                </ul>
+              </>
             ) : null}
             {result?.assumptions?.length ? (
               <>
-                <h4>Ambiguity / assumptions</h4>
+                <h4>Missing information</h4>
                 <ul>
                   {result.assumptions.map((a) => (
                     <li key={a}>{a}</li>
@@ -526,7 +600,7 @@ export function CaptureWorkspace({
             ) : null}
             <button
               type="button"
-              className="ghost-btn"
+              className="ghost-btn mt-3"
               onClick={() => {
                 setResult(null);
                 setSuggestions([]);
@@ -540,14 +614,11 @@ export function CaptureWorkspace({
             <div className="capture-review-suggestions-head">
               <h3>Suggested additions</h3>
               <div className="row-actions">
-                <button type="button" className="primary-btn" onClick={addAllReviewed}>
-                  Add all reviewed items
-                </button>
-                <button type="button" className="ghost-btn" onClick={addEverythingFromResult}>
-                  Add everything
+                <button type="button" className="primary-btn" onClick={acceptAll}>
+                  Accept All
                 </button>
                 <button type="button" className="ghost-btn" onClick={dismissAll}>
-                  Dismiss all
+                  Dismiss All
                 </button>
               </div>
             </div>
@@ -557,7 +628,10 @@ export function CaptureWorkspace({
             ) : (
               <ul className="suggestion-list">
                 {visibleSuggestions.map((item) => (
-                  <li key={item.id} className={`suggestion-card ${added[item.id] ? "is-added" : ""}`}>
+                  <li
+                    key={item.id}
+                    className={`suggestion-card ${added[item.id] ? "is-added" : ""}`}
+                  >
                     <div className="suggestion-top">
                       <span className="tag">{KIND_LABEL[item.kind]}</span>
                       <span className="meta">
@@ -583,7 +657,7 @@ export function CaptureWorkspace({
                     <p className="meta">→ {item.destination}</p>
                     <div className="row-actions">
                       {added[item.id] ? (
-                        <span className="accepted">Added</span>
+                        <span className="accepted">Accepted</span>
                       ) : (
                         <>
                           <button
@@ -608,7 +682,7 @@ export function CaptureWorkspace({
                             className="primary-btn"
                             onClick={() => applyOne(item)}
                           >
-                            Add
+                            Accept
                           </button>
                           <button
                             type="button"
@@ -624,21 +698,6 @@ export function CaptureWorkspace({
                 ))}
               </ul>
             )}
-            {lastUndo ? (
-              <p className="meta mt-2">
-                Batch applied.{" "}
-                <button
-                  type="button"
-                  className="ghost-btn"
-                  onClick={() => {
-                    setLastUndo(null);
-                    announce("Undo is limited in this version — remove items from To Do if needed.");
-                  }}
-                >
-                  Noted
-                </button>
-              </p>
-            ) : null}
           </div>
         </div>
       )}
@@ -650,16 +709,14 @@ export function CaptureWorkspace({
             <button
               type="button"
               className="ghost-btn"
-              onClick={() => void analyse(content || result?.rawContent || "", "conversation")}
+              onClick={() => void analyse(content, "conversation")}
             >
               Retry
             </button>
             <button
               type="button"
               className="ghost-btn"
-              onClick={() =>
-                void navigator.clipboard.writeText(content || result?.rawContent || "")
-              }
+              onClick={() => void navigator.clipboard.writeText(content)}
             >
               Copy text
             </button>
@@ -679,3 +736,12 @@ export function CaptureWorkspace({
     </section>
   );
 }
+
+type SpeechRecognitionLike = {
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((event: unknown) => void) | null;
+  onerror: ((event: unknown) => void) | null;
+  start: () => void;
+  stop: () => void;
+};

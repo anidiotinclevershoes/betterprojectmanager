@@ -4,30 +4,26 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { CaptureWorkspace } from "@/components/capture/CaptureWorkspace";
+import { CoachPreview } from "@/components/coach/CoachPreview";
 import { CloneRelOpsButton } from "@/components/CloneRelOpsButton";
 import { StatusPill } from "@/components/DashboardChrome";
 import { ProjectKnowledgeBrief } from "@/components/ProjectKnowledgeBrief";
-import { ProjectWidgetGrid } from "@/components/ProjectWidgetGrid";
+import { ProjectTimelineGantt } from "@/components/ProjectTimelineGantt";
 import { WorkspaceCustomiser } from "@/components/workspace/WorkspaceCustomiser";
 import { WorkspaceFrameRow } from "@/components/workspace/WorkspaceGrid";
 import { getPlaybookStage } from "@/lib/release-playbook";
 import {
   daysUntil,
-  formatWhen,
   projectReleases,
   toDateInputValue,
-  upcomingMeetings,
 } from "@/lib/selectors";
 import { useMission } from "@/lib/store";
 import { useWorkspaceLayout } from "@/lib/workspace/useWorkspaceLayout";
-
-type ProjectTab = "overview" | "work" | "meetings" | "knowledge" | "timeline" | "release";
 
 export default function ProjectDashboardPage() {
   const params = useParams<{ id: string }>();
   const { state, hydrated } = useMission();
   const project = state.projects.find((p) => p.id === params.id);
-  const [tab, setTab] = useState<ProjectTab>("overview");
   const [customiseOpen, setCustomiseOpen] = useState(false);
   const layoutScope = project ? `project:${project.id}` : "overview";
   const {
@@ -50,29 +46,17 @@ export default function ProjectDashboardPage() {
   }
 
   const release = projectReleases(state, project.id)[0];
-  const meetings = upcomingMeetings(state, project.id);
   const due = daysUntil(project.nextMilestoneAt);
   const stage = release ? getPlaybookStage(release.currentStage) : null;
   const isReleaseOps = project.kind === "release_ops";
 
-  const tabs: { id: ProjectTab; label: string }[] = [
-    { id: "overview", label: "Overview" },
-    { id: "work", label: "Work" },
-    { id: "meetings", label: "Meetings" },
-    { id: "knowledge", label: "Knowledge" },
-    { id: "timeline", label: "Timeline" },
-    ...(isReleaseOps || release ? [{ id: "release" as const, label: "Release" }] : []),
-  ];
-
   return (
-    <div className="workspace-page">
+    <div className="workspace-page project-scroll">
       <div className="project-identity">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill status={project.status} />
-            {isReleaseOps ? (
-              <span className="tag">Release ops</span>
-            ) : null}
+            {isReleaseOps ? <span className="tag">Release ops</span> : null}
           </div>
           <p className="project-focus">
             {project.currentFocus}
@@ -87,90 +71,49 @@ export default function ProjectDashboardPage() {
         {isReleaseOps ? <CloneRelOpsButton projectId={project.id} /> : null}
       </div>
 
-      <nav className="project-tabs" aria-label="Project sections">
-        {tabs.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`project-tab ${tab === item.id ? "is-active" : ""}`}
-            onClick={() => setTab(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
-
-      {(tab === "overview" || tab === "work") && (
-        <>
+      <div className="capture-coach-row">
+        <div className="capture-coach-main">
           <CaptureWorkspace defaultProjectId={project.id} />
-          <div className="workspace-toolbar">
-            <p className="meta">{tab === "work" ? "Work frames" : "Project frames"}</p>
-            <button
-              type="button"
-              className="ghost-btn"
-              onClick={() => setCustomiseOpen(true)}
-            >
-              Customise workspace
-            </button>
-          </div>
-          {!hydrated ? (
-            <p className="empty-copy">Loading…</p>
-          ) : (
-            <WorkspaceFrameRow frames={frames} projectId={project.id} />
-          )}
-          {tab === "overview" ? (
-            <div className="mt-4">
-              <ProjectKnowledgeBrief projectId={project.id} />
-            </div>
-          ) : null}
-        </>
+        </div>
+        <CoachPreview />
+      </div>
+
+      <div className="workspace-toolbar">
+        <p className="meta">Project workspace</p>
+        <button
+          type="button"
+          className="ghost-btn"
+          onClick={() => setCustomiseOpen(true)}
+        >
+          Customise workspace
+        </button>
+      </div>
+
+      {!hydrated ? (
+        <p className="empty-copy">Loading…</p>
+      ) : (
+        <WorkspaceFrameRow frames={frames} projectId={project.id} />
       )}
 
-      {tab === "meetings" ? (
-        <section className="workspace-frame">
-          <header className="workspace-frame-header">
-            <h2>Meetings</h2>
-          </header>
-          <div className="workspace-frame-body">
-            {meetings.length === 0 ? (
-              <p className="empty-copy">No upcoming meetings for this project.</p>
-            ) : (
-              <ul className="frame-list">
-                {meetings.map((m) => (
-                  <li key={m.id} className="frame-row">
-                    <Link href={`/meetings/${m.id}`} className="frame-row-title">
-                      {m.title}
-                    </Link>
-                    <span className="meta">{formatWhen(m.startsAt)}</span>
-                    <Link href={`/meetings/${m.id}`} className="ghost-btn">
-                      Open brief
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </section>
-      ) : null}
-
-      {tab === "knowledge" ? (
-        <div className="space-y-4">
+      <section className="workspace-frame">
+        <header className="workspace-frame-header">
+          <h2>Knowledge</h2>
+        </header>
+        <div className="workspace-frame-body">
           <ProjectKnowledgeBrief projectId={project.id} />
-          <ProjectWidgetGrid project={project} dense />
         </div>
-      ) : null}
+      </section>
 
-      {tab === "timeline" ? (
-        <WorkspaceFrameRow
-          frames={frames.filter((f) => f.type === "timeline").map((f) => ({
-            ...f,
-            visible: true,
-          }))}
-          projectId={project.id}
-        />
-      ) : null}
+      <section className="workspace-frame">
+        <header className="workspace-frame-header">
+          <h2>Project timeline</h2>
+        </header>
+        <div className="workspace-frame-body">
+          <ProjectTimelineGantt projectId={project.id} />
+        </div>
+      </section>
 
-      {tab === "release" ? (
+      {(isReleaseOps || release) && (
         <section className="workspace-frame">
           <header className="workspace-frame-header">
             <h2>Release</h2>
@@ -193,16 +136,11 @@ export default function ProjectDashboardPage() {
                     </li>
                   ))}
                 </ul>
-                {isReleaseOps ? (
-                  <div className="mt-3">
-                    <CloneRelOpsButton projectId={project.id} />
-                  </div>
-                ) : null}
               </>
             )}
           </div>
         </section>
-      ) : null}
+      )}
 
       <WorkspaceCustomiser
         open={customiseOpen}

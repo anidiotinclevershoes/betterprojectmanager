@@ -284,7 +284,7 @@ export function CoachDrawer({
           {error ? <p className="error-banner">{error}</p> : null}
           {!hasResponse && !busy ? (
             <p className="empty-copy">
-              Coach reads what is already in Mission Control and answers: what
+              Coach reads what is already in Lume and answers: what
               would an exceptional PM do now? Nothing runs until you click Run
               coaching.
             </p>

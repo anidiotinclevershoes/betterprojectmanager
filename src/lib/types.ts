@@ -242,6 +242,33 @@ export interface TimelineItemInput {
   notes?: string;
 }
 
+export type HistoryEventType =
+  | "task_added"
+  | "task_completed"
+  | "task_updated"
+  | "suggestion_accepted"
+  | "suggestion_dismissed"
+  | "meeting_created"
+  | "milestone_changed"
+  | "risk_added"
+  | "knowledge_updated"
+  | "project_created"
+  | "capture_analysed"
+  | "coach_accepted"
+  | "nudge_chased"
+  | "nudge_resolved"
+  | "other";
+
+export interface HistoryEvent {
+  id: string;
+  type: HistoryEventType;
+  title: string;
+  detail?: string;
+  projectId?: string | null;
+  createdAt: string;
+  source?: "user" | "ai" | "system";
+}
+
 export interface MissionState {
   projects: Project[];
   memories: MemoryEntry[];
@@ -251,5 +278,9 @@ export interface MissionState {
   todos: TodoItem[];
   knowledge: ProjectKnowledge[];
   timeline: TimelineItem[];
+  history?: HistoryEvent[];
   lastAnalyzedAt?: string;
+  /** Analyses consumed in the current calendar month (local). */
+  analysesThisMonth?: number;
+  analysesMonthKey?: string;
 }

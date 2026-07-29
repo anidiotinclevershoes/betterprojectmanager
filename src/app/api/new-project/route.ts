@@ -60,7 +60,7 @@ async function assembleWithOpenAI(
   fallback: CreateProjectInput,
 ): Promise<CreateProjectInput> {
   const key = getOpenAIKey();
-  const prompt = `You turn interview answers into a Mission Control project draft.
+  const prompt = `You turn interview answers into a Lume project draft.
 
 Return ONLY valid JSON with this shape:
 {

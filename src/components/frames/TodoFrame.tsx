@@ -1,11 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DetailModal } from "@/components/DetailModal";
+import { daysUntil } from "@/lib/selectors";
 import { relativeDue, todoOriginLabel } from "@/lib/workspace/frames-data";
 import { useMission } from "@/lib/store";
 import type { TodoItem } from "@/lib/types";
+
+const DASHBOARD_LIMIT = 8;
 
 export function TodoFrame({
   projectId,
@@ -16,17 +18,28 @@ export function TodoFrame({
   const { state, toggleTodo, removeTodo, addTodo, updateTodo } = useMission();
   const [title, setTitle] = useState("");
   const [edit, setEdit] = useState<TodoItem | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
-  const todos = (state.todos ?? [])
-    .filter((t) => !t.done)
-    .filter((t) => (projectId ? t.projectId === projectId : true))
-    .sort((a, b) => (a.dueAt ?? "9999").localeCompare(b.dueAt ?? "9999"));
+  const allOpen = useMemo(() => {
+    return (state.todos ?? [])
+      .filter((t) => !t.done)
+      .filter((t) => (projectId ? t.projectId === projectId : true))
+      .sort((a, b) => {
+        const da = daysUntil(a.dueAt);
+        const db = daysUntil(b.dueAt);
+        const sa = da === null ? 999 : da;
+        const sb = db === null ? 999 : db;
+        return sa - sb;
+      });
+  }, [state.todos, projectId]);
+
+  const todos = showAll ? allOpen : allOpen.slice(0, DASHBOARD_LIMIT);
 
   const projectCode = (id?: string | null) =>
     id ? state.projects.find((p) => p.id === id)?.code ?? "—" : "Personal";
 
   return (
-    <div className="frame-body">
+    <div className="frame-body frame-body-scroll">
       <div className="frame-toolbar">
         <input
           value={title}
@@ -52,49 +65,65 @@ export function TodoFrame({
         </button>
       </div>
 
-      {todos.length === 0 ? (
+      {allOpen.length === 0 ? (
         <p className="empty-copy">
           No open tasks here. Add one manually or capture an update.
         </p>
       ) : (
-        <ul className="frame-list">
-          {todos.map((todo) => (
-            <li key={todo.id} className="frame-row">
-              <input
-                type="checkbox"
-                checked={todo.done}
-                onChange={() => toggleTodo(todo.id)}
-                aria-label={`Complete ${todo.title}`}
-              />
-              <button
-                type="button"
-                className="frame-row-title"
-                onClick={() => setEdit(todo)}
-              >
-                {todo.title}
-              </button>
-              <span className="tag">{projectCode(todo.projectId)}</span>
-              {relativeDue(todo) ? (
-                <span className="meta">{relativeDue(todo)}</span>
-              ) : null}
-              <span className="origin">{todoOriginLabel(todo)}</span>
+        <>
+          <ul className="frame-list">
+            {todos.map((todo) => (
+              <li key={todo.id} className="frame-row">
+                <input
+                  type="checkbox"
+                  checked={todo.done}
+                  onChange={() => toggleTodo(todo.id)}
+                  aria-label={`Complete ${todo.title}`}
+                />
+                <button
+                  type="button"
+                  className="frame-row-title"
+                  onClick={() => setEdit(todo)}
+                >
+                  {todo.title}
+                </button>
+                <span className="tag">{projectCode(todo.projectId)}</span>
+                {relativeDue(todo) ? (
+                  <span className="meta">{relativeDue(todo)}</span>
+                ) : null}
+                <span className="origin">{todoOriginLabel(todo)}</span>
+                <button
+                  type="button"
+                  className="ghost-btn"
+                  aria-label="Remove"
+                  onClick={() => removeTodo(todo.id)}
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="frame-footer">
+            <span className="meta">
+              Viewing {todos.length} of {allOpen.length} tasks
+            </span>
+            {allOpen.length > DASHBOARD_LIMIT ? (
               <button
                 type="button"
                 className="ghost-btn"
-                aria-label="Remove"
-                onClick={() => removeTodo(todo.id)}
+                onClick={() => setShowAll((v) => !v)}
               >
-                ×
+                {showAll ? "Show less" : "View all"}
               </button>
-            </li>
-          ))}
-        </ul>
+            ) : null}
+          </div>
+        </>
       )}
 
       <DetailModal
         open={Boolean(edit)}
-        title="Edit to-do"
         onClose={() => setEdit(null)}
+        title="Task"
       >
         {edit ? (
           <label className="field">

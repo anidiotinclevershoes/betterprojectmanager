@@ -1,31 +1,19 @@
 import type { Metadata } from "next";
-import { Source_Serif_4, Sora, Syne } from "next/font/google";
+import { Inter } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 import { AppearanceProvider } from "@/lib/appearance";
 import { MissionProvider } from "@/lib/store";
+import { MISSION_MESSAGE, MISSION_NAME, MISSION_TAGLINE } from "@/lib/mission";
 import "./globals.css";
 
-const sora = Sora({
-  variable: "--font-sora",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-});
-
-const syne = Syne({
-  variable: "--font-syne",
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-});
-
-const sourceSerif = Source_Serif_4({
-  variable: "--font-source-serif",
-  subsets: ["latin"],
-  weight: ["400", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "Mission Control — AI Chief Project Officer",
-  description:
-    "Your AI Chief Project Officer, Executive Coach and Second Brain. Built to make you a better Project Manager.",
+  title: `${MISSION_NAME} — ${MISSION_TAGLINE}`,
+  description: MISSION_MESSAGE,
 };
 
 const themeBootScript = `
@@ -51,13 +39,13 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme="dark"
-      className={`${sora.variable} ${syne.variable} ${sourceSerif.variable} h-full antialiased`}
+      className={`${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
-      <body className="min-h-full bg-[var(--bg-app)] text-[var(--text-primary)]">
+      <body className="min-h-full bg-[var(--bg-app)] text-[var(--text-primary)] font-sans">
         <AppearanceProvider>
           <MissionProvider>
             <AppShell>{children}</AppShell>

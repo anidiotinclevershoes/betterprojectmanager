@@ -83,7 +83,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     id: projectId,
     name,
     code,
-    summary: input.summary.trim() || `${name} — newly added to Mission Control.`,
+    summary: input.summary.trim() || `${name} — newly added to Lume.`,
     status: input.status ?? "watch",
     kind: input.kind ?? "delivery",
     currentFocus:
@@ -192,7 +192,7 @@ function uniqueBullets(items: string[]) {
   return out;
 }
 
-/** Best interview questions for building a useful Mission Control project. */
+/** Best interview questions for building a useful Lume project. */
 export const PROJECT_INTERVIEW: Array<{
   id: string;
   prompt: string;

@@ -23,11 +23,9 @@ export const frameRegistry: Record<string, ComponentType<FrameProps>> = {
 
 function spanFor(frame: WorkspaceFrameConfig): string {
   if (frame.size === "full") return "lg:col-span-12";
-  if (frame.size === "wide") return "lg:col-span-8";
-  if (frame.size === "compact") return "lg:col-span-3";
-  if (frame.type === "todo") return "lg:col-span-5";
+  if (frame.size === "wide" || frame.type === "todo") return "lg:col-span-5";
   if (frame.type === "meetingPrep") return "lg:col-span-4";
-  if (frame.type === "nudge") return "lg:col-span-3";
+  if (frame.type === "nudge" || frame.size === "compact") return "lg:col-span-3";
   return "lg:col-span-4";
 }
 
@@ -42,43 +40,25 @@ export function WorkspaceFrameRow({
     .filter((f) => f.visible && f.type !== "timeline")
     .sort((a, b) => a.order - b.order);
 
-  const timeline = [...frames]
-    .filter((f) => f.visible && f.type === "timeline")
-    .sort((a, b) => a.order - b.order)[0];
-
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        {visible.map((frame) => {
-          const Component = frameRegistry[frame.type];
-          if (!Component) return null;
-          return (
-            <div key={frame.id} className={`min-w-0 ${spanFor(frame)}`}>
-              <WorkspaceFrame
-                type={frame.type}
-                title={frame.title ?? FRAME_LABELS[frame.type]}
-              >
-                <Component
-                  projectId={projectId ?? frame.projectScope}
-                  size={frame.size}
-                />
-              </WorkspaceFrame>
-            </div>
-          );
-        })}
-      </div>
-      {timeline ? (
-        <WorkspaceFrame
-          type="timeline"
-          title={timeline.title ?? FRAME_LABELS.timeline}
-        >
-          <TimelineFrame
-            projectId={projectId ?? timeline.projectScope}
-            size={timeline.size}
-            snapshot={!projectId}
-          />
-        </WorkspaceFrame>
-      ) : null}
+    <div className="workspace-grid grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-start">
+      {visible.map((frame) => {
+        const Component = frameRegistry[frame.type];
+        if (!Component) return null;
+        return (
+          <div key={frame.id} className={`min-w-0 ${spanFor(frame)}`}>
+            <WorkspaceFrame
+              type={frame.type}
+              title={frame.title ?? FRAME_LABELS[frame.type]}
+            >
+              <Component
+                projectId={projectId ?? frame.projectScope}
+                size={frame.size}
+              />
+            </WorkspaceFrame>
+          </div>
+        );
+      })}
     </div>
   );
 }

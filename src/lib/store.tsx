@@ -41,6 +41,11 @@ import type {
   TimelineItemInput,
   TodoItem,
 } from "./types";
+import {
+  bumpAnalysisUsage,
+  makeHistoryEvent,
+  pushHistory,
+} from "./workspace/history";
 
 const STORAGE_KEY = "mission-control-state-v5";
 
@@ -126,6 +131,9 @@ function normaliseState(raw: MissionState): MissionState {
     todos: raw.todos ?? [],
     knowledge: raw.knowledge ?? [],
     timeline: raw.timeline ?? [],
+    history: raw.history ?? [],
+    analysesThisMonth: raw.analysesThisMonth ?? 0,
+    analysesMonthKey: raw.analysesMonthKey,
   };
 }
 
@@ -328,7 +336,19 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const analyzeCaptureWithAI = useCallback(
-    async (input: CaptureInput) => requestCaptureAnalysis(input),
+    async (input: CaptureInput) => {
+      const result = await requestCaptureAnalysis(input);
+      setState((prev) =>
+        pushHistory(bumpAnalysisUsage(prev), makeHistoryEvent({
+          type: "capture_analysed",
+          title: "Capture analysed",
+          detail: result.memory.title,
+          projectId: result.memory.projectId ?? input.projectId,
+          source: "ai",
+        })),
+      );
+      return result;
+    },
     [requestCaptureAnalysis],
   );
 
@@ -373,13 +393,22 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         dueAt,
         sourceRecommendationId: rec.id,
       };
-      return {
-        ...prev,
-        todos: [todo, ...(prev.todos ?? [])],
-        recommendations: prev.recommendations.map((r) =>
-          r.id === recommendationId ? { ...r, status: "done" } : r,
-        ),
-      };
+      return pushHistory(
+        {
+          ...prev,
+          todos: [todo, ...(prev.todos ?? [])],
+          recommendations: prev.recommendations.map((r) =>
+            r.id === recommendationId ? { ...r, status: "done" } : r,
+          ),
+        },
+        makeHistoryEvent({
+          type: "suggestion_accepted",
+          title: "Suggestion accepted",
+          detail: rec.title,
+          projectId: rec.projectId,
+          source: "user",
+        }),
+      );
     });
   }, []);
 
@@ -393,12 +422,25 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleTodo = useCallback((todoId: string) => {
-    setState((prev) => ({
-      ...prev,
-      todos: (prev.todos ?? []).map((t) =>
-        t.id === todoId ? { ...t, done: !t.done } : t,
-      ),
-    }));
+    setState((prev) => {
+      const todo = (prev.todos ?? []).find((t) => t.id === todoId);
+      if (!todo) return prev;
+      const nextDone = !todo.done;
+      return pushHistory(
+        {
+          ...prev,
+          todos: (prev.todos ?? []).map((t) =>
+            t.id === todoId ? { ...t, done: nextDone } : t,
+          ),
+        },
+        makeHistoryEvent({
+          type: nextDone ? "task_completed" : "task_updated",
+          title: nextDone ? "Task completed" : "Task reopened",
+          detail: todo.title,
+          projectId: todo.projectId,
+        }),
+      );
+    });
   }, []);
 
   const removeTodo = useCallback((todoId: string) => {
@@ -432,7 +474,15 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         createdAt: new Date().toISOString(),
         dueAt,
       };
-      return { ...prev, todos: [todo, ...(prev.todos ?? [])] };
+      return pushHistory(
+        { ...prev, todos: [todo, ...(prev.todos ?? [])] },
+        makeHistoryEvent({
+          type: "task_added",
+          title: "Task added",
+          detail: title,
+          projectId: input.projectId ?? null,
+        }),
+      );
     });
   }, []);
 

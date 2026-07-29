@@ -321,7 +321,7 @@ export function CoachBanner({
 
           <aside className="coach-banner-actions">
             <header>
-              <h3>Accept into Mission Control</h3>
+              <h3>Accept into Lume</h3>
               <p>Add coaching lines into To do, Suggestions, or Knowledge.</p>
             </header>
             {actions.length === 0 ? (

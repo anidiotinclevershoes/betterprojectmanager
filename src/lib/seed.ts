@@ -1110,6 +1110,7 @@ export const DEMO_TIMELINE: TimelineItem[] = [
 ];
 
 export function createSeedState(): MissionState {
+  const now = Date.now();
   return {
     projects: DEMO_PROJECTS,
     memories: DEMO_MEMORIES,
@@ -1119,6 +1120,55 @@ export function createSeedState(): MissionState {
     todos: DEMO_TODOS,
     knowledge: DEMO_KNOWLEDGE,
     timeline: DEMO_TIMELINE,
+    history: [
+      {
+        id: "hist-seed-1",
+        type: "capture_analysed",
+        title: "Capture analysed",
+        detail: "Release 9 CAB notes reviewed",
+        projectId: "proj-atlas",
+        createdAt: new Date(now - 2 * 3600000).toISOString(),
+        source: "ai",
+      },
+      {
+        id: "hist-seed-2",
+        type: "task_added",
+        title: "Task added",
+        detail: "Chase regression sign-off evidence",
+        projectId: "proj-atlas",
+        createdAt: new Date(now - 5 * 3600000).toISOString(),
+        source: "user",
+      },
+      {
+        id: "hist-seed-3",
+        type: "coach_accepted",
+        title: "Coach recommendation accepted",
+        detail: "Proactively align stakeholders ahead of CAB",
+        projectId: "proj-atlas",
+        createdAt: new Date(now - 86400000).toISOString(),
+        source: "ai",
+      },
+      {
+        id: "hist-seed-4",
+        type: "knowledge_updated",
+        title: "Knowledge updated",
+        detail: "SSO vendor lead time preference recorded",
+        projectId: "proj-horizon",
+        createdAt: new Date(now - 2 * 86400000).toISOString(),
+        source: "user",
+      },
+      {
+        id: "hist-seed-5",
+        type: "risk_added",
+        title: "Risk added",
+        detail: "Merge window evidence still incomplete",
+        projectId: "proj-relops",
+        createdAt: new Date(now - 3 * 86400000).toISOString(),
+        source: "ai",
+      },
+    ],
     lastAnalyzedAt: new Date().toISOString(),
+    analysesThisMonth: 22,
+    analysesMonthKey: `${new Date().getUTCFullYear()}-${String(new Date().getUTCMonth() + 1).padStart(2, "0")}`,
   };
 }

@@ -186,7 +186,7 @@ export function analyseCapture(
     /assume|probably|might|not sure|unclear|i think|seems/i.test(content)
   ) {
     assumptions.push(
-      "Uncertainty language detected — Mission Control will treat unverified claims as assumptions until confirmed.",
+      "Uncertainty language detected — Lume will treat unverified claims as assumptions until confirmed.",
     );
     recommendations.push({
       id: id("rec"),

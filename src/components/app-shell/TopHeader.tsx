@@ -5,14 +5,12 @@ import { AppearanceToggle } from "@/components/app-shell/AppearanceToggle";
 export function TopHeader({
   title,
   subtitle,
-  onOpenCoach,
   onOpenMobileNav,
   userName,
   onSignOut,
 }: {
   title: string;
   subtitle?: string;
-  onOpenCoach: () => void;
   onOpenMobileNav: () => void;
   userName?: string | null;
   onSignOut?: () => void;
@@ -35,14 +33,7 @@ export function TopHeader({
       </div>
 
       <div className="top-header-right">
-        <label className="header-search">
-          <span className="sr-only">Search</span>
-          <input type="search" placeholder="Search…" disabled title="Coming soon" />
-        </label>
         <AppearanceToggle />
-        <button type="button" className="primary-btn coach-trigger" onClick={onOpenCoach}>
-          Coach
-        </button>
         {userName ? (
           <div className="header-user">
             <span className="header-user-name">{userName}</span>

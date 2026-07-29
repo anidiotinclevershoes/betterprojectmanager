@@ -224,12 +224,12 @@ export default function NewProjectPage() {
   return (
     <div className="new-project">
       <div className="mb-3">
-        <h1 className="brand-mark text-xl font-extrabold tracking-tight md:text-2xl">
+        <h1 className="text-xl font-bold tracking-tight md:text-2xl">
           New project
         </h1>
-        <p className="text-xs text-ink-soft md:text-sm">
-          Keep it light — enough for Mission Control to coach you well, not a
-          full project plan.
+        <p className="text-xs text-[var(--text-secondary)] md:text-sm">
+          Guided setup for experienced PMs, or talk it through — Lume proposes a
+          draft and nothing is saved until you confirm.
         </p>
       </div>
 
