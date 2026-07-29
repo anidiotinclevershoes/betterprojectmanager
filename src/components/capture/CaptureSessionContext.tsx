@@ -102,7 +102,6 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     toggleTodo,
     removeTodo,
     updateTodo,
-    updateTodoDueDate,
   } = useMission();
 
   const [slice, setSlice] = useState<CapturePersistSlice>(emptySlice);
@@ -284,20 +283,11 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         finish();
         return;
       }
-      if (item.op === "rename" && item.targetTodoId) {
-        updateTodo(item.targetTodoId, { title: text });
-        finish();
-        return;
-      }
-      if (item.op === "change_due" && item.targetTodoId) {
-        updateTodoDueDate(item.targetTodoId, item.date || undefined);
-        finish();
-        return;
-      }
       if (item.op === "update" && item.targetTodoId) {
         updateTodo(item.targetTodoId, {
           title: text,
           detail: item.recommendation?.action,
+          dueAt: item.date ?? undefined,
         });
         finish();
         return;
@@ -371,7 +361,6 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       state.todos,
       toggleTodo,
       updateTodo,
-      updateTodoDueDate,
     ],
   );
 

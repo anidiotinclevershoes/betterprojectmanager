@@ -31,6 +31,26 @@ export interface Recommendation {
   suggestedScript?: string;
   createdAt: string;
   status: "active" | "done" | "dismissed";
+  /** Capture review: inferred mutation (optional for legacy results). */
+  operation?:
+    | "create"
+    | "update"
+    | "complete"
+    | "remove"
+    | "archive"
+    | "delete";
+  /** Capture review: destination item type (optional for legacy results). */
+  itemType?:
+    | "action"
+    | "milestone"
+    | "decision"
+    | "risk"
+    | "stakeholder"
+    | "knowledge"
+    | "nudge"
+    | "meeting"
+    | "memory";
+  targetTitle?: string;
 }
 
 export interface Stakeholder {

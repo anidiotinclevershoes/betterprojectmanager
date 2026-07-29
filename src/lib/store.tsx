@@ -314,6 +314,15 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           releases: latest.releases,
           knowledge: latest.knowledge ?? [],
           timeline: latest.timeline ?? [],
+          todos: (latest.todos ?? [])
+            .filter((t) => !t.done)
+            .slice(0, 40)
+            .map((t) => ({
+              id: t.id,
+              title: t.title,
+              projectId: t.projectId,
+              dueAt: t.dueAt,
+            })),
         },
       }),
     });

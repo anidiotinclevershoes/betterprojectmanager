@@ -23,6 +23,7 @@ type Body = {
     | "releases"
     | "knowledge"
     | "timeline"
+    | "todos"
   >;
 };
 
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
     const projects = body.state?.projects ?? [];
     const knowledge = body.state?.knowledge ?? [];
     const timeline = body.state?.timeline ?? [];
+    const todos = body.state?.todos ?? [];
     const input: CaptureInput = {
       content,
       projectId: body.projectId,
@@ -64,7 +66,7 @@ export async function POST(request: Request) {
         recommendations: body.state?.recommendations ?? [],
         meetings: body.state?.meetings ?? [],
         releases: body.state?.releases ?? [],
-        todos: [],
+        todos,
         knowledge,
         timeline,
       };
@@ -87,6 +89,15 @@ export async function POST(request: Request) {
       projects,
       existingKnowledge,
       existingTimeline: timeline.filter((t) => t.projectId === body.projectId),
+      openTodos: todos
+        .filter((t) => !t.done)
+        .slice(0, 40)
+        .map((t) => ({
+          id: t.id,
+          title: t.title,
+          projectId: t.projectId,
+          dueAt: t.dueAt,
+        })),
     });
 
     const result = buildCaptureResultFromAi({

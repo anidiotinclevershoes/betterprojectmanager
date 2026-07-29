@@ -2869,3 +2869,138 @@ body {
     grid-column: span 12;
   }
 }
+
+/* ——— Sprint 1 refinement ——— */
+
+.capture-workspace-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.capture-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.capture-new-btn {
+  min-height: 34px;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.suggestion-list {
+  gap: 8px;
+}
+
+.suggestion-card {
+  padding: 10px 12px;
+  gap: 6px;
+}
+
+.suggestion-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.suggestion-meta-labels {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.suggestion-project {
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.suggestion-content {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.suggestion-destructive-note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--danger);
+}
+
+.suggestion-card.is-destructive {
+  border-color: rgba(228, 91, 91, 0.35);
+}
+
+.suggestion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.coach-results-card {
+  padding: 14px 16px 16px;
+}
+
+.coach-results-header {
+  margin-bottom: 10px;
+  align-items: flex-start;
+}
+
+.coach-results-header h2 {
+  font-size: 16px;
+  margin: 2px 0 2px;
+}
+
+.coach-results-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.coach-results-grid {
+  gap: 10px;
+  align-items: stretch;
+}
+
+.coach-results-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 10px 12px;
+}
+
+.coach-results-section .coach-section-body {
+  flex: 1;
+}
+
+.coach-results-section .coach-section-body p {
+  margin: 0 0 6px;
+}
+
+.coach-results-section.is-disruptive {
+  background: rgba(245, 197, 66, 0.08);
+  border-color: rgba(245, 197, 66, 0.45);
+}
+
+.coach-results-intro {
+  margin-bottom: 10px;
+}
+
+.coach-results-actions {
+  margin-top: 10px;
+  padding-top: 10px;
+}

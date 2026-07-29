@@ -1,4 +1,10 @@
 import { analyseCapture } from "./coach";
+import {
+  parseSuggestionKind,
+  parseSuggestionOp,
+  type SuggestionKind,
+  type SuggestionOp,
+} from "./capture/suggestions";
 import { extractKnowledgePatchFromText } from "./knowledge";
 import { COACHING_SYSTEM_PROMPT, MEMORY_TYPES } from "./mission";
 import { extractTimelinePatchFromText } from "./timeline";
@@ -97,6 +103,9 @@ export type AiCapturePayload = {
     why: string;
     leadershipImpact: string;
     suggestedScript?: string;
+    operation?: string;
+    itemType?: string;
+    targetTitle?: string;
   }>;
   suggestedProjectId?: string | null;
   knowledgePatch?: Partial<ProjectKnowledge["sections"]>;
@@ -119,7 +128,10 @@ const CAPTURE_JSON_SCHEMA_HINT = `{
       "action": "what the PM should do",
       "why": "why this matters",
       "leadershipImpact": "how this makes them look calm, prepared, proactive and trusted",
-      "suggestedScript": "optional short script"
+      "suggestedScript": "optional short script",
+      "operation": "create|update|complete|remove|archive|delete",
+      "itemType": "todo|milestone|knowledge|stakeholder|nudge|meeting|decision|risk|memory",
+      "targetTitle": "optional exact title of an existing todo/meeting/stakeholder when updating/completing/removing"
     }
   ],
   "suggestedProjectId": "project id if clear, else null",
@@ -148,6 +160,12 @@ export async function tidyAndCoachWithOpenAI(args: {
   projects: Project[];
   existingKnowledge?: ProjectKnowledge | null;
   existingTimeline?: TimelineItem[];
+  openTodos?: Array<{
+    id: string;
+    title: string;
+    projectId?: string | null;
+    dueAt?: string;
+  }>;
 }): Promise<AiCapturePayload> {
   const key = getOpenAIKey();
   if (!key) {
@@ -186,6 +204,9 @@ ${JSON.stringify(
   2,
 )}
 
+Existing open to-dos (use targetTitle + operation when the capture refers to these):
+${JSON.stringify(args.openTodos ?? [], null, 2)}
+
 Raw capture:
 """
 ${args.rawText}
@@ -199,6 +220,10 @@ Rules:
 - If uncertain, put uncertainty in assumptions.
 - Produce 1–4 high-signal recommendations, not a task dump.
 - Prefer leadership moves over administrative chores.
+- For EVERY recommendation set operation and itemType explicitly.
+- operation meanings: create=new record; update=change existing; complete=mark finished; remove=drop relationship/item from active set; archive=soft-close; delete=hard remove.
+- Use update/complete/remove/archive/delete only when an existing record is clearly referenced; set targetTitle to that record's title.
+- New tasks, milestones, knowledge bullets and memory use create.
 - knowledgePatch must stay sparse: max a few short bullets total, only facts relevant to running the project. Skip trivia, filler and duplicates of existing knowledge.
 - timelinePatch: ONLY add dates explicitly stated or clearly implied. Do not invent a full calendar. Prefer 0–3 new items. Never remove existing timeline items.
 - Use empty arrays for sections / timelinePatch when nothing new.`;
@@ -297,20 +322,34 @@ export function buildCaptureResultFromAi(args: {
 
   const recommendations: Recommendation[] = (
     args.ai.recommendations ?? []
-  ).map((rec) => ({
-    id: id("rec"),
-    kind: rec.kind,
-    urgency: rec.urgency,
-    title: rec.title,
-    action: rec.action,
-    why: rec.why,
-    leadershipImpact: rec.leadershipImpact,
-    suggestedScript: rec.suggestedScript,
-    projectId,
-    relatedMemoryIds: [memoryId],
-    createdAt: now,
-    status: "active",
-  }));
+  ).map((rec) => {
+    const operation = parseSuggestionOp(
+      rec.operation,
+      rec.title || "recommendation",
+    ) as SuggestionOp;
+    const itemType = parseSuggestionKind(
+      rec.itemType,
+      "action",
+      rec.title || "recommendation",
+    ) as SuggestionKind;
+    return {
+      id: id("rec"),
+      kind: rec.kind,
+      urgency: rec.urgency,
+      title: rec.title,
+      action: rec.action,
+      why: rec.why,
+      leadershipImpact: rec.leadershipImpact,
+      suggestedScript: rec.suggestedScript,
+      projectId,
+      relatedMemoryIds: [memoryId],
+      createdAt: now,
+      status: "active" as const,
+      operation,
+      itemType,
+      targetTitle: rec.targetTitle,
+    };
+  });
 
   return {
     memory: {

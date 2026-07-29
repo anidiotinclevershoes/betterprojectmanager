@@ -7,10 +7,7 @@ import { analysesRemaining } from "@/lib/workspace/history";
 import {
   KIND_LABEL,
   OP_LABEL,
-  SUGGESTION_KINDS,
-  SUGGESTION_OPS,
-  type SuggestionKind,
-  type SuggestionOp,
+  isDestructiveOp,
 } from "@/lib/capture/suggestions";
 
 function projectCode(
@@ -42,7 +39,6 @@ export function CaptureWorkspace({
     added,
     editing,
     setEditingContent,
-    updateSuggestion,
     collapsed,
     setCollapsed,
     busy,
@@ -56,7 +52,6 @@ export function CaptureWorkspace({
     dismissOne,
     clearSession,
     pendingCount,
-    hasTranscript,
   } = session;
 
   const effectiveProjectId = projectId || defaultProjectId || "";
@@ -86,43 +81,11 @@ export function CaptureWorkspace({
     await analyse(content, "conversation", defaultProjectId);
   }
 
-  const reviewOpen = Boolean(result);
+  const reviewOpen = Boolean(result) && !collapsed;
   const visibleSuggestions = suggestions.filter(
     (s) => !dismissed[s.id] && !added[s.id],
   );
-
-  if (reviewOpen && collapsed) {
-    return (
-      <section className="capture-workspace capture-collapsed" aria-labelledby={titleId}>
-        <div className="capture-collapsed-row">
-          <div>
-            <h2 id={titleId} className="capture-title">
-              Capture
-            </h2>
-            <p className="meta">
-              {hasTranscript ? "Transcript available" : "Analysis ready"}
-              {fileNames.length ? ` · ${fileNames.length} file(s)` : ""}
-              {pendingCount > 0
-                ? ` · ${pendingCount} suggested action${pendingCount === 1 ? "" : "s"}`
-                : " · All suggestions reviewed"}
-            </p>
-          </div>
-          <div className="row-actions">
-            <button
-              type="button"
-              className="primary-btn"
-              onClick={() => setCollapsed(false)}
-            >
-              Expand
-            </button>
-            <button type="button" className="ghost-btn" onClick={clearSession}>
-              New capture
-            </button>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const showSessionActions = Boolean(result);
 
   return (
     <section className="capture-workspace capture-compact" aria-labelledby={titleId}>
@@ -131,20 +94,28 @@ export function CaptureWorkspace({
           <h2 id={titleId} className="capture-title">
             Capture anything
           </h2>
-          <p className="capture-support">
-            Paste notes, type an update, upload a file or record your thoughts.
-          </p>
+          {!showSessionActions ? (
+            <p className="capture-support">
+              Paste notes, type an update, upload a file or record your thoughts.
+            </p>
+          ) : null}
         </div>
-        {reviewOpen ? (
-          <div className="row-actions">
+        {showSessionActions ? (
+          <div className="capture-header-actions">
             <button
               type="button"
-              className="ghost-btn"
-              onClick={() => setCollapsed(true)}
+              className="icon-btn"
+              onClick={() => setCollapsed(!collapsed)}
+              aria-label={collapsed ? "Expand capture review" : "Collapse capture review"}
+              title={collapsed ? "Expand" : "Collapse"}
             >
-              Collapse
+              {collapsed ? "▾" : "▴"}
             </button>
-            <button type="button" className="ghost-btn" onClick={clearSession}>
+            <button
+              type="button"
+              className="ghost-btn capture-new-btn"
+              onClick={clearSession}
+            >
               New capture
             </button>
           </div>
@@ -167,6 +138,15 @@ export function CaptureWorkspace({
           />
           {fileNames.length ? (
             <p className="meta mt-1">Files: {fileNames.join(", ")}</p>
+          ) : null}
+          {result && collapsed ? (
+            <p className="meta mt-1">
+              Review collapsed
+              {pendingCount > 0
+                ? ` · ${pendingCount} suggested action${pendingCount === 1 ? "" : "s"} pending`
+                : " · suggestions reviewed"}
+              . Expand to continue reviewing without re-analysing.
+            </p>
           ) : null}
 
           <div className="capture-toolbar">
@@ -283,7 +263,13 @@ export function CaptureWorkspace({
                   busy !== "idle" ||
                   recording.active ||
                   !content.trim() ||
-                  usage.remaining <= 0
+                  usage.remaining <= 0 ||
+                  Boolean(result)
+                }
+                title={
+                  result
+                    ? "Expand the review or start a new capture to analyse again"
+                    : undefined
                 }
               >
                 Analyse
@@ -330,47 +316,18 @@ export function CaptureWorkspace({
             ) : (
               <ul className="suggestion-list">
                 {visibleSuggestions.map((item) => (
-                  <li key={item.id} className="suggestion-card">
-                    <div className="suggestion-top suggestion-controls">
-                      <label className="field mb-0">
-                        <span className="sr-only">Type</span>
-                        <select
-                          value={item.kind}
-                          onChange={(e) =>
-                            updateSuggestion(item.id, {
-                              kind: e.target.value as SuggestionKind,
-                            })
-                          }
-                          aria-label="Suggestion type"
-                        >
-                          {SUGGESTION_KINDS.map((kind) => (
-                            <option key={kind} value={kind}>
-                              {KIND_LABEL[kind]}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label className="field mb-0">
-                        <span className="sr-only">Operation</span>
-                        <select
-                          value={item.op}
-                          onChange={(e) =>
-                            updateSuggestion(item.id, {
-                              op: e.target.value as SuggestionOp,
-                            })
-                          }
-                          aria-label="Suggestion operation"
-                        >
-                          {SUGGESTION_OPS.map((op) => (
-                            <option key={op} value={op}>
-                              {OP_LABEL[op]}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <span className="meta">
+                  <li
+                    key={item.id}
+                    className={`suggestion-card ${isDestructiveOp(item.op) ? "is-destructive" : ""} ${added[item.id] ? "is-added" : ""}`}
+                  >
+                    <div className="suggestion-meta-row">
+                      <span className="suggestion-meta-labels">
+                        <span className="tag">{OP_LABEL[item.op]}</span>
+                        <span className="meta">·</span>
+                        <span className="tag">{KIND_LABEL[item.kind]}</span>
+                      </span>
+                      <span className="suggestion-project">
                         {projectCode(state.projects, item.projectId)}
-                        {item.date ? ` · ${item.date}` : ""}
                       </span>
                     </div>
                     {editing[item.id] !== undefined ? (
@@ -385,11 +342,12 @@ export function CaptureWorkspace({
                     ) : (
                       <p className="suggestion-content">{item.content}</p>
                     )}
-                    <p className="meta">
-                      {OP_LABEL[item.op]} → {KIND_LABEL[item.kind]} ·{" "}
-                      {item.destination}
-                    </p>
-                    <div className="row-actions">
+                    {isDestructiveOp(item.op) ? (
+                      <p className="suggestion-destructive-note">
+                        Destructive action — requires confirmation
+                      </p>
+                    ) : null}
+                    <div className="suggestion-actions">
                       <button
                         type="button"
                         className="ghost-btn"

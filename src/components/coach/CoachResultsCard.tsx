@@ -10,6 +10,14 @@ const SECTION_ORDER = [
   "Recommended Actions",
 ] as const;
 
+function stripMarkdownNoise(text: string) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "");
+}
+
 function parseSections(markdown: string) {
   const blocks = markdown.split(/\n(?=##\s+)/);
   const mapped = new Map<string, string>();
@@ -19,11 +27,14 @@ function parseSections(markdown: string) {
     const lines = block.trim().split("\n");
     const headingLine = lines[0]?.startsWith("##") ? lines[0] : null;
     if (!headingLine) {
-      intro = block.trim();
+      intro = stripMarkdownNoise(block.trim());
       continue;
     }
-    const heading = headingLine.replace(/^##\s+/, "").replace(/^\d+\.\s*/, "").trim();
-    const body = lines.slice(1).join("\n").trim();
+    const heading = headingLine
+      .replace(/^##\s+/, "")
+      .replace(/^\d+\.\s*/, "")
+      .trim();
+    const body = stripMarkdownNoise(lines.slice(1).join("\n").trim());
     const key =
       SECTION_ORDER.find((name) =>
         heading.toLowerCase().includes(name.toLowerCase()),
@@ -32,6 +43,19 @@ function parseSections(markdown: string) {
   }
 
   return { intro, mapped };
+}
+
+function renderLines(body: string) {
+  return body.split("\n").map((line, idx) => {
+    const key = `${idx}-${line.slice(0, 20)}`;
+    if (!line.trim()) return null;
+    if (line.startsWith("> ")) {
+      return (
+        <blockquote key={key}>{line.replace(/^>\s?/, "")}</blockquote>
+      );
+    }
+    return <p key={key}>{line}</p>;
+  });
 }
 
 export function CoachResultsCard() {
@@ -48,6 +72,7 @@ export function CoachResultsCard() {
     acceptAction,
     dismissResults,
     openDrawer,
+    scope,
   } = useCoachSession();
 
   if (!showResults) return null;
@@ -60,20 +85,24 @@ export function CoachResultsCard() {
     ),
   ];
 
+  const scopeLabel =
+    scope === "project" ? "Current project" : "All projects";
+
   return (
     <section className="coach-results-card" aria-live="polite">
       <header className="coach-results-header">
-        <div>
+        <div className="min-w-0">
           <p className="eyebrow">Lume Coach</p>
           <h2>{busy && !markdown ? "Reviewing…" : title || "Coaching results"}</h2>
           <p className="meta">
-            {provider ? (provider === "openai" ? "OpenAI" : "Local") : "…"}
+            Scope: {scopeLabel}
+            {provider ? ` · ${provider === "openai" ? "OpenAI" : "Local"}` : ""}
             {lastRunAt
               ? ` · ${new Date(lastRunAt).toISOString().slice(0, 16).replace("T", " ")}`
               : ""}
           </p>
         </div>
-        <div className="row-actions">
+        <div className="coach-results-header-actions">
           <button type="button" className="ghost-btn" onClick={openDrawer}>
             Run again
           </button>
@@ -92,9 +121,7 @@ export function CoachResultsCard() {
 
       {intro ? (
         <div className="coach-section-body coach-results-intro">
-          {intro.split("\n").map((line, idx) => (
-            <p key={`${idx}-${line.slice(0, 12)}`}>{line}</p>
-          ))}
+          {renderLines(intro)}
         </div>
       ) : null}
 
@@ -108,20 +135,7 @@ export function CoachResultsCard() {
               className={`coach-results-section ${isDisruptive ? "is-disruptive" : ""}`}
             >
               <h3>{name}</h3>
-              <div className="coach-section-body">
-                {body.split("\n").map((line, idx) => {
-                  const key = `${idx}-${line.slice(0, 20)}`;
-                  if (!line.trim()) return <br key={key} />;
-                  if (line.startsWith("> ")) {
-                    return (
-                      <blockquote key={key}>
-                        {line.replace(/^>\s?/, "")}
-                      </blockquote>
-                    );
-                  }
-                  return <p key={key}>{line}</p>;
-                })}
-              </div>
+              <div className="coach-section-body">{renderLines(body)}</div>
             </section>
           );
         })}
@@ -129,11 +143,11 @@ export function CoachResultsCard() {
 
       {actions.length > 0 ? (
         <div className="coach-results-actions">
-          <h3>Recommended actions</h3>
+          <h3>Accept into workspace</h3>
           <ul>
             {actions.slice(0, 10).map((action) => (
               <li key={action.id}>
-                <p>{action.title}</p>
+                <p>{stripMarkdownNoise(action.title)}</p>
                 {accepted[action.id] ? (
                   <span className="accepted">{accepted[action.id]}</span>
                 ) : (

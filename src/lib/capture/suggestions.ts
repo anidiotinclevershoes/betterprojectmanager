@@ -22,9 +22,7 @@ export type SuggestionOp =
   | "complete"
   | "archive"
   | "delete"
-  | "remove"
-  | "rename"
-  | "change_due";
+  | "remove";
 
 export type PendingSuggestion = {
   id: string;
@@ -60,12 +58,89 @@ export const OP_LABEL: Record<SuggestionOp, string> = {
   archive: "Archive",
   delete: "Delete",
   remove: "Remove",
-  rename: "Rename",
-  change_due: "Change due date",
 };
 
-export const SUGGESTION_KINDS = Object.keys(KIND_LABEL) as SuggestionKind[];
-export const SUGGESTION_OPS = Object.keys(OP_LABEL) as SuggestionOp[];
+const OPS = new Set<string>(Object.keys(OP_LABEL));
+const KINDS = new Set<string>(Object.keys(KIND_LABEL));
+
+const DESTRUCTIVE_OPS = new Set<SuggestionOp>([
+  "remove",
+  "archive",
+  "delete",
+]);
+
+export function isDestructiveOp(op: SuggestionOp) {
+  return DESTRUCTIVE_OPS.has(op);
+}
+
+/** Parse AI operation; unknown values fall back safely and log in development. */
+export function parseSuggestionOp(
+  raw: unknown,
+  context = "suggestion",
+): SuggestionOp {
+  if (typeof raw === "string") {
+    const normalized = raw.trim().toLowerCase().replace(/[\s-]+/g, "_");
+    const aliases: Record<string, SuggestionOp> = {
+      create: "create",
+      add: "create",
+      update: "update",
+      change: "update",
+      change_due: "update",
+      rename: "update",
+      complete: "complete",
+      done: "complete",
+      finish: "complete",
+      archive: "archive",
+      delete: "delete",
+      remove: "remove",
+    };
+    const mapped = aliases[normalized];
+    if (mapped && OPS.has(mapped)) return mapped;
+    if (OPS.has(normalized)) return normalized as SuggestionOp;
+  }
+  if (process.env.NODE_ENV === "development") {
+    console.warn(
+      `[capture] schema mismatch: unknown operation for ${context}:`,
+      raw,
+      "— falling back to create",
+    );
+  }
+  return "create";
+}
+
+export function parseSuggestionKind(
+  raw: unknown,
+  fallback: SuggestionKind,
+  context = "suggestion",
+): SuggestionKind {
+  if (typeof raw === "string") {
+    const normalized = raw.trim().toLowerCase().replace(/[\s-]+/g, "_");
+    const aliases: Record<string, SuggestionKind> = {
+      action: "action",
+      todo: "action",
+      to_do: "action",
+      milestone: "milestone",
+      decision: "decision",
+      risk: "risk",
+      stakeholder: "stakeholder",
+      knowledge: "knowledge",
+      nudge: "nudge",
+      meeting: "meeting",
+      memory: "memory",
+    };
+    const mapped = aliases[normalized];
+    if (mapped && KINDS.has(mapped)) return mapped;
+    if (KINDS.has(normalized)) return normalized as SuggestionKind;
+  }
+  if (process.env.NODE_ENV === "development") {
+    console.warn(
+      `[capture] schema mismatch: unknown itemType for ${context}:`,
+      raw,
+      `— falling back to ${fallback}`,
+    );
+  }
+  return fallback;
+}
 
 export function destinationFor(kind: SuggestionKind): string {
   switch (kind) {
@@ -88,13 +163,75 @@ export function destinationFor(kind: SuggestionKind): string {
   }
 }
 
+function kindFromRecommendation(rec: Recommendation): SuggestionKind {
+  if (rec.itemType) {
+    return parseSuggestionKind(rec.itemType, "action", rec.title);
+  }
+  if (rec.kind === "risk") return "risk";
+  if (rec.kind === "decision") return "decision";
+  if (rec.kind === "meeting" || rec.kind === "meeting_prep") return "meeting";
+  if (rec.kind === "stakeholder_update") return "nudge";
+  return "action";
+}
+
+function inferOpFromText(title: string, action: string): SuggestionOp | null {
+  const text = `${title} ${action}`;
+  if (/\b(complete|completed|finished|done|closed|resolved)\b/i.test(text)) {
+    return "complete";
+  }
+  if (/\b(delete|deleted|cancel|cancelled|canceled)\b/i.test(text)) {
+    return "delete";
+  }
+  if (/\b(remove|removed|drop|dropped)\b/i.test(text)) {
+    return "remove";
+  }
+  if (/\b(archive|archived)\b/i.test(text)) {
+    return "archive";
+  }
+  if (
+    /\b(update|updated|change|changed|rename|renamed|due|deadline)\b/i.test(
+      text,
+    )
+  ) {
+    return "update";
+  }
+  return null;
+}
+
+function matchTodo(
+  openTodos: { id: string; title: string }[],
+  targetTitle?: string,
+  content?: string,
+) {
+  if (targetTitle) {
+    const needle = targetTitle.toLowerCase();
+    const exact = openTodos.find((t) => t.title.toLowerCase() === needle);
+    if (exact) return exact;
+    const partial = openTodos.find(
+      (t) =>
+        t.title.toLowerCase().includes(needle.slice(0, 24)) ||
+        needle.includes(t.title.toLowerCase().slice(0, 24)),
+    );
+    if (partial) return partial;
+  }
+  if (content) {
+    const blob = content.toLowerCase();
+    return openTodos.find((t) => blob.includes(t.title.toLowerCase().slice(0, 24)));
+  }
+  return undefined;
+}
+
 export function buildSuggestions(
   result: CaptureResult,
-  openTodos: { id: string; title: string; projectId?: string | null; dueAt?: string }[] = [],
+  openTodos: {
+    id: string;
+    title: string;
+    projectId?: string | null;
+    dueAt?: string;
+  }[] = [],
 ): PendingSuggestion[] {
   const items: PendingSuggestion[] = [];
   const projectId = result.knowledgeProjectId || result.memory.projectId;
-  const blob = `${result.memory.content} ${result.insights.join(" ")}`.toLowerCase();
 
   items.push({
     id: `memory-${result.memory.id}`,
@@ -102,30 +239,40 @@ export function buildSuggestions(
     op: "create",
     content: result.memory.title,
     projectId: result.memory.projectId,
-    destination: "Knowledge",
+    destination: destinationFor("memory"),
   });
 
   for (const rec of result.recommendations) {
-    const kind: SuggestionKind =
-      rec.kind === "risk"
-        ? "risk"
-        : rec.kind === "decision"
-          ? "decision"
-          : rec.kind === "meeting" || rec.kind === "meeting_prep"
-            ? "meeting"
-            : rec.kind === "stakeholder_update"
-              ? "nudge"
-              : "action";
-    const matched = openTodos.find((t) =>
-      blob.includes(t.title.toLowerCase().slice(0, 24)),
+    const kind = kindFromRecommendation(rec);
+    const matched = matchTodo(
+      openTodos,
+      rec.targetTitle,
+      `${rec.title} ${rec.action}`,
     );
-    const completeIntent =
-      /\b(complete|done|finished|closed|resolved)\b/i.test(rec.title) ||
-      /\b(complete|done|finished|closed|resolved)\b/i.test(rec.action);
+    const fromSchema = rec.operation
+      ? parseSuggestionOp(rec.operation, rec.title)
+      : null;
+    const inferred = inferOpFromText(rec.title, rec.action);
+    let op: SuggestionOp = fromSchema ?? inferred ?? "create";
+
+    // Completing/updating/removing needs a target when possible
+    if (
+      (op === "complete" ||
+        op === "update" ||
+        op === "delete" ||
+        op === "remove" ||
+        op === "archive") &&
+      !matched &&
+      !fromSchema
+    ) {
+      // Keep inferred op if AI said so via schema; otherwise create
+      if (!fromSchema) op = "create";
+    }
+
     items.push({
       id: `rec-${rec.id}`,
       kind,
-      op: matched && completeIntent ? "complete" : matched ? "update" : "create",
+      op,
       content: rec.title,
       projectId: rec.projectId ?? projectId,
       destination: destinationFor(kind),
@@ -142,7 +289,7 @@ export function buildSuggestions(
       content: item.label,
       projectId,
       date: item.startAt?.slice(0, 10),
-      destination: "Milestone",
+      destination: destinationFor("milestone"),
       timelineItem: item,
     });
   }
@@ -172,54 +319,6 @@ export function buildSuggestions(
           knowledgeBullet: bullet,
         });
       }
-    }
-  }
-
-  // Surface destructive / update opportunities for open todos referenced in the capture
-  for (const todo of openTodos.slice(0, 8)) {
-    if (!blob.includes(todo.title.toLowerCase().slice(0, 18))) continue;
-    if (items.some((i) => i.targetTodoId === todo.id)) continue;
-    if (/\b(delete|remove|drop|cancel)\b/i.test(blob)) {
-      items.push({
-        id: `todo-del-${todo.id}`,
-        kind: "action",
-        op: "delete",
-        content: todo.title,
-        projectId: todo.projectId,
-        destination: "To Do",
-        targetTodoId: todo.id,
-      });
-    } else if (/\b(complete|done|finished|closed)\b/i.test(blob)) {
-      items.push({
-        id: `todo-done-${todo.id}`,
-        kind: "action",
-        op: "complete",
-        content: todo.title,
-        projectId: todo.projectId,
-        destination: "To Do",
-        targetTodoId: todo.id,
-      });
-    } else if (/\b(rename|retitle|now called)\b/i.test(blob)) {
-      items.push({
-        id: `todo-rename-${todo.id}`,
-        kind: "action",
-        op: "rename",
-        content: todo.title,
-        projectId: todo.projectId,
-        destination: "To Do",
-        targetTodoId: todo.id,
-      });
-    } else if (/\b(due|deadline|by )\b/i.test(blob)) {
-      items.push({
-        id: `todo-due-${todo.id}`,
-        kind: "action",
-        op: "change_due",
-        content: todo.title,
-        projectId: todo.projectId,
-        date: todo.dueAt?.slice(0, 10),
-        destination: "To Do",
-        targetTodoId: todo.id,
-      });
     }
   }
 
