@@ -12,6 +12,8 @@ import {
   scoreGoldenResult,
 } from "@/lib/dev/golden";
 import { logPromptAssemblyDiagnostic } from "@/ai/domain";
+import { recordCaptureMetricsSafe } from "@/lib/dev/cockpit";
+import { COACHING_SYSTEM_PROMPT } from "@/lib/mission";
 import {
   buildCapturePromptAssembly,
   buildCaptureResultFromAi,
@@ -141,13 +143,30 @@ export async function POST(request: Request) {
     let result;
     const openaiConfigured = isOpenAIConfigured();
     let notice: string | undefined;
+    let providerUsage: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+    } | null = null;
+    let responseText: string | null = null;
+    let model: string | null = null;
 
     if (!openaiConfigured) {
       result = localCaptureFallback(input, state, captureContext);
       notice =
         "OPENAI_API_KEY not set — used local Capture fallback (same as production).";
+      responseText = JSON.stringify({
+        findings: result.findings ?? [],
+        operations: result.proposedOperations ?? [],
+      });
     } else {
-      const { ai, promptAssembly: assembled } = await tidyAndCoachWithOpenAI({
+      const {
+        ai,
+        promptAssembly: assembled,
+        providerUsage: usage,
+        responseText: raw,
+        model: usedModel,
+      } = await tidyAndCoachWithOpenAI({
         rawText: content,
         projectId,
         sourceType: "note",
@@ -158,6 +177,9 @@ export async function POST(request: Request) {
         captureContext,
       });
       promptAssembly = assembled;
+      providerUsage = usage;
+      responseText = raw;
+      model = usedModel;
       result = buildCaptureResultFromAi({
         rawText: content,
         projectId,
@@ -166,6 +188,19 @@ export async function POST(request: Request) {
         captureContext,
       });
     }
+
+    recordCaptureMetricsSafe({
+      startedAt: started,
+      requestId: analysisRequestId,
+      source: "golden",
+      promptAssembly,
+      captureContext,
+      result,
+      providerUsage,
+      responseText,
+      model,
+      systemPrompt: COACHING_SYSTEM_PROMPT,
+    });
 
     const enrichedManifest = {
       ...contextManifest,

@@ -13,6 +13,8 @@ import {
   tidyAndCoachWithOpenAI,
 } from "@/lib/openai";
 import { logPromptAssemblyDiagnostic } from "@/ai/domain";
+import { recordCaptureMetricsSafe } from "@/lib/dev/cockpit";
+import { COACHING_SYSTEM_PROMPT } from "@/lib/mission";
 import type {
   CaptureInput,
   HistoryEvent,
@@ -58,6 +60,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const startedAt = Date.now();
   try {
     const body = (await request.json()) as Body;
     const content = body.content?.trim();
@@ -119,6 +122,9 @@ export async function POST(request: Request) {
       };
       const result = localCaptureFallback(input, fallbackState, captureContext);
       let enrichedManifest = contextManifest;
+      let promptAssemblyForMetrics = null as ReturnType<
+        typeof buildCapturePromptAssembly
+      > | null;
       try {
         const promptAssembly = buildCapturePromptAssembly({
           rawText: content,
@@ -141,6 +147,7 @@ export async function POST(request: Request) {
             })),
           captureContext,
         });
+        promptAssemblyForMetrics = promptAssembly;
         logPromptAssemblyDiagnostic(promptAssembly);
         enrichedManifest = {
           ...contextManifest,
@@ -161,6 +168,23 @@ export async function POST(request: Request) {
       } catch {
         /* prompt assembly must not break local fallback */
       }
+      if (promptAssemblyForMetrics) {
+        recordCaptureMetricsSafe({
+          startedAt,
+          requestId: analysisRequestId,
+          source: "capture",
+          promptAssembly: promptAssemblyForMetrics,
+          captureContext,
+          result,
+          providerUsage: null,
+          responseText: JSON.stringify({
+            findings: result.findings ?? [],
+            operations: result.proposedOperations ?? [],
+          }),
+          model: null,
+          systemPrompt: COACHING_SYSTEM_PROMPT,
+        });
+      }
       return NextResponse.json({
         result,
         openaiConfigured: false,
@@ -175,7 +199,8 @@ export async function POST(request: Request) {
     const existingKnowledge: ProjectKnowledge | null =
       knowledge.find((k) => k.projectId === body.projectId) ?? null;
 
-    const { ai, promptAssembly } = await tidyAndCoachWithOpenAI({
+    const { ai, promptAssembly, providerUsage, responseText, model } =
+      await tidyAndCoachWithOpenAI({
       rawText: content,
       projectId: body.projectId,
       sourceType: body.sourceType,
@@ -200,6 +225,19 @@ export async function POST(request: Request) {
       sourceType: body.sourceType,
       ai,
       captureContext,
+    });
+
+    recordCaptureMetricsSafe({
+      startedAt,
+      requestId: analysisRequestId,
+      source: "capture",
+      promptAssembly,
+      captureContext,
+      result,
+      providerUsage,
+      responseText,
+      model,
+      systemPrompt: COACHING_SYSTEM_PROMPT,
     });
 
     const enrichedManifest = {

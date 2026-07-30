@@ -182,6 +182,13 @@ export async function tidyAndCoachWithOpenAI(
 ): Promise<{
   ai: AiCapturePayload;
   promptAssembly: AssembledPrompt;
+  providerUsage: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  } | null;
+  responseText: string;
+  model: string;
 }> {
   const key = getOpenAIKey();
   if (!key) {
@@ -190,6 +197,7 @@ export async function tidyAndCoachWithOpenAI(
 
   const promptAssembly = buildCapturePromptAssembly(args);
   logPromptAssemblyDiagnostic(promptAssembly);
+  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -198,7 +206,7 @@ export async function tidyAndCoachWithOpenAI(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      model,
       temperature: 0.3,
       response_format: { type: "json_object" },
       messages: [
@@ -215,6 +223,11 @@ export async function tidyAndCoachWithOpenAI(
 
   const data = (await response.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+    };
   };
   const content = data.choices?.[0]?.message?.content;
   if (!content) {
@@ -224,6 +237,9 @@ export async function tidyAndCoachWithOpenAI(
   return {
     ai: JSON.parse(content) as AiCapturePayload,
     promptAssembly,
+    providerUsage: data.usage ?? null,
+    responseText: content,
+    model,
   };
 }
 

@@ -130,6 +130,15 @@ function AppShellInner({ children }: { children: ReactNode }) {
         subtitle: "Development capture scenario checker",
       };
     }
+    if (
+      process.env.NODE_ENV === "development" &&
+      pathname.startsWith("/dev/ai-cockpit")
+    ) {
+      return {
+        title: "AI Cockpit",
+        subtitle: "Measured Capture health and prompt evolution",
+      };
+    }
     if (pathname.startsWith("/meetings")) {
       return { title: "Meetings", subtitle: "Briefs and preparation" };
     }
