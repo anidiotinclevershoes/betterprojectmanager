@@ -152,6 +152,19 @@ export function Sidebar({
             </span>
             {!collapsed ? <span>Coaching</span> : null}
           </Link>
+          {process.env.NODE_ENV === "development" ? (
+            <Link
+              href="/dev/golden-test"
+              className={`sidebar-link ${pathname.startsWith("/dev/golden-test") ? "is-active" : ""}`}
+              onClick={onCloseMobile}
+              title="Golden Test (development only)"
+            >
+              <span className="sidebar-ico" aria-hidden>
+                🧪
+              </span>
+              {!collapsed ? <span>Golden Test</span> : null}
+            </Link>
+          ) : null}
         </nav>
 
         <div className="sidebar-bottom">

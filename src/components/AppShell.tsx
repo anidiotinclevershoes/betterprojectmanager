@@ -121,6 +121,15 @@ function AppShellInner({ children }: { children: ReactNode }) {
         subtitle: "Previous Coach sessions",
       };
     }
+    if (
+      process.env.NODE_ENV === "development" &&
+      pathname.startsWith("/dev/golden-test")
+    ) {
+      return {
+        title: "Golden Test",
+        subtitle: "Development capture scenario checker",
+      };
+    }
     if (pathname.startsWith("/meetings")) {
       return { title: "Meetings", subtitle: "Briefs and preparation" };
     }

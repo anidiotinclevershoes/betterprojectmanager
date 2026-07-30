@@ -10,7 +10,8 @@
     "verify": "npx --yes tsx scripts/verify-coach.ts",
     "verify:capture-context": "npx --yes tsx scripts/verify-capture-context.ts",
     "verify:capture-prompt": "npx --yes tsx scripts/verify-capture-prompt-path.ts",
-    "verify:ai-domain": "npx --yes tsx scripts/verify-ai-domain.ts"
+    "verify:ai-domain": "npx --yes tsx scripts/verify-ai-domain.ts",
+    "verify:golden-test": "npx --yes tsx scripts/verify-golden-test.ts"
   },
   "dependencies": {
     "next": "16.2.11",
