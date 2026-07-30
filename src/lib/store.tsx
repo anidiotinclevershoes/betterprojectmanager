@@ -331,20 +331,29 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           memories: latest.memories.slice(0, 40),
           recommendations: latest.recommendations
             .filter((r) => r.status === "active")
-            .slice(0, 20),
+            .slice(0, 40),
           meetings: latest.meetings,
           releases: latest.releases,
           knowledge: latest.knowledge ?? [],
           timeline: latest.timeline ?? [],
-          todos: (latest.todos ?? [])
-            .filter((t) => !t.done)
-            .slice(0, 40)
-            .map((t) => ({
-              id: t.id,
-              title: t.title,
-              projectId: t.projectId,
-              dueAt: t.dueAt,
-            })),
+          todos: (latest.todos ?? []).slice(0, 80).map((t) => ({
+            id: t.id,
+            title: t.title,
+            detail: t.detail,
+            projectId: t.projectId,
+            dueAt: t.dueAt,
+            done: t.done,
+            createdAt: t.createdAt,
+          })),
+          history: (latest.history ?? []).slice(0, 40).map((h) => ({
+            id: h.id,
+            type: h.type,
+            title: h.title,
+            detail: h.detail,
+            projectId: h.projectId,
+            createdAt: h.createdAt,
+            source: h.source,
+          })),
         },
       }),
     });

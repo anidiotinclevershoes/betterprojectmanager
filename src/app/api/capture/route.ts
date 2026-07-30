@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { buildCaptureContext } from "@/lib/capture/context";
 import {
   buildCaptureResultFromAi,
   getOpenAIKeyDiagnostics,
@@ -6,7 +7,14 @@ import {
   localCaptureFallback,
   tidyAndCoachWithOpenAI,
 } from "@/lib/openai";
-import type { CaptureInput, MissionState, ProjectKnowledge } from "@/lib/types";
+import type {
+  CaptureInput,
+  HistoryEvent,
+  MissionState,
+  ProjectKnowledge,
+  Recommendation,
+  TodoItem,
+} from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -24,6 +32,7 @@ type Body = {
     | "knowledge"
     | "timeline"
     | "todos"
+    | "history"
   >;
 };
 
@@ -52,20 +61,41 @@ export async function POST(request: Request) {
     const projects = body.state?.projects ?? [];
     const knowledge = body.state?.knowledge ?? [];
     const timeline = body.state?.timeline ?? [];
-    const todos = body.state?.todos ?? [];
+    const todos = (body.state?.todos ?? []) as TodoItem[];
+    const recommendations = (body.state?.recommendations ??
+      []) as Recommendation[];
+    const history = (body.state?.history ?? []) as HistoryEvent[];
+    const meetings = body.state?.meetings ?? [];
+    const releases = body.state?.releases ?? [];
+
     const input: CaptureInput = {
       content,
       projectId: body.projectId,
       sourceType: body.sourceType,
     };
 
+    const captureContext = buildCaptureContext({
+      projectId: body.projectId,
+      captureText: content,
+      state: {
+        projects,
+        todos,
+        meetings,
+        releases,
+        knowledge,
+        timeline,
+        recommendations,
+        history,
+      },
+    });
+
     if (!isOpenAIConfigured()) {
       const fallbackState = {
         projects,
         memories: body.state?.memories ?? [],
-        recommendations: body.state?.recommendations ?? [],
-        meetings: body.state?.meetings ?? [],
-        releases: body.state?.releases ?? [],
+        recommendations,
+        meetings,
+        releases,
         todos,
         knowledge,
         timeline,
@@ -74,6 +104,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         result,
         openaiConfigured: false,
+        captureContextDiagnostics: captureContext.diagnostics,
         notice:
           "OPENAI_API_KEY not set — used local coaching. Add your OpenAI API key to enable tidy-up.",
       });
@@ -98,6 +129,7 @@ export async function POST(request: Request) {
           projectId: t.projectId,
           dueAt: t.dueAt,
         })),
+      captureContext,
     });
 
     const result = buildCaptureResultFromAi({
@@ -110,6 +142,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       result,
       openaiConfigured: true,
+      captureContextDiagnostics: captureContext.diagnostics,
     });
   } catch (error) {
     const message =

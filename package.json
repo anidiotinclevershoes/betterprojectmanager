@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "verify": "npx --yes tsx scripts/verify-coach.ts"
+    "verify": "npx --yes tsx scripts/verify-coach.ts",
+    "verify:capture-context": "npx --yes tsx scripts/verify-capture-context.ts"
   },
   "dependencies": {
     "next": "16.2.11",
