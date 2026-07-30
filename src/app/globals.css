@@ -3465,3 +3465,113 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ——— Capture context inspector (development) ——— */
+
+.capture-context-btn {
+  font-size: 11px;
+}
+
+.capture-context-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px 24px;
+  overflow: auto;
+}
+
+.capture-context-backdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.capture-context-panel {
+  position: relative;
+  z-index: 1;
+  width: min(640px, 100%);
+  max-height: calc(100vh - 72px);
+  overflow: auto;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px 18px 20px;
+}
+
+.capture-context-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.capture-context-head h3 {
+  margin: 2px 0 0;
+  font-size: 16px;
+}
+
+.capture-context-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin: 0 0 12px;
+}
+
+.capture-context-meta dt {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.capture-context-meta dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+}
+
+.capture-context-panel h4 {
+  margin: 14px 0 6px;
+  font-size: 12px;
+}
+
+.capture-context-counts,
+.capture-context-limits,
+.capture-context-records {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.capture-context-counts li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.capture-context-limits li,
+.capture-context-records li {
+  font-size: 12px;
+  padding: 4px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.capture-context-title {
+  font-weight: 600;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}

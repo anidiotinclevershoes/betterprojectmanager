@@ -26,6 +26,7 @@ import {
   type CloneRelOpsInput,
 } from "./relops-clone";
 import { createSeedState } from "./seed";
+import type { CaptureContextManifest } from "./capture/context";
 import {
   extractTimelinePatchFromText,
   mergeTimelineItems,
@@ -87,7 +88,11 @@ type MissionContextValue = {
   capture: (input: CaptureInput) => CaptureResult;
   captureWithAI: (input: CaptureInput) => Promise<CaptureResult>;
   /** Analyse without writing — user confirms additions in Capture review. */
-  analyzeCaptureWithAI: (input: CaptureInput) => Promise<CaptureResult>;
+  analyzeCaptureWithAI: (input: CaptureInput) => Promise<{
+    result: CaptureResult;
+    contextManifest: CaptureContextManifest | null;
+    requestId: string | null;
+  }>;
   applyCaptureResult: (result: CaptureResult) => void;
   setRecommendationStatus: (
     id: string,
@@ -362,6 +367,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       result?: CaptureResult;
       error?: string;
       openaiConfigured?: boolean;
+      contextManifest?: CaptureContextManifest | null;
+      requestId?: string | null;
     };
 
     if (typeof data.openaiConfigured === "boolean") {
@@ -372,12 +379,17 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error || "Capture failed");
     }
 
-    return data.result;
+    return {
+      result: data.result,
+      contextManifest: data.contextManifest ?? null,
+      requestId: data.requestId ?? null,
+    };
   }, []);
 
   const analyzeCaptureWithAI = useCallback(
     async (input: CaptureInput) => {
-      const result = await requestCaptureAnalysis(input);
+      const { result, contextManifest, requestId } =
+        await requestCaptureAnalysis(input);
       setState((prev) =>
         pushHistory(bumpAnalysisUsage(prev), makeHistoryEvent({
           type: "capture_analysed",
@@ -387,14 +399,14 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           source: "ai",
         })),
       );
-      return result;
+      return { result, contextManifest, requestId };
     },
     [requestCaptureAnalysis],
   );
 
   const captureWithAI = useCallback(
     async (input: CaptureInput) => {
-      const result = await requestCaptureAnalysis(input);
+      const { result } = await requestCaptureAnalysis(input);
       setState((prev) => mergeCapture(prev, result));
       return result;
     },

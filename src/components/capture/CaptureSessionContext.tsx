@@ -24,6 +24,7 @@ import {
   upsertCaptureSession,
   type CaptureSource,
 } from "@/lib/sessions/history";
+import type { CaptureContextManifest } from "@/lib/capture/context";
 
 type Busy = "idle" | "transcribing" | "analysing";
 
@@ -70,6 +71,7 @@ type CaptureSessionValue = {
   source: CaptureSource;
   setSource: (value: CaptureSource) => void;
   analysedAt: string | null;
+  contextManifest: CaptureContextManifest | null;
 };
 
 const CaptureSessionContext = createContext<CaptureSessionValue | null>(null);
@@ -83,6 +85,7 @@ function normalizeSlice(raw: CapturePersistSlice | null): CapturePersistSlice {
     source: raw.source ?? "typed",
     historyId: raw.historyId ?? null,
     analysedAt: raw.analysedAt ?? null,
+    contextManifest: raw.contextManifest ?? null,
     dismissed: raw.dismissed ?? {},
     added: raw.added ?? {},
     editing: raw.editing ?? {},
@@ -117,6 +120,7 @@ function emptySlice(): CapturePersistSlice {
     source: "typed",
     historyId: null,
     analysedAt: null,
+    contextManifest: null,
   };
 }
 
@@ -138,6 +142,7 @@ function persistHistory(slice: CapturePersistSlice) {
       slice.added,
       slice.dismissed,
     ),
+    contextManifest: slice.contextManifest ?? null,
   });
 }
 
@@ -296,7 +301,10 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       }));
       try {
         const effective = scopedProjectId || slice.projectId || undefined;
-        const next = await analyzeCaptureWithAI({
+        const {
+          result: next,
+          contextManifest,
+        } = await analyzeCaptureWithAI({
           content: trimmed,
           projectId: effective,
           sourceType,
@@ -328,6 +336,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
             historyId,
             analysedAt,
             source,
+            contextManifest: contextManifest ?? null,
           };
           persistHistory(nextSlice);
           return nextSlice;
@@ -528,6 +537,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       source: slice.source,
       setSource,
       analysedAt: slice.analysedAt,
+      contextManifest: slice.contextManifest ?? null,
     }),
     [
       addFileName,

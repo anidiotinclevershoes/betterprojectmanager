@@ -4,6 +4,7 @@
  * survive dismiss / New capture so users can reopen them later.
  */
 
+import type { CaptureContextManifest } from "@/lib/capture/context";
 import type { CaptureResult } from "@/lib/types";
 import type { PendingSuggestion } from "@/lib/capture/suggestions";
 
@@ -28,6 +29,8 @@ export type CaptureSessionRecord = {
   dismissed: Record<string, boolean>;
   added: Record<string, boolean>;
   status: CaptureSessionStatus;
+  /** Optional Phase 1 observability; older sessions may omit this. */
+  contextManifest?: CaptureContextManifest | null;
 };
 
 export type CoachingSessionRecord = {

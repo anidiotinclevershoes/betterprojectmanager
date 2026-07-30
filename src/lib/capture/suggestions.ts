@@ -4,6 +4,7 @@ import type {
   Recommendation,
   TimelineItemInput,
 } from "@/lib/types";
+import type { CaptureContextManifest } from "@/lib/capture/context";
 
 export type SuggestionKind =
   | "action"
@@ -341,6 +342,7 @@ export type CapturePersistSlice = {
   source: "typed" | "recorded" | "uploaded";
   historyId: string | null;
   analysedAt: string | null;
+  contextManifest?: CaptureContextManifest | null;
 };
 
 export const CAPTURE_SESSION_KEY = "lume-capture-session-v1";

@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { buildCaptureContext } from "@/lib/capture/context";
+import {
+  buildCaptureContext,
+  buildCaptureContextManifest,
+  logCaptureContextDiagnostic,
+} from "@/lib/capture/context";
 import {
   buildCaptureResultFromAi,
   getOpenAIKeyDiagnostics,
@@ -36,6 +40,10 @@ type Body = {
   >;
 };
 
+function requestId() {
+  return `capreq-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export async function GET() {
   const diagnostics = getOpenAIKeyDiagnostics();
   return NextResponse.json({
@@ -67,6 +75,7 @@ export async function POST(request: Request) {
     const history = (body.state?.history ?? []) as HistoryEvent[];
     const meetings = body.state?.meetings ?? [];
     const releases = body.state?.releases ?? [];
+    const analysisRequestId = requestId();
 
     const input: CaptureInput = {
       content,
@@ -74,6 +83,7 @@ export async function POST(request: Request) {
       sourceType: body.sourceType,
     };
 
+    // Context must be built before the AI request.
     const captureContext = buildCaptureContext({
       projectId: body.projectId,
       captureText: content,
@@ -88,6 +98,11 @@ export async function POST(request: Request) {
         history,
       },
     });
+    const contextManifest = buildCaptureContextManifest(
+      captureContext,
+      analysisRequestId,
+    );
+    logCaptureContextDiagnostic(contextManifest);
 
     if (!isOpenAIConfigured()) {
       const fallbackState = {
@@ -104,9 +119,11 @@ export async function POST(request: Request) {
       return NextResponse.json({
         result,
         openaiConfigured: false,
+        requestId: analysisRequestId,
+        contextManifest,
         captureContextDiagnostics: captureContext.diagnostics,
         notice:
-          "OPENAI_API_KEY not set — used local coaching. Add your OpenAI API key to enable tidy-up.",
+          "OPENAI_API_KEY not set — used local coaching. Add your OpenAI key to enable tidy-up.",
       });
     }
 
@@ -142,6 +159,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       result,
       openaiConfigured: true,
+      requestId: analysisRequestId,
+      contextManifest,
       captureContextDiagnostics: captureContext.diagnostics,
     });
   } catch (error) {

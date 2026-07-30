@@ -157,7 +157,7 @@ const CAPTURE_JSON_SCHEMA_HINT = `{
   ]
 }`;
 
-export async function tidyAndCoachWithOpenAI(args: {
+export type CapturePromptBuildArgs = {
   rawText: string;
   projectId?: string;
   sourceType?: CaptureInput["sourceType"];
@@ -170,14 +170,14 @@ export async function tidyAndCoachWithOpenAI(args: {
     projectId?: string | null;
     dueAt?: string;
   }>;
-  /** Phase 1: structured project context. Preferred over ad-hoc lists when present. */
   captureContext?: CaptureProjectContext | null;
-}): Promise<AiCapturePayload> {
-  const key = getOpenAIKey();
-  if (!key) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
+};
 
+/**
+ * Pure prompt construction for Capture analysis.
+ * Used by the OpenAI caller and by path tests that assert context inclusion.
+ */
+export function buildCaptureUserPrompt(args: CapturePromptBuildArgs): string {
   const projectContext = args.projects.map((p) => ({
     id: p.id,
     code: p.code,
@@ -210,7 +210,12 @@ ${JSON.stringify(
 Existing open to-dos (use targetTitle + operation when the capture refers to these):
 ${JSON.stringify(args.openTodos ?? [], null, 2)}`;
 
-  const userPrompt = `The user captured a raw note (possibly a voice ramble). Tidy it into institutional memory, produce proactive coaching recommendations, and extract ONLY project-relevant bullets for the knowledge brief.
+  const observabilityHint =
+    process.env.NODE_ENV === "development"
+      ? `\n- When relevant existing records influence your analysis, reference their exact title in your explanation (for example in insights). Do not invent hidden reasoning.`
+      : "";
+
+  return `The user captured a raw note (possibly a voice ramble). Tidy it into institutional memory, produce proactive coaching recommendations, and extract ONLY project-relevant bullets for the knowledge brief.
 
 Your job is to identify how the new Capture relates to the known project state.
 Do not create a new record merely because a fact is mentioned.
@@ -251,15 +256,18 @@ Rules:
 - knowledgePatch must stay sparse: max a few short bullets total, only facts relevant to running the project. Skip trivia, filler and duplicates of existing knowledge.
 - timelinePatch: ONLY add dates explicitly stated or clearly implied. Do not invent a full calendar. Prefer 0–3 new items. Never remove existing timeline items.
 - Use empty arrays for sections / timelinePatch when nothing new.
-- Never invent record IDs. Never claim a change has already been applied.`;
+- Never invent record IDs. Never claim a change has already been applied.${observabilityHint}`;
+}
 
-  if (process.env.NODE_ENV === "development" && args.captureContext) {
-    console.info("[capture-context]", {
-      projectScoped: args.captureContext.diagnostics.projectScoped,
-      recordCount: args.captureContext.diagnostics.recordCount,
-      approxChars: args.captureContext.diagnostics.approxChars,
-    });
+export async function tidyAndCoachWithOpenAI(
+  args: CapturePromptBuildArgs,
+): Promise<AiCapturePayload> {
+  const key = getOpenAIKey();
+  if (!key) {
+    throw new Error("OPENAI_API_KEY is not configured");
   }
+
+  const userPrompt = buildCaptureUserPrompt(args);
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",

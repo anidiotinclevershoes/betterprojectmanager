@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { useCaptureSession } from "@/components/capture/CaptureSessionContext";
+import { CaptureContextInspector } from "@/components/capture/CaptureContextInspector";
 import { useMission } from "@/lib/store";
 import { analysesRemaining } from "@/lib/workspace/history";
 import {
@@ -68,6 +69,7 @@ export function CaptureWorkspace({
     isAnalysed,
     setSource,
     analysedAt,
+    contextManifest,
   } = session;
 
   const effectiveProjectId = projectId || defaultProjectId || "";
@@ -127,6 +129,7 @@ export function CaptureWorkspace({
         </div>
         {showSessionActions ? (
           <div className="capture-header-actions">
+            <CaptureContextInspector manifest={contextManifest} />
             {!collapsed ? (
               <button
                 type="button"

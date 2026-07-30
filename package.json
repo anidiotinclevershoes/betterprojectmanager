@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "verify": "npx --yes tsx scripts/verify-coach.ts",
-    "verify:capture-context": "npx --yes tsx scripts/verify-capture-context.ts"
+    "verify:capture-context": "npx --yes tsx scripts/verify-capture-context.ts",
+    "verify:capture-prompt": "npx --yes tsx scripts/verify-capture-prompt-path.ts"
   },
   "dependencies": {
     "next": "16.2.11",

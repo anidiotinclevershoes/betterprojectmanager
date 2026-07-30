@@ -48,6 +48,13 @@ export type CaptureContextRecord = {
   updatedAt?: string;
 };
 
+export type CaptureContextLimitHit = {
+  bucket: string;
+  included: number;
+  available: number;
+  excluded: CaptureContextRecord[];
+};
+
 export type CaptureProjectContext = {
   project: {
     id: string;
@@ -69,12 +76,40 @@ export type CaptureProjectContext = {
   knowledge: CaptureContextRecord[];
   history: CaptureContextRecord[];
   releases: CaptureContextRecord[];
-  /** Development diagnostic — approximate serialised size. */
   diagnostics: {
     recordCount: number;
     approxChars: number;
     projectScoped: boolean;
+    builtAt: string;
+    limitsReached: CaptureContextLimitHit[];
   };
+};
+
+/** Traceability blob stored with a Capture analysis (not full source records). */
+export type CaptureContextManifest = {
+  builtAt: string;
+  projectId?: string | null;
+  projectName?: string | null;
+  projectCode?: string | null;
+  requestId?: string | null;
+  approximateCharacterCount: number;
+  counts: Record<string, number>;
+  limitsReached: string[];
+  records: Array<{
+    id: string;
+    type: string;
+    title: string;
+    status?: string;
+    date?: string | null;
+  }>;
+  excludedByLimit: Array<{
+    id: string;
+    type: string;
+    title: string;
+    status?: string;
+    date?: string | null;
+    bucket: string;
+  }>;
 };
 
 export type CaptureContextState = Pick<
@@ -109,9 +144,7 @@ function scoreText(haystack: string, needles: Set<string>): number {
   return score;
 }
 
-function rec(
-  partial: CaptureContextRecord,
-): CaptureContextRecord {
+function rec(partial: CaptureContextRecord): CaptureContextRecord {
   return {
     id: partial.id,
     type: partial.type,
@@ -123,22 +156,35 @@ function rec(
   };
 }
 
-function takeRanked<T>(
+function takeRankedWithExclusions<T>(
   items: T[],
   limit: number,
   rank: (item: T) => number,
-): T[] {
-  return [...items]
+  toRecord: (item: T) => CaptureContextRecord,
+  bucket: string,
+): { included: CaptureContextRecord[]; hit: CaptureContextLimitHit | null } {
+  const ranked = [...items]
     .map((item, index) => ({ item, index, score: rank(item) }))
-    .sort((a, b) => b.score - a.score || a.index - b.index)
-    .slice(0, Math.max(0, limit))
-    .map((x) => x.item);
+    .sort((a, b) => b.score - a.score || a.index - b.index);
+  const kept = ranked.slice(0, Math.max(0, limit));
+  const dropped = ranked.slice(Math.max(0, limit));
+  const included = kept.map((x) => toRecord(x.item));
+  if (dropped.length === 0) {
+    return { included, hit: null };
+  }
+  return {
+    included,
+    hit: {
+      bucket,
+      included: included.length,
+      available: ranked.length,
+      excluded: dropped.map((x) => toRecord(x.item)),
+    },
+  };
 }
 
-function knowledgeBullets(
+function knowledgeCandidates(
   knowledge: ProjectKnowledge | undefined,
-  limits: CaptureContextLimits,
-  keywords: Set<string>,
 ): CaptureContextRecord[] {
   if (!knowledge) return [];
   const rows: CaptureContextRecord[] = [];
@@ -155,12 +201,11 @@ function knowledgeBullets(
       );
     }
   }
-  return takeRanked(rows, limits.knowledgeItems, (r) =>
-    scoreText(`${r.title} ${r.summary ?? ""}`, keywords),
-  );
+  return rows;
 }
 
 function emptyContext(projectScoped: boolean): CaptureProjectContext {
+  const builtAt = new Date().toISOString();
   const base: CaptureProjectContext = {
     project: null,
     todos: [],
@@ -173,7 +218,13 @@ function emptyContext(projectScoped: boolean): CaptureProjectContext {
     knowledge: [],
     history: [],
     releases: [],
-    diagnostics: { recordCount: 0, approxChars: 0, projectScoped },
+    diagnostics: {
+      recordCount: 0,
+      approxChars: 0,
+      projectScoped,
+      builtAt,
+      limitsReached: [],
+    },
   };
   base.diagnostics.approxChars = JSON.stringify(stripDiagnostics(base)).length;
   return base;
@@ -226,6 +277,8 @@ export function buildCaptureContext(args: {
   };
   const projectId = args.projectId || null;
   const keywords = tokensFrom(args.captureText);
+  const builtAt = new Date().toISOString();
+  const limitsReached: CaptureContextLimitHit[] = [];
 
   if (!projectId) {
     return emptyContext(false);
@@ -236,7 +289,6 @@ export function buildCaptureContext(args: {
     return emptyContext(true);
   }
 
-  // Snapshot arrays so callers cannot observe mutation through returned context.
   const todos = [...(args.state.todos ?? [])];
   const meetings = [...(args.state.meetings ?? [])];
   const timeline = [...(args.state.timeline ?? [])];
@@ -245,23 +297,30 @@ export function buildCaptureContext(args: {
   const knowledgeList = [...(args.state.knowledge ?? [])];
 
   const projectTodos = todos.filter((t) => t.projectId === projectId);
-  const openTodos = takeRanked(
+
+  const openPick = takeRankedWithExclusions(
     projectTodos.filter((t) => !t.done),
     limits.openTodos,
     (t) =>
       scoreText(`${t.title} ${t.detail ?? ""}`, keywords) * 3 +
       (t.dueAt ? 1 : 0),
-  ).map((t) => todoRecord(t, "todo"));
+    (t) => todoRecord(t, "todo"),
+    "To Dos",
+  );
+  if (openPick.hit) limitsReached.push(openPick.hit);
 
-  const completedTodos = takeRanked(
+  const completedPick = takeRankedWithExclusions(
     projectTodos.filter((t) => t.done),
     limits.recentCompletedTodos,
     (t) =>
       scoreText(`${t.title} ${t.detail ?? ""}`, keywords) * 2 +
       Date.parse(t.createdAt || "") / 1e13,
-  ).map((t) => todoRecord(t, "todo_completed"));
+    (t) => todoRecord(t, "todo_completed"),
+    "Completed To Dos",
+  );
+  if (completedPick.hit) limitsReached.push(completedPick.hit);
 
-  const nudges = takeRanked(
+  const nudgePick = takeRankedWithExclusions(
     buildNudgeItems(
       {
         projects: [project],
@@ -280,34 +339,38 @@ export function buildCaptureContext(args: {
     ),
     limits.nudges,
     (n) => scoreText(`${n.person} ${n.item}`, keywords) * 3 + n.daysWaiting,
-  ).map((n) =>
-    rec({
-      id: n.id,
-      type: "nudge",
-      title: `${n.person} — ${n.item}`,
-      status: n.urgency,
-      summary: n.suggestedMessage?.slice(0, 160),
-    }),
+    (n) =>
+      rec({
+        id: n.id,
+        type: "nudge",
+        title: `${n.person} — ${n.item}`,
+        status: n.urgency,
+        summary: n.suggestedMessage?.slice(0, 160),
+      }),
+    "Nudges",
   );
+  if (nudgePick.hit) limitsReached.push(nudgePick.hit);
 
-  const meetingRows = takeRanked(
+  const meetingPick = takeRankedWithExclusions(
     meetings.filter((m) => m.projectId === projectId),
     limits.meetings,
     (m) =>
       scoreText(`${m.title} ${m.prep.openingScript}`, keywords) * 2 +
       Date.parse(m.startsAt || "") / 1e13,
-  ).map((m) =>
-    rec({
-      id: m.id,
-      type: "meeting",
-      title: m.title,
-      status: m.phase,
-      date: m.startsAt,
-      summary: m.prep.objectives.slice(0, 2).join("; ") || undefined,
-    }),
+    (m) =>
+      rec({
+        id: m.id,
+        type: "meeting",
+        title: m.title,
+        status: m.phase,
+        date: m.startsAt,
+        summary: m.prep.objectives.slice(0, 2).join("; ") || undefined,
+      }),
+    "Meetings",
   );
+  if (meetingPick.hit) limitsReached.push(meetingPick.hit);
 
-  const milestones = takeRanked(
+  const milestonePick = takeRankedWithExclusions(
     timeline.filter(
       (t) =>
         t.projectId === projectId &&
@@ -318,10 +381,20 @@ export function buildCaptureContext(args: {
     ),
     limits.milestones,
     (t) => scoreText(`${t.label} ${t.notes ?? ""}`, keywords) * 2,
-  ).map((t) => timelineRecord(t));
+    (t) => timelineRecord(t),
+    "Milestones",
+  );
+  if (milestonePick.hit) limitsReached.push(milestonePick.hit);
 
   const knowledge = knowledgeList.find((k) => k.projectId === projectId);
-  const knowledgeRows = knowledgeBullets(knowledge, limits, keywords);
+  const knowledgePick = takeRankedWithExclusions(
+    knowledgeCandidates(knowledge),
+    limits.knowledgeItems,
+    (r) => scoreText(`${r.title} ${r.summary ?? ""}`, keywords),
+    (r) => r,
+    "Knowledge",
+  );
+  if (knowledgePick.hit) limitsReached.push(knowledgePick.hit);
 
   const risksFromKnowledge = (knowledge?.sections.risks ?? []).map(
     (bullet, i) =>
@@ -350,13 +423,16 @@ export function buildCaptureContext(args: {
         updatedAt: r.createdAt,
       }),
     );
-  const risks = takeRanked(
+  const riskPick = takeRankedWithExclusions(
     [...risksFromKnowledge, ...riskRecs],
     limits.risks,
     (r) => scoreText(`${r.title} ${r.summary ?? ""}`, keywords),
+    (r) => r,
+    "Risks",
   );
+  if (riskPick.hit) limitsReached.push(riskPick.hit);
 
-  const stakeholders = takeRanked(
+  const stakeholderPick = takeRankedWithExclusions(
     [...project.stakeholders],
     limits.stakeholders,
     (s) =>
@@ -364,61 +440,73 @@ export function buildCaptureContext(args: {
         `${s.name} ${s.role} ${(s.concerns ?? []).join(" ")}`,
         keywords,
       ) * 2,
-  ).map((s) =>
-    rec({
-      id: s.id,
-      type: "stakeholder",
-      title: s.name,
-      status: s.role,
-      date: s.lastContactAt ?? null,
-      summary: (s.concerns ?? []).slice(0, 2).join("; ") || undefined,
-    }),
+    (s) =>
+      rec({
+        id: s.id,
+        type: "stakeholder",
+        title: s.name,
+        status: s.role,
+        date: s.lastContactAt ?? null,
+        summary: (s.concerns ?? []).slice(0, 2).join("; ") || undefined,
+      }),
+    "Stakeholders",
   );
+  if (stakeholderPick.hit) limitsReached.push(stakeholderPick.hit);
 
-  const historyRows = takeRanked(
+  const historyPick = takeRankedWithExclusions(
     history.filter((h) => h.projectId === projectId),
     limits.historyEvents,
     (h) =>
       scoreText(`${h.title} ${h.detail ?? ""}`, keywords) +
       Date.parse(h.createdAt || "") / 1e13,
-  ).map((h) =>
-    rec({
-      id: h.id,
-      type: `history:${h.type}`,
-      title: h.title,
-      date: h.createdAt,
-      summary: h.detail?.slice(0, 160),
-      updatedAt: h.createdAt,
-    }),
+    (h) =>
+      rec({
+        id: h.id,
+        type: `history:${h.type}`,
+        title: h.title,
+        date: h.createdAt,
+        summary: h.detail?.slice(0, 160),
+        updatedAt: h.createdAt,
+      }),
+    "History",
   );
+  if (historyPick.hit) limitsReached.push(historyPick.hit);
 
-  const releaseRows = takeRanked(
+  const releasePick = takeRankedWithExclusions(
     releases.filter((r) => r.projectId === projectId),
     limits.releases,
     (r) => scoreText(`${r.name} ${r.risks.join(" ")}`, keywords),
-  ).map((r) =>
-    rec({
-      id: r.id,
-      type: "release",
-      title: r.name,
-      status: r.currentStage,
-      summary: r.risks.slice(0, 2).join("; ") || undefined,
-    }),
+    (r) =>
+      rec({
+        id: r.id,
+        type: "release",
+        title: r.name,
+        status: r.currentStage,
+        summary: r.risks.slice(0, 2).join("; ") || undefined,
+      }),
+    "Releases",
   );
+  if (releasePick.hit) limitsReached.push(releasePick.hit);
 
   const ctx: CaptureProjectContext = {
     project: projectMeta(project),
-    todos: openTodos,
-    completedTodos,
-    nudges,
-    meetings: meetingRows,
-    milestones,
-    risks,
-    stakeholders,
-    knowledge: knowledgeRows,
-    history: historyRows,
-    releases: releaseRows,
-    diagnostics: { recordCount: 0, approxChars: 0, projectScoped: true },
+    todos: openPick.included,
+    completedTodos: completedPick.included,
+    nudges: nudgePick.included,
+    meetings: meetingPick.included,
+    milestones: milestonePick.included,
+    risks: riskPick.included,
+    stakeholders: stakeholderPick.included,
+    knowledge: knowledgePick.included,
+    history: historyPick.included,
+    releases: releasePick.included,
+    diagnostics: {
+      recordCount: 0,
+      approxChars: 0,
+      projectScoped: true,
+      builtAt,
+      limitsReached,
+    },
   };
   ctx.diagnostics.recordCount = countRecords(ctx);
   ctx.diagnostics.approxChars = JSON.stringify(stripDiagnostics(ctx)).length;
@@ -472,4 +560,90 @@ export function estimateCaptureContextSize(ctx: CaptureProjectContext) {
     recordCount: ctx.diagnostics.recordCount,
     approxChars: ctx.diagnostics.approxChars,
   };
+}
+
+export function contextTypeCounts(ctx: CaptureProjectContext) {
+  return {
+    "To Dos": ctx.todos.length,
+    "Completed To Dos": ctx.completedTodos.length,
+    Nudges: ctx.nudges.length,
+    Meetings: ctx.meetings.length,
+    Milestones: ctx.milestones.length,
+    Risks: ctx.risks.length,
+    Stakeholders: ctx.stakeholders.length,
+    Knowledge: ctx.knowledge.length,
+    History: ctx.history.length,
+    Releases: ctx.releases.length,
+  };
+}
+
+export function buildCaptureContextManifest(
+  ctx: CaptureProjectContext,
+  requestId?: string | null,
+): CaptureContextManifest {
+  const buckets: Array<[string, CaptureContextRecord[]]> = [
+    ["todo", ctx.todos],
+    ["todo_completed", ctx.completedTodos],
+    ["nudge", ctx.nudges],
+    ["meeting", ctx.meetings],
+    ["milestone", ctx.milestones],
+    ["risk", ctx.risks],
+    ["stakeholder", ctx.stakeholders],
+    ["knowledge", ctx.knowledge],
+    ["history", ctx.history],
+    ["release", ctx.releases],
+  ];
+  const records = buckets.flatMap(([, list]) =>
+    list.map((r) => ({
+      id: r.id,
+      type: r.type,
+      title: r.title,
+      status: r.status,
+      date: r.date ?? null,
+    })),
+  );
+  const excludedByLimit = ctx.diagnostics.limitsReached.flatMap((hit) =>
+    hit.excluded.map((r) => ({
+      id: r.id,
+      type: r.type,
+      title: r.title,
+      status: r.status,
+      date: r.date ?? null,
+      bucket: hit.bucket,
+    })),
+  );
+  return {
+    builtAt: ctx.diagnostics.builtAt,
+    projectId: ctx.project?.id ?? null,
+    projectName: ctx.project?.name ?? null,
+    projectCode: ctx.project?.code ?? null,
+    requestId: requestId ?? null,
+    approximateCharacterCount: ctx.diagnostics.approxChars,
+    counts: contextTypeCounts(ctx),
+    limitsReached: ctx.diagnostics.limitsReached.map(
+      (h) => `${h.bucket} — ${h.included} of ${h.available} included`,
+    ),
+    records,
+    excludedByLimit,
+  };
+}
+
+export function logCaptureContextDiagnostic(manifest: CaptureContextManifest) {
+  if (process.env.NODE_ENV !== "development") return;
+  const c = manifest.counts;
+  console.info(
+    [
+      "[Capture Context]",
+      `Project: ${manifest.projectCode ?? manifest.projectName ?? "None"}`,
+      `Records: ${manifest.records.length}`,
+      `To Dos: ${c["To Dos"] ?? 0}`,
+      `Nudges: ${c.Nudges ?? 0}`,
+      `Meetings: ${c.Meetings ?? 0}`,
+      `Knowledge: ${c.Knowledge ?? 0}`,
+      `Approx chars: ${manifest.approximateCharacterCount.toLocaleString()}`,
+      manifest.requestId ? `Request: ${manifest.requestId}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  );
 }
