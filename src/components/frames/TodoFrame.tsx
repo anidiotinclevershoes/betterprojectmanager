@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DetailModal } from "@/components/DetailModal";
 import { useFrameExpand } from "@/components/workspace/FrameExpandContext";
 import { FRAME_TRANSITION_MS, isValidDateInput } from "@/lib/dates";
@@ -33,6 +33,10 @@ export function TodoFrame({
   const [edit, setEdit] = useState<TodoItem | null>(null);
   const [completing, setCompleting] = useState<Record<string, boolean>>({});
   const limit = itemLimitFor(size);
+
+  useEffect(() => {
+    setNewProjectId(projectId ?? "");
+  }, [projectId]);
 
   const allOpen = useMemo(() => {
     return (state.todos ?? [])
