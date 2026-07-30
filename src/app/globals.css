@@ -1824,6 +1824,11 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.workspace-toolbar-end {
+  justify-content: flex-end;
 }
 
 .workspace-frame {
@@ -1832,6 +1837,7 @@ body {
   border-radius: 10px;
   overflow: hidden;
   min-height: 12rem;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -1850,6 +1856,77 @@ body {
   font-size: 15px;
   font-weight: 650;
   color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.frame-identity-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+.frame-type-todo {
+  border-top: 2px solid rgba(99, 140, 255, 0.55);
+}
+.frame-type-todo .frame-identity-icon {
+  background: rgba(99, 140, 255, 0.16);
+  color: #6b8cff;
+}
+.frame-type-todo .origin,
+.frame-type-todo .tag {
+  background: rgba(99, 140, 255, 0.12);
+  color: #6b8cff;
+}
+
+.frame-type-meetingPrep {
+  border-top: 2px solid rgba(53, 185, 127, 0.55);
+}
+.frame-type-meetingPrep .frame-identity-icon {
+  background: rgba(53, 185, 127, 0.16);
+  color: var(--success);
+}
+
+.frame-type-nudge {
+  border-top: 2px solid rgba(228, 162, 59, 0.55);
+}
+.frame-type-nudge .frame-identity-icon {
+  background: rgba(228, 162, 59, 0.16);
+  color: var(--warning);
+}
+
+.frame-type-timeline {
+  border-top: 2px solid rgba(140, 150, 170, 0.55);
+}
+.frame-type-timeline .frame-identity-icon {
+  background: rgba(140, 150, 170, 0.16);
+  color: var(--text-secondary);
+}
+
+.frame-type-knowledge {
+  border-top: 2px solid rgba(168, 130, 255, 0.45);
+}
+.frame-type-knowledge .frame-identity-icon {
+  background: rgba(168, 130, 255, 0.14);
+  color: #a882ff;
+}
+
+.frame-type-release {
+  border-top: 2px solid rgba(228, 91, 91, 0.4);
+}
+.frame-type-release .frame-identity-icon {
+  background: rgba(228, 91, 91, 0.12);
+  color: var(--danger);
 }
 
 .workspace-frame-body,
@@ -1863,6 +1940,8 @@ body {
   display: flex;
   gap: 8px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .frame-toolbar.between {
@@ -1908,9 +1987,14 @@ body {
   border-radius: 8px;
 }
 
+.is-card-clickable {
+  cursor: pointer;
+}
+
 .frame-row:hover,
 .prep-card:hover,
-.nudge-card:hover {
+.nudge-card:hover,
+.is-card-clickable:hover {
   background: var(--bg-hover);
 }
 
@@ -2562,9 +2646,10 @@ body {
   max-height: none;
 }
 
+/* Dashboard frames must not nest scrollbars; overflow goes to View all. */
 .frame-body-scroll {
-  max-height: 28rem;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 .frame-footer {
@@ -2572,6 +2657,7 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
   margin-top: 10px;
   padding-top: 8px;
   border-top: 1px solid var(--border-subtle);
@@ -2587,16 +2673,65 @@ body {
   gap: 6px;
   padding: 8px;
   border-radius: 8px;
+  transition: opacity 0.35s ease, background-color 0.35s ease, transform 0.35s ease;
 }
 
 .nudge-row:hover {
   background: var(--bg-hover);
 }
 
+.nudge-row.is-resolving {
+  opacity: 0.45;
+  background: var(--bg-hover);
+  pointer-events: none;
+  transform: scale(0.99);
+}
+
+.nudge-due-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.nudge-due-row input[type="date"] {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  min-width: 0;
+  flex: 1 1 9rem;
+}
+
 .nudge-row-main {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+}
+
+@media (max-width: 899px) {
+  .frame-row-title {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .workspace-frame-header {
+    flex-wrap: wrap;
+  }
+
+  .row-actions {
+    gap: 4px;
+  }
+
+  .row-actions .ghost-btn,
+  .row-actions .primary-btn {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
 }
 
 .nudge-avatar {

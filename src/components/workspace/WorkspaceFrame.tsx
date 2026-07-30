@@ -3,6 +3,14 @@
 import type { ReactNode } from "react";
 import { FRAME_LABELS } from "@/lib/workspace/layout";
 
+const FRAME_ICON: Record<string, string> = {
+  todo: "✓",
+  meetingPrep: "◎",
+  nudge: "↗",
+  timeline: "▭",
+  knowledge: "◇",
+};
+
 export function WorkspaceFrame({
   type,
   title,
@@ -14,10 +22,16 @@ export function WorkspaceFrame({
   children: ReactNode;
   action?: ReactNode;
 }) {
+  const icon = FRAME_ICON[type] ?? "•";
   return (
-    <section className="workspace-frame">
+    <section className={`workspace-frame frame-identity frame-type-${type}`}>
       <header className="workspace-frame-header">
-        <h2>{title ?? FRAME_LABELS[type] ?? type}</h2>
+        <h2>
+          <span className="frame-identity-icon" aria-hidden>
+            {icon}
+          </span>
+          {title ?? FRAME_LABELS[type] ?? type}
+        </h2>
         {action ? <div className="workspace-frame-action">{action}</div> : null}
       </header>
       <div className="workspace-frame-body">{children}</div>

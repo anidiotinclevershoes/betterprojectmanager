@@ -4,21 +4,26 @@ import { useMemo, useState } from "react";
 import { DetailModal } from "@/components/DetailModal";
 import { daysUntil } from "@/lib/selectors";
 import { relativeDue, todoOriginLabel } from "@/lib/workspace/frames-data";
+import {
+  isInteractiveTarget,
+  itemLimitFor,
+} from "@/lib/workspace/packing";
+import type { FrameSize } from "@/lib/workspace/layout";
 import { useMission } from "@/lib/store";
 import type { TodoItem } from "@/lib/types";
 
-const DASHBOARD_LIMIT = 8;
-
 export function TodoFrame({
   projectId,
+  size = "wide",
 }: {
   projectId?: string | null;
-  size?: string;
+  size?: FrameSize | string;
 }) {
   const { state, toggleTodo, removeTodo, addTodo, updateTodo } = useMission();
   const [title, setTitle] = useState("");
   const [edit, setEdit] = useState<TodoItem | null>(null);
-  const [showAll, setShowAll] = useState(false);
+  const [viewAll, setViewAll] = useState(false);
+  const limit = itemLimitFor(size);
 
   const allOpen = useMemo(() => {
     return (state.todos ?? [])
@@ -33,13 +38,14 @@ export function TodoFrame({
       });
   }, [state.todos, projectId]);
 
-  const todos = showAll ? allOpen : allOpen.slice(0, DASHBOARD_LIMIT);
+  const todos = allOpen.slice(0, limit);
+  const overflow = allOpen.length > limit;
 
   const projectCode = (id?: string | null) =>
     id ? state.projects.find((p) => p.id === id)?.code ?? "—" : "Personal";
 
   return (
-    <div className="frame-body frame-body-scroll">
+    <div className="frame-body">
       <div className="frame-toolbar">
         <input
           value={title}
@@ -73,52 +79,54 @@ export function TodoFrame({
         <>
           <ul className="frame-list">
             {todos.map((todo) => (
-              <li key={todo.id} className="frame-row">
-                <input
-                  type="checkbox"
-                  checked={todo.done}
-                  onChange={() => toggleTodo(todo.id)}
-                  aria-label={`Complete ${todo.title}`}
-                />
-                <button
-                  type="button"
-                  className="frame-row-title"
-                  onClick={() => setEdit(todo)}
-                >
-                  {todo.title}
-                </button>
-                <span className="tag">{projectCode(todo.projectId)}</span>
-                {relativeDue(todo) ? (
-                  <span className="meta">{relativeDue(todo)}</span>
-                ) : null}
-                <span className="origin">{todoOriginLabel(todo)}</span>
-                <button
-                  type="button"
-                  className="ghost-btn"
-                  aria-label="Remove"
-                  onClick={() => removeTodo(todo.id)}
-                >
-                  ×
-                </button>
-              </li>
+              <TodoRow
+                key={todo.id}
+                todo={todo}
+                projectLabel={projectCode(todo.projectId)}
+                onOpen={() => setEdit(todo)}
+                onToggle={() => toggleTodo(todo.id)}
+                onRemove={() => removeTodo(todo.id)}
+              />
             ))}
           </ul>
-          <div className="frame-footer">
-            <span className="meta">
-              Viewing {todos.length} of {allOpen.length} tasks
-            </span>
-            {allOpen.length > DASHBOARD_LIMIT ? (
+          {overflow ? (
+            <div className="frame-footer">
+              <span className="meta">
+                Showing {todos.length} of {allOpen.length}
+              </span>
               <button
                 type="button"
                 className="ghost-btn"
-                onClick={() => setShowAll((v) => !v)}
+                onClick={() => setViewAll(true)}
               >
-                {showAll ? "Show less" : "View all"}
+                View all
               </button>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
         </>
       )}
+
+      <DetailModal
+        open={viewAll}
+        onClose={() => setViewAll(false)}
+        title="All to-dos"
+      >
+        <ul className="frame-list">
+          {allOpen.map((todo) => (
+            <TodoRow
+              key={todo.id}
+              todo={todo}
+              projectLabel={projectCode(todo.projectId)}
+              onOpen={() => {
+                setViewAll(false);
+                setEdit(todo);
+              }}
+              onToggle={() => toggleTodo(todo.id)}
+              onRemove={() => removeTodo(todo.id)}
+            />
+          ))}
+        </ul>
+      </DetailModal>
 
       <DetailModal
         open={Boolean(edit)}
@@ -139,5 +147,59 @@ export function TodoFrame({
         ) : null}
       </DetailModal>
     </div>
+  );
+}
+
+function TodoRow({
+  todo,
+  projectLabel,
+  onOpen,
+  onToggle,
+  onRemove,
+}: {
+  todo: TodoItem;
+  projectLabel: string;
+  onOpen: () => void;
+  onToggle: () => void;
+  onRemove: () => void;
+}) {
+  return (
+    <li
+      className="frame-row is-card-clickable"
+      onClick={(e) => {
+        if (isInteractiveTarget(e.target)) return;
+        onOpen();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          if (isInteractiveTarget(e.target)) return;
+          e.preventDefault();
+          onOpen();
+        }
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={todo.done}
+        onChange={onToggle}
+        aria-label={`Complete ${todo.title}`}
+      />
+      <button type="button" className="frame-row-title" onClick={onOpen}>
+        {todo.title}
+      </button>
+      <span className="tag">{projectLabel}</span>
+      {relativeDue(todo) ? (
+        <span className="meta">{relativeDue(todo)}</span>
+      ) : null}
+      <span className="origin">{todoOriginLabel(todo)}</span>
+      <button
+        type="button"
+        className="ghost-btn"
+        aria-label="Remove"
+        onClick={onRemove}
+      >
+        ×
+      </button>
+    </li>
   );
 }

@@ -56,7 +56,8 @@ export function WorkspaceCustomiser({
         </div>
         <div className="max-h-[60vh] space-y-2 overflow-y-auto p-4">
           <p className="text-[12px] text-[var(--text-muted)]">
-            Show, hide, reorder and size frames. Capture and Coach stay available.
+            Show, hide, reorder and size frames. Timeline appears in the
+            workspace when enabled. Capture and Coach stay available.
           </p>
           {ordered.map((frame, index) => (
             <div

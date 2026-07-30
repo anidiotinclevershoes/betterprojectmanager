@@ -5,10 +5,9 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { CaptureCoachRow } from "@/components/capture/CaptureCoachRow";
 import { CloneRelOpsButton } from "@/components/CloneRelOpsButton";
-import { StatusPill } from "@/components/DashboardChrome";
 import { ProjectKnowledgeBrief } from "@/components/ProjectKnowledgeBrief";
-import { ProjectTimelineGantt } from "@/components/ProjectTimelineGantt";
 import { WorkspaceCustomiser } from "@/components/workspace/WorkspaceCustomiser";
+import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
 import { WorkspaceFrameRow } from "@/components/workspace/WorkspaceGrid";
 import { getPlaybookStage } from "@/lib/release-playbook";
 import {
@@ -53,10 +52,7 @@ export default function ProjectDashboardPage() {
     <div className="workspace-page project-scroll">
       <div className="project-identity">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusPill status={project.status} />
-            {isReleaseOps ? <span className="tag">Release ops</span> : null}
-          </div>
+          {isReleaseOps ? <span className="tag">Release ops</span> : null}
           <p className="project-focus">
             {project.currentFocus}
             {project.nextMilestone
@@ -72,8 +68,7 @@ export default function ProjectDashboardPage() {
 
       <CaptureCoachRow defaultProjectId={project.id} />
 
-      <div className="workspace-toolbar">
-        <p className="meta">Project workspace</p>
+      <div className="workspace-toolbar workspace-toolbar-end">
         <button
           type="button"
           className="ghost-btn"
@@ -89,28 +84,19 @@ export default function ProjectDashboardPage() {
         <WorkspaceFrameRow frames={frames} projectId={project.id} />
       )}
 
-      <section className="workspace-frame">
-        <header className="workspace-frame-header">
-          <h2>Knowledge</h2>
-        </header>
-        <div className="workspace-frame-body">
-          <ProjectKnowledgeBrief projectId={project.id} />
-        </div>
-      </section>
-
-      <section className="workspace-frame">
-        <header className="workspace-frame-header">
-          <h2>Project timeline</h2>
-        </header>
-        <div className="workspace-frame-body">
-          <ProjectTimelineGantt projectId={project.id} />
-        </div>
-      </section>
+      <WorkspaceFrame type="knowledge" title="Knowledge">
+        <ProjectKnowledgeBrief projectId={project.id} />
+      </WorkspaceFrame>
 
       {(isReleaseOps || release) && (
-        <section className="workspace-frame">
+        <section className="workspace-frame frame-identity frame-type-release">
           <header className="workspace-frame-header">
-            <h2>Release</h2>
+            <h2>
+              <span className="frame-identity-icon" aria-hidden>
+                ▴
+              </span>
+              Release
+            </h2>
             <Link href="/releases" className="ghost-btn">
               Playbook
             </Link>

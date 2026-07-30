@@ -22,8 +22,7 @@ export default function OverviewPage() {
     <div className="workspace-page">
       <CaptureCoachRow />
 
-      <div className="workspace-toolbar">
-        <p className="meta">Workspace frames</p>
+      <div className="workspace-toolbar workspace-toolbar-end">
         <button
           type="button"
           className="ghost-btn"

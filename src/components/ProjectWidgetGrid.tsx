@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { CloneRelOpsButton } from "@/components/CloneRelOpsButton";
 import { DetailModal } from "@/components/DetailModal";
-import { StatusPill } from "@/components/DashboardChrome";
 import { ProjectKnowledgeBrief } from "@/components/ProjectKnowledgeBrief";
 import { ProjectTimelineGantt } from "@/components/ProjectTimelineGantt";
 import {
@@ -110,7 +109,6 @@ export function ProjectWidgetGrid({
               {project.code}
             </Link>
             <span className="truncate text-sm text-ink-soft">{project.name}</span>
-            <StatusPill status={project.status} />
             {isReleaseOps ? (
               <span className="rounded bg-mist-deep px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-soft">
                 Release ops
