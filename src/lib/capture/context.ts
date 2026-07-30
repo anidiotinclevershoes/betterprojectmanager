@@ -110,6 +110,14 @@ export type CaptureContextManifest = {
     date?: string | null;
     bucket: string;
   }>;
+  /** Development: modular prompt section presence + size (Phase 1.5). */
+  promptAssembly?: {
+    sections: Array<{ id: string; label: string; present: boolean }>;
+    approximateCharacters: number;
+    estimatedTokens: number;
+    contextRecordCount: number;
+    dictionaryEntryCount: number;
+  };
 };
 
 export type CaptureContextState = Pick<

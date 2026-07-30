@@ -5,12 +5,14 @@ import {
   logCaptureContextDiagnostic,
 } from "@/lib/capture/context";
 import {
+  buildCapturePromptAssembly,
   buildCaptureResultFromAi,
   getOpenAIKeyDiagnostics,
   isOpenAIConfigured,
   localCaptureFallback,
   tidyAndCoachWithOpenAI,
 } from "@/lib/openai";
+import { logPromptAssemblyDiagnostic } from "@/ai/domain";
 import type {
   CaptureInput,
   HistoryEvent,
@@ -116,11 +118,54 @@ export async function POST(request: Request) {
         timeline,
       };
       const result = localCaptureFallback(input, fallbackState);
+      let enrichedManifest = contextManifest;
+      try {
+        const promptAssembly = buildCapturePromptAssembly({
+          rawText: content,
+          projectId: body.projectId,
+          sourceType: body.sourceType,
+          projects,
+          existingKnowledge:
+            knowledge.find((k) => k.projectId === body.projectId) ?? null,
+          existingTimeline: timeline.filter(
+            (t) => t.projectId === body.projectId,
+          ),
+          openTodos: todos
+            .filter((t) => !t.done)
+            .slice(0, 40)
+            .map((t) => ({
+              id: t.id,
+              title: t.title,
+              projectId: t.projectId,
+              dueAt: t.dueAt,
+            })),
+          captureContext,
+        });
+        logPromptAssemblyDiagnostic(promptAssembly);
+        enrichedManifest = {
+          ...contextManifest,
+          promptAssembly: {
+            sections: promptAssembly.sections.map((s) => ({
+              id: s.id,
+              label: s.label,
+              present: true,
+            })),
+            approximateCharacters:
+              promptAssembly.diagnostics.approximateCharacters,
+            estimatedTokens: promptAssembly.diagnostics.estimatedTokens,
+            contextRecordCount: promptAssembly.diagnostics.contextRecordCount,
+            dictionaryEntryCount:
+              promptAssembly.diagnostics.dictionaryEntryCount,
+          },
+        };
+      } catch {
+        /* prompt assembly must not break local fallback */
+      }
       return NextResponse.json({
         result,
         openaiConfigured: false,
         requestId: analysisRequestId,
-        contextManifest,
+        contextManifest: enrichedManifest,
         captureContextDiagnostics: captureContext.diagnostics,
         notice:
           "OPENAI_API_KEY not set — used local coaching. Add your OpenAI key to enable tidy-up.",
@@ -130,7 +175,7 @@ export async function POST(request: Request) {
     const existingKnowledge: ProjectKnowledge | null =
       knowledge.find((k) => k.projectId === body.projectId) ?? null;
 
-    const ai = await tidyAndCoachWithOpenAI({
+    const { ai, promptAssembly } = await tidyAndCoachWithOpenAI({
       rawText: content,
       projectId: body.projectId,
       sourceType: body.sourceType,
@@ -156,11 +201,26 @@ export async function POST(request: Request) {
       ai,
     });
 
+    const enrichedManifest = {
+      ...contextManifest,
+      promptAssembly: {
+        sections: promptAssembly.sections.map((s) => ({
+          id: s.id,
+          label: s.label,
+          present: true,
+        })),
+        approximateCharacters: promptAssembly.diagnostics.approximateCharacters,
+        estimatedTokens: promptAssembly.diagnostics.estimatedTokens,
+        contextRecordCount: promptAssembly.diagnostics.contextRecordCount,
+        dictionaryEntryCount: promptAssembly.diagnostics.dictionaryEntryCount,
+      },
+    };
+
     return NextResponse.json({
       result,
       openaiConfigured: true,
       requestId: analysisRequestId,
-      contextManifest,
+      contextManifest: enrichedManifest,
       captureContextDiagnostics: captureContext.diagnostics,
     });
   } catch (error) {

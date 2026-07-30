@@ -149,6 +149,18 @@ const state = horizonFixture();
     "structured context section must be present in the prompt",
   );
   assert.ok(
+    userPrompt.includes("## Project Domain"),
+    "Phase 1.5: Project Domain section must be present",
+  );
+  assert.ok(
+    userPrompt.includes("## Project Dictionary"),
+    "Phase 1.5: Dictionary section must be present",
+  );
+  assert.ok(
+    userPrompt.includes("CAB") && userPrompt.includes("Change Advisory Board"),
+    "Phase 1.5: default dictionary terms must appear",
+  );
+  assert.ok(
     userPrompt.includes(CAPTURE_TEXT),
     "prompt must include the new Capture text",
   );

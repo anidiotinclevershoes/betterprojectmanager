@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { CaptureContextManifest } from "@/lib/capture/context";
 
-/** Development-only inspector for Phase 1 context assembly. */
+/** Development-only inspector for Phase 1 context + Phase 1.5 prompt assembly. */
 export function CaptureContextInspector({
   manifest,
 }: {
@@ -18,6 +18,8 @@ export function CaptureContextInspector({
     manifest.projectCode ||
     manifest.projectName ||
     (manifest.projectId ? manifest.projectId : "None");
+
+  const prompt = manifest.promptAssembly;
 
   return (
     <>
@@ -84,6 +86,38 @@ export function CaptureContextInspector({
               ) : null}
             </dl>
 
+            {prompt ? (
+              <>
+                <h4>Prompt sections</h4>
+                <ul className="capture-context-counts">
+                  {prompt.sections.map((s) => (
+                    <li key={s.id}>
+                      <span>{s.label}</span>
+                      <span>{s.present ? "✓" : "✗"}</span>
+                    </li>
+                  ))}
+                </ul>
+                <dl className="capture-context-meta">
+                  <div>
+                    <dt>Prompt chars</dt>
+                    <dd>{prompt.approximateCharacters.toLocaleString()}</dd>
+                  </div>
+                  <div>
+                    <dt>Est. tokens</dt>
+                    <dd>{prompt.estimatedTokens.toLocaleString()}</dd>
+                  </div>
+                  <div>
+                    <dt>Context records</dt>
+                    <dd>{prompt.contextRecordCount}</dd>
+                  </div>
+                  <div>
+                    <dt>Dictionary entries</dt>
+                    <dd>{prompt.dictionaryEntryCount}</dd>
+                  </div>
+                </dl>
+              </>
+            ) : null}
+
             <h4>Counts by type</h4>
             <ul className="capture-context-counts">
               {Object.entries(manifest.counts).map(([label, count]) => (
@@ -119,9 +153,7 @@ export function CaptureContextInspector({
                     <span className="meta mono">{r.id}</span>
                     {r.status ? <span className="meta">{r.status}</span> : null}
                     {r.date ? (
-                      <span className="meta">
-                        {r.date.slice(0, 10)}
-                      </span>
+                      <span className="meta">{r.date.slice(0, 10)}</span>
                     ) : null}
                   </li>
                 ))
