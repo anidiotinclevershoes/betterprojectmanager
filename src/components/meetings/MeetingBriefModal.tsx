@@ -1,8 +1,20 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
-import { formatWhen } from "@/lib/selectors";
+import { useEffect, useId, useRef, useState } from "react";
+import { isValidDateInput } from "@/lib/dates";
+import { formatWhen, toDateInputValue } from "@/lib/selectors";
 import { useMission } from "@/lib/store";
+
+function linesToList(text: string) {
+  return text
+    .split("\n")
+    .map((l) => l.replace(/^•\s*/, "").trim())
+    .filter(Boolean);
+}
+
+function listToLines(items: string[]) {
+  return items.join("\n");
+}
 
 export function MeetingBriefModal({
   meetingId,
@@ -11,12 +23,40 @@ export function MeetingBriefModal({
   meetingId: string | null;
   onClose: () => void;
 }) {
-  const { state } = useMission();
+  const { state, updateMeeting } = useMission();
   const meeting = meetingId
     ? state.meetings.find((m) => m.id === meetingId)
     : null;
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  const [title, setTitle] = useState("");
+  const [projectId, setProjectId] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("09:00");
+  const [opening, setOpening] = useState("");
+  const [objectives, setObjectives] = useState("");
+  const [talkingPoints, setTalkingPoints] = useState("");
+  const [questions, setQuestions] = useState("");
+  const [missing, setMissing] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!meeting) return;
+    setTitle(meeting.title);
+    setProjectId(meeting.projectId);
+    const d = new Date(meeting.startsAt);
+    setDate(toDateInputValue(meeting.startsAt));
+    setTime(
+      `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`,
+    );
+    setOpening(meeting.prep.openingScript);
+    setObjectives(listToLines(meeting.prep.objectives));
+    setTalkingPoints(listToLines(meeting.prep.talkingPoints));
+    setQuestions(listToLines(meeting.prep.questionsToAsk));
+    setMissing(listToLines(meeting.prep.risksToDiscuss));
+    setSaved(false);
+  }, [meeting]);
 
   useEffect(() => {
     if (!meetingId) return;
@@ -31,18 +71,38 @@ export function MeetingBriefModal({
   if (!meeting) return null;
 
   const project = state.projects.find((p) => p.id === meeting.projectId);
-  const prep = meeting.prep;
+  const dateOk = !date || isValidDateInput(date);
+
+  function save() {
+    if (!meeting || !dateOk) return;
+    const startsAt =
+      date && time
+        ? new Date(`${date}T${time}:00`).toISOString()
+        : meeting.startsAt;
+    updateMeeting(meeting.id, {
+      title,
+      projectId: projectId || meeting.projectId,
+      startsAt,
+      openingScript: opening,
+      objectives: linesToList(objectives),
+      talkingPoints: linesToList(talkingPoints),
+      questionsToAsk: linesToList(questions),
+      risksToDiscuss: linesToList(missing),
+    });
+    setSaved(true);
+  }
+
   const fullBrief = [
-    prep.openingScript,
+    opening,
     "",
     "Objectives:",
-    ...prep.objectives.map((i) => `• ${i}`),
+    ...linesToList(objectives).map((i) => `• ${i}`),
     "",
     "Talking points:",
-    ...prep.talkingPoints.map((i) => `• ${i}`),
+    ...linesToList(talkingPoints).map((i) => `• ${i}`),
     "",
     "Questions:",
-    ...prep.questionsToAsk.map((i) => `• ${i}`),
+    ...linesToList(questions).map((i) => `• ${i}`),
   ].join("\n");
 
   return (
@@ -59,7 +119,7 @@ export function MeetingBriefModal({
             <p className="eyebrow">
               {project?.code ?? "Project"} · {formatWhen(meeting.startsAt)}
             </p>
-            <h2 id={titleId}>{meeting.title}</h2>
+            <h2 id={titleId}>Edit meeting prep</h2>
           </div>
           <button
             ref={closeRef}
@@ -72,54 +132,119 @@ export function MeetingBriefModal({
           </button>
         </header>
         <div className="detail-modal-body meeting-brief-body">
-          <section>
-            <h3>Strong opening</h3>
-            <p className="opening-script">{prep.openingScript}</p>
-            <div className="row-actions">
-              <button
-                type="button"
-                className="ghost-btn"
-                onClick={() =>
-                  void navigator.clipboard.writeText(prep.openingScript)
-                }
-              >
-                Copy opening
-              </button>
-              <button
-                type="button"
-                className="ghost-btn"
-                onClick={() => void navigator.clipboard.writeText(fullBrief)}
-              >
-                Copy full brief
-              </button>
-            </div>
-          </section>
-          <BriefList title="Objectives" items={prep.objectives} />
-          <BriefList title="Talking points" items={prep.talkingPoints} />
-          <BriefList title="Questions to ask" items={prep.questionsToAsk} />
-          <BriefList
-            title="Likely stakeholder concerns"
-            items={prep.stakeholderConcerns}
-          />
-          <BriefList title="Decisions required" items={prep.decisionsToObtain} />
-          <BriefList title="Risks to call out" items={prep.risksToDiscuss} />
-          <BriefList title="People to engage" items={prep.peopleToEngage} />
+          <label className="field">
+            <span>Meeting title</span>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} />
+          </label>
+          <label className="field">
+            <span>Project</span>
+            <select
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+            >
+              {state.projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.code}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="field-row-2">
+            <label className="field">
+              <span>Date</span>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                aria-invalid={!dateOk || undefined}
+              />
+            </label>
+            <label className="field">
+              <span>Time</span>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+              />
+            </label>
+          </div>
+          {!dateOk ? (
+            <p className="field-error" role="alert">
+              Enter a valid date.
+            </p>
+          ) : null}
+          <label className="field">
+            <span>Opening</span>
+            <textarea
+              className="capture-textarea"
+              rows={3}
+              value={opening}
+              onChange={(e) => setOpening(e.target.value)}
+            />
+          </label>
+          <label className="field">
+            <span>Objectives (one per line)</span>
+            <textarea
+              className="capture-textarea"
+              rows={3}
+              value={objectives}
+              onChange={(e) => setObjectives(e.target.value)}
+            />
+          </label>
+          <label className="field">
+            <span>Talking points (one per line)</span>
+            <textarea
+              className="capture-textarea"
+              rows={3}
+              value={talkingPoints}
+              onChange={(e) => setTalkingPoints(e.target.value)}
+            />
+          </label>
+          <label className="field">
+            <span>Questions (one per line)</span>
+            <textarea
+              className="capture-textarea"
+              rows={3}
+              value={questions}
+              onChange={(e) => setQuestions(e.target.value)}
+            />
+          </label>
+          <label className="field">
+            <span>Missing information / risks (one per line)</span>
+            <textarea
+              className="capture-textarea"
+              rows={3}
+              value={missing}
+              onChange={(e) => setMissing(e.target.value)}
+            />
+          </label>
+          <div className="row-actions">
+            <button
+              type="button"
+              className="primary-btn"
+              onClick={save}
+              disabled={!dateOk || !title.trim()}
+            >
+              Save changes
+            </button>
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => void navigator.clipboard.writeText(opening)}
+            >
+              Copy opening
+            </button>
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => void navigator.clipboard.writeText(fullBrief)}
+            >
+              Copy full brief
+            </button>
+            {saved ? <span className="meta">Saved</span> : null}
+          </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function BriefList({ title, items }: { title: string; items: string[] }) {
-  if (!items.length) return null;
-  return (
-    <section>
-      <h3>{title}</h3>
-      <ul>
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </section>
   );
 }

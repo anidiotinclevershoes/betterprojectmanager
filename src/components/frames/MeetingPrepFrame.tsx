@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { DetailModal } from "@/components/DetailModal";
 import { MeetingBriefModal } from "@/components/meetings/MeetingBriefModal";
+import { useFrameExpand } from "@/components/workspace/FrameExpandContext";
 import { buildMeetingPrepItems } from "@/lib/workspace/frames-data";
 import type { FrameSize } from "@/lib/workspace/layout";
 import {
@@ -20,19 +20,22 @@ const CONFIDENCE_LABEL = {
 export function MeetingPrepFrame({
   projectId,
   size = "standard",
+  frameId = "meetingPrep",
 }: {
   projectId?: string | null;
   size?: FrameSize | string;
+  frameId?: string;
 }) {
   const { state } = useMission();
+  const { isExpanded, expand, collapse } = useFrameExpand();
+  const expanded = isExpanded(frameId);
   const items = buildMeetingPrepItems(state, projectId ?? undefined);
   const [briefId, setBriefId] = useState<string | null>(null);
-  const [viewAll, setViewAll] = useState(false);
   const limit = itemLimitFor(size);
-  const visible = items.slice(0, limit);
+  const visible = expanded ? items : items.slice(0, limit);
   const featured = visible[0];
   const rest = visible.slice(1);
-  const overflow = items.length > limit;
+  const overflow = !expanded && items.length > limit;
 
   return (
     <div className="frame-body">
@@ -122,57 +125,31 @@ export function MeetingPrepFrame({
               </li>
             ))}
           </ul>
-          {overflow ? (
+          {overflow || expanded ? (
             <div className="frame-footer">
               <span className="meta">
-                Showing {visible.length} of {items.length}
+                {expanded
+                  ? `${items.length} meetings`
+                  : `Showing ${visible.length} of ${items.length}`}
               </span>
-              <button
-                type="button"
-                className="ghost-btn"
-                onClick={() => setViewAll(true)}
-              >
-                View all
-              </button>
+              {overflow ? (
+                <button
+                  type="button"
+                  className="ghost-btn"
+                  onClick={() => expand(frameId)}
+                >
+                  View all
+                </button>
+              ) : null}
+              {expanded ? (
+                <button type="button" className="ghost-btn" onClick={collapse}>
+                  Collapse
+                </button>
+              ) : null}
             </div>
           ) : null}
         </>
       )}
-
-      <DetailModal
-        open={viewAll}
-        onClose={() => setViewAll(false)}
-        title="Meeting prep"
-      >
-        <ul className="frame-list">
-          {items.map((item) => (
-            <li
-              key={item.meeting.id}
-              className="frame-row prep-compact is-card-clickable"
-              onClick={(e) => {
-                if (isInteractiveTarget(e.target)) return;
-                setViewAll(false);
-                setBriefId(item.meeting.id);
-              }}
-            >
-              <button
-                type="button"
-                className="frame-row-title"
-                onClick={() => {
-                  setViewAll(false);
-                  setBriefId(item.meeting.id);
-                }}
-              >
-                {item.meeting.title}
-              </button>
-              <span className="meta">{item.whenLabel}</span>
-              <span className={`prep-badge prep-${item.confidence}`}>
-                {CONFIDENCE_LABEL[item.confidence]}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </DetailModal>
 
       <MeetingBriefModal
         meetingId={briefId}

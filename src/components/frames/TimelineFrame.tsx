@@ -11,6 +11,7 @@ export function TimelineFrame({
   projectId?: string | null;
   snapshot?: boolean;
   size?: string;
+  frameId?: string;
 }) {
   const { state } = useMission();
 

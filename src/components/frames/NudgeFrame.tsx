@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { DetailModal } from "@/components/DetailModal";
+import { useFrameExpand } from "@/components/workspace/FrameExpandContext";
+import { FRAME_TRANSITION_MS, isValidDateInput } from "@/lib/dates";
 import { buildNudgeItems, type NudgeItem } from "@/lib/workspace/frames-data";
 import type { FrameSize } from "@/lib/workspace/layout";
 import {
@@ -10,22 +12,25 @@ import {
 } from "@/lib/workspace/packing";
 import { useMission } from "@/lib/store";
 
-const RESOLVE_FADE_MS = 700;
-
 export function NudgeFrame({
   projectId,
   size = "compact",
+  frameId = "nudge",
 }: {
   projectId?: string | null;
   size?: FrameSize | string;
+  frameId?: string;
 }) {
-  const { state, dismissSuggestion, addTodo } = useMission();
+  const { state, addTodo, resolveNudge, dismissSuggestion } = useMission();
+  const { isExpanded, expand, collapse } = useFrameExpand();
+  const expanded = isExpanded(frameId);
+
   const [pendingDue, setPendingDue] = useState<Record<string, boolean>>({});
   const [dueDraft, setDueDraft] = useState<Record<string, string>>({});
   const [resolving, setResolving] = useState<Record<string, boolean>>({});
   const [removed, setRemoved] = useState<Record<string, boolean>>({});
   const [draftFor, setDraftFor] = useState<NudgeItem | null>(null);
-  const [viewAll, setViewAll] = useState(false);
+  const [editItem, setEditItem] = useState<NudgeItem | null>(null);
   const limit = itemLimitFor(size);
 
   const allItems = useMemo(
@@ -36,26 +41,43 @@ export function NudgeFrame({
     [state, projectId, removed],
   );
 
-  const items = allItems.slice(0, limit);
-  const overflow = allItems.length > limit;
+  const items = expanded ? allItems : allItems.slice(0, limit);
+  const overflow = !expanded && allItems.length > limit;
 
   function beginResolve(item: NudgeItem) {
+    if (resolving[item.id] || removed[item.id]) return;
+    // History before the item disappears from the active frame.
+    resolveNudge({
+      nudgeId: item.id,
+      person: item.person,
+      subject: item.item,
+      projectId: item.projectId,
+      daysWaiting: item.daysWaiting,
+      source:
+        item.source === "recommendation" || item.source === "stakeholder"
+          ? item.source
+          : "stakeholder",
+      recommendationId:
+        item.source === "recommendation"
+          ? item.id.replace(/^rec-/, "")
+          : undefined,
+    });
     setResolving((prev) => ({ ...prev, [item.id]: true }));
     window.setTimeout(() => {
+      if (item.source === "recommendation") {
+        dismissSuggestion(item.id.replace(/^rec-/, ""));
+      }
       setRemoved((prev) => ({ ...prev, [item.id]: true }));
       setResolving((prev) => {
         const next = { ...prev };
         delete next[item.id];
         return next;
       });
-      if (item.source === "recommendation") {
-        dismissSuggestion(item.id.replace(/^rec-/, ""));
-      }
-    }, RESOLVE_FADE_MS);
+    }, FRAME_TRANSITION_MS);
   }
 
   function scheduleFollowUp(item: NudgeItem, date: string) {
-    if (!date) return;
+    if (!date || !isValidDateInput(date)) return;
     addTodo({
       title: `Follow up: ${item.item}`,
       projectId: item.projectId ?? null,
@@ -90,6 +112,7 @@ export function NudgeFrame({
                   setDueDraft((prev) => ({ ...prev, [item.id]: v }))
                 }
                 onOpenDraft={() => setDraftFor(item)}
+                onOpenEdit={() => setEditItem(item)}
                 onToggleDue={() =>
                   setPendingDue((prev) => ({
                     ...prev,
@@ -101,54 +124,100 @@ export function NudgeFrame({
               />
             ))}
           </ul>
-          {overflow ? (
+          {overflow || expanded ? (
             <div className="frame-footer">
               <span className="meta">
-                Showing {items.length} of {allItems.length}
+                {expanded
+                  ? `${allItems.length} nudges`
+                  : `Showing ${items.length} of ${allItems.length}`}
               </span>
-              <button
-                type="button"
-                className="ghost-btn"
-                onClick={() => setViewAll(true)}
-              >
-                View all
-              </button>
+              {overflow ? (
+                <button
+                  type="button"
+                  className="ghost-btn"
+                  onClick={() => expand(frameId)}
+                >
+                  View all
+                </button>
+              ) : null}
+              {expanded ? (
+                <button type="button" className="ghost-btn" onClick={collapse}>
+                  Collapse
+                </button>
+              ) : null}
             </div>
           ) : null}
         </>
       )}
 
       <DetailModal
-        open={viewAll}
-        onClose={() => setViewAll(false)}
-        title="All nudges"
+        open={Boolean(editItem)}
+        onClose={() => setEditItem(null)}
+        title="Nudge"
       >
-        <ul className="frame-list">
-          {allItems.map((item) => (
-            <NudgeRow
-              key={item.id}
-              item={item}
-              resolving={Boolean(resolving[item.id])}
-              showDue={Boolean(pendingDue[item.id])}
-              dueValue={dueDraft[item.id] ?? ""}
-              onDueValue={(v) =>
-                setDueDraft((prev) => ({ ...prev, [item.id]: v }))
-              }
-              onOpenDraft={() => {
-                setViewAll(false);
-                setDraftFor(item);
-              }}
-              onToggleDue={() =>
-                setPendingDue((prev) => ({
-                  ...prev,
-                  [item.id]: !prev[item.id],
-                }))
-              }
-              onSchedule={(date) => scheduleFollowUp(item, date)}
-              onResolve={() => beginResolve(item)}
-            />
-          ))}
-        </ul>
+        {editItem ? (
+          <div className="space-y-3">
+            <label className="field">
+              <span>Person / team</span>
+              <input value={editItem.person} readOnly />
+            </label>
+            <label className="field">
+              <span>Subject</span>
+              <input value={editItem.item} readOnly />
+            </label>
+            <label className="field">
+              <span>Project</span>
+              <input value={editItem.projectCode ?? "—"} readOnly />
+            </label>
+            <label className="field">
+              <span>Due date</span>
+              <input
+                type="date"
+                value={dueDraft[editItem.id] ?? ""}
+                onChange={(e) =>
+                  setDueDraft((prev) => ({
+                    ...prev,
+                    [editItem.id]: e.target.value,
+                  }))
+                }
+              />
+            </label>
+            <label className="field">
+              <span>Notes</span>
+              <textarea
+                className="capture-textarea"
+                rows={3}
+                defaultValue={editItem.suggestedMessage ?? ""}
+                id="nudge-edit-notes"
+              />
+            </label>
+            <div className="row-actions">
+              <button
+                type="button"
+                className="primary-btn"
+                disabled={!dueDraft[editItem.id]}
+                onClick={() => {
+                  const date = dueDraft[editItem.id];
+                  if (!date) return;
+                  scheduleFollowUp(editItem, date);
+                  setEditItem(null);
+                }}
+              >
+                Schedule follow-up
+              </button>
+              <button
+                type="button"
+                className="ghost-btn"
+                onClick={() => {
+                  beginResolve(editItem);
+                  setEditItem(null);
+                }}
+              >
+                Mark resolved
+              </button>
+            </div>
+          </div>
+        ) : null}
       </DetailModal>
 
       {draftFor ? (
@@ -219,6 +288,7 @@ function NudgeRow({
   dueValue,
   onDueValue,
   onOpenDraft,
+  onOpenEdit,
   onToggleDue,
   onSchedule,
   onResolve,
@@ -229,16 +299,17 @@ function NudgeRow({
   dueValue: string;
   onDueValue: (v: string) => void;
   onOpenDraft: () => void;
+  onOpenEdit: () => void;
   onToggleDue: () => void;
   onSchedule: (date: string) => void;
   onResolve: () => void;
 }) {
   return (
     <li
-      className={`nudge-row is-card-clickable ${resolving ? "is-resolving" : ""}`}
+      className={`nudge-row is-card-clickable frame-item-transition ${resolving ? "is-resolving is-completing" : ""}`}
       onClick={(e) => {
         if (isInteractiveTarget(e.target)) return;
-        onOpenDraft();
+        onOpenEdit();
       }}
     >
       <div className="nudge-row-main">
@@ -280,7 +351,7 @@ function NudgeRow({
           <button
             type="button"
             className="primary-btn"
-            disabled={!dueValue}
+            disabled={!dueValue || !isValidDateInput(dueValue)}
             onClick={() => onSchedule(dueValue)}
           >
             Schedule

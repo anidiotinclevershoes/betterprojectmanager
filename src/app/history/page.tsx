@@ -3,14 +3,15 @@
 import { useMemo, useState } from "react";
 import { useMission } from "@/lib/store";
 import type { HistoryEventType } from "@/lib/types";
+import { historyAccentForType } from "@/lib/workspace/frame-accents";
 
 const TYPE_LABELS: Record<HistoryEventType, string> = {
-  task_added: "Task added",
-  task_completed: "Task completed",
-  task_updated: "Task updated",
+  task_added: "To Do added",
+  task_completed: "To Do completed",
+  task_updated: "To Do updated",
   suggestion_accepted: "Suggestion accepted",
   suggestion_dismissed: "Suggestion dismissed",
-  meeting_created: "Meeting created",
+  meeting_created: "Meeting updated",
   milestone_changed: "Milestone changed",
   risk_added: "Risk added",
   knowledge_updated: "Knowledge updated",
@@ -146,7 +147,17 @@ export default function HistoryPage() {
                     />
                     <div className="min-w-0 flex-1">
                       <p className="history-title">
-                        {TYPE_LABELS[event.type]}
+                        <span
+                          className={`history-type-tag history-accent-${historyAccentForType(event.type)}`}
+                        >
+                          {TYPE_LABELS[event.type]}
+                        </span>
+                        {event.title &&
+                        event.title !== TYPE_LABELS[event.type] ? (
+                          <span className="history-event-title">
+                            {event.title}
+                          </span>
+                        ) : null}
                         {event.source === "ai" ? (
                           <span className="tag">AI</span>
                         ) : null}

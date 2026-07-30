@@ -4,6 +4,10 @@ import type { ComponentType } from "react";
 import type { WorkspaceFrameConfig, FrameSize } from "@/lib/workspace/layout";
 import { FRAME_LABELS } from "@/lib/workspace/layout";
 import { packWorkspaceFrames } from "@/lib/workspace/packing";
+import {
+  FrameExpandProvider,
+  useFrameExpand,
+} from "@/components/workspace/FrameExpandContext";
 import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
 import { TodoFrame } from "@/components/frames/TodoFrame";
 import { MeetingPrepFrame } from "@/components/frames/MeetingPrepFrame";
@@ -13,6 +17,7 @@ import { TimelineFrame } from "@/components/frames/TimelineFrame";
 type FrameProps = {
   projectId?: string | null;
   size?: FrameSize;
+  frameId?: string;
 };
 
 export const frameRegistry: Record<string, ComponentType<FrameProps>> = {
@@ -37,13 +42,14 @@ const SPAN_CLASS: Record<number, string> = {
   12: "lg:col-span-12",
 };
 
-export function WorkspaceFrameRow({
+function WorkspaceFrameRowInner({
   frames,
   projectId,
 }: {
   frames: WorkspaceFrameConfig[];
   projectId?: string | null;
 }) {
+  const { isExpanded } = useFrameExpand();
   const visible = frames.filter((f) => f.visible);
   const packed = packWorkspaceFrames(visible);
 
@@ -52,25 +58,48 @@ export function WorkspaceFrameRow({
       {packed.map(({ frame, span }) => {
         const Component = frameRegistry[frame.type];
         if (!Component) return null;
-        const spanClass = SPAN_CLASS[span] ?? "lg:col-span-4";
+        const expanded = isExpanded(frame.id);
+        const spanClass = expanded
+          ? "lg:col-span-12"
+          : (SPAN_CLASS[span] ?? "lg:col-span-4");
         const mdSpan =
-          frame.size === "full" || span >= 6
+          expanded || frame.size === "full" || span >= 6
             ? "md:col-span-6"
             : "md:col-span-3";
         return (
-          <div key={frame.id} className={`min-w-0 ${mdSpan} ${spanClass}`}>
+          <div
+            key={frame.id}
+            className={`min-w-0 ${mdSpan} ${spanClass} ${expanded ? "is-frame-expanded" : ""}`}
+            data-frame-expand={frame.id}
+          >
             <WorkspaceFrame
               type={frame.type}
               title={frame.title ?? FRAME_LABELS[frame.type]}
+              expanded={expanded}
             >
               <Component
                 projectId={projectId ?? frame.projectScope}
                 size={frame.size}
+                frameId={frame.id}
               />
             </WorkspaceFrame>
           </div>
         );
       })}
     </div>
+  );
+}
+
+export function WorkspaceFrameRow({
+  frames,
+  projectId,
+}: {
+  frames: WorkspaceFrameConfig[];
+  projectId?: string | null;
+}) {
+  return (
+    <FrameExpandProvider>
+      <WorkspaceFrameRowInner frames={frames} projectId={projectId} />
+    </FrameExpandProvider>
   );
 }

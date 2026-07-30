@@ -100,6 +100,28 @@ type MissionContextValue = {
   addTodo: (input: AddTodoInput) => void;
   updateTodo: (todoId: string, patch: UpdateTodoInput) => void;
   updateTodoDueDate: (todoId: string, dueAt: string | undefined) => void;
+  resolveNudge: (input: {
+    nudgeId: string;
+    person: string;
+    subject: string;
+    projectId?: string | null;
+    daysWaiting?: number;
+    source?: "stakeholder" | "recommendation";
+    recommendationId?: string;
+  }) => void;
+  updateMeeting: (
+    meetingId: string,
+    patch: {
+      title?: string;
+      projectId?: string;
+      startsAt?: string;
+      objectives?: string[];
+      openingScript?: string;
+      talkingPoints?: string[];
+      questionsToAsk?: string[];
+      risksToDiscuss?: string[];
+    },
+  ) => void;
   addSuggestion: (input: AddSuggestionInput) => string | null;
   createProject: (input: CreateProjectInput) => string;
   cloneRelOps: (input: CloneRelOpsInput) => void;
@@ -444,9 +466,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         },
         makeHistoryEvent({
           type: nextDone ? "task_completed" : "task_updated",
-          title: nextDone ? "Task completed" : "Task reopened",
+          title: nextDone ? "You completed a To Do" : "You reopened a To Do",
           detail: todo.title,
           projectId: todo.projectId,
+          source: "user",
         }),
       );
     });
@@ -487,48 +510,215 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         { ...prev, todos: [todo, ...(prev.todos ?? [])] },
         makeHistoryEvent({
           type: "task_added",
-          title: "Task added",
+          title: "You added a To Do",
           detail: title,
           projectId: input.projectId ?? null,
+          source: "user",
         }),
       );
     });
   }, []);
 
   const updateTodo = useCallback((todoId: string, patch: UpdateTodoInput) => {
-    setState((prev) => ({
-      ...prev,
-      todos: (prev.todos ?? []).map((t) => {
-        if (t.id !== todoId) return t;
-        const projectId =
-          patch.projectId !== undefined ? patch.projectId : t.projectId;
-        const project = projectId
-          ? prev.projects.find((p) => p.id === projectId)
-          : undefined;
-        let dueAt = t.dueAt;
-        if (patch.dueAt === null) dueAt = undefined;
-        else if (typeof patch.dueAt === "string") {
-          const iso = patch.dueAt.includes("T")
-            ? patch.dueAt
-            : new Date(`${patch.dueAt}T09:00:00`).toISOString();
-          dueAt = clampDueToWindow(project, iso);
-        }
-        return {
-          ...t,
-          title: patch.title !== undefined ? patch.title.trim() || t.title : t.title,
-          detail:
-            patch.detail === null
-              ? undefined
-              : patch.detail !== undefined
-                ? patch.detail.trim() || undefined
-                : t.detail,
-          done: patch.done ?? t.done,
-          projectId,
-          dueAt,
-        };
-      }),
-    }));
+    setState((prev) => {
+      const before = (prev.todos ?? []).find((t) => t.id === todoId);
+      if (!before) return prev;
+      const projectId =
+        patch.projectId !== undefined ? patch.projectId : before.projectId;
+      const project = projectId
+        ? prev.projects.find((p) => p.id === projectId)
+        : undefined;
+      let dueAt = before.dueAt;
+      if (patch.dueAt === null) dueAt = undefined;
+      else if (typeof patch.dueAt === "string") {
+        const iso = patch.dueAt.includes("T")
+          ? patch.dueAt
+          : new Date(`${patch.dueAt}T09:00:00`).toISOString();
+        dueAt = clampDueToWindow(project, iso);
+      }
+      const next = {
+        ...before,
+        title:
+          patch.title !== undefined
+            ? patch.title.trim() || before.title
+            : before.title,
+        detail:
+          patch.detail === null
+            ? undefined
+            : patch.detail !== undefined
+              ? patch.detail.trim() || undefined
+              : before.detail,
+        done: patch.done ?? before.done,
+        projectId,
+        dueAt,
+      };
+
+      const changes: string[] = [];
+      if (before.title !== next.title) {
+        changes.push(`Title:\n${before.title} → ${next.title}`);
+      }
+      if ((before.projectId ?? null) !== (next.projectId ?? null)) {
+        const b =
+          before.projectId
+            ? prev.projects.find((p) => p.id === before.projectId)?.code ?? "—"
+            : "Unassigned";
+        const a =
+          next.projectId
+            ? prev.projects.find((p) => p.id === next.projectId)?.code ?? "—"
+            : "Unassigned";
+        changes.push(`Project:\n${b} → ${a}`);
+      }
+      if ((before.dueAt ?? "") !== (next.dueAt ?? "")) {
+        const fmt = (iso?: string) =>
+          iso
+            ? new Date(iso).toLocaleDateString(undefined, {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })
+            : "None";
+        changes.push(`Due date:\n${fmt(before.dueAt)} → ${fmt(next.dueAt)}`);
+      }
+      if ((before.detail ?? "") !== (next.detail ?? "")) {
+        changes.push("Notes updated");
+      }
+
+      const updated = {
+        ...prev,
+        todos: (prev.todos ?? []).map((t) => (t.id === todoId ? next : t)),
+      };
+      if (!changes.length) return updated;
+      return pushHistory(
+        updated,
+        makeHistoryEvent({
+          type: "task_updated",
+          title: "You updated a To Do",
+          detail: `${next.title}\n${changes.join("\n")}`,
+          projectId: next.projectId,
+          source: "user",
+        }),
+      );
+    });
   }, []);
+
+  const resolveNudge = useCallback(
+    (input: {
+      nudgeId: string;
+      person: string;
+      subject: string;
+      projectId?: string | null;
+      daysWaiting?: number;
+      source?: "stakeholder" | "recommendation";
+      recommendationId?: string;
+    }) => {
+      setState((prev) => {
+        const marker = `#nudge:${input.nudgeId}`;
+        const already = (prev.history ?? []).some(
+          (h) =>
+            h.type === "nudge_resolved" && (h.detail ?? "").includes(marker),
+        );
+        if (already) return prev;
+        const projectCode = input.projectId
+          ? prev.projects.find((p) => p.id === input.projectId)?.code
+          : null;
+        const waiting =
+          typeof input.daysWaiting === "number" && input.daysWaiting > 0
+            ? `Waiting ${input.daysWaiting}d`
+            : null;
+        const detail = [
+          `${input.person} — ${input.subject}`,
+          projectCode,
+          waiting,
+          marker,
+        ]
+          .filter(Boolean)
+          .join("\n");
+        return pushHistory(
+          prev,
+          makeHistoryEvent({
+            type: "nudge_resolved",
+            title: "You resolved a Nudge",
+            detail,
+            projectId: input.projectId,
+            source: input.source === "recommendation" ? "ai" : "user",
+          }),
+        );
+      });
+    },
+    [],
+  );
+
+  const updateMeeting = useCallback(
+    (
+      meetingId: string,
+      patch: {
+        title?: string;
+        projectId?: string;
+        startsAt?: string;
+        objectives?: string[];
+        openingScript?: string;
+        talkingPoints?: string[];
+        questionsToAsk?: string[];
+        risksToDiscuss?: string[];
+      },
+    ) => {
+      setState((prev) => {
+        const before = prev.meetings.find((m) => m.id === meetingId);
+        if (!before) return prev;
+        const next = {
+          ...before,
+          title: patch.title?.trim() || before.title,
+          projectId: patch.projectId ?? before.projectId,
+          startsAt: patch.startsAt ?? before.startsAt,
+          prep: {
+            ...before.prep,
+            objectives: patch.objectives ?? before.prep.objectives,
+            openingScript:
+              patch.openingScript !== undefined
+                ? patch.openingScript
+                : before.prep.openingScript,
+            talkingPoints: patch.talkingPoints ?? before.prep.talkingPoints,
+            questionsToAsk: patch.questionsToAsk ?? before.prep.questionsToAsk,
+            risksToDiscuss: patch.risksToDiscuss ?? before.prep.risksToDiscuss,
+          },
+        };
+        const changes: string[] = [];
+        if (before.title !== next.title) {
+          changes.push(`Title:\n${before.title} → ${next.title}`);
+        }
+        if (before.startsAt !== next.startsAt) {
+          changes.push("Date/time updated");
+        }
+        if (before.prep.openingScript !== next.prep.openingScript) {
+          changes.push("Opening updated");
+        }
+        if (
+          JSON.stringify(before.prep.objectives) !==
+          JSON.stringify(next.prep.objectives)
+        ) {
+          changes.push("Objectives updated");
+        }
+        const updated = {
+          ...prev,
+          meetings: prev.meetings.map((m) =>
+            m.id === meetingId ? next : m,
+          ),
+        };
+        if (!changes.length) return updated;
+        return pushHistory(
+          updated,
+          makeHistoryEvent({
+            type: "meeting_created",
+            title: "You updated Meeting Prep",
+            detail: `${next.title}\n${changes.join("\n")}`,
+            projectId: next.projectId,
+            source: "user",
+          }),
+        );
+      });
+    },
+    [],
+  );
 
   const updateTodoDueDate = useCallback(
     (todoId: string, dueAt: string | undefined) => {
@@ -625,13 +815,22 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           updatedAt: new Date().toISOString(),
           sections: { ...current.sections, [sectionId]: cleaned },
         };
-        return {
-          ...prev,
-          knowledge: [
-            ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
-            next,
-          ],
-        };
+        return pushHistory(
+          {
+            ...prev,
+            knowledge: [
+              ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
+              next,
+            ],
+          },
+          makeHistoryEvent({
+            type: "knowledge_updated",
+            title: "You updated Knowledge",
+            detail: `${sectionId} updated`,
+            projectId,
+            source: "user",
+          }),
+        );
       });
     },
     [],
@@ -716,6 +915,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       addTodo,
       updateTodo,
       updateTodoDueDate,
+      resolveNudge,
+      updateMeeting,
       addSuggestion,
       createProject,
       cloneRelOps,
@@ -744,6 +945,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       addTodo,
       updateTodo,
       updateTodoDueDate,
+      resolveNudge,
+      updateMeeting,
       addSuggestion,
       createProject,
       cloneRelOps,

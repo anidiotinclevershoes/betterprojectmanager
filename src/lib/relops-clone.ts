@@ -65,8 +65,9 @@ export function cloneRelOpsProject(
 
   const mergeAt = toIsoDate(input.mergeDate);
   const releaseAt = toIsoDate(input.releaseDate);
-  if (new Date(releaseAt) <= new Date(mergeAt)) {
-    throw new Error("Release date must be after merge date.");
+  // Safety net: release must be on or after merge (UI validates first).
+  if (new Date(releaseAt) < new Date(mergeAt)) {
+    throw new Error("Release date must be on or after the merge date.");
   }
 
   const oldMerge = template.mergeDate ?? findEarliestTimeline(state, template.id);
