@@ -143,7 +143,7 @@ export async function POST(request: Request) {
     let notice: string | undefined;
 
     if (!openaiConfigured) {
-      result = localCaptureFallback(input, state);
+      result = localCaptureFallback(input, state, captureContext);
       notice =
         "OPENAI_API_KEY not set — used local Capture fallback (same as production).";
     } else {
@@ -163,6 +163,7 @@ export async function POST(request: Request) {
         projectId,
         sourceType: "note",
         ai,
+        captureContext,
       });
     }
 

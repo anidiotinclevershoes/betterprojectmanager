@@ -117,7 +117,7 @@ export async function POST(request: Request) {
         knowledge,
         timeline,
       };
-      const result = localCaptureFallback(input, fallbackState);
+      const result = localCaptureFallback(input, fallbackState, captureContext);
       let enrichedManifest = contextManifest;
       try {
         const promptAssembly = buildCapturePromptAssembly({
@@ -199,6 +199,7 @@ export async function POST(request: Request) {
       projectId: body.projectId,
       sourceType: body.sourceType,
       ai,
+      captureContext,
     });
 
     const enrichedManifest = {

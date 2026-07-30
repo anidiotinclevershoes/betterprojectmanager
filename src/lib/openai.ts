@@ -1,30 +1,24 @@
 import { analyseCapture } from "./coach";
 import {
-  parseSuggestionKind,
-  parseSuggestionOp,
-  type SuggestionKind,
-  type SuggestionOp,
-} from "./capture/suggestions";
-import {
   buildCaptureAssembledPrompt,
   logPromptAssemblyDiagnostic,
   type AssembledPrompt,
 } from "@/ai/domain";
 import type { CaptureProjectContext } from "./capture/context";
-import { extractKnowledgePatchFromText } from "./knowledge";
+import {
+  attachFindingsToResult,
+  knowledgePatchFromOperations,
+  recommendationsFromOperations,
+  runFindingsPipeline,
+} from "./capture/findings";
 import { COACHING_SYSTEM_PROMPT, MEMORY_TYPES } from "./mission";
-import { extractTimelinePatchFromText } from "./timeline";
 import type {
   CaptureInput,
   CaptureResult,
   MissionState,
   Project,
   ProjectKnowledge,
-  Recommendation,
-  RecommendationKind,
-  RecommendationUrgency,
   TimelineItem,
-  TimelineItemInput,
 } from "./types";
 
 /**
@@ -101,21 +95,9 @@ export type AiCapturePayload = {
   people: string[];
   insights: string[];
   assumptions: string[];
-  recommendations: Array<{
-    kind: RecommendationKind;
-    urgency: RecommendationUrgency;
-    title: string;
-    action: string;
-    why: string;
-    leadershipImpact: string;
-    suggestedScript?: string;
-    operation?: string;
-    itemType?: string;
-    targetTitle?: string;
-  }>;
+  /** Phase 1.6: structured findings — not final operations. */
+  findings?: unknown[];
   suggestedProjectId?: string | null;
-  knowledgePatch?: Partial<ProjectKnowledge["sections"]>;
-  timelinePatch?: TimelineItemInput[];
 };
 
 const CAPTURE_JSON_SCHEMA_HINT = `{
@@ -124,40 +106,37 @@ const CAPTURE_JSON_SCHEMA_HINT = `{
   "memoryType": one of ${JSON.stringify(MEMORY_TYPES)},
   "tags": ["short", "tags"],
   "people": ["Full Names if known"],
-  "insights": ["what changed / what this means"],
+  "insights": ["short factual bullets of what happened"],
   "assumptions": ["explicit assumptions when info is missing"],
-  "recommendations": [
+  "findings": [
     {
-      "kind": "stakeholder_update|escalation|conversation|meeting|decision|risk|dependency|release|meeting_prep|leadership|assumption",
-      "urgency": "now|today|this_week|watch",
-      "title": "leadership move title",
-      "action": "what the PM should do",
-      "why": "why this matters",
-      "leadershipImpact": "how this makes them look calm, prepared, proactive and trusted",
-      "suggestedScript": "optional short script",
-      "operation": "create|update|complete|remove|archive|delete",
-      "itemType": "todo|milestone|knowledge|stakeholder|nudge|meeting|decision|risk|memory",
-      "targetTitle": "optional exact title of an existing todo/meeting/stakeholder when updating/completing/removing"
+      "fact": "one concrete fact from the Capture",
+      "evidence": "short quote or paraphrase from Capture supporting the fact",
+      "findingType": "ENTITY_COMPLETED|ENTITY_UPDATED|ENTITY_BLOCKED|ENTITY_REOPENED|NEW_INFORMATION|NO_CHANGE|AMBIGUOUS",
+      "target": {
+        "entityType": "todo|risk|knowledge|stakeholder|meeting|milestone|nudge|release",
+        "entityId": "exact id from the supplied Existing records list — never invent",
+        "title": "exact title from that record"
+      },
+      "changes": {
+        "fieldName": { "previous": "optional prior value", "proposed": "new value" }
+      },
+      "confidence": 0-100,
+      "requiresClarification": false,
+      "clarificationQuestion": "only when ambiguous",
+      "reasoningSummary": "one or two sentences linking evidence to the finding"
     }
   ],
-  "suggestedProjectId": "project id if clear, else null",
-  "knowledgePatch": {
-    "now": ["0-3 short bullets: what is newly true"],
-    "decisions": ["0-2 short bullets: decisions / trade-offs only if stated"],
-    "risks": ["0-3 short bullets: risks / blockers only if relevant"],
-    "people": ["0-2 short bullets: stakeholder prefs/concerns only if relevant"],
-    "openLoops": ["0-3 short bullets: waiting on / unconfirmed only if relevant"]
-  },
-  "timelinePatch": [
-    {
-      "label": "short milestone/meeting/deadline label",
-      "type": "phase|milestone|meeting|deadline|submission",
-      "startAt": "ISO date if explicitly stated or clearly implied",
-      "endAt": "optional ISO end for phases",
-      "notes": "optional short note"
-    }
-  ]
-}`;
+  "suggestedProjectId": "project id if clear, else null"
+}
+
+Important:
+- Do NOT return recommendations, operations, knowledgePatch, or timelinePatch.
+- Do NOT invent record IDs. If no record matches, omit target or use AMBIGUOUS / NEW_INFORMATION.
+- Prefer matching an existing record over creating duplicate Knowledge.
+- Do not create Knowledge merely to record a transient status update (e.g. a To Do completed).
+- Mark uncertainty as AMBIGUOUS rather than guessing.`;
+
 
 export type CapturePromptBuildArgs = {
   rawText: string;
@@ -294,6 +273,7 @@ export function buildCaptureResultFromAi(args: {
   projectId?: string;
   sourceType?: CaptureInput["sourceType"];
   ai: AiCapturePayload;
+  captureContext?: CaptureProjectContext | null;
 }): CaptureResult {
   const memoryType = (MEMORY_TYPES as readonly string[]).includes(
     args.ai.memoryType,
@@ -307,38 +287,24 @@ export function buildCaptureResultFromAi(args: {
   const now = new Date().toISOString();
   const projectId = args.ai.suggestedProjectId || args.projectId || undefined;
 
-  const recommendations: Recommendation[] = (
-    args.ai.recommendations ?? []
-  ).map((rec) => {
-    const operation = parseSuggestionOp(
-      rec.operation,
-      rec.title || "recommendation",
-    ) as SuggestionOp;
-    const itemType = parseSuggestionKind(
-      rec.itemType,
-      "action",
-      rec.title || "recommendation",
-    ) as SuggestionKind;
-    return {
-      id: id("rec"),
-      kind: rec.kind,
-      urgency: rec.urgency,
-      title: rec.title,
-      action: rec.action,
-      why: rec.why,
-      leadershipImpact: rec.leadershipImpact,
-      suggestedScript: rec.suggestedScript,
-      projectId,
-      relatedMemoryIds: [memoryId],
-      createdAt: now,
-      status: "active" as const,
-      operation,
-      itemType,
-      targetTitle: rec.targetTitle,
-    };
+  const pipeline = runFindingsPipeline({
+    rawFindings: args.ai.findings,
+    captureText: args.rawText,
+    captureContext: args.captureContext,
+    allowLocalFallback: false,
   });
 
-  return {
+  const recommendations = recommendationsFromOperations(
+    pipeline.operations,
+    projectId,
+    memoryId,
+  );
+  const knowledgePatch = knowledgePatchFromOperations(
+    pipeline.operations,
+    pipeline.findings,
+  );
+
+  const base: CaptureResult = {
     memory: {
       id: memoryId,
       type: memoryType,
@@ -351,38 +317,81 @@ export function buildCaptureResultFromAi(args: {
       createdAt: now,
       source: "capture",
     },
-    insights: [
-      ...(args.ai.insights ?? []),
-      "Tidied from raw capture with OpenAI.",
-    ],
+    insights: [...(args.ai.insights ?? [])],
     assumptions: args.ai.assumptions ?? [],
     recommendations,
     rawContent: args.rawText,
     tidied: true,
     provider: "openai",
-    knowledgePatch: args.ai.knowledgePatch,
+    knowledgePatch,
     knowledgeProjectId: projectId,
-    timelinePatch: args.ai.timelinePatch,
+    timelinePatch: undefined,
+    findingsValidation: {
+      ok: pipeline.validation.ok,
+      errors: pipeline.validation.errors,
+      warnings: pipeline.validation.warnings,
+      invalidTargetCount: pipeline.validation.invalidTargetCount,
+    },
   };
+
+  return attachFindingsToResult(
+    base,
+    pipeline.findings,
+    pipeline.operations,
+  );
 }
 
 export function localCaptureFallback(
   input: CaptureInput,
   state: MissionState,
+  captureContext?: CaptureProjectContext | null,
 ): CaptureResult {
-  const result = analyseCapture(input, state);
-  const projectId = result.memory.projectId || input.projectId;
-  return {
-    ...result,
+  const analysed = analyseCapture(input, state);
+  const projectId = analysed.memory.projectId || input.projectId;
+
+  const pipeline = runFindingsPipeline({
+    rawFindings: null,
+    captureText: input.content,
+    captureContext: captureContext ?? null,
+    allowLocalFallback: true,
+  });
+
+  const memoryId = analysed.memory.id;
+  const recommendations = recommendationsFromOperations(
+    pipeline.operations,
+    projectId,
+    memoryId,
+  );
+  const knowledgePatch = knowledgePatchFromOperations(
+    pipeline.operations,
+    pipeline.findings,
+  );
+
+  const base: CaptureResult = {
+    ...analysed,
+    recommendations,
     rawContent: input.content,
     tidied: false,
     provider: "local",
-    knowledgePatch: projectId
-      ? extractKnowledgePatchFromText(input.content)
-      : undefined,
+    knowledgePatch,
     knowledgeProjectId: projectId,
-    timelinePatch: projectId
-      ? extractTimelinePatchFromText(input.content)
-      : undefined,
+    timelinePatch: undefined,
+    insights: [
+      ...pipeline.findings.map((f) => f.fact),
+      ...(analysed.insights ?? []).slice(0, 2),
+    ],
+    findingsValidation: {
+      ok: pipeline.validation.ok,
+      errors: pipeline.validation.errors,
+      warnings: pipeline.validation.warnings,
+      invalidTargetCount: pipeline.validation.invalidTargetCount,
+    },
   };
+
+  return attachFindingsToResult(
+    base,
+    pipeline.findings,
+    pipeline.operations,
+  );
 }
+

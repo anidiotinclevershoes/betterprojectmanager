@@ -231,6 +231,11 @@ export function buildSuggestions(
     dueAt?: string;
   }[] = [],
 ): PendingSuggestion[] {
+  // Phase 1.6: prefer deterministic proposed operations when present.
+  if (result.proposedOperations?.length) {
+    return buildSuggestionsFromProposedOps(result, openTodos);
+  }
+
   const items: PendingSuggestion[] = [];
   const projectId = result.knowledgeProjectId || result.memory.projectId;
 
@@ -256,7 +261,6 @@ export function buildSuggestions(
     const inferred = inferOpFromText(rec.title, rec.action);
     let op: SuggestionOp = fromSchema ?? inferred ?? "create";
 
-    // Completing/updating/removing needs a target when possible
     if (
       (op === "complete" ||
         op === "update" ||
@@ -266,7 +270,6 @@ export function buildSuggestions(
       !matched &&
       !fromSchema
     ) {
-      // Keep inferred op if AI said so via schema; otherwise create
       if (!fromSchema) op = "create";
     }
 
@@ -321,6 +324,75 @@ export function buildSuggestions(
         });
       }
     }
+  }
+
+  return items
+    .map((item, i) => ({ ...item, id: `${item.id}-${i}` }))
+    .filter((item) => item.content.trim());
+}
+
+function buildSuggestionsFromProposedOps(
+  result: CaptureResult,
+  openTodos: {
+    id: string;
+    title: string;
+    projectId?: string | null;
+    dueAt?: string;
+  }[],
+): PendingSuggestion[] {
+  const projectId = result.knowledgeProjectId || result.memory.projectId;
+  const items: PendingSuggestion[] = [];
+
+  for (const op of result.proposedOperations ?? []) {
+    if (op.operation === "NO_CHANGE") continue;
+    const kind: SuggestionKind =
+      op.entityType === "todo"
+        ? "action"
+        : op.entityType === "risk"
+          ? "risk"
+          : op.entityType === "knowledge"
+            ? "knowledge"
+            : op.entityType === "stakeholder"
+              ? "stakeholder"
+              : op.entityType === "meeting"
+                ? "meeting"
+                : op.entityType === "milestone"
+                  ? "milestone"
+                  : op.entityType === "nudge"
+                    ? "nudge"
+                    : "knowledge";
+    const suggestionOp = op.operation.toLowerCase() as SuggestionOp;
+    const matched =
+      op.entityType === "todo"
+        ? openTodos.find((t) => t.id === op.targetId) ??
+          matchTodo(openTodos, op.targetTitle)
+        : undefined;
+    const rec = result.recommendations.find(
+      (r) => r.proposedOperationId === op.id || r.sourceFindingId === op.sourceFindingId,
+    );
+    const proposedText =
+      typeof op.proposedValues?.text === "string"
+        ? String(op.proposedValues.text)
+        : op.targetTitle ?? op.reason;
+
+    items.push({
+      id: `op-${op.id}`,
+      kind,
+      op: suggestionOp,
+      content: proposedText,
+      projectId: projectId ?? null,
+      destination: destinationFor(kind),
+      targetTodoId: matched?.id ?? (op.entityType === "todo" ? op.targetId : undefined),
+      recommendation: rec,
+      knowledgeSection:
+        kind === "knowledge" || kind === "risk"
+          ? kind === "risk"
+            ? "risks"
+            : "now"
+          : undefined,
+      knowledgeBullet:
+        kind === "knowledge" || kind === "risk" ? proposedText : undefined,
+    });
   }
 
   return items

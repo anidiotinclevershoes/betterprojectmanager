@@ -26,6 +26,8 @@ export type GoldenExpectedOutcome = {
   entity: GoldenEntity;
   /** Existing record title / knowledge bullet to match (fuzzy). */
   targetTitle: string;
+  /** Preferred stable fixture ID when available. */
+  targetId?: string;
   /** Optional human hint for the Reasoning card. */
   reasoningHint?: {
     foundLabel: string;
@@ -98,6 +100,8 @@ export type GoldenProposedOp = {
   detail?: string;
   confidence: number | null;
   confidenceEstimated: boolean;
+  sourceFindingId?: string;
+  targetId?: string;
 };
 
 export type GoldenReasoningStep = {
@@ -106,6 +110,7 @@ export type GoldenReasoningStep = {
   foundTitle: string;
   captureStates: string;
   recommend: string;
+  sourceFindingId?: string;
 };
 
 export type GoldenPresentation = {
@@ -113,4 +118,16 @@ export type GoldenPresentation = {
   facts: string[];
   reasoning: GoldenReasoningStep[];
   proposed: GoldenProposedOp[];
+  findingCards?: Array<{
+    id: string;
+    fact: string;
+    matchedLabel?: string;
+    matchedTitle?: string;
+    meaning: string;
+    confidence: number;
+    requiresClarification: boolean;
+    clarificationQuestion?: string;
+    invalidTarget?: boolean;
+    validationWarning?: string;
+  }>;
 };

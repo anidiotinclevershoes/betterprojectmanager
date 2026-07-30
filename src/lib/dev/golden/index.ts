@@ -1,4 +1,8 @@
-export type { GoldenScenarioFixture, GoldenScore, GoldenPresentation } from "./types";
+export type {
+  GoldenScenarioFixture,
+  GoldenScore,
+  GoldenPresentation,
+} from "./types";
 export {
   FUTURE_SCENARIO_STUBS,
   WEBSITE_REFRESH_SCENARIO,
@@ -7,7 +11,6 @@ export {
   listGoldenScenarios,
 } from "./scenarios";
 export {
-  estimateConfidence,
   presentGoldenResult,
   scoreGoldenResult,
   titlesLooselyMatch,

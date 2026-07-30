@@ -1,5 +1,5 @@
 /**
- * Golden Test — scoring / presentation unit checks (no network).
+ * Golden Test — scoring presentation checks + three pipeline runs.
  * Run: npx tsx scripts/verify-golden-test.ts
  */
 import assert from "node:assert/strict";
@@ -9,118 +9,54 @@ import {
   presentGoldenResult,
   scoreGoldenResult,
 } from "../src/lib/dev/golden";
-import type { CaptureResult } from "../src/lib/types";
+import { buildCaptureContext } from "../src/lib/capture/context";
+import { localCaptureFallback } from "../src/lib/openai";
+import type { MissionState } from "../src/lib/types";
 
 const scenario = WEBSITE_REFRESH_SCENARIO;
-const state = fixtureToMissionState(scenario);
+const fixture = fixtureToMissionState(scenario);
+const state: MissionState = { ...fixture, memories: [] };
 
 assert.equal(state.projects[0]?.name, "Website Refresh");
 assert.ok(state.todos.some((t) => t.title === "Obtain CAB approval"));
-assert.ok(
-  state.knowledge[0]?.sections.risks.includes("CDN deployment delayed"),
-);
 
-const strongResult: CaptureResult = {
-  memory: {
-    id: "mem-1",
-    type: "conversation",
+const runs: Array<ReturnType<typeof scoreGoldenResult>> = [];
+for (let i = 0; i < 3; i++) {
+  const captureContext = buildCaptureContext({
     projectId: scenario.project.id,
-    title: "CAB approved and release moved",
-    content:
-      "CAB approval received. Release moved to 19 August. CDN issue resolved.",
-    tags: [],
-    people: ["Sarah"],
-    occurredAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    source: "capture",
-  },
-  insights: [
-    "CAB approval received",
-    "Release moved to 19 August",
-    "CDN issue resolved",
-  ],
-  assumptions: [],
-  recommendations: [
+    captureText: scenario.defaultCapture,
+    state,
+  });
+  const result = localCaptureFallback(
     {
-      id: "r1",
-      kind: "decision",
-      urgency: "now",
-      title: "Complete Obtain CAB approval",
-      action: "Mark Obtain CAB approval complete",
-      why: "Approval received",
-      leadershipImpact: "Close the loop",
+      content: scenario.defaultCapture,
       projectId: scenario.project.id,
-      createdAt: new Date().toISOString(),
-      status: "active",
-      operation: "complete",
-      itemType: "action",
-      targetTitle: "Obtain CAB approval",
+      sourceType: "note",
     },
-    {
-      id: "r2",
-      kind: "release",
-      urgency: "today",
-      title: "Update release date to 19 August",
-      action: "Change Release planned for 12 August to 19 August",
-      why: "Sarah agreed",
-      leadershipImpact: "Keep timeline honest",
-      projectId: scenario.project.id,
-      createdAt: new Date().toISOString(),
-      status: "active",
-      operation: "update",
-      itemType: "knowledge",
-      targetTitle: "Release planned for 12 August",
-    },
-    {
-      id: "r3",
-      kind: "risk",
-      urgency: "today",
-      title: "Close CDN deployment delayed",
-      action: "Mark CDN risk complete — issue resolved",
-      why: "CDN resolved",
-      leadershipImpact: "Reduce noise",
-      projectId: scenario.project.id,
-      createdAt: new Date().toISOString(),
-      status: "active",
-      operation: "complete",
-      itemType: "risk",
-      targetTitle: "CDN deployment delayed",
-    },
-  ],
-  knowledgePatch: {
-    now: ["Release planned for 19 August"],
-    risks: [],
-  },
-  knowledgeProjectId: scenario.project.id,
-  provider: "openai",
-  tidied: true,
-};
-
-const score = scoreGoldenResult(scenario, strongResult);
-assert.equal(score.total, 3);
-assert.ok(score.matched >= 2, `expected >=2 matched, got ${score.matched}`);
-assert.ok(["excellent", "good"].includes(score.grade));
-
-const presented = presentGoldenResult(
-  scenario,
-  strongResult,
-  scenario.defaultCapture,
-);
-assert.ok(presented.summary.length > 10);
-assert.ok(presented.facts.length >= 3);
-assert.ok(presented.reasoning.length >= 1);
-assert.ok(presented.proposed.length >= 3);
-assert.equal(presented.proposed.some((p) => p.operation === "complete"), true);
-
-const emptyScore = scoreGoldenResult(scenario, {
-  ...strongResult,
-  recommendations: [],
-  knowledgePatch: {},
-  timelinePatch: [],
-});
-assert.ok(emptyScore.outcomes.some((o) => o.status === "missing"));
+    state,
+    captureContext,
+  );
+  const score = scoreGoldenResult(scenario, result);
+  const presented = presentGoldenResult(
+    scenario,
+    result,
+    scenario.defaultCapture,
+  );
+  assert.equal(score.passed, true, `run ${i + 1} failed: ${score.gradeLabel}`);
+  assert.equal(score.matched, 3);
+  assert.equal(score.unexpectedCount, 0);
+  assert.equal(result.proposedOperations?.length, 3);
+  assert.ok(presented.findingCards && presented.findingCards.length >= 3);
+  assert.ok(
+    presented.reasoning.every((r) => r.sourceFindingId),
+    "reasoning must link to findings",
+  );
+  runs.push(score);
+}
 
 console.log("verify-golden-test: all checks passed");
-console.log(
-  `  strong score: ${score.gradeLabel} (${score.matched}/${score.total})`,
-);
+for (const [i, score] of runs.entries()) {
+  console.log(
+    `  live-local run ${i + 1}: ${score.gradeEmoji} ${score.gradeLabel} (${score.matched}/${score.total}, unexpected=${score.unexpectedCount})`,
+  );
+}

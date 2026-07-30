@@ -35,7 +35,12 @@ type AnalyseResponse = {
   scenarioName?: string;
   result?: CaptureResult;
   presentation?: GoldenPresentation;
-  score?: GoldenScore;
+  score?: GoldenScore & {
+    passed?: boolean;
+    unexpectedCount?: number;
+    invalidTargetCount?: number;
+    contradictions?: number;
+  };
   diagnostics?: GoldenDiagnostics;
   promptText?: string;
 };
@@ -79,7 +84,15 @@ export function GoldenTestClient({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [score, setScore] = useState<GoldenScore | null>(null);
+  const [score, setScore] = useState<
+    | (GoldenScore & {
+        passed?: boolean;
+        unexpectedCount?: number;
+        invalidTargetCount?: number;
+        contradictions?: number;
+      })
+    | null
+  >(null);
   const [presentation, setPresentation] = useState<GoldenPresentation | null>(
     null,
   );
@@ -179,6 +192,9 @@ export function GoldenTestClient({
           </p>
           <p className="golden-score-meta">
             {score.matched} / {score.total} expected outcomes matched
+            {"passed" in score && score.passed === false
+              ? ` · ${score.unexpectedCount ?? 0} unexpected · ${score.invalidTargetCount ?? 0} invalid IDs · ${score.contradictions ?? 0} contradictions`
+              : null}
           </p>
           <ul className="golden-score-chips">
             {score.outcomes.map((o, i) => (
@@ -277,6 +293,44 @@ export function GoldenTestClient({
                   <li key={f}>✓ {f}</li>
                 ))}
               </ul>
+            </article>
+
+            <article className="golden-card golden-card-wide">
+              <h3>Findings</h3>
+              <div className="golden-ops">
+                {(presentation.findingCards ?? []).length === 0 ? (
+                  <p className="meta">No findings returned.</p>
+                ) : (
+                  (presentation.findingCards ?? []).map((f) => (
+                    <div key={f.id} className="golden-op-card">
+                      <p className="golden-op-head">Finding</p>
+                      <p className="golden-op-title">{f.fact}</p>
+                      {f.matchedTitle ? (
+                        <p className="meta">
+                          Matched to {f.matchedLabel} · {f.matchedTitle}
+                        </p>
+                      ) : (
+                        <p className="meta">No matched record</p>
+                      )}
+                      <p className="meta">Meaning · {f.meaning}</p>
+                      <p className="golden-op-conf">
+                        Confidence {f.confidence}%
+                      </p>
+                      {f.requiresClarification ? (
+                        <p className="golden-error">
+                          Needs clarification
+                          {f.clarificationQuestion
+                            ? `: ${f.clarificationQuestion}`
+                            : ""}
+                        </p>
+                      ) : null}
+                      {f.invalidTarget && f.validationWarning ? (
+                        <p className="meta">{f.validationWarning}</p>
+                      ) : null}
+                    </div>
+                  ))
+                )}
+              </div>
             </article>
 
             <article className="golden-card golden-card-wide">

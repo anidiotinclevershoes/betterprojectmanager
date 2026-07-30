@@ -47,40 +47,41 @@ export const WEBSITE_REFRESH_SCENARIO: GoldenScenarioFixture = {
       operation: "complete",
       entity: "todo",
       targetTitle: "Obtain CAB approval",
+      targetId: "golden-todo-cab",
       minConfidence: 80,
       reasoningHint: {
         foundLabel: "Found existing To Do",
         foundTitle: "Obtain CAB approval",
         captureStates: "Capture states approval received",
-        recommend: "Recommend completing existing To Do",
+        recommend: "COMPLETE existing To Do",
       },
     },
     {
       id: "update-release-date",
       operation: "update",
-      allowedOperations: ["update", "create"],
       entity: "knowledge",
       targetTitle: "Release planned for 12 August",
+      targetId: "know-golden-proj-website-refresh-now-0",
       minConfidence: 75,
       reasoningHint: {
         foundLabel: "Found Knowledge",
         foundTitle: "Release planned for 12 August",
         captureStates: "Capture changes date to 19 August",
-        recommend: "Recommend updating release date",
+        recommend: "UPDATE existing Knowledge",
       },
     },
     {
       id: "resolve-cdn",
       operation: "complete",
-      allowedOperations: ["complete", "update", "archive"],
       entity: "risk",
       targetTitle: "CDN deployment delayed",
+      targetId: "golden-risk-0",
       minConfidence: 75,
       reasoningHint: {
         foundLabel: "Found Risk",
         foundTitle: "CDN deployment delayed",
         captureStates: "Capture states the CDN issue is resolved",
-        recommend: "Recommend closing the existing risk",
+        recommend: "COMPLETE existing Risk",
       },
     },
   ],
@@ -224,7 +225,7 @@ export function fixtureToMissionState(
     sections: {
       now: [...scenario.knowledge],
       decisions: [],
-      risks: [...scenario.risks],
+      risks: [], // Risks live as recommendation records so IDs stay stable
       people: scenario.stakeholders.map((s) => `${s.name} (${s.role})`),
       openLoops: scenario.todos
         .filter((t) => !t.done)

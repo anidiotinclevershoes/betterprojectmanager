@@ -51,6 +51,10 @@ export interface Recommendation {
     | "meeting"
     | "memory";
   targetTitle?: string;
+  /** Phase 1.6: links recommendation back to validated finding / proposed op. */
+  sourceFindingId?: string;
+  proposedOperationId?: string;
+  confidence?: number;
 }
 
 export interface Stakeholder {
@@ -231,6 +235,17 @@ export interface CaptureResult {
   knowledgeProjectId?: string;
   /** Dates/milestones for the project timeline — AI appends, does not rebuild. */
   timelinePatch?: TimelineItemInput[];
+  /** Phase 1.6: validated findings from analysis. */
+  findings?: import("./capture/findings").CaptureFinding[];
+  /** Phase 1.6: deterministic operations derived from findings. */
+  proposedOperations?: import("./capture/findings").ProposedOperation[];
+  /** Phase 1.6: validation warnings (dev / Golden Test). */
+  findingsValidation?: {
+    ok: boolean;
+    errors: string[];
+    warnings: string[];
+    invalidTargetCount: number;
+  };
 }
 
 /** Lightweight timeline entry the UI renders; AI only adds/updates these. */
