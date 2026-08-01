@@ -90,6 +90,12 @@ export function GoldenTestClient({
         unexpectedCount?: number;
         invalidTargetCount?: number;
         contradictions?: number;
+        prohibitedTriggered?: number;
+        ambiguousFindings?: number;
+        scoringMode?: "standard" | "hard";
+        hardBand?: "strong" | "mixed" | "unreliable";
+        hardBandLabel?: string;
+        hardExplanation?: string;
       })
     | null
   >(null);
@@ -185,17 +191,49 @@ export function GoldenTestClient({
       </header>
 
       {score ? (
-        <section className={`golden-score golden-score-${score.grade}`}>
-          <p className="eyebrow">Overall Result</p>
+        <section
+          className={`golden-score golden-score-${score.grade}${
+            score.scoringMode === "hard"
+              ? ` golden-score-hard golden-score-hard-${score.hardBand ?? "mixed"}`
+              : ""
+          }`}
+        >
+          <p className="eyebrow">
+            {score.scoringMode === "hard"
+              ? "Hard scenario result"
+              : "Overall Result"}
+          </p>
           <p className="golden-score-grade">
-            {score.gradeEmoji} {score.gradeLabel}
+            {score.scoringMode === "hard"
+              ? score.hardBandLabel ?? score.gradeLabel
+              : `${score.gradeEmoji} ${score.gradeLabel}`}
           </p>
-          <p className="golden-score-meta">
-            {score.matched} / {score.total} expected outcomes matched
-            {"passed" in score && score.passed === false
-              ? ` · ${score.unexpectedCount ?? 0} unexpected · ${score.invalidTargetCount ?? 0} invalid IDs · ${score.contradictions ?? 0} contradictions`
-              : null}
-          </p>
+          {score.scoringMode === "hard" ? (
+            <>
+              <ul className="golden-hard-metrics">
+                <li>
+                  Expected outcomes matched: {score.matched} / {score.total}
+                </li>
+                <li>
+                  Prohibited outcomes triggered:{" "}
+                  {score.prohibitedTriggered ?? 0}
+                </li>
+                <li>Unexpected operations: {score.unexpectedCount ?? 0}</li>
+                <li>Ambiguous findings: {score.ambiguousFindings ?? 0}</li>
+                <li>Invalid targets: {score.invalidTargetCount ?? 0}</li>
+              </ul>
+              {score.hardExplanation ? (
+                <p className="golden-hard-explanation">{score.hardExplanation}</p>
+              ) : null}
+            </>
+          ) : (
+            <p className="golden-score-meta">
+              {score.matched} / {score.total} expected outcomes matched
+              {"passed" in score && score.passed === false
+                ? ` · ${score.unexpectedCount ?? 0} unexpected · ${score.invalidTargetCount ?? 0} invalid IDs · ${score.contradictions ?? 0} contradictions`
+                : null}
+            </p>
+          )}
           <ul className="golden-score-chips">
             {score.outcomes.map((o, i) => (
               <li key={`${o.status}-${i}`} className={statusClass(o.status)}>
@@ -207,10 +245,16 @@ export function GoldenTestClient({
         </section>
       ) : (
         <section className="golden-score golden-score-idle">
-          <p className="eyebrow">Overall Result</p>
+          <p className="eyebrow">
+            {scenario.scoringMode === "hard"
+              ? "Hard scenario result"
+              : "Overall Result"}
+          </p>
           <p className="golden-score-grade">Ready</p>
           <p className="golden-score-meta">
-            Press Analyse Scenario to score this fixture.
+            {scenario.scoringMode === "hard"
+              ? "Press Analyse Scenario. A low band is a measurement, not an application failure."
+              : "Press Analyse Scenario to score this fixture."}
           </p>
         </section>
       )}
@@ -240,7 +284,9 @@ export function GoldenTestClient({
         <h4>Stakeholders</h4>
         <ul className="golden-list">
           {scenario.stakeholders.map((s) => (
-            <li key={s.id}>• {s.name}</li>
+            <li key={s.id}>
+              • {s.name} — {s.role}
+            </li>
           ))}
         </ul>
 

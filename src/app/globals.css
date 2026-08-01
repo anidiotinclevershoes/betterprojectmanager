@@ -3636,6 +3636,46 @@ body {
   border-color: color-mix(in srgb, var(--danger) 35%, var(--border-subtle));
 }
 
+/* Hard scenario: neutral bands — not pass/fail of the application. */
+.golden-score-hard,
+.golden-score-hard.golden-score-excellent,
+.golden-score-hard.golden-score-good,
+.golden-score-hard.golden-score-needs_work,
+.golden-score-hard.golden-score-poor {
+  border-color: var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-elevated) 92%, var(--ink) 4%);
+}
+
+.golden-score-hard-strong {
+  border-color: color-mix(in srgb, var(--ink-soft) 35%, var(--border-subtle));
+}
+
+.golden-score-hard-mixed {
+  border-color: color-mix(in srgb, var(--ink-soft) 45%, var(--border-subtle));
+}
+
+.golden-score-hard-unreliable {
+  border-color: color-mix(in srgb, var(--ink-soft) 55%, var(--border-subtle));
+}
+
+.golden-hard-metrics {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.golden-hard-explanation {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  max-width: 52rem;
+}
+
 .golden-score-grade {
   margin: 4px 0;
   font-size: 26px;

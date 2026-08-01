@@ -39,12 +39,28 @@ export type GoldenExpectedOutcome = {
   minConfidence?: number;
 };
 
+/** Operations that must not appear — used especially by hard scenarios. */
+export type GoldenProhibitedOutcome = {
+  id: string;
+  label: string;
+  operation?: GoldenOperation | GoldenOperation[];
+  entity?: GoldenEntity;
+  /** Loose title / detail match — any token matches (OR). */
+  titleIncludes?: string[];
+  /** All of these must appear in title/detail (AND). */
+  titleIncludesAll?: string[];
+};
+
+export type GoldenScoringMode = "standard" | "hard";
+
 export type GoldenScenarioFixture = {
   id: string;
   name: string;
   description: string;
   /** Coming soon scenarios stay listed but disabled. */
   available: boolean;
+  /** standard = regression pass/fail; hard = exploratory Strong/Mixed/Unreliable. */
+  scoringMode?: GoldenScoringMode;
   defaultCapture: string;
   project: {
     id: string;
@@ -65,6 +81,7 @@ export type GoldenScenarioFixture = {
   stakeholders: Array<{ id: string; name: string; role: string }>;
   knowledge: string[];
   expected: GoldenExpectedOutcome[];
+  prohibited?: GoldenProhibitedOutcome[];
 };
 
 export type MatchStatus = "correct" | "needs_review" | "missing" | "unexpected";
@@ -82,6 +99,9 @@ export type ScoredOutcome = {
   detail?: string;
 };
 
+/** Neutral hard-scenario bands — not pass/fail of the application. */
+export type HardScenarioBand = "strong" | "mixed" | "unreliable";
+
 export type GoldenScore = {
   grade: "excellent" | "good" | "needs_work" | "poor";
   gradeLabel: string;
@@ -89,6 +109,13 @@ export type GoldenScore = {
   matched: number;
   total: number;
   outcomes: ScoredOutcome[];
+  /** Present when scoringMode is hard. */
+  hardBand?: HardScenarioBand;
+  hardBandLabel?: string;
+  hardExplanation?: string;
+  prohibitedTriggered?: number;
+  ambiguousFindings?: number;
+  scoringMode?: GoldenScoringMode;
 };
 
 export type GoldenProposedOp = {

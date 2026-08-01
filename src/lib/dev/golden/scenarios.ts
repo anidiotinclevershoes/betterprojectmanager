@@ -1,23 +1,13 @@
 import type { MissionState, Project, ProjectKnowledge, TodoItem } from "@/lib/types";
 import type { GoldenScenarioFixture } from "./types";
 
-export const WEBSITE_REFRESH_SCENARIO: GoldenScenarioFixture = {
-  id: "website-refresh",
-  name: "Website Refresh",
-  description:
-    "CAB approval arrives, release date moves, and a CDN risk is cleared.",
-  available: true,
-  defaultCapture: [
-    "CAB approval has now been received.",
-    "Sarah has agreed to move the release to 19 August.",
-    "The CDN issue has been resolved.",
-  ].join("\n\n"),
+const WEBSITE_REFRESH_BASELINE = {
   project: {
     id: "golden-proj-website-refresh",
     name: "Website Refresh",
     code: "WEB",
     summary: "Public website refresh programme",
-    status: "watch",
+    status: "watch" as const,
     currentFocus: "CAB approval and release readiness",
   },
   todos: [
@@ -37,54 +27,158 @@ export const WEBSITE_REFRESH_SCENARIO: GoldenScenarioFixture = {
     },
   ],
   risks: ["CDN deployment delayed"],
+  knowledge: ["Release planned for 12 August"],
+};
+
+const WEBSITE_REFRESH_EXPECTED: GoldenScenarioFixture["expected"] = [
+  {
+    id: "complete-cab",
+    operation: "complete",
+    entity: "todo",
+    targetTitle: "Obtain CAB approval",
+    targetId: "golden-todo-cab",
+    minConfidence: 80,
+    reasoningHint: {
+      foundLabel: "Found existing To Do",
+      foundTitle: "Obtain CAB approval",
+      captureStates: "Capture states approval received",
+      recommend: "COMPLETE existing To Do",
+    },
+  },
+  {
+    id: "update-release-date",
+    operation: "update",
+    entity: "knowledge",
+    targetTitle: "Release planned for 12 August",
+    targetId: "know-golden-proj-website-refresh-now-0",
+    minConfidence: 75,
+    reasoningHint: {
+      foundLabel: "Found Knowledge",
+      foundTitle: "Release planned for 12 August",
+      captureStates: "Capture changes date to 19 August",
+      recommend: "UPDATE existing Knowledge",
+    },
+  },
+  {
+    id: "resolve-cdn",
+    operation: "complete",
+    entity: "risk",
+    targetTitle: "CDN deployment delayed",
+    targetId: "golden-risk-0",
+    minConfidence: 75,
+    reasoningHint: {
+      foundLabel: "Found Risk",
+      foundTitle: "CDN deployment delayed",
+      captureStates: "Capture states the CDN issue is resolved",
+      recommend: "COMPLETE existing Risk",
+    },
+  },
+];
+
+const WEBSITE_REFRESH_PROHIBITED: NonNullable<
+  GoldenScenarioFixture["prohibited"]
+> = [
+  {
+    id: "no-milk",
+    label: "Personal errand (milk) must not become project work",
+    titleIncludes: ["milk"],
+  },
+  {
+    id: "no-new-cdn-risk",
+    label: "Do not create a new CDN monitoring risk",
+    operation: "create",
+    entity: "risk",
+    titleIncludes: ["cdn"],
+  },
+  {
+    id: "no-remove-sarah",
+    label: "Do not remove Sarah",
+    operation: ["delete", "remove", "archive"],
+    entity: "stakeholder",
+    titleIncludes: ["sarah"],
+  },
+  {
+    id: "no-marcus-owner",
+    label: "Do not transfer project ownership to Marcus",
+    operation: ["create", "update"],
+    entity: "stakeholder",
+    titleIncludesAll: ["marcus"],
+    titleIncludes: ["owner", "business owner", "taking over", "replace"],
+  },
+  {
+    id: "no-duplicate-cab",
+    label: "Do not create a duplicate CAB To Do",
+    operation: "create",
+    entity: "todo",
+    titleIncludes: ["cab"],
+  },
+  {
+    id: "no-duplicate-release-knowledge",
+    label: "Do not create duplicate release-date Knowledge",
+    operation: "create",
+    entity: "knowledge",
+    titleIncludes: ["release", "august"],
+  },
+];
+
+export const WEBSITE_REFRESH_SCENARIO: GoldenScenarioFixture = {
+  id: "website-refresh",
+  name: "Website Refresh — Standard",
+  description:
+    "CAB approval arrives, release date moves, and a CDN risk is cleared.",
+  available: true,
+  scoringMode: "standard",
+  defaultCapture: [
+    "CAB approval has now been received.",
+    "Sarah has agreed to move the release to 19 August.",
+    "The CDN issue has been resolved.",
+  ].join("\n\n"),
+  project: WEBSITE_REFRESH_BASELINE.project,
+  todos: WEBSITE_REFRESH_BASELINE.todos,
+  risks: WEBSITE_REFRESH_BASELINE.risks,
   stakeholders: [
     { id: "golden-stake-sarah", name: "Sarah", role: "Release Lead" },
   ],
-  knowledge: ["Release planned for 12 August"],
-  expected: [
-    {
-      id: "complete-cab",
-      operation: "complete",
-      entity: "todo",
-      targetTitle: "Obtain CAB approval",
-      targetId: "golden-todo-cab",
-      minConfidence: 80,
-      reasoningHint: {
-        foundLabel: "Found existing To Do",
-        foundTitle: "Obtain CAB approval",
-        captureStates: "Capture states approval received",
-        recommend: "COMPLETE existing To Do",
-      },
-    },
-    {
-      id: "update-release-date",
-      operation: "update",
-      entity: "knowledge",
-      targetTitle: "Release planned for 12 August",
-      targetId: "know-golden-proj-website-refresh-now-0",
-      minConfidence: 75,
-      reasoningHint: {
-        foundLabel: "Found Knowledge",
-        foundTitle: "Release planned for 12 August",
-        captureStates: "Capture changes date to 19 August",
-        recommend: "UPDATE existing Knowledge",
-      },
-    },
-    {
-      id: "resolve-cdn",
-      operation: "complete",
-      entity: "risk",
-      targetTitle: "CDN deployment delayed",
-      targetId: "golden-risk-0",
-      minConfidence: 75,
-      reasoningHint: {
-        foundLabel: "Found Risk",
-        foundTitle: "CDN deployment delayed",
-        captureStates: "Capture states the CDN issue is resolved",
-        recommend: "COMPLETE existing Risk",
-      },
-    },
+  knowledge: WEBSITE_REFRESH_BASELINE.knowledge,
+  expected: WEBSITE_REFRESH_EXPECTED,
+};
+
+/**
+ * Deliberately difficult voice dump: corrections, repetition, irrelevant
+ * content, negated instructions, and a clarifying summary at the end.
+ * Not designed for a perfect score.
+ */
+export const WEBSITE_REFRESH_HARD_SCENARIO: GoldenScenarioFixture = {
+  id: "website-refresh-hard",
+  name: "Website Refresh — Hard Capture",
+  description:
+    "Rambling brain dump with corrections, filler, irrelevant content, and role ambiguity.",
+  available: true,
+  scoringMode: "hard",
+  defaultCapture: [
+    "Okay, so, right, just dumping this before I forget.",
+    "",
+    "The CAB thing — I think we're good there. Well, actually, yes, Sarah confirmed it after the call, so CAB is approved now. I mentioned that already, didn't I? Anyway, the approval task shouldn't still be hanging around.",
+    "",
+    "The release date... we said the nineteenth, I think. Wait, no, that was the workshop. The release is definitely moving from the twelfth to the nineteenth of August. Sarah agreed to that, but I don't think everyone has been told yet.",
+    "",
+    "The CDN issue was causing the delay, although there was another little problem with images loading slowly. Ignore that bit for now — the actual deployment blocker is resolved. We should probably keep an eye on it, but I don't want a brand-new risk created just because I said that.",
+    "",
+    "Marcus was mentioned, but he isn't taking over the project. He's only helping with the release notes. Don't replace Sarah.",
+    "",
+    "I also need to remember milk on the way home — obviously not project related.",
+    "",
+    "So, summary: CAB approved, release is the nineteenth, CDN blocker resolved, Sarah is still the owner, Marcus only owns release notes. I think that's everything.",
+  ].join("\n"),
+  project: WEBSITE_REFRESH_BASELINE.project,
+  todos: WEBSITE_REFRESH_BASELINE.todos,
+  risks: WEBSITE_REFRESH_BASELINE.risks,
+  stakeholders: [
+    { id: "golden-stake-sarah", name: "Sarah", role: "Business Owner" },
   ],
+  knowledge: WEBSITE_REFRESH_BASELINE.knowledge,
+  expected: WEBSITE_REFRESH_EXPECTED,
+  prohibited: WEBSITE_REFRESH_PROHIBITED,
 };
 
 /** Placeholder scenarios for the dropdown — not runnable yet. */
@@ -172,7 +266,11 @@ export const FUTURE_SCENARIO_STUBS: GoldenScenarioFixture[] = [
 ];
 
 export function listGoldenScenarios(): GoldenScenarioFixture[] {
-  return [WEBSITE_REFRESH_SCENARIO, ...FUTURE_SCENARIO_STUBS];
+  return [
+    WEBSITE_REFRESH_SCENARIO,
+    WEBSITE_REFRESH_HARD_SCENARIO,
+    ...FUTURE_SCENARIO_STUBS,
+  ];
 }
 
 export function getGoldenScenario(id: string): GoldenScenarioFixture | null {

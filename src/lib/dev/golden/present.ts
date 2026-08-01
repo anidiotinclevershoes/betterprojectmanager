@@ -120,12 +120,120 @@ export type GoldenScoreExtras = {
   contradictions: number;
   unexpectedCount: number;
   passed: boolean;
+  prohibitedTriggered: number;
+  ambiguousFindings: number;
+  scoringMode: "standard" | "hard";
 };
+
+function matchesProhibited(
+  op: GoldenProposedOp,
+  rule: NonNullable<GoldenScenarioFixture["prohibited"]>[number],
+): boolean {
+  if (rule.operation) {
+    const ops = Array.isArray(rule.operation)
+      ? rule.operation
+      : [rule.operation];
+    if (!ops.includes(op.operation)) return false;
+  }
+  if (rule.entity && op.entity !== rule.entity) return false;
+  const hay = normalize(`${op.title} ${op.detail ?? ""}`);
+  if (rule.titleIncludesAll?.length) {
+    const allHit = rule.titleIncludesAll.every((token) =>
+      hay.includes(normalize(token)),
+    );
+    if (!allHit) return false;
+  }
+  if (rule.titleIncludes?.length) {
+    const hit = rule.titleIncludes.some((token) =>
+      hay.includes(normalize(token)),
+    );
+    if (!hit) return false;
+  }
+  return Boolean(
+    rule.operation ||
+      rule.entity ||
+      (rule.titleIncludes?.length ?? 0) > 0 ||
+      (rule.titleIncludesAll?.length ?? 0) > 0,
+  );
+}
+
+/**
+ * Deterministic friendly copy for hard scenarios — not another AI judgment.
+ */
+export function hardScenarioExplanation(input: {
+  matched: number;
+  total: number;
+  prohibitedTriggered: number;
+  unexpectedCount: number;
+  ambiguousFindings: number;
+  invalidTargetCount: number;
+}): string {
+  const {
+    matched,
+    total,
+    prohibitedTriggered,
+    unexpectedCount,
+    ambiguousFindings,
+    invalidTargetCount,
+  } = input;
+  const reviewables =
+    unexpectedCount + ambiguousFindings + invalidTargetCount + prohibitedTriggered;
+
+  if (
+    matched === total &&
+    total > 0 &&
+    prohibitedTriggered === 0 &&
+    reviewables <= 2
+  ) {
+    if (reviewables > 0) {
+      return `Lume understood the main project changes but produced ${reviewables} low-confidence suggestions that should be reviewed carefully.`;
+    }
+    return "Lume understood the main project changes. Review each suggestion before accepting.";
+  }
+
+  if (matched >= Math.ceil(total / 2) && prohibitedTriggered === 0) {
+    return `Lume understood the main project changes but produced ${Math.max(reviewables, 1)} low-confidence suggestions that should be reviewed carefully.`;
+  }
+
+  return "The Capture was too ambiguous for reliable automated suggestions. The extracted facts are available, but no changes should be accepted without review.";
+}
+
+export function hardScenarioBand(input: {
+  matched: number;
+  total: number;
+  prohibitedTriggered: number;
+  unexpectedCount: number;
+  invalidTargetCount: number;
+}): { band: "strong" | "mixed" | "unreliable"; label: string } {
+  const {
+    matched,
+    total,
+    prohibitedTriggered,
+    unexpectedCount,
+    invalidTargetCount,
+  } = input;
+
+  if (prohibitedTriggered > 0 || matched === 0) {
+    return { band: "unreliable", label: "Unreliable" };
+  }
+  if (
+    matched === total &&
+    unexpectedCount === 0 &&
+    invalidTargetCount === 0
+  ) {
+    return { band: "strong", label: "Strong" };
+  }
+  if (matched >= Math.ceil(total / 2)) {
+    return { band: "mixed", label: "Mixed" };
+  }
+  return { band: "unreliable", label: "Unreliable" };
+}
 
 export function scoreGoldenResult(
   scenario: GoldenScenarioFixture,
   result: CaptureResult,
 ): GoldenScore & GoldenScoreExtras {
+  const scoringMode = scenario.scoringMode ?? "standard";
   const proposed = proposalFromResult(result);
   const findings = result.findings ?? [];
   const findingById = new Map(findings.map((f) => [f.id, f]));
@@ -136,6 +244,9 @@ export function scoreGoldenResult(
   const invalidTargetCount =
     result.findingsValidation?.invalidTargetCount ??
     findings.filter((f) => f.invalidTarget).length;
+  const ambiguousFindings = findings.filter(
+    (f) => f.requiresClarification || f.invalidTarget,
+  ).length;
 
   for (const expected of scenario.expected) {
     const candidates = proposed.filter((p) => {
@@ -240,6 +351,29 @@ export function scoreGoldenResult(
     });
   }
 
+  const prohibitedRules = scenario.prohibited ?? [];
+  const prohibitedHits = new Set<string>();
+  for (const p of proposed) {
+    for (const rule of prohibitedRules) {
+      if (matchesProhibited(p, rule)) {
+        prohibitedHits.add(rule.id);
+        if (!used.has(p.id)) {
+          used.add(p.id);
+          outcomes.push({
+            status: "unexpected",
+            operation: p.operation,
+            entity: p.entity,
+            targetTitle: p.title,
+            confidence: p.confidence,
+            confidenceEstimated: p.confidenceEstimated,
+            label: `${p.operation.toUpperCase()} · ${p.entityLabel} · ${p.title}`,
+            detail: `Prohibited: ${rule.label}`,
+          });
+        }
+      }
+    }
+  }
+
   for (const p of proposed) {
     if (used.has(p.id)) continue;
     outcomes.push({
@@ -259,19 +393,53 @@ export function scoreGoldenResult(
   const total = scenario.expected.length;
   const unexpectedCount = outcomes.filter((o) => o.status === "unexpected")
     .length;
+  const prohibitedTriggered = prohibitedHits.size;
   const ratio = total === 0 ? 0 : matched / total;
 
+  // Standard regression criteria — unchanged for non-hard scenarios.
   const passed =
+    scoringMode === "standard" &&
     matched === total &&
     total > 0 &&
     unexpectedCount === 0 &&
     invalidTargetCount === 0 &&
-    contradictions === 0;
+    contradictions === 0 &&
+    prohibitedTriggered === 0;
 
   let grade: GoldenScore["grade"] = "poor";
   let gradeLabel = "Poor";
-  let gradeEmoji = "🔴";
-  if (passed) {
+  let gradeEmoji = "●";
+  let hardBand: GoldenScore["hardBand"];
+  let hardBandLabel: string | undefined;
+  let hardExplanation: string | undefined;
+
+  if (scoringMode === "hard") {
+    const band = hardScenarioBand({
+      matched,
+      total,
+      prohibitedTriggered,
+      unexpectedCount,
+      invalidTargetCount,
+    });
+    hardBand = band.band;
+    hardBandLabel = band.label;
+    hardExplanation = hardScenarioExplanation({
+      matched,
+      total,
+      prohibitedTriggered,
+      unexpectedCount,
+      ambiguousFindings,
+      invalidTargetCount,
+    });
+    grade =
+      band.band === "strong"
+        ? "excellent"
+        : band.band === "mixed"
+          ? "good"
+          : "poor";
+    gradeLabel = band.label;
+    gradeEmoji = "○";
+  } else if (passed) {
     grade = "excellent";
     gradeLabel = "Passed";
     gradeEmoji = "🟢";
@@ -283,6 +451,8 @@ export function scoreGoldenResult(
     grade = "needs_work";
     gradeLabel = "Needs work";
     gradeEmoji = "🟠";
+  } else {
+    gradeEmoji = "🔴";
   }
 
   return {
@@ -296,6 +466,12 @@ export function scoreGoldenResult(
     contradictions,
     unexpectedCount,
     passed,
+    prohibitedTriggered,
+    ambiguousFindings,
+    scoringMode,
+    hardBand,
+    hardBandLabel,
+    hardExplanation,
   };
 }
 
