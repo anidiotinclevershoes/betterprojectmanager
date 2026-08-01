@@ -32,6 +32,7 @@ import {
   pruneSeededSessions,
 } from "./sessions/history";
 import type { CaptureContextManifest } from "./capture/context";
+import type { CaptureReliabilityAssessment } from "./capture/reliability";
 import {
   extractTimelinePatchFromText,
   mergeTimelineItems,
@@ -97,6 +98,7 @@ type MissionContextValue = {
     result: CaptureResult;
     contextManifest: CaptureContextManifest | null;
     requestId: string | null;
+    reliability: CaptureReliabilityAssessment | null;
   }>;
   applyCaptureResult: (result: CaptureResult) => void;
   setRecommendationStatus: (
@@ -375,6 +377,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       openaiConfigured?: boolean;
       contextManifest?: CaptureContextManifest | null;
       requestId?: string | null;
+      reliability?: CaptureReliabilityAssessment | null;
     };
 
     if (typeof data.openaiConfigured === "boolean") {
@@ -389,12 +392,13 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       result: data.result,
       contextManifest: data.contextManifest ?? null,
       requestId: data.requestId ?? null,
+      reliability: data.reliability ?? null,
     };
   }, []);
 
   const analyzeCaptureWithAI = useCallback(
     async (input: CaptureInput) => {
-      const { result, contextManifest, requestId } =
+      const { result, contextManifest, requestId, reliability } =
         await requestCaptureAnalysis(input);
       setState((prev) =>
         pushHistory(bumpAnalysisUsage(prev), makeHistoryEvent({
@@ -405,7 +409,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           source: "ai",
         })),
       );
-      return { result, contextManifest, requestId };
+      return { result, contextManifest, requestId, reliability };
     },
     [requestCaptureAnalysis],
   );

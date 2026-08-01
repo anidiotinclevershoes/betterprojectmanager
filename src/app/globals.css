@@ -2350,6 +2350,79 @@ body {
   color: var(--text-secondary);
 }
 
+/* Capture reliability — calm / neutral (not error styling). */
+.capture-reliability-notice {
+  margin: 10px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-elevated) 88%, var(--ink) 4%);
+  color: var(--text-primary);
+}
+
+.capture-reliability-notice.is-review_recommended {
+  border-color: color-mix(in srgb, var(--ink-soft) 35%, var(--border-subtle));
+}
+
+.capture-reliability-notice.is-limited {
+  border-color: color-mix(in srgb, var(--ink-soft) 50%, var(--border-subtle));
+}
+
+.capture-reliability-title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.capture-reliability-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.capture-reliability-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.capture-reliability-triggers {
+  margin: 10px 0 0;
+  padding-left: 1.1rem;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.capture-reliability-triggers span {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.capture-reliability-dev {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.capture-reliability-dev pre {
+  margin: 6px 0 0;
+  max-height: 220px;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--bg-hover);
+  font-size: 10px;
+}
+
+.capture-finding-ambiguous {
+  border-left: 3px solid color-mix(in srgb, var(--ink-soft) 55%, transparent);
+  padding-left: 8px;
+  margin: 6px 0;
+}
+
 .coach-drawer-backdrop {
   position: fixed;
   inset: 0;

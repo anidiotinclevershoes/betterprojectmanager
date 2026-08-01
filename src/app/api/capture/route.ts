@@ -14,6 +14,10 @@ import {
 } from "@/lib/openai";
 import { logPromptAssemblyDiagnostic } from "@/ai/domain";
 import { recordCaptureMetricsSafe } from "@/lib/dev/cockpit";
+import {
+  assessCaptureReliability,
+  reliabilityForCockpit,
+} from "@/lib/capture/reliability/assess";
 import { COACHING_SYSTEM_PROMPT } from "@/lib/mission";
 import type {
   CaptureInput,
@@ -168,6 +172,11 @@ export async function POST(request: Request) {
       } catch {
         /* prompt assembly must not break local fallback */
       }
+      const reliability = assessCaptureReliability({
+        captureText: content,
+        result,
+        contextManifest: enrichedManifest,
+      });
       if (promptAssemblyForMetrics) {
         recordCaptureMetricsSafe({
           startedAt,
@@ -183,6 +192,7 @@ export async function POST(request: Request) {
           }),
           model: null,
           systemPrompt: COACHING_SYSTEM_PROMPT,
+          reliability: reliabilityForCockpit(reliability),
         });
       }
       return NextResponse.json({
@@ -191,6 +201,7 @@ export async function POST(request: Request) {
         requestId: analysisRequestId,
         contextManifest: enrichedManifest,
         captureContextDiagnostics: captureContext.diagnostics,
+        reliability,
         notice:
           "OPENAI_API_KEY not set — used local coaching. Add your OpenAI key to enable tidy-up.",
       });
@@ -227,19 +238,6 @@ export async function POST(request: Request) {
       captureContext,
     });
 
-    recordCaptureMetricsSafe({
-      startedAt,
-      requestId: analysisRequestId,
-      source: "capture",
-      promptAssembly,
-      captureContext,
-      result,
-      providerUsage,
-      responseText,
-      model,
-      systemPrompt: COACHING_SYSTEM_PROMPT,
-    });
-
     const enrichedManifest = {
       ...contextManifest,
       promptAssembly: {
@@ -255,12 +253,33 @@ export async function POST(request: Request) {
       },
     };
 
+    const reliability = assessCaptureReliability({
+      captureText: content,
+      result,
+      contextManifest: enrichedManifest,
+    });
+
+    recordCaptureMetricsSafe({
+      startedAt,
+      requestId: analysisRequestId,
+      source: "capture",
+      promptAssembly,
+      captureContext,
+      result,
+      providerUsage,
+      responseText,
+      model,
+      systemPrompt: COACHING_SYSTEM_PROMPT,
+      reliability: reliabilityForCockpit(reliability),
+    });
+
     return NextResponse.json({
       result,
       openaiConfigured: true,
       requestId: analysisRequestId,
       contextManifest: enrichedManifest,
       captureContextDiagnostics: captureContext.diagnostics,
+      reliability,
     });
   } catch (error) {
     const message =

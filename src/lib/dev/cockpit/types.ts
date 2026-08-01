@@ -76,6 +76,20 @@ export type CaptureRunMetrics = {
   promptSections: PromptSectionMeasure[];
   contextBuckets: ContextBucketMeasure[];
   composition: CompositionSlice[];
+
+  /** Transparent Capture reliability inputs (measured rules, not a quality score). */
+  reliability?: {
+    state: "normal" | "review_recommended" | "limited";
+    inputTokens: number;
+    inputTokensMeasured: boolean;
+    truncated: boolean;
+    findingsCount: number;
+    ambiguousFindings: number;
+    clarificationCount: number;
+    invalidTargetCount: number;
+    validationErrors: number;
+    triggeredRules: string[];
+  } | null;
 };
 
 export type CockpitStore = {

@@ -222,6 +222,7 @@ export function buildCaptureRunMetrics(args: {
     completion_tokens?: number;
     total_tokens?: number;
   } | null;
+  reliability?: CaptureRunMetrics["reliability"];
 }): CaptureRunMetrics {
   const measured = measurePromptComposition({
     promptAssembly: args.promptAssembly,
@@ -291,5 +292,6 @@ export function buildCaptureRunMetrics(args: {
     promptSections: measured.promptSections,
     contextBuckets: measured.contextBuckets,
     composition: measured.composition,
+    reliability: args.reliability ?? null,
   };
 }

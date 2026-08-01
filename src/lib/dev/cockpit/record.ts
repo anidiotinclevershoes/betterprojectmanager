@@ -7,6 +7,7 @@ import {
 import type { AssembledPrompt } from "@/ai/domain/types";
 import type { CaptureProjectContext } from "@/lib/capture/context";
 import type { CaptureResult } from "@/lib/types";
+import type { CaptureRunMetrics } from "./types";
 
 /** Lightweight, development-only Capture metric recording. */
 export function recordCaptureMetricsSafe(args: {
@@ -24,6 +25,7 @@ export function recordCaptureMetricsSafe(args: {
   responseText?: string | null;
   model?: string | null;
   systemPrompt?: string | null;
+  reliability?: CaptureRunMetrics["reliability"];
 }) {
   if (!isCockpitEnabled()) return;
   try {
@@ -45,6 +47,7 @@ export function recordCaptureMetricsSafe(args: {
       systemPrompt: args.systemPrompt ?? COACHING_SYSTEM_PROMPT,
       responseText: args.responseText ?? null,
       providerUsage: args.providerUsage ?? null,
+      reliability: args.reliability ?? null,
     });
     recordCaptureRun(run);
   } catch (error) {

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { useCaptureSession } from "@/components/capture/CaptureSessionContext";
 import { CaptureContextInspector } from "@/components/capture/CaptureContextInspector";
+import { CaptureReliabilityNotice } from "@/components/capture/CaptureReliabilityNotice";
 import { useMission } from "@/lib/store";
 import { analysesRemaining } from "@/lib/workspace/history";
 import {
@@ -10,6 +11,7 @@ import {
   OP_LABEL,
   isDestructiveOp,
 } from "@/lib/capture/suggestions";
+import { shouldWarnBeforeAnalysis } from "@/lib/capture/reliability";
 
 function projectCode(
   projects: { id: string; code: string }[],
@@ -60,16 +62,20 @@ export function CaptureWorkspace({
     setError,
     statusMessage,
     announce,
-    analyse,
+    analyse: runAnalyse,
     applyOne,
     dismissOne,
     clearSession,
     expandAnalysis,
+    editCapture,
+    dismissPreReliabilityWarn,
     pendingCount,
     isAnalysed,
     setSource,
     analysedAt,
     contextManifest,
+    reliability,
+    preWarnDismissed,
   } = session;
 
   const effectiveProjectId = projectId || defaultProjectId || "";
@@ -102,10 +108,25 @@ export function CaptureWorkspace({
       if (collapsed) expandAnalysis();
       return;
     }
-    await analyse(content, "conversation", defaultProjectId);
+    await runAnalyse(content, "conversation", defaultProjectId);
   }
 
+  const preReliability = useMemo(
+    () => (!isAnalysed ? shouldWarnBeforeAnalysis(content) : null),
+    [content, isAnalysed],
+  );
+  const showPreWarn =
+    !isAnalysed &&
+    !preWarnDismissed &&
+    preReliability &&
+    preReliability.state !== "normal";
+
   const reviewOpen = Boolean(result) && !collapsed;
+  const clarificationFindings =
+    result?.findings?.filter(
+      (f) => f.requiresClarification || f.invalidTarget,
+    ) ?? [];
+  const isDev = process.env.NODE_ENV === "development";
   const visibleSuggestions = suggestions.filter(
     (s) => !dismissed[s.id] && !added[s.id],
   );
@@ -289,7 +310,7 @@ export function CaptureWorkspace({
               </span>
             ) : null}
 
-            {!isAnalysed ? (
+            {!isAnalysed && !showPreWarn ? (
               <button
                 type="submit"
                 className="primary-btn analyse-btn"
@@ -315,6 +336,32 @@ export function CaptureWorkspace({
         </div>
       </form>
 
+      {showPreWarn && preReliability ? (
+        <CaptureReliabilityNotice
+          assessment={preReliability}
+          stage="pre"
+          onAnalyseAnyway={() => {
+            dismissPreReliabilityWarn();
+            void runAnalyse(content, "conversation", defaultProjectId);
+          }}
+          showDevDetails={isDev}
+        />
+      ) : null}
+
+      {reviewOpen && reliability && reliability.state !== "normal" ? (
+        <CaptureReliabilityNotice
+          assessment={reliability}
+          stage="post"
+          onEditCapture={editCapture}
+          onAnalyseAgain={() => {
+            void runAnalyse(content, "conversation", defaultProjectId, {
+              force: true,
+            });
+          }}
+          showDevDetails={isDev}
+        />
+      ) : null}
+
       {reviewOpen ? (
         <div className="capture-review">
           <div className="capture-review-feedback">
@@ -327,6 +374,24 @@ export function CaptureWorkspace({
                 <ul>
                   {result.insights.map((insight) => (
                     <li key={insight}>{insight}</li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
+            {clarificationFindings.length ? (
+              <>
+                <h4>Needs clarification</h4>
+                <ul>
+                  {clarificationFindings.map((f) => (
+                    <li key={f.id} className="capture-finding-ambiguous">
+                      {f.fact}
+                      {f.clarificationQuestion
+                        ? ` — ${f.clarificationQuestion}`
+                        : ""}
+                      {f.invalidTarget && f.validationWarning
+                        ? ` (${f.validationWarning})`
+                        : ""}
+                    </li>
                   ))}
                 </ul>
               </>
@@ -436,7 +501,9 @@ export function CaptureWorkspace({
             <button
               type="button"
               className="ghost-btn"
-              onClick={() => void analyse(content, "conversation", defaultProjectId)}
+              onClick={() =>
+                void runAnalyse(content, "conversation", defaultProjectId)
+              }
             >
               Retry
             </button>

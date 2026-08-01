@@ -5,6 +5,7 @@ import type {
   TimelineItemInput,
 } from "@/lib/types";
 import type { CaptureContextManifest } from "@/lib/capture/context";
+import type { CaptureReliabilityAssessment } from "@/lib/capture/reliability";
 
 export type SuggestionKind =
   | "action"
@@ -415,6 +416,9 @@ export type CapturePersistSlice = {
   historyId: string | null;
   analysedAt: string | null;
   contextManifest?: CaptureContextManifest | null;
+  reliability?: CaptureReliabilityAssessment | null;
+  /** User dismissed the pre-analysis long-capture notice for this draft. */
+  preWarnDismissed?: boolean;
 };
 
 export const CAPTURE_SESSION_KEY = "lume-capture-session-v1";

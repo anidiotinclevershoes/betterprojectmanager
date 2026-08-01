@@ -423,6 +423,36 @@ export function AiCockpitClient() {
                                   : `${fmtTokens(run.completionTokens)} (tokenizer)`}
                             </span>
                           </div>
+                          {run.reliability ? (
+                            <div className="cockpit-run-usage">
+                              <span>
+                                Reliability: {run.reliability.state}
+                              </span>
+                              <span>
+                                Input tokens:{" "}
+                                {fmtTokens(run.reliability.inputTokens)}
+                                {run.reliability.inputTokensMeasured
+                                  ? " (measured)"
+                                  : " (approx)"}
+                              </span>
+                              <span>
+                                Truncated:{" "}
+                                {run.reliability.truncated ? "yes" : "no"}
+                              </span>
+                              <span>
+                                Ambiguous: {run.reliability.ambiguousFindings} ·
+                                Clarification:{" "}
+                                {run.reliability.clarificationCount} · Invalid
+                                targets: {run.reliability.invalidTargetCount}
+                              </span>
+                              <span>
+                                Rules:{" "}
+                                {run.reliability.triggeredRules.length
+                                  ? run.reliability.triggeredRules.join(", ")
+                                  : "none"}
+                              </span>
+                            </div>
+                          ) : null}
                         </div>
                       ) : null}
                     </button>

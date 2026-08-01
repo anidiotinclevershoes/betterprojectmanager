@@ -25,6 +25,7 @@ import {
   type CaptureSource,
 } from "@/lib/sessions/history";
 import type { CaptureContextManifest } from "@/lib/capture/context";
+import type { CaptureReliabilityAssessment } from "@/lib/capture/reliability";
 
 type Busy = "idle" | "transcribing" | "analysing";
 
@@ -57,11 +58,15 @@ type CaptureSessionValue = {
     raw: string,
     sourceType: "conversation" | "voice_note",
     scopedProjectId?: string,
+    options?: { force?: boolean },
   ) => Promise<void>;
   applyOne: (item: PendingSuggestion, scopedProjectId?: string) => void;
   dismissOne: (id: string) => void;
   clearSession: () => void;
   expandAnalysis: () => void;
+  /** Clear analysis but keep transcript — used after limited reliability. */
+  editCapture: () => void;
+  dismissPreReliabilityWarn: () => void;
   /** True when capture has in-progress work and is not collapsed. */
   isExpandedSession: boolean;
   pendingCount: number;
@@ -72,6 +77,8 @@ type CaptureSessionValue = {
   setSource: (value: CaptureSource) => void;
   analysedAt: string | null;
   contextManifest: CaptureContextManifest | null;
+  reliability: CaptureReliabilityAssessment | null;
+  preWarnDismissed: boolean;
 };
 
 const CaptureSessionContext = createContext<CaptureSessionValue | null>(null);
@@ -86,6 +93,8 @@ function normalizeSlice(raw: CapturePersistSlice | null): CapturePersistSlice {
     historyId: raw.historyId ?? null,
     analysedAt: raw.analysedAt ?? null,
     contextManifest: raw.contextManifest ?? null,
+    reliability: raw.reliability ?? null,
+    preWarnDismissed: raw.preWarnDismissed ?? false,
     dismissed: raw.dismissed ?? {},
     added: raw.added ?? {},
     editing: raw.editing ?? {},
@@ -121,6 +130,8 @@ function emptySlice(): CapturePersistSlice {
     historyId: null,
     analysedAt: null,
     contextManifest: null,
+    reliability: null,
+    preWarnDismissed: false,
   };
 }
 
@@ -188,9 +199,14 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
 
   const setContent = useCallback((value: string) => {
     setSlice((prev) => {
-      // Lock transcript once analysed — New capture is the only clear path.
+      // Lock transcript once analysed — New capture / Edit Capture unlock.
       if (prev.result) return prev;
-      return { ...prev, content: value, collapsed: false };
+      return {
+        ...prev,
+        content: value,
+        collapsed: false,
+        preWarnDismissed: false,
+      };
     });
   }, []);
 
@@ -278,16 +294,40 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const editCapture = useCallback(() => {
+    setSlice((prev) => ({
+      ...prev,
+      result: null,
+      suggestions: [],
+      dismissed: {},
+      added: {},
+      editing: {},
+      analysedAt: null,
+      historyId: null,
+      reliability: null,
+      contextManifest: null,
+      collapsed: false,
+      preWarnDismissed: false,
+      error: null,
+    }));
+    announce("Capture unlocked for editing.");
+  }, [announce]);
+
+  const dismissPreReliabilityWarn = useCallback(() => {
+    setSlice((prev) => ({ ...prev, preWarnDismissed: true }));
+  }, []);
+
   const analyse = useCallback(
     async (
       raw: string,
       sourceType: "conversation" | "voice_note",
       scopedProjectId?: string,
+      options?: { force?: boolean },
     ) => {
       const trimmed = raw.trim();
       if (!trimmed) return;
-      // Do not re-analyse an already analysed Capture.
-      if (slice.result) return;
+      // Do not re-analyse an already analysed Capture unless forced (Analyse again).
+      if (slice.result && !options?.force) return;
       setBusy("analysing");
       setSlice((prev) => ({
         ...prev,
@@ -298,12 +338,16 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         added: {},
         editing: {},
         collapsed: false,
+        reliability: null,
+        contextManifest: null,
+        analysedAt: null,
       }));
       try {
         const effective = scopedProjectId || slice.projectId || undefined;
         const {
           result: next,
           contextManifest,
+          reliability,
         } = await analyzeCaptureWithAI({
           content: trimmed,
           projectId: effective,
@@ -319,7 +363,11 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           }));
         const analysedAt = new Date().toISOString();
         const historyId = createCaptureSessionId();
-        const suggestions = buildSuggestions(next, openTodos);
+        // Limited analyses: keep facts/summary; suppress actionable suggestions.
+        const suggestions =
+          reliability?.state === "limited"
+            ? []
+            : buildSuggestions(next, openTodos);
         const source: CaptureSource =
           sourceType === "voice_note"
             ? "recorded"
@@ -337,11 +385,19 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
             analysedAt,
             source,
             contextManifest: contextManifest ?? null,
+            reliability: reliability ?? null,
+            preWarnDismissed: false,
           };
           persistHistory(nextSlice);
           return nextSlice;
         });
-        announce("Capture analysis complete. Review suggested actions.");
+        announce(
+          reliability?.state === "limited"
+            ? "Limited analysis — review the Capture before accepting changes."
+            : reliability?.state === "review_recommended"
+              ? "Capture analysed — review recommended."
+              : "Capture analysis complete. Review suggested actions.",
+        );
       } catch (err) {
         setSlice((prev) => ({
           ...prev,
@@ -530,6 +586,8 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       dismissOne,
       clearSession,
       expandAnalysis,
+      editCapture,
+      dismissPreReliabilityWarn,
       isExpandedSession,
       pendingCount,
       hasTranscript,
@@ -538,6 +596,8 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       setSource,
       analysedAt: slice.analysedAt,
       contextManifest: slice.contextManifest ?? null,
+      reliability: slice.reliability ?? null,
+      preWarnDismissed: Boolean(slice.preWarnDismissed),
     }),
     [
       addFileName,
@@ -547,6 +607,8 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       busy,
       clearSession,
       dismissOne,
+      dismissPreReliabilityWarn,
+      editCapture,
       expandAnalysis,
       hasTranscript,
       isAnalysed,
