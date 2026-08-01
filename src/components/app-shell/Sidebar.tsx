@@ -8,6 +8,7 @@ import {
   projectAttentionCount,
 } from "@/lib/workspace/attention";
 import { useMission } from "@/lib/store";
+import { ResetDemoDataButton } from "@/components/dev/ResetDemoDataButton";
 
 export function Sidebar({
   collapsed,
@@ -176,6 +177,10 @@ export function Sidebar({
                 </span>
                 {!collapsed ? <span>AI Cockpit</span> : null}
               </Link>
+              <ResetDemoDataButton
+                collapsed={collapsed}
+                onAfterReset={onCloseMobile}
+              />
             </>
           ) : null}
         </nav>

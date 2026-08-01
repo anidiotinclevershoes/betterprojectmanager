@@ -26,6 +26,11 @@ import {
   type CloneRelOpsInput,
 } from "./relops-clone";
 import { createSeedState } from "./seed";
+import { resetSeedData, type SeedResetResult } from "./seed-reset";
+import {
+  clearActiveCaptureIfSeeded,
+  pruneSeededSessions,
+} from "./sessions/history";
 import type { CaptureContextManifest } from "./capture/context";
 import {
   extractTimelinePatchFromText,
@@ -147,7 +152,8 @@ type MissionContextValue = {
     item: TimelineItemInput & { source?: TimelineItem["source"] },
   ) => void;
   refreshCoaching: () => void;
-  resetDemo: () => void;
+  /** Development: restore seeded demo baseline; preserve non-seeded data. */
+  resetDemo: () => SeedResetResult;
 };
 
 const MissionContext = createContext<MissionContextValue | null>(null);
@@ -912,10 +918,46 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     setState((prev) => withProactiveCoaching(prev));
   }, []);
 
-  const resetDemo = useCallback(() => {
-    const seed = createSeedState();
-    persist(seed);
-    setState(seed);
+  const resetDemo = useCallback((): SeedResetResult => {
+    const previous = stateRef.current;
+    try {
+      const result = resetSeedData(previous);
+      if (!result.ok) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("[resetDemo] seed merge failed", result.error);
+        }
+        return result;
+      }
+
+      // Persist only after a complete successful merge (localStorage is atomic per key).
+      persist(result.state);
+      setState(result.state);
+
+      try {
+        pruneSeededSessions({
+          seedProjectIds: result.manifest.projectIds,
+          seedCaptureSessionIds:
+            result.manifest.recordIdsByType.captureSessions ?? [],
+          seedCoachingSessionIds:
+            result.manifest.recordIdsByType.coachingSessions ?? [],
+        });
+        clearActiveCaptureIfSeeded(result.manifest.projectIds);
+      } catch (sessionErr) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("[resetDemo] session prune failed", sessionErr);
+        }
+        // Mission state already restored; surface soft failure for retry of prune only.
+      }
+
+      return result;
+    } catch (err) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("[resetDemo] failed", err);
+      }
+      // Do not persist partial state — previous in-memory state remains until next success.
+      setState(previous);
+      return { ok: false, error: "Could not restore demo data." };
+    }
   }, []);
 
   const value = useMemo(

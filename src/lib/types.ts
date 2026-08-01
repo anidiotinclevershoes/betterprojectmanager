@@ -17,6 +17,8 @@ export type RecommendationKind =
 
 export interface Recommendation {
   id: string;
+  /** Development seed / demo marker — never infer from title alone. */
+  isSeeded?: boolean;
   kind: RecommendationKind;
   urgency: RecommendationUrgency;
   title: string;
@@ -59,6 +61,8 @@ export interface Recommendation {
 
 export interface Stakeholder {
   id: string;
+  /** Development seed / demo marker. */
+  isSeeded?: boolean;
   name: string;
   role: string;
   preferences?: string[];
@@ -68,6 +72,8 @@ export interface Stakeholder {
 
 export interface Project {
   id: string;
+  /** Development seed / demo marker — never infer from name alone. */
+  isSeeded?: boolean;
   name: string;
   code: string;
   summary: string;
@@ -91,6 +97,8 @@ export interface Project {
 
 export interface MemoryEntry {
   id: string;
+  /** Development seed / demo marker. */
+  isSeeded?: boolean;
   type: MemoryType;
   projectId?: string;
   title: string;
@@ -135,6 +143,8 @@ export interface MeetingDebrief {
 
 export interface Meeting {
   id: string;
+  /** Development seed / demo marker. */
+  isSeeded?: boolean;
   projectId: string;
   title: string;
   startsAt: string;
@@ -168,6 +178,8 @@ export interface ReleaseStageStatus {
 
 export interface Release {
   id: string;
+  /** Development seed / demo marker. */
+  isSeeded?: boolean;
   projectId: string;
   name: string;
   targetDate: string;
@@ -186,6 +198,8 @@ export interface CaptureInput {
 /** Owned checklist item — accepted from suggestions or added manually. */
 export interface TodoItem {
   id: string;
+  /** Development seed / demo marker. */
+  isSeeded?: boolean;
   /** null / undefined = personal / generic (not tied to a project) */
   projectId?: string | null;
   title: string;
@@ -218,6 +232,8 @@ export type KnowledgeSectionId =
 
 export interface ProjectKnowledge {
   projectId: string;
+  /** Development seed / demo marker (rare; usually keyed by seed projectId). */
+  isSeeded?: boolean;
   updatedAt: string;
   sections: Record<KnowledgeSectionId, string[]>;
 }
@@ -258,6 +274,8 @@ export type TimelineItemType =
 
 export interface TimelineItem {
   id: string;
+  /** Development seed / demo marker. */
+  isSeeded?: boolean;
   projectId: string;
   label: string;
   type: TimelineItemType;
@@ -296,6 +314,8 @@ export type HistoryEventType =
 
 export interface HistoryEvent {
   id: string;
+  /** Development seed / demo marker. */
+  isSeeded?: boolean;
   type: HistoryEventType;
   title: string;
   detail?: string;

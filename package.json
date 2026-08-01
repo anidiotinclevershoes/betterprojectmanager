@@ -12,7 +12,8 @@
     "verify:capture-prompt": "npx --yes tsx scripts/verify-capture-prompt-path.ts",
     "verify:ai-domain": "npx --yes tsx scripts/verify-ai-domain.ts",
     "verify:golden-test": "npx --yes tsx scripts/verify-golden-test.ts",
-    "verify:findings": "npx --yes tsx scripts/verify-findings.ts"
+    "verify:findings": "npx --yes tsx scripts/verify-findings.ts",
+    "verify:seed-reset": "npx --yes tsx scripts/verify-seed-reset.ts"
   },
   "dependencies": {
     "js-tiktoken": "^1.0.21",

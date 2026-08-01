@@ -31,6 +31,8 @@ export type CaptureSessionRecord = {
   status: CaptureSessionStatus;
   /** Optional Phase 1 observability; older sessions may omit this. */
   contextManifest?: CaptureContextManifest | null;
+  /** Development seed / demo marker for selective reset. */
+  isSeeded?: boolean;
 };
 
 export type CoachingSessionRecord = {
@@ -44,6 +46,8 @@ export type CoachingSessionRecord = {
   provider: "openai" | "local" | null;
   recommendationStates: Record<string, "pending" | "accepted" | "dismissed">;
   status: "active" | "dismissed" | "completed";
+  /** Development seed / demo marker for selective reset. */
+  isSeeded?: boolean;
 };
 
 const CAPTURE_HISTORY_KEY = "lume-capture-sessions-v1";
@@ -145,6 +149,67 @@ export function upsertCoachingSession(
 
 export function createCoachingSessionId() {
   return id("coach");
+}
+
+/**
+ * Remove durable Capture/Coach sessions that belong to seeded demo projects
+ * or are explicitly marked `isSeeded`. User sessions for other projects stay.
+ */
+export function pruneSeededSessions(options: {
+  seedProjectIds: readonly string[];
+  seedCaptureSessionIds?: readonly string[];
+  seedCoachingSessionIds?: readonly string[];
+}): { captureRemoved: number; coachingRemoved: number } {
+  const projectIds = new Set(options.seedProjectIds);
+  const captureSeedIds = new Set(options.seedCaptureSessionIds ?? []);
+  const coachingSeedIds = new Set(options.seedCoachingSessionIds ?? []);
+
+  const captures = listCaptureSessions();
+  const nextCaptures = captures.filter((s) => {
+    const seededFlag = (s as CaptureSessionRecord & { isSeeded?: boolean })
+      .isSeeded;
+    if (seededFlag) return false;
+    if (captureSeedIds.has(s.id)) return false;
+    if (s.projectId && projectIds.has(s.projectId)) return false;
+    return true;
+  });
+  writeList(CAPTURE_HISTORY_KEY, nextCaptures);
+
+  const coaching = listCoachingSessions();
+  const nextCoaching = coaching.filter((s) => {
+    const seededFlag = (s as CoachingSessionRecord & { isSeeded?: boolean })
+      .isSeeded;
+    if (seededFlag) return false;
+    if (coachingSeedIds.has(s.id)) return false;
+    if (s.projectId && projectIds.has(s.projectId)) return false;
+    return true;
+  });
+  writeList(COACHING_HISTORY_KEY, nextCoaching);
+
+  return {
+    captureRemoved: captures.length - nextCaptures.length,
+    coachingRemoved: coaching.length - nextCoaching.length,
+  };
+}
+
+/** Clear active Capture workspace if it targets a seeded project. */
+export function clearActiveCaptureIfSeeded(
+  seedProjectIds: readonly string[],
+  activeKey = "lume-capture-session-v1",
+): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = window.sessionStorage.getItem(activeKey);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw) as { projectId?: string | null };
+    if (parsed.projectId && seedProjectIds.includes(parsed.projectId)) {
+      window.sessionStorage.removeItem(activeKey);
+      return true;
+    }
+  } catch {
+    /* ignore */
+  }
+  return false;
 }
 
 export function statusLabel(status: CaptureSessionStatus) {
