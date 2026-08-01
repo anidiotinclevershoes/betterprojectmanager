@@ -20,14 +20,25 @@ export type GoldenOperation =
 
 export type GoldenExpectedOutcome = {
   id: string;
+  /** Preferred / exact operation for this expectation. */
   operation: GoldenOperation;
-  /** Alternate ops that still count as Correct (e.g. complete vs update). */
+  /**
+   * Narrow set of operations that yield the same canonical app state.
+   * When omitted, only `operation` (+ legacy `allowedOperations`) is accepted.
+   */
+  acceptedOperations?: GoldenOperation[];
+  /** @deprecated Prefer acceptedOperations — kept for standard scenario compat. */
   allowedOperations?: GoldenOperation[];
   entity: GoldenEntity;
-  /** Existing record title / knowledge bullet to match (fuzzy). */
+  /** Existing record title / knowledge bullet to match. */
   targetTitle: string;
   /** Preferred stable fixture ID when available. */
   targetId?: string;
+  /**
+   * Required resulting field changes (narrow equality / inclusion check).
+   * Example: `{ status: ["COMPLETED", "RESOLVED"] }` or `{ date: "19 August" }`.
+   */
+  expectedChanges?: Record<string, unknown>;
   /** Optional human hint for the Reasoning card. */
   reasoningHint?: {
     foundLabel: string;
@@ -59,7 +70,7 @@ export type GoldenScenarioFixture = {
   description: string;
   /** Coming soon scenarios stay listed but disabled. */
   available: boolean;
-  /** standard = regression pass/fail; hard = exploratory Strong/Mixed/Unreliable. */
+  /** standard = regression pass/fail; hard = Strong/Mixed/Failed + separate reliability. */
   scoringMode?: GoldenScoringMode;
   defaultCapture: string;
   project: {
@@ -84,7 +95,12 @@ export type GoldenScenarioFixture = {
   prohibited?: GoldenProhibitedOutcome[];
 };
 
-export type MatchStatus = "correct" | "needs_review" | "missing" | "unexpected";
+export type MatchStatus =
+  | "correct"
+  | "valid_alternative"
+  | "needs_review"
+  | "missing"
+  | "unexpected";
 
 export type ScoredOutcome = {
   status: MatchStatus;
@@ -97,10 +113,25 @@ export type ScoredOutcome = {
   confidenceEstimated?: boolean;
   label: string;
   detail?: string;
+  /** Friendly status chip label. */
+  statusLabel?: string;
+  resultingStatus?: string;
 };
 
-/** Neutral hard-scenario bands — not pass/fail of the application. */
-export type HardScenarioBand = "strong" | "mixed" | "unreliable";
+/** Regression bands for hard scenarios (independent of reliability). */
+export type HardRegressionBand = "strong" | "mixed" | "failed";
+
+export type GoldenReliabilityVerdict = {
+  state: "normal" | "review_recommended" | "limited";
+  label: string;
+  ambiguousFindings: number;
+  clarificationCount: number;
+  invalidTargetCount: number;
+  validationErrors: number;
+  lowConfidenceCount: number;
+  missingOperationMappings: number;
+  truncated: boolean;
+};
 
 export type GoldenScore = {
   grade: "excellent" | "good" | "needs_work" | "poor";
@@ -109,13 +140,15 @@ export type GoldenScore = {
   matched: number;
   total: number;
   outcomes: ScoredOutcome[];
-  /** Present when scoringMode is hard. */
-  hardBand?: HardScenarioBand;
+  /** Hard regression band — never driven by op-label mismatch alone. */
+  hardBand?: HardRegressionBand;
   hardBandLabel?: string;
   hardExplanation?: string;
   prohibitedTriggered?: number;
   ambiguousFindings?: number;
   scoringMode?: GoldenScoringMode;
+  /** Independent of expected-operation matching. */
+  reliability?: GoldenReliabilityVerdict;
 };
 
 export type GoldenProposedOp = {
@@ -129,6 +162,8 @@ export type GoldenProposedOp = {
   confidenceEstimated: boolean;
   sourceFindingId?: string;
   targetId?: string;
+  proposedValues?: Record<string, unknown>;
+  resultingStatus?: string;
 };
 
 export type GoldenReasoningStep = {

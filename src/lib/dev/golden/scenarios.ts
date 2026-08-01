@@ -30,6 +30,7 @@ const WEBSITE_REFRESH_BASELINE = {
   knowledge: ["Release planned for 12 August"],
 };
 
+/** Standard scenario — unchanged Knowledge-based release date expectation. */
 const WEBSITE_REFRESH_EXPECTED: GoldenScenarioFixture["expected"] = [
   {
     id: "complete-cab",
@@ -71,6 +72,64 @@ const WEBSITE_REFRESH_EXPECTED: GoldenScenarioFixture["expected"] = [
       foundTitle: "CDN deployment delayed",
       captureStates: "Capture states the CDN issue is resolved",
       recommend: "COMPLETE existing Risk",
+    },
+  },
+];
+
+/**
+ * Hard scenario — Milestone date update + canonical Risk resolve.
+ * COMPLETE is preferred for Risk; UPDATE with resolved status is a valid alternative.
+ */
+const WEBSITE_REFRESH_HARD_EXPECTED: GoldenScenarioFixture["expected"] = [
+  {
+    id: "complete-cab",
+    operation: "complete",
+    entity: "todo",
+    targetTitle: "Obtain CAB approval",
+    targetId: "golden-todo-cab",
+    minConfidence: 80,
+    reasoningHint: {
+      foundLabel: "Found existing To Do",
+      foundTitle: "Obtain CAB approval",
+      captureStates: "Capture states approval received",
+      recommend: "COMPLETE existing To Do",
+    },
+  },
+  {
+    id: "update-release-milestone",
+    operation: "update",
+    entity: "milestone",
+    targetTitle: "Release",
+    targetId: "golden-tl-release",
+    expectedChanges: {
+      date: ["19 August", "2026-08-19"],
+      startAt: ["2026-08-19", "19 August"],
+    },
+    minConfidence: 75,
+    reasoningHint: {
+      foundLabel: "Found Milestone",
+      foundTitle: "Release",
+      captureStates: "Capture moves release from 12 August to 19 August",
+      recommend: "UPDATE existing Milestone date",
+    },
+  },
+  {
+    id: "resolve-cdn",
+    operation: "complete",
+    entity: "risk",
+    targetTitle: "CDN deployment delayed",
+    targetId: "golden-risk-0",
+    /** Canonical resolve is COMPLETE; UPDATE+RESOLVED is a narrow semantic equivalent. */
+    acceptedOperations: ["complete", "update"],
+    expectedChanges: {
+      status: ["COMPLETED", "RESOLVED", "done", "DONE"],
+    },
+    minConfidence: 75,
+    reasoningHint: {
+      foundLabel: "Found Risk",
+      foundTitle: "CDN deployment delayed",
+      captureStates: "Capture states the CDN issue is resolved",
+      recommend: "COMPLETE (resolve) existing Risk",
     },
   },
 ];
@@ -177,7 +236,7 @@ export const WEBSITE_REFRESH_HARD_SCENARIO: GoldenScenarioFixture = {
     { id: "golden-stake-sarah", name: "Sarah", role: "Business Owner" },
   ],
   knowledge: WEBSITE_REFRESH_BASELINE.knowledge,
-  expected: WEBSITE_REFRESH_EXPECTED,
+  expected: WEBSITE_REFRESH_HARD_EXPECTED,
   prohibited: WEBSITE_REFRESH_PROHIBITED,
 };
 

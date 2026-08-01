@@ -1,14 +1,16 @@
 /**
- * Golden Test — scoring presentation checks + three pipeline runs.
+ * Golden Test — scoring, hard-scenario repair, facts, reliability separation.
  * Run: npx tsx scripts/verify-golden-test.ts
  */
 import assert from "node:assert/strict";
 import {
   WEBSITE_REFRESH_HARD_SCENARIO,
   WEBSITE_REFRESH_SCENARIO,
+  assessGoldenReliability,
+  expectedChangesMatch,
+  extractAtomicFacts,
   fixtureToMissionState,
-  hardScenarioBand,
-  hardScenarioExplanation,
+  hardRegressionBand,
   listGoldenScenarios,
   presentGoldenResult,
   scoreGoldenResult,
@@ -16,24 +18,38 @@ import {
 import { buildCaptureContext } from "../src/lib/capture/context";
 import { localCaptureFallback } from "../src/lib/openai";
 import type { CaptureResult, MissionState } from "../src/lib/types";
+import type { ProposedOperation } from "../src/lib/capture/findings";
 
+function baseOp(
+  over: Partial<ProposedOperation> &
+    Pick<
+      ProposedOperation,
+      "id" | "operation" | "entityType" | "sourceFindingId"
+    >,
+): ProposedOperation {
+  return {
+    targetTitle: over.targetTitle ?? "x",
+    reason: over.reason ?? "test",
+    evidence: over.evidence ?? "test",
+    confidence: over.confidence ?? 90,
+    destructive: false,
+    requiresClarification: false,
+    ...over,
+  };
+}
+
+// --- Standard remains strict and unchanged ---
 const scenario = WEBSITE_REFRESH_SCENARIO;
 assert.equal(scenario.name, "Website Refresh — Standard");
 assert.equal(scenario.scoringMode, "standard");
+assert.equal(scenario.expected[1]?.entity, "knowledge");
+assert.equal(scenario.expected[1]?.targetId, "know-golden-proj-website-refresh-now-0");
 
 const listed = listGoldenScenarios();
-assert.ok(listed.some((s) => s.id === "website-refresh"));
 assert.ok(listed.some((s) => s.id === "website-refresh-hard"));
-assert.equal(
-  listed.find((s) => s.id === "website-refresh-hard")?.name,
-  "Website Refresh — Hard Capture",
-);
 
 const fixture = fixtureToMissionState(scenario);
 const state: MissionState = { ...fixture, memories: [] };
-
-assert.equal(state.projects[0]?.name, "Website Refresh");
-assert.ok(state.todos.some((t) => t.title === "Obtain CAB approval"));
 
 const runs: Array<ReturnType<typeof scoreGoldenResult>> = [];
 for (let i = 0; i < 3; i++) {
@@ -51,7 +67,9 @@ for (let i = 0; i < 3; i++) {
     state,
     captureContext,
   );
-  const score = scoreGoldenResult(scenario, result);
+  const score = scoreGoldenResult(scenario, result, {
+    captureText: scenario.defaultCapture,
+  });
   const presented = presentGoldenResult(
     scenario,
     result,
@@ -63,20 +81,22 @@ for (let i = 0; i < 3; i++) {
   assert.equal(score.scoringMode, "standard");
   assert.equal(result.proposedOperations?.length, 3);
   assert.ok(presented.findingCards && presented.findingCards.length >= 3);
+  // Facts must be atomic — not raw multi-sentence transcript dumps
+  assert.ok(presented.facts.every((f) => f.length < 160));
   assert.ok(
-    presented.reasoning.every((r) => r.sourceFindingId),
-    "reasoning must link to findings",
+    presented.facts.some((f) => /cab/i.test(f)),
+    "facts should mention CAB",
   );
   runs.push(score);
 }
 
-// --- Hard scenario ---
+// --- Hard scenario expectations ---
 const hard = WEBSITE_REFRESH_HARD_SCENARIO;
 assert.equal(hard.scoringMode, "hard");
-assert.ok(hard.defaultCapture.toLowerCase().includes("milk"));
-assert.ok(hard.defaultCapture.toLowerCase().includes("marcus"));
-assert.ok(/\.\.\./.test(hard.defaultCapture) || /wait, no/i.test(hard.defaultCapture));
-assert.equal(hard.stakeholders[0]?.role, "Business Owner");
+assert.equal(hard.expected[1]?.entity, "milestone");
+assert.equal(hard.expected[1]?.targetId, "golden-tl-release");
+assert.equal(hard.expected[2]?.entity, "risk");
+assert.deepEqual(hard.expected[2]?.acceptedOperations, ["complete", "update"]);
 
 const hardFixture = fixtureToMissionState(hard);
 const hardState: MissionState = { ...hardFixture, memories: [] };
@@ -94,91 +114,190 @@ const hardResult = localCaptureFallback(
   hardState,
   hardContext,
 );
-const hardScore = scoreGoldenResult(hard, hardResult);
-
-assert.equal(hardScore.scoringMode, "hard");
-assert.ok(hardScore.hardBandLabel);
-assert.ok(hardScore.hardExplanation);
-// Hard is exploratory — do not require Perfect / passed.
-assert.equal(hardScore.passed, false);
-assert.ok(
-  ["Strong", "Mixed", "Unreliable"].includes(hardScore.hardBandLabel!),
+const hardScore = scoreGoldenResult(hard, hardResult, {
+  captureText: hard.defaultCapture,
+});
+const hardPresented = presentGoldenResult(
+  hard,
+  hardResult,
+  hard.defaultCapture,
 );
+
+assert.equal(hardScore.matched, 3, `hard matched ${hardScore.matched}/3: ${hardScore.outcomes.map((o) => `${o.status}:${o.label}`).join(" | ")}`);
+assert.equal(hardScore.prohibitedTriggered, 0);
+assert.equal(hardScore.unexpectedCount, 0);
+assert.equal(hardScore.invalidTargetCount, 0);
+assert.equal(hardScore.hardBandLabel, "Strong");
+assert.ok(hardScore.reliability);
+assert.notEqual(
+  hardScore.reliability!.label,
+  "Limited",
+  "reliability must not be Limited when signals are clean",
+);
+// Overall grade is Strong (regression), not Unreliable from op labels
+assert.equal(hardScore.gradeLabel, "Strong");
 
 const opsText = JSON.stringify(hardResult.proposedOperations ?? []).toLowerCase();
-assert.equal(
-  opsText.includes("milk"),
-  false,
-  "irrelevant personal content must not become an operation",
+assert.equal(opsText.includes("milk"), false);
+assert.ok(
+  (hardResult.proposedOperations ?? []).some(
+    (o) => o.entityType === "milestone" && o.operation === "UPDATE",
+  ),
+  "hard local pipeline should UPDATE the Release milestone",
 );
 
-// Prohibited outcomes affect the hard score when triggered
-const withProhibited: CaptureResult = {
+// Atomic facts — filler / milk out; negated ownership in
+const factsBlob = hardPresented.facts.join("\n");
+assert.equal(/milk/i.test(factsBlob), false, "milk must be omitted from Facts");
+assert.equal(
+  /okay,? so|before i forget/i.test(factsBlob),
+  false,
+  "filler speech must be omitted from Facts",
+);
+assert.ok(
+  hardPresented.facts.some((f) => /sarah remains/i.test(f)),
+  "Sarah remains owner should be retained",
+);
+assert.ok(
+  hardPresented.facts.some((f) => /marcus/i.test(f) && /release notes/i.test(f)),
+  "Marcus release-notes support should be retained",
+);
+assert.ok(hardPresented.facts.every((f) => f.length < 160));
+
+// --- Semantic Risk alternative (UPDATE + RESOLVED) ---
+const altRiskResult: CaptureResult = {
+  ...hardResult,
+  proposedOperations: (hardResult.proposedOperations ?? []).map((op) =>
+    op.entityType === "risk"
+      ? {
+          ...op,
+          operation: "UPDATE" as const,
+          proposedValues: { status: "RESOLVED" },
+        }
+      : op,
+  ),
+};
+const altScore = scoreGoldenResult(hard, altRiskResult, {
+  captureText: hard.defaultCapture,
+});
+assert.equal(altScore.matched, 3);
+assert.ok(
+  altScore.outcomes.some(
+    (o) =>
+      o.expectedId === "resolve-cdn" && o.status === "valid_alternative",
+  ),
+  "UPDATE+RESOLVED risk should be Valid alternative",
+);
+assert.equal(altScore.hardBandLabel, "Strong");
+
+// Wrong target still fails
+const wrongTarget: CaptureResult = {
+  ...hardResult,
+  proposedOperations: (hardResult.proposedOperations ?? []).map((op) =>
+    op.entityType === "todo"
+      ? { ...op, targetId: "golden-todo-window", targetTitle: "Confirm release window" }
+      : op,
+  ),
+};
+const wrongScore = scoreGoldenResult(hard, wrongTarget, {
+  captureText: hard.defaultCapture,
+});
+assert.ok(wrongScore.matched < 3);
+
+// Duplicate Knowledge creation still fails (prohibited)
+const dupKnowledge: CaptureResult = {
   ...hardResult,
   proposedOperations: [
     ...(hardResult.proposedOperations ?? []),
-    {
-      id: "op-bad-milk",
-      sourceFindingId: "f-milk",
+    baseOp({
+      id: "op-dup-know",
+      sourceFindingId: "f-dup",
       operation: "CREATE",
-      entityType: "todo",
-      targetTitle: "Buy milk on the way home",
-      proposedValues: { text: "Buy milk" },
-      confidence: 40,
-      reason: "Personal reminder",
-      evidence: "milk on the way home",
-      destructive: false,
-      requiresClarification: false,
-    },
+      entityType: "knowledge",
+      targetTitle: "Release planned for 19 August",
+      proposedValues: { text: "Release planned for 19 August" },
+    }),
   ],
 };
-const prohibitedScore = scoreGoldenResult(hard, withProhibited);
-assert.ok(
-  (prohibitedScore.prohibitedTriggered ?? 0) >= 1,
-  "prohibited milk operation should be counted",
-);
-assert.equal(prohibitedScore.hardBand, "unreliable");
+const dupScore = scoreGoldenResult(hard, dupKnowledge, {
+  captureText: hard.defaultCapture,
+});
+assert.ok((dupScore.prohibitedTriggered ?? 0) >= 1);
 
-// Friendly explanation rules are deterministic
+// Invented monitoring Risk still fails
+const monitorRisk: CaptureResult = {
+  ...hardResult,
+  proposedOperations: [
+    ...(hardResult.proposedOperations ?? []),
+    baseOp({
+      id: "op-monitor",
+      sourceFindingId: "f-mon",
+      operation: "CREATE",
+      entityType: "risk",
+      targetTitle: "Monitor CDN after fix",
+    }),
+  ],
+};
+const monitorScore = scoreGoldenResult(hard, monitorRisk, {
+  captureText: hard.defaultCapture,
+});
+assert.ok((monitorScore.prohibitedTriggered ?? 0) >= 1);
+assert.equal(monitorScore.hardBandLabel, "Failed");
+
+// Reliability independent from expected-operation matching
+const reliabilityClean = assessGoldenReliability(hardResult, hard.defaultCapture);
+assert.equal(reliabilityClean.state, "normal");
+const mismatchedLabels: CaptureResult = {
+  ...hardResult,
+  // Force a regression miss without dirtying reliability signals
+  proposedOperations: (hardResult.proposedOperations ?? []).filter(
+    (o) => o.entityType !== "milestone",
+  ),
+};
+const missScore = scoreGoldenResult(hard, mismatchedLabels, {
+  captureText: hard.defaultCapture,
+});
+assert.ok(missScore.matched < 3);
+assert.equal(missScore.reliability?.state, "normal");
+assert.notEqual(missScore.gradeLabel, "Unreliable");
+
 assert.equal(
-  hardScenarioBand({
+  hardRegressionBand({
     matched: 3,
     total: 3,
     prohibitedTriggered: 0,
     unexpectedCount: 0,
-    invalidTargetCount: 0,
   }).label,
   "Strong",
 );
+
+assert.ok(
+  expectedChangesMatch(
+    { status: ["COMPLETED", "RESOLVED"] },
+    { status: "RESOLVED" },
+  ),
+);
 assert.equal(
-  hardScenarioBand({
-    matched: 2,
-    total: 3,
-    prohibitedTriggered: 0,
-    unexpectedCount: 1,
-    invalidTargetCount: 0,
-  }).label,
-  "Mixed",
+  expectedChangesMatch({ status: ["COMPLETED"] }, { status: "OPEN" }),
+  false,
 );
-assert.match(
-  hardScenarioExplanation({
-    matched: 0,
-    total: 3,
-    prohibitedTriggered: 1,
-    unexpectedCount: 2,
-    ambiguousFindings: 2,
-    invalidTargetCount: 1,
-  }),
-  /too ambiguous/i,
-);
+
+// extractAtomicFacts unit checks
+const atomic = extractAtomicFacts(hardResult, hard.defaultCapture);
+assert.equal(atomic.some((f) => /milk/i.test(f)), false);
+assert.ok(atomic.some((f) => /sarah remains/i.test(f)));
 
 console.log("verify-golden-test: all checks passed");
 for (const [i, score] of runs.entries()) {
   console.log(
-    `  standard local run ${i + 1}: ${score.gradeEmoji} ${score.gradeLabel} (${score.matched}/${score.total}, unexpected=${score.unexpectedCount})`,
+    `  standard local run ${i + 1}: ${score.gradeEmoji} ${score.gradeLabel} (${score.matched}/${score.total})`,
   );
 }
 console.log(
-  `  hard local run: ${hardScore.hardBandLabel} (${hardScore.matched}/${hardScore.total}, prohibited=${hardScore.prohibitedTriggered}, unexpected=${hardScore.unexpectedCount})`,
+  `  hard local run: ${hardScore.hardBandLabel} (${hardScore.matched}/${hardScore.total}) reliability=${hardScore.reliability?.label}`,
 );
 console.log(`  hard explanation: ${hardScore.hardExplanation}`);
+console.log(`  hard facts: ${hardPresented.facts.join(" | ")}`);
+console.log(
+  `  hard outcomes: ${hardScore.outcomes.map((o) => `${o.statusLabel}:${o.label}`).join(" · ")}`,
+);

@@ -1,14 +1,23 @@
+import type { CaptureContextManifest } from "@/lib/capture/context";
 import type { CaptureResult } from "@/lib/types";
 import type { CaptureFinding, ProposedOperation } from "@/lib/capture/findings";
 import { findingMeaningLabel } from "@/lib/capture/findings";
+import {
+  collectPostAnalysisSignals,
+  evaluatePostAnalysisReliability,
+} from "@/lib/capture/reliability";
+import { extractAtomicFacts } from "./facts";
 import type { GoldenScenarioFixture } from "./types";
 import type {
   GoldenEntity,
+  GoldenExpectedOutcome,
   GoldenOperation,
   GoldenPresentation,
   GoldenProposedOp,
   GoldenReasoningStep,
+  GoldenReliabilityVerdict,
   GoldenScore,
+  HardRegressionBand,
   MatchStatus,
   ScoredOutcome,
 } from "./types";
@@ -70,6 +79,15 @@ function toGoldenOp(op: string): GoldenOperation {
   return op.toLowerCase() as GoldenOperation;
 }
 
+function resultingStatusFromValues(
+  values?: Record<string, unknown>,
+): string | undefined {
+  if (!values) return undefined;
+  const status = values.status;
+  if (typeof status === "string") return status;
+  return undefined;
+}
+
 function proposalFromResult(result: CaptureResult): GoldenProposedOp[] {
   const ops = result.proposedOperations ?? [];
   return ops
@@ -80,6 +98,7 @@ function proposalFromResult(result: CaptureResult): GoldenProposedOp[] {
         typeof op.proposedValues?.text === "string"
           ? String(op.proposedValues.text)
           : undefined;
+      const resultingStatus = resultingStatusFromValues(op.proposedValues);
       return {
         id: op.id,
         operation: toGoldenOp(op.operation),
@@ -93,19 +112,27 @@ function proposalFromResult(result: CaptureResult): GoldenProposedOp[] {
         confidenceEstimated: false,
         sourceFindingId: op.sourceFindingId,
         targetId: op.targetId,
+        proposedValues: op.proposedValues,
+        resultingStatus,
       };
     });
 }
 
-function opsMatch(
-  expected: GoldenScenarioFixture["expected"][number],
-  op: GoldenOperation,
-): boolean {
-  const allowed = new Set<GoldenOperation>([
+function acceptedOps(expected: GoldenExpectedOutcome): Set<GoldenOperation> {
+  if (expected.acceptedOperations?.length) {
+    return new Set(expected.acceptedOperations);
+  }
+  return new Set<GoldenOperation>([
     expected.operation,
     ...(expected.allowedOperations ?? []),
   ]);
-  return allowed.has(op);
+}
+
+function opsAccepted(
+  expected: GoldenExpectedOutcome,
+  op: GoldenOperation,
+): boolean {
+  return acceptedOps(expected).has(op);
 }
 
 function entityCompatible(
@@ -113,6 +140,36 @@ function entityCompatible(
   actual: GoldenEntity,
 ): boolean {
   return expected === actual;
+}
+
+function valueMatchesWant(got: unknown, want: unknown): boolean {
+  const wantList = Array.isArray(want) ? want : [want];
+  const gotNorm = normalize(String(got ?? ""));
+  return wantList.some((w) => {
+    const wn = normalize(String(w));
+    return Boolean(wn) && (gotNorm === wn || gotNorm.includes(wn) || wn.includes(gotNorm));
+  });
+}
+
+/** Narrow expectedChanges check — no wildcards. */
+export function expectedChangesMatch(
+  expected?: Record<string, unknown>,
+  actual?: Record<string, unknown>,
+): boolean {
+  if (!expected || Object.keys(expected).length === 0) return true;
+  if (!actual) return false;
+  const blob = normalize(JSON.stringify(actual));
+  for (const [key, want] of Object.entries(expected)) {
+    if (key in actual) {
+      if (!valueMatchesWant(actual[key], want)) return false;
+      continue;
+    }
+    // Allow date-like expectations to match any string field content.
+    const wantList = Array.isArray(want) ? want : [want];
+    const inBlob = wantList.some((w) => blob.includes(normalize(String(w))));
+    if (!inBlob) return false;
+  }
+  return true;
 }
 
 export type GoldenScoreExtras = {
@@ -123,6 +180,8 @@ export type GoldenScoreExtras = {
   prohibitedTriggered: number;
   ambiguousFindings: number;
   scoringMode: "standard" | "hard";
+  exactMatched: number;
+  alternativeMatched: number;
 };
 
 function matchesProhibited(
@@ -158,8 +217,139 @@ function matchesProhibited(
 }
 
 /**
- * Deterministic friendly copy for hard scenarios — not another AI judgment.
+ * Reliability from analysis signals only — never from fixture op-label mismatch.
  */
+export function assessGoldenReliability(
+  result: CaptureResult,
+  captureText = "",
+  contextManifest?: CaptureContextManifest | null,
+): GoldenReliabilityVerdict {
+  const findings = result.findings ?? [];
+  const lowConfidenceCount = findings.filter(
+    (f) => typeof f.confidence === "number" && f.confidence < 60,
+  ).length;
+  const mappedFindingIds = new Set(
+    (result.proposedOperations ?? []).map((o) => o.sourceFindingId),
+  );
+  const missingOperationMappings = findings.filter(
+    (f) =>
+      !f.requiresClarification &&
+      !f.invalidTarget &&
+      f.findingType !== "NO_CHANGE" &&
+      f.findingType !== "AMBIGUOUS" &&
+      !mappedFindingIds.has(f.id),
+  ).length;
+
+  const signals = collectPostAnalysisSignals({
+    captureText,
+    result,
+    contextManifest,
+    measuredInputTokens: null,
+  });
+  const assessment = evaluatePostAnalysisReliability(signals);
+
+  // Elevate when many low-confidence findings exist (signal-based, not fixture).
+  let state = assessment.state;
+  if (
+    state === "normal" &&
+    findings.length > 0 &&
+    lowConfidenceCount / findings.length >= 0.5
+  ) {
+    state = "review_recommended";
+  }
+  if (
+    state === "normal" &&
+    missingOperationMappings >= 2 &&
+    findings.length >= 2
+  ) {
+    state = "review_recommended";
+  }
+
+  const label =
+    state === "normal"
+      ? "Normal"
+      : state === "review_recommended"
+        ? "Review recommended"
+        : "Limited";
+
+  return {
+    state,
+    label,
+    ambiguousFindings: findings.filter(
+      (f) => f.findingType === "AMBIGUOUS" || f.requiresClarification,
+    ).length,
+    clarificationCount: findings.filter((f) => f.requiresClarification).length,
+    invalidTargetCount:
+      result.findingsValidation?.invalidTargetCount ??
+      findings.filter((f) => f.invalidTarget).length,
+    validationErrors: result.findingsValidation?.errors?.length ?? 0,
+    lowConfidenceCount,
+    missingOperationMappings,
+    truncated: signals.truncated,
+  };
+}
+
+export function hardRegressionExplanation(input: {
+  matched: number;
+  total: number;
+  prohibitedTriggered: number;
+  unexpectedCount: number;
+  alternativeMatched: number;
+}): string {
+  const {
+    matched,
+    total,
+    prohibitedTriggered,
+    unexpectedCount,
+    alternativeMatched,
+  } = input;
+
+  if (matched === total && total > 0 && prohibitedTriggered === 0 && unexpectedCount === 0) {
+    if (alternativeMatched > 0) {
+      return `All ${total} expected project changes were recognised (${alternativeMatched} via valid alternative operations).`;
+    }
+    return `All ${total} expected project changes were recognised.`;
+  }
+
+  if (matched >= Math.ceil(total / 2) && prohibitedTriggered === 0) {
+    return `Lume recognised ${matched} of ${total} expected project changes. Review unmatched or unexpected items before accepting.`;
+  }
+
+  return "The Capture did not match enough expected project changes for a strong regression result.";
+}
+
+export function hardRegressionBand(input: {
+  matched: number;
+  total: number;
+  prohibitedTriggered: number;
+  unexpectedCount: number;
+}): { band: HardRegressionBand; label: string } {
+  const { matched, total, prohibitedTriggered, unexpectedCount } = input;
+
+  if (prohibitedTriggered > 0 || matched === 0) {
+    return { band: "failed", label: "Failed" };
+  }
+  if (matched === total && unexpectedCount === 0) {
+    return { band: "strong", label: "Strong" };
+  }
+  if (matched >= Math.ceil(total / 2)) {
+    return { band: "mixed", label: "Mixed" };
+  }
+  return { band: "failed", label: "Failed" };
+}
+
+/** @deprecated Use hardRegressionBand — kept for older verify imports. */
+export function hardScenarioBand(input: {
+  matched: number;
+  total: number;
+  prohibitedTriggered: number;
+  unexpectedCount: number;
+  invalidTargetCount: number;
+}) {
+  return hardRegressionBand(input);
+}
+
+/** @deprecated Use hardRegressionExplanation. */
 export function hardScenarioExplanation(input: {
   matched: number;
   total: number;
@@ -167,71 +357,38 @@ export function hardScenarioExplanation(input: {
   unexpectedCount: number;
   ambiguousFindings: number;
   invalidTargetCount: number;
-}): string {
-  const {
-    matched,
-    total,
-    prohibitedTriggered,
-    unexpectedCount,
-    ambiguousFindings,
-    invalidTargetCount,
-  } = input;
-  const reviewables =
-    unexpectedCount + ambiguousFindings + invalidTargetCount + prohibitedTriggered;
-
-  if (
-    matched === total &&
-    total > 0 &&
-    prohibitedTriggered === 0 &&
-    reviewables <= 2
-  ) {
-    if (reviewables > 0) {
-      return `Lume understood the main project changes but produced ${reviewables} low-confidence suggestions that should be reviewed carefully.`;
-    }
-    return "Lume understood the main project changes. Review each suggestion before accepting.";
-  }
-
-  if (matched >= Math.ceil(total / 2) && prohibitedTriggered === 0) {
-    return `Lume understood the main project changes but produced ${Math.max(reviewables, 1)} low-confidence suggestions that should be reviewed carefully.`;
-  }
-
-  return "The Capture was too ambiguous for reliable automated suggestions. The extracted facts are available, but no changes should be accepted without review.";
+}) {
+  return hardRegressionExplanation({
+    matched: input.matched,
+    total: input.total,
+    prohibitedTriggered: input.prohibitedTriggered,
+    unexpectedCount: input.unexpectedCount,
+    alternativeMatched: 0,
+  });
 }
 
-export function hardScenarioBand(input: {
-  matched: number;
-  total: number;
-  prohibitedTriggered: number;
-  unexpectedCount: number;
-  invalidTargetCount: number;
-}): { band: "strong" | "mixed" | "unreliable"; label: string } {
-  const {
-    matched,
-    total,
-    prohibitedTriggered,
-    unexpectedCount,
-    invalidTargetCount,
-  } = input;
-
-  if (prohibitedTriggered > 0 || matched === 0) {
-    return { band: "unreliable", label: "Unreliable" };
+function statusChip(status: MatchStatus): string {
+  switch (status) {
+    case "correct":
+      return "Correct";
+    case "valid_alternative":
+      return "Valid alternative";
+    case "needs_review":
+      return "Needs review";
+    case "missing":
+      return "Missing";
+    case "unexpected":
+      return "Unexpected";
   }
-  if (
-    matched === total &&
-    unexpectedCount === 0 &&
-    invalidTargetCount === 0
-  ) {
-    return { band: "strong", label: "Strong" };
-  }
-  if (matched >= Math.ceil(total / 2)) {
-    return { band: "mixed", label: "Mixed" };
-  }
-  return { band: "unreliable", label: "Unreliable" };
 }
 
 export function scoreGoldenResult(
   scenario: GoldenScenarioFixture,
   result: CaptureResult,
+  options?: {
+    captureText?: string;
+    contextManifest?: CaptureContextManifest | null;
+  },
 ): GoldenScore & GoldenScoreExtras {
   const scoringMode = scenario.scoringMode ?? "standard";
   const proposed = proposalFromResult(result);
@@ -248,6 +405,12 @@ export function scoreGoldenResult(
     (f) => f.requiresClarification || f.invalidTarget,
   ).length;
 
+  const reliability = assessGoldenReliability(
+    result,
+    options?.captureText ?? result.rawContent ?? "",
+    options?.contextManifest,
+  );
+
   for (const expected of scenario.expected) {
     const candidates = proposed.filter((p) => {
       if (used.has(p.id)) return false;
@@ -260,18 +423,24 @@ export function scoreGoldenResult(
       );
     });
 
-    let best =
+    const best =
       candidates.find(
         (p) =>
-          opsMatch(expected, p.operation) &&
+          opsAccepted(expected, p.operation) &&
+          entityCompatible(expected.entity, p.entity) &&
+          expectedChangesMatch(expected.expectedChanges, p.proposedValues),
+      ) ??
+      candidates.find(
+        (p) =>
+          opsAccepted(expected, p.operation) &&
           entityCompatible(expected.entity, p.entity),
       ) ??
-      candidates.find((p) => opsMatch(expected, p.operation)) ??
       candidates[0];
 
     if (!best) {
       outcomes.push({
         status: "missing",
+        statusLabel: "Missing",
         expectedId: expected.id,
         expected,
         label: `${expected.operation.toUpperCase()} · ${entityLabel(expected.entity)} · ${expected.targetTitle}`,
@@ -288,7 +457,6 @@ export function scoreGoldenResult(
     if (!best.sourceFindingId || !finding) {
       contradictions += 1;
     } else {
-      // Reasoning-operation contradiction: finding target vs operation target
       if (
         finding.target?.entityId &&
         best.targetId &&
@@ -306,7 +474,8 @@ export function scoreGoldenResult(
       }
     }
 
-    const opOk = opsMatch(expected, best.operation);
+    const opOk = opsAccepted(expected, best.operation);
+    const exactOp = best.operation === expected.operation;
     const entityOk = entityCompatible(expected.entity, best.entity);
     const idOk = expected.targetId
       ? best.targetId === expected.targetId
@@ -316,6 +485,10 @@ export function scoreGoldenResult(
       Boolean(
         best.detail && titlesLooselyMatch(best.detail, expected.targetTitle),
       );
+    const changesOk = expectedChangesMatch(
+      expected.expectedChanges,
+      best.proposedValues,
+    );
 
     let confOk = true;
     if (typeof expected.minConfidence === "number" && best.confidence != null) {
@@ -323,12 +496,44 @@ export function scoreGoldenResult(
     }
 
     let status: MatchStatus = "correct";
-    if (!opOk || !entityOk || !titleOk || !idOk) status = "needs_review";
-    else if (!confOk) status = "needs_review";
-    else if (!finding || !best.sourceFindingId) status = "needs_review";
+    if (!opOk || !entityOk || !titleOk || !idOk || !changesOk) {
+      status = "needs_review";
+    } else if (!exactOp) {
+      status = "valid_alternative";
+    } else if (!confOk) {
+      status = "needs_review";
+    } else if (!finding || !best.sourceFindingId) {
+      status = "needs_review";
+    }
+
+    const resultingStatus =
+      best.resultingStatus ??
+      (typeof best.proposedValues?.status === "string"
+        ? String(best.proposedValues.status)
+        : undefined);
+
+    let detail: string | undefined;
+    if (status === "valid_alternative") {
+      detail = resultingStatus
+        ? `Resulting status: ${resultingStatus}`
+        : `Accepted alternative to ${expected.operation.toUpperCase()}`;
+    } else if (!best.sourceFindingId) {
+      detail = "Operation has no source finding";
+    } else if (!opOk) {
+      detail = `Operation ${best.operation} vs expected ${expected.operation}`;
+    } else if (!entityOk) {
+      detail = `Entity ${best.entity} vs expected ${expected.entity}`;
+    } else if (!idOk) {
+      detail = `Target id ${best.targetId} vs expected ${expected.targetId}`;
+    } else if (!changesOk) {
+      detail = "Target matched, but the proposed field change was missing.";
+    } else if (!confOk) {
+      detail = `Confidence ${best.confidence}% below target ${expected.minConfidence}%`;
+    }
 
     outcomes.push({
       status,
+      statusLabel: statusChip(status),
       expectedId: expected.id,
       expected,
       operation: best.operation,
@@ -337,17 +542,8 @@ export function scoreGoldenResult(
       confidence: best.confidence,
       confidenceEstimated: best.confidenceEstimated,
       label: `${best.operation.toUpperCase()} · ${best.entityLabel} · ${best.title}`,
-      detail: !best.sourceFindingId
-        ? "Operation has no source finding"
-        : !opOk
-          ? `Operation ${best.operation} vs expected ${expected.operation}`
-          : !entityOk
-            ? `Entity ${best.entity} vs expected ${expected.entity}`
-            : !idOk
-              ? `Target id ${best.targetId} vs expected ${expected.targetId}`
-              : !confOk
-                ? `Confidence ${best.confidence}% below target ${expected.minConfidence}%`
-                : undefined,
+      detail,
+      resultingStatus,
     });
   }
 
@@ -361,6 +557,7 @@ export function scoreGoldenResult(
           used.add(p.id);
           outcomes.push({
             status: "unexpected",
+            statusLabel: "Unexpected",
             operation: p.operation,
             entity: p.entity,
             targetTitle: p.title,
@@ -378,6 +575,7 @@ export function scoreGoldenResult(
     if (used.has(p.id)) continue;
     outcomes.push({
       status: "unexpected",
+      statusLabel: "Unexpected",
       operation: p.operation,
       entity: p.entity,
       targetTitle: p.title,
@@ -389,55 +587,65 @@ export function scoreGoldenResult(
   }
 
   const relevant = outcomes.filter((o) => o.status !== "unexpected");
-  const matched = relevant.filter((o) => o.status === "correct").length;
+  const exactMatched = relevant.filter((o) => o.status === "correct").length;
+  const alternativeMatched = relevant.filter(
+    (o) => o.status === "valid_alternative",
+  ).length;
+  const matched = exactMatched + alternativeMatched;
   const total = scenario.expected.length;
   const unexpectedCount = outcomes.filter((o) => o.status === "unexpected")
     .length;
   const prohibitedTriggered = prohibitedHits.size;
   const ratio = total === 0 ? 0 : matched / total;
 
-  // Standard regression criteria — unchanged for non-hard scenarios.
+  // Standard remains strict: exact matches only (no valid_alternative credit).
+  const standardMatched = exactMatched;
   const passed =
     scoringMode === "standard" &&
-    matched === total &&
+    standardMatched === total &&
     total > 0 &&
     unexpectedCount === 0 &&
     invalidTargetCount === 0 &&
     contradictions === 0 &&
-    prohibitedTriggered === 0;
+    prohibitedTriggered === 0 &&
+    alternativeMatched === 0;
 
   let grade: GoldenScore["grade"] = "poor";
-  let gradeLabel = "Poor";
+  let gradeLabel = "Failed";
   let gradeEmoji = "●";
   let hardBand: GoldenScore["hardBand"];
   let hardBandLabel: string | undefined;
   let hardExplanation: string | undefined;
 
   if (scoringMode === "hard") {
-    const band = hardScenarioBand({
+    const band = hardRegressionBand({
       matched,
       total,
       prohibitedTriggered,
       unexpectedCount,
-      invalidTargetCount,
     });
     hardBand = band.band;
     hardBandLabel = band.label;
-    hardExplanation = hardScenarioExplanation({
+    hardExplanation = hardRegressionExplanation({
       matched,
       total,
       prohibitedTriggered,
       unexpectedCount,
-      ambiguousFindings,
-      invalidTargetCount,
+      alternativeMatched,
     });
-    grade =
-      band.band === "strong"
-        ? "excellent"
-        : band.band === "mixed"
-          ? "good"
-          : "poor";
-    gradeLabel = band.label;
+    // Overall grade uses regression band — Unreliable only via reliability.state.
+    if (reliability.state === "limited") {
+      gradeLabel = "Unreliable";
+      grade = "poor";
+    } else {
+      gradeLabel = band.label;
+      grade =
+        band.band === "strong"
+          ? "excellent"
+          : band.band === "mixed"
+            ? "good"
+            : "poor";
+    }
     gradeEmoji = "○";
   } else if (passed) {
     grade = "excellent";
@@ -452,6 +660,7 @@ export function scoreGoldenResult(
     gradeLabel = "Needs work";
     gradeEmoji = "🟠";
   } else {
+    gradeLabel = "Failed";
     gradeEmoji = "🔴";
   }
 
@@ -459,7 +668,7 @@ export function scoreGoldenResult(
     grade,
     gradeLabel,
     gradeEmoji,
-    matched,
+    matched: scoringMode === "standard" ? standardMatched : matched,
     total,
     outcomes,
     invalidTargetCount,
@@ -472,6 +681,9 @@ export function scoreGoldenResult(
     hardBand,
     hardBandLabel,
     hardExplanation,
+    reliability,
+    exactMatched,
+    alternativeMatched,
   };
 }
 
@@ -497,17 +709,7 @@ export function presentGoldenResult(
   const findings = result.findings ?? [];
   const findingById = new Map(findings.map((f) => [f.id, f]));
 
-  const facts: string[] = [];
-  for (const line of captureText.split(/\n+/)) {
-    const trimmed = line.trim();
-    if (trimmed) facts.push(trimmed.replace(/\.$/, ""));
-  }
-  for (const insight of result.insights ?? []) {
-    if (/tidied from raw/i.test(insight)) continue;
-    if (!facts.some((f) => titlesLooselyMatch(f, insight))) {
-      facts.push(insight);
-    }
-  }
+  const facts = extractAtomicFacts(result, captureText);
 
   const reasoning: GoldenReasoningStep[] = [];
   for (const op of result.proposedOperations ?? []) {
@@ -544,7 +746,7 @@ export function presentGoldenResult(
       result.memory.content?.trim() ||
       result.memory.title ||
       "No summary returned.",
-    facts: facts.slice(0, 8),
+    facts,
     reasoning,
     proposed,
     findingCards,

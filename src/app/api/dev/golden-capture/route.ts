@@ -218,7 +218,10 @@ export async function POST(request: Request) {
     };
 
     const presentation = presentGoldenResult(scenario, result, content);
-    const score = scoreGoldenResult(scenario, result);
+    const score = scoreGoldenResult(scenario, result, {
+      captureText: content,
+      contextManifest,
+    });
     const elapsedMs = Date.now() - started;
 
     return NextResponse.json({

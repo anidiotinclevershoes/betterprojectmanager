@@ -12,9 +12,14 @@ export {
   listGoldenScenarios,
 } from "./scenarios";
 export {
+  assessGoldenReliability,
+  expectedChangesMatch,
+  hardRegressionBand,
+  hardRegressionExplanation,
   hardScenarioBand,
   hardScenarioExplanation,
   presentGoldenResult,
   scoreGoldenResult,
   titlesLooselyMatch,
 } from "./present";
+export { extractAtomicFacts } from "./facts";

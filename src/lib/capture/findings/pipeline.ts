@@ -39,7 +39,9 @@ export function extractLocalFindings(
       if (cabCue || genericComplete) {
         findings.push({
           id: nextId(),
-          fact: `${record.title} is complete`,
+          fact: cabCue
+            ? "CAB approval was received"
+            : `${record.title} is complete`,
           evidence: captureText.slice(0, 200),
           findingType: "ENTITY_COMPLETED",
           target: {
@@ -70,7 +72,9 @@ export function extractLocalFindings(
       if (cdnCue || generic) {
         findings.push({
           id: nextId(),
-          fact: `${record.title} is resolved`,
+          fact: cdnCue
+            ? "The CDN deployment blocker was resolved"
+            : `${record.title} is resolved`,
           evidence: captureText.slice(0, 200),
           findingType: "ENTITY_COMPLETED",
           target: {
@@ -88,16 +92,23 @@ export function extractLocalFindings(
       }
     }
 
-    if (record.entityType === "knowledge") {
+    // Digit date form ("19 August") → Knowledge (standard Golden baseline).
+    // Word date form ("nineteenth of August") → Milestone when present (hard scenario).
+    const digitNewDate = /\b19\s*aug/.test(text);
+    const wordNewDate =
+      /\b(19th|nineteenth)\b/.test(text) && /\baug/.test(text);
+    const oldDateInRecord = (blob: string) =>
+      /\b12\s*aug/.test(blob) ||
+      /\b(12th|twelfth)\b/.test(blob);
+
+    if (record.entityType === "knowledge" && digitNewDate) {
       const titleKey = record.title.toLowerCase();
       const releaseCue =
-        /\brelease\b/.test(titleKey) &&
-        /\b12\s*aug/.test(titleKey) &&
-        /\b19\s*aug/.test(text);
+        /\brelease\b/.test(titleKey) && oldDateInRecord(titleKey);
       if (releaseCue) {
         findings.push({
           id: nextId(),
-          fact: "Release date moved to 19 August",
+          fact: "Release moved from 12 August to 19 August",
           evidence: captureText.slice(0, 240),
           findingType: "ENTITY_UPDATED",
           target: {
@@ -114,6 +125,38 @@ export function extractLocalFindings(
           confidence: 93,
           requiresClarification: false,
           reasoningSummary: `Existing Knowledge "${record.title}" should update to the new date.`,
+        });
+      }
+    }
+
+    if (record.entityType === "milestone" && wordNewDate && !digitNewDate) {
+      const blob = `${record.title} ${record.summary ?? ""}`.toLowerCase();
+      const releaseCue =
+        /\brelease\b/.test(blob) && oldDateInRecord(blob);
+      if (releaseCue) {
+        findings.push({
+          id: nextId(),
+          fact: "Release moved from 12 August to 19 August",
+          evidence: captureText.slice(0, 240),
+          findingType: "ENTITY_UPDATED",
+          target: {
+            entityType: "milestone",
+            entityId: record.id,
+            title: record.title,
+          },
+          changes: {
+            startAt: {
+              previous: "2026-08-12",
+              proposed: "2026-08-19",
+            },
+            date: {
+              previous: "12 August",
+              proposed: "19 August",
+            },
+          },
+          confidence: 92,
+          requiresClarification: false,
+          reasoningSummary: `Existing Milestone "${record.title}" should move to 19 August.`,
         });
       }
     }

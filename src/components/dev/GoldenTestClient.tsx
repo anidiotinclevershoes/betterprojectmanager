@@ -47,7 +47,8 @@ type AnalyseResponse = {
 
 const STATUS_LABEL: Record<MatchStatus, string> = {
   correct: "Correct",
-  needs_review: "Needs Review",
+  valid_alternative: "Valid alternative",
+  needs_review: "Needs review",
   missing: "Missing",
   unexpected: "Unexpected",
 };
@@ -56,6 +57,8 @@ function statusClass(status: MatchStatus) {
   switch (status) {
     case "correct":
       return "is-correct";
+    case "valid_alternative":
+      return "is-alternative";
     case "needs_review":
       return "is-review";
     case "missing":
@@ -99,9 +102,10 @@ export function GoldenTestClient({
         prohibitedTriggered?: number;
         ambiguousFindings?: number;
         scoringMode?: "standard" | "hard";
-        hardBand?: "strong" | "mixed" | "unreliable";
+        hardBand?: "strong" | "mixed" | "failed";
         hardBandLabel?: string;
         hardExplanation?: string;
+        reliability?: GoldenScore["reliability"];
       })
     | null
   >(null);
@@ -225,8 +229,13 @@ export function GoldenTestClient({
                   {score.prohibitedTriggered ?? 0}
                 </li>
                 <li>Unexpected operations: {score.unexpectedCount ?? 0}</li>
-                <li>Ambiguous findings: {score.ambiguousFindings ?? 0}</li>
                 <li>Invalid targets: {score.invalidTargetCount ?? 0}</li>
+                <li>
+                  Reliability: {score.reliability?.label ?? "Normal"}
+                  {score.reliability
+                    ? ` · ${score.reliability.ambiguousFindings} ambiguous · ${score.reliability.clarificationCount} need clarification`
+                    : ""}
+                </li>
               </ul>
               {score.hardExplanation ? (
                 <p className="golden-hard-explanation">{score.hardExplanation}</p>
@@ -243,8 +252,13 @@ export function GoldenTestClient({
           <ul className="golden-score-chips">
             {score.outcomes.map((o, i) => (
               <li key={`${o.status}-${i}`} className={statusClass(o.status)}>
-                <span>{STATUS_LABEL[o.status]}</span>
-                <span>{o.label}</span>
+                <span>{o.statusLabel ?? STATUS_LABEL[o.status]}</span>
+                <span>
+                  {o.label}
+                  {o.detail ? (
+                    <span className="meta"> — {o.detail}</span>
+                  ) : null}
+                </span>
               </li>
             ))}
           </ul>
@@ -259,7 +273,7 @@ export function GoldenTestClient({
           <p className="golden-score-grade">Ready</p>
           <p className="golden-score-meta">
             {scenario.scoringMode === "hard"
-              ? "Press Analyse Scenario. A low band is a measurement, not an application failure."
+              ? "Press Analyse Scenario. Regression score and reliability are reported separately."
               : "Press Analyse Scenario to score this fixture."}
           </p>
         </section>
