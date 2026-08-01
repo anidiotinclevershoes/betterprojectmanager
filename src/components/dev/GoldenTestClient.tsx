@@ -67,16 +67,22 @@ function statusClass(status: MatchStatus) {
 
 export function GoldenTestClient({
   scenarios,
+  initialScenarioId,
 }: {
   scenarios: GoldenScenarioFixture[];
+  /** Optional deep-link, e.g. /dev/golden-test?scenario=website-refresh-hard */
+  initialScenarioId?: string;
 }) {
   const available = useMemo(
     () => scenarios.filter((s) => s.available),
     [scenarios],
   );
-  const [scenarioId, setScenarioId] = useState(
-    available[0]?.id ?? "website-refresh",
-  );
+  const initial =
+    (initialScenarioId &&
+      available.find((s) => s.id === initialScenarioId)?.id) ||
+    available[0]?.id ||
+    "website-refresh";
+  const [scenarioId, setScenarioId] = useState(initial);
   const scenario =
     scenarios.find((s) => s.id === scenarioId) ?? available[0] ?? scenarios[0];
 
