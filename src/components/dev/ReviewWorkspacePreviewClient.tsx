@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   CaptureSummary,
   SuggestedChangesList,
@@ -97,9 +98,20 @@ const OBSERVATIONS = [
   "Marcus supports release notes",
 ];
 
+function initialAdded(state: string | null): Record<string, boolean> {
+  if (state === "approved") {
+    return { "op-cab-1": true, "op-release-1": true };
+  }
+  return {};
+}
+
 /** Development-only static preview of the Capture review workspace. */
 export function ReviewWorkspacePreviewClient() {
-  const [added, setAdded] = useState<Record<string, boolean>>({});
+  const search = useSearchParams();
+  const previewState = search.get("state");
+  const [added, setAdded] = useState<Record<string, boolean>>(() =>
+    initialAdded(previewState),
+  );
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
 
   const pending = useMemo(
@@ -113,6 +125,7 @@ export function ReviewWorkspacePreviewClient() {
   const reviewedCount = FIXTURE_MODELS.filter(
     (m) => added[m.id] || dismissed[m.id],
   ).length;
+  const whyOpenIds = previewState === "why" ? ["op-cdn-1"] : undefined;
 
   return (
     <main style={{ maxWidth: 760, margin: "24px auto", padding: "0 16px" }}>
@@ -120,7 +133,7 @@ export function ReviewWorkspacePreviewClient() {
         <h1 style={{ margin: 0, fontSize: 20 }}>Capture review workspace preview</h1>
         <p className="meta">
           Static Sprint 2.1 layout — no AI calls, no project writes from this
-          page.
+          page. States: default, ?state=why, ?state=approved
         </p>
       </header>
 
@@ -145,13 +158,6 @@ export function ReviewWorkspacePreviewClient() {
             rows={4}
             value={`Okay so CAB approval has now been received. Release has moved to the nineteenth. CDN deployment blocker looks resolved — there was also mention of a separate hosting issue. Sarah is still the Business Owner. Marcus is helping with release notes.`}
           />
-          <div className="capture-toolbar">
-            <div className="capture-toolbar-right">
-              <button type="button" className="primary-btn analyse-btn">
-                Expand Analysis
-              </button>
-            </div>
-          </div>
         </section>
 
         <div className="capture-review capture-review-workspace">
@@ -169,6 +175,7 @@ export function ReviewWorkspacePreviewClient() {
             needsReviewCount={needsReviewCount}
             reviewedCount={reviewedCount}
             totalCount={FIXTURE_MODELS.length}
+            whyOpenIds={whyOpenIds}
             onApprove={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
             onDismiss={(id) =>
               setDismissed((prev) => ({ ...prev, [id]: true }))

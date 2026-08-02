@@ -23,12 +23,6 @@ export function WhyPanel({
         aria-expanded={open}
         aria-controls={controlId}
         onClick={onToggle}
-        onKeyDown={(e) => {
-          if (e.key === " " || e.key === "Enter") {
-            e.preventDefault();
-            onToggle();
-          }
-        }}
       >
         <span aria-hidden>{open ? "▲" : "▼"}</span> Why?
       </button>

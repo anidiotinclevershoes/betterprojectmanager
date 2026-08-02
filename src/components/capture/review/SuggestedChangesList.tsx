@@ -14,6 +14,7 @@ export function SuggestedChangesList({
   onApprove,
   onDismiss,
   onApproveReady,
+  whyOpenIds,
 }: {
   models: ReviewChangeViewModel[];
   added: Record<string, boolean>;
@@ -25,6 +26,8 @@ export function SuggestedChangesList({
   onApprove: (id: string) => void;
   onDismiss: (id: string) => void;
   onApproveReady: () => void;
+  /** Optional: open Why panels for these ids on first render. */
+  whyOpenIds?: string[];
 }) {
   const pending = models.filter((m) => !added[m.id] && !dismissed[m.id]);
   const reviewed = models.filter((m) => added[m.id] || dismissed[m.id]);
@@ -99,6 +102,7 @@ export function SuggestedChangesList({
                   ? () => onDismiss(model.id)
                   : undefined
               }
+              initialWhyOpen={whyOpenIds?.includes(model.id)}
             />
           ))}
         </ul>

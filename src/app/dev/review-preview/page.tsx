@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ReviewWorkspacePreviewClient } from "@/components/dev/ReviewWorkspacePreviewClient";
 
@@ -8,5 +9,9 @@ export default function ReviewPreviewPage() {
   if (process.env.NODE_ENV !== "development") {
     notFound();
   }
-  return <ReviewWorkspacePreviewClient />;
+  return (
+    <Suspense fallback={<p className="meta">Loading preview…</p>}>
+      <ReviewWorkspacePreviewClient />
+    </Suspense>
+  );
 }

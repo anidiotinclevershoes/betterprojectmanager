@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
-import { ReviewBadge } from "./ReviewBadge";
+import { ReadinessBadge, ReviewBadge } from "./ReviewBadge";
 import type { ChangeDiff } from "@/lib/capture/review/viewModel";
 
 const KIND_ICON: Record<SuggestionKind, string> = {
@@ -59,10 +59,11 @@ export function CompactChangeCard({
             <h4 className="compact-change-title">{recordName}</h4>
           </div>
         </div>
-        <ReviewBadge
-          operation={operation}
-          tone={emphasized ? "review" : "ready"}
-        />
+        {emphasized ? (
+          <ReadinessBadge readiness="needs_review" />
+        ) : (
+          <ReviewBadge operation={operation} tone="ready" />
+        )}
       </header>
 
       {diff ? (
