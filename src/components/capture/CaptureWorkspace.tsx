@@ -6,20 +6,16 @@ import { CaptureContextInspector } from "@/components/capture/CaptureContextInsp
 import { CaptureReliabilityNotice } from "@/components/capture/CaptureReliabilityNotice";
 import { useMission } from "@/lib/store";
 import { analysesRemaining } from "@/lib/workspace/history";
-import {
-  KIND_LABEL,
-  OP_LABEL,
-  isDestructiveOp,
-} from "@/lib/capture/suggestions";
 import { shouldWarnBeforeAnalysis } from "@/lib/capture/reliability";
-
-function projectCode(
-  projects: { id: string; code: string }[],
-  projectId?: string | null,
-) {
-  if (!projectId) return "Unassigned";
-  return projects.find((p) => p.id === projectId)?.code ?? "—";
-}
+import { buildCaptureObservations } from "@/lib/capture/review/observations";
+import {
+  buildReviewChangeViewModels,
+  reviewCounts,
+} from "@/lib/capture/review/viewModel";
+import {
+  CaptureSummary,
+  SuggestedChangesList,
+} from "@/components/capture/review";
 
 function formatAnalysedAt(iso: string | null) {
   if (!iso) return null;
@@ -52,8 +48,6 @@ export function CaptureWorkspace({
     suggestions,
     dismissed,
     added,
-    editing,
-    setEditingContent,
     collapsed,
     setCollapsed,
     busy,
@@ -69,7 +63,6 @@ export function CaptureWorkspace({
     expandAnalysis,
     editCapture,
     dismissPreReliabilityWarn,
-    pendingCount,
     isAnalysed,
     setSource,
     analysedAt,
@@ -122,15 +115,44 @@ export function CaptureWorkspace({
     preReliability.state !== "normal";
 
   const reviewOpen = Boolean(result) && !collapsed;
-  const clarificationFindings =
-    result?.findings?.filter(
-      (f) => f.requiresClarification || f.invalidTarget,
-    ) ?? [];
   const isDev = process.env.NODE_ENV === "development";
-  const visibleSuggestions = suggestions.filter(
-    (s) => !dismissed[s.id] && !added[s.id],
-  );
   const showSessionActions = Boolean(result);
+
+  const observations = useMemo(
+    () =>
+      result ? buildCaptureObservations(result, content) : [],
+    [result, content],
+  );
+  const reviewModels = useMemo(
+    () =>
+      result ? buildReviewChangeViewModels(suggestions, result, content) : [],
+    [result, suggestions, content],
+  );
+  const pendingModels = useMemo(
+    () =>
+      reviewModels.filter((m) => !added[m.id] && !dismissed[m.id]),
+    [reviewModels, added, dismissed],
+  );
+  const counts = useMemo(() => reviewCounts(pendingModels), [pendingModels]);
+  const reviewedCount = useMemo(
+    () =>
+      reviewModels.filter((m) => added[m.id] || dismissed[m.id]).length,
+    [reviewModels, added, dismissed],
+  );
+
+  function approveById(id: string) {
+    const model = reviewModels.find((m) => m.id === id);
+    if (!model) return;
+    applyOne(model.suggestion, defaultProjectId);
+  }
+
+  function approveReady() {
+    for (const model of pendingModels) {
+      if (model.readiness === "ready") {
+        applyOne(model.suggestion, defaultProjectId);
+      }
+    }
+  }
   const analysedLabel = formatAnalysedAt(analysedAt);
 
   return (
@@ -174,167 +196,177 @@ export function CaptureWorkspace({
       </div>
 
       {/* Transcript stays visible after analysis (read-only), including when collapsed. */}
-      <form onSubmit={onSubmit} className="capture-form">
-        <label className="sr-only" htmlFor="capture-input">
-          Capture notes
-        </label>
-        <textarea
-          id="capture-input"
-          value={content}
-          onChange={(e) => {
-            if (!isAnalysed) setContent(e.target.value);
-          }}
-          rows={3}
-          readOnly={isAnalysed}
-          disabled={busy === "analysing"}
-          placeholder="What happened? Add notes, paste text or drop files here…"
-          className={`capture-textarea capture-textarea-idle ${isAnalysed ? "is-readonly" : ""}`}
-          aria-readonly={isAnalysed || undefined}
-        />
-        {fileNames.length && !isAnalysed ? (
-          <p className="meta mt-1">Files: {fileNames.join(", ")}</p>
+      <section
+        className="capture-transcript-panel"
+        aria-labelledby={isAnalysed ? "capture-transcript-title" : undefined}
+      >
+        {isAnalysed ? (
+          <h3 id="capture-transcript-title" className="capture-review-section-title">
+            Capture Transcript
+          </h3>
         ) : null}
+        <form onSubmit={onSubmit} className="capture-form">
+          <label className="sr-only" htmlFor="capture-input">
+            Capture notes
+          </label>
+          <textarea
+            id="capture-input"
+            value={content}
+            onChange={(e) => {
+              if (!isAnalysed) setContent(e.target.value);
+            }}
+            rows={3}
+            readOnly={isAnalysed}
+            disabled={busy === "analysing"}
+            placeholder="What happened? Add notes, paste text or drop files here…"
+            className={`capture-textarea capture-textarea-idle ${isAnalysed ? "is-readonly" : ""}`}
+            aria-readonly={isAnalysed || undefined}
+          />
+          {fileNames.length && !isAnalysed ? (
+            <p className="meta mt-1">Files: {fileNames.join(", ")}</p>
+          ) : null}
 
-        <div className="capture-toolbar">
-          <div className="capture-toolbar-left">
-            {!defaultProjectId && !isAnalysed ? (
-              <select
-                value={effectiveProjectId}
-                onChange={(e) => setProjectId(e.target.value)}
-                disabled={busy !== "idle" || recording.active}
-                aria-label="Project"
-              >
-                <option value="">All / unlinked</option>
-                {state.projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.code}
-                  </option>
-                ))}
-              </select>
-            ) : null}
+          <div className="capture-toolbar">
+            <div className="capture-toolbar-left">
+              {!defaultProjectId && !isAnalysed ? (
+                <select
+                  value={effectiveProjectId}
+                  onChange={(e) => setProjectId(e.target.value)}
+                  disabled={busy !== "idle" || recording.active}
+                  aria-label="Project"
+                >
+                  <option value="">All / unlinked</option>
+                  {state.projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.code}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
 
-            {!isAnalysed ? (
-              <>
-                {!recording.active ? (
+              {!isAnalysed ? (
+                <>
+                  {!recording.active ? (
+                    <button
+                      type="button"
+                      className="ghost-btn"
+                      onClick={() => void recording.start()}
+                      disabled={busy === "analysing" || busy === "transcribing"}
+                    >
+                      Record
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="danger-btn"
+                      onClick={recording.stop}
+                    >
+                      Stop · {recording.seconds}s
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     className="ghost-btn"
-                    onClick={() => void recording.start()}
-                    disabled={busy === "analysing" || busy === "transcribing"}
+                    onClick={() => {
+                      void navigator.clipboard
+                        .readText()
+                        .then((text) => {
+                          if (text)
+                            setContent(content ? `${content}\n${text}` : text);
+                        })
+                        .catch(() =>
+                          setError(
+                            "Clipboard access blocked — paste with Ctrl/Cmd+V instead.",
+                          ),
+                        );
+                    }}
+                    disabled={busy === "analysing"}
                   >
-                    Record
+                    Paste text
                   </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="danger-btn"
-                    onClick={recording.stop}
-                  >
-                    Stop · {recording.seconds}s
-                  </button>
-                )}
 
+                  <label className="ghost-btn file-btn">
+                    Upload file
+                    <input
+                      type="file"
+                      accept=".txt,.md,.csv,.json"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file || isAnalysed) return;
+                        addFileName(file.name);
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          const text = String(reader.result ?? "");
+                          setContent(content ? `${content}\n${text}` : text);
+                        };
+                        reader.readAsText(file);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </>
+              ) : null}
+
+              {recording.active || busy !== "idle" ? (
+                <span className="capture-status" role="status">
+                  {recording.active ? (
+                    <>
+                      <span className="live-dot" aria-hidden />
+                      {recording.hint ?? `Recording… ${recording.seconds}s`}
+                    </>
+                  ) : busy === "transcribing" ? (
+                    "Transcribing…"
+                  ) : (
+                    "Analysing your update…"
+                  )}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="capture-toolbar-right">
+              {!isAnalysed ? (
+                <span className="usage-meter" title="Analyses this month">
+                  <span className="usage-label">
+                    {usage.remaining} analyses remaining
+                  </span>
+                  <span className="usage-bar" aria-hidden>
+                    <span
+                      style={{
+                        width: `${Math.min(100, (usage.used / usage.limit) * 100)}%`,
+                      }}
+                    />
+                  </span>
+                </span>
+              ) : null}
+
+              {!isAnalysed && !showPreWarn ? (
+                <button
+                  type="submit"
+                  className="primary-btn analyse-btn"
+                  disabled={
+                    busy !== "idle" ||
+                    recording.active ||
+                    !content.trim() ||
+                    usage.remaining <= 0
+                  }
+                >
+                  Analyse
+                </button>
+              ) : collapsed ? (
                 <button
                   type="button"
-                  className="ghost-btn"
-                  onClick={() => {
-                    void navigator.clipboard
-                      .readText()
-                      .then((text) => {
-                        if (text)
-                          setContent(content ? `${content}\n${text}` : text);
-                      })
-                      .catch(() =>
-                        setError(
-                          "Clipboard access blocked — paste with Ctrl/Cmd+V instead.",
-                        ),
-                      );
-                  }}
-                  disabled={busy === "analysing"}
+                  className="primary-btn analyse-btn"
+                  onClick={expandAnalysis}
                 >
-                  Paste text
+                  Expand Analysis
                 </button>
-
-                <label className="ghost-btn file-btn">
-                  Upload file
-                  <input
-                    type="file"
-                    accept=".txt,.md,.csv,.json"
-                    className="sr-only"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file || isAnalysed) return;
-                      addFileName(file.name);
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        const text = String(reader.result ?? "");
-                        setContent(content ? `${content}\n${text}` : text);
-                      };
-                      reader.readAsText(file);
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
-              </>
-            ) : null}
-
-            {recording.active || busy !== "idle" ? (
-              <span className="capture-status" role="status">
-                {recording.active ? (
-                  <>
-                    <span className="live-dot" aria-hidden />
-                    {recording.hint ?? `Recording… ${recording.seconds}s`}
-                  </>
-                ) : busy === "transcribing" ? (
-                  "Transcribing…"
-                ) : (
-                  "Analysing your update…"
-                )}
-              </span>
-            ) : null}
+              ) : null}
+            </div>
           </div>
-
-          <div className="capture-toolbar-right">
-            {!isAnalysed ? (
-              <span className="usage-meter" title="Analyses this month">
-                <span className="usage-label">
-                  {usage.remaining} analyses remaining
-                </span>
-                <span className="usage-bar" aria-hidden>
-                  <span
-                    style={{
-                      width: `${Math.min(100, (usage.used / usage.limit) * 100)}%`,
-                    }}
-                  />
-                </span>
-              </span>
-            ) : null}
-
-            {!isAnalysed && !showPreWarn ? (
-              <button
-                type="submit"
-                className="primary-btn analyse-btn"
-                disabled={
-                  busy !== "idle" ||
-                  recording.active ||
-                  !content.trim() ||
-                  usage.remaining <= 0
-                }
-              >
-                Analyse
-              </button>
-            ) : collapsed ? (
-              <button
-                type="button"
-                className="primary-btn analyse-btn"
-                onClick={expandAnalysis}
-              >
-                Expand analysis
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </form>
+        </form>
+      </section>
 
       {showPreWarn && preReliability ? (
         <CaptureReliabilityNotice
@@ -363,134 +395,25 @@ export function CaptureWorkspace({
       ) : null}
 
       {reviewOpen ? (
-        <div className="capture-review">
-          <div className="capture-review-feedback">
-            <h3>Interpretation</h3>
-            <h4>Summary</h4>
-            <p className="capture-summary">{result?.memory.content}</p>
-            {result?.insights?.length ? (
-              <>
-                <h4>Observations</h4>
-                <ul>
-                  {result.insights.map((insight) => (
-                    <li key={insight}>{insight}</li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-            {clarificationFindings.length ? (
-              <>
-                <h4>Needs clarification</h4>
-                <ul>
-                  {clarificationFindings.map((f) => (
-                    <li key={f.id} className="capture-finding-ambiguous">
-                      {f.fact}
-                      {f.clarificationQuestion
-                        ? ` — ${f.clarificationQuestion}`
-                        : ""}
-                      {f.invalidTarget && f.validationWarning
-                        ? ` (${f.validationWarning})`
-                        : ""}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-            {result?.assumptions?.length ? (
-              <>
-                <h4>Missing information</h4>
-                <ul>
-                  {result.assumptions.map((a) => (
-                    <li key={a}>{a}</li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-          </div>
-
-          <div className="capture-review-suggestions">
-            <div className="capture-review-suggestions-head">
-              <h3>Suggested actions</h3>
-              <p className="meta">Review each item individually</p>
-            </div>
-
-            {visibleSuggestions.length === 0 ? (
-              <p className="empty-copy">No pending suggestions.</p>
-            ) : (
-              <ul className="suggestion-list">
-                {visibleSuggestions.map((item) => (
-                  <li
-                    key={item.id}
-                    className={`suggestion-card ${isDestructiveOp(item.op) ? "is-destructive" : ""} ${added[item.id] ? "is-added" : ""}`}
-                  >
-                    <div className="suggestion-meta-row">
-                      <span className="suggestion-meta-labels">
-                        <span className="tag">{OP_LABEL[item.op]}</span>
-                        <span className="meta">·</span>
-                        <span className="tag">{KIND_LABEL[item.kind]}</span>
-                      </span>
-                      <span className="suggestion-project">
-                        {projectCode(state.projects, item.projectId)}
-                      </span>
-                    </div>
-                    {editing[item.id] !== undefined ? (
-                      <textarea
-                        value={editing[item.id]}
-                        onChange={(e) =>
-                          setEditingContent(item.id, e.target.value)
-                        }
-                        rows={2}
-                        className="capture-textarea compact"
-                      />
-                    ) : (
-                      <p className="suggestion-content">{item.content}</p>
-                    )}
-                    {isDestructiveOp(item.op) ? (
-                      <p className="suggestion-destructive-note">
-                        Destructive action — requires confirmation
-                      </p>
-                    ) : null}
-                    <div className="suggestion-actions">
-                      <button
-                        type="button"
-                        className="ghost-btn"
-                        onClick={() =>
-                          setEditingContent(
-                            item.id,
-                            editing[item.id] !== undefined
-                              ? null
-                              : item.content,
-                          )
-                        }
-                      >
-                        {editing[item.id] !== undefined ? "Done" : "Edit"}
-                      </button>
-                      <button
-                        type="button"
-                        className="primary-btn"
-                        onClick={() => applyOne(item, defaultProjectId)}
-                      >
-                        Accept
-                      </button>
-                      <button
-                        type="button"
-                        className="ghost-btn"
-                        onClick={() => dismissOne(item.id)}
-                      >
-                        Dismiss
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {suggestions.some((s) => added[s.id]) ? (
-              <p className="meta mt-2">
-                {suggestions.filter((s) => added[s.id]).length} accepted ·{" "}
-                {pendingCount} remaining
-              </p>
-            ) : null}
-          </div>
+        <div className="capture-review capture-review-workspace">
+          <CaptureSummary
+            observations={observations}
+            projectChanges={reviewModels.length}
+            readyCount={counts.ready}
+            needsReviewCount={counts.needsReview}
+          />
+          <SuggestedChangesList
+            models={reviewModels}
+            added={added}
+            dismissed={dismissed}
+            readyCount={counts.ready}
+            needsReviewCount={counts.needsReview}
+            reviewedCount={reviewedCount}
+            totalCount={reviewModels.length}
+            onApprove={approveById}
+            onDismiss={dismissOne}
+            onApproveReady={approveReady}
+          />
         </div>
       ) : null}
 
