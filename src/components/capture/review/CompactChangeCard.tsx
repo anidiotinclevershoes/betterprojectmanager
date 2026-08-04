@@ -17,14 +17,82 @@ const KIND_ICON: Record<SuggestionKind, string> = {
   memory: "☰",
 };
 
+function ChangeDiffBlock({
+  diff,
+  entityKind,
+}: {
+  diff: ChangeDiff;
+  entityKind: SuggestionKind;
+}) {
+  const layout = diff.layout ?? "from_to";
+
+  if (layout === "create") {
+    return (
+      <div
+        className={`compact-change-diff compact-change-diff-create is-kind-${entityKind}`}
+        aria-label={`${diff.label}: ${diff.to}`}
+      >
+        <p className="compact-change-diff-label">{diff.label}</p>
+        <p className="compact-change-to compact-change-create-title">{diff.to}</p>
+        {diff.meta ? <p className="compact-change-create-meta">{diff.meta}</p> : null}
+      </div>
+    );
+  }
+
+  if (layout === "remove") {
+    return (
+      <div
+        className={`compact-change-diff compact-change-diff-remove is-kind-${entityKind}`}
+        aria-label={`Current ${diff.from}, suggested ${diff.to}`}
+      >
+        <div className="compact-change-diff-grid">
+          <div className="compact-change-diff-col">
+            <span className="compact-change-col-label">Current</span>
+            <span className="compact-change-from">{diff.from}</span>
+          </div>
+          <span className="compact-change-arrow" aria-hidden>
+            →
+          </span>
+          <div className="compact-change-diff-col">
+            <span className="compact-change-col-label">Suggested</span>
+            <span className="compact-change-to">{diff.to}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`compact-change-diff is-kind-${entityKind}`}
+      aria-label={`${diff.label}: current ${diff.from}, suggested ${diff.to}`}
+    >
+      <p className="compact-change-diff-label">{diff.label}</p>
+      <div className="compact-change-diff-grid">
+        <div className="compact-change-diff-col">
+          <span className="compact-change-col-label">Current</span>
+          <span className="compact-change-from">{diff.from}</span>
+        </div>
+        <span className="compact-change-arrow" aria-hidden>
+          →
+        </span>
+        <div className="compact-change-diff-col">
+          <span className="compact-change-col-label">Suggested</span>
+          <span className="compact-change-to">{diff.to}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function CompactChangeCard({
   entityKind,
   entityLabel,
   recordName,
   operation,
   diff,
+  why,
   actions,
-  footer,
   emphasized,
   state,
 }: {
@@ -33,8 +101,9 @@ export function CompactChangeCard({
   recordName: string;
   operation: Parameters<typeof ReviewBadge>[0]["operation"];
   diff?: ChangeDiff;
+  /** Why panel — rendered above actions. */
+  why?: ReactNode;
   actions: ReactNode;
-  footer?: ReactNode;
   emphasized?: boolean;
   state?: "pending" | "approved" | "dismissed";
 }) {
@@ -42,6 +111,7 @@ export function CompactChangeCard({
     <article
       className={[
         "compact-change-card",
+        `is-kind-${entityKind}`,
         emphasized ? "is-emphasized" : "",
         state === "approved" ? "is-approved" : "",
         state === "dismissed" ? "is-dismissed" : "",
@@ -54,7 +124,7 @@ export function CompactChangeCard({
           <span className="compact-change-ico" aria-hidden>
             {KIND_ICON[entityKind]}
           </span>
-          <div>
+          <div className="compact-change-titles">
             <p className="compact-change-type">{entityLabel}</p>
             <h4 className="compact-change-title">{recordName}</h4>
           </div>
@@ -62,25 +132,15 @@ export function CompactChangeCard({
         {emphasized ? (
           <ReadinessBadge readiness="needs_review" />
         ) : (
-          <ReviewBadge operation={operation} tone="ready" />
+          <ReviewBadge operation={operation} tone="default" />
         )}
       </header>
 
-      {diff ? (
-        <div className="compact-change-diff" aria-label={`${diff.label} change`}>
-          <p className="compact-change-diff-label">{diff.label}</p>
-          <div className="compact-change-diff-values">
-            <span className="compact-change-from">{diff.from}</span>
-            <span className="compact-change-arrow" aria-hidden>
-              ↓
-            </span>
-            <span className="compact-change-to">{diff.to}</span>
-          </div>
-        </div>
-      ) : null}
+      {diff ? <ChangeDiffBlock diff={diff} entityKind={entityKind} /> : null}
+
+      {why ? <div className="compact-change-why">{why}</div> : null}
 
       <div className="compact-change-actions">{actions}</div>
-      {footer}
     </article>
   );
 }

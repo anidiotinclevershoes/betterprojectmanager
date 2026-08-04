@@ -36,6 +36,16 @@ export function SuggestedChangeCard({
         diff={model.diff}
         emphasized={needsReview && state === "pending"}
         state={state}
+        why={
+          <WhyPanel
+            open={whyOpen}
+            onToggle={() => setWhyOpen((v) => !v)}
+            evidence={model.evidence}
+            interpretation={model.interpretation}
+            confidence={model.confidence}
+            controlId={whyId}
+          />
+        }
         actions={
           state === "pending" ? (
             <>
@@ -75,20 +85,10 @@ export function SuggestedChangeCard({
               </div>
             </>
           ) : (
-            <p className="meta compact-change-status-label">
+            <p className="meta compact-change-status-label" aria-live="polite">
               {state === "approved" ? "Approved" : "Dismissed"}
             </p>
           )
-        }
-        footer={
-          <WhyPanel
-            open={whyOpen}
-            onToggle={() => setWhyOpen((v) => !v)}
-            evidence={model.evidence}
-            interpretation={model.interpretation}
-            confidence={model.confidence}
-            controlId={whyId}
-          />
         }
       />
     </li>

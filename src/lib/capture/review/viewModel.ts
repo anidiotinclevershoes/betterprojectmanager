@@ -16,10 +16,16 @@ import {
 
 export type ReviewReadiness = "ready" | "needs_review";
 
+export type ChangeDiffLayout = "from_to" | "create" | "remove";
+
 export type ChangeDiff = {
   label: string;
   from: string;
   to: string;
+  /** How the card should render the change. */
+  layout?: ChangeDiffLayout;
+  /** Optional secondary line (e.g. due date on create). */
+  meta?: string;
 };
 
 export type ReviewChangeViewModel = {
@@ -91,11 +97,48 @@ function findFinding(
   return result.findings?.find((f) => f.id === op.sourceFindingId);
 }
 
+function humanizeStatus(value: string): string {
+  const v = value.trim();
+  if (/^OPEN$/i.test(v) || /^open$/i.test(v)) return "Open";
+  if (/^COMPLETED$/i.test(v) || /^done$/i.test(v)) return "Complete";
+  if (/^RESOLVED$/i.test(v)) return "Resolved";
+  if (/^BLOCKED$/i.test(v)) return "Blocked";
+  if (/^ARCHIVED$/i.test(v)) return "Archived";
+  return v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+}
+
 function buildDiff(
   item: PendingSuggestion,
   op: ProposedOperation | undefined,
   finding: CaptureFinding | undefined,
 ): ChangeDiff | undefined {
+  if (item.op === "create") {
+    const values = op?.proposedValues ?? {};
+    const due =
+      (typeof values.date === "string" && values.date) ||
+      (typeof values.dueDate === "string" && values.dueDate) ||
+      item.date;
+    return {
+      label: `New ${KIND_LABEL[item.kind]}`,
+      from: "",
+      to: item.content,
+      layout: "create",
+      meta: due ? `Due ${formatShortDate(String(due))}` : undefined,
+    };
+  }
+
+  if (item.op === "remove" || item.op === "archive" || item.op === "delete") {
+    return {
+      label: KIND_LABEL[item.kind],
+      from: item.kind === "stakeholder" ? "Active stakeholder" : "Active",
+      to:
+        item.op === "archive"
+          ? "Archive from project"
+          : "Remove from project",
+      layout: "remove",
+    };
+  }
+
   if (item.op === "complete") {
     const prev =
       typeof finding?.changes?.status?.previous === "string"
@@ -103,12 +146,36 @@ function buildDiff(
         : "Open";
     return {
       label: "Status",
-      from: prev === "OPEN" || prev === "open" ? "Open" : prev,
-      to: "Complete",
+      from: humanizeStatus(prev),
+      to: item.kind === "risk" ? "Resolved" : "Complete",
+      layout: "from_to",
     };
   }
 
   const values = op?.proposedValues ?? {};
+
+  const ownerVal =
+    (typeof values.owner === "string" && values.owner) ||
+    (typeof values.assignee === "string" && values.assignee) ||
+    (typeof values.businessOwner === "string" && values.businessOwner) ||
+    (typeof finding?.changes?.owner?.proposed === "string" &&
+      String(finding.changes.owner.proposed)) ||
+    undefined;
+  const prevOwner =
+    typeof finding?.changes?.owner?.previous === "string"
+      ? String(finding.changes.owner.previous)
+      : typeof finding?.changes?.assignee?.previous === "string"
+        ? String(finding.changes.assignee.previous)
+        : undefined;
+  if (item.op === "update" && ownerVal) {
+    return {
+      label: "Owner",
+      from: prevOwner || "—",
+      to: ownerVal,
+      layout: "from_to",
+    };
+  }
+
   const dateVal =
     (typeof values.date === "string" && values.date) ||
     (typeof values.startAt === "string" && values.startAt) ||
@@ -125,6 +192,7 @@ function buildDiff(
       label: item.kind === "milestone" ? "Release Date" : "Date",
       from: prevDate ? formatShortDate(prevDate) : "—",
       to: formatShortDate(String(dateVal)),
+      layout: "from_to",
     };
   }
 
@@ -144,14 +212,7 @@ function buildDiff(
       label: KIND_LABEL[item.kind],
       from: prevText ? formatShortDate(prevText) : "—",
       to: textVal ? formatShortDate(textVal) : item.content,
-    };
-  }
-
-  if (item.op === "create") {
-    return {
-      label: "New",
-      from: "—",
-      to: item.content,
+      layout: "from_to",
     };
   }
 
@@ -162,15 +223,24 @@ function buildDiff(
         : "Open";
     return {
       label: "Status",
-      from: prev === "OPEN" || prev === "open" ? "Open" : prev,
+      from: humanizeStatus(prev),
       to:
         values.status === "COMPLETED" || values.status === "RESOLVED"
-          ? "Resolved"
-          : String(values.status),
+          ? item.kind === "risk"
+            ? "Resolved"
+            : "Complete"
+          : humanizeStatus(String(values.status)),
+      layout: "from_to",
     };
   }
 
-  return undefined;
+  // Plain-text fallback when structured old/new values are unavailable.
+  return {
+    label: OP_LABEL[item.op],
+    from: "—",
+    to: item.content,
+    layout: "from_to",
+  };
 }
 
 function buildInterpretation(
@@ -211,6 +281,28 @@ function evidenceExcerpts(
   return excerpts.slice(0, 2);
 }
 
+function opsDisagree(
+  item: PendingSuggestion,
+  op: ProposedOperation | undefined,
+): boolean {
+  if (!op) return false;
+  const mapped = op.operation.toLowerCase();
+  if (mapped === "complete" && item.op !== "complete") return true;
+  if (mapped === "update" && item.op !== "update" && item.op !== "complete") {
+    return true;
+  }
+  if (mapped === "create" && item.op !== "create") return true;
+  if (
+    (mapped === "archive" || mapped === "delete") &&
+    item.op !== "archive" &&
+    item.op !== "delete" &&
+    item.op !== "remove"
+  ) {
+    return true;
+  }
+  return false;
+}
+
 function assessReadiness(
   item: PendingSuggestion,
   finding: CaptureFinding | undefined,
@@ -230,7 +322,19 @@ function assessReadiness(
       reason: finding.validationWarning || "Target record could not be matched confidently.",
     };
   }
-  if (isDestructiveOp(item.op)) {
+  if (finding?.findingType === "AMBIGUOUS") {
+    return {
+      readiness: "needs_review",
+      reason: "The Capture contained ambiguous evidence for this change.",
+    };
+  }
+  if (opsDisagree(item, op)) {
+    return {
+      readiness: "needs_review",
+      reason: "Finding and proposed operation are inconsistent.",
+    };
+  }
+  if (isDestructiveOp(item.op) || op?.destructive) {
     return {
       readiness: "needs_review",
       reason: "Destructive action — confirm before applying.",
@@ -243,10 +347,11 @@ function assessReadiness(
       reason: "Confidence is below the ready threshold.",
     };
   }
-  if (finding?.findingType === "AMBIGUOUS") {
+  // Unmatched NEW_INFORMATION / no safe single operation
+  if (!op && finding?.findingType === "NEW_INFORMATION") {
     return {
       readiness: "needs_review",
-      reason: "The Capture contained ambiguous evidence for this change.",
+      reason: "Cannot safely produce a single operation from this finding.",
     };
   }
   return { readiness: "ready" };
@@ -290,8 +395,21 @@ export function buildReviewChangeViewModels(
   });
 }
 
+/**
+ * @deprecated Prefer computeReviewCounts from ./counts for shared summary logic.
+ * Kept for callers that only have pending models.
+ */
 export function reviewCounts(models: ReviewChangeViewModel[]) {
   const ready = models.filter((m) => m.readiness === "ready").length;
   const needsReview = models.filter((m) => m.readiness === "needs_review").length;
   return { ready, needsReview, total: models.length };
 }
+
+export {
+  computeReviewCounts,
+  countProjectChangesDetected,
+  pendingReadyModels,
+  uniqueProjectChangeFindings,
+  findingRepresentsProjectChange,
+} from "./counts";
+export type { ReviewCountSummary } from "./counts";

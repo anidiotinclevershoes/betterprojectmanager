@@ -14,7 +14,8 @@
     "verify:golden-test": "npx --yes tsx scripts/verify-golden-test.ts",
     "verify:findings": "npx --yes tsx scripts/verify-findings.ts",
     "verify:seed-reset": "npx --yes tsx scripts/verify-seed-reset.ts",
-    "verify:capture-reliability": "npx --yes tsx scripts/verify-capture-reliability.ts"
+    "verify:capture-reliability": "npx --yes tsx scripts/verify-capture-reliability.ts",
+    "verify:capture-review": "npx --yes tsx scripts/verify-capture-review.ts"
   },
   "dependencies": {
     "js-tiktoken": "^1.0.21",

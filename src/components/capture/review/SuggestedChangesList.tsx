@@ -44,44 +44,39 @@ export function SuggestedChangesList({
       aria-labelledby="capture-changes-title"
     >
       <div className="capture-changes-head">
-        <div>
+        <div className="capture-changes-head-main">
           <h3 id="capture-changes-title" className="capture-review-section-title">
-            Suggested Changes
+            Review Changes
           </h3>
           <p className="capture-review-progress" role="status">
             Reviewed {reviewedCount} of {totalCount}
           </p>
         </div>
         <div className="capture-changes-counts" aria-label="Review counts">
-          <span className="capture-count-chip is-ready">
-            <span className="capture-count-label">Ready</span>
-            <strong>{readyCount}</strong>
+          <span className="capture-count-inline">
+            Ready <strong>{readyCount}</strong>
           </span>
-          <span className="capture-count-chip is-review">
-            <span className="capture-count-label">Needs Review</span>
-            <strong>{needsReviewCount}</strong>
+          <span className="capture-count-sep" aria-hidden>
+            ·
           </span>
+          <span className="capture-count-inline">
+            Needs Review <strong>{needsReviewCount}</strong>
+          </span>
+          {readyCount > 0 ? (
+            <button
+              type="button"
+              className="ghost-btn capture-apply-ready-btn"
+              onClick={onApproveReady}
+              aria-label={`Apply Ready (${readyCount})`}
+            >
+              Apply Ready ({readyCount})
+            </button>
+          ) : null}
         </div>
       </div>
 
-      {readyCount > 0 ? (
-        <div className="capture-bulk-bar">
-          <button
-            type="button"
-            className="primary-btn"
-            onClick={onApproveReady}
-          >
-            Approve Ready
-          </button>
-          <span className="meta">
-            Approves {readyCount} ready item{readyCount === 1 ? "" : "s"}. Needs
-            Review stays.
-          </span>
-        </div>
-      ) : null}
-
       {totalCount === 0 ? (
-        <p className="empty-copy">No suggested changes.</p>
+        <p className="empty-copy">No changes to review.</p>
       ) : (
         <ul className="suggested-change-list">
           {ordered.map((model) => (

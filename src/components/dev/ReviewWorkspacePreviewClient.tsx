@@ -6,8 +6,13 @@ import {
   CaptureSummary,
   SuggestedChangesList,
 } from "@/components/capture/review";
-import type { ReviewChangeViewModel } from "@/lib/capture/review/viewModel";
+import {
+  computeReviewCounts,
+  pendingReadyModels,
+  type ReviewChangeViewModel,
+} from "@/lib/capture/review/viewModel";
 import type { PendingSuggestion } from "@/lib/capture/suggestions";
+import type { CaptureResult } from "@/lib/types";
 
 function stubSuggestion(
   partial: Partial<PendingSuggestion> &
@@ -16,6 +21,26 @@ function stubSuggestion(
   return {
     destination: "project",
     projectId: "golden-proj-website-refresh",
+    ...partial,
+  };
+}
+
+function stubResult(partial: Partial<CaptureResult> = {}): CaptureResult {
+  return {
+    memory: {
+      id: "mem-preview",
+      type: "conversation",
+      title: "Preview",
+      content: "",
+      tags: [],
+      people: [],
+      occurredAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      source: "capture",
+    },
+    insights: [],
+    assumptions: [],
+    recommendations: [],
     ...partial,
   };
 }
@@ -36,7 +61,12 @@ const FIXTURE_MODELS: ReviewChangeViewModel[] = [
     operation: "complete",
     operationLabel: "Complete",
     readiness: "ready",
-    diff: { label: "Status", from: "Open", to: "Complete" },
+    diff: {
+      label: "Status",
+      from: "Open",
+      to: "Complete",
+      layout: "from_to",
+    },
     evidence: ["CAB approval has now been received."],
     interpretation:
       "Lume matched this statement to the existing CAB approval task and believes it has now been completed.",
@@ -57,7 +87,12 @@ const FIXTURE_MODELS: ReviewChangeViewModel[] = [
     operation: "update",
     operationLabel: "Update",
     readiness: "ready",
-    diff: { label: "Release Date", from: "12 Aug", to: "19 Aug" },
+    diff: {
+      label: "Release Date",
+      from: "12 Aug",
+      to: "19 Aug",
+      layout: "from_to",
+    },
     evidence: ["Release has moved to the nineteenth."],
     interpretation:
       "Lume detected a date change for the release milestone and proposes updating it to 19 August.",
@@ -79,7 +114,12 @@ const FIXTURE_MODELS: ReviewChangeViewModel[] = [
     readiness: "needs_review",
     needsReviewReason:
       "Lume detected evidence that the blocker has been resolved. A separate issue was also mentioned.",
-    diff: { label: "Status", from: "Open", to: "Resolved" },
+    diff: {
+      label: "Status",
+      from: "Open",
+      to: "Resolved",
+      layout: "from_to",
+    },
     evidence: [
       "CDN deployment blocker looks resolved.",
       "There was also mention of a separate hosting issue.",
@@ -95,8 +135,60 @@ const OBSERVATIONS = [
   "Release moved to 19 August",
   "CDN deployment blocker resolved",
   "Sarah remains Business Owner",
-  "Marcus supports release notes",
+  "Marcus is supporting release notes",
 ];
+
+/** Minimal result so shared counters derive changesDetected from findings. */
+const FIXTURE_RESULT: CaptureResult = stubResult({
+  findings: [
+    {
+      id: "f-cab",
+      fact: "CAB approval received",
+      evidence: "CAB approval has now been received.",
+      findingType: "ENTITY_COMPLETED",
+      target: {
+        entityType: "todo",
+        entityId: "golden-todo-cab",
+        title: "Obtain CAB approval",
+      },
+      confidence: 95,
+      requiresClarification: false,
+      reasoningSummary: "CAB complete",
+    },
+    {
+      id: "f-release",
+      fact: "Release moved to 19 August",
+      evidence: "Release has moved to the nineteenth.",
+      findingType: "ENTITY_UPDATED",
+      target: {
+        entityType: "milestone",
+        entityId: "golden-ms-release",
+        title: "Website refresh go-live",
+      },
+      changes: {
+        date: { previous: "2025-08-12", proposed: "2025-08-19" },
+      },
+      confidence: 92,
+      requiresClarification: false,
+      reasoningSummary: "Date update",
+    },
+    {
+      id: "f-cdn",
+      fact: "CDN deployment blocker resolved",
+      evidence: "CDN deployment blocker looks resolved.",
+      findingType: "AMBIGUOUS",
+      target: {
+        entityType: "risk",
+        entityId: "golden-risk-cdn",
+        title: "CDN deployment delayed",
+      },
+      confidence: 64,
+      requiresClarification: true,
+      clarificationQuestion: "Confirm CDN risk resolution.",
+      reasoningSummary: "Ambiguous with hosting issue",
+    },
+  ],
+});
 
 function initialAdded(state: string | null): Record<string, boolean> {
   if (state === "approved") {
@@ -114,17 +206,16 @@ export function ReviewWorkspacePreviewClient() {
   );
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
 
-  const pending = useMemo(
-    () => FIXTURE_MODELS.filter((m) => !added[m.id] && !dismissed[m.id]),
+  const counts = useMemo(
+    () =>
+      computeReviewCounts({
+        result: FIXTURE_RESULT,
+        models: FIXTURE_MODELS,
+        added,
+        dismissed,
+      }),
     [added, dismissed],
   );
-  const readyCount = pending.filter((m) => m.readiness === "ready").length;
-  const needsReviewCount = pending.filter(
-    (m) => m.readiness === "needs_review",
-  ).length;
-  const reviewedCount = FIXTURE_MODELS.filter(
-    (m) => added[m.id] || dismissed[m.id],
-  ).length;
   const whyOpenIds = previewState === "why" ? ["op-cdn-1"] : undefined;
 
   return (
@@ -163,18 +254,18 @@ export function ReviewWorkspacePreviewClient() {
         <div className="capture-review capture-review-workspace">
           <CaptureSummary
             observations={OBSERVATIONS}
-            projectChanges={FIXTURE_MODELS.length}
-            readyCount={readyCount}
-            needsReviewCount={needsReviewCount}
+            changesDetected={counts.changesDetected}
+            readyCount={counts.ready}
+            needsReviewCount={counts.needsReview}
           />
           <SuggestedChangesList
             models={FIXTURE_MODELS}
             added={added}
             dismissed={dismissed}
-            readyCount={readyCount}
-            needsReviewCount={needsReviewCount}
-            reviewedCount={reviewedCount}
-            totalCount={FIXTURE_MODELS.length}
+            readyCount={counts.ready}
+            needsReviewCount={counts.needsReview}
+            reviewedCount={counts.reviewed}
+            totalCount={counts.total}
             whyOpenIds={whyOpenIds}
             onApprove={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
             onDismiss={(id) =>
@@ -183,8 +274,12 @@ export function ReviewWorkspacePreviewClient() {
             onApproveReady={() => {
               setAdded((prev) => {
                 const next = { ...prev };
-                for (const m of pending) {
-                  if (m.readiness === "ready") next[m.id] = true;
+                for (const m of pendingReadyModels(
+                  FIXTURE_MODELS,
+                  prev,
+                  dismissed,
+                )) {
+                  next[m.id] = true;
                 }
                 return next;
               });

@@ -38,10 +38,11 @@ export function WhyPanel({
               ))}
             </div>
           ) : null}
-          <div className="why-panel-block">
-            <p className="why-panel-label">Interpretation</p>
-            <p className="why-panel-copy">{interpretation}</p>
-          </div>
+          {interpretation ? (
+            <div className="why-panel-block">
+              <p className="why-panel-copy">{interpretation}</p>
+            </div>
+          ) : null}
           {confidence != null ? (
             <div className="why-panel-block">
               <p className="why-panel-label">Confidence</p>

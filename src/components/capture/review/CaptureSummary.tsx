@@ -2,12 +2,13 @@
 
 export function CaptureSummary({
   observations,
-  projectChanges,
+  changesDetected,
   readyCount,
   needsReviewCount,
 }: {
   observations: string[];
-  projectChanges: number;
+  /** Unique validated project-state changes. */
+  changesDetected: number;
   readyCount: number;
   needsReviewCount: number;
 }) {
@@ -34,16 +35,15 @@ export function CaptureSummary({
 
       <p className="capture-summary-line" role="status">
         <span>
-          {projectChanges} project change{projectChanges === 1 ? "" : "s"}{" "}
-          detected
+          {changesDetected} change{changesDetected === 1 ? "" : "s"} detected
         </span>
         <span aria-hidden>·</span>
         <span>
-          {readyCount} ready to apply
+          {readyCount} ready
         </span>
         <span aria-hidden>·</span>
         <span>
-          {needsReviewCount} need{needsReviewCount === 1 ? "s" : ""} review
+          {needsReviewCount} needs review
         </span>
       </p>
     </section>

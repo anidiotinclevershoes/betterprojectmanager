@@ -10,7 +10,8 @@ import { shouldWarnBeforeAnalysis } from "@/lib/capture/reliability";
 import { buildCaptureObservations } from "@/lib/capture/review/observations";
 import {
   buildReviewChangeViewModels,
-  reviewCounts,
+  computeReviewCounts,
+  pendingReadyModels,
 } from "@/lib/capture/review/viewModel";
 import {
   CaptureSummary,
@@ -128,16 +129,15 @@ export function CaptureWorkspace({
       result ? buildReviewChangeViewModels(suggestions, result, content) : [],
     [result, suggestions, content],
   );
-  const pendingModels = useMemo(
+  const counts = useMemo(
     () =>
-      reviewModels.filter((m) => !added[m.id] && !dismissed[m.id]),
-    [reviewModels, added, dismissed],
-  );
-  const counts = useMemo(() => reviewCounts(pendingModels), [pendingModels]);
-  const reviewedCount = useMemo(
-    () =>
-      reviewModels.filter((m) => added[m.id] || dismissed[m.id]).length,
-    [reviewModels, added, dismissed],
+      computeReviewCounts({
+        result,
+        models: reviewModels,
+        added,
+        dismissed,
+      }),
+    [result, reviewModels, added, dismissed],
   );
 
   function approveById(id: string) {
@@ -147,10 +147,8 @@ export function CaptureWorkspace({
   }
 
   function approveReady() {
-    for (const model of pendingModels) {
-      if (model.readiness === "ready") {
-        applyOne(model.suggestion, defaultProjectId);
-      }
+    for (const model of pendingReadyModels(reviewModels, added, dismissed)) {
+      applyOne(model.suggestion, defaultProjectId);
     }
   }
   const analysedLabel = formatAnalysedAt(analysedAt);
@@ -398,7 +396,7 @@ export function CaptureWorkspace({
         <div className="capture-review capture-review-workspace">
           <CaptureSummary
             observations={observations}
-            projectChanges={reviewModels.length}
+            changesDetected={counts.changesDetected}
             readyCount={counts.ready}
             needsReviewCount={counts.needsReview}
           />
@@ -408,8 +406,8 @@ export function CaptureWorkspace({
             dismissed={dismissed}
             readyCount={counts.ready}
             needsReviewCount={counts.needsReview}
-            reviewedCount={reviewedCount}
-            totalCount={reviewModels.length}
+            reviewedCount={counts.reviewed}
+            totalCount={counts.total}
             onApprove={approveById}
             onDismiss={dismissOne}
             onApproveReady={approveReady}

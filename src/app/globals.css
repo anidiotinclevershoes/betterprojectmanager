@@ -2341,6 +2341,10 @@ body {
   margin-bottom: 10px;
 }
 
+.capture-changes-head-main {
+  min-width: 0;
+}
+
 .capture-review-progress {
   margin: 2px 0 0;
   font-size: 12px;
@@ -2350,7 +2354,33 @@ body {
 .capture-changes-counts {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
+  max-width: 100%;
+}
+
+.capture-count-inline {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.capture-count-inline strong {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.capture-count-sep {
+  color: var(--text-muted);
+}
+
+.capture-apply-ready-btn {
+  margin-left: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 32px;
+  padding: 4px 10px;
 }
 
 .capture-count-chip {
@@ -2383,18 +2413,6 @@ body {
   color: var(--text-muted);
 }
 
-.capture-bulk-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-  background: rgba(53, 185, 127, 0.06);
-}
-
 .suggested-change-list {
   list-style: none;
   margin: 0;
@@ -2415,13 +2433,39 @@ body {
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
-  border-left: 3px solid var(--border-subtle);
+  border-left: 3px solid var(--accent-timeline);
   background: var(--bg-surface-raised);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
   transition:
     opacity 160ms ease,
     border-color 160ms ease,
     background-color 160ms ease;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.compact-change-card.is-kind-action {
+  border-left-color: var(--accent-todo);
+}
+.compact-change-card.is-kind-milestone,
+.compact-change-card.is-kind-meeting {
+  border-left-color: var(--accent-timeline);
+}
+.compact-change-card.is-kind-risk {
+  border-left-color: var(--accent-release);
+}
+.compact-change-card.is-kind-stakeholder {
+  border-left-color: var(--accent-meeting);
+}
+.compact-change-card.is-kind-knowledge,
+.compact-change-card.is-kind-memory {
+  border-left-color: var(--accent-knowledge);
+}
+.compact-change-card.is-kind-nudge {
+  border-left-color: var(--accent-nudge);
+}
+.compact-change-card.is-kind-decision {
+  border-left-color: var(--accent-coach);
 }
 
 .compact-change-card.is-emphasized {
@@ -2445,12 +2489,18 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
+  min-width: 0;
 }
 
 .compact-change-entity {
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.compact-change-titles {
   min-width: 0;
 }
 
@@ -2460,10 +2510,11 @@ body {
   justify-content: center;
   width: 22px;
   height: 22px;
-  margin-top: 1px;
+  margin-top: 2px;
   font-size: 13px;
   line-height: 1;
   color: var(--text-secondary);
+  flex: 0 0 auto;
 }
 
 .compact-change-type {
@@ -2475,17 +2526,19 @@ body {
 }
 
 .compact-change-title {
-  margin: 1px 0 0;
+  margin: 2px 0 0;
   font-family: var(--font-sans), Inter, ui-sans-serif, system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   line-height: 1.3;
   color: var(--text-primary);
+  overflow-wrap: anywhere;
 }
 
 .compact-change-diff {
   display: grid;
-  gap: 2px;
+  gap: 4px;
+  min-width: 0;
 }
 
 .compact-change-diff-label {
@@ -2494,28 +2547,88 @@ body {
   color: var(--text-muted);
 }
 
-.compact-change-diff-values {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
+.compact-change-diff-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: 8px;
   font-size: 13px;
+}
+
+.compact-change-diff-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.compact-change-col-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .compact-change-from {
   color: var(--text-secondary);
   text-decoration: line-through;
   text-decoration-color: rgba(255, 255, 255, 0.25);
+  overflow-wrap: anywhere;
 }
 
 .compact-change-arrow {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-bottom: 1px;
 }
 
 .compact-change-to {
   color: var(--text-primary);
   font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* Proposed value uses entity/frame accent — not status colours */
+.compact-change-card.is-kind-action .compact-change-to,
+.compact-change-diff.is-kind-action .compact-change-to {
+  color: var(--accent-todo);
+}
+.compact-change-card.is-kind-milestone .compact-change-to,
+.compact-change-card.is-kind-meeting .compact-change-to {
+  color: var(--accent-timeline);
+}
+.compact-change-card.is-kind-risk .compact-change-to {
+  color: var(--accent-release);
+}
+.compact-change-card.is-kind-stakeholder .compact-change-to {
+  color: var(--accent-meeting);
+}
+.compact-change-card.is-kind-knowledge .compact-change-to,
+.compact-change-card.is-kind-memory .compact-change-to {
+  color: var(--accent-knowledge);
+}
+.compact-change-card.is-kind-nudge .compact-change-to {
+  color: var(--accent-nudge);
+}
+.compact-change-card.is-kind-decision .compact-change-to {
+  color: var(--accent-coach);
+}
+
+.compact-change-create-title {
+  margin: 0;
+  font-size: 14px;
+}
+
+.compact-change-create-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.compact-change-why {
+  min-width: 0;
 }
 
 .compact-change-actions {
@@ -2548,15 +2661,16 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 6px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.01em;
   border: 1px solid var(--border-subtle);
   background: var(--bg-hover);
   color: var(--text-secondary);
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .review-badge-ico {
@@ -2596,11 +2710,17 @@ body {
   font-weight: 600;
   cursor: pointer;
   padding: 2px 0;
+  border-radius: 4px;
 }
 
-.why-panel-toggle:hover,
+.why-panel-toggle:hover {
+  color: var(--text-primary);
+}
+
 .why-panel-toggle:focus-visible {
   color: var(--text-primary);
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .why-panel-body {
@@ -2609,6 +2729,8 @@ body {
   flex-direction: column;
   gap: 8px;
   animation: why-panel-in 180ms ease;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 @keyframes why-panel-in {
@@ -2664,6 +2786,35 @@ body {
 
 .why-panel-confidence {
   font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 699px) {
+  .compact-change-diff-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .compact-change-arrow {
+    display: none;
+  }
+
+  .compact-change-diff-col + .compact-change-arrow + .compact-change-diff-col::before {
+    content: none;
+  }
+
+  .capture-changes-counts {
+    width: 100%;
+  }
+
+  .capture-apply-ready-btn {
+    margin-left: 0;
+  }
+
+  .capture-review-workspace,
+  .capture-transcript-panel,
+  .compact-change-card {
+    overflow-x: hidden;
+  }
 }
 
 .suggestion-list {
