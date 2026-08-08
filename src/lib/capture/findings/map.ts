@@ -153,14 +153,18 @@ export function mapFindingToOperation(
     if (explicitType === "knowledge" && looksTransientStatusUpdate(finding)) {
       return null;
     }
+    const createTitle =
+      (typeof finding.changes?.title?.proposed === "string"
+        ? String(finding.changes.title.proposed)
+        : null) ?? finding.fact.slice(0, 120);
     return {
       id: id("op"),
       sourceFindingId: finding.id,
       operation: "CREATE",
       entityType: explicitType,
-      targetTitle: finding.fact.slice(0, 120),
+      targetTitle: createTitle,
       proposedValues: {
-        title: finding.fact,
+        title: createTitle,
         summary: finding.evidence,
         ...(finding.changes
           ? Object.fromEntries(

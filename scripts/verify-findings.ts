@@ -5,8 +5,11 @@
 import assert from "node:assert/strict";
 import {
   buildContextRecordIndex,
+  classifyFindingDisposition,
+  dedupeProposedOperations,
   mapFindingToOperation,
   mapFindingsToOperations,
+  reconcileFindingCoverage,
   validateCaptureFindings,
   type CaptureFinding,
   type IndexedContextRecord,
@@ -450,6 +453,133 @@ const index = indexFromPairs([
     true,
     `local fallback should pass golden: ${JSON.stringify(score, null, 2)}`,
   );
+}
+
+// --- Sprint 2.1.5 coverage + duplicate-op guard ---
+{
+  const ambiguous: CaptureFinding = {
+    id: "f-amb",
+    fact: "CDN maybe resolved but another issue remains",
+    evidence: "CDN looks resolved; hosting issue mentioned",
+    findingType: "AMBIGUOUS",
+    target: {
+      entityType: "risk",
+      entityId: "risk-cdn",
+      title: "CDN deployment delayed",
+    },
+    confidence: 64,
+    requiresClarification: true,
+    clarificationQuestion: "Confirm which CDN issue is resolved?",
+    reasoningSummary: "Ambiguous",
+  };
+  assert.equal(
+    classifyFindingDisposition(ambiguous, null).disposition,
+    "needs_review",
+  );
+
+  const unmatched: CaptureFinding = {
+    id: "f-um",
+    fact: "Move CAB pack submission to Friday",
+    evidence: "submission moved to Friday",
+    findingType: "ENTITY_UPDATED",
+    invalidTarget: true,
+    validationWarning: "Unknown target",
+    confidence: 80,
+    requiresClarification: false,
+    reasoningSummary: "Date move",
+  };
+  assert.equal(
+    classifyFindingDisposition(unmatched, null).disposition,
+    "unmatched",
+  );
+
+  const createReady: CaptureFinding = {
+    id: "f-new",
+    fact: "New to-do: book the go-live bridge",
+    evidence: "Create a to-do to book the go-live bridge",
+    findingType: "NEW_INFORMATION",
+    changes: {
+      entityType: { proposed: "todo" },
+      title: { proposed: "book the go-live bridge" },
+    },
+    confidence: 88,
+    requiresClarification: false,
+    reasoningSummary: "Explicit create",
+  };
+  const createOp = {
+    id: "op-new",
+    sourceFindingId: "f-new",
+    operation: "CREATE" as const,
+    entityType: "todo" as const,
+    targetTitle: "book the go-live bridge",
+    reason: "create",
+    evidence: "create",
+    confidence: 88,
+    destructive: false,
+    requiresClarification: false,
+  };
+  assert.equal(
+    classifyFindingDisposition(createReady, createOp).disposition,
+    "ready",
+  );
+
+  const dupOps = dedupeProposedOperations([
+    {
+      id: "op-a",
+      sourceFindingId: "f1",
+      operation: "UPDATE",
+      entityType: "todo",
+      targetId: "todo-1",
+      targetTitle: "CAB pack",
+      proposedValues: { date: "Friday" },
+      reason: "due Friday",
+      evidence: "Friday",
+      confidence: 80,
+      destructive: false,
+      requiresClarification: false,
+    },
+    {
+      id: "op-b",
+      sourceFindingId: "f2",
+      operation: "UPDATE",
+      entityType: "todo",
+      targetId: "todo-1",
+      targetTitle: "CAB pack",
+      proposedValues: { date: "Friday" },
+      reason: "due Friday again",
+      evidence: "Friday",
+      confidence: 90,
+      destructive: false,
+      requiresClarification: false,
+    },
+    {
+      id: "op-c",
+      sourceFindingId: "f3",
+      operation: "UPDATE",
+      entityType: "todo",
+      targetId: "todo-1",
+      targetTitle: "CAB pack",
+      proposedValues: { owner: "Nina" },
+      reason: "owner Nina",
+      evidence: "Nina",
+      confidence: 85,
+      destructive: false,
+      requiresClarification: false,
+    },
+  ]);
+  assert.equal(dupOps.length, 1, "compatible UPDATEs on same target merge");
+  assert.equal(dupOps[0].proposedValues?.date, "Friday");
+  assert.equal(dupOps[0].proposedValues?.owner, "Nina");
+
+  const coverage = reconcileFindingCoverage(
+    [ambiguous, unmatched, createReady],
+    [createOp],
+  );
+  assert.equal(coverage.actionableCount, 3);
+  assert.equal(coverage.readyCount, 1);
+  assert.equal(coverage.needsReviewCount, 1);
+  assert.equal(coverage.unmatchedCount, 1);
+  assert.equal(coverage.silentDropCount, 0);
 }
 
 console.log("verify-findings: all checks passed");

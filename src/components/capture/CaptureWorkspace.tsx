@@ -143,6 +143,11 @@ export function CaptureWorkspace({
   function approveById(id: string) {
     const model = reviewModels.find((m) => m.id === id);
     if (!model) return;
+    // Unmatched coverage gaps have no safe operation — dismiss only.
+    if (model.readiness === "unmatched") {
+      dismissOne(id);
+      return;
+    }
     applyOne(model.suggestion, defaultProjectId);
   }
 
@@ -398,7 +403,7 @@ export function CaptureWorkspace({
             observations={observations}
             changesDetected={counts.changesDetected}
             readyCount={counts.ready}
-            needsReviewCount={counts.needsReview}
+            needsAttentionCount={counts.needsAttention}
           />
           <SuggestedChangesList
             models={reviewModels}
@@ -406,6 +411,7 @@ export function CaptureWorkspace({
             dismissed={dismissed}
             readyCount={counts.ready}
             needsReviewCount={counts.needsReview}
+            unmatchedCount={counts.unmatched}
             reviewedCount={counts.reviewed}
             totalCount={counts.total}
             onApprove={approveById}

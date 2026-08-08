@@ -70,6 +70,10 @@ export function collectPostAnalysisSignals(args: {
   const excludedByLimitCount =
     args.contextManifest?.excludedByLimit?.length ?? 0;
   const limitsReachedCount = args.contextManifest?.limitsReached?.length ?? 0;
+  const coverage = args.result.findingCoverage;
+  const coverageUnmatched = coverage?.unmatchedCount ?? invalidTargetCount;
+  const coverageNeedsAttention =
+    (coverage?.needsReviewCount ?? clarificationCount) + coverageUnmatched;
 
   return {
     stage: "post",
@@ -83,6 +87,8 @@ export function collectPostAnalysisSignals(args: {
     ambiguousFindings,
     clarificationCount,
     invalidTargetCount,
+    coverageNeedsAttention,
+    coverageUnmatched,
     validationErrors,
     validationOk,
     operationsCount: args.result.proposedOperations?.length ?? 0,

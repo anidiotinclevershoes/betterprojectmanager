@@ -256,7 +256,7 @@ export function ReviewWorkspacePreviewClient() {
             observations={OBSERVATIONS}
             changesDetected={counts.changesDetected}
             readyCount={counts.ready}
-            needsReviewCount={counts.needsReview}
+            needsAttentionCount={counts.needsAttention}
           />
           <SuggestedChangesList
             models={FIXTURE_MODELS}
@@ -264,6 +264,7 @@ export function ReviewWorkspacePreviewClient() {
             dismissed={dismissed}
             readyCount={counts.ready}
             needsReviewCount={counts.needsReview}
+            unmatchedCount={counts.unmatched}
             reviewedCount={counts.reviewed}
             totalCount={counts.total}
             whyOpenIds={whyOpenIds}

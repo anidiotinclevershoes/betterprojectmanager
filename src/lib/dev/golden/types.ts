@@ -62,7 +62,7 @@ export type GoldenProhibitedOutcome = {
   titleIncludesAll?: string[];
 };
 
-export type GoldenScoringMode = "standard" | "hard";
+export type GoldenScoringMode = "standard" | "hard" | "mixed";
 
 export type GoldenScenarioFixture = {
   id: string;
@@ -99,6 +99,7 @@ export type MatchStatus =
   | "correct"
   | "valid_alternative"
   | "needs_review"
+  | "unmatched"
   | "missing"
   | "unexpected";
 
@@ -133,6 +134,23 @@ export type GoldenReliabilityVerdict = {
   truncated: boolean;
 };
 
+export type GoldenCoverageSummary = {
+  expectedActionable: number;
+  accountedFor: number;
+  correct: number;
+  needsReview: number;
+  unmatched: number;
+  silentDrops: number;
+  prohibited: number;
+  invalidTargets: number;
+  createsExpected: number;
+  createsAccounted: number;
+  updatesExpected: number;
+  updatesAccounted: number;
+  completionsExpected: number;
+  completionsAccounted: number;
+};
+
 export type GoldenScore = {
   grade: "excellent" | "good" | "needs_work" | "poor";
   gradeLabel: string;
@@ -149,6 +167,8 @@ export type GoldenScore = {
   scoringMode?: GoldenScoringMode;
   /** Independent of expected-operation matching. */
   reliability?: GoldenReliabilityVerdict;
+  /** Sprint 2.1.5 mixed / coverage gate. */
+  coverage?: GoldenCoverageSummary;
 };
 
 export type GoldenProposedOp = {

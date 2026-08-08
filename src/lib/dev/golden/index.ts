@@ -5,6 +5,7 @@ export type {
 } from "./types";
 export {
   FUTURE_SCENARIO_STUBS,
+  MIXED_OPERATIONS_SCENARIO,
   WEBSITE_REFRESH_HARD_SCENARIO,
   WEBSITE_REFRESH_SCENARIO,
   fixtureToMissionState,

@@ -17,6 +17,8 @@ type ObservationCategory =
   | "cab_approval"
   | "release_date"
   | "cdn_blocker"
+  | "hypercare_risk"
+  | "cab_pack_due"
   | "business_owner"
   | "release_notes_support"
   | "implementation_guidance"
@@ -26,6 +28,8 @@ type ObservationCandidate = {
   text: string;
   category: ObservationCategory;
   targetKey?: string;
+  /** Same target + same changed fields → merge even if wording differs. */
+  changeKey?: string;
   confidence: number;
   source: "finding" | "insight" | "transcript";
 };
@@ -74,6 +78,18 @@ export function detectObservationCategory(text: string): ObservationCategory {
   const t = text.toLowerCase();
   if (/\bcab\b/.test(t) && /\bapprov/.test(t)) return "cab_approval";
   if (
+    /\b(hypercare|staffing gap)\b/.test(t) &&
+    /\b(resolv|confirm|roster|full)\b/.test(t)
+  ) {
+    return "hypercare_risk";
+  }
+  if (
+    /\b(cab pack|submission)\b/.test(t) &&
+    /\b(due|friday|moved|move|submit)\b/.test(t)
+  ) {
+    return "cab_pack_due";
+  }
+  if (
     /\brelease\b/.test(t) &&
     (/\b(date|moved|changed|nineteenth|august|go-?live)\b/.test(t) ||
       /\b19\b/.test(t))
@@ -106,6 +122,10 @@ function preferredPhrase(category: ObservationCategory, raw: string): string {
       return ensurePhrase(raw.replace(/\b(changed|moved)\b/i, "moved"));
     case "cdn_blocker":
       return "CDN deployment blocker resolved";
+    case "hypercare_risk":
+      return "Hypercare staffing gap risk is resolved";
+    case "cab_pack_due":
+      return "CAB pack submission due date moved to Friday";
     case "business_owner":
       return "Sarah remains Business Owner";
     case "release_notes_support":
@@ -118,17 +138,24 @@ function preferredPhrase(category: ObservationCategory, raw: string): string {
 }
 
 function candidateFromFinding(finding: CaptureFinding): ObservationCandidate | null {
-  if (finding.invalidTarget) return null;
   if (finding.findingType === "NO_CHANGE") return null;
   const raw = finding.fact?.trim();
   if (!raw || isNoise(raw)) return null;
   const category = detectObservationCategory(raw);
+  const fields = finding.changes
+    ? Object.keys(finding.changes).sort().join(",")
+    : finding.findingType;
   return {
     text: preferredPhrase(category, raw),
     category,
     targetKey: finding.target?.entityId
       ? `${finding.target.entityType}:${finding.target.entityId}`
       : undefined,
+    changeKey: finding.target?.entityId
+      ? `${finding.target.entityId}:${fields}`
+      : category !== "other"
+        ? `cat:${category}`
+        : undefined,
     confidence: finding.confidence ?? 0,
     source: "finding",
   };
@@ -149,8 +176,18 @@ export function dedupeObservationCandidates(
   for (const next of candidates) {
     const nextTokens = tokens(next.text);
     const idx = kept.findIndex((existing) => {
-      if (next.targetKey && existing.targetKey && next.targetKey === existing.targetKey) {
+      // Same target + same field/change → one conclusion (prefer informative).
+      if (
+        next.changeKey &&
+        existing.changeKey &&
+        next.changeKey === existing.changeKey
+      ) {
         return true;
+      }
+      if (next.targetKey && existing.targetKey && next.targetKey === existing.targetKey) {
+        // Same record, same finding type category — collapse near-duplicates only.
+        const overlap = jaccard(nextTokens, tokens(existing.text));
+        return overlap >= 0.45;
       }
       if (
         next.category !== "other" &&
@@ -164,8 +201,8 @@ export function dedupeObservationCandidates(
       const a = normalizeText(next.text);
       const b = normalizeText(existing.text);
       const substring = a.includes(b) || b.includes(a);
-      // Conservative: require strong overlap AND shared significant tokens
-      return (overlap >= 0.55 && substring) || overlap >= 0.72;
+      // Conservative: require strong overlap; do not merge merely similar wording.
+      return (overlap >= 0.55 && substring) || overlap >= 0.75;
     });
 
     if (idx < 0) {
@@ -180,7 +217,7 @@ export function dedupeObservationCandidates(
         existing.category === "other") ||
       next.confidence > existing.confidence ||
       (next.confidence === existing.confidence &&
-        next.text.length < existing.text.length);
+        next.text.length > existing.text.length);
 
     if (preferNext) kept[idx] = next;
   }

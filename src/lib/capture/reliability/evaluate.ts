@@ -251,6 +251,17 @@ export function evaluatePostAnalysisReliability(
     });
   }
 
+  // Align banner with review attention: unmatched / needs-review coverage gaps.
+  if (signals.coverageNeedsAttention > 0 && state === "normal") {
+    state = "review_recommended";
+    triggeredRules.push("coverage_needs_attention");
+    triggers.push({
+      id: "coverage",
+      label: "Items needing attention",
+      detail: `${signals.coverageNeedsAttention} actionable finding(s) need review or could not be matched`,
+    });
+  }
+
   if (state === "normal") {
     return {
       state,

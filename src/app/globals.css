@@ -2474,6 +2474,11 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
+.compact-change-card.is-unmatched {
+  border-left-color: var(--accent-timeline);
+  background: color-mix(in srgb, var(--accent-timeline) 10%, var(--bg-surface-raised));
+}
+
 .compact-change-card.is-approved {
   opacity: 0.55;
   border-left-color: var(--success);
@@ -2649,6 +2654,7 @@ body {
   font-size: 12px;
   line-height: 1.4;
   color: var(--text-secondary);
+  white-space: pre-line;
 }
 
 .compact-change-action-row {
@@ -2688,6 +2694,12 @@ body {
   border-color: rgba(228, 162, 59, 0.4);
   background: rgba(228, 162, 59, 0.14);
   color: var(--warning);
+}
+
+.review-badge-unmatched {
+  border-color: color-mix(in srgb, var(--accent-timeline) 45%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent-timeline) 14%, transparent);
+  color: var(--accent-timeline);
 }
 
 .review-badge-muted {
@@ -4296,6 +4308,10 @@ body {
 
 .golden-score-chips .is-alternative {
   border-left: 3px solid color-mix(in srgb, var(--ink-soft) 55%, var(--success));
+}
+
+.golden-score-chips .is-unmatched {
+  border-color: color-mix(in srgb, var(--accent-timeline) 40%, var(--border-subtle));
 }
 
 .golden-score-chips .is-review {

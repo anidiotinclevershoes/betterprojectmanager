@@ -9,6 +9,7 @@ export function SuggestedChangesList({
   dismissed,
   readyCount,
   needsReviewCount,
+  unmatchedCount,
   reviewedCount,
   totalCount,
   onApprove,
@@ -21,6 +22,7 @@ export function SuggestedChangesList({
   dismissed: Record<string, boolean>;
   readyCount: number;
   needsReviewCount: number;
+  unmatchedCount: number;
   reviewedCount: number;
   totalCount: number;
   onApprove: (id: string) => void;
@@ -31,8 +33,9 @@ export function SuggestedChangesList({
 }) {
   const pending = models.filter((m) => !added[m.id] && !dismissed[m.id]);
   const reviewed = models.filter((m) => added[m.id] || dismissed[m.id]);
-  // Needs-review first (attention), then ready, then muted reviewed items.
+  // Unmatched + needs-review first, then ready, then muted reviewed items.
   const ordered = [
+    ...pending.filter((m) => m.readiness === "unmatched"),
     ...pending.filter((m) => m.readiness === "needs_review"),
     ...pending.filter((m) => m.readiness === "ready"),
     ...reviewed,
@@ -62,6 +65,16 @@ export function SuggestedChangesList({
           <span className="capture-count-inline">
             Needs Review <strong>{needsReviewCount}</strong>
           </span>
+          {unmatchedCount > 0 ? (
+            <>
+              <span className="capture-count-sep" aria-hidden>
+                ·
+              </span>
+              <span className="capture-count-inline">
+                Unmatched <strong>{unmatchedCount}</strong>
+              </span>
+            </>
+          ) : null}
           {readyCount > 0 ? (
             <button
               type="button"
@@ -93,7 +106,8 @@ export function SuggestedChangesList({
               onApprove={() => onApprove(model.id)}
               onDismiss={() => onDismiss(model.id)}
               onKeepOpen={
-                model.readiness === "needs_review"
+                model.readiness === "needs_review" ||
+                model.readiness === "unmatched"
                   ? () => onDismiss(model.id)
                   : undefined
               }

@@ -12,8 +12,12 @@ export type ReviewCountSummary = {
   changesDetected: number;
   /** Pending actionable ops that are ready to apply. */
   ready: number;
-  /** Pending items that need human review. */
+  /** Pending items that need human review (ambiguous / unsafe). */
   needsReview: number;
+  /** Pending actionable findings that could not match a target. */
+  unmatched: number;
+  /** needsReview + unmatched — high-level attention count. */
+  needsAttention: number;
   /** Cards already approved or dismissed. */
   reviewed: number;
   /** Total review cards (pending + reviewed). */
@@ -36,6 +40,18 @@ function factCategory(fact: string): string | null {
   const t = fact.toLowerCase();
   if (/\bcab\b/.test(t) && /\bapprov/.test(t)) return "cab_approval";
   if (
+    /\b(hypercare|staffing gap)\b/.test(t) &&
+    /\b(resolv|confirm|roster)\b/.test(t)
+  ) {
+    return "hypercare_risk";
+  }
+  if (
+    /\b(cab pack|submission)\b/.test(t) &&
+    /\b(due|friday|moved|move)\b/.test(t)
+  ) {
+    return "cab_pack_due";
+  }
+  if (
     /\brelease\b/.test(t) &&
     (/\b(date|moved|changed|nineteenth|august)\b/.test(t) || /\b19\b/.test(t))
   ) {
@@ -53,23 +69,27 @@ function factCategory(fact: string): string | null {
 
 /** Validated finding that changes project state (or Review Required with a likely change). */
 export function findingRepresentsProjectChange(finding: CaptureFinding): boolean {
-  if (finding.invalidTarget) return false;
   if (finding.findingType === "NO_CHANGE") return false;
 
+  // Invalid-target findings are still project changes — they surface as Unmatched.
+  if (finding.invalidTarget) return true;
+
   if (finding.findingType === "AMBIGUOUS") {
-    // Review Required where a likely project change was identified.
     return Boolean(
       finding.target?.entityId ||
         (finding.changes && Object.keys(finding.changes).length > 0) ||
-        finding.requiresClarification,
+        finding.requiresClarification ||
+        finding.invalidTarget,
     );
   }
 
   if (finding.findingType === "NEW_INFORMATION") {
-    // Exclude pure informational notes with no project-state effect.
     return Boolean(
       finding.target?.entityId ||
-        (finding.changes && Object.keys(finding.changes).length > 0),
+        (finding.changes && Object.keys(finding.changes).length > 0) ||
+        /\b(create|raise|add|book|new (to-?do|task|risk|action))\b/i.test(
+          finding.fact,
+        ),
     );
   }
 
@@ -78,7 +98,10 @@ export function findingRepresentsProjectChange(finding: CaptureFinding): boolean
 
 export function changeFindingDedupeKey(finding: CaptureFinding): string {
   if (finding.target?.entityId) {
-    return `target:${finding.target.entityType}:${finding.target.entityId}`;
+    const fields = finding.changes
+      ? Object.keys(finding.changes).sort().join(",")
+      : finding.findingType;
+    return `target:${finding.target.entityType}:${finding.target.entityId}:${fields}`;
   }
   const category = factCategory(finding.fact);
   if (category) return `category:${category}`;
@@ -99,8 +122,13 @@ export function uniqueProjectChangeFindings(
       seen.set(key, finding);
       continue;
     }
-    // Prefer higher confidence / clearer fact when collapsing duplicates.
     if ((finding.confidence ?? 0) > (existing.confidence ?? 0)) {
+      seen.set(key, finding);
+    } else if (
+      (finding.confidence ?? 0) === (existing.confidence ?? 0) &&
+      finding.fact.length > existing.fact.length
+    ) {
+      // Prefer the more informative phrasing when confidence ties.
       seen.set(key, finding);
     }
   }
@@ -109,10 +137,15 @@ export function uniqueProjectChangeFindings(
 
 export function countProjectChangesDetected(result: CaptureResult | null | undefined): number {
   if (!result) return 0;
+
+  // Prefer coverage actionable count when present (shared source of truth).
+  if (result.findingCoverage) {
+    return result.findingCoverage.actionableCount;
+  }
+
   const unique = uniqueProjectChangeFindings(result.findings);
   if (unique.length > 0) return unique.length;
 
-  // Fallback when findings are absent but proposed ops / recommendations exist.
   const actionable = (result.proposedOperations ?? []).filter(
     (op) => op.operation !== "NO_CHANGE",
   );
@@ -141,18 +174,23 @@ export function computeReviewCounts(args: {
   const pending = args.models.filter((m) => !added[m.id] && !dismissed[m.id]);
   const ready = pending.filter((m) => m.readiness === "ready").length;
   const needsReview = pending.filter((m) => m.readiness === "needs_review").length;
+  const unmatched = pending.filter((m) => m.readiness === "unmatched").length;
   const reviewed = args.models.filter((m) => added[m.id] || dismissed[m.id]).length;
 
   let changesDetected = countProjectChangesDetected(args.result);
-  // If findings under-count relative to review cards (legacy path), use unique cards.
   if (changesDetected === 0 && args.models.length > 0) {
     changesDetected = args.models.length;
   }
+
+  // Never imply "nothing to review" when unresolved actionable cards exist.
+  const needsAttention = needsReview + unmatched;
 
   return {
     changesDetected,
     ready,
     needsReview,
+    unmatched,
+    needsAttention,
     reviewed,
     total: args.models.length,
   };

@@ -5,6 +5,7 @@ import type {
   RecommendationKind,
   RecommendationUrgency,
 } from "@/lib/types";
+import type { FindingCoverageReport } from "./coverage";
 import type { CaptureFinding, ProposedOperation } from "./types";
 
 function id(prefix: string) {
@@ -150,10 +151,12 @@ export function attachFindingsToResult(
   result: CaptureResult,
   findings: CaptureFinding[],
   operations: ProposedOperation[],
+  coverage?: FindingCoverageReport,
 ): CaptureResult {
   return {
     ...result,
     findings,
     proposedOperations: operations,
+    findingCoverage: coverage,
   };
 }

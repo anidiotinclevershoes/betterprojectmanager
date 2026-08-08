@@ -4,7 +4,11 @@
  */
 
 import type { CaptureResult } from "@/lib/types";
-import type { CaptureFinding, ProposedOperation } from "@/lib/capture/findings";
+import type {
+  CaptureFinding,
+  FindingCoverageItem,
+  ProposedOperation,
+} from "@/lib/capture/findings";
 import {
   KIND_LABEL,
   OP_LABEL,
@@ -14,7 +18,7 @@ import {
   type SuggestionOp,
 } from "@/lib/capture/suggestions";
 
-export type ReviewReadiness = "ready" | "needs_review";
+export type ReviewReadiness = "ready" | "needs_review" | "unmatched";
 
 export type ChangeDiffLayout = "from_to" | "create" | "remove";
 
@@ -303,11 +307,37 @@ function opsDisagree(
   return false;
 }
 
+function coverageForFinding(
+  result: CaptureResult,
+  findingId: string | undefined,
+): FindingCoverageItem | undefined {
+  if (!findingId) return undefined;
+  return result.findingCoverage?.items.find((i) => i.findingId === findingId);
+}
+
 function assessReadiness(
   item: PendingSuggestion,
   finding: CaptureFinding | undefined,
   op: ProposedOperation | undefined,
+  coverage?: FindingCoverageItem,
 ): { readiness: ReviewReadiness; reason?: string } {
+  if (coverage?.disposition === "unmatched") {
+    return {
+      readiness: "unmatched",
+      reason:
+        coverage.reason ||
+        "Lume couldn't confidently identify the existing item this should update.",
+    };
+  }
+  if (coverage?.disposition === "needs_review") {
+    return {
+      readiness: "needs_review",
+      reason:
+        coverage.reason ||
+        finding?.clarificationQuestion ||
+        "Lume needs clarification before this change is applied.",
+    };
+  }
   if (finding?.requiresClarification || op?.requiresClarification) {
     return {
       readiness: "needs_review",
@@ -318,8 +348,10 @@ function assessReadiness(
   }
   if (finding?.invalidTarget) {
     return {
-      readiness: "needs_review",
-      reason: finding.validationWarning || "Target record could not be matched confidently.",
+      readiness: "unmatched",
+      reason:
+        finding.validationWarning ||
+        "Lume couldn't confidently identify the existing item this should update.",
     };
   }
   if (finding?.findingType === "AMBIGUOUS") {
@@ -347,7 +379,6 @@ function assessReadiness(
       reason: "Confidence is below the ready threshold.",
     };
   }
-  // Unmatched NEW_INFORMATION / no safe single operation
   if (!op && finding?.findingType === "NEW_INFORMATION") {
     return {
       readiness: "needs_review",
@@ -357,15 +388,115 @@ function assessReadiness(
   return { readiness: "ready" };
 }
 
+function kindFromFinding(finding: CaptureFinding): SuggestionKind {
+  const t = finding.target?.entityType;
+  if (t === "todo") return "action";
+  if (t === "risk") return "risk";
+  if (t === "milestone") return "milestone";
+  if (t === "meeting") return "meeting";
+  if (t === "stakeholder") return "stakeholder";
+  if (t === "knowledge") return "knowledge";
+  if (t === "nudge") return "nudge";
+  const proposed = finding.changes?.entityType?.proposed;
+  if (proposed === "todo" || proposed === "action") return "action";
+  if (proposed === "risk") return "risk";
+  if (/\brisk\b/i.test(finding.fact)) return "risk";
+  return "action";
+}
+
+function opFromFinding(finding: CaptureFinding): SuggestionOp {
+  if (finding.findingType === "ENTITY_COMPLETED") return "complete";
+  if (finding.findingType === "NEW_INFORMATION") return "create";
+  if (finding.findingType === "ENTITY_UPDATED") return "update";
+  return "update";
+}
+
+/** Surface coverage gaps that never became proposed operations. */
+function buildCoverageGapViewModels(
+  result: CaptureResult,
+  captureText: string,
+  coveredFindingIds: Set<string>,
+): ReviewChangeViewModel[] {
+  const coverage = result.findingCoverage?.items ?? [];
+  const findingsById = new Map((result.findings ?? []).map((f) => [f.id, f]));
+  const gaps: ReviewChangeViewModel[] = [];
+
+  for (const item of coverage) {
+    if (
+      item.disposition !== "needs_review" &&
+      item.disposition !== "unmatched"
+    ) {
+      continue;
+    }
+    if (coveredFindingIds.has(item.findingId)) continue;
+    const finding = findingsById.get(item.findingId);
+    if (!finding) continue;
+
+    const kind = kindFromFinding(finding);
+    const op = opFromFinding(finding);
+    const suggestion: PendingSuggestion = {
+      id: `coverage-${item.findingId}`,
+      kind,
+      op,
+      content: finding.fact,
+      destination: "project",
+      projectId: result.knowledgeProjectId ?? result.memory.projectId,
+    };
+
+    gaps.push({
+      id: suggestion.id,
+      suggestion,
+      entityKind: kind,
+      entityLabel: KIND_LABEL[kind],
+      recordName: finding.target?.title || finding.fact.slice(0, 80),
+      operation: op,
+      operationLabel: OP_LABEL[op],
+      readiness: item.disposition,
+      needsReviewReason:
+        item.disposition === "unmatched"
+          ? `Lume understood: ${finding.fact}\n\nLume couldn't confidently identify the existing item this should update.`
+          : item.reason,
+      diff: {
+        label: item.disposition === "unmatched" ? "Unmatched" : "Needs Review",
+        from: "—",
+        to: finding.fact,
+        layout: "from_to",
+      },
+      evidence: evidenceExcerpts(finding, captureText),
+      interpretation:
+        finding.reasoningSummary ||
+        (item.disposition === "unmatched"
+          ? "Lume understood a project change but could not match it to an existing record."
+          : "Lume needs a human decision before applying a change."),
+      confidence: finding.confidence ?? null,
+      finding,
+    });
+  }
+
+  return gaps;
+}
+
 export function buildReviewChangeViewModels(
   suggestions: PendingSuggestion[],
   result: CaptureResult,
   captureText: string,
 ): ReviewChangeViewModel[] {
-  return suggestions.map((item) => {
+  const fromSuggestions = suggestions.map((item) => {
     const operationSource = findOperation(item, result);
-    const finding = findFinding(operationSource, result);
-    const { readiness, reason } = assessReadiness(item, finding, operationSource);
+    const finding =
+      findFinding(operationSource, result) ??
+      (item.recommendation?.sourceFindingId
+        ? result.findings?.find(
+            (f) => f.id === item.recommendation?.sourceFindingId,
+          )
+        : undefined);
+    const coverage = coverageForFinding(result, finding?.id);
+    const { readiness, reason } = assessReadiness(
+      item,
+      finding,
+      operationSource,
+      coverage,
+    );
     const recordName =
       operationSource?.targetTitle ||
       item.recommendation?.targetTitle ||
@@ -393,6 +524,23 @@ export function buildReviewChangeViewModels(
       operationSource,
     };
   });
+
+  const coveredFindingIds = new Set(
+    fromSuggestions
+      .map((m) => m.finding?.id)
+      .filter((id): id is string => Boolean(id)),
+  );
+  // Also treat ops' source findings as covered even if finding join failed.
+  for (const op of result.proposedOperations ?? []) {
+    coveredFindingIds.add(op.sourceFindingId);
+  }
+
+  const gaps = buildCoverageGapViewModels(
+    result,
+    captureText,
+    coveredFindingIds,
+  );
+  return [...fromSuggestions, ...gaps];
 }
 
 /**

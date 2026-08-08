@@ -19,6 +19,17 @@ export {
   mapFindingsToOperations,
 } from "./map";
 export {
+  classifyFindingDisposition,
+  dedupeProposedOperations,
+  isMateriallyActionable,
+  reconcileFindingCoverage,
+} from "./coverage";
+export type {
+  FindingCoverageItem,
+  FindingCoverageReport,
+  FindingDisposition,
+} from "./coverage";
+export {
   extractLocalFindings,
   runFindingsPipeline,
 } from "./pipeline";

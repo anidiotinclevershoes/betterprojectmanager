@@ -32,8 +32,18 @@ export function ReviewBadge({
 export function ReadinessBadge({
   readiness,
 }: {
-  readiness: "ready" | "needs_review";
+  readiness: "ready" | "needs_review" | "unmatched";
 }) {
+  if (readiness === "unmatched") {
+    return (
+      <span className="review-badge review-badge-unmatched">
+        <span className="review-badge-ico" aria-hidden>
+          ?
+        </span>
+        <span>Unmatched</span>
+      </span>
+    );
+  }
   if (readiness === "needs_review") {
     return (
       <span className="review-badge review-badge-review">

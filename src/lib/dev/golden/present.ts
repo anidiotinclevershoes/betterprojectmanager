@@ -179,7 +179,7 @@ export type GoldenScoreExtras = {
   passed: boolean;
   prohibitedTriggered: number;
   ambiguousFindings: number;
-  scoringMode: "standard" | "hard";
+  scoringMode: "standard" | "hard" | "mixed";
   exactMatched: number;
   alternativeMatched: number;
 };
@@ -375,11 +375,40 @@ function statusChip(status: MatchStatus): string {
       return "Valid alternative";
     case "needs_review":
       return "Needs review";
+    case "unmatched":
+      return "Unmatched";
     case "missing":
       return "Missing";
     case "unexpected":
       return "Unexpected";
   }
+}
+
+function coverageAccountedForExpected(
+  expected: GoldenExpectedOutcome,
+  result: CaptureResult,
+): { status: "needs_review" | "unmatched"; fact: string; reason: string } | null {
+  const coverage = result.findingCoverage?.items ?? [];
+  const findings = result.findings ?? [];
+  for (const item of coverage) {
+    if (item.disposition !== "needs_review" && item.disposition !== "unmatched") {
+      continue;
+    }
+    const finding = findings.find((f) => f.id === item.findingId);
+    if (!finding) continue;
+    const hay = `${finding.fact} ${finding.target?.title ?? ""} ${item.fact}`;
+    if (
+      titlesLooselyMatch(hay, expected.targetTitle) ||
+      titlesLooselyMatch(finding.fact, expected.targetTitle)
+    ) {
+      return {
+        status: item.disposition,
+        fact: finding.fact,
+        reason: item.reason,
+      };
+    }
+  }
+  return null;
 }
 
 export function scoreGoldenResult(
@@ -438,13 +467,26 @@ export function scoreGoldenResult(
       candidates[0];
 
     if (!best) {
+      // Coverage gate: Needs Review / Unmatched still count as accounted-for.
+      const covered = coverageAccountedForExpected(expected, result);
+      if (covered) {
+        outcomes.push({
+          status: covered.status,
+          statusLabel: statusChip(covered.status),
+          expectedId: expected.id,
+          expected,
+          label: `${expected.operation.toUpperCase()} · ${entityLabel(expected.entity)} · ${expected.targetTitle}`,
+          detail: covered.reason || covered.fact,
+        });
+        continue;
+      }
       outcomes.push({
         status: "missing",
-        statusLabel: "Missing",
+        statusLabel: "Silent drop",
         expectedId: expected.id,
         expected,
         label: `${expected.operation.toUpperCase()} · ${entityLabel(expected.entity)} · ${expected.targetTitle}`,
-        detail: "Expected outcome was not proposed",
+        detail: "Expected outcome was not proposed and has no review disposition",
       });
       continue;
     }
@@ -591,12 +633,52 @@ export function scoreGoldenResult(
   const alternativeMatched = relevant.filter(
     (o) => o.status === "valid_alternative",
   ).length;
+  const needsReviewAccounted = relevant.filter(
+    (o) => o.status === "needs_review",
+  ).length;
+  const unmatchedAccounted = relevant.filter(
+    (o) => o.status === "unmatched",
+  ).length;
+  const silentDrops = relevant.filter((o) => o.status === "missing").length;
   const matched = exactMatched + alternativeMatched;
+  const accountedFor =
+    matched + needsReviewAccounted + unmatchedAccounted;
   const total = scenario.expected.length;
   const unexpectedCount = outcomes.filter((o) => o.status === "unexpected")
     .length;
   const prohibitedTriggered = prohibitedHits.size;
   const ratio = total === 0 ? 0 : matched / total;
+
+  const byOp = (op: string) =>
+    scenario.expected.filter((e) => e.operation === op);
+  const accountedOutcome = (expectedId: string) =>
+    outcomes.find(
+      (o) =>
+        o.expectedId === expectedId &&
+        (o.status === "correct" ||
+          o.status === "valid_alternative" ||
+          o.status === "needs_review" ||
+          o.status === "unmatched"),
+    );
+  const countAccounted = (ops: typeof scenario.expected) =>
+    ops.filter((e) => accountedOutcome(e.id)).length;
+
+  const coverage = {
+    expectedActionable: total,
+    accountedFor,
+    correct: matched,
+    needsReview: needsReviewAccounted,
+    unmatched: unmatchedAccounted,
+    silentDrops,
+    prohibited: prohibitedTriggered,
+    invalidTargets: invalidTargetCount,
+    createsExpected: byOp("create").length,
+    createsAccounted: countAccounted(byOp("create")),
+    updatesExpected: byOp("update").length,
+    updatesAccounted: countAccounted(byOp("update")),
+    completionsExpected: byOp("complete").length,
+    completionsAccounted: countAccounted(byOp("complete")),
+  };
 
   // Standard remains strict: exact matches only (no valid_alternative credit).
   const standardMatched = exactMatched;
@@ -609,6 +691,14 @@ export function scoreGoldenResult(
     contradictions === 0 &&
     prohibitedTriggered === 0 &&
     alternativeMatched === 0;
+
+  const mixedGatePassed =
+    scoringMode === "mixed" &&
+    accountedFor === total &&
+    total > 0 &&
+    silentDrops === 0 &&
+    prohibitedTriggered === 0 &&
+    invalidTargetCount === 0;
 
   let grade: GoldenScore["grade"] = "poor";
   let gradeLabel = "Failed";
@@ -647,6 +737,21 @@ export function scoreGoldenResult(
             : "poor";
     }
     gradeEmoji = "○";
+  } else if (scoringMode === "mixed") {
+    hardExplanation = `Coverage ${accountedFor} / ${total} · Silent drops ${silentDrops} · Correct ${matched} · Needs review ${needsReviewAccounted} · Unmatched ${unmatchedAccounted}`;
+    if (mixedGatePassed) {
+      grade = "excellent";
+      gradeLabel = "Coverage passed";
+      gradeEmoji = "🟢";
+    } else if (accountedFor >= Math.ceil(total * 0.7) && silentDrops === 0) {
+      grade = "good";
+      gradeLabel = "Mostly covered";
+      gradeEmoji = "🟡";
+    } else {
+      grade = "poor";
+      gradeLabel = "Coverage failed";
+      gradeEmoji = "🔴";
+    }
   } else if (passed) {
     grade = "excellent";
     gradeLabel = "Passed";
@@ -674,7 +779,7 @@ export function scoreGoldenResult(
     invalidTargetCount,
     contradictions,
     unexpectedCount,
-    passed,
+    passed: scoringMode === "mixed" ? mixedGatePassed : passed,
     prohibitedTriggered,
     ambiguousFindings,
     scoringMode,
@@ -684,6 +789,7 @@ export function scoreGoldenResult(
     reliability,
     exactMatched,
     alternativeMatched,
+    coverage,
   };
 }
 

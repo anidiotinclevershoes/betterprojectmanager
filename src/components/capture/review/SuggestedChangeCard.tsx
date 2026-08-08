@@ -17,7 +17,7 @@ export function SuggestedChangeCard({
   state?: "pending" | "approved" | "dismissed";
   onApprove: () => void;
   onDismiss: () => void;
-  /** Needs-review only: explicitly keep without applying. */
+  /** Needs-review / unmatched: dismiss without applying. */
   onKeepOpen?: () => void;
   /** Optional initial Why panel state (e.g. preview/demo). */
   initialWhyOpen?: boolean;
@@ -25,6 +25,11 @@ export function SuggestedChangeCard({
   const [whyOpen, setWhyOpen] = useState(initialWhyOpen);
   const whyId = useId();
   const needsReview = model.readiness === "needs_review";
+  const unmatched = model.readiness === "unmatched";
+  const attentionReadiness =
+    state === "pending" && (needsReview || unmatched)
+      ? (model.readiness as "needs_review" | "unmatched")
+      : undefined;
 
   return (
     <li className="suggested-change-item">
@@ -34,7 +39,7 @@ export function SuggestedChangeCard({
         recordName={model.recordName}
         operation={model.operation}
         diff={model.diff}
-        emphasized={needsReview && state === "pending"}
+        readiness={attentionReadiness}
         state={state}
         why={
           <WhyPanel
@@ -49,39 +54,52 @@ export function SuggestedChangeCard({
         actions={
           state === "pending" ? (
             <>
-              {needsReview && model.needsReviewReason ? (
+              {attentionReadiness && model.needsReviewReason ? (
                 <p className="compact-change-review-copy">
                   {model.needsReviewReason}
                 </p>
               ) : null}
               <div className="compact-change-action-row">
-                {needsReview && onKeepOpen ? (
+                {unmatched ? (
                   <button
                     type="button"
-                    className="muted-btn"
-                    onClick={onKeepOpen}
+                    className="ghost-btn"
+                    onClick={onDismiss}
                   >
-                    Keep Open
+                    Dismiss
                   </button>
-                ) : null}
-                <button
-                  type="button"
-                  className="primary-btn"
-                  onClick={onApprove}
-                >
-                  {needsReview &&
-                  model.entityKind === "risk" &&
-                  (model.operation === "complete" || model.operation === "update")
-                    ? "Resolve Risk"
-                    : "Approve"}
-                </button>
-                <button
-                  type="button"
-                  className="ghost-btn"
-                  onClick={onDismiss}
-                >
-                  Dismiss
-                </button>
+                ) : (
+                  <>
+                    {needsReview && onKeepOpen ? (
+                      <button
+                        type="button"
+                        className="muted-btn"
+                        onClick={onKeepOpen}
+                      >
+                        Keep Open
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="primary-btn"
+                      onClick={onApprove}
+                    >
+                      {needsReview &&
+                      model.entityKind === "risk" &&
+                      (model.operation === "complete" ||
+                        model.operation === "update")
+                        ? "Resolve Risk"
+                        : "Approve"}
+                    </button>
+                    <button
+                      type="button"
+                      className="ghost-btn"
+                      onClick={onDismiss}
+                    >
+                      Dismiss
+                    </button>
+                  </>
+                )}
               </div>
             </>
           ) : (

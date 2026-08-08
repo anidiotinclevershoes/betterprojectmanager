@@ -354,6 +354,7 @@ export function buildCaptureResultFromAi(args: {
     base,
     pipeline.findings,
     pipeline.operations,
+    pipeline.coverage,
   );
 }
 
@@ -408,6 +409,7 @@ export function localCaptureFallback(
     base,
     pipeline.findings,
     pipeline.operations,
+    pipeline.coverage,
   );
 }
 

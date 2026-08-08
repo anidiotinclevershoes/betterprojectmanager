@@ -93,6 +93,7 @@ export function CompactChangeCard({
   diff,
   why,
   actions,
+  readiness,
   emphasized,
   state,
 }: {
@@ -104,15 +105,19 @@ export function CompactChangeCard({
   /** Why panel — rendered above actions. */
   why?: ReactNode;
   actions: ReactNode;
+  readiness?: "needs_review" | "unmatched";
+  /** @deprecated Prefer readiness */
   emphasized?: boolean;
   state?: "pending" | "approved" | "dismissed";
 }) {
+  const attention = readiness ?? (emphasized ? "needs_review" : undefined);
   return (
     <article
       className={[
         "compact-change-card",
         `is-kind-${entityKind}`,
-        emphasized ? "is-emphasized" : "",
+        attention ? "is-emphasized" : "",
+        attention === "unmatched" ? "is-unmatched" : "",
         state === "approved" ? "is-approved" : "",
         state === "dismissed" ? "is-dismissed" : "",
       ]
@@ -129,8 +134,8 @@ export function CompactChangeCard({
             <h4 className="compact-change-title">{recordName}</h4>
           </div>
         </div>
-        {emphasized ? (
-          <ReadinessBadge readiness="needs_review" />
+        {attention ? (
+          <ReadinessBadge readiness={attention} />
         ) : (
           <ReviewBadge operation={operation} tone="default" />
         )}

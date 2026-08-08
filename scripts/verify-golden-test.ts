@@ -4,6 +4,7 @@
  */
 import assert from "node:assert/strict";
 import {
+  MIXED_OPERATIONS_SCENARIO,
   WEBSITE_REFRESH_HARD_SCENARIO,
   WEBSITE_REFRESH_SCENARIO,
   assessGoldenReliability,
@@ -287,6 +288,62 @@ const atomic = extractAtomicFacts(hardResult, hard.defaultCapture);
 assert.equal(atomic.some((f) => /milk/i.test(f)), false);
 assert.ok(atomic.some((f) => /sarah remains/i.test(f)));
 
+// Hard gate: no silent drops when findings exist for expected outcomes
+assert.equal(
+  hardScore.coverage?.silentDrops ??
+    hardScore.outcomes.filter((o) => o.status === "missing").length,
+  0,
+  "hard scenario must have 0 silent drops",
+);
+
+// --- Mixed 3/3/3 coverage gate ---
+const mixed = MIXED_OPERATIONS_SCENARIO;
+assert.equal(mixed.scoringMode, "mixed");
+assert.equal(mixed.expected.length, 9);
+assert.ok(listGoldenScenarios().some((s) => s.id === "mixed-operations"));
+
+const mixedFixture = fixtureToMissionState(mixed);
+const mixedState: MissionState = { ...mixedFixture, memories: [] };
+const mixedContext = buildCaptureContext({
+  projectId: mixed.project.id,
+  captureText: mixed.defaultCapture,
+  state: mixedState,
+});
+const mixedResult = localCaptureFallback(
+  {
+    content: mixed.defaultCapture,
+    projectId: mixed.project.id,
+    sourceType: "note",
+  },
+  mixedState,
+  mixedContext,
+);
+const mixedScore = scoreGoldenResult(mixed, mixedResult, {
+  captureText: mixed.defaultCapture,
+});
+
+assert.ok(mixedScore.coverage, "mixed score should include coverage summary");
+assert.equal(
+  mixedScore.coverage!.silentDrops,
+  0,
+  `mixed silent drops must be 0; outcomes=${mixedScore.outcomes.map((o) => `${o.status}:${o.label}`).join(" | ")}`,
+);
+assert.equal(
+  mixedScore.coverage!.accountedFor,
+  9,
+  `mixed must account for 9/9; got ${mixedScore.coverage!.accountedFor}; outcomes=${mixedScore.outcomes.map((o) => `${o.status}:${o.label}`).join(" | ")}`,
+);
+assert.equal(mixedScore.prohibitedTriggered, 0);
+assert.equal(mixedScore.invalidTargetCount, 0);
+assert.equal(mixedScore.coverage!.createsAccounted, 3);
+assert.equal(mixedScore.coverage!.updatesAccounted, 3);
+assert.equal(mixedScore.coverage!.completionsAccounted, 3);
+assert.equal(mixedResult.findingCoverage?.silentDropCount ?? 0, 0);
+
+const mixedOpsText = JSON.stringify(mixedResult.proposedOperations ?? []).toLowerCase();
+assert.equal(mixedOpsText.includes("timesheet"), false);
+assert.equal(mixedOpsText.includes("onetrust"), false);
+
 console.log("verify-golden-test: all checks passed");
 for (const [i, score] of runs.entries()) {
   console.log(
@@ -294,10 +351,16 @@ for (const [i, score] of runs.entries()) {
   );
 }
 console.log(
-  `  hard local run: ${hardScore.hardBandLabel} (${hardScore.matched}/${hardScore.total}) reliability=${hardScore.reliability?.label}`,
+  `  hard local run: ${hardScore.hardBandLabel} (${hardScore.matched}/${hardScore.total}) reliability=${hardScore.reliability?.label} silentDrops=${hardScore.coverage?.silentDrops ?? 0}`,
 );
 console.log(`  hard explanation: ${hardScore.hardExplanation}`);
 console.log(`  hard facts: ${hardPresented.facts.join(" | ")}`);
 console.log(
   `  hard outcomes: ${hardScore.outcomes.map((o) => `${o.statusLabel}:${o.label}`).join(" · ")}`,
+);
+console.log(
+  `  mixed coverage: ${mixedScore.coverage!.accountedFor}/${mixedScore.coverage!.expectedActionable} correct=${mixedScore.coverage!.correct} needsReview=${mixedScore.coverage!.needsReview} unmatched=${mixedScore.coverage!.unmatched} silentDrops=${mixedScore.coverage!.silentDrops}`,
+);
+console.log(
+  `  mixed outcomes: ${mixedScore.outcomes.map((o) => `${o.statusLabel}:${o.label}`).join(" · ")}`,
 );

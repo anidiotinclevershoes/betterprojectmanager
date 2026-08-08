@@ -262,6 +262,8 @@ export interface CaptureResult {
     warnings: string[];
     invalidTargetCount: number;
   };
+  /** Sprint 2.1.5: actionable finding dispositions after mapping. */
+  findingCoverage?: import("./capture/findings").FindingCoverageReport;
 }
 
 /** Lightweight timeline entry the UI renders; AI only adds/updates these. */

@@ -34,6 +34,9 @@ export type PostAnalysisReliabilitySignals = {
   ambiguousFindings: number;
   clarificationCount: number;
   invalidTargetCount: number;
+  /** Coverage: actionable findings needing review or unmatched. */
+  coverageNeedsAttention: number;
+  coverageUnmatched: number;
   validationErrors: number;
   validationOk: boolean;
   operationsCount: number;

@@ -324,10 +324,172 @@ export const FUTURE_SCENARIO_STUBS: GoldenScenarioFixture[] = [
   },
 ];
 
+/**
+ * Mixed 3/3/3 — creates, updates, completions against seeded RelOps-style state.
+ * Conversational but not as hard as the rambling Hard Capture.
+ */
+export const MIXED_OPERATIONS_SCENARIO: GoldenScenarioFixture = {
+  id: "mixed-operations",
+  name: "Mixed Operations — 3/3/3",
+  description:
+    "Three creates, three updates, three completions/resolutions with light conversational noise.",
+  available: true,
+  scoringMode: "mixed",
+  defaultCapture: [
+    "Okay quick dump before I forget.",
+    "",
+    "Merge freeze notice is done — that went out this morning, we can close Publish March merge freeze notice off. The two unsigned modules are both in the evidence tracker now with proper links from Sam, so Chase two unsigned modules into evidence tracker is complete as well. And the Hypercare staffing gap for Release 9 risk is resolved — Nina confirmed the full roster in writing, every shift named, so we can clear that risk.",
+    "",
+    "On the open stuff that still needs changing: Submit complete CAB pack 24h before board is no longer Thursday — move that due date to Friday close of play. Finalise rollback plan with Nina — she’s owning it through to CAB-ready, and the due date should move out by two days. Also Confirm smoke checklist owners for go-live — push that due date to next Tuesday; we don’t need it this week.",
+    "",
+    "Three new things we don’t have tracked yet. Create a to-do to book the go-live bridge call for Friday 14:00 with CAB Secretariat and Nina. Raise a new risk: intermittent payment gateway timeouts in UAT after the last build — not blocking CAB yet but needs watching. And add an action to send Priya the written Release 9 brief plus residual risk summary by end of day Wednesday.",
+    "",
+    "Don’t invent anything else. Timesheet and OneTrust can wait.",
+  ].join("\n"),
+  project: {
+    id: "golden-proj-mixed-ops",
+    name: "Release 9 Operations",
+    code: "R9",
+    summary: "Mixed operations Capture coverage fixture",
+    status: "watch",
+    currentFocus: "CAB pack and go-live readiness",
+  },
+  todos: [
+    {
+      id: "golden-mixed-freeze",
+      title: "Publish March merge freeze notice",
+      detail: "In/out list + exception path in release channel",
+      done: false,
+      statusLabel: "Open",
+    },
+    {
+      id: "golden-mixed-unsigned",
+      title: "Chase two unsigned modules into evidence tracker",
+      detail: "Require links from Sam — no verbal sign-off",
+      done: false,
+      statusLabel: "Open",
+    },
+    {
+      id: "golden-mixed-rollback",
+      title: "Finalise rollback plan with Nina",
+      detail: "Move from draft to CAB-ready attachment",
+      done: false,
+      statusLabel: "Open",
+    },
+    {
+      id: "golden-mixed-cab-pack",
+      title: "Submit complete CAB pack 24h before board",
+      detail: "Change record, evidence, rollback, roster, residual risks",
+      done: false,
+      statusLabel: "Open",
+    },
+    {
+      id: "golden-mixed-smoke",
+      title: "Confirm smoke checklist owners for go-live",
+      done: false,
+      statusLabel: "Open",
+    },
+  ],
+  risks: ["Hypercare staffing gap for Release 9"],
+  stakeholders: [
+    { id: "golden-mixed-nina", name: "Nina", role: "Release Engineer" },
+    { id: "golden-mixed-priya", name: "Priya", role: "Sponsor" },
+  ],
+  knowledge: ["Release 9 CAB board is Thursday"],
+  expected: [
+    {
+      id: "complete-freeze",
+      operation: "complete",
+      entity: "todo",
+      targetTitle: "Publish March merge freeze notice",
+      targetId: "golden-mixed-freeze",
+      minConfidence: 70,
+    },
+    {
+      id: "complete-unsigned",
+      operation: "complete",
+      entity: "todo",
+      targetTitle: "Chase two unsigned modules into evidence tracker",
+      targetId: "golden-mixed-unsigned",
+      minConfidence: 70,
+    },
+    {
+      id: "resolve-hypercare",
+      operation: "complete",
+      entity: "risk",
+      targetTitle: "Hypercare staffing gap for Release 9",
+      targetId: "golden-risk-0",
+      acceptedOperations: ["complete", "update"],
+      expectedChanges: {
+        status: ["COMPLETED", "RESOLVED", "done", "DONE"],
+      },
+      minConfidence: 70,
+    },
+    {
+      id: "update-cab-pack",
+      operation: "update",
+      entity: "todo",
+      targetTitle: "Submit complete CAB pack 24h before board",
+      targetId: "golden-mixed-cab-pack",
+      minConfidence: 65,
+    },
+    {
+      id: "update-rollback",
+      operation: "update",
+      entity: "todo",
+      targetTitle: "Finalise rollback plan with Nina",
+      targetId: "golden-mixed-rollback",
+      minConfidence: 65,
+    },
+    {
+      id: "update-smoke",
+      operation: "update",
+      entity: "todo",
+      targetTitle: "Confirm smoke checklist owners for go-live",
+      targetId: "golden-mixed-smoke",
+      minConfidence: 65,
+    },
+    {
+      id: "create-bridge",
+      operation: "create",
+      entity: "todo",
+      targetTitle: "book the go-live bridge call",
+      minConfidence: 65,
+    },
+    {
+      id: "create-gateway-risk",
+      operation: "create",
+      entity: "risk",
+      targetTitle: "payment gateway timeouts",
+      minConfidence: 65,
+    },
+    {
+      id: "create-priya-brief",
+      operation: "create",
+      entity: "todo",
+      targetTitle: "send Priya the written Release 9 brief",
+      minConfidence: 65,
+    },
+  ],
+  prohibited: [
+    {
+      id: "no-timesheet",
+      label: "Timesheet must not become project work",
+      titleIncludes: ["timesheet"],
+    },
+    {
+      id: "no-onetrust",
+      label: "OneTrust deferral must not become an operation",
+      titleIncludes: ["onetrust"],
+    },
+  ],
+};
+
 export function listGoldenScenarios(): GoldenScenarioFixture[] {
   return [
     WEBSITE_REFRESH_SCENARIO,
     WEBSITE_REFRESH_HARD_SCENARIO,
+    MIXED_OPERATIONS_SCENARIO,
     ...FUTURE_SCENARIO_STUBS,
   ];
 }

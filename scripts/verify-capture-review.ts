@@ -297,10 +297,11 @@ function model(
 
   assert.equal(findingRepresentsProjectChange(findings[3]), true);
   assert.equal(findingRepresentsProjectChange(findings[4]), false);
-  assert.equal(findingRepresentsProjectChange(findings[5]), false);
+  // Invalid-target findings still count as project changes (surfaced as Unmatched).
+  assert.equal(findingRepresentsProjectChange(findings[5]), true);
   assert.equal(findingRepresentsProjectChange(findings[6]), false);
-  assert.equal(uniqueProjectChangeFindings(findings).length, 3);
-  assert.equal(countProjectChangesDetected(stubResult({ findings })), 3);
+  assert.equal(uniqueProjectChangeFindings(findings).length, 4);
+  assert.equal(countProjectChangesDetected(stubResult({ findings })), 4);
 }
 
 // --- 4. Ready / Needs Review share the same selector ---
@@ -362,6 +363,8 @@ function model(
   assert.equal(counts.changesDetected, 3);
   assert.equal(counts.ready, 2);
   assert.equal(counts.needsReview, 1);
+  assert.equal(counts.unmatched, 0);
+  assert.equal(counts.needsAttention, 1);
   assert.equal(counts.total, 3);
   assert.equal(counts.reviewed, 0);
 

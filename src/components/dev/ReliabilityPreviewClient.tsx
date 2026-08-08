@@ -53,6 +53,8 @@ const POST: CaptureReliabilityAssessment = {
     ambiguousFindings: 3,
     clarificationCount: 3,
     invalidTargetCount: 1,
+    coverageNeedsAttention: 2,
+    coverageUnmatched: 1,
     validationErrors: 0,
     validationOk: true,
     operationsCount: 2,

@@ -49,7 +49,8 @@ const STATUS_LABEL: Record<MatchStatus, string> = {
   correct: "Correct",
   valid_alternative: "Valid alternative",
   needs_review: "Needs review",
-  missing: "Missing",
+  unmatched: "Unmatched",
+  missing: "Silent drop",
   unexpected: "Unexpected",
 };
 
@@ -61,6 +62,8 @@ function statusClass(status: MatchStatus) {
       return "is-alternative";
     case "needs_review":
       return "is-review";
+    case "unmatched":
+      return "is-unmatched";
     case "missing":
       return "is-missing";
     case "unexpected":
@@ -101,11 +104,12 @@ export function GoldenTestClient({
         contradictions?: number;
         prohibitedTriggered?: number;
         ambiguousFindings?: number;
-        scoringMode?: "standard" | "hard";
+        scoringMode?: "standard" | "hard" | "mixed";
         hardBand?: "strong" | "mixed" | "failed";
         hardBandLabel?: string;
         hardExplanation?: string;
         reliability?: GoldenScore["reliability"];
+        coverage?: GoldenScore["coverage"];
       })
     | null
   >(null);
@@ -205,20 +209,50 @@ export function GoldenTestClient({
           className={`golden-score golden-score-${score.grade}${
             score.scoringMode === "hard"
               ? ` golden-score-hard golden-score-hard-${score.hardBand ?? "mixed"}`
-              : ""
+              : score.scoringMode === "mixed"
+                ? " golden-score-mixed"
+                : ""
           }`}
         >
           <p className="eyebrow">
             {score.scoringMode === "hard"
               ? "Hard scenario result"
-              : "Overall Result"}
+              : score.scoringMode === "mixed"
+                ? "Mixed operations coverage"
+                : "Overall Result"}
           </p>
           <p className="golden-score-grade">
             {score.scoringMode === "hard"
               ? score.hardBandLabel ?? score.gradeLabel
               : `${score.gradeEmoji} ${score.gradeLabel}`}
           </p>
-          {score.scoringMode === "hard" ? (
+          {score.scoringMode === "mixed" && score.coverage ? (
+            <>
+              <ul className="golden-hard-metrics">
+                <li>
+                  Coverage {score.coverage.accountedFor} /{" "}
+                  {score.coverage.expectedActionable}
+                </li>
+                <li>Correct {score.coverage.correct}</li>
+                <li>Needs Review {score.coverage.needsReview}</li>
+                <li>Unmatched {score.coverage.unmatched}</li>
+                <li>Silent Drops {score.coverage.silentDrops}</li>
+                <li>Prohibited {score.coverage.prohibited}</li>
+                <li>Invalid Targets {score.coverage.invalidTargets}</li>
+                <li>
+                  Creates {score.coverage.createsAccounted}/
+                  {score.coverage.createsExpected} · Updates{" "}
+                  {score.coverage.updatesAccounted}/
+                  {score.coverage.updatesExpected} · Completions{" "}
+                  {score.coverage.completionsAccounted}/
+                  {score.coverage.completionsExpected}
+                </li>
+              </ul>
+              {score.hardExplanation ? (
+                <p className="golden-hard-explanation">{score.hardExplanation}</p>
+              ) : null}
+            </>
+          ) : score.scoringMode === "hard" ? (
             <>
               <ul className="golden-hard-metrics">
                 <li>
@@ -230,6 +264,11 @@ export function GoldenTestClient({
                 </li>
                 <li>Unexpected operations: {score.unexpectedCount ?? 0}</li>
                 <li>Invalid targets: {score.invalidTargetCount ?? 0}</li>
+                <li>
+                  Silent drops:{" "}
+                  {score.coverage?.silentDrops ??
+                    score.outcomes.filter((o) => o.status === "missing").length}
+                </li>
                 <li>
                   Reliability: {score.reliability?.label ?? "Normal"}
                   {score.reliability
