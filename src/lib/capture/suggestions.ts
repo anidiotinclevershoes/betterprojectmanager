@@ -401,6 +401,23 @@ function buildSuggestionsFromProposedOps(
     .filter((item) => item.content.trim());
 }
 
+export type CaptureReviewOverride = {
+  readiness?: "ready" | "needs_review" | "unmatched";
+  reviewReason?:
+    | "TARGET_UNCERTAIN"
+    | "ENTITY_TYPE_UNCERTAIN"
+    | "STATE_UNCERTAIN"
+    | "OPERATION_UNCERTAIN"
+    | "VALUE_UNCERTAIN"
+    | null;
+  kind?: SuggestionKind;
+  op?: SuggestionOp;
+  content?: string;
+  targetTodoId?: string;
+  recordName?: string;
+  accepted?: boolean;
+};
+
 export type CapturePersistSlice = {
   content: string;
   projectId: string;
@@ -411,6 +428,10 @@ export type CapturePersistSlice = {
   added: Record<string, boolean>;
   editing: Record<string, string>;
   collapsed: boolean;
+  /** Capture chrome maximized (expand). */
+  maximized?: boolean;
+  /** Deterministic user corrections — no AI re-run. */
+  reviewOverrides?: Record<string, CaptureReviewOverride>;
   error: string | null;
   source: "typed" | "recorded" | "uploaded";
   historyId: string | null;

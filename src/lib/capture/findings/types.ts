@@ -21,7 +21,8 @@ export const FINDING_TYPES: FindingType[] = [
 
 export type FindingTarget = {
   entityType: AIEntityType;
-  entityId: string;
+  /** Omitted for explicit CREATE / NEW_INFORMATION (no existing record). */
+  entityId?: string;
   title: string;
 };
 

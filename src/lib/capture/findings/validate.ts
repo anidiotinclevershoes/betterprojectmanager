@@ -121,10 +121,13 @@ function clampConfidence(raw: unknown): number | null {
 function parseTarget(
   raw: unknown,
   index: Map<string, IndexedContextRecord>,
+  opts?: { allowCreateWithoutId?: boolean },
 ): {
   target?: FindingTarget;
   invalidTarget?: boolean;
   warning?: string;
+  /** True when target is a CREATE shape (type + title, no existing id). */
+  createShaped?: boolean;
 } {
   if (raw == null) return {};
   if (typeof raw !== "object") {
@@ -140,7 +143,17 @@ function parseTarget(
     asString(obj.entityType) ?? asString(obj.type) ?? "";
   const entityType = normalizeEntityType(entityTypeRaw);
 
+  // Explicit CREATE: entity type without an existing record id is valid.
   if (!entityId) {
+    if (opts?.allowCreateWithoutId && entityType) {
+      return {
+        target: {
+          entityType,
+          title: title || "New item",
+        },
+        createShaped: true,
+      };
+    }
     return {
       invalidTarget: true,
       warning: "target missing entityId",
@@ -149,6 +162,17 @@ function parseTarget(
 
   const existing = index.get(entityId);
   if (!existing) {
+    // Unknown id on NEW_INFORMATION with a type may still be CREATE intent.
+    if (opts?.allowCreateWithoutId && entityType) {
+      return {
+        target: {
+          entityType,
+          title: title || "New item",
+        },
+        createShaped: true,
+        warning: `Unknown target ID "${entityId}" treated as CREATE (${entityType})`,
+      };
+    }
     return {
       invalidTarget: true,
       warning: `Unknown target ID "${entityId}" — not in provided context`,
@@ -175,6 +199,25 @@ function parseTarget(
       title: existing.title || title,
     },
   };
+}
+
+function explicitCreateTypeFromRow(
+  row: Record<string, unknown>,
+  changes: CaptureFinding["changes"],
+): ReturnType<typeof normalizeEntityType> {
+  const proposed = changes?.entityType?.proposed;
+  if (typeof proposed === "string") {
+    return normalizeEntityType(proposed);
+  }
+  if (row.target != null && typeof row.target === "object") {
+    const t = row.target as Record<string, unknown>;
+    const id = asString(t.entityId) ?? asString(t.id);
+    const type = normalizeEntityType(
+      asString(t.entityType) ?? asString(t.type) ?? "",
+    );
+    if (type && !id) return type;
+  }
+  return null;
 }
 
 function parseChanges(raw: unknown): CaptureFinding["changes"] | undefined {
@@ -255,40 +298,87 @@ export function validateCaptureFindings(
       continue;
     }
 
-    const targetParse = parseTarget(row.target, contextIndex);
+    const changes = parseChanges(row.changes);
+    const createTypeHint =
+      findingTypeRaw === "NEW_INFORMATION"
+        ? explicitCreateTypeFromRow(row, changes)
+        : null;
+    const targetParse = parseTarget(row.target, contextIndex, {
+      allowCreateWithoutId: Boolean(createTypeHint) || findingTypeRaw === "NEW_INFORMATION",
+    });
     if (targetParse.warning) warnings.push(`Finding[${i}]: ${targetParse.warning}`);
-    if (targetParse.invalidTarget) invalidTargetCount += 1;
+
+    // CREATE-shaped findings are not "unmatched existing targets".
+    const isCreateShaped =
+      Boolean(targetParse.createShaped) ||
+      (findingTypeRaw === "NEW_INFORMATION" && Boolean(createTypeHint));
+    const invalidExistingTarget =
+      Boolean(targetParse.invalidTarget) && !isCreateShaped;
+    if (invalidExistingTarget) invalidTargetCount += 1;
 
     const requiresClarification = Boolean(row.requiresClarification);
     const clarificationQuestion =
       asString(row.clarificationQuestion) ?? undefined;
+
+    const resolvedTarget =
+      targetParse.target ??
+      (createTypeHint
+        ? {
+            entityType: createTypeHint,
+            title: fact.slice(0, 120),
+          }
+        : undefined);
 
     const finding: CaptureFinding = {
       id: asString(row.id) ?? id("finding"),
       fact,
       evidence,
       findingType: findingTypeRaw as FindingType,
-      target: targetParse.target,
-      changes: parseChanges(row.changes),
+      target: resolvedTarget,
+      changes,
       confidence,
       requiresClarification:
         requiresClarification ||
-        Boolean(targetParse.invalidTarget) ||
+        invalidExistingTarget ||
         findingTypeRaw === "AMBIGUOUS",
-      clarificationQuestion: targetParse.invalidTarget
+      clarificationQuestion: invalidExistingTarget
         ? clarificationQuestion ??
           "Which existing project record does this fact refer to?"
         : clarificationQuestion,
       reasoningSummary,
-      invalidTarget: targetParse.invalidTarget,
-      validationWarning: targetParse.warning,
+      invalidTarget: invalidExistingTarget ? true : undefined,
+      validationWarning: invalidExistingTarget
+        ? targetParse.warning
+        : targetParse.createShaped
+          ? undefined
+          : targetParse.warning,
     };
 
-    // Invalid ID → force ambiguous, no silent rematch
-    if (targetParse.invalidTarget) {
+    // Invalid existing-record ID → force ambiguous, no silent rematch.
+    // Do not do this for explicit CREATE / NEW_INFORMATION create shapes.
+    if (invalidExistingTarget) {
       finding.findingType = "AMBIGUOUS";
       finding.target = undefined;
       finding.requiresClarification = true;
+    }
+
+    // Explicit CREATE: never demand an existing target.
+    if (isCreateShaped) {
+      delete finding.invalidTarget;
+      if (!finding.target && createTypeHint) {
+        finding.target = {
+          entityType: createTypeHint,
+          title:
+            (typeof changes?.title?.proposed === "string"
+              ? String(changes.title.proposed)
+              : null) ?? fact.slice(0, 120),
+        };
+      }
+      const q = finding.clarificationQuestion ?? "";
+      if (/which existing|existing (project )?record/i.test(q)) {
+        finding.requiresClarification = false;
+        finding.clarificationQuestion = undefined;
+      }
     }
 
     findings.push(finding);

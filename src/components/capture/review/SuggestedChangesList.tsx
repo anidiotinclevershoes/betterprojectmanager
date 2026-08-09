@@ -1,7 +1,9 @@
 "use client";
 
 import type { ReviewChangeViewModel } from "@/lib/capture/review/viewModel";
+import type { SuggestionKind } from "@/lib/capture/suggestions";
 import { SuggestedChangeCard } from "./SuggestedChangeCard";
+import type { TargetOption } from "./TargetPicker";
 
 export function SuggestedChangesList({
   models,
@@ -12,9 +14,16 @@ export function SuggestedChangesList({
   unmatchedCount,
   reviewedCount,
   totalCount,
+  targetOptions,
+  highlightedId,
   onApprove,
   onDismiss,
   onApproveReady,
+  onUseThis,
+  onChooseTarget,
+  onCreateNew,
+  onResolve,
+  onChangeEntityKind,
   whyOpenIds,
 }: {
   models: ReviewChangeViewModel[];
@@ -25,15 +34,21 @@ export function SuggestedChangesList({
   unmatchedCount: number;
   reviewedCount: number;
   totalCount: number;
+  targetOptions: TargetOption[];
+  highlightedId?: string | null;
   onApprove: (id: string) => void;
   onDismiss: (id: string) => void;
   onApproveReady: () => void;
+  onUseThis: (id: string) => void;
+  onChooseTarget: (id: string, option: TargetOption) => void;
+  onCreateNew: (id: string) => void;
+  onResolve: (id: string) => void;
+  onChangeEntityKind: (id: string, kind: SuggestionKind) => void;
   /** Optional: open Why panels for these ids on first render. */
   whyOpenIds?: string[];
 }) {
   const pending = models.filter((m) => !added[m.id] && !dismissed[m.id]);
   const reviewed = models.filter((m) => added[m.id] || dismissed[m.id]);
-  // Unmatched + needs-review first, then ready, then muted reviewed items.
   const ordered = [
     ...pending.filter((m) => m.readiness === "unmatched"),
     ...pending.filter((m) => m.readiness === "needs_review"),
@@ -103,14 +118,16 @@ export function SuggestedChangesList({
                     ? "dismissed"
                     : "pending"
               }
+              targetOptions={targetOptions}
+              highlighted={highlightedId === model.id}
               onApprove={() => onApprove(model.id)}
               onDismiss={() => onDismiss(model.id)}
-              onKeepOpen={
-                model.readiness === "needs_review" ||
-                model.readiness === "unmatched"
-                  ? () => onDismiss(model.id)
-                  : undefined
-              }
+              onKeepOpen={() => onDismiss(model.id)}
+              onUseThis={() => onUseThis(model.id)}
+              onChooseTarget={(option) => onChooseTarget(model.id, option)}
+              onCreateNew={() => onCreateNew(model.id)}
+              onResolve={() => onResolve(model.id)}
+              onChangeEntityKind={(kind) => onChangeEntityKind(model.id, kind)}
               initialWhyOpen={whyOpenIds?.includes(model.id)}
             />
           ))}

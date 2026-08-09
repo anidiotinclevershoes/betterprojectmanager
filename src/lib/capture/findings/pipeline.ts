@@ -265,7 +265,11 @@ export function extractLocalFindings(
         fact: `New ${pattern.label}: ${title}`,
         evidence: match[0],
         findingType: "NEW_INFORMATION",
-        // No target.entityId — CREATE must not be treated as unmatched/invalid.
+        // CREATE shape: entity type without existing id — never unmatched.
+        target: {
+          entityType: pattern.entity,
+          title,
+        },
         changes: {
           entityType: { proposed: pattern.entity },
           title: { proposed: title },

@@ -1,17 +1,21 @@
 "use client";
 
+import type { CaptureObservation } from "@/lib/capture/review/observations";
+
 export function CaptureSummary({
   observations,
   changesDetected,
   readyCount,
   needsAttentionCount,
+  onSelectObservation,
 }: {
-  observations: string[];
+  observations: CaptureObservation[];
   /** Unique validated project-state changes. */
   changesDetected: number;
   readyCount: number;
   /** Needs Review + Unmatched. */
   needsAttentionCount: number;
+  onSelectObservation?: (observation: CaptureObservation) => void;
 }) {
   return (
     <section className="capture-summary-panel" aria-labelledby="capture-understood-title">
@@ -23,14 +27,41 @@ export function CaptureSummary({
         <p className="meta">No clear project observations extracted.</p>
       ) : (
         <ul className="capture-observation-list">
-          {observations.map((obs) => (
-            <li key={obs}>
-              <span className="capture-observation-check" aria-hidden>
-                ✓
-              </span>
-              <span>{obs}</span>
-            </li>
-          ))}
+          {observations.map((obs) => {
+            const clickable = Boolean(obs.reviewCardId && onSelectObservation);
+            const statusClass = `is-status-${obs.actionStatus}`;
+            const content = (
+              <>
+                <span className="capture-observation-main">
+                  <span className="capture-observation-check" aria-hidden>
+                    ✓
+                  </span>
+                  <span className="capture-observation-text">{obs.text}</span>
+                </span>
+                <span
+                  className={`capture-observation-action ${statusClass}`}
+                  title={obs.actionLabel}
+                >
+                  {obs.actionLabel}
+                </span>
+              </>
+            );
+            return (
+              <li key={obs.id} className="capture-observation-item">
+                {clickable ? (
+                  <button
+                    type="button"
+                    className="capture-observation-row is-clickable"
+                    onClick={() => onSelectObservation?.(obs)}
+                  >
+                    {content}
+                  </button>
+                ) : (
+                  <div className="capture-observation-row">{content}</div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
 

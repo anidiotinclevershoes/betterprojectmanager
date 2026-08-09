@@ -112,8 +112,9 @@ const FIXTURE_MODELS: ReviewChangeViewModel[] = [
     operation: "complete",
     operationLabel: "Complete",
     readiness: "needs_review",
-    needsReviewReason:
-      "Lume detected evidence that the blocker has been resolved. A separate issue was also mentioned.",
+    reviewReason: "STATE_UNCERTAIN",
+    needsReviewReason: "Lume isn't sure whether this Risk is resolved.",
+    spansColumns: true,
     diff: {
       label: "Status",
       from: "Open",
@@ -131,11 +132,39 @@ const FIXTURE_MODELS: ReviewChangeViewModel[] = [
 ];
 
 const OBSERVATIONS = [
-  "CAB approval received",
-  "Release moved to 19 August",
-  "CDN deployment blocker resolved",
-  "Sarah remains Business Owner",
-  "Marcus is supporting release notes",
+  {
+    id: "obs-cab",
+    text: "CAB approval received",
+    actionStatus: "complete" as const,
+    actionLabel: "Complete · Obtain CAB approval",
+    reviewCardId: "op-cab-1",
+  },
+  {
+    id: "obs-release",
+    text: "Release moved to 19 August",
+    actionStatus: "update" as const,
+    actionLabel: "Update · Website refresh go-live",
+    reviewCardId: "op-release-1",
+  },
+  {
+    id: "obs-cdn",
+    text: "CDN deployment blocker resolved",
+    actionStatus: "needs_review" as const,
+    actionLabel: "Needs Review · CDN deployment delayed",
+    reviewCardId: "op-cdn-1",
+  },
+  {
+    id: "obs-sarah",
+    text: "Sarah remains Business Owner",
+    actionStatus: "no_change" as const,
+    actionLabel: "No Change",
+  },
+  {
+    id: "obs-marcus",
+    text: "Marcus is supporting release notes",
+    actionStatus: "no_change" as const,
+    actionLabel: "No Change",
+  },
 ];
 
 /** Minimal result so shared counters derive changesDetected from findings. */
@@ -267,6 +296,18 @@ export function ReviewWorkspacePreviewClient() {
             unmatchedCount={counts.unmatched}
             reviewedCount={counts.reviewed}
             totalCount={counts.total}
+            targetOptions={[
+              {
+                id: "golden-todo-cab",
+                title: "Obtain CAB approval",
+                entityLabel: "To Do",
+              },
+              {
+                id: "golden-risk-cdn",
+                title: "CDN deployment delayed",
+                entityLabel: "Risk",
+              },
+            ]}
             whyOpenIds={whyOpenIds}
             onApprove={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
             onDismiss={(id) =>
@@ -285,6 +326,11 @@ export function ReviewWorkspacePreviewClient() {
                 return next;
               });
             }}
+            onUseThis={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
+            onChooseTarget={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
+            onCreateNew={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
+            onResolve={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
+            onChangeEntityKind={() => undefined}
           />
         </div>
       </section>

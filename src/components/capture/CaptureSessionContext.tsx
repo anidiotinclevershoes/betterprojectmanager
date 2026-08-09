@@ -44,10 +44,22 @@ type CaptureSessionValue = {
   setEditingContent: (id: string, value: string | null) => void;
   updateSuggestion: (
     id: string,
-    patch: Partial<Pick<PendingSuggestion, "kind" | "op" | "content" | "date">>,
+    patch: Partial<
+      Pick<PendingSuggestion, "kind" | "op" | "content" | "date" | "targetTodoId">
+    >,
+  ) => void;
+  reviewOverrides: Record<string, import("@/lib/capture/suggestions").CaptureReviewOverride>;
+  setReviewOverride: (
+    id: string,
+    patch: import("@/lib/capture/suggestions").CaptureReviewOverride | null,
   ) => void;
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
+  maximized: boolean;
+  setMaximized: (value: boolean) => void;
+  minimiseCapture: () => void;
+  expandCapture: () => void;
+  restoreCapture: () => void;
   busy: Busy;
   setBusy: (value: Busy) => void;
   error: string | null;
@@ -100,6 +112,8 @@ function normalizeSlice(raw: CapturePersistSlice | null): CapturePersistSlice {
     editing: raw.editing ?? {},
     fileNames: raw.fileNames ?? [],
     suggestions: raw.suggestions ?? [],
+    maximized: raw.maximized ?? false,
+    reviewOverrides: raw.reviewOverrides ?? {},
   };
 }
 
@@ -125,6 +139,8 @@ function emptySlice(): CapturePersistSlice {
     added: {},
     editing: {},
     collapsed: false,
+    maximized: false,
+    reviewOverrides: {},
     error: null,
     source: "typed",
     historyId: null,
@@ -262,7 +278,9 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
   const updateSuggestion = useCallback(
     (
       id: string,
-      patch: Partial<Pick<PendingSuggestion, "kind" | "op" | "content" | "date">>,
+      patch: Partial<
+        Pick<PendingSuggestion, "kind" | "op" | "content" | "date" | "targetTodoId">
+      >,
     ) => {
       setSlice((prev) => ({
         ...prev,
@@ -276,6 +294,41 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  const setReviewOverride = useCallback(
+    (
+      id: string,
+      patch: import("@/lib/capture/suggestions").CaptureReviewOverride | null,
+    ) => {
+      setSlice((prev) => {
+        const reviewOverrides = { ...(prev.reviewOverrides ?? {}) };
+        if (patch === null) delete reviewOverrides[id];
+        else reviewOverrides[id] = { ...reviewOverrides[id], ...patch };
+        return { ...prev, reviewOverrides };
+      });
+    },
+    [],
+  );
+
+  const setMaximized = useCallback((value: boolean) => {
+    setSlice((prev) => ({
+      ...prev,
+      maximized: value,
+      collapsed: value ? false : prev.collapsed,
+    }));
+  }, []);
+
+  const minimiseCapture = useCallback(() => {
+    setSlice((prev) => ({ ...prev, collapsed: true, maximized: false }));
+  }, []);
+
+  const expandCapture = useCallback(() => {
+    setSlice((prev) => ({ ...prev, collapsed: false, maximized: true }));
+  }, []);
+
+  const restoreCapture = useCallback(() => {
+    setSlice((prev) => ({ ...prev, collapsed: false, maximized: false }));
+  }, []);
 
   const clearSession = useCallback(() => {
     setSlice((prev) => {
@@ -338,6 +391,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         added: {},
         editing: {},
         collapsed: false,
+        reviewOverrides: {},
         reliability: null,
         contextManifest: null,
         analysedAt: null,
@@ -381,6 +435,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
             suggestions,
             content: trimmed,
             collapsed: false,
+            reviewOverrides: {},
             historyId,
             analysedAt,
             source,
@@ -573,8 +628,15 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       editing: slice.editing,
       setEditingContent,
       updateSuggestion,
+      reviewOverrides: slice.reviewOverrides ?? {},
+      setReviewOverride,
       collapsed: slice.collapsed,
       setCollapsed,
+      maximized: Boolean(slice.maximized),
+      setMaximized,
+      minimiseCapture,
+      expandCapture,
+      restoreCapture,
       busy,
       setBusy,
       error: slice.error,
@@ -610,15 +672,20 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       dismissPreReliabilityWarn,
       editCapture,
       expandAnalysis,
+      expandCapture,
       hasTranscript,
       isAnalysed,
       isExpandedSession,
+      minimiseCapture,
       pendingCount,
+      restoreCapture,
       setCollapsed,
       setContent,
       setEditingContent,
       setError,
+      setMaximized,
       setProjectId,
+      setReviewOverride,
       setSource,
       slice,
       statusMessage,

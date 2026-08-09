@@ -9,12 +9,12 @@ export function CaptureCoachRow({
 }: {
   defaultProjectId?: string;
 }) {
-  const { isExpandedSession, collapsed } = useCaptureSession();
-  const showCoachTeaser = !isExpandedSession || collapsed;
+  const { isExpandedSession, collapsed, maximized } = useCaptureSession();
+  const showCoachTeaser = (!isExpandedSession || collapsed) && !maximized;
 
   return (
     <div
-      className={`capture-coach-row ${showCoachTeaser ? "" : "is-capture-full"}`}
+      className={`capture-coach-row ${showCoachTeaser ? "" : "is-capture-full"} ${maximized ? "is-capture-maximized" : ""}`}
     >
       <div className="capture-coach-main">
         <CaptureWorkspace defaultProjectId={defaultProjectId} />

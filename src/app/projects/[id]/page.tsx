@@ -9,12 +9,6 @@ import { ProjectKnowledgeBrief } from "@/components/ProjectKnowledgeBrief";
 import { WorkspaceCustomiser } from "@/components/workspace/WorkspaceCustomiser";
 import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
 import { WorkspaceFrameRow } from "@/components/workspace/WorkspaceGrid";
-import { getPlaybookStage } from "@/lib/release-playbook";
-import {
-  daysUntil,
-  projectReleases,
-  toDateInputValue,
-} from "@/lib/selectors";
 import { useMission } from "@/lib/store";
 import { useWorkspaceLayout } from "@/lib/workspace/useWorkspaceLayout";
 
@@ -43,30 +37,34 @@ export default function ProjectDashboardPage() {
     );
   }
 
-  const release = projectReleases(state, project.id)[0];
-  const due = daysUntil(project.nextMilestoneAt);
-  const stage = release ? getPlaybookStage(release.currentStage) : null;
   const isReleaseOps = project.kind === "release_ops";
 
   return (
     <div className="workspace-page project-scroll">
-      <div className="project-identity">
-        <div className="min-w-0">
-          {isReleaseOps ? <span className="tag">Release ops</span> : null}
-          <p className="project-focus">
-            {project.currentFocus}
-            {project.nextMilestone
-              ? ` · ${project.nextMilestone}${due !== null ? ` (${due >= 0 ? `${due}d` : "overdue"})` : ""}`
-              : ""}
-            {isReleaseOps && project.mergeDate && project.releaseDate
-              ? ` · merge ${toDateInputValue(project.mergeDate)} → release ${toDateInputValue(project.releaseDate)}`
-              : ""}
-          </p>
+      {isReleaseOps ? (
+        <div className="project-identity project-identity-compact">
+          <span className="tag">Release ops</span>
+          <CloneRelOpsButton projectId={project.id} />
         </div>
-        {isReleaseOps ? <CloneRelOpsButton projectId={project.id} /> : null}
-      </div>
+      ) : null}
 
+      {/* Capture is the fixed top workspace layer — always above project frames. */}
       <CaptureCoachRow defaultProjectId={project.id} />
+
+      <div className="project-workspace-transition" aria-label="Project workspace">
+        <div className="project-workspace-rule" aria-hidden />
+        <div className="project-workspace-identity">
+          <span
+            className={`project-workspace-accent is-status-${project.status}`}
+            aria-hidden
+          />
+          <div className="min-w-0">
+            <p className="project-workspace-name">{project.name}</p>
+            <p className="project-workspace-label">Project Workspace</p>
+          </div>
+        </div>
+        <div className="project-workspace-rule" aria-hidden />
+      </div>
 
       <div className="workspace-toolbar workspace-toolbar-end">
         <button
@@ -87,40 +85,6 @@ export default function ProjectDashboardPage() {
       <WorkspaceFrame type="knowledge" title="Knowledge">
         <ProjectKnowledgeBrief projectId={project.id} />
       </WorkspaceFrame>
-
-      {(isReleaseOps || release) && (
-        <section className="workspace-frame frame-identity frame-type-release">
-          <header className="workspace-frame-header">
-            <h2>
-              <span className="frame-identity-icon" aria-hidden>
-                ▴
-              </span>
-              Release
-            </h2>
-            <Link href="/releases" className="ghost-btn">
-              Playbook
-            </Link>
-          </header>
-          <div className="workspace-frame-body">
-            {!release ? (
-              <p className="empty-copy">No active release.</p>
-            ) : (
-              <>
-                <p className="frame-row-title">
-                  {release.name} · {stage?.label}
-                </p>
-                <ul className="mt-2 space-y-1">
-                  {release.risks.slice(0, 6).map((r) => (
-                    <li key={r} className="meta text-[var(--danger)]">
-                      • {r}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </div>
-        </section>
-      )}
 
       <WorkspaceCustomiser
         open={customiseOpen}

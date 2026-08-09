@@ -39,6 +39,18 @@ function ChangeDiffBlock({
     );
   }
 
+  if (layout === "suggested_only" || !diff.from || diff.from === "—") {
+    return (
+      <div
+        className={`compact-change-diff compact-change-diff-suggested is-kind-${entityKind}`}
+        aria-label={`${diff.label}: ${diff.to}`}
+      >
+        <p className="compact-change-diff-label">{diff.label}</p>
+        <p className="compact-change-to">{diff.to}</p>
+      </div>
+    );
+  }
+
   if (layout === "remove") {
     return (
       <div
@@ -96,6 +108,7 @@ export function CompactChangeCard({
   readiness,
   emphasized,
   state,
+  highlighted,
 }: {
   entityKind: SuggestionKind;
   entityLabel: string;
@@ -109,6 +122,7 @@ export function CompactChangeCard({
   /** @deprecated Prefer readiness */
   emphasized?: boolean;
   state?: "pending" | "approved" | "dismissed";
+  highlighted?: boolean;
 }) {
   const attention = readiness ?? (emphasized ? "needs_review" : undefined);
   return (
@@ -120,6 +134,7 @@ export function CompactChangeCard({
         attention === "unmatched" ? "is-unmatched" : "",
         state === "approved" ? "is-approved" : "",
         state === "dismissed" ? "is-dismissed" : "",
+        highlighted ? "is-flash" : "",
       ]
         .filter(Boolean)
         .join(" ")}

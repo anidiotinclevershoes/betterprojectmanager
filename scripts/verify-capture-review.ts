@@ -195,23 +195,28 @@ function model(
   );
 
   assert.equal(
-    obs.filter((o) => /cab/i.test(o)).length,
+    obs.filter((o) => /cab/i.test(o.text)).length,
     1,
     "CAB conclusions should appear once",
   );
   assert.equal(
-    obs.filter((o) => /release/i.test(o) && /19|august/i.test(o)).length,
+    obs.filter((o) => /release/i.test(o.text) && /19|august/i.test(o.text))
+      .length,
     1,
     "Release date conclusions should appear once",
   );
   assert.equal(
-    obs.filter((o) => /cdn/i.test(o)).length,
+    obs.filter((o) => /cdn/i.test(o.text)).length,
     1,
     "CDN conclusions should appear once",
   );
-  assert.ok(obs.some((o) => /CAB approval received/i.test(o)));
-  assert.ok(obs.some((o) => /Release moved to 19 August/i.test(o)));
-  assert.ok(obs.some((o) => /CDN deployment blocker resolved/i.test(o)));
+  assert.ok(obs.some((o) => /CAB approval received/i.test(o.text)));
+  assert.ok(obs.some((o) => /Release moved to 19 August/i.test(o.text)));
+  assert.ok(obs.some((o) => /CDN deployment blocker resolved/i.test(o.text)));
+  assert.ok(
+    obs.some((o) => o.actionLabel && o.actionLabel.length > 0),
+    "observations expose downstream action labels",
+  );
 }
 
 // --- 2. Distinct related conclusions are retained ---
@@ -236,8 +241,8 @@ function model(
       source: "insight",
     },
   ]);
-  assert.ok(merged.some((o) => /Sarah remains Business Owner/i.test(o)));
-  assert.equal(merged.filter((o) => /Marcus/i.test(o)).length, 1);
+  assert.ok(merged.some((o) => /Sarah remains Business Owner/i.test(o.text)));
+  assert.equal(merged.filter((o) => /Marcus/i.test(o.text)).length, 1);
   assert.equal(
     detectObservationCategory("Sarah remains Business Owner"),
     "business_owner",

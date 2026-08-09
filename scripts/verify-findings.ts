@@ -582,4 +582,85 @@ const index = indexFromPairs([
   assert.equal(coverage.silentDropCount, 0);
 }
 
+// --- Sprint 2.1.6: explicit CREATE must not require an existing target ---
+{
+  const report = validateCaptureFindings(
+    [
+      {
+        id: "create-todo",
+        fact: "Create a to-do to book the go-live bridge call",
+        evidence: "Create a to-do to book the go-live bridge call.",
+        findingType: "NEW_INFORMATION",
+        target: { entityType: "todo", title: "Book the go-live bridge call" },
+        changes: {
+          entityType: { proposed: "todo" },
+          title: { proposed: "Book the go-live bridge call" },
+        },
+        confidence: 90,
+        requiresClarification: false,
+        reasoningSummary: "Explicit new To Do",
+      },
+      {
+        id: "create-risk",
+        fact: "Raise a new risk regarding intermittent payment gateway timeouts",
+        evidence: "Raise a new risk regarding intermittent payment gateway timeouts.",
+        findingType: "NEW_INFORMATION",
+        changes: {
+          entityType: { proposed: "risk" },
+          title: { proposed: "Intermittent payment gateway timeouts" },
+        },
+        confidence: 88,
+        requiresClarification: true,
+        clarificationQuestion:
+          "Which existing project record does this fact refer to?",
+        reasoningSummary: "Explicit new Risk",
+      },
+      {
+        id: "update-missing",
+        fact: "Move an unknown pack to Friday",
+        evidence: "Move pack to Friday",
+        findingType: "ENTITY_UPDATED",
+        target: { entityType: "todo", title: "Unknown pack" },
+        confidence: 80,
+        requiresClarification: false,
+        reasoningSummary: "Update without id",
+      },
+    ],
+    index,
+  );
+
+  assert.equal(report.invalidTargetCount, 1, "only missing existing targets count");
+  const todo = report.findings.find((f) => f.id === "create-todo");
+  const risk = report.findings.find((f) => f.id === "create-risk");
+  const missing = report.findings.find((f) => f.id === "update-missing");
+  assert.ok(todo);
+  assert.ok(risk);
+  assert.equal(todo!.requiresClarification, false);
+  assert.equal(todo!.invalidTarget, undefined);
+  assert.equal(todo!.target?.entityType, "todo");
+  assert.equal(todo!.target?.entityId, undefined);
+  assert.equal(risk!.requiresClarification, false);
+  assert.equal(risk!.invalidTarget, undefined);
+  assert.equal(risk!.target?.entityType, "risk");
+  assert.ok(
+    !/which existing/i.test(risk!.clarificationQuestion ?? ""),
+    "CREATE must not ask for an existing target",
+  );
+  assert.equal(missing!.findingType, "AMBIGUOUS");
+  assert.equal(missing!.invalidTarget, true);
+
+  const todoOp = mapFindingToOperation(todo!);
+  const riskOp = mapFindingToOperation(risk!);
+  assert.equal(todoOp?.operation, "CREATE");
+  assert.equal(riskOp?.operation, "CREATE");
+  assert.equal(
+    classifyFindingDisposition(todo!, todoOp).disposition,
+    "ready",
+  );
+  assert.equal(
+    classifyFindingDisposition(risk!, riskOp).disposition,
+    "ready",
+  );
+}
+
 console.log("verify-findings: all checks passed");

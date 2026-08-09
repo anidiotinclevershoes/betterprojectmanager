@@ -3,10 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LumeLogo } from "@/components/brand/LumeLogo";
-import {
-  attentionLabel,
-  projectAttentionCount,
-} from "@/lib/workspace/attention";
 import { useMission } from "@/lib/store";
 import { ResetDemoDataButton } from "@/components/dev/ResetDemoDataButton";
 
@@ -77,20 +73,19 @@ export function Sidebar({
 
           <p className="sidebar-label">{collapsed ? "P" : "Projects"}</p>
           {state.projects.map((project) => {
-            const count = projectAttentionCount(state, project.id);
             return (
               <Link
                 key={project.id}
                 href={`/projects/${project.id}`}
-                title={`${project.name} — ${attentionLabel(count)}`}
+                title={project.name}
                 className={`sidebar-link sidebar-project ${activeProjectId === project.id ? "is-active" : ""}`}
                 onClick={onCloseMobile}
               >
                 {!collapsed ? (
                   <span className="sidebar-project-meta">
                     <span className="truncate font-semibold">{project.code}</span>
-                    <span className="sidebar-attention">
-                      {attentionLabel(count)}
+                    <span className="sidebar-project-name truncate meta">
+                      {project.name}
                     </span>
                   </span>
                 ) : (

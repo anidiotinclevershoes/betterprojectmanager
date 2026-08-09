@@ -17,10 +17,16 @@ import {
   type SuggestionKind,
   type SuggestionOp,
 } from "@/lib/capture/suggestions";
+import {
+  deriveReviewReason,
+  reviewReasonCopy,
+  type ReviewReason,
+} from "./reviewReason";
 
 export type ReviewReadiness = "ready" | "needs_review" | "unmatched";
+export type { ReviewReason };
 
-export type ChangeDiffLayout = "from_to" | "create" | "remove";
+export type ChangeDiffLayout = "from_to" | "create" | "remove" | "suggested_only";
 
 export type ChangeDiff = {
   label: string;
@@ -30,6 +36,19 @@ export type ChangeDiff = {
   layout?: ChangeDiffLayout;
   /** Optional secondary line (e.g. due date on create). */
   meta?: string;
+};
+
+/** User corrections applied without another AI call. */
+export type ReviewCorrectionOverride = {
+  readiness?: ReviewReadiness;
+  reviewReason?: ReviewReason | null;
+  kind?: SuggestionKind;
+  op?: SuggestionOp;
+  content?: string;
+  targetTodoId?: string;
+  recordName?: string;
+  /** Accept proposed target / promote to ready. */
+  accepted?: boolean;
 };
 
 export type ReviewChangeViewModel = {
@@ -42,12 +61,15 @@ export type ReviewChangeViewModel = {
   operationLabel: string;
   readiness: ReviewReadiness;
   needsReviewReason?: string;
+  reviewReason?: ReviewReason;
   diff?: ChangeDiff;
   evidence: string[];
   interpretation: string;
   confidence: number | null;
   finding?: CaptureFinding;
   operationSource?: ProposedOperation;
+  /** Complex correction UI — may span both columns. */
+  spansColumns?: boolean;
 };
 
 function formatShortDate(value: string): string {
@@ -172,9 +194,17 @@ function buildDiff(
         ? String(finding.changes.assignee.previous)
         : undefined;
   if (item.op === "update" && ownerVal) {
+    if (!prevOwner) {
+      return {
+        label: "Owner",
+        from: "",
+        to: ownerVal,
+        layout: "suggested_only",
+      };
+    }
     return {
       label: "Owner",
-      from: prevOwner || "—",
+      from: prevOwner,
       to: ownerVal,
       layout: "from_to",
     };
@@ -192,9 +222,17 @@ function buildDiff(
         : undefined;
 
   if (dateVal && (item.op === "update" || item.kind === "milestone")) {
+    if (!prevDate) {
+      return {
+        label: item.kind === "milestone" ? "Release Date" : "Date",
+        from: "",
+        to: formatShortDate(String(dateVal)),
+        layout: "suggested_only",
+      };
+    }
     return {
       label: item.kind === "milestone" ? "Release Date" : "Date",
-      from: prevDate ? formatShortDate(prevDate) : "—",
+      from: formatShortDate(prevDate),
       to: formatShortDate(String(dateVal)),
       layout: "from_to",
     };
@@ -212,9 +250,17 @@ function buildDiff(
       : undefined;
 
   if (item.op === "update" && (textVal || prevText)) {
+    if (!prevText) {
+      return {
+        label: KIND_LABEL[item.kind],
+        from: "",
+        to: textVal ? formatShortDate(textVal) : item.content,
+        layout: "suggested_only",
+      };
+    }
     return {
       label: KIND_LABEL[item.kind],
-      from: prevText ? formatShortDate(prevText) : "—",
+      from: formatShortDate(prevText),
       to: textVal ? formatShortDate(textVal) : item.content,
       layout: "from_to",
     };
@@ -241,9 +287,9 @@ function buildDiff(
   // Plain-text fallback when structured old/new values are unavailable.
   return {
     label: OP_LABEL[item.op],
-    from: "—",
+    from: "",
     to: item.content,
-    layout: "from_to",
+    layout: "suggested_only",
   };
 }
 
@@ -372,6 +418,18 @@ function assessReadiness(
       reason: "Destructive action — confirm before applying.",
     };
   }
+  // Explicit CREATE ops are ready — no existing target required.
+  if (op?.operation === "CREATE" || item.op === "create") {
+    const explicitCreate =
+      finding?.findingType === "NEW_INFORMATION" &&
+      Boolean(
+        (finding.target?.entityType && !finding.target.entityId) ||
+          finding.changes?.entityType?.proposed,
+      );
+    if (explicitCreate || op?.operation === "CREATE") {
+      return { readiness: "ready" };
+    }
+  }
   const confidence = op?.confidence ?? finding?.confidence ?? item.recommendation?.confidence;
   if (typeof confidence === "number" && confidence < 70) {
     return {
@@ -443,24 +501,38 @@ function buildCoverageGapViewModels(
       projectId: result.knowledgeProjectId ?? result.memory.projectId,
     };
 
+    const readiness = item.disposition;
+    const reviewReason = deriveReviewReason({
+      readiness,
+      finding,
+      coverage: item,
+      suggestion,
+      needsReviewReason: item.reason,
+    });
+    const recordName = finding.target?.title || finding.fact.slice(0, 80);
     gaps.push({
       id: suggestion.id,
       suggestion,
       entityKind: kind,
       entityLabel: KIND_LABEL[kind],
-      recordName: finding.target?.title || finding.fact.slice(0, 80),
+      recordName,
       operation: op,
       operationLabel: OP_LABEL[op],
-      readiness: item.disposition,
-      needsReviewReason:
-        item.disposition === "unmatched"
+      readiness,
+      reviewReason,
+      needsReviewReason: reviewReason
+        ? reviewReasonCopy(reviewReason, {
+            recordName,
+            entityLabel: KIND_LABEL[kind],
+          })
+        : item.disposition === "unmatched"
           ? `Lume understood: ${finding.fact}\n\nLume couldn't confidently identify the existing item this should update.`
           : item.reason,
       diff: {
         label: item.disposition === "unmatched" ? "Unmatched" : "Needs Review",
-        from: "—",
+        from: "",
         to: finding.fact,
-        layout: "from_to",
+        layout: "suggested_only",
       },
       evidence: evidenceExcerpts(finding, captureText),
       interpretation:
@@ -470,16 +542,70 @@ function buildCoverageGapViewModels(
           : "Lume needs a human decision before applying a change."),
       confidence: finding.confidence ?? null,
       finding,
+      spansColumns: true,
     });
   }
 
   return gaps;
 }
 
+function applyOverride(
+  model: ReviewChangeViewModel,
+  override?: ReviewCorrectionOverride,
+): ReviewChangeViewModel {
+  if (!override) return model;
+  const kind = override.kind ?? model.entityKind;
+  const op = override.op ?? model.operation;
+  const content = override.content ?? model.suggestion.content;
+  const recordName = override.recordName ?? model.recordName;
+  const suggestion: PendingSuggestion = {
+    ...model.suggestion,
+    kind,
+    op,
+    content,
+    targetTodoId: override.targetTodoId ?? model.suggestion.targetTodoId,
+  };
+  let readiness = override.readiness ?? model.readiness;
+  let reviewReason =
+    override.reviewReason === null
+      ? undefined
+      : (override.reviewReason ?? model.reviewReason);
+  if (override.accepted || override.readiness === "ready") {
+    readiness = "ready";
+    reviewReason = undefined;
+  }
+  const entityLabel = KIND_LABEL[kind];
+  return {
+    ...model,
+    suggestion,
+    entityKind: kind,
+    entityLabel,
+    recordName,
+    operation: op,
+    operationLabel: OP_LABEL[op],
+    readiness,
+    reviewReason,
+    needsReviewReason: reviewReason
+      ? reviewReasonCopy(reviewReason, { recordName, entityLabel })
+      : undefined,
+    diff:
+      op === "create"
+        ? {
+            label: `New ${entityLabel}`,
+            from: "",
+            to: content,
+            layout: "create",
+          }
+        : model.diff,
+    spansColumns: readiness !== "ready",
+  };
+}
+
 export function buildReviewChangeViewModels(
   suggestions: PendingSuggestion[],
   result: CaptureResult,
   captureText: string,
+  overrides: Record<string, ReviewCorrectionOverride> = {},
 ): ReviewChangeViewModel[] {
   const fromSuggestions = suggestions.map((item) => {
     const operationSource = findOperation(item, result);
@@ -501,8 +627,16 @@ export function buildReviewChangeViewModels(
       operationSource?.targetTitle ||
       item.recommendation?.targetTitle ||
       item.content;
+    const reviewReason = deriveReviewReason({
+      readiness,
+      finding,
+      operation: operationSource,
+      coverage,
+      suggestion: item,
+      needsReviewReason: reason,
+    });
 
-    return {
+    const model: ReviewChangeViewModel = {
       id: item.id,
       suggestion: item,
       entityKind: item.kind,
@@ -511,7 +645,13 @@ export function buildReviewChangeViewModels(
       operation: item.op,
       operationLabel: OP_LABEL[item.op],
       readiness,
-      needsReviewReason: reason,
+      reviewReason,
+      needsReviewReason: reviewReason
+        ? reviewReasonCopy(reviewReason, {
+            recordName,
+            entityLabel: KIND_LABEL[item.kind],
+          })
+        : reason,
       diff: buildDiff(item, operationSource, finding),
       evidence: evidenceExcerpts(finding, captureText),
       interpretation: buildInterpretation(item, finding),
@@ -522,7 +662,9 @@ export function buildReviewChangeViewModels(
         null,
       finding,
       operationSource,
+      spansColumns: readiness !== "ready",
     };
+    return applyOverride(model, overrides[item.id]);
   });
 
   const coveredFindingIds = new Set(
@@ -539,7 +681,7 @@ export function buildReviewChangeViewModels(
     result,
     captureText,
     coveredFindingIds,
-  );
+  ).map((m) => applyOverride(m, overrides[m.id]));
   return [...fromSuggestions, ...gaps];
 }
 

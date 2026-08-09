@@ -4,7 +4,8 @@
  */
 
 import type { CaptureResult } from "@/lib/types";
-import type { CaptureFinding } from "@/lib/capture/findings";
+import type { CaptureFinding, ProposedOperation } from "@/lib/capture/findings";
+import { KIND_LABEL, type SuggestionKind } from "@/lib/capture/suggestions";
 
 const FILLER =
   /\b(okay|so|right|just dumping|before i forget|anyway|i think|didn't i|wait,? no|obviously|i mentioned that already)\b/i;
@@ -24,14 +25,35 @@ type ObservationCategory =
   | "implementation_guidance"
   | "other";
 
+export type ObservationActionStatus =
+  | "create"
+  | "update"
+  | "complete"
+  | "resolve"
+  | "no_change"
+  | "needs_review"
+  | "unmatched"
+  | "ignored";
+
+export type CaptureObservation = {
+  id: string;
+  text: string;
+  actionStatus: ObservationActionStatus;
+  /** Compact right-side label, e.g. "Create · To Do". */
+  actionLabel: string;
+  /** Review card id to scroll to, when an actionable change exists. */
+  reviewCardId?: string;
+  findingId?: string;
+};
+
 type ObservationCandidate = {
   text: string;
   category: ObservationCategory;
   targetKey?: string;
-  /** Same target + same changed fields → merge even if wording differs. */
   changeKey?: string;
   confidence: number;
   source: "finding" | "insight" | "transcript";
+  findingId?: string;
 };
 
 function ensurePhrase(text: string): string {
@@ -112,7 +134,6 @@ export function detectObservationCategory(text: string): ObservationCategory {
   return "other";
 }
 
-/** Prefer concise canonical phrasing for known categories. */
 function preferredPhrase(category: ObservationCategory, raw: string): string {
   switch (category) {
     case "cab_approval":
@@ -158,25 +179,18 @@ function candidateFromFinding(finding: CaptureFinding): ObservationCandidate | n
         : undefined,
     confidence: finding.confidence ?? 0,
     source: "finding",
+    findingId: finding.id,
   };
 }
 
-/**
- * Conservative semantic merge:
- * 1. Same linked target → one conclusion
- * 2. Same non-other category → one conclusion
- * 3. High token overlap on normalised text → keep shorter / preferred
- * Distinct people/facts (Sarah vs Marcus) stay separate via category.
- */
 export function dedupeObservationCandidates(
   candidates: ObservationCandidate[],
-): string[] {
+): ObservationCandidate[] {
   const kept: ObservationCandidate[] = [];
 
   for (const next of candidates) {
     const nextTokens = tokens(next.text);
     const idx = kept.findIndex((existing) => {
-      // Same target + same field/change → one conclusion (prefer informative).
       if (
         next.changeKey &&
         existing.changeKey &&
@@ -185,7 +199,6 @@ export function dedupeObservationCandidates(
         return true;
       }
       if (next.targetKey && existing.targetKey && next.targetKey === existing.targetKey) {
-        // Same record, same finding type category — collapse near-duplicates only.
         const overlap = jaccard(nextTokens, tokens(existing.text));
         return overlap >= 0.45;
       }
@@ -201,7 +214,6 @@ export function dedupeObservationCandidates(
       const a = normalizeText(next.text);
       const b = normalizeText(existing.text);
       const substring = a.includes(b) || b.includes(a);
-      // Conservative: require strong overlap; do not merge merely similar wording.
       return (overlap >= 0.55 && substring) || overlap >= 0.75;
     });
 
@@ -213,8 +225,7 @@ export function dedupeObservationCandidates(
     const existing = kept[idx];
     const preferNext =
       (next.source === "finding" && existing.source !== "finding") ||
-      (next.category !== "other" &&
-        existing.category === "other") ||
+      (next.category !== "other" && existing.category === "other") ||
       next.confidence > existing.confidence ||
       (next.confidence === existing.confidence &&
         next.text.length > existing.text.length);
@@ -222,24 +233,138 @@ export function dedupeObservationCandidates(
     if (preferNext) kept[idx] = next;
   }
 
-  return kept.map((c) => c.text);
+  return kept;
 }
 
-/** Concise project-relevant observations for “What Lume Understood”. */
+function entityLabelFromType(entityType?: string): string {
+  if (!entityType) return "Item";
+  const map: Record<string, SuggestionKind> = {
+    todo: "action",
+    action: "action",
+    risk: "risk",
+    milestone: "milestone",
+    meeting: "meeting",
+    stakeholder: "stakeholder",
+    knowledge: "knowledge",
+    nudge: "nudge",
+  };
+  const kind = map[entityType] ?? "action";
+  return KIND_LABEL[kind];
+}
+
+function shortTargetName(title?: string): string | undefined {
+  if (!title?.trim()) return undefined;
+  const t = title.trim();
+  return t.length > 36 ? `${t.slice(0, 34)}…` : t;
+}
+
+function actionFromFinding(
+  finding: CaptureFinding | undefined,
+  op: ProposedOperation | undefined,
+  coverageDisposition?: string,
+): { status: ObservationActionStatus; label: string; reviewCardId?: string } {
+  if (!finding) {
+    return { status: "no_change", label: "No Change" };
+  }
+
+  if (finding.findingType === "NO_CHANGE") {
+    return { status: "no_change", label: "No Change" };
+  }
+
+  const entity = entityLabelFromType(
+    op?.entityType ?? finding.target?.entityType ??
+      (typeof finding.changes?.entityType?.proposed === "string"
+        ? String(finding.changes.entityType.proposed)
+        : undefined),
+  );
+  const targetBit = shortTargetName(op?.targetTitle ?? finding.target?.title);
+
+  if (coverageDisposition === "unmatched" || finding.invalidTarget) {
+    return {
+      status: "unmatched",
+      label: targetBit ? `Unmatched · ${targetBit}` : "Unmatched",
+      reviewCardId: `coverage-${finding.id}`,
+    };
+  }
+
+  if (
+    coverageDisposition === "needs_review" ||
+    finding.requiresClarification ||
+    finding.findingType === "AMBIGUOUS"
+  ) {
+    return {
+      status: "needs_review",
+      label: targetBit ? `Needs Review · ${targetBit}` : "Needs Review",
+      reviewCardId: op
+        ? undefined // resolved below by caller with suggestion id
+        : `coverage-${finding.id}`,
+    };
+  }
+
+  if (op?.operation === "CREATE") {
+    return {
+      status: "create",
+      label: `Create · ${entity}`,
+    };
+  }
+  if (op?.operation === "COMPLETE") {
+    const isRisk = (op.entityType ?? finding.target?.entityType) === "risk";
+    return {
+      status: isRisk ? "resolve" : "complete",
+      label: isRisk
+        ? `Resolve · ${targetBit ?? entity}`
+        : `Complete · ${targetBit ?? entity}`,
+    };
+  }
+  if (op?.operation === "UPDATE") {
+    return {
+      status: "update",
+      label: `Update · ${targetBit ?? entity}`,
+    };
+  }
+  if (op?.operation === "ARCHIVE" || op?.operation === "DELETE") {
+    return {
+      status: "needs_review",
+      label: `Needs Review · ${targetBit ?? entity}`,
+    };
+  }
+
+  if (finding.findingType === "NEW_INFORMATION") {
+    return {
+      status: "needs_review",
+      label: "Needs Review",
+      reviewCardId: `coverage-${finding.id}`,
+    };
+  }
+
+  return { status: "ignored", label: "Ignored" };
+}
+
+/**
+ * Concise project-relevant observations for “What Lume Understood”,
+ * each linked to the downstream review action when available.
+ */
 export function buildCaptureObservations(
   result: CaptureResult,
   captureText: string,
-): string[] {
+  reviewCardIdsByFinding: Record<string, string> = {},
+): CaptureObservation[] {
   const candidates: ObservationCandidate[] = [];
   const text = captureText.toLowerCase();
+  const opsByFinding = new Map<string, ProposedOperation>();
+  for (const op of result.proposedOperations ?? []) {
+    opsByFinding.set(op.sourceFindingId, op);
+  }
+  const coverageByFinding = new Map(
+    (result.findingCoverage?.items ?? []).map((i) => [i.findingId, i]),
+  );
+  const findingsById = new Map((result.findings ?? []).map((f) => [f.id, f]));
 
-  // 1. Validated findings (structured — preferred)
   for (const finding of result.findings ?? []) {
     const c = candidateFromFinding(finding);
     if (c) candidates.push(c);
   }
 
-  // 2. Insights that look project-relevant
   for (const insight of result.insights ?? []) {
     if (isNoise(insight) || insight.length > 120) continue;
     if (
@@ -258,7 +383,6 @@ export function buildCaptureObservations(
     });
   }
 
-  // 3. Transcript fallbacks for ownership / support facts often lacking findings
   if (
     /\bsarah\b/.test(text) &&
     (/\bstill the owner\b/.test(text) ||
@@ -290,7 +414,47 @@ export function buildCaptureObservations(
     });
   }
 
-  return dedupeObservationCandidates(candidates)
-    .filter((o) => !IRRELEVANT.test(o))
-    .slice(0, 8);
+  const deduped = dedupeObservationCandidates(candidates).filter(
+    (o) => !IRRELEVANT.test(o.text),
+  );
+
+  return deduped.slice(0, 8).map((c, index) => {
+    const finding = c.findingId ? findingsById.get(c.findingId) : undefined;
+    const op = c.findingId ? opsByFinding.get(c.findingId) : undefined;
+    const coverage = c.findingId
+      ? coverageByFinding.get(c.findingId)
+      : undefined;
+    const action = actionFromFinding(finding, op, coverage?.disposition);
+    const reviewCardId =
+      (c.findingId && reviewCardIdsByFinding[c.findingId]) ||
+      action.reviewCardId;
+
+    // No-change insights (Sarah/Marcus ownership) without findings.
+    let status = action.status;
+    let label = action.label;
+    if (!finding && (c.category === "business_owner" || c.category === "release_notes_support")) {
+      status = "no_change";
+      label = "No Change";
+    }
+
+    return {
+      id: `obs-${index}-${normalizeText(c.text).slice(0, 24)}`,
+      text: c.text,
+      actionStatus: status,
+      actionLabel: label,
+      reviewCardId:
+        status === "no_change" || status === "ignored"
+          ? undefined
+          : reviewCardId,
+      findingId: c.findingId,
+    };
+  });
+}
+
+/** @deprecated Prefer CaptureObservation[]; kept for string-only callers. */
+export function buildCaptureObservationTexts(
+  result: CaptureResult,
+  captureText: string,
+): string[] {
+  return buildCaptureObservations(result, captureText).map((o) => o.text);
 }

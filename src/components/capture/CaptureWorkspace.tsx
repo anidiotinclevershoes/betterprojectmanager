@@ -4,10 +4,14 @@ import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "rea
 import { useCaptureSession } from "@/components/capture/CaptureSessionContext";
 import { CaptureContextInspector } from "@/components/capture/CaptureContextInspector";
 import { CaptureReliabilityNotice } from "@/components/capture/CaptureReliabilityNotice";
+import { CaptureTips } from "@/components/capture/CaptureTips";
 import { useMission } from "@/lib/store";
 import { analysesRemaining } from "@/lib/workspace/history";
 import { shouldWarnBeforeAnalysis } from "@/lib/capture/reliability";
-import { buildCaptureObservations } from "@/lib/capture/review/observations";
+import {
+  buildCaptureObservations,
+  type CaptureObservation,
+} from "@/lib/capture/review/observations";
 import {
   buildReviewChangeViewModels,
   computeReviewCounts,
@@ -17,6 +21,9 @@ import {
   CaptureSummary,
   SuggestedChangesList,
 } from "@/components/capture/review";
+import type { TargetOption } from "@/components/capture/review/TargetPicker";
+import type { SuggestionKind } from "@/lib/capture/suggestions";
+import { KIND_LABEL } from "@/lib/capture/suggestions";
 
 function formatAnalysedAt(iso: string | null) {
   if (!iso) return null;
@@ -50,7 +57,6 @@ export function CaptureWorkspace({
     dismissed,
     added,
     collapsed,
-    setCollapsed,
     busy,
     setBusy,
     error,
@@ -70,9 +76,26 @@ export function CaptureWorkspace({
     contextManifest,
     reliability,
     preWarnDismissed,
+    reviewOverrides,
+    setReviewOverride,
+    updateSuggestion,
+    maximized,
+    minimiseCapture,
+    expandCapture,
+    restoreCapture,
   } = session;
 
   const effectiveProjectId = projectId || defaultProjectId || "";
+  const scopedProject = defaultProjectId
+    ? state.projects.find((p) => p.id === defaultProjectId)
+    : null;
+  const scopeLabel = scopedProject
+    ? scopedProject.name
+    : effectiveProjectId
+      ? state.projects.find((p) => p.id === effectiveProjectId)?.name
+      : null;
+  const isProjectScoped = Boolean(defaultProjectId);
+
   const recording = useRecordingBridge({
     content,
     setContent,
@@ -85,6 +108,9 @@ export function CaptureWorkspace({
 
   const liveRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  const [highlightedCardId, setHighlightedCardId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (defaultProjectId && !projectId) setProjectId(defaultProjectId);
@@ -102,6 +128,7 @@ export function CaptureWorkspace({
       if (collapsed) expandAnalysis();
       return;
     }
+    // Project-scoped Capture must stay within that project.
     await runAnalyse(content, "conversation", defaultProjectId);
   }
 
@@ -119,15 +146,33 @@ export function CaptureWorkspace({
   const isDev = process.env.NODE_ENV === "development";
   const showSessionActions = Boolean(result);
 
-  const observations = useMemo(
-    () =>
-      result ? buildCaptureObservations(result, content) : [],
-    [result, content],
-  );
   const reviewModels = useMemo(
     () =>
-      result ? buildReviewChangeViewModels(suggestions, result, content) : [],
-    [result, suggestions, content],
+      result
+        ? buildReviewChangeViewModels(
+            suggestions,
+            result,
+            content,
+            reviewOverrides,
+          )
+        : [],
+    [result, suggestions, content, reviewOverrides],
+  );
+
+  const reviewCardIdsByFinding = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const m of reviewModels) {
+      if (m.finding?.id) map[m.finding.id] = m.id;
+    }
+    return map;
+  }, [reviewModels]);
+
+  const observations = useMemo(
+    () =>
+      result
+        ? buildCaptureObservations(result, content, reviewCardIdsByFinding)
+        : [],
+    [result, content, reviewCardIdsByFinding],
   );
   const counts = useMemo(
     () =>
@@ -140,10 +185,58 @@ export function CaptureWorkspace({
     [result, reviewModels, added, dismissed],
   );
 
+  const targetOptions = useMemo((): TargetOption[] => {
+    const pid = defaultProjectId || effectiveProjectId;
+    if (!pid) return [];
+    const options: TargetOption[] = [];
+    for (const t of state.todos ?? []) {
+      if (t.projectId !== pid || t.done) continue;
+      options.push({
+        id: t.id,
+        title: t.title,
+        entityLabel: KIND_LABEL.action,
+        status: "Open",
+      });
+    }
+    for (const m of state.meetings ?? []) {
+      if (m.projectId !== pid) continue;
+      options.push({
+        id: m.id,
+        title: m.title,
+        entityLabel: KIND_LABEL.meeting,
+      });
+    }
+    const knowledge = state.knowledge?.find((k) => k.projectId === pid);
+    for (const [index, risk] of (knowledge?.sections.risks ?? []).entries()) {
+      options.push({
+        id: `know-risk-${pid}-${index}`,
+        title: risk,
+        entityLabel: KIND_LABEL.risk,
+      });
+    }
+    for (const release of state.releases ?? []) {
+      if (release.projectId !== pid) continue;
+      for (const [index, risk] of release.risks.entries()) {
+        options.push({
+          id: `${release.id}-risk-${index}`,
+          title: risk,
+          entityLabel: KIND_LABEL.risk,
+        });
+      }
+    }
+    return options;
+  }, [
+    defaultProjectId,
+    effectiveProjectId,
+    state.todos,
+    state.meetings,
+    state.knowledge,
+    state.releases,
+  ]);
+
   function approveById(id: string) {
     const model = reviewModels.find((m) => m.id === id);
     if (!model) return;
-    // Unmatched coverage gaps have no safe operation — dismiss only.
     if (model.readiness === "unmatched") {
       dismissOne(id);
       return;
@@ -156,10 +249,100 @@ export function CaptureWorkspace({
       applyOne(model.suggestion, defaultProjectId);
     }
   }
+
+  function onUseThis(id: string) {
+    setReviewOverride(id, {
+      accepted: true,
+      readiness: "ready",
+      reviewReason: null,
+    });
+  }
+
+  function onChooseTarget(id: string, option: TargetOption) {
+    const kind: SuggestionKind =
+      option.entityLabel === KIND_LABEL.risk
+        ? "risk"
+        : option.entityLabel === KIND_LABEL.nudge
+          ? "nudge"
+          : option.entityLabel === KIND_LABEL.meeting
+            ? "meeting"
+            : "action";
+    updateSuggestion(id, {
+      content: option.title,
+      targetTodoId: option.id,
+      kind,
+      op: "update",
+    });
+    setReviewOverride(id, {
+      accepted: true,
+      readiness: "ready",
+      reviewReason: null,
+      content: option.title,
+      targetTodoId: option.id,
+      kind,
+      op: "update",
+      recordName: option.title,
+    });
+  }
+
+  function onCreateNew(id: string) {
+    const model = reviewModels.find((m) => m.id === id);
+    if (!model) return;
+    updateSuggestion(id, { op: "create", targetTodoId: undefined });
+    setReviewOverride(id, {
+      accepted: true,
+      readiness: "ready",
+      reviewReason: null,
+      op: "create",
+      content: model.suggestion.content,
+      recordName: model.recordName,
+    });
+  }
+
+  function onResolve(id: string) {
+    const model = reviewModels.find((m) => m.id === id);
+    if (!model) return;
+    updateSuggestion(id, { op: "complete" });
+    setReviewOverride(id, {
+      accepted: true,
+      readiness: "ready",
+      reviewReason: null,
+      op: "complete",
+    });
+    applyOne({ ...model.suggestion, op: "complete" }, defaultProjectId);
+  }
+
+  function onChangeEntityKind(id: string, kind: SuggestionKind) {
+    updateSuggestion(id, { kind });
+    setReviewOverride(id, {
+      kind,
+      accepted: true,
+      readiness: "ready",
+      reviewReason: null,
+    });
+  }
+
+  function onSelectObservation(obs: CaptureObservation) {
+    if (!obs.reviewCardId) return;
+    const el = document.getElementById(`review-card-${obs.reviewCardId}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedCardId(obs.reviewCardId);
+    window.setTimeout(() => setHighlightedCardId(null), 1400);
+  }
+
   const analysedLabel = formatAnalysedAt(analysedAt);
+  const panelClass = [
+    "capture-workspace",
+    "capture-compact",
+    maximized ? "is-maximized" : "",
+    collapsed ? "is-minimised" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <section className="capture-workspace capture-compact" aria-labelledby={titleId}>
+    <section className={panelClass} aria-labelledby={titleId}>
       <div className="capture-workspace-head">
         <div>
           <h2 id={titleId} className="capture-title">
@@ -172,21 +355,63 @@ export function CaptureWorkspace({
           ) : analysedLabel ? (
             <p className="capture-support meta">Last analysed {analysedLabel}</p>
           ) : null}
+          <p
+            className="capture-scope-indicator"
+            title={
+              isProjectScoped
+                ? "Lume will consider and update this project only. For updates spanning multiple projects, use Capture from Overview."
+                : "Overview Capture can update across projects when the Capture names them."
+            }
+          >
+            <span className="capture-scope-dot" aria-hidden>
+              ◎
+            </span>
+            {isProjectScoped && scopeLabel
+              ? `${scopeLabel} only`
+              : "All Projects"}
+          </p>
         </div>
-        {showSessionActions ? (
-          <div className="capture-header-actions">
+        <div className="capture-header-actions">
+          {showSessionActions ? (
             <CaptureContextInspector manifest={contextManifest} />
-            {!collapsed ? (
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={() => setCollapsed(true)}
-                aria-label="Collapse capture review"
-                title="Collapse"
-              >
-                ▴
-              </button>
-            ) : null}
+          ) : null}
+          <div className="capture-window-controls" role="group" aria-label="Capture window">
+            <button
+              type="button"
+              className="capture-window-btn"
+              onClick={minimiseCapture}
+              aria-label="Minimise Capture"
+              title="Minimise Capture"
+            >
+              ─
+            </button>
+            <button
+              type="button"
+              className="capture-window-btn"
+              onClick={() => {
+                if (collapsed) restoreCapture();
+                else if (maximized) restoreCapture();
+                else expandCapture();
+              }}
+              aria-label={
+                collapsed
+                  ? "Restore Capture"
+                  : maximized
+                    ? "Restore Capture"
+                    : "Expand Capture"
+              }
+              title={
+                collapsed
+                  ? "Restore Capture"
+                  : maximized
+                    ? "Restore Capture"
+                    : "Expand Capture"
+              }
+            >
+              {maximized && !collapsed ? "❐" : "□"}
+            </button>
+          </div>
+          {showSessionActions ? (
             <button
               type="button"
               className="ghost-btn capture-new-btn"
@@ -194,8 +419,8 @@ export function CaptureWorkspace({
             >
               New capture
             </button>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
       {/* Transcript stays visible after analysis (read-only), including when collapsed. */}
@@ -225,6 +450,7 @@ export function CaptureWorkspace({
             className={`capture-textarea capture-textarea-idle ${isAnalysed ? "is-readonly" : ""}`}
             aria-readonly={isAnalysed || undefined}
           />
+          {!isAnalysed ? <CaptureTips /> : null}
           {fileNames.length && !isAnalysed ? (
             <p className="meta mt-1">Files: {fileNames.join(", ")}</p>
           ) : null}
@@ -357,14 +583,6 @@ export function CaptureWorkspace({
                 >
                   Analyse
                 </button>
-              ) : collapsed ? (
-                <button
-                  type="button"
-                  className="primary-btn analyse-btn"
-                  onClick={expandAnalysis}
-                >
-                  Expand Analysis
-                </button>
               ) : null}
             </div>
           </div>
@@ -404,6 +622,7 @@ export function CaptureWorkspace({
             changesDetected={counts.changesDetected}
             readyCount={counts.ready}
             needsAttentionCount={counts.needsAttention}
+            onSelectObservation={onSelectObservation}
           />
           <SuggestedChangesList
             models={reviewModels}
@@ -414,9 +633,16 @@ export function CaptureWorkspace({
             unmatchedCount={counts.unmatched}
             reviewedCount={counts.reviewed}
             totalCount={counts.total}
+            targetOptions={targetOptions}
+            highlightedId={highlightedCardId}
             onApprove={approveById}
             onDismiss={dismissOne}
             onApproveReady={approveReady}
+            onUseThis={onUseThis}
+            onChooseTarget={onChooseTarget}
+            onCreateNew={onCreateNew}
+            onResolve={onResolve}
+            onChangeEntityKind={onChangeEntityKind}
           />
         </div>
       ) : null}
