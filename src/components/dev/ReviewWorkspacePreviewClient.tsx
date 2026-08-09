@@ -129,6 +129,54 @@ const FIXTURE_MODELS: ReviewChangeViewModel[] = [
       "Evidence suggests the CDN risk may be resolved, but another issue nearby makes this uncertain.",
     confidence: 64,
   },
+  {
+    id: "op-create-1",
+    suggestion: stubSuggestion({
+      id: "op-create-1",
+      kind: "action",
+      op: "create",
+      content: "Book the go-live bridge call",
+    }),
+    entityKind: "action",
+    entityLabel: "To Do",
+    recordName: "Book the go-live bridge call",
+    operation: "create",
+    operationLabel: "Create",
+    readiness: "ready",
+    diff: {
+      label: "New To Do",
+      from: "",
+      to: "Book the go-live bridge call",
+      layout: "create",
+    },
+    evidence: ["Create a to-do to book the go-live bridge call."],
+    interpretation: "Explicit CREATE — no existing target required.",
+    confidence: 90,
+  },
+  {
+    id: "op-create-risk-1",
+    suggestion: stubSuggestion({
+      id: "op-create-risk-1",
+      kind: "risk",
+      op: "create",
+      content: "Intermittent payment gateway timeouts",
+    }),
+    entityKind: "risk",
+    entityLabel: "Risk",
+    recordName: "Intermittent payment gateway timeouts",
+    operation: "create",
+    operationLabel: "Create",
+    readiness: "ready",
+    diff: {
+      label: "New Risk",
+      from: "",
+      to: "Intermittent payment gateway timeouts",
+      layout: "create",
+    },
+    evidence: ["Raise a new risk regarding intermittent payment gateway timeouts."],
+    interpretation: "Explicit CREATE Risk — no existing target required.",
+    confidence: 88,
+  },
 ];
 
 const OBSERVATIONS = [
@@ -164,6 +212,20 @@ const OBSERVATIONS = [
     text: "Marcus is supporting release notes",
     actionStatus: "no_change" as const,
     actionLabel: "No Change",
+  },
+  {
+    id: "obs-bridge",
+    text: "Book the go-live bridge call",
+    actionStatus: "create" as const,
+    actionLabel: "Create · To Do",
+    reviewCardId: "op-create-1",
+  },
+  {
+    id: "obs-gateway",
+    text: "Raise payment gateway timeout risk",
+    actionStatus: "create" as const,
+    actionLabel: "Create · Risk",
+    reviewCardId: "op-create-risk-1",
   },
 ];
 
@@ -248,7 +310,7 @@ export function ReviewWorkspacePreviewClient() {
   const whyOpenIds = previewState === "why" ? ["op-cdn-1"] : undefined;
 
   return (
-    <main style={{ maxWidth: 760, margin: "24px auto", padding: "0 16px" }}>
+    <main style={{ maxWidth: 1100, margin: "24px auto", padding: "0 16px" }}>
       <header style={{ marginBottom: 16 }}>
         <h1 style={{ margin: 0, fontSize: 20 }}>Capture review workspace preview</h1>
         <p className="meta">
