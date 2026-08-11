@@ -12,6 +12,7 @@ import type {
 import {
   KIND_LABEL,
   OP_LABEL,
+  destinationFor,
   isDestructiveOp,
   type PendingSuggestion,
   type SuggestionKind,
@@ -47,6 +48,8 @@ export type ReviewCorrectionOverride = {
   content?: string;
   targetTodoId?: string;
   recordName?: string;
+  projectId?: string | null;
+  projectName?: string | null;
   /** Accept proposed target / promote to ready. */
   accepted?: boolean;
 };
@@ -70,6 +73,10 @@ export type ReviewChangeViewModel = {
   operationSource?: ProposedOperation;
   /** Complex correction UI — may span both columns. */
   spansColumns?: boolean;
+  projectId?: string | null;
+  projectName?: string | null;
+  projectCode?: string | null;
+  showProjectLabel?: boolean;
 };
 
 function formatShortDate(value: string): string {
@@ -367,6 +374,30 @@ function assessReadiness(
   op: ProposedOperation | undefined,
   coverage?: FindingCoverageItem,
 ): { readiness: ReviewReadiness; reason?: string } {
+  if (
+    item.projectUncertain ||
+    (finding?.projectCandidates &&
+      finding.projectCandidates.length > 1 &&
+      !item.projectId &&
+      !finding.projectId)
+  ) {
+    return {
+      readiness: "needs_review",
+      reason: "Which project does this refer to?",
+    };
+  }
+  // CREATE without a known project destination cannot be Apply Ready.
+  if (
+    (item.op === "create" || op?.operation === "CREATE") &&
+    !item.projectId &&
+    !op?.projectId &&
+    !finding?.projectId
+  ) {
+    return {
+      readiness: "needs_review",
+      reason: "Which project does this refer to?",
+    };
+  }
   if (coverage?.disposition === "unmatched") {
     return {
       readiness: "unmatched",
@@ -492,13 +523,22 @@ function buildCoverageGapViewModels(
 
     const kind = kindFromFinding(finding);
     const op = opFromFinding(finding);
+    const projectUncertain =
+      Boolean(finding.projectCandidates?.length) && !finding.projectId;
     const suggestion: PendingSuggestion = {
       id: `coverage-${item.findingId}`,
       kind,
       op,
       content: finding.fact,
-      destination: "project",
-      projectId: result.knowledgeProjectId ?? result.memory.projectId,
+      destination: destinationFor(kind),
+      projectId: projectUncertain
+        ? null
+        : (finding.projectId ??
+          result.knowledgeProjectId ??
+          result.memory.projectId),
+      projectName: projectUncertain ? null : (finding.projectName ?? null),
+      projectUncertain,
+      projectCandidates: finding.projectCandidates,
     };
 
     const readiness = item.disposition;
@@ -524,6 +564,7 @@ function buildCoverageGapViewModels(
         ? reviewReasonCopy(reviewReason, {
             recordName,
             entityLabel: KIND_LABEL[kind],
+            projectCandidates: finding.projectCandidates,
           })
         : item.disposition === "unmatched"
           ? `Lume understood: ${finding.fact}\n\nLume couldn't confidently identify the existing item this should update.`
@@ -543,6 +584,8 @@ function buildCoverageGapViewModels(
       confidence: finding.confidence ?? null,
       finding,
       spansColumns: true,
+      projectId: suggestion.projectId,
+      projectName: suggestion.projectName,
     });
   }
 
@@ -564,6 +607,15 @@ function applyOverride(
     op,
     content,
     targetTodoId: override.targetTodoId ?? model.suggestion.targetTodoId,
+    projectId:
+      override.projectId !== undefined
+        ? override.projectId
+        : model.suggestion.projectId,
+    projectName:
+      override.projectName !== undefined
+        ? override.projectName
+        : model.suggestion.projectName,
+    projectUncertain: override.accepted ? false : model.suggestion.projectUncertain,
   };
   let readiness = override.readiness ?? model.readiness;
   let reviewReason =
@@ -582,22 +634,36 @@ function applyOverride(
     entityLabel,
     recordName,
     operation: op,
-    operationLabel: OP_LABEL[op],
+    operationLabel:
+      suggestion.isKnowledgeRemember && op === "create"
+        ? "Remember"
+        : kind === "risk" && op === "complete"
+          ? "Resolve"
+          : OP_LABEL[op],
     readiness,
     reviewReason,
     needsReviewReason: reviewReason
-      ? reviewReasonCopy(reviewReason, { recordName, entityLabel })
+      ? reviewReasonCopy(reviewReason, {
+          recordName,
+          entityLabel,
+          projectCandidates: suggestion.projectCandidates,
+        })
       : undefined,
     diff:
       op === "create"
         ? {
-            label: `New ${entityLabel}`,
+            label: suggestion.isKnowledgeRemember
+              ? "Remember · Knowledge"
+              : `New ${entityLabel}`,
             from: "",
             to: content,
             layout: "create",
           }
         : model.diff,
     spansColumns: readiness !== "ready",
+    projectId: suggestion.projectId,
+    projectName: suggestion.projectName,
+    projectCode: suggestion.projectCode ?? model.projectCode,
   };
 }
 
@@ -627,6 +693,16 @@ export function buildReviewChangeViewModels(
       operationSource?.targetTitle ||
       item.recommendation?.targetTitle ||
       item.content;
+    const projectId =
+      item.projectId ??
+      operationSource?.projectId ??
+      finding?.projectId ??
+      null;
+    const projectName =
+      item.projectName ??
+      operationSource?.projectName ??
+      finding?.projectName ??
+      null;
     const reviewReason = deriveReviewReason({
       readiness,
       finding,
@@ -643,13 +719,20 @@ export function buildReviewChangeViewModels(
       entityLabel: KIND_LABEL[item.kind],
       recordName,
       operation: item.op,
-      operationLabel: OP_LABEL[item.op],
+      operationLabel:
+        item.kind === "risk" && item.op === "complete"
+          ? "Resolve"
+          : item.isKnowledgeRemember
+            ? "Remember"
+            : OP_LABEL[item.op],
       readiness,
       reviewReason,
       needsReviewReason: reviewReason
         ? reviewReasonCopy(reviewReason, {
             recordName,
             entityLabel: KIND_LABEL[item.kind],
+            projectCandidates:
+              item.projectCandidates ?? finding?.projectCandidates,
           })
         : reason,
       diff: buildDiff(item, operationSource, finding),
@@ -663,9 +746,25 @@ export function buildReviewChangeViewModels(
       finding,
       operationSource,
       spansColumns: readiness !== "ready",
+      projectId,
+      projectName,
+      projectCode: item.projectCode,
     };
     return applyOverride(model, overrides[item.id]);
   });
+
+  const projectIds = new Set<string>();
+  for (const m of fromSuggestions) {
+    if (m.projectId) projectIds.add(m.projectId);
+    for (const c of m.suggestion.projectCandidates ?? []) {
+      projectIds.add(c.id);
+    }
+  }
+  const multiProject = projectIds.size > 1;
+  const withLabels = fromSuggestions.map((m) => ({
+    ...m,
+    showProjectLabel: multiProject && Boolean(m.projectId || m.projectName),
+  }));
 
   const coveredFindingIds = new Set(
     fromSuggestions
@@ -682,7 +781,7 @@ export function buildReviewChangeViewModels(
     captureText,
     coveredFindingIds,
   ).map((m) => applyOverride(m, overrides[m.id]));
-  return [...fromSuggestions, ...gaps];
+  return [...withLabels, ...gaps];
 }
 
 /**

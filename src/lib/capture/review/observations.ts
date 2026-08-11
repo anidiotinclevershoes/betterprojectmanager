@@ -278,12 +278,21 @@ function actionFromFinding(
         : undefined),
   );
   const targetBit = shortTargetName(op?.targetTitle ?? finding.target?.title);
+  const projectUncertain =
+    Boolean(finding.projectCandidates?.length) && !finding.projectId;
 
   if (coverageDisposition === "unmatched" || finding.invalidTarget) {
     return {
       status: "unmatched",
       label: targetBit ? `Unmatched · ${targetBit}` : "Unmatched",
       reviewCardId: `coverage-${finding.id}`,
+    };
+  }
+
+  if (projectUncertain) {
+    return {
+      status: "needs_review",
+      label: "Needs Review · Which project?",
     };
   }
 
@@ -298,6 +307,18 @@ function actionFromFinding(
       reviewCardId: op
         ? undefined // resolved below by caller with suggestion id
         : `coverage-${finding.id}`,
+    };
+  }
+
+  const isRemember =
+    (op?.entityType === "knowledge" ||
+      finding.target?.entityType === "knowledge") &&
+    (op?.operation === "CREATE" || finding.findingType === "NEW_INFORMATION");
+
+  if (isRemember) {
+    return {
+      status: "create",
+      label: "Remember · Knowledge",
     };
   }
 

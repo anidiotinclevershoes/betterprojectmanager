@@ -198,6 +198,8 @@ export function TodoFrame({
                     projectId: edit.projectId ?? null,
                     dueAt: edit.dueAt ?? null,
                     detail: edit.detail ?? null,
+                    kind: edit.kind ?? "ACTION",
+                    waitingOn: edit.waitingOn ?? null,
                   });
                   setEdit(null);
                 }}
@@ -236,6 +238,38 @@ export function TodoFrame({
                 ))}
               </select>
             </label>
+            <label className="field">
+              <span>Kind</span>
+              <select
+                value={edit.kind ?? "ACTION"}
+                onChange={(e) =>
+                  setEdit({
+                    ...edit,
+                    kind: e.target.value as TodoItem["kind"],
+                  })
+                }
+              >
+                <option value="ACTION">Action</option>
+                <option value="WAITING">Waiting</option>
+                <option value="CHASE">Chase</option>
+                <option value="REMINDER">Reminder</option>
+              </select>
+            </label>
+            {(edit.kind === "WAITING" || edit.kind === "CHASE") && (
+              <label className="field">
+                <span>Waiting on</span>
+                <input
+                  value={edit.waitingOn ?? ""}
+                  onChange={(e) =>
+                    setEdit({
+                      ...edit,
+                      waitingOn: e.target.value || undefined,
+                    })
+                  }
+                  placeholder="Person or team"
+                />
+              </label>
+            )}
             <label className="field">
               <span>Due date</span>
               <input
@@ -309,9 +343,25 @@ function TodoRow({
       <button type="button" className="frame-row-title" onClick={onOpen}>
         {todo.title}
       </button>
+      {todo.kind && todo.kind !== "ACTION" ? (
+        <span className={`todo-kind-tag is-${todo.kind.toLowerCase()}`}>
+          {todo.kind === "CHASE"
+            ? "Chase"
+            : todo.kind === "WAITING"
+              ? "Waiting"
+              : "Reminder"}
+        </span>
+      ) : null}
+      {todo.waitingOn ? (
+        <span className="meta">Waiting on: {todo.waitingOn}</span>
+      ) : null}
       <span className="tag">{projectLabel}</span>
       {relativeDue(todo) ? (
-        <span className="meta">{relativeDue(todo)}</span>
+        <span className="meta">
+          {todo.kind === "CHASE" || todo.kind === "WAITING"
+            ? `Follow-up ${relativeDue(todo)}`
+            : relativeDue(todo)}
+        </span>
       ) : null}
       <span className="origin">{todoOriginLabel(todo)}</span>
       <button

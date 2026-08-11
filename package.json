@@ -15,7 +15,8 @@
     "verify:findings": "npx --yes tsx scripts/verify-findings.ts",
     "verify:seed-reset": "npx --yes tsx scripts/verify-seed-reset.ts",
     "verify:capture-reliability": "npx --yes tsx scripts/verify-capture-reliability.ts",
-    "verify:capture-review": "npx --yes tsx scripts/verify-capture-review.ts"
+    "verify:capture-review": "npx --yes tsx scripts/verify-capture-review.ts",
+    "verify:capture-workspace": "npx --yes tsx scripts/verify-capture-workspace-refinement.ts"
   },
   "dependencies": {
     "js-tiktoken": "^1.0.21",

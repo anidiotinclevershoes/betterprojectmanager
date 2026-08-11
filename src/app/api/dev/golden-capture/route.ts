@@ -186,6 +186,11 @@ export async function POST(request: Request) {
         sourceType: "note",
         ai,
         captureContext,
+        allOpenTodos: openTodos.map((t) => ({
+          id: t.id,
+          title: t.title,
+          projectId: t.projectId,
+        })),
       });
     }
 

@@ -4,6 +4,10 @@
  */
 
 import { buildNudgeItems } from "@/lib/workspace/frames-data";
+import {
+  detectMentionedProjects,
+  buildProjectIndex,
+} from "@/lib/capture/projectResolve";
 import type {
   MissionState,
   Project,
@@ -66,6 +70,15 @@ export type CaptureProjectContext = {
     mergeDate?: string | null;
     releaseDate?: string | null;
   } | null;
+  /** Lightweight catalogue of all projects — not deep records. */
+  projectIndex?: Array<{
+    id: string;
+    name: string;
+    code: string;
+    conciseSummary?: string;
+  }>;
+  /** Project ids that contributed deeper context buckets. */
+  deepContextProjectIds?: string[];
   todos: CaptureContextRecord[];
   completedTodos: CaptureContextRecord[];
   nudges: CaptureContextRecord[];
@@ -283,19 +296,45 @@ export function buildCaptureContext(args: {
     ...DEFAULT_CAPTURE_CONTEXT_LIMITS,
     ...args.limits,
   };
-  const projectId = args.projectId || null;
+  const softHintId = args.projectId || null;
   const keywords = tokensFrom(args.captureText);
   const builtAt = new Date().toISOString();
   const limitsReached: CaptureContextLimitHit[] = [];
+  const projectIndex = buildProjectIndex(args.state.projects ?? []).map((p) => {
+    const full = args.state.projects.find((x) => x.id === p.id);
+    return {
+      ...p,
+      conciseSummary: full?.currentFocus || full?.summary?.slice(0, 120),
+    };
+  });
+  const mentioned = detectMentionedProjects(
+    args.captureText,
+    args.state.projects ?? [],
+  );
+  // Deeper context: explicit mentions win; otherwise soft sidebar hint only.
+  const deepContextProjectIds = mentioned.length
+    ? mentioned.map((m) => m.id)
+    : softHintId
+      ? [softHintId]
+      : [];
 
-  if (!projectId) {
-    return emptyContext(false);
+  const primaryId = deepContextProjectIds[0] ?? softHintId;
+  if (!primaryId) {
+    const empty = emptyContext(false);
+    empty.projectIndex = projectIndex;
+    empty.deepContextProjectIds = [];
+    return empty;
   }
 
-  const project = args.state.projects.find((p) => p.id === projectId);
+  const project = args.state.projects.find((p) => p.id === primaryId);
   if (!project) {
-    return emptyContext(true);
+    const empty = emptyContext(Boolean(softHintId));
+    empty.projectIndex = projectIndex;
+    empty.deepContextProjectIds = [];
+    return empty;
   }
+
+  const projectId = primaryId;
 
   const todos = [...(args.state.todos ?? [])];
   const meetings = [...(args.state.meetings ?? [])];
@@ -498,6 +537,8 @@ export function buildCaptureContext(args: {
 
   const ctx: CaptureProjectContext = {
     project: projectMeta(project),
+    projectIndex,
+    deepContextProjectIds,
     todos: openPick.included,
     completedTodos: completedPick.included,
     nudges: nudgePick.included,
@@ -511,11 +552,36 @@ export function buildCaptureContext(args: {
     diagnostics: {
       recordCount: 0,
       approxChars: 0,
-      projectScoped: true,
+      projectScoped: deepContextProjectIds.length === 1,
       builtAt,
       limitsReached,
     },
   };
+
+  // Merge additional mentioned projects' open todos + risks (capped) without
+  // loading every project in full.
+  for (const extraId of deepContextProjectIds.slice(1)) {
+    const extraTodos = (args.state.todos ?? [])
+      .filter((t) => t.projectId === extraId && !t.done)
+      .slice(0, 8)
+      .map((t) => todoRecord(t, "todo"));
+    ctx.todos = [...ctx.todos, ...extraTodos];
+    const extraKnowledge = (args.state.knowledge ?? []).find(
+      (k) => k.projectId === extraId,
+    );
+    const extraRisks = (extraKnowledge?.sections.risks ?? [])
+      .slice(0, 6)
+      .map((title, i) =>
+        rec({
+          id: `risk-${extraId}-${i}`,
+          type: "risk",
+          title: title.replace(/^\s*\[resolved\]\s*/i, ""),
+          status: /^\s*\[resolved\]/i.test(title) ? "resolved" : "open",
+        }),
+      );
+    ctx.risks = [...ctx.risks, ...extraRisks];
+  }
+
   ctx.diagnostics.recordCount = countRecords(ctx);
   ctx.diagnostics.approxChars = JSON.stringify(stripDiagnostics(ctx)).length;
   return ctx;

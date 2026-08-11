@@ -27,7 +27,18 @@ export function mapFindingToOperation(
   targetRecord?: IndexedContextRecord | null,
 ): ProposedOperation | null {
   if (finding.requiresClarification || finding.findingType === "AMBIGUOUS") {
-    return null;
+    // Project-only uncertainty: still emit CREATE so review can show project chips.
+    const projectUncertainCreate =
+      Boolean(finding.projectCandidates?.length) &&
+      !finding.projectId &&
+      finding.findingType === "NEW_INFORMATION" &&
+      Boolean(
+        finding.target?.entityType ||
+          finding.changes?.entityType?.proposed,
+      );
+    if (!projectUncertainCreate) {
+      return null;
+    }
   }
   if (finding.invalidTarget) {
     return null;
@@ -41,6 +52,11 @@ export function mapFindingToOperation(
   const targetId = finding.target?.entityId ?? targetRecord?.id;
   const targetTitle =
     finding.target?.title ?? targetRecord?.title ?? undefined;
+  const projectFields = {
+    projectId: finding.projectId,
+    projectName: finding.projectName,
+    projectCode: finding.projectCode,
+  };
 
   if (finding.findingType === "ENTITY_COMPLETED" && entityType && targetId) {
     // Risks: COMPLETE is the canonical resolved lifecycle action.
@@ -49,11 +65,12 @@ export function mapFindingToOperation(
         id: id("op"),
         sourceFindingId: finding.id,
         operation: "COMPLETE",
-        entityType,
+        entityType: entityType === "nudge" ? "todo" : entityType,
         targetId,
         targetTitle,
+        ...projectFields,
         proposedValues:
-          entityType === "todo" || entityType === "risk"
+          entityType === "todo" || entityType === "risk" || entityType === "nudge"
             ? { status: "COMPLETED" }
             : undefined,
         reason: finding.reasoningSummary,
@@ -157,15 +174,28 @@ export function mapFindingToOperation(
       (typeof finding.changes?.title?.proposed === "string"
         ? String(finding.changes.title.proposed)
         : null) ?? finding.fact.slice(0, 120);
+    const todoKind =
+      typeof finding.changes?.todoKind?.proposed === "string"
+        ? String(finding.changes.todoKind.proposed)
+        : undefined;
+    const waitingOn =
+      typeof finding.changes?.waitingOn?.proposed === "string"
+        ? String(finding.changes.waitingOn.proposed)
+        : undefined;
     return {
       id: id("op"),
       sourceFindingId: finding.id,
       operation: "CREATE",
-      entityType: explicitType,
+      entityType: explicitType === "nudge" ? "todo" : explicitType,
       targetTitle: createTitle,
+      projectId: finding.projectId,
+      projectName: finding.projectName,
+      projectCode: finding.projectCode,
       proposedValues: {
         title: createTitle,
         summary: finding.evidence,
+        ...(todoKind ? { todoKind } : {}),
+        ...(waitingOn ? { waitingOn } : {}),
         ...(finding.changes
           ? Object.fromEntries(
               Object.entries(finding.changes).map(([k, v]) => [k, v.proposed]),
@@ -176,7 +206,7 @@ export function mapFindingToOperation(
       evidence: finding.evidence,
       confidence: finding.confidence,
       destructive: false,
-      requiresClarification: false,
+      requiresClarification: Boolean(finding.projectCandidates?.length) && !finding.projectId,
     };
   }
 
@@ -187,17 +217,18 @@ function resolveExplicitCreateType(
   finding: CaptureFinding,
 ): AIEntityType | null {
   if (finding.target?.entityType && !finding.target.entityId) {
-    return finding.target.entityType;
+    return finding.target.entityType === "nudge"
+      ? "todo"
+      : finding.target.entityType;
   }
   const proposed = finding.changes?.entityType?.proposed;
   if (typeof proposed === "string") {
     const t = proposed.toLowerCase();
-    if (t === "todo" || t === "action") return "todo";
+    if (t === "todo" || t === "action" || t === "nudge") return "todo";
     if (t === "risk") return "risk";
     if (t === "meeting") return "meeting";
     if (t === "milestone") return "milestone";
     if (t === "stakeholder") return "stakeholder";
-    // knowledge CREATE must be explicit and not transient — handled by caller
     if (t === "knowledge") return "knowledge";
   }
   return null;

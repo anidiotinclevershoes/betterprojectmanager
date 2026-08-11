@@ -15,7 +15,8 @@ export type ReviewReason =
   | "ENTITY_TYPE_UNCERTAIN"
   | "STATE_UNCERTAIN"
   | "OPERATION_UNCERTAIN"
-  | "VALUE_UNCERTAIN";
+  | "VALUE_UNCERTAIN"
+  | "PROJECT_UNCERTAIN";
 
 export function deriveReviewReason(args: {
   readiness: "ready" | "needs_review" | "unmatched";
@@ -25,11 +26,25 @@ export function deriveReviewReason(args: {
   suggestion?: PendingSuggestion;
   needsReviewReason?: string;
 }): ReviewReason | undefined {
-  const { readiness, finding, operation, coverage, suggestion, needsReviewReason } =
-    args;
+  const {
+    readiness,
+    finding,
+    operation,
+    coverage,
+    suggestion,
+    needsReviewReason,
+  } = args;
   if (readiness === "ready") return undefined;
 
-  if (readiness === "unmatched") return "TARGET_UNCERTAIN";
+  if (
+    (finding?.projectCandidates &&
+      finding.projectCandidates.length > 1 &&
+      !finding.projectId &&
+      !suggestion?.projectId) ||
+    suggestion?.projectUncertain
+  ) {
+    return "PROJECT_UNCERTAIN";
+  }
 
   const blob = [
     coverage?.reason,
@@ -40,6 +55,12 @@ export function deriveReviewReason(args: {
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
+
+  if (/which project|project uncertain|ambiguous project/i.test(blob)) {
+    return "PROJECT_UNCERTAIN";
+  }
+
+  if (readiness === "unmatched") return "TARGET_UNCERTAIN";
 
   if (
     finding?.invalidTarget ||
@@ -97,7 +118,6 @@ export function deriveReviewReason(args: {
     return finding.target?.entityId ? "OPERATION_UNCERTAIN" : "TARGET_UNCERTAIN";
   }
 
-  // Default for needs_review: prefer target when no confident id, else operation.
   if (!finding?.target?.entityId && suggestion?.op !== "create") {
     return "TARGET_UNCERTAIN";
   }
@@ -109,9 +129,16 @@ export function reviewReasonCopy(
   opts?: {
     recordName?: string;
     entityLabel?: string;
+    projectCandidates?: Array<{ name: string; code?: string }>;
   },
 ): string {
   switch (reason) {
+    case "PROJECT_UNCERTAIN":
+      return opts?.projectCandidates?.length
+        ? `Which project?\n${opts.projectCandidates
+            .map((c) => c.code || c.name)
+            .join(" · ")}`
+        : "Which project does this refer to?";
     case "TARGET_UNCERTAIN":
       return opts?.recordName
         ? `Lume thinks this refers to:\n${opts.recordName}`

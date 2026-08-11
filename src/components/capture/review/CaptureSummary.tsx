@@ -39,7 +39,15 @@ export function CaptureSummary({
                   <span className="capture-observation-text">{obs.text}</span>
                 </span>
                 <span
-                  className={`capture-observation-action ${statusClass}`}
+                  className={`capture-observation-action ${statusClass}${
+                    obs.actionLabel.startsWith("Remember")
+                      ? " is-remember"
+                      : ""
+                  }${
+                    obs.actionLabel.includes("Which project")
+                      ? " is-project-uncertain"
+                      : ""
+                  }`}
                   title={obs.actionLabel}
                 >
                   {obs.actionLabel}

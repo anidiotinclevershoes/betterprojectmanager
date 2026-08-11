@@ -78,7 +78,8 @@ export function Sidebar({
                 key={project.id}
                 href={`/projects/${project.id}`}
                 title={project.name}
-                className={`sidebar-link sidebar-project ${activeProjectId === project.id ? "is-active" : ""}`}
+                className={`sidebar-link sidebar-project ${activeProjectId === project.id ? "is-active is-project-owned" : ""}`}
+                data-project-status={project.status}
                 onClick={onCloseMobile}
               >
                 {!collapsed ? (

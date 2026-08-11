@@ -6,6 +6,7 @@ import { FRAME_LABELS } from "@/lib/workspace/layout";
 const FRAME_ICON: Record<string, string> = {
   todo: "✓",
   meetingPrep: "◎",
+  risks: "⚠",
   nudge: "↗",
   timeline: "▭",
   knowledge: "◇",

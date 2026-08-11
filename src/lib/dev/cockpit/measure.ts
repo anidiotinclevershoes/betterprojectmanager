@@ -50,6 +50,8 @@ function buildComposition(args: {
   const history = byBucket.get("history")?.tokens ?? 0;
   const meetings = byBucket.get("meetings")?.tokens ?? 0;
   const stakeholders = byBucket.get("stakeholders")?.tokens ?? 0;
+  const projectIndex = byBucket.get("projectIndex")?.tokens ?? 0;
+  const deepContext = byBucket.get("deepContext")?.tokens ?? 0;
 
   const role = bySection.get("role")?.tokens ?? 0;
   const domain = bySection.get("domain")?.tokens ?? 0;
@@ -62,6 +64,8 @@ function buildComposition(args: {
     history +
     meetings +
     stakeholders +
+    projectIndex +
+    deepContext +
     (byBucket.get("nudges")?.tokens ?? 0) +
     (byBucket.get("milestones")?.tokens ?? 0) +
     (byBucket.get("releases")?.tokens ?? 0) +
@@ -133,6 +137,20 @@ function buildComposition(args: {
       color: COMPOSITION_COLORS.stakeholders,
     },
     {
+      id: "projectIndex",
+      label: "Project Index",
+      tokens: projectIndex,
+      characters: byBucket.get("projectIndex")?.characters ?? 0,
+      color: COMPOSITION_COLORS.projectIndex,
+    },
+    {
+      id: "deepContext",
+      label: "Deep Context",
+      tokens: deepContext,
+      characters: byBucket.get("deepContext")?.characters ?? 0,
+      color: COMPOSITION_COLORS.deepContext,
+    },
+    {
       id: "metadata",
       label: "Metadata",
       tokens: metadata,
@@ -157,6 +175,10 @@ export function measurePromptComposition(args: {
   composition: CompositionSlice[];
   promptTokensTokenizer: number;
   promptCharacters: number;
+  projectIndexProjectCount: number | null;
+  deepContextProjectCount: number | null;
+  projectIndexTokens: number | null;
+  deepContextTokens: number | null;
 } {
   const promptSections = args.promptAssembly.sections.map((s) =>
     measureText(s.label, s.id, s.content),
@@ -184,6 +206,23 @@ export function measurePromptComposition(args: {
       measureBucket("history", "History", ctx.history),
       measureBucket("releases", "Releases", ctx.releases),
     );
+    if (ctx.projectIndex?.length) {
+      contextBuckets.push(
+        measureBucket("projectIndex", "Project Index", ctx.projectIndex),
+      );
+    }
+    if (ctx.deepContextProjectIds?.length) {
+      contextBuckets.push(
+        measureBucket("deepContext", "Deep Context Projects", [
+          {
+            projectIds: ctx.deepContextProjectIds,
+            // Approximate deeper payload already counted in buckets above;
+            // this slice records which projects contributed depth.
+            note: "project ids with deeper context",
+          },
+        ]),
+      );
+    }
   }
 
   const composition = buildComposition({
@@ -197,6 +236,12 @@ export function measurePromptComposition(args: {
     composition,
     promptTokensTokenizer: full.tokens,
     promptCharacters: full.characters,
+    projectIndexProjectCount: ctx?.projectIndex?.length ?? null,
+    deepContextProjectCount: ctx?.deepContextProjectIds?.length ?? null,
+    projectIndexTokens:
+      contextBuckets.find((b) => b.id === "projectIndex")?.tokens ?? null,
+    deepContextTokens:
+      contextBuckets.find((b) => b.id === "deepContext")?.tokens ?? null,
   };
 }
 
@@ -292,6 +337,10 @@ export function buildCaptureRunMetrics(args: {
     promptSections: measured.promptSections,
     contextBuckets: measured.contextBuckets,
     composition: measured.composition,
+    projectIndexProjectCount: measured.projectIndexProjectCount,
+    deepContextProjectCount: measured.deepContextProjectCount,
+    projectIndexTokens: measured.projectIndexTokens,
+    deepContextTokens: measured.deepContextTokens,
     reliability: args.reliability ?? null,
   };
 }

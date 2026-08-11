@@ -46,6 +46,12 @@ export type CaptureFinding = {
   /** Set by validation when the AI returned a bad target ID. */
   invalidTarget?: boolean;
   validationWarning?: string;
+  /** Resolved destination project when known. */
+  projectId?: string;
+  projectName?: string;
+  projectCode?: string;
+  /** Candidate projects when PROJECT_UNCERTAIN. */
+  projectCandidates?: Array<{ id: string; name: string; code?: string }>;
 };
 
 export type ProposedOperation = {
@@ -61,6 +67,9 @@ export type ProposedOperation = {
   confidence: number;
   destructive: boolean;
   requiresClarification: boolean;
+  projectId?: string;
+  projectName?: string;
+  projectCode?: string;
 };
 
 /** Indexed context record for ID validation and mapping. */

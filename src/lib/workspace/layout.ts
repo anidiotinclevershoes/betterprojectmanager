@@ -2,7 +2,7 @@ export type FrameSize = "compact" | "standard" | "wide" | "full";
 
 export type WorkspaceFrameConfig = {
   id: string;
-  type: "todo" | "meetingPrep" | "nudge" | "timeline";
+  type: "todo" | "meetingPrep" | "risks" | "timeline" | "nudge";
   title?: string;
   visible: boolean;
   order: number;
@@ -15,6 +15,11 @@ export type WorkspaceLayout = {
   frames: WorkspaceFrameConfig[];
 };
 
+/**
+ * Default frames — Nudge Me retired from the visible workspace.
+ * Waiting/Chase semantics live on To Do metadata instead.
+ * Risks is a first-class frame (not buried in Knowledge).
+ */
 export const DEFAULT_OVERVIEW_LAYOUT: WorkspaceLayout = {
   frames: [
     {
@@ -26,20 +31,20 @@ export const DEFAULT_OVERVIEW_LAYOUT: WorkspaceLayout = {
       size: "wide",
     },
     {
-      id: "meetingPrep",
-      type: "meetingPrep",
-      title: "Meeting Prep",
+      id: "risks",
+      type: "risks",
+      title: "Risks",
       visible: true,
       order: 1,
       size: "standard",
     },
     {
-      id: "nudge",
-      type: "nudge",
-      title: "Nudge Me",
+      id: "meetingPrep",
+      type: "meetingPrep",
+      title: "Meeting Prep",
       visible: true,
       order: 2,
-      size: "compact",
+      size: "standard",
     },
     {
       id: "timeline",
@@ -49,21 +54,68 @@ export const DEFAULT_OVERVIEW_LAYOUT: WorkspaceLayout = {
       order: 3,
       size: "full",
     },
+    // Retained for Customiser migration of older layouts; not shown by default.
+    {
+      id: "nudge",
+      type: "nudge",
+      title: "Nudge Me",
+      visible: false,
+      order: 4,
+      size: "compact",
+    },
   ],
 };
 
-const LAYOUT_KEY = "mc-workspace-layout-v2";
+/** Bumped so retired Nudge / new Risks apply for existing localStorage users. */
+const LAYOUT_KEY = "mc-workspace-layout-v3";
+
+function migrateLayout(parsed: WorkspaceLayout): WorkspaceLayout {
+  const byType = new Map(parsed.frames.map((f) => [f.type, f]));
+  const frames = DEFAULT_OVERVIEW_LAYOUT.frames.map((def) => {
+    const existing = byType.get(def.type);
+    if (!existing) return { ...def };
+    return {
+      ...def,
+      ...existing,
+      // Force Nudge retired unless user re-enables in customiser after v3.
+      visible: def.type === "nudge" ? false : (existing.visible ?? def.visible),
+      title: def.title ?? existing.title,
+      order: def.order,
+    };
+  });
+  // Keep any unknown custom frames
+  for (const f of parsed.frames) {
+    if (!DEFAULT_OVERVIEW_LAYOUT.frames.some((d) => d.type === f.type)) {
+      frames.push(f);
+    }
+  }
+  return { frames };
+}
 
 export function readWorkspaceLayout(scope = "overview"): WorkspaceLayout {
-  if (typeof window === "undefined") return DEFAULT_OVERVIEW_LAYOUT;
+  const fallback =
+    scope === "overview" ? DEFAULT_OVERVIEW_LAYOUT : defaultProjectLayout(scope);
+  if (typeof window === "undefined") return fallback;
   try {
     const raw = window.localStorage.getItem(`${LAYOUT_KEY}:${scope}`);
-    if (!raw) return DEFAULT_OVERVIEW_LAYOUT;
+    if (!raw) {
+      // One-time migrate from v2 if present
+      const legacy = window.localStorage.getItem(`mc-workspace-layout-v2:${scope}`);
+      if (legacy) {
+        const parsed = JSON.parse(legacy) as WorkspaceLayout;
+        if (parsed?.frames?.length) {
+          const migrated = migrateLayout(parsed);
+          writeWorkspaceLayout(migrated, scope);
+          return migrated;
+        }
+      }
+      return fallback;
+    }
     const parsed = JSON.parse(raw) as WorkspaceLayout;
-    if (!parsed?.frames?.length) return DEFAULT_OVERVIEW_LAYOUT;
-    return parsed;
+    if (!parsed?.frames?.length) return fallback;
+    return migrateLayout(parsed);
   } catch {
-    return DEFAULT_OVERVIEW_LAYOUT;
+    return fallback;
   }
 }
 
@@ -88,8 +140,9 @@ export function visibleFrames(layout: WorkspaceLayout) {
 export const FRAME_LABELS: Record<string, string> = {
   todo: "To Do",
   meetingPrep: "Meeting Prep",
-  nudge: "Nudge Me",
+  risks: "Risks",
   timeline: "Timeline",
+  nudge: "Nudge Me",
 };
 
 export function defaultProjectLayout(projectId: string): WorkspaceLayout {

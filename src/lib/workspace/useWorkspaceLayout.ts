@@ -18,16 +18,7 @@ export function useWorkspaceLayout(scope = "overview") {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (scope === "overview") {
-      setLayout(readWorkspaceLayout("overview"));
-    } else {
-      try {
-        const raw = window.localStorage.getItem(`mc-workspace-layout-v2:${scope}`);
-        setLayout(raw ? readWorkspaceLayout(scope) : defaultProjectLayout(scope));
-      } catch {
-        setLayout(defaultProjectLayout(scope));
-      }
-    }
+    setLayout(readWorkspaceLayout(scope));
     setHydrated(true);
   }, [scope]);
 

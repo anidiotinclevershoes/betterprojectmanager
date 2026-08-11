@@ -86,15 +86,8 @@ export function CaptureWorkspace({
   } = session;
 
   const effectiveProjectId = projectId || defaultProjectId || "";
-  const scopedProject = defaultProjectId
-    ? state.projects.find((p) => p.id === defaultProjectId)
-    : null;
-  const scopeLabel = scopedProject
-    ? scopedProject.name
-    : effectiveProjectId
-      ? state.projects.find((p) => p.id === effectiveProjectId)?.name
-      : null;
-  const isProjectScoped = Boolean(defaultProjectId);
+  // Soft context hint only — Capture remains project-agnostic.
+  const softHintProjectId = defaultProjectId || undefined;
 
   const recording = useRecordingBridge({
     content,
@@ -128,8 +121,8 @@ export function CaptureWorkspace({
       if (collapsed) expandAnalysis();
       return;
     }
-    // Project-scoped Capture must stay within that project.
-    await runAnalyse(content, "conversation", defaultProjectId);
+    // Soft hint only — Capture may address any project named in the text.
+    await runAnalyse(content, "conversation", softHintProjectId);
   }
 
   const preReliability = useMemo(
@@ -312,6 +305,25 @@ export function CaptureWorkspace({
     applyOne({ ...model.suggestion, op: "complete" }, defaultProjectId);
   }
 
+  function onChooseProject(
+    id: string,
+    project: { id: string; name: string; code?: string },
+  ) {
+    updateSuggestion(id, {
+      projectId: project.id,
+      projectName: project.name,
+      projectCode: project.code ?? null,
+      projectUncertain: false,
+    });
+    setReviewOverride(id, {
+      accepted: true,
+      readiness: "ready",
+      reviewReason: null,
+      projectId: project.id,
+      projectName: project.name,
+    });
+  }
+
   function onChangeEntityKind(id: string, kind: SuggestionKind) {
     updateSuggestion(id, { kind });
     setReviewOverride(id, {
@@ -344,7 +356,7 @@ export function CaptureWorkspace({
   return (
     <section className={panelClass} aria-labelledby={titleId}>
       <div className="capture-workspace-head">
-        <div>
+        <div className="capture-head-copy">
           <h2 id={titleId} className="capture-title">
             Capture anything
           </h2>
@@ -355,27 +367,25 @@ export function CaptureWorkspace({
           ) : analysedLabel ? (
             <p className="capture-support meta">Last analysed {analysedLabel}</p>
           ) : null}
-          <p
-            className="capture-scope-indicator"
-            title={
-              isProjectScoped
-                ? "Lume will consider and update this project only. For updates spanning multiple projects, use Capture from Overview."
-                : "Overview Capture can update across projects when the Capture names them."
-            }
-          >
-            <span className="capture-scope-dot" aria-hidden>
-              ◎
-            </span>
-            {isProjectScoped && scopeLabel
-              ? `${scopeLabel} only`
-              : "All Projects"}
-          </p>
         </div>
         <div className="capture-header-actions">
           {showSessionActions ? (
             <CaptureContextInspector manifest={contextManifest} />
           ) : null}
-          <div className="capture-window-controls" role="group" aria-label="Capture window">
+          <button
+            type="button"
+            className="muted-btn capture-new-btn"
+            onClick={clearSession}
+            title="New Capture"
+            aria-label="New Capture"
+          >
+            New Capture
+          </button>
+          <div
+            className="capture-window-controls"
+            role="group"
+            aria-label="Capture window"
+          >
             <button
               type="button"
               className="capture-window-btn"
@@ -411,15 +421,6 @@ export function CaptureWorkspace({
               {maximized && !collapsed ? "❐" : "□"}
             </button>
           </div>
-          {showSessionActions ? (
-            <button
-              type="button"
-              className="ghost-btn capture-new-btn"
-              onClick={clearSession}
-            >
-              New capture
-            </button>
-          ) : null}
         </div>
       </div>
 
@@ -640,6 +641,7 @@ export function CaptureWorkspace({
             onApproveReady={approveReady}
             onUseThis={onUseThis}
             onChooseTarget={onChooseTarget}
+            onChooseProject={onChooseProject}
             onCreateNew={onCreateNew}
             onResolve={onResolve}
             onChangeEntityKind={onChangeEntityKind}

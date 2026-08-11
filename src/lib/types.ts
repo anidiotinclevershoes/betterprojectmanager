@@ -196,6 +196,8 @@ export interface CaptureInput {
 }
 
 /** Owned checklist item — accepted from suggestions or added manually. */
+export type TodoKind = "ACTION" | "WAITING" | "CHASE" | "REMINDER";
+
 export interface TodoItem {
   id: string;
   /** Development seed / demo marker. */
@@ -209,6 +211,10 @@ export interface TodoItem {
   /** ISO datetime — editable; for RELOPS prefer within merge→release window */
   dueAt?: string;
   sourceRecommendationId?: string;
+  /** Follow-up semantics formerly expressed as Nudge Me. */
+  kind?: TodoKind;
+  /** Person/org the item is waiting on (Waiting / Chase). */
+  waitingOn?: string;
 }
 
 /** AI-proposed meeting the user can later expand into agenda/script. */

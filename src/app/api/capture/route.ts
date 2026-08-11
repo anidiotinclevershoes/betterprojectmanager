@@ -236,6 +236,13 @@ export async function POST(request: Request) {
       sourceType: body.sourceType,
       ai,
       captureContext,
+      allOpenTodos: todos
+        .filter((t) => !t.done)
+        .map((t) => ({
+          id: t.id,
+          title: t.title,
+          projectId: t.projectId,
+        })),
     });
 
     const enrichedManifest = {

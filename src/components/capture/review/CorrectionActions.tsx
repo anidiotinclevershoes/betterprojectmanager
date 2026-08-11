@@ -20,6 +20,11 @@ const ENTITY_CHOICES: SuggestionKind[] = [
 export type CorrectionHandlers = {
   onUseThis: () => void;
   onChooseTarget: (option: TargetOption) => void;
+  onChooseProject: (project: {
+    id: string;
+    name: string;
+    code?: string;
+  }) => void;
   onCreateNew: () => void;
   onResolve: () => void;
   onKeepOpen: () => void;
@@ -56,6 +61,33 @@ export function CorrectionActions({
   }
 
   const copy = model.needsReviewReason;
+
+  if (reason === "PROJECT_UNCERTAIN") {
+    const candidates =
+      model.suggestion.projectCandidates ??
+      model.finding?.projectCandidates ??
+      [];
+    return (
+      <div className="compact-change-correction">
+        <p className="compact-change-review-copy">Which project?</p>
+        <div className="compact-change-action-row">
+          {candidates.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className="muted-btn"
+              onClick={() => handlers.onChooseProject(p)}
+            >
+              {p.code || p.name}
+            </button>
+          ))}
+          <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+            Dismiss
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (reason === "TARGET_UNCERTAIN") {
     return (

@@ -326,9 +326,36 @@ export function ReviewWorkspacePreviewClient() {
             <p className="capture-support meta">Last analysed just now</p>
           </div>
           <div className="capture-header-actions">
-            <button type="button" className="ghost-btn capture-new-btn">
-              New capture
+            <button
+              type="button"
+              className="muted-btn capture-new-btn"
+              title="New Capture"
+              aria-label="New Capture"
+            >
+              New Capture
             </button>
+            <div
+              className="capture-window-controls"
+              role="group"
+              aria-label="Capture window"
+            >
+              <button
+                type="button"
+                className="capture-window-btn"
+                title="Minimise Capture"
+                aria-label="Minimise Capture"
+              >
+                ─
+              </button>
+              <button
+                type="button"
+                className="capture-window-btn"
+                title="Expand Capture"
+                aria-label="Expand Capture"
+              >
+                □
+              </button>
+            </div>
           </div>
         </div>
 
@@ -392,6 +419,7 @@ export function ReviewWorkspacePreviewClient() {
             onChooseTarget={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
             onCreateNew={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
             onResolve={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
+            onChooseProject={(id) => setAdded((prev) => ({ ...prev, [id]: true }))}
             onChangeEntityKind={() => undefined}
           />
         </div>

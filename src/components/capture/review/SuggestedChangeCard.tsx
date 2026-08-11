@@ -20,6 +20,7 @@ export function SuggestedChangeCard({
   onKeepOpen,
   onUseThis,
   onChooseTarget,
+  onChooseProject,
   onCreateNew,
   onResolve,
   onChangeEntityKind,
@@ -34,6 +35,11 @@ export function SuggestedChangeCard({
   onKeepOpen?: () => void;
   onUseThis?: () => void;
   onChooseTarget?: (option: TargetOption) => void;
+  onChooseProject?: (project: {
+    id: string;
+    name: string;
+    code?: string;
+  }) => void;
   onCreateNew?: () => void;
   onResolve?: () => void;
   onChangeEntityKind?: (kind: SuggestionKind) => void;
@@ -52,6 +58,7 @@ export function SuggestedChangeCard({
   const handlers: CorrectionHandlers = {
     onUseThis: () => onUseThis?.() ?? onApprove(),
     onChooseTarget: (option) => onChooseTarget?.(option),
+    onChooseProject: (project) => onChooseProject?.(project),
     onCreateNew: () => onCreateNew?.(),
     onResolve: () => onResolve?.() ?? onApprove(),
     onKeepOpen: () => onKeepOpen?.() ?? onDismiss(),
@@ -77,6 +84,12 @@ export function SuggestedChangeCard({
         entityLabel={model.entityLabel}
         recordName={model.recordName}
         operation={model.operation}
+        operationLabel={model.operationLabel}
+        projectLabel={
+          model.showProjectLabel
+            ? model.projectCode || model.projectName || undefined
+            : undefined
+        }
         diff={model.diff}
         readiness={attentionReadiness}
         state={state}

@@ -67,6 +67,8 @@ type AddTodoInput = {
   detail?: string;
   projectId?: string | null;
   dueAt?: string;
+  kind?: import("@/lib/types").TodoKind;
+  waitingOn?: string;
 };
 
 type UpdateTodoInput = {
@@ -75,6 +77,8 @@ type UpdateTodoInput = {
   dueAt?: string | null;
   done?: boolean;
   projectId?: string | null;
+  kind?: import("@/lib/types").TodoKind | null;
+  waitingOn?: string | null;
 };
 
 type AddSuggestionInput = {
@@ -256,11 +260,12 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, [state]);
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
+    try {
       setState(withProactiveCoaching(readStoredState()));
-      setHydrated(true);
-    });
-    return () => cancelAnimationFrame(frame);
+    } catch {
+      /* keep seed state */
+    }
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -536,6 +541,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         done: false,
         createdAt: new Date().toISOString(),
         dueAt,
+        kind: input.kind,
+        waitingOn: input.waitingOn?.trim() || undefined,
       };
       return pushHistory(
         { ...prev, todos: [todo, ...(prev.todos ?? [])] },
@@ -582,6 +589,18 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         done: patch.done ?? before.done,
         projectId,
         dueAt,
+        kind:
+          patch.kind === null
+            ? undefined
+            : patch.kind !== undefined
+              ? patch.kind
+              : before.kind,
+        waitingOn:
+          patch.waitingOn === null
+            ? undefined
+            : patch.waitingOn !== undefined
+              ? patch.waitingOn.trim() || undefined
+              : before.waitingOn,
       };
 
       const changes: string[] = [];

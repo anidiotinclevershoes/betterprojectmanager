@@ -165,9 +165,18 @@ function AppShellInner({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
+  const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
+  const routeId = projectMatch?.[1] ?? null;
+  const activeProjectId = routeId && routeId !== "new" ? routeId : null;
+  const activeProject = activeProjectId
+    ? state.projects.find((p) => p.id === activeProjectId)
+    : null;
+
   return (
     <div
-      className={`app-shell ${collapsed ? "sidebar-collapsed" : ""} ${drawerOpen ? "coach-open" : ""}`}
+      className={`app-shell ${collapsed ? "sidebar-collapsed" : ""} ${drawerOpen ? "coach-open" : ""} ${activeProject ? "has-project-workspace" : ""}`}
+      data-active-project={activeProject?.code ?? undefined}
+      data-project-status={activeProject?.status ?? undefined}
     >
       <Sidebar
         collapsed={collapsed}

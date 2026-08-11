@@ -20,21 +20,21 @@ export function CaptureTips() {
       {open ? (
         <div id={tipId} className="capture-tips-panel" role="note">
           <p className="capture-tips-lead">
-            Tip: clear instructions help Lume. Everyday notes still work —
-            be explicit when you want the most precise result.
+            For the clearest results, use direct language and name the project
+            when it could be ambiguous. Everyday notes still work.
           </p>
           <ul className="capture-tips-list">
-            <li>“Complete…”</li>
-            <li>“Change… to…”</li>
-            <li>“Remove…”</li>
-            <li>“Resolve…”</li>
-            <li>“Create a To Do…”</li>
-            <li>“Raise a Risk…”</li>
+            <li>“ATLAS: complete the CAB task.”</li>
+            <li>“HORIZON: change launch to 24 September.”</li>
+            <li>“Resolve the gateway risk.”</li>
+            <li>“Create a To Do for ATLAS to call the vendor.”</li>
+            <li>“Remember that CAB needs the pack 24h before the board.”</li>
           </ul>
         </div>
       ) : (
         <p className="capture-tips-inline meta">
-          Tip: try “Complete…”, “Create a To Do…”, “Raise a Risk…”
+          Tip: name the project when ambiguous — “ATLAS: complete…”, “Remember
+          that…”
         </p>
       )}
     </div>

@@ -101,7 +101,7 @@ export function recommendationsFromOperations(
         action: op.reason,
         why: op.evidence,
         leadershipImpact: "Act on validated Capture findings without inventing duplicate work.",
-        projectId,
+        projectId: op.projectId ?? projectId,
         relatedMemoryIds: [memoryId],
         createdAt: now,
         status: "active" as const,

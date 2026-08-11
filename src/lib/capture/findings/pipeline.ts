@@ -1,5 +1,10 @@
 import type { CaptureProjectContext } from "@/lib/capture/context";
 import {
+  detectMentionedProjects,
+  resolveProjectForFact,
+  splitCaptureByProjectPrefix,
+} from "@/lib/capture/projectResolve";
+import {
   dedupeProposedOperations,
   reconcileFindingCoverage,
   type FindingCoverageReport,
@@ -229,11 +234,12 @@ export function extractLocalFindings(
   // Explicit CREATE cues — genuinely new work (no existing target expected).
   const createPatterns: Array<{
     re: RegExp;
-    entity: "todo" | "risk";
+    entity: "todo" | "risk" | "knowledge";
     label: string;
+    todoKind?: "ACTION" | "WAITING" | "CHASE" | "REMINDER";
   }> = [
     {
-      re: /create a to-?do(?:\s+to)?\s+([^.!\n]{8,120})/gi,
+      re: /create a to[\s-]?do(?:\s+to)?\s+([^.!\n]{8,120})/gi,
       entity: "todo",
       label: "To Do",
     },
@@ -243,29 +249,78 @@ export function extractLocalFindings(
       label: "action",
     },
     {
-      re: /raise a new risk[:\s]+([^.!\n]{8,120})/gi,
+      re: /raise a(?:\s+new)? risk[:\s]+([^.!\n]{8,120})/gi,
       entity: "risk",
       label: "risk",
+    },
+    {
+      re: /raise a(?:\s+new)?\s+([^.!\n]{8,100}?)\s+risk\b/gi,
+      entity: "risk",
+      label: "risk",
+    },
+    {
+      re: /chase\s+([A-Z][a-zA-Z]+)(?:\s+for|\s+on)?\s+([^.!\n]{6,100})/gi,
+      entity: "todo",
+      label: "Chase",
+      todoKind: "CHASE",
+    },
+    {
+      re: /await(?:ing)?\s+(?:(?:a\s+)?response\s+from\s+)?([A-Z][a-zA-Z]+|[A-Za-z][A-Za-z0-9 &-]{2,40})(?:\s+for)?\s*([^.!\n]{0,100})/gi,
+      entity: "todo",
+      label: "Waiting",
+      todoKind: "WAITING",
+    },
+    {
+      re: /waiting\s+on\s+([A-Z][a-zA-Z]+|[A-Za-z][A-Za-z0-9 &-]{2,40})(?:\s+for)?\s*([^.!\n]{0,100})/gi,
+      entity: "todo",
+      label: "Waiting",
+      todoKind: "WAITING",
+    },
+    {
+      re: /remember(?:\s+that)?\s+([^.!\n]{12,160})/gi,
+      entity: "knowledge",
+      label: "Knowledge",
     },
   ];
 
   const seenCreateTitles = new Set<string>();
   for (const pattern of createPatterns) {
     for (const match of captureText.matchAll(pattern.re)) {
-      const title = (match[1] ?? "")
+      let title = (match[1] ?? "")
         .replace(/\s+/g, " ")
         .trim()
         .replace(/\.$/, "");
+      let waitingOn: string | undefined;
+      if (pattern.todoKind === "CHASE" && match[2]) {
+        waitingOn = match[1];
+        // Guard against false positives like "Chase two unsigned modules…"
+        if (!/^[A-Z][a-zA-Z]+$/.test(waitingOn) || /^(two|the|a|an|all|this|that)$/i.test(waitingOn)) {
+          continue;
+        }
+        title = `Chase ${match[1]}: ${match[2].replace(/\s+/g, " ").trim()}`;
+      } else if (pattern.todoKind === "WAITING") {
+        waitingOn = (match[1] ?? "").replace(/\s+/g, " ").trim();
+        if (!waitingOn || /^(two|the|a|an|all)$/i.test(waitingOn)) continue;
+        const detail = (match[2] ?? "").replace(/\s+/g, " ").trim();
+        title = detail
+          ? `Await ${waitingOn}: ${detail}`
+          : `Await ${waitingOn}`;
+      }
       if (!title || IRRELEVANT_LOCAL.test(title)) continue;
+      if (pattern.entity === "knowledge" && isTransientEventKnowledge(title)) {
+        continue;
+      }
       const key = title.toLowerCase().slice(0, 48);
       if (seenCreateTitles.has(key)) continue;
       seenCreateTitles.add(key);
       findings.push({
         id: nextId(),
-        fact: `New ${pattern.label}: ${title}`,
+        fact:
+          pattern.entity === "knowledge"
+            ? title
+            : `New ${pattern.label}: ${title}`,
         evidence: match[0],
         findingType: "NEW_INFORMATION",
-        // CREATE shape: entity type without existing id — never unmatched.
         target: {
           entityType: pattern.entity,
           title,
@@ -273,15 +328,33 @@ export function extractLocalFindings(
         changes: {
           entityType: { proposed: pattern.entity },
           title: { proposed: title },
+          ...(pattern.todoKind
+            ? { todoKind: { proposed: pattern.todoKind } }
+            : {}),
+          ...(waitingOn ? { waitingOn: { proposed: waitingOn } } : {}),
+          ...((pattern.todoKind === "CHASE" ||
+            pattern.todoKind === "WAITING") &&
+          /\bfriday\b/i.test(match[0])
+            ? { date: { proposed: "Friday" } }
+            : {}),
         },
         confidence: 88,
         requiresClarification: false,
-        reasoningSummary: `Capture explicitly requests a new ${pattern.label}.`,
+        reasoningSummary:
+          pattern.entity === "knowledge"
+            ? "Durable project context worth remembering."
+            : `Capture explicitly requests a new ${pattern.label}.`,
       });
     }
   }
 
   return findings;
+}
+
+function isTransientEventKnowledge(title: string): boolean {
+  return /\b(was received|is complete|is done|was resolved|moved to|changed to)\b/i.test(
+    title,
+  );
 }
 
 const IRRELEVANT_LOCAL =
@@ -343,6 +416,199 @@ function titleNearCompletionCue(text: string, title: string): boolean {
   return false;
 }
 
+/**
+ * Stamp project identity onto findings using mentions + record ownership.
+ * Soft sidebar hint is never used alone to resolve ambiguity.
+ */
+export function stampFindingProjects(
+  findings: CaptureFinding[],
+  args: {
+    captureText: string;
+    projects: Array<{ id: string; name: string; code: string }>;
+    contextIndex: Map<string, IndexedContextRecord>;
+    softHintProjectId?: string | null;
+    allOpenTodos?: Array<{ id: string; title: string; projectId?: string | null }>;
+  },
+): CaptureFinding[] {
+  const projects = args.projects as import("@/lib/types").Project[];
+  const segments = splitCaptureByProjectPrefix(args.captureText, projects);
+
+  return findings.map((finding) => {
+    if (finding.projectId) return finding;
+
+    const evidence = finding.evidence || finding.fact;
+    const segment = segments.find(
+      (s) =>
+        s.project &&
+        s.text
+          .toLowerCase()
+          .includes(evidence.toLowerCase().slice(0, Math.min(40, evidence.length))),
+    );
+    if (segment?.project) {
+      return {
+        ...finding,
+        projectId: segment.project.id,
+        projectName: segment.project.name,
+        projectCode: segment.project.code,
+        projectCandidates: undefined,
+      };
+    }
+
+    const resolution = resolveProjectForFact({
+      fact: finding.fact,
+      evidence: finding.evidence,
+      projects,
+      softHintProjectId: args.softHintProjectId,
+    });
+
+    if (resolution.status === "resolved") {
+      return {
+        ...finding,
+        projectId: resolution.project.id,
+        projectName: resolution.project.name,
+        projectCode: resolution.project.code,
+      };
+    }
+
+    if (resolution.status === "ambiguous") {
+      return {
+        ...finding,
+        projectCandidates: resolution.candidates.map((c) => ({
+          id: c.id,
+          name: c.name,
+          code: c.code,
+        })),
+        requiresClarification: true,
+        clarificationQuestion:
+          finding.clarificationQuestion || "Which project does this refer to?",
+      };
+    }
+
+    const mentioned = detectMentionedProjects(
+      `${finding.fact} ${finding.evidence}`,
+      projects,
+    );
+
+    // Bare CAB approval: only PROJECT_UNCERTAIN when multiple projects own CAB todos.
+    if (
+      /\bcab\b/i.test(finding.fact) &&
+      /\bapprov/i.test(finding.fact) &&
+      !mentioned.length
+    ) {
+      const cabTodos = (args.allOpenTodos ?? []).filter(
+        (t) =>
+          /\bcab\b/i.test(t.title) &&
+          /\bapprov/i.test(t.title) &&
+          t.projectId,
+      );
+      const cabProjectIds = [
+        ...new Set(cabTodos.map((t) => t.projectId).filter(Boolean) as string[]),
+      ];
+      if (cabProjectIds.length > 1) {
+        return {
+          ...finding,
+          projectCandidates: cabProjectIds.map((id) => {
+            const p = projects.find((x) => x.id === id);
+            return {
+              id,
+              name: p?.name ?? id,
+              code: p?.code,
+            };
+          }),
+          requiresClarification: true,
+          clarificationQuestion: "Which project does this refer to?",
+          target: undefined,
+          findingType: "AMBIGUOUS" as const,
+        };
+      }
+      if (cabProjectIds.length === 1) {
+        const p = projects.find((x) => x.id === cabProjectIds[0]);
+        if (p) {
+          return {
+            ...finding,
+            projectId: p.id,
+            projectName: p.name,
+            projectCode: p.code,
+          };
+        }
+      }
+    }
+
+    // Soft hint may assign CREATE destinations when no other project evidence
+    // exists. It must not resolve genuine multi-project ambiguity alone.
+    const isExplicitCreate =
+      finding.findingType === "NEW_INFORMATION" &&
+      Boolean(finding.target?.entityType) &&
+      !finding.target?.entityId;
+
+    if (!finding.projectId && projects.length === 1) {
+      return {
+        ...finding,
+        projectId: projects[0].id,
+        projectName: projects[0].name,
+        projectCode: projects[0].code,
+      };
+    }
+
+    if (
+      isExplicitCreate &&
+      !finding.projectId &&
+      args.softHintProjectId &&
+      mentioned.length === 0
+    ) {
+      const p = projects.find((x) => x.id === args.softHintProjectId);
+      if (p) {
+        return {
+          ...finding,
+          projectId: p.id,
+          projectName: p.name,
+          projectCode: p.code,
+        };
+      }
+    }
+
+    if (
+      finding.findingType === "NEW_INFORMATION" &&
+      !finding.projectId &&
+      projects.length > 1 &&
+      mentioned.length === 0 &&
+      !isExplicitCreate
+    ) {
+      return {
+        ...finding,
+        projectCandidates: projects.map((p) => ({
+          id: p.id,
+          name: p.name,
+          code: p.code,
+        })),
+        requiresClarification: true,
+        clarificationQuestion: "Which project does this refer to?",
+      };
+    }
+
+    // CREATE without soft hint or mention → ask which project.
+    if (
+      isExplicitCreate &&
+      !finding.projectId &&
+      projects.length > 1 &&
+      mentioned.length === 0
+    ) {
+      return {
+        ...finding,
+        projectCandidates: projects.map((p) => ({
+          id: p.id,
+          name: p.name,
+          code: p.code,
+        })),
+        requiresClarification: true,
+        clarificationQuestion: "Which project does this refer to?",
+      };
+    }
+
+    return finding;
+  });
+}
+
 export type FindingsPipelineResult = {
   findings: CaptureFinding[];
   operations: ProposedOperation[];
@@ -361,6 +627,9 @@ export function runFindingsPipeline(args: {
   captureContext: CaptureProjectContext | null | undefined;
   /** When AI findings are empty / missing, derive local findings. */
   allowLocalFallback?: boolean;
+  projects?: Array<{ id: string; name: string; code: string }>;
+  softHintProjectId?: string | null;
+  allOpenTodos?: Array<{ id: string; title: string; projectId?: string | null }>;
 }): FindingsPipelineResult {
   const contextIndex = buildContextRecordIndex(args.captureContext);
   let validation = validateCaptureFindings(args.rawFindings, contextIndex);
@@ -374,6 +643,25 @@ export function runFindingsPipeline(args: {
     const local = extractLocalFindings(args.captureText, contextIndex);
     validation = validateCaptureFindings(local, contextIndex);
   }
+
+  const projects =
+    args.projects ??
+    (args.captureContext?.projectIndex ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      code: p.code,
+    }));
+  const softHint =
+    args.softHintProjectId ?? args.captureContext?.project?.id ?? null;
+
+  const stamped = stampFindingProjects(validation.findings, {
+    captureText: args.captureText,
+    projects,
+    contextIndex,
+    softHintProjectId: softHint,
+    allOpenTodos: args.allOpenTodos,
+  });
+  validation = { ...validation, findings: stamped };
 
   const mapped = mapFindingsToOperations(validation.findings, contextIndex);
   const operations = dedupeProposedOperations(mapped);

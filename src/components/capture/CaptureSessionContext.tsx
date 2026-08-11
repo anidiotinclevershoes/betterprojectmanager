@@ -45,7 +45,18 @@ type CaptureSessionValue = {
   updateSuggestion: (
     id: string,
     patch: Partial<
-      Pick<PendingSuggestion, "kind" | "op" | "content" | "date" | "targetTodoId">
+      Pick<
+        PendingSuggestion,
+        | "kind"
+        | "op"
+        | "content"
+        | "date"
+        | "targetTodoId"
+        | "projectId"
+        | "projectName"
+        | "projectCode"
+        | "projectUncertain"
+      >
     >,
   ) => void;
   reviewOverrides: Record<string, import("@/lib/capture/suggestions").CaptureReviewOverride>;
@@ -185,6 +196,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     toggleTodo,
     removeTodo,
     updateTodo,
+    replaceKnowledge,
   } = useMission();
 
   const [slice, setSlice] = useState<CapturePersistSlice>(emptySlice);
@@ -279,7 +291,18 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     (
       id: string,
       patch: Partial<
-        Pick<PendingSuggestion, "kind" | "op" | "content" | "date" | "targetTodoId">
+        Pick<
+          PendingSuggestion,
+          | "kind"
+          | "op"
+          | "content"
+          | "date"
+          | "targetTodoId"
+          | "projectId"
+          | "projectName"
+          | "projectCode"
+          | "projectUncertain"
+        >
       >,
     ) => {
       setSlice((prev) => ({
@@ -530,7 +553,40 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           detail: item.recommendation?.action,
           projectId: pid,
           dueAt: item.date,
+          kind: item.todoKind ?? (item.kind === "nudge" ? "CHASE" : "ACTION"),
+          waitingOn: item.waitingOn,
         });
+      } else if (item.kind === "risk" && pid) {
+        if (item.op === "complete") {
+          const knowledge = state.knowledge?.find((k) => k.projectId === pid);
+          if (knowledge) {
+            let matched = false;
+            const nextRisks = (knowledge.sections.risks ?? []).map((r) => {
+              const cleaned = r.replace(/^\s*\[resolved\]\s*/i, "").trim();
+              if (
+                cleaned.toLowerCase() === text.toLowerCase() ||
+                text.toLowerCase().includes(cleaned.toLowerCase().slice(0, 24))
+              ) {
+                matched = true;
+                return `[Resolved] ${cleaned}`;
+              }
+              return r;
+            });
+            replaceKnowledge({
+              ...knowledge,
+              sections: {
+                ...knowledge.sections,
+                risks: matched
+                  ? nextRisks
+                  : [...nextRisks, `[Resolved] ${text}`],
+              },
+            });
+          } else {
+            addKnowledgeBullet(pid, "risks", `[Resolved] ${text}`);
+          }
+        } else {
+          addKnowledgeBullet(pid, "risks", text);
+        }
       } else if (item.timelineItem && pid) {
         addTimelineItem(pid, {
           ...item.timelineItem,
@@ -552,18 +608,19 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         pid &&
         (item.kind === "knowledge" ||
           item.kind === "decision" ||
-          item.kind === "risk" ||
           item.kind === "stakeholder")
       ) {
         const section =
-          item.kind === "risk"
-            ? "risks"
-            : item.kind === "decision"
-              ? "decisions"
-              : item.kind === "stakeholder"
-                ? "people"
-                : "now";
+          item.kind === "decision"
+            ? "decisions"
+            : item.kind === "stakeholder"
+              ? "people"
+              : "now";
         addKnowledgeBullet(pid, section, text);
+      } else if (item.kind === "risk" && !pid) {
+        // Risk CREATE/Resolve requires a known project destination.
+        announce("Choose a project before applying this Risk change.");
+        return;
       } else {
         addTodo({ title: text, projectId: pid });
       }
@@ -577,9 +634,11 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       announce,
       applyCaptureResult,
       removeTodo,
+      replaceKnowledge,
       slice.editing,
       slice.projectId,
       slice.result,
+      state.knowledge,
       state.todos,
       toggleTodo,
       updateTodo,

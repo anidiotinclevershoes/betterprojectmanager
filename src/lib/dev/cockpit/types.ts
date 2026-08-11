@@ -77,6 +77,12 @@ export type CaptureRunMetrics = {
   contextBuckets: ContextBucketMeasure[];
   composition: CompositionSlice[];
 
+  /** Measured project-index / deep-context contribution when present. */
+  projectIndexProjectCount?: number | null;
+  deepContextProjectCount?: number | null;
+  projectIndexTokens?: number | null;
+  deepContextTokens?: number | null;
+
   /** Transparent Capture reliability inputs (measured rules, not a quality score). */
   reliability?: {
     state: "normal" | "review_recommended" | "limited";
@@ -108,5 +114,7 @@ export const COMPOSITION_COLORS: Record<string, string> = {
   metadata: "#64748B",
   meetings: "#38BDF8",
   stakeholders: "#84CC16",
+  projectIndex: "#94A3B8",
+  deepContext: "#64748B",
   other: "#94A3B8",
 };

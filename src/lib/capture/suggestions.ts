@@ -32,6 +32,11 @@ export type PendingSuggestion = {
   op: SuggestionOp;
   content: string;
   projectId?: string | null;
+  projectName?: string | null;
+  projectCode?: string | null;
+  /** True when project destination must be chosen by the user. */
+  projectUncertain?: boolean;
+  projectCandidates?: Array<{ id: string; name: string; code?: string }>;
   date?: string;
   destination: string;
   targetTodoId?: string;
@@ -39,6 +44,11 @@ export type PendingSuggestion = {
   timelineItem?: TimelineItemInput;
   knowledgeSection?: KnowledgeSectionId;
   knowledgeBullet?: string;
+  /** To Do follow-up semantics (Waiting / Chase). */
+  todoKind?: import("@/lib/types").TodoKind;
+  waitingOn?: string;
+  /** Compact Knowledge remember proposal. */
+  isKnowledgeRemember?: boolean;
 };
 
 export const KIND_LABEL: Record<SuggestionKind, string> = {
@@ -48,7 +58,7 @@ export const KIND_LABEL: Record<SuggestionKind, string> = {
   risk: "Risk",
   stakeholder: "Stakeholder",
   knowledge: "Knowledge",
-  nudge: "Nudge",
+  nudge: "To Do",
   meeting: "Meeting",
   memory: "Knowledge",
 };
@@ -147,19 +157,20 @@ export function parseSuggestionKind(
 export function destinationFor(kind: SuggestionKind): string {
   switch (kind) {
     case "action":
-      return "To Do";
     case "nudge":
-      return "Nudge";
+      return "To Do";
     case "meeting":
-      return "Meeting";
+      return "Meeting Prep";
     case "milestone":
-      return "Milestone";
+      return "Timeline";
+    case "risk":
+      return "Risks";
     case "memory":
     case "knowledge":
     case "decision":
-    case "risk":
-    case "stakeholder":
       return "Knowledge";
+    case "stakeholder":
+      return "Stakeholders";
     default:
       return "Workspace";
   }
@@ -232,8 +243,9 @@ export function buildSuggestions(
     dueAt?: string;
   }[] = [],
 ): PendingSuggestion[] {
-  // Phase 1.6: prefer deterministic proposed operations when present.
-  if (result.proposedOperations?.length) {
+  // Prefer deterministic proposed operations when the findings pipeline ran
+  // (including empty arrays — do not fall back to legacy memory dumping).
+  if (result.proposedOperations) {
     return buildSuggestionsFromProposedOps(result, openTodos);
   }
 
@@ -360,39 +372,90 @@ function buildSuggestionsFromProposedOps(
                 : op.entityType === "milestone"
                   ? "milestone"
                   : op.entityType === "nudge"
-                    ? "nudge"
+                    ? "action" // Nudge → To Do
                     : "knowledge";
     const suggestionOp = op.operation.toLowerCase() as SuggestionOp;
     const matched =
-      op.entityType === "todo"
+      op.entityType === "todo" || op.entityType === "nudge"
         ? openTodos.find((t) => t.id === op.targetId) ??
           matchTodo(openTodos, op.targetTitle)
         : undefined;
     const rec = result.recommendations.find(
-      (r) => r.proposedOperationId === op.id || r.sourceFindingId === op.sourceFindingId,
+      (r) =>
+        r.proposedOperationId === op.id ||
+        r.sourceFindingId === op.sourceFindingId,
     );
     const proposedText =
       typeof op.proposedValues?.text === "string"
         ? String(op.proposedValues.text)
         : op.targetTitle ?? op.reason;
 
+    const finding = result.findings?.find((f) => f.id === op.sourceFindingId);
+    const pid =
+      op.projectId ??
+      finding?.projectId ??
+      rec?.projectId ??
+      projectId ??
+      null;
+    const projectName =
+      op.projectName ??
+      finding?.projectName ??
+      null;
+    const projectCode =
+      op.projectCode ??
+      finding?.projectCode ??
+      finding?.projectCandidates?.find((c) => c.id === pid)?.code ??
+      null;
+    const projectUncertain =
+      Boolean(finding?.projectCandidates?.length) && !pid;
+    const isRemember = kind === "knowledge" && suggestionOp === "create";
+
+    const todoKindRaw = op.proposedValues?.todoKind;
+    const todoKind =
+      todoKindRaw === "CHASE" ||
+      todoKindRaw === "WAITING" ||
+      todoKindRaw === "REMINDER" ||
+      todoKindRaw === "ACTION"
+        ? todoKindRaw
+        : undefined;
+    const waitingOn =
+      typeof op.proposedValues?.waitingOn === "string"
+        ? String(op.proposedValues.waitingOn)
+        : undefined;
+
     items.push({
       id: `op-${op.id}`,
       kind,
       op: suggestionOp,
       content: proposedText,
-      projectId: projectId ?? null,
+      projectId: pid,
+      projectName,
+      projectCode,
+      projectUncertain,
+      projectCandidates: finding?.projectCandidates,
+      date:
+        typeof op.proposedValues?.dueDate === "string"
+          ? String(op.proposedValues.dueDate)
+          : typeof op.proposedValues?.date === "string"
+            ? String(op.proposedValues.date)
+            : undefined,
       destination: destinationFor(kind),
-      targetTodoId: matched?.id ?? (op.entityType === "todo" ? op.targetId : undefined),
+      targetTodoId:
+        matched?.id ??
+        (op.entityType === "todo" || op.entityType === "nudge"
+          ? op.targetId
+          : undefined),
       recommendation: rec,
-      knowledgeSection:
-        kind === "knowledge" || kind === "risk"
-          ? kind === "risk"
-            ? "risks"
-            : "now"
+      knowledgeSection: isRemember
+        ? "now"
+        : kind === "risk"
+          ? "risks"
           : undefined,
       knowledgeBullet:
-        kind === "knowledge" || kind === "risk" ? proposedText : undefined,
+        isRemember || kind === "risk" ? proposedText : undefined,
+      isKnowledgeRemember: isRemember && suggestionOp === "create",
+      todoKind,
+      waitingOn,
     });
   }
 
@@ -409,12 +472,15 @@ export type CaptureReviewOverride = {
     | "STATE_UNCERTAIN"
     | "OPERATION_UNCERTAIN"
     | "VALUE_UNCERTAIN"
+    | "PROJECT_UNCERTAIN"
     | null;
   kind?: SuggestionKind;
   op?: SuggestionOp;
   content?: string;
   targetTodoId?: string;
   recordName?: string;
+  projectId?: string | null;
+  projectName?: string | null;
   accepted?: boolean;
 };
 

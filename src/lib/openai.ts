@@ -290,6 +290,8 @@ export function buildCaptureResultFromAi(args: {
   sourceType?: CaptureInput["sourceType"];
   ai: AiCapturePayload;
   captureContext?: CaptureProjectContext | null;
+  /** Open todos across projects — used for PROJECT_UNCERTAIN detection. */
+  allOpenTodos?: Array<{ id: string; title: string; projectId?: string | null }>;
 }): CaptureResult {
   const memoryType = (MEMORY_TYPES as readonly string[]).includes(
     args.ai.memoryType,
@@ -308,6 +310,9 @@ export function buildCaptureResultFromAi(args: {
     captureText: args.rawText,
     captureContext: args.captureContext,
     allowLocalFallback: false,
+    projects: args.captureContext?.projectIndex,
+    softHintProjectId: args.projectId,
+    allOpenTodos: args.allOpenTodos,
   });
 
   const recommendations = recommendationsFromOperations(
@@ -371,6 +376,19 @@ export function localCaptureFallback(
     captureText: input.content,
     captureContext: captureContext ?? null,
     allowLocalFallback: true,
+    projects: (state.projects ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      code: p.code,
+    })),
+    softHintProjectId: input.projectId,
+    allOpenTodos: (state.todos ?? [])
+      .filter((t) => !t.done)
+      .map((t) => ({
+        id: t.id,
+        title: t.title,
+        projectId: t.projectId,
+      })),
   });
 
   const memoryId = analysed.memory.id;

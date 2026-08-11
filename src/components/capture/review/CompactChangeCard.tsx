@@ -102,6 +102,8 @@ export function CompactChangeCard({
   entityLabel,
   recordName,
   operation,
+  operationLabel,
+  projectLabel,
   diff,
   why,
   actions,
@@ -114,6 +116,8 @@ export function CompactChangeCard({
   entityLabel: string;
   recordName: string;
   operation: Parameters<typeof ReviewBadge>[0]["operation"];
+  operationLabel?: string;
+  projectLabel?: string;
   diff?: ChangeDiff;
   /** Why panel — rendered above actions. */
   why?: ReactNode;
@@ -145,7 +149,10 @@ export function CompactChangeCard({
             {KIND_ICON[entityKind]}
           </span>
           <div className="compact-change-titles">
-            <p className="compact-change-type">{entityLabel}</p>
+            <p className="compact-change-type">
+              {projectLabel ? `${projectLabel} · ` : ""}
+              {operationLabel || entityLabel}
+            </p>
             <h4 className="compact-change-title">{recordName}</h4>
           </div>
         </div>

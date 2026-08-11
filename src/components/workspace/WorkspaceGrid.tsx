@@ -11,6 +11,7 @@ import {
 import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
 import { TodoFrame } from "@/components/frames/TodoFrame";
 import { MeetingPrepFrame } from "@/components/frames/MeetingPrepFrame";
+import { RiskFrame } from "@/components/frames/RiskFrame";
 import { NudgeFrame } from "@/components/frames/NudgeFrame";
 import { TimelineFrame } from "@/components/frames/TimelineFrame";
 
@@ -23,6 +24,7 @@ type FrameProps = {
 export const frameRegistry: Record<string, ComponentType<FrameProps>> = {
   todo: TodoFrame,
   meetingPrep: MeetingPrepFrame,
+  risks: RiskFrame,
   nudge: NudgeFrame,
   timeline: TimelineFrame,
 };

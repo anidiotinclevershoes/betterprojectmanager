@@ -40,7 +40,11 @@ export default function ProjectDashboardPage() {
   const isReleaseOps = project.kind === "release_ops";
 
   return (
-    <div className="workspace-page project-scroll">
+    <div
+      className={`workspace-page project-scroll project-owned-workspace is-status-${project.status}`}
+      data-project-id={project.id}
+      data-project-code={project.code}
+    >
       {isReleaseOps ? (
         <div className="project-identity project-identity-compact">
           <span className="tag">Release ops</span>
@@ -51,20 +55,7 @@ export default function ProjectDashboardPage() {
       {/* Capture is the fixed top workspace layer — always above project frames. */}
       <CaptureCoachRow defaultProjectId={project.id} />
 
-      <div className="project-workspace-transition" aria-label="Project workspace">
-        <div className="project-workspace-rule" aria-hidden />
-        <div className="project-workspace-identity">
-          <span
-            className={`project-workspace-accent is-status-${project.status}`}
-            aria-hidden
-          />
-          <div className="min-w-0">
-            <p className="project-workspace-name">{project.name}</p>
-            <p className="project-workspace-label">Project Workspace</p>
-          </div>
-        </div>
-        <div className="project-workspace-rule" aria-hidden />
-      </div>
+      <div className="project-owned-divider" aria-hidden />
 
       <div className="workspace-toolbar workspace-toolbar-end">
         <button
@@ -76,15 +67,17 @@ export default function ProjectDashboardPage() {
         </button>
       </div>
 
-      {!hydrated ? (
-        <p className="empty-copy">Loading…</p>
-      ) : (
-        <WorkspaceFrameRow frames={frames} projectId={project.id} />
-      )}
+      <div className="project-owned-frames">
+        {!hydrated ? (
+          <p className="empty-copy">Loading…</p>
+        ) : (
+          <WorkspaceFrameRow frames={frames} projectId={project.id} />
+        )}
 
-      <WorkspaceFrame type="knowledge" title="Knowledge">
-        <ProjectKnowledgeBrief projectId={project.id} />
-      </WorkspaceFrame>
+        <WorkspaceFrame type="knowledge" title="Knowledge">
+          <ProjectKnowledgeBrief projectId={project.id} />
+        </WorkspaceFrame>
+      </div>
 
       <WorkspaceCustomiser
         open={customiseOpen}
