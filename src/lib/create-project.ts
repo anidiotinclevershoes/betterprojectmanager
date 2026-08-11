@@ -568,66 +568,115 @@ function extractFocus(text: string): string {
   return m ? ensureSentence(m[0].replace(/\s+/g, " ").trim().slice(0, 160)) : "";
 }
 
+/** Proper noun capture — do not use the `i` flag with [A-Z] (JS would match lowercase). */
+const PERSON =
+  "\\b((?:[A-Z][a-z]+(?:\\s+[A-Z][a-z]+)?)|(?:Finance|Security|Operations|Platform))\\b";
+
 function extractStakeholders(text: string): SetupStakeholderDraft[] {
   const people: SetupStakeholderDraft[] = [];
-  const patterns: Array<{ re: RegExp; role?: string }> = [
-    {
-      re: /([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:owns|is|as)\s+(?:the\s+)?(?:business(?:\s+side)?|business owner)/gi,
-      role: "Business Owner",
-    },
-    {
-      re: /([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:is leading|leads|leading)\s+technical/gi,
-      role: "Technical Lead",
-    },
-    {
-      re: /([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:owns|is)\s+(?:the\s+)?sponsor/gi,
-      role: "Sponsor",
-    },
-    {
-      re: /([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:from|in)\s+Finance/gi,
-      role: "Finance",
-    },
-    {
-      re: /([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:handles|owns|leads)\s+([^.!\n,]{4,40})/gi,
-    },
-  ];
+  const patterns: Array<{ re: RegExp; role?: string; roleFromGroup?: number }> =
+    [
+      {
+        re: new RegExp(
+          `${PERSON}\\s+(?:owns|is|as)\\s+(?:the\\s+)?(?:business(?:\\s+side)?|business owner)`,
+          "g",
+        ),
+        role: "Business Owner",
+      },
+      {
+        re: new RegExp(
+          `${PERSON}\\s+(?:is leading|leads|leading)\\s+technical`,
+          "g",
+        ),
+        role: "Technical Lead",
+      },
+      {
+        re: new RegExp(
+          `${PERSON}\\s+(?:owns|is)\\s+(?:the\\s+)?sponsor`,
+          "g",
+        ),
+        role: "Sponsor",
+      },
+      {
+        re: new RegExp(
+          `${PERSON}\\s+(?:handles|owns|leads)\\s+([^.!\\n,]{4,40})`,
+          "g",
+        ),
+        roleFromGroup: 2,
+      },
+    ];
 
-  for (const { re, role } of patterns) {
+  const stop = /^(This|We|The|Our|CAB|Security|Platform|And|But|Then|Need|Needs|Confirmation|Await|Waiting)$/i;
+
+  for (const { re, role, roleFromGroup } of patterns) {
     for (const match of text.matchAll(re)) {
       const name = match[1]?.trim();
-      if (!name || /^(This|We|The|Our|CAB|Security|Platform)$/i.test(name)) {
-        continue;
-      }
+      if (!name || stop.test(name) || name.includes(" and ")) continue;
       if (people.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
         continue;
       }
-      const inferredRole =
-        role ||
-        (match[2] ? titleCase(match[2].trim().slice(0, 40)) : undefined);
-      const uncertain = !role && !match[2];
+      const fromGroup =
+        roleFromGroup != null
+          ? titleCase((match[roleFromGroup] ?? "").trim().slice(0, 40))
+          : "";
+      const inferredRole = role || fromGroup || undefined;
+      if (!inferredRole) continue;
+      // Skip roles that look like sentence debris
+      if (/^(the|and|but|from|for)\b/i.test(inferredRole)) continue;
       people.push({
         name,
-        role: inferredRole || "Stakeholder",
-        needsReview: uncertain || /lead\?/i.test(inferredRole || ""),
+        role: inferredRole,
+        needsReview: !role,
       });
       if (people.length >= 8) break;
     }
     if (people.length >= 8) break;
   }
+
+  // Team / function named without a person — e.g. "confirmation from Finance"
+  if (
+    /\bfrom Finance\b/i.test(text) &&
+    !people.some((p) => /finance/i.test(p.name) || /finance/i.test(p.role ?? ""))
+  ) {
+    people.push({
+      name: "Finance",
+      role: "Finance",
+      needsReview: true,
+    });
+  }
+
   return people;
 }
 
 function extractRisks(text: string): SetupRiskDraft[] {
   const risks: SetupRiskDraft[] = [];
-  const cues =
-    /((?:worried|concern(?:ed)?|risk|threaten|may delay|might delay|could delay|blocker|worried that)\s+[^.!\n]{10,140})/gi;
-  for (const match of text.matchAll(cues)) {
-    let title = match[1]!.replace(/\s+/g, " ").trim();
-    title = title.replace(/^(worried|concerned|concern)\s+(that\s+)?/i, "");
-    title = ensureSentence(title.slice(0, 160));
-    const needsReview = /maybe|possibly|might|could be/i.test(title);
-    if (!risks.some((r) => r.title.toLowerCase() === title.toLowerCase())) {
-      risks.push({ title, needsReview });
+  const cues = [
+    /\b(?:we're|we are)\s+worried\s+(?:that\s+)?([^.!\n]{10,140})/gi,
+    /\bworried\s+(?:that\s+)?([^.!\n]{10,140})/gi,
+    /\bconcern(?:ed)?\s+(?:that\s+|about\s+)?([^.!\n]{10,140})/gi,
+    /\b(?:risk(?:s)?\s+(?:is|are|that)\s+)([^.!\n]{10,140})/gi,
+    /\b([^.!\n]{8,120}?\b(?:may|might|could)\s+delay\b[^.!\n]{0,80})/gi,
+    /\b([^.!\n]{8,100}?\bthreaten(?:s|ed|ing)?\b[^.!\n]{0,80})/gi,
+  ];
+  for (const re of cues) {
+    for (const match of text.matchAll(re)) {
+      let title = (match[1] ?? match[0]!).replace(/\s+/g, " ").trim();
+      title = title.replace(/^(worried|concerned|concern)\s+(that\s+|about\s+)?/i, "");
+      title = title.replace(/^(we're|we are)\s+worried\s+(that\s+)?/i, "");
+      // Avoid knowledge lines that merely mention "risk" as a noun in a preference
+      if (
+        /\b(?:residual[- ]risk|risk summary|risks included)\b/i.test(title) &&
+        !/\b(delay|threaten|blocker|worried)\b/i.test(title)
+      ) {
+        continue;
+      }
+      title = ensureSentence(title.slice(0, 160));
+      if (title.length < 12) continue;
+      const needsReview = /maybe|possibly|might|could be/i.test(title);
+      if (!risks.some((r) => r.title.toLowerCase() === title.toLowerCase())) {
+        risks.push({ title, needsReview });
+      }
+      if (risks.length >= 8) break;
     }
     if (risks.length >= 8) break;
   }
@@ -726,7 +775,7 @@ function extractDates(text: string): SetupDateDraft[] {
 function extractKnowledge(text: string): string[] {
   const facts: string[] = [];
   const patterns = [
-    /((?:CAB|Security|Platform|Finance|Steering)[^.!\n]{10,140}(?:requires?|needs?|prefer|normally|only|must|before)[^.!\n]{5,80})/gi,
+    /((?:CAB|Security|Platform|Steering)[^.!\n]{10,140}(?:requires?|needs?|prefer|normally|only|must|before)[^.!\n]{5,80})/gi,
     /((?:[A-Z][a-z]+)\s+(?:normally|usually|only|prefers?|wants?|requires?)[^.!\n]{10,120})/gi,
     /((?:remember|rule|constraint|always|never)\s+[^.!\n]{10,120})/gi,
   ];
@@ -734,9 +783,23 @@ function extractKnowledge(text: string): string[] {
     for (const m of text.matchAll(re)) {
       let fact = m[1]!.replace(/\s+/g, " ").trim();
       fact = fact.replace(/^remember(?:\s+that)?\s+/i, "");
-      if (/^(worried|we need|we've)/i.test(fact)) continue;
+      if (/^(worried|we need|we've|finance)/i.test(fact)) continue;
+      if (/\b(still need|waiting on|confirmation from)\b/i.test(fact)) continue;
       const cleaned = ensureSentence(fact.slice(0, 180));
-      if (!facts.some((f) => f.toLowerCase() === cleaned.toLowerCase())) {
+      if (cleaned.length < 24) continue;
+      // Skip exact duplicates and obvious substring echoes of a longer fact
+      const lower = cleaned.toLowerCase();
+      if (facts.some((f) => f.toLowerCase() === lower)) continue;
+      if (facts.some((f) => f.toLowerCase().includes(lower) && f.length > cleaned.length + 10)) {
+        continue;
+      }
+      // Prefer longer fact when a new one contains an existing shorter one
+      const shorterIdx = facts.findIndex(
+        (f) => lower.includes(f.toLowerCase()) && cleaned.length > f.length + 10,
+      );
+      if (shorterIdx >= 0) {
+        facts.splice(shorterIdx, 1, cleaned);
+      } else {
         facts.push(cleaned);
       }
       if (facts.length >= 12) return facts;

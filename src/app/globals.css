@@ -5799,10 +5799,10 @@ body {
 
 .np-brand {
   margin: 0;
-  font-size: 12px;
+  font-size: clamp(18px, 2.4vw, 26px);
   font-weight: 800;
-  letter-spacing: 0.28em;
-  color: var(--text-secondary);
+  letter-spacing: 0.32em;
+  color: var(--text-primary);
 }
 
 .np-hero-title {
