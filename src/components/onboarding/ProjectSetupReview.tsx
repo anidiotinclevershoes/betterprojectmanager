@@ -442,7 +442,9 @@ function StakeholderList({
           />
           {item.needsReview ? (
             <span className="np-needs-review">
-              {item.role ? `${item.role}?` : "Needs Review"}
+              {item.role && item.role !== item.name
+                ? `${item.role}?`
+                : "Needs Review"}
             </span>
           ) : null}
           <button
