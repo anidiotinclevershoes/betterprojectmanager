@@ -5771,3 +5771,556 @@ body {
     align-items: flex-start;
   }
 }
+
+/* ——— New Project onboarding ——— */
+
+.np-page,
+.np-first-run-page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.np-experience {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 0 48px;
+}
+
+.np-hero {
+  text-align: center;
+  padding: 18px 12px 8px;
+}
+
+.np-hero-logo {
+  color: var(--brand-yellow);
+  margin: 0 auto 10px;
+}
+
+.np-brand {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  color: var(--text-secondary);
+}
+
+.np-hero-title {
+  margin: 8px 0 12px;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+
+.np-hero-lead {
+  margin: 0 auto;
+  max-width: 42rem;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.np-trust {
+  margin: 0 auto;
+  max-width: 40rem;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent-timeline) 28%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent-timeline) 8%, var(--bg-surface));
+  text-align: center;
+}
+
+.np-trust p {
+  margin: 0;
+}
+
+.np-trust .meta {
+  margin-top: 4px;
+}
+
+.np-trust.is-inline {
+  max-width: none;
+  text-align: left;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.np-path-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.np-path-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 16px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  min-height: 240px;
+}
+
+.np-path-card h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.np-path-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.np-path-card .primary-btn,
+.np-path-card .muted-btn,
+.np-path-card .ghost-btn {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.np-path-card.is-recommended {
+  border-color: color-mix(in srgb, var(--accent-primary) 45%, var(--border-subtle));
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent-primary) 12%, transparent),
+      transparent 48%
+    ),
+    var(--bg-surface);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-primary) 18%, transparent);
+}
+
+.np-path-card.is-quiet {
+  opacity: 0.92;
+}
+
+.np-recommended-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--accent-primary);
+  background: color-mix(in srgb, var(--accent-primary) 16%, transparent);
+}
+
+.np-back {
+  align-self: flex-start;
+}
+
+.np-panel-head {
+  margin-bottom: 8px;
+}
+
+.np-panel-head h2 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 750;
+}
+
+.np-panel-lead {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 42rem;
+}
+
+.np-talk-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.9fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.np-record-panel {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-surface-raised) 80%, transparent);
+  margin-bottom: 12px;
+}
+
+.np-record-status {
+  font-size: 13px;
+  font-weight: 650;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.np-record-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.np-reassure {
+  margin: 0;
+}
+
+.np-transcript-field textarea {
+  min-height: 220px;
+}
+
+.np-talk-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.np-guidance,
+.np-knowledge-callout,
+.np-example {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  margin-bottom: 12px;
+}
+
+.np-guidance h3,
+.np-knowledge-callout h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.np-guidance-list,
+.np-knowledge-callout ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.np-knowledge-callout {
+  border-color: color-mix(in srgb, var(--accent-knowledge) 30%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent-knowledge) 8%, var(--bg-surface));
+}
+
+.np-example-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--accent-primary);
+  font-size: 13px;
+  font-weight: 650;
+  padding: 0;
+  cursor: pointer;
+}
+
+.np-example-body {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid color-mix(in srgb, var(--accent-timeline) 50%, transparent);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+.np-paste textarea {
+  min-height: 280px;
+}
+
+.np-paste-tip {
+  margin: 8px 0 0;
+}
+
+.np-blank-form {
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.np-review {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 88px;
+}
+
+.np-kicker {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.np-review-title {
+  margin: 4px 0 6px;
+  font-size: 26px;
+  font-weight: 750;
+}
+
+.np-review-lead {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.np-review-summary {
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 28%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent-primary) 8%, var(--bg-surface));
+}
+
+.np-review-summary-label {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.np-review-summary-stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.np-review-summary-stats strong {
+  color: var(--text-primary);
+  font-weight: 750;
+}
+
+.np-section {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.np-section.is-emphasis {
+  border-color: color-mix(in srgb, var(--accent-knowledge) 35%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent-knowledge) 6%, var(--bg-surface));
+}
+
+.np-section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+.np-section-badge {
+  margin-left: 8px;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent-knowledge);
+  vertical-align: middle;
+}
+
+.np-section-body {
+  padding: 0 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.np-compact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.np-compact-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) auto auto auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.np-stakeholder-list .np-compact-row,
+.np-date-list .np-compact-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+}
+
+.np-compact-title {
+  min-width: 0;
+}
+
+.np-needs-review {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--warning);
+  white-space: nowrap;
+}
+
+.np-compact-row.is-needs-review {
+  outline: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.np-knowledge-intro {
+  margin: 0 0 4px;
+}
+
+.np-remember-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.np-remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.np-remember-row.is-skipped {
+  opacity: 0.65;
+}
+
+.np-remember-check {
+  color: var(--accent-knowledge);
+  font-weight: 700;
+}
+
+.np-remember-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.np-remember-actions {
+  display: inline-flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.np-not-mentioned {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px dashed var(--border-subtle);
+}
+
+.np-not-mentioned-title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.np-not-mentioned ul {
+  margin: 0 0 6px;
+  padding-left: 18px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.np-review-sticky {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0 4px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--bg-app) 92%, transparent) 28%,
+    var(--bg-app)
+  );
+  z-index: 5;
+}
+
+.np-review-sticky-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.np-create-btn {
+  min-width: 140px;
+}
+
+.np-success {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--success) 14%, transparent);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+@media (max-width: 980px) {
+  .np-path-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .np-path-card.is-quiet {
+    grid-column: 1 / -1;
+  }
+  .np-talk-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .np-path-grid {
+    grid-template-columns: 1fr;
+  }
+  .np-path-card.is-quiet {
+    grid-column: auto;
+  }
+  .np-compact-row,
+  .np-stakeholder-list .np-compact-row,
+  .np-date-list .np-compact-row {
+    grid-template-columns: 1fr;
+  }
+  .np-remember-row {
+    flex-wrap: wrap;
+  }
+  .np-review-sticky {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .np-review-sticky-main {
+    justify-content: stretch;
+  }
+  .np-create-btn {
+    width: 100%;
+  }
+}

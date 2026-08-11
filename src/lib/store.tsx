@@ -820,17 +820,39 @@ export function MissionProvider({ children }: { children: ReactNode }) {
 
   const createProject = useCallback((input: CreateProjectInput) => {
     const bundle = buildNewProject(input);
-    setState((prev) => ({
-      ...prev,
-      projects: [...prev.projects, bundle.project],
-      knowledge: [...(prev.knowledge ?? []), bundle.knowledge],
-      recommendations: [
-        ...bundle.recommendations,
-        ...prev.recommendations,
-      ],
-      todos: [...bundle.todos, ...(prev.todos ?? [])],
-      lastAnalyzedAt: new Date().toISOString(),
-    }));
+    setState((prev) => {
+      let next = {
+        ...prev,
+        projects: [...prev.projects, bundle.project],
+        knowledge: [...(prev.knowledge ?? []), bundle.knowledge],
+        recommendations: [
+          ...bundle.recommendations,
+          ...prev.recommendations,
+        ],
+        todos: [...bundle.todos, ...(prev.todos ?? [])],
+        timeline: [...(bundle.timeline ?? []), ...(prev.timeline ?? [])],
+        lastAnalyzedAt: new Date().toISOString(),
+      };
+      if (input.sourceNarrative?.trim()) {
+        const memory = {
+          id: `mem-setup-${bundle.project.id}`,
+          type: "conversation" as const,
+          projectId: bundle.project.id,
+          title: `Project setup — ${bundle.project.code}`,
+          content: input.sourceNarrative.trim(),
+          tags: ["project-setup", input.sourceMode ?? "setup"],
+          people: (input.stakeholders ?? []).map((s) => s.name).filter(Boolean),
+          occurredAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          source: "capture" as const,
+        };
+        next = {
+          ...next,
+          memories: [memory, ...(next.memories ?? [])],
+        };
+      }
+      return next;
+    });
     return bundle.project.id;
   }, []);
 
