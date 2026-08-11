@@ -5423,22 +5423,22 @@ body {
 :root,
 [data-theme="dark"] {
   --accent-risk: #d97757;
-  --workspace-owned-bg: color-mix(in srgb, var(--bg-surface-raised) 72%, #101826);
+  --workspace-owned-bg: color-mix(in srgb, var(--bg-surface-raised) 68%, #142033);
   --workspace-owned-edge: color-mix(in srgb, var(--accent-timeline) 58%, transparent);
   --workspace-owned-selected: color-mix(
     in srgb,
-    var(--workspace-owned-bg) 78%,
+    var(--workspace-owned-bg) 70%,
     var(--accent-soft)
   );
 }
 
 [data-theme="light"] {
   --accent-risk: #c45f3a;
-  --workspace-owned-bg: color-mix(in srgb, #e8eef6 78%, #f7f8fa);
+  --workspace-owned-bg: color-mix(in srgb, #dfe8f5 82%, #f4f7fb);
   --workspace-owned-edge: color-mix(in srgb, var(--accent-timeline) 48%, transparent);
   --workspace-owned-selected: color-mix(
     in srgb,
-    var(--workspace-owned-bg) 82%,
+    var(--workspace-owned-bg) 72%,
     var(--accent-soft)
   );
 }
@@ -5491,7 +5491,7 @@ body {
   border-radius: 0;
   background: var(--workspace-owned-selected);
   border: none;
-  box-shadow: inset 3px 0 0 var(--workspace-owned-edge);
+  box-shadow: none;
 }
 
 /* Compact boundary strip — marks where project-specific content begins. */
@@ -5522,8 +5522,8 @@ body {
 
 .project-workspace-name {
   margin: 2px 0 0;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 550;
   letter-spacing: 0;
   text-transform: none;
   color: var(--text-secondary);
