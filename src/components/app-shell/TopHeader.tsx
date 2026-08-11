@@ -1,6 +1,7 @@
 "use client";
 
 import { AppearanceToggle } from "@/components/app-shell/AppearanceToggle";
+import { HeaderCoachButton } from "@/components/coach/HeaderCoachButton";
 
 export function TopHeader({
   title,
@@ -38,6 +39,7 @@ export function TopHeader({
       </div>
 
       <div className="top-header-right">
+        <HeaderCoachButton />
         <AppearanceToggle />
         {userName ? (
           <div className="header-user">

@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
-import { useCaptureSession } from "@/components/capture/CaptureSessionContext";
+import { CaptureBestPractice } from "@/components/capture/CaptureBestPractice";
 import { CaptureContextInspector } from "@/components/capture/CaptureContextInspector";
 import { CaptureReliabilityNotice } from "@/components/capture/CaptureReliabilityNotice";
-import { CaptureTips } from "@/components/capture/CaptureTips";
+import { useCaptureSession } from "@/components/capture/CaptureSessionContext";
 import { useMission } from "@/lib/store";
 import { analysesRemaining } from "@/lib/workspace/history";
 import { shouldWarnBeforeAnalysis } from "@/lib/capture/reliability";
@@ -24,6 +24,30 @@ import {
 import type { TargetOption } from "@/components/capture/review/TargetPicker";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
 import { KIND_LABEL } from "@/lib/capture/suggestions";
+
+type CaptureBlock = {
+  id: string;
+  text: string;
+  source: "typed" | "recorded";
+};
+
+function makeBlock(
+  source: CaptureBlock["source"],
+  text = "",
+): CaptureBlock {
+  return {
+    id: `blk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+    text,
+    source,
+  };
+}
+
+function joinBlocks(blocks: CaptureBlock[]) {
+  return blocks
+    .map((b) => b.text.trim())
+    .filter(Boolean)
+    .join("\n\n");
+}
 
 function formatAnalysedAt(iso: string | null) {
   if (!iso) return null;
@@ -51,7 +75,6 @@ export function CaptureWorkspace({
     projectId,
     setProjectId,
     fileNames,
-    addFileName,
     result,
     suggestions,
     dismissed,
@@ -89,9 +112,98 @@ export function CaptureWorkspace({
   // Soft context hint only — Capture remains project-agnostic.
   const softHintProjectId = defaultProjectId || undefined;
 
+  const [blocks, setBlocks] = useState<CaptureBlock[]>(() => [
+    makeBlock("typed", content),
+  ]);
+  const recordingIdRef = useRef<string | null>(null);
+  const pushingContentRef = useRef(false);
+
+  // Keep analyse payload in sync with visible blocks.
+  useEffect(() => {
+    const joined = joinBlocks(blocks);
+    if (joined === content) return;
+    pushingContentRef.current = true;
+    setContent(joined);
+  }, [blocks, content, setContent]);
+
+  // Adopt external content changes (session hydrate / New Capture) without
+  // collapsing multi-block structure when we were the ones who pushed.
+  useEffect(() => {
+    if (pushingContentRef.current) {
+      pushingContentRef.current = false;
+      return;
+    }
+    if (!content.trim()) {
+      setBlocks((prev) =>
+        prev.some((b) => b.text.trim()) ? [makeBlock("typed")] : prev,
+      );
+      recordingIdRef.current = null;
+      return;
+    }
+    setBlocks((prev) =>
+      joinBlocks(prev).trim() ? prev : [makeBlock("typed", content)],
+    );
+  }, [content]);
+
+  function updateBlockText(id: string, text: string) {
+    setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, text } : b)));
+  }
+
+  function deleteBlock(id: string) {
+    setBlocks((prev) => {
+      const next = prev.filter((b) => b.id !== id);
+      if (!next.length) return [makeBlock("typed")];
+      if (next[next.length - 1]?.source !== "typed") {
+        return [...next, makeBlock("typed")];
+      }
+      return next;
+    });
+    if (recordingIdRef.current === id) recordingIdRef.current = null;
+  }
+
+  function prepareRecordingBlock() {
+    const rec = makeBlock("recorded", "");
+    recordingIdRef.current = rec.id;
+    setBlocks((prev) => {
+      const trimmed = [...prev];
+      while (
+        trimmed.length &&
+        trimmed[trimmed.length - 1]!.source === "typed" &&
+        !trimmed[trimmed.length - 1]!.text.trim()
+      ) {
+        trimmed.pop();
+      }
+      return [...trimmed, rec];
+    });
+    return rec.id;
+  }
+
+  function setRecordingText(text: string) {
+    const id = recordingIdRef.current;
+    if (!id) return;
+    updateBlockText(id, text);
+  }
+
+  function finalizeRecordingBlock() {
+    const id = recordingIdRef.current;
+    recordingIdRef.current = null;
+    setBlocks((prev) => {
+      let next = [...prev];
+      const idx = id ? next.findIndex((b) => b.id === id) : -1;
+      if (idx >= 0 && !next[idx]!.text.trim()) {
+        next = next.filter((b) => b.id !== id);
+      }
+      if (!next.length || next[next.length - 1]!.source !== "typed") {
+        next = [...next, makeBlock("typed")];
+      }
+      return next;
+    });
+  }
+
   const recording = useRecordingBridge({
-    content,
-    setContent,
+    setRecordingText,
+    prepareRecordingBlock,
+    finalizeRecordingBlock,
     setBusy,
     setError,
     announce,
@@ -362,7 +474,8 @@ export function CaptureWorkspace({
           </h2>
           {!showSessionActions ? (
             <p className="capture-support">
-              Paste notes, type an update, upload a file or record your thoughts.
+              Type an update or record your thoughts — Lume will organise what
+              you share.
             </p>
           ) : analysedLabel ? (
             <p className="capture-support meta">Last analysed {analysedLabel}</p>
@@ -374,7 +487,7 @@ export function CaptureWorkspace({
           ) : null}
           <button
             type="button"
-            className="muted-btn capture-new-btn"
+            className="capture-new-btn"
             onClick={clearSession}
             title="New Capture"
             aria-label="New Capture"
@@ -438,23 +551,65 @@ export function CaptureWorkspace({
           <label className="sr-only" htmlFor="capture-input">
             Capture notes
           </label>
-          <textarea
-            id="capture-input"
-            value={content}
-            onChange={(e) => {
-              if (!isAnalysed) setContent(e.target.value);
-            }}
-            rows={3}
-            readOnly={isAnalysed}
-            disabled={busy === "analysing"}
-            placeholder="What happened? Add notes, paste text or drop files here…"
-            className={`capture-textarea capture-textarea-idle ${isAnalysed ? "is-readonly" : ""}`}
-            aria-readonly={isAnalysed || undefined}
-          />
-          {!isAnalysed ? <CaptureTips /> : null}
-          {fileNames.length && !isAnalysed ? (
-            <p className="meta mt-1">Files: {fileNames.join(", ")}</p>
-          ) : null}
+          <div className="capture-blocks" aria-label="Capture notes">
+            {blocks.map((block, index) => (
+              <div
+                key={block.id}
+                className={`capture-block is-${block.source}`}
+              >
+                {index > 0 ? (
+                  <div className="capture-block-break" role="separator">
+                    <span className="capture-block-break-rule" aria-hidden />
+                    <span className="capture-block-break-label">
+                      {block.source === "recorded"
+                        ? "Recording"
+                        : "Continued"}
+                    </span>
+                    {!isAnalysed ? (
+                      <button
+                        type="button"
+                        className="ghost-btn capture-block-delete"
+                        onClick={() => deleteBlock(block.id)}
+                        aria-label="Delete this section"
+                        title="Delete this section"
+                      >
+                        Delete
+                      </button>
+                    ) : null}
+                  </div>
+                ) : blocks.length > 1 && !isAnalysed ? (
+                  <div className="capture-block-break is-leading">
+                    <button
+                      type="button"
+                      className="ghost-btn capture-block-delete"
+                      onClick={() => deleteBlock(block.id)}
+                      aria-label="Delete this section"
+                      title="Delete this section"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ) : null}
+                <CaptureAutoTextarea
+                  id={index === blocks.length - 1 ? "capture-input" : undefined}
+                  value={block.text}
+                  readOnly={isAnalysed}
+                  disabled={busy === "analysing"}
+                  placeholder={
+                    index === 0
+                      ? "What happened? Type notes or press Record…"
+                      : block.source === "recorded"
+                        ? "Recording transcript…"
+                        : "Continue typing…"
+                  }
+                  onChange={(text) => {
+                    if (!isAnalysed) updateBlockText(block.id, text);
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          {!isAnalysed ? <CaptureBestPractice /> : null}
 
           <div className="capture-toolbar">
             <div className="capture-toolbar-left">
@@ -494,48 +649,6 @@ export function CaptureWorkspace({
                       Stop · {recording.seconds}s
                     </button>
                   )}
-
-                  <button
-                    type="button"
-                    className="ghost-btn"
-                    onClick={() => {
-                      void navigator.clipboard
-                        .readText()
-                        .then((text) => {
-                          if (text)
-                            setContent(content ? `${content}\n${text}` : text);
-                        })
-                        .catch(() =>
-                          setError(
-                            "Clipboard access blocked — paste with Ctrl/Cmd+V instead.",
-                          ),
-                        );
-                    }}
-                    disabled={busy === "analysing"}
-                  >
-                    Paste text
-                  </button>
-
-                  <label className="ghost-btn file-btn">
-                    Upload file
-                    <input
-                      type="file"
-                      accept=".txt,.md,.csv,.json"
-                      className="sr-only"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (!file || isAnalysed) return;
-                        addFileName(file.name);
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          const text = String(reader.result ?? "");
-                          setContent(content ? `${content}\n${text}` : text);
-                        };
-                        reader.readAsText(file);
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
                 </>
               ) : null}
 
@@ -684,17 +797,59 @@ export function CaptureWorkspace({
   );
 }
 
+function CaptureAutoTextarea({
+  id,
+  value,
+  onChange,
+  readOnly,
+  disabled,
+  placeholder,
+}: {
+  id?: string;
+  value: string;
+  onChange: (value: string) => void;
+  readOnly?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "0px";
+    el.style.height = `${Math.max(el.scrollHeight, 72)}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      ref={ref}
+      id={id}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={3}
+      readOnly={readOnly}
+      disabled={disabled}
+      placeholder={placeholder}
+      className={`capture-textarea capture-textarea-idle capture-textarea-auto ${readOnly ? "is-readonly" : ""}`}
+      aria-readonly={readOnly || undefined}
+    />
+  );
+}
+
 function useRecordingBridge({
-  content,
-  setContent,
+  setRecordingText,
+  prepareRecordingBlock,
+  finalizeRecordingBlock,
   setBusy,
   setError,
   announce,
   locked,
   onRecorded,
 }: {
-  content: string;
-  setContent: (v: string) => void;
+  setRecordingText: (text: string) => void;
+  prepareRecordingBlock: () => string;
+  finalizeRecordingBlock: () => void;
   setBusy: (v: "idle" | "transcribing" | "analysing") => void;
   setError: (v: string | null) => void;
   announce: (v: string) => void;
@@ -706,15 +861,11 @@ function useRecordingBridge({
   const timerRef = useRef<number | null>(null);
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
   const liveBaseRef = useRef("");
-  const contentRef = useRef(content);
+  const recordingTextRef = useRef("");
   const lockedRef = useRef(locked);
   const [active, setActive] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [hint, setHint] = useState<string | null>(null);
-
-  useEffect(() => {
-    contentRef.current = content;
-  }, [content]);
 
   useEffect(() => {
     lockedRef.current = locked;
@@ -745,6 +896,9 @@ function useRecordingBridge({
         void finish(recorder.mimeType || mimeType);
       };
       mediaRecorderRef.current = recorder;
+      prepareRecordingBlock();
+      liveBaseRef.current = "";
+      recordingTextRef.current = "";
       recorder.start();
       setActive(true);
       setSeconds(0);
@@ -774,7 +928,6 @@ function useRecordingBridge({
         setHint("Recording… live transcription unavailable in this browser");
         return;
       }
-      liveBaseRef.current = contentRef.current;
       const recognition = new SR();
       recognition.continuous = true;
       recognition.interimResults = true;
@@ -794,9 +947,9 @@ function useRecordingBridge({
         if (finalChunk) {
           liveBaseRef.current = `${liveBaseRef.current} ${finalChunk}`.trim();
         }
-        setContent(
-          `${liveBaseRef.current}${interim ? ` ${interim}` : ""}`.trim(),
-        );
+        const next = `${liveBaseRef.current}${interim ? ` ${interim}` : ""}`.trim();
+        recordingTextRef.current = next;
+        setRecordingText(next);
         setHint("Live transcription");
       };
       recognition.onerror = () => setHint("Recording…");
@@ -807,6 +960,7 @@ function useRecordingBridge({
       setError(
         "Microphone permission denied. Allow mic access or type your note instead.",
       );
+      finalizeRecordingBlock();
     }
   }
 
@@ -828,10 +982,12 @@ function useRecordingBridge({
   async function finish(mimeType: string) {
     if (lockedRef.current) {
       setBusy("idle");
+      finalizeRecordingBlock();
       return;
     }
-    if (contentRef.current.trim()) {
+    if (recordingTextRef.current.trim()) {
       setBusy("idle");
+      finalizeRecordingBlock();
       announce("Recording saved. Edit the transcript, then press Analyse.");
       return;
     }
@@ -850,11 +1006,15 @@ function useRecordingBridge({
       if (!response.ok || !data.text) {
         throw new Error(data.error || "Transcription failed");
       }
-      if (!lockedRef.current) setContent(data.text);
+      if (!lockedRef.current) {
+        recordingTextRef.current = data.text;
+        setRecordingText(data.text);
+      }
       announce("Transcript ready. Edit if needed, then press Analyse.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Voice capture failed");
     } finally {
+      finalizeRecordingBlock();
       setBusy("idle");
     }
   }
