@@ -41,43 +41,51 @@ export default function ProjectDashboardPage() {
 
   return (
     <div
-      className={`workspace-page project-scroll project-owned-workspace is-status-${project.status}`}
+      className="workspace-page project-scroll"
       data-project-id={project.id}
       data-project-code={project.code}
     >
-      {isReleaseOps ? (
-        <div className="project-identity project-identity-compact">
-          <span className="tag">Release ops</span>
-          <CloneRelOpsButton projectId={project.id} />
-        </div>
-      ) : null}
-
-      {/* Capture is the fixed top workspace layer — always above project frames. */}
+      {/* Capture + Coach sit above the project-owned workspace. */}
       <CaptureCoachRow defaultProjectId={project.id} />
 
-      <div className="project-owned-divider" aria-hidden />
+      <section
+        className={`project-owned-workspace is-status-${project.status}`}
+        aria-label={`${project.code} project workspace`}
+      >
+        <header className="project-workspace-boundary">
+          <div className="project-workspace-identity">
+            <h2 className="project-workspace-code">{project.code}</h2>
+            <p className="project-workspace-name">{project.name}</p>
+          </div>
+          <div className="project-workspace-boundary-actions">
+            {isReleaseOps ? (
+              <div className="project-identity-compact">
+                <span className="tag">Release ops</span>
+                <CloneRelOpsButton projectId={project.id} />
+              </div>
+            ) : null}
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => setCustomiseOpen(true)}
+            >
+              Customise workspace
+            </button>
+          </div>
+        </header>
 
-      <div className="workspace-toolbar workspace-toolbar-end">
-        <button
-          type="button"
-          className="ghost-btn"
-          onClick={() => setCustomiseOpen(true)}
-        >
-          Customise workspace
-        </button>
-      </div>
+        <div className="project-owned-frames">
+          {!hydrated ? (
+            <p className="empty-copy">Loading…</p>
+          ) : (
+            <WorkspaceFrameRow frames={frames} projectId={project.id} />
+          )}
 
-      <div className="project-owned-frames">
-        {!hydrated ? (
-          <p className="empty-copy">Loading…</p>
-        ) : (
-          <WorkspaceFrameRow frames={frames} projectId={project.id} />
-        )}
-
-        <WorkspaceFrame type="knowledge" title="Knowledge">
-          <ProjectKnowledgeBrief projectId={project.id} />
-        </WorkspaceFrame>
-      </div>
+          <WorkspaceFrame type="knowledge" title="Knowledge">
+            <ProjectKnowledgeBrief projectId={project.id} />
+          </WorkspaceFrame>
+        </div>
+      </section>
 
       <WorkspaceCustomiser
         open={customiseOpen}

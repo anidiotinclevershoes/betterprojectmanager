@@ -149,14 +149,12 @@ function AppShellInner({ children }: { children: ReactNode }) {
       return { title: "Release playbook", subtitle: "Release stages and risks" };
     }
     const match = pathname.match(/^\/projects\/([^/]+)/);
-    if (match?.[1]) {
-      const project = state.projects.find((p) => p.id === match[1]);
-      if (project) {
-        return {
-          title: project.code,
-          subtitle: project.name,
-        };
-      }
+    if (match?.[1] && match[1] !== "new") {
+      // Project identity lives below Capture — do not announce it in the top chrome.
+      return {
+        title: "",
+        subtitle: undefined,
+      };
     }
     return { title: "Lume", subtitle: undefined };
   }, [pathname, state.projects]);
@@ -193,6 +191,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
           onOpenMobileNav={() => setMobileOpen(true)}
           userName={user?.name}
           onSignOut={() => void signOut()}
+          quiet={!header.title}
         />
         <main className="app-content">
           <div className="mb-4">

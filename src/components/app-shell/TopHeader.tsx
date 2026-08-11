@@ -8,15 +8,18 @@ export function TopHeader({
   onOpenMobileNav,
   userName,
   onSignOut,
+  quiet = false,
 }: {
   title: string;
   subtitle?: string;
   onOpenMobileNav: () => void;
   userName?: string | null;
   onSignOut?: () => void;
+  /** Hide page title block (project pages place identity below Capture). */
+  quiet?: boolean;
 }) {
   return (
-    <header className="top-header">
+    <header className={`top-header ${quiet ? "is-quiet" : ""}`}>
       <div className="top-header-left">
         <button
           type="button"
@@ -26,10 +29,12 @@ export function TopHeader({
         >
           ☰
         </button>
-        <div className="min-w-0">
-          <h1 className="page-title">{title}</h1>
-          {subtitle ? <p className="page-subtitle">{subtitle}</p> : null}
-        </div>
+        {!quiet && title ? (
+          <div className="min-w-0">
+            <h1 className="page-title">{title}</h1>
+            {subtitle ? <p className="page-subtitle">{subtitle}</p> : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="top-header-right">
