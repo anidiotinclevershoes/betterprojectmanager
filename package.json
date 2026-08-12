@@ -17,9 +17,13 @@
     "verify:capture-reliability": "npx --yes tsx scripts/verify-capture-reliability.ts",
     "verify:capture-review": "npx --yes tsx scripts/verify-capture-review.ts",
     "verify:capture-workspace": "npx --yes tsx scripts/verify-capture-workspace-refinement.ts",
-    "verify:new-project": "npx --yes tsx scripts/verify-new-project-onboarding.ts"
+    "verify:new-project": "npx --yes tsx scripts/verify-new-project-onboarding.ts",
+    "verify:rls-policies": "npx --yes tsx scripts/verify-rls-policies.ts",
+    "verify:tenant-isolation": "npx --yes tsx scripts/verify-tenant-isolation.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.3",
     "js-tiktoken": "^1.0.21",
     "next": "16.2.11",
     "react": "19.2.4",
