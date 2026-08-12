@@ -81,6 +81,18 @@ You have two easy options.
 9. Copy **all** of its contents into the SQL Editor
 10. Click **Run**
 11. Confirm it succeeds
+12. Open a third new query
+13. Open this file:
+
+   `supabase/migrations/20260812195500_fix_grants_and_membership_helper.sql`
+
+14. Copy **all** of its contents into the SQL Editor
+15. Click **Run**
+16. Confirm it succeeds
+
+> If you already ran the first two migrations earlier and hit
+> `permission denied for table workspace_members`, you only need to run this
+> third file, then re-run `npm run verify:tenant-isolation`.
 
 #### Option B: Supabase CLI (if you are comfortable)
 
@@ -162,6 +174,13 @@ Do not deploy random branches to production without deciding that deliberately.
 ---
 
 ## If something fails
+
+### “permission denied for table workspace_members”
+Run the third migration in SQL Editor:
+
+`supabase/migrations/20260812195500_fix_grants_and_membership_helper.sql`
+
+Then re-run `npm run verify:tenant-isolation`.
 
 ### “relation does not exist”
 You probably skipped a migration. Re-run both SQL files in order.

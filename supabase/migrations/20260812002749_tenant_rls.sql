@@ -94,10 +94,15 @@ create policy workspaces_delete_owner
 -- ---------------------------------------------------------------------------
 -- Workspace members
 -- ---------------------------------------------------------------------------
+-- Users can always read their own membership rows (needed to list workspaces).
+-- They can also read fellow members of workspaces they belong to.
 create policy workspace_members_select_member
   on public.workspace_members for select
   to authenticated
-  using (public.is_workspace_member(workspace_id));
+  using (
+    user_id = auth.uid()
+    or public.is_workspace_member(workspace_id)
+  );
 
 -- Only existing owners may add members (bootstrap uses security definer functions)
 create policy workspace_members_insert_owner

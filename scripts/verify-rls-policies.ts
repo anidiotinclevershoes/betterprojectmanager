@@ -111,4 +111,28 @@ check("policies use is_workspace_member / auth.uid", () => {
   assert.match(rls, /auth\.uid\(\)/i);
 });
 
+check("membership helper bypasses row security under FORCE RLS", () => {
+  assert.match(schema, /set row_security = off/i);
+  assert.match(
+    rls,
+    /workspace_members_select_member[\s\S]*user_id = auth\.uid\(\)/i,
+  );
+});
+
+check("authenticated role is granted table access", () => {
+  assert.match(schema, /grant select, insert, update, delete on table/i);
+  assert.match(schema, /to authenticated, service_role/i);
+});
+
+const fixPath = path.join(
+  root,
+  "supabase/migrations/20260812195500_fix_grants_and_membership_helper.sql",
+);
+check("fix migration exists for already-applied projects", () => {
+  assert.equal(fs.existsSync(fixPath), true);
+  const fix = fs.readFileSync(fixPath, "utf8");
+  assert.match(fix, /grant select, insert, update, delete on table/i);
+  assert.match(fix, /set row_security = off/i);
+});
+
 console.log(`\n${passed} RLS/schema structural checks passed.`);

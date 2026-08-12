@@ -55,13 +55,16 @@ create table public.workspace_members (
 
 create index workspace_members_user_id_idx on public.workspace_members (user_id);
 
--- Membership helper used by RLS
+-- Membership helper used by RLS.
+-- row_security = off is required so this can read workspace_members under FORCE RLS
+-- without recursion / permission failures inside policy checks.
 create or replace function public.is_workspace_member(p_workspace_id uuid)
 returns boolean
 language sql
 stable
 security definer
 set search_path = public
+set row_security = off
 as $$
   select exists (
     select 1
@@ -80,6 +83,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
+set row_security = off
 as $$
 declare
   ws_id uuid;
@@ -507,6 +511,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = public
+set row_security = off
 as $$
 declare
   ws_id uuid;
@@ -533,3 +538,31 @@ $$;
 
 revoke all on function public.create_workspace_with_owner(text) from public;
 grant execute on function public.create_workspace_with_owner(text) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Table privileges for API roles
+-- RLS still filters rows; without these GRANTs PostgREST returns
+-- "permission denied for table …"
+-- ---------------------------------------------------------------------------
+grant usage on schema public to anon, authenticated, service_role;
+
+grant select, insert, update, delete on table
+  public.profiles,
+  public.workspaces,
+  public.workspace_members,
+  public.projects,
+  public.stakeholders,
+  public.todos,
+  public.risks,
+  public.knowledge_items,
+  public.milestones,
+  public.memories,
+  public.recommendations,
+  public.meetings,
+  public.releases,
+  public.capture_sessions,
+  public.history_events,
+  public.coach_sessions,
+  public.workspace_preferences,
+  public.workspace_usage
+to authenticated, service_role;
