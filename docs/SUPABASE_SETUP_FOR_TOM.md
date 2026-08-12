@@ -162,13 +162,103 @@ Do not deploy random branches to production without deciding that deliberately.
 
 ---
 
+## Phase 2 — Auth dashboard settings (Tom)
+
+After Phase 1 migrations are applied, configure Auth so signup / reset emails work.
+
+### Step A — Run the Phase 2 migration
+
+1. Open **SQL Editor**
+2. New query
+3. Paste all of:
+
+   `supabase/migrations/20260812203000_phase2_ensure_personal_workspace.sql`
+
+4. Click **Run**
+
+### Step B — Site URL + redirect URLs
+
+1. Left sidebar → **Authentication**
+2. Click **URL Configuration** (or **Settings** under Auth)
+3. Set **Site URL**:
+   - Local: `http://localhost:3000`
+   - Later production: your Vercel URL (for example `https://your-app.vercel.app`)
+4. Under **Redirect URLs**, add each of these (one per line / entry):
+   - `http://localhost:3000/auth/callback`
+   - `http://localhost:3000/reset-password`
+   - When you have Vercel: `https://YOUR-DOMAIN/auth/callback`
+   - When you have Vercel: `https://YOUR-DOMAIN/reset-password`
+
+### Step C — Email / password provider
+
+1. **Authentication → Providers → Email**
+2. Ensure **Email** is enabled
+3. Decide **Confirm email**:
+   - On = users must click a confirmation link before login (recommended for real users)
+   - Off = easier local testing
+4. Leave password requirements at Supabase defaults (Lume also enforces 8+ characters in the UI)
+
+### Step D — Local env for Phase 2
+
+In `.env.local` (in addition to Phase 1 keys):
+
+```bash
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+# Optional explicit modes:
+# LUME_AUTH=supabase
+# LUME_PERSISTENCE=supabase
+```
+
+With Supabase keys present, Lume auto-uses Supabase Auth + Supabase persistence.
+
+For local regression against seeded demo data instead:
+
+```bash
+LUME_AUTH=demo
+LUME_PERSISTENCE=local
+DEMO_USERS=you@example.com:password:You
+AUTH_SECRET=at-least-16-chars-secret
+```
+
+### Step E — Smoke test
+
+```bash
+npm run verify:phase2-auth
+npm run verify:tenant-isolation
+npm run verify:phase2-persistence
+npm run dev
+```
+
+Then open `http://localhost:3000/signup` and create a test account.
+
+### Email branding (later)
+
+Confirmation and password-reset emails currently use Supabase’s default templates.
+You can brand them later under **Authentication → Email Templates**. Functional text is enough for Phase 2.
+
+### Account deletion (documented, not built)
+
+When a user is deleted from Auth, Phase 1 schema cascades:
+
+- `profiles` row deletes with `auth.users`
+- `workspace_members` rows for that user delete
+- Owned workspace data is **not** auto-wiped unless you delete the workspace
+  (workspaces can outlive a single member in future team scenarios)
+
+Full user-facing “delete my account” belongs in a later production-safety phase.
+
+---
+
 ## Safety checklist
 
 - [ ] New Supabase project created for Lume only
 - [ ] Values are in `.env.local`, not committed
-- [ ] Both SQL migrations ran successfully
+- [ ] Phase 1 SQL migrations ran successfully
+- [ ] Phase 2 `ensure_personal_workspace` migration ran
+- [ ] Auth Site URL + Redirect URLs set
 - [ ] `npm run verify:tenant-isolation` passes (or intentionally skipped)
-- [ ] Existing Lume demo still runs with `npm run dev`
+- [ ] `npm run verify:phase2-auth` passes
+- [ ] Existing Lume demo still runs with `npm run dev` (or demo mode)
 - [ ] You did **not** paste the service-role key into chat
 
 ---

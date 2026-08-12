@@ -19,7 +19,9 @@
     "verify:capture-workspace": "npx --yes tsx scripts/verify-capture-workspace-refinement.ts",
     "verify:new-project": "npx --yes tsx scripts/verify-new-project-onboarding.ts",
     "verify:rls-policies": "npx --yes tsx scripts/verify-rls-policies.ts",
-    "verify:tenant-isolation": "npx --yes tsx scripts/verify-tenant-isolation.ts"
+    "verify:tenant-isolation": "npx --yes tsx scripts/verify-tenant-isolation.ts",
+    "verify:phase2-auth": "npx --yes tsx scripts/verify-phase2-auth.ts",
+    "verify:phase2-persistence": "npx --yes tsx scripts/verify-phase2-persistence.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
