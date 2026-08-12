@@ -11,10 +11,20 @@ import {
   CoachSessionProvider,
   useCoachSession,
 } from "@/components/coach/CoachSessionContext";
+import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import { useMission } from "@/lib/store";
 import { MISSION_MESSAGE } from "@/lib/mission";
 
 const SIDEBAR_KEY = "mc-sidebar-collapsed-v1";
+
+function isAuthChromePath(pathname: string) {
+  return (
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password"
+  );
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -37,7 +47,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
     null,
   );
 
-  const onLogin = pathname === "/login";
+  const onAuthPage = isAuthChromePath(pathname);
 
   useEffect(() => {
     try {
@@ -48,7 +58,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (onLogin) return;
+    if (onAuthPage) return;
     let cancelled = false;
     fetch("/api/auth/me")
       .then((res) => res.json())
@@ -65,7 +75,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [onLogin, pathname]);
+  }, [onAuthPage, pathname]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -79,6 +89,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
 
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
+    clearAuthenticatedBrowserState();
     setUser(null);
     router.replace("/login");
     router.refresh();
@@ -162,7 +173,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
     return { title: "Lume", subtitle: undefined };
   }, [pathname, state.projects]);
 
-  if (onLogin) {
+  if (onAuthPage) {
     return <>{children}</>;
   }
 

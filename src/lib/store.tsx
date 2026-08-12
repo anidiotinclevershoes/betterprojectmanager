@@ -53,8 +53,27 @@ import {
   makeHistoryEvent,
   pushHistory,
 } from "./workspace/history";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { loadMissionStateFromSupabase } from "@/lib/data/supabase/load-mission-state";
+import {
+  persistCaptureSession,
+  persistHistoryEvent,
+  persistKnowledgeBullet,
+  persistMemory,
+  persistNewProject,
+  persistTimelineItem,
+  persistTodoCreate,
+  persistTodoDelete,
+  persistTodoUpdate,
+} from "@/lib/data/supabase/persist-mutations";
 
 const STORAGE_KEY = "mission-control-state-v5";
+
+type PersistMeta = {
+  mode: "local" | "supabase";
+  workspaceId: string | null;
+  userId: string | null;
+};
 
 type OpenAIDiagnostics = {
   keyPrefix: string | null;
@@ -139,7 +158,7 @@ type MissionContextValue = {
     },
   ) => void;
   addSuggestion: (input: AddSuggestionInput) => string | null;
-  createProject: (input: CreateProjectInput) => string;
+  createProject: (input: CreateProjectInput) => Promise<string>;
   cloneRelOps: (input: CloneRelOpsInput) => void;
   refreshSuggestions: (projectId: string) => void;
   updateKnowledgeSection: (
@@ -160,6 +179,11 @@ type MissionContextValue = {
   refreshCoaching: () => void;
   /** Development: restore seeded demo baseline; preserve non-seeded data. */
   resetDemo: () => SeedResetResult;
+  /** Persistence mode for the current session. */
+  persistenceMode: "local" | "supabase";
+  /** Soft save status for Supabase-backed sessions. */
+  saveStatus: "idle" | "saving" | "saved" | "error";
+  saveError: string | null;
 };
 
 const MissionContext = createContext<MissionContextValue | null>(null);
@@ -253,23 +277,76 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   );
   const [openaiDiagnostics, setOpenaiDiagnostics] =
     useState<OpenAIDiagnostics | null>(null);
+  const [persistenceMode, setPersistenceMode] = useState<"local" | "supabase">(
+    "local",
+  );
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
   const stateRef = useRef(state);
+  const persistMetaRef = useRef<PersistMeta>({
+    mode: "local",
+    workspaceId: null,
+    userId: null,
+  });
 
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
 
   useEffect(() => {
-    try {
-      setState(withProactiveCoaching(readStoredState()));
-    } catch {
-      /* keep seed state */
+    let cancelled = false;
+    async function hydrate() {
+      try {
+        const me = await fetch("/api/auth/me").then((r) => r.json()) as {
+          persistence?: string;
+          mode?: string;
+          user?: { id?: string } | null;
+        };
+        const useSupabase =
+          me.persistence === "supabase" && Boolean(me.user?.id);
+        if (useSupabase) {
+          const client = createBrowserSupabaseClient();
+          const loaded = await loadMissionStateFromSupabase(client);
+          if (cancelled) return;
+          persistMetaRef.current = {
+            mode: "supabase",
+            workspaceId: loaded.workspaceId,
+            userId: loaded.userId,
+          };
+          setPersistenceMode("supabase");
+          setState(normaliseState(loaded.state));
+          setHydrated(true);
+          return;
+        }
+      } catch (err) {
+        console.error("[MissionProvider] supabase hydrate failed", err);
+        // Fall through to local only when not in supabase auth session
+      }
+      if (cancelled) return;
+      persistMetaRef.current = {
+        mode: "local",
+        workspaceId: null,
+        userId: null,
+      };
+      setPersistenceMode("local");
+      try {
+        setState(withProactiveCoaching(readStoredState()));
+      } catch {
+        /* keep seed state */
+      }
+      setHydrated(true);
     }
-    setHydrated(true);
+    void hydrate();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
+    if (persistMetaRef.current.mode === "supabase") return;
     persist(state);
   }, [state, hydrated]);
 
@@ -310,6 +387,72 @@ export function MissionProvider({ children }: { children: ReactNode }) {
 
   const applyCaptureResult = useCallback((result: CaptureResult) => {
     setState((prev) => mergeCapture(prev, result));
+    const meta = persistMetaRef.current;
+    if (meta.mode !== "supabase" || !meta.workspaceId) return;
+    void (async () => {
+      setSaveStatus("saving");
+      setSaveError(null);
+      try {
+        const client = createBrowserSupabaseClient();
+        const workspaceId = meta.workspaceId!;
+        const userId = meta.userId;
+        if (result.memory) {
+          await persistMemory(client, workspaceId, userId, result.memory);
+        }
+        const projectId =
+          result.knowledgeProjectId || result.memory.projectId || null;
+        if (projectId && result.knowledgePatch) {
+          for (const [section, bullets] of Object.entries(
+            result.knowledgePatch,
+          )) {
+            for (const body of bullets ?? []) {
+              if (!body?.trim()) continue;
+              await persistKnowledgeBullet(
+                client,
+                workspaceId,
+                projectId,
+                section,
+                body.trim(),
+                userId,
+              );
+            }
+          }
+        }
+        if (projectId && result.timelinePatch?.length) {
+          for (const item of result.timelinePatch) {
+            await persistTimelineItem(client, workspaceId, projectId, {
+              label: item.label,
+              type: item.type,
+              startAt: item.startAt,
+              endAt: item.endAt,
+              notes: item.notes,
+              source: "capture",
+            });
+          }
+        }
+        await persistCaptureSession(client, workspaceId, userId, {
+          projectId,
+          transcript: result.rawContent || result.memory.content || "",
+          result,
+          suggestions: result.recommendations,
+          status: "applied",
+        });
+        await persistHistoryEvent(client, workspaceId, userId, {
+          type: "capture_analysed",
+          title: "Capture applied",
+          detail: result.memory.title,
+          projectId,
+          source: "ai",
+        });
+        setSaveStatus("saved");
+      } catch (err) {
+        console.error("[applyCaptureResult] persist failed", err);
+        setSaveStatus("error");
+        setSaveError(
+          err instanceof Error ? err.message : "Could not save Capture changes",
+        );
+      }
+    })();
   }, []);
 
   const capture = useCallback((input: CaptureInput) => {
@@ -489,10 +632,15 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleTodo = useCallback((todoId: string) => {
+    let nextDone = false;
+    let projectId: string | null | undefined;
+    let title = "";
     setState((prev) => {
       const todo = (prev.todos ?? []).find((t) => t.id === todoId);
       if (!todo) return prev;
-      const nextDone = !todo.done;
+      nextDone = !todo.done;
+      projectId = todo.projectId;
+      title = todo.title;
       return pushHistory(
         {
           ...prev,
@@ -509,6 +657,28 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         }),
       );
     });
+    const meta = persistMetaRef.current;
+    if (meta.mode === "supabase" && meta.workspaceId) {
+      void (async () => {
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistTodoUpdate(client, todoId, { done: nextDone });
+          await persistHistoryEvent(client, meta.workspaceId!, meta.userId, {
+            type: nextDone ? "task_completed" : "task_updated",
+            title: nextDone ? "You completed a To Do" : "You reopened a To Do",
+            detail: title,
+            projectId,
+            source: "user",
+          });
+        } catch (err) {
+          console.error("[toggleTodo] persist failed", err);
+          setSaveStatus("error");
+          setSaveError(
+            err instanceof Error ? err.message : "Could not save To Do",
+          );
+        }
+      })();
+    }
   }, []);
 
   const removeTodo = useCallback((todoId: string) => {
@@ -516,16 +686,33 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       ...prev,
       todos: (prev.todos ?? []).filter((t) => t.id !== todoId),
     }));
+    const meta = persistMetaRef.current;
+    if (meta.mode === "supabase" && meta.workspaceId) {
+      void (async () => {
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistTodoDelete(client, todoId);
+        } catch (err) {
+          console.error("[removeTodo] persist failed", err);
+          setSaveStatus("error");
+          setSaveError(
+            err instanceof Error ? err.message : "Could not delete To Do",
+          );
+        }
+      })();
+    }
   }, []);
 
   const addTodo = useCallback((input: AddTodoInput) => {
     const title = input.title.trim();
     if (!title) return;
-    setState((prev) => {
+    const meta = persistMetaRef.current;
+
+    const buildDueAt = (prev: MissionState) => {
       const project = input.projectId
         ? prev.projects.find((p) => p.id === input.projectId)
         : undefined;
-      const dueAt = input.dueAt
+      return input.dueAt
         ? clampDueToWindow(
             project,
             input.dueAt.includes("T")
@@ -533,6 +720,62 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               : new Date(`${input.dueAt}T09:00:00`).toISOString(),
           )
         : undefined;
+    };
+
+    if (meta.mode === "supabase" && meta.workspaceId) {
+      void (async () => {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          const dueAt = buildDueAt(stateRef.current);
+          const created = await persistTodoCreate(
+            client,
+            meta.workspaceId!,
+            meta.userId,
+            {
+              projectId: input.projectId ?? null,
+              title,
+              detail: input.detail?.trim() || undefined,
+              done: false,
+              dueAt,
+              kind: input.kind,
+              waitingOn: input.waitingOn?.trim() || undefined,
+            },
+          );
+          setState((prev) =>
+            pushHistory(
+              { ...prev, todos: [created, ...(prev.todos ?? [])] },
+              makeHistoryEvent({
+                type: "task_added",
+                title: "You added a To Do",
+                detail: title,
+                projectId: input.projectId ?? null,
+                source: "user",
+              }),
+            ),
+          );
+          await persistHistoryEvent(client, meta.workspaceId!, meta.userId, {
+            type: "task_added",
+            title: "You added a To Do",
+            detail: title,
+            projectId: input.projectId ?? null,
+            source: "user",
+          });
+          setSaveStatus("saved");
+        } catch (err) {
+          console.error("[addTodo] persist failed", err);
+          setSaveStatus("error");
+          setSaveError(
+            err instanceof Error ? err.message : "Could not save To Do",
+          );
+        }
+      })();
+      return;
+    }
+
+    setState((prev) => {
+      const dueAt = buildDueAt(prev);
       const todo: TodoItem = {
         id: id("todo"),
         projectId: input.projectId ?? null,
@@ -649,6 +892,29 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         }),
       );
     });
+    const meta = persistMetaRef.current;
+    if (meta.mode === "supabase" && meta.workspaceId) {
+      void (async () => {
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistTodoUpdate(client, todoId, {
+            title: patch.title,
+            detail: patch.detail,
+            dueAt: patch.dueAt,
+            done: patch.done,
+            projectId: patch.projectId,
+            kind: patch.kind,
+            waitingOn: patch.waitingOn,
+          });
+        } catch (err) {
+          console.error("[updateTodo] persist failed", err);
+          setSaveStatus("error");
+          setSaveError(
+            err instanceof Error ? err.message : "Could not save To Do",
+          );
+        }
+      })();
+    }
   }, []);
 
   const resolveNudge = useCallback(
@@ -818,7 +1084,50 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     return recId;
   }, []);
 
-  const createProject = useCallback((input: CreateProjectInput) => {
+  const createProject = useCallback(async (input: CreateProjectInput) => {
+    const meta = persistMetaRef.current;
+    if (meta.mode === "supabase" && meta.workspaceId) {
+      setSaveStatus("saving");
+      setSaveError(null);
+      try {
+        const client = createBrowserSupabaseClient();
+        const persisted = await persistNewProject(
+          client,
+          meta.workspaceId,
+          meta.userId,
+          input,
+        );
+        const setupMemory = (
+          persisted as typeof persisted & {
+            setupMemory?: import("@/lib/types").MemoryEntry;
+          }
+        ).setupMemory;
+        setState((prev) => ({
+          ...prev,
+          projects: [...prev.projects, persisted.project],
+          knowledge: [...(prev.knowledge ?? []), persisted.knowledge],
+          recommendations: [
+            ...persisted.recommendations,
+            ...prev.recommendations,
+          ],
+          todos: [...persisted.todos, ...(prev.todos ?? [])],
+          timeline: [...(persisted.timeline ?? []), ...(prev.timeline ?? [])],
+          memories: setupMemory
+            ? [setupMemory, ...(prev.memories ?? [])]
+            : prev.memories,
+          lastAnalyzedAt: new Date().toISOString(),
+        }));
+        setSaveStatus("saved");
+        return persisted.project.id;
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Could not save project";
+        setSaveStatus("error");
+        setSaveError(message);
+        throw err;
+      }
+    }
+
     const bundle = buildNewProject(input);
     setState((prev) => {
       let next = {
@@ -925,6 +1234,28 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           ],
         };
       });
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId && bullet.trim()) {
+        void (async () => {
+          try {
+            const client = createBrowserSupabaseClient();
+            await persistKnowledgeBullet(
+              client,
+              meta.workspaceId!,
+              projectId,
+              sectionId,
+              bullet.trim(),
+              meta.userId,
+            );
+          } catch (err) {
+            console.error("[addKnowledgeBullet] persist failed", err);
+            setSaveStatus("error");
+            setSaveError(
+              err instanceof Error ? err.message : "Could not save knowledge",
+            );
+          }
+        })();
+      }
     },
     [],
   );
@@ -946,6 +1277,38 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       projectId: string,
       item: TimelineItemInput & { source?: TimelineItem["source"] },
     ) => {
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        void (async () => {
+          try {
+            const client = createBrowserSupabaseClient();
+            const created = await persistTimelineItem(
+              client,
+              meta.workspaceId!,
+              projectId,
+              {
+                label: item.label,
+                type: item.type,
+                startAt: item.startAt,
+                endAt: item.endAt,
+                notes: item.notes,
+                source: item.source ?? "manual",
+              },
+            );
+            setState((prev) => ({
+              ...prev,
+              timeline: [...(prev.timeline ?? []), created],
+            }));
+          } catch (err) {
+            console.error("[addTimelineItem] persist failed", err);
+            setSaveStatus("error");
+            setSaveError(
+              err instanceof Error ? err.message : "Could not save date",
+            );
+          }
+        })();
+        return;
+      }
       setState((prev) => ({
         ...prev,
         timeline: mergeTimelineItems(
@@ -1035,12 +1398,18 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       addTimelineItem,
       refreshCoaching,
       resetDemo,
+      persistenceMode,
+      saveStatus,
+      saveError,
     }),
     [
       state,
       hydrated,
       openaiConfigured,
       openaiDiagnostics,
+      persistenceMode,
+      saveStatus,
+      saveError,
       capture,
       captureWithAI,
       analyzeCaptureWithAI,

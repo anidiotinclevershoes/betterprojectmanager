@@ -1571,6 +1571,78 @@ body {
   color: var(--ink-soft);
 }
 
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  margin-bottom: 0.85rem;
+}
+
+.auth-brand-logo {
+  color: var(--teal);
+  margin-bottom: 0.25rem;
+}
+
+.auth-brand-name {
+  margin: 0;
+  font-family: var(--font-syne), sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.auth-brand-tag {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.auth-footer {
+  margin-top: 1rem;
+}
+
+.auth-links {
+  margin: 0.35rem 0 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.auth-text-link {
+  color: var(--teal);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-notice {
+  margin: 0 0 0.85rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  background: rgba(13, 148, 136, 0.1);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.field-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.np-path-grid-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 720px) {
+  .np-path-grid-two {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ——— Mission Control v02 shell ——— */
 
 .app-shell {

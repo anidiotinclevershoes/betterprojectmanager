@@ -20,7 +20,7 @@ import {
 } from "@/lib/create-project";
 import { useMission } from "@/lib/store";
 
-type Path = "choose" | "talk" | "paste" | "blank" | "review";
+type Path = "choose" | "talk" | "blank" | "review";
 
 export function NewProjectExperience({
   variant = "page",
@@ -37,10 +37,22 @@ export function NewProjectExperience({
   const [success, setSuccess] = useState<string | null>(null);
 
   const createFromDraft = useCallback(
-    (input: CreateProjectInput) => {
-      const id = createProject(input);
-      setSuccess(`${input.name.trim() || input.code} is ready.`);
-      router.push(`/projects/${id}`);
+    async (input: CreateProjectInput) => {
+      setBusy(true);
+      setError(null);
+      try {
+        const id = await createProject(input);
+        setSuccess(`${input.name.trim() || input.code} is ready.`);
+        router.push(`/projects/${id}`);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Could not create the project. Please try again.",
+        );
+      } finally {
+        setBusy(false);
+      }
     },
     [createProject, router],
   );
@@ -85,7 +97,6 @@ export function NewProjectExperience({
         <ChoosePaths
           variant={variant}
           onTalk={() => setPath("talk")}
-          onPaste={() => setPath("paste")}
           onBlank={() => setPath("blank")}
         />
       ) : null}
@@ -99,26 +110,17 @@ export function NewProjectExperience({
         />
       ) : null}
 
-      {path === "paste" ? (
-        <PastePath
-          busy={busy}
-          onBack={() => setPath("choose")}
-          onBuild={(text) => void analyseNarrative(text, "paste")}
-        />
-      ) : null}
-
       {path === "blank" ? (
         <BlankPath
           busy={busy}
           error={error}
           onBack={() => setPath("choose")}
           onCreate={(input) => {
-            setError(null);
             if (!input.name.trim()) {
               setError("Give the project a name.");
               return;
             }
-            createFromDraft({
+            void createFromDraft({
               ...input,
               sourceMode: "blank",
             });
@@ -132,14 +134,9 @@ export function NewProjectExperience({
           onChange={setDraft}
           busy={busy}
           error={error}
-          onBack={() => setPath(draft.sourceMode === "talk" ? "talk" : "paste")}
+          onBack={() => setPath("talk")}
           onConfirm={() => {
-            setBusy(true);
-            try {
-              createFromDraft(draft);
-            } finally {
-              setBusy(false);
-            }
+            void createFromDraft(draft);
           }}
         />
       ) : null}
@@ -157,12 +154,10 @@ export function NewProjectExperience({
 function ChoosePaths({
   variant,
   onTalk,
-  onPaste,
   onBlank,
 }: {
   variant: "first-run" | "page";
   onTalk: () => void;
-  onPaste: () => void;
   onBlank: () => void;
 }) {
   return (
@@ -189,7 +184,7 @@ function ChoosePaths({
         </p>
       </div>
 
-      <div className="np-path-grid">
+      <div className="np-path-grid np-path-grid-two">
         <article className="np-path-card is-recommended">
           <span className="np-recommended-badge">Recommended</span>
           <h2>Talk It Through</h2>
@@ -201,18 +196,6 @@ function ChoosePaths({
           <p className="meta">Lume will structure it for you.</p>
           <button type="button" className="primary-btn" onClick={onTalk}>
             Talk it through
-          </button>
-        </article>
-
-        <article className="np-path-card">
-          <h2>Paste Project Information</h2>
-          <p>
-            Already have something written down? Paste a project brief,
-            handover, PID, meeting notes, email thread or rough notes and Lume
-            will extract what it can.
-          </p>
-          <button type="button" className="muted-btn" onClick={onPaste}>
-            Paste project info
           </button>
         </article>
 
@@ -543,65 +526,6 @@ function TalkPath({
             ) : null}
           </div>
         </aside>
-      </div>
-    </div>
-  );
-}
-
-function PastePath({
-  busy,
-  onBack,
-  onBuild,
-}: {
-  busy: boolean;
-  onBack: () => void;
-  onBuild: (text: string) => void;
-}) {
-  const [text, setText] = useState("");
-
-  return (
-    <div className="np-paste">
-      <button type="button" className="ghost-btn np-back" onClick={onBack}>
-        ← Pathways
-      </button>
-      <header className="np-panel-head">
-        <h2>Paste what you already have</h2>
-        <p className="np-panel-lead">
-          A PID, handover, project brief, email chain, meeting notes, rough plan
-          or brain dump all work.
-        </p>
-      </header>
-
-      <div className="np-trust is-inline" role="note">
-        You&apos;ll review everything before anything is created.
-      </div>
-
-      <label className="field">
-        Project information
-        <textarea
-          rows={14}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Paste project information here…"
-        />
-      </label>
-      <p className="meta np-paste-tip">
-        More context usually means a better starting project. Dates, names,
-        risks, dependencies, decisions and project-specific rules are especially
-        useful.
-      </p>
-      <div className="np-talk-footer">
-        <button type="button" className="ghost-btn" onClick={onBack}>
-          Back
-        </button>
-        <button
-          type="button"
-          className="primary-btn"
-          disabled={busy || !text.trim()}
-          onClick={() => onBuild(text.trim())}
-        >
-          {busy ? "Building…" : "Build My Project"}
-        </button>
       </div>
     </div>
   );

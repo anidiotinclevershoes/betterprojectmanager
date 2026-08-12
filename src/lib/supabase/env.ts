@@ -21,11 +21,3 @@ export function getSupabaseServiceRoleKey(): string | undefined {
 export function isSupabaseConfigured(): boolean {
   return Boolean(getSupabaseUrl() && getSupabaseAnonKey());
 }
-
-/** Persistence mode for future dual-write. Default remains local. */
-export type LumePersistenceMode = "local" | "supabase";
-
-export function getPersistenceMode(): LumePersistenceMode {
-  const raw = (process.env.LUME_PERSISTENCE || "local").trim().toLowerCase();
-  return raw === "supabase" ? "supabase" : "local";
-}

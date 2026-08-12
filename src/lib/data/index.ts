@@ -1,10 +1,8 @@
 import { createLocalRepositories } from "@/lib/data/local/repositories";
 import { createSupabaseRepositories } from "@/lib/data/supabase/repositories";
 import type { LumeDataRepositories } from "@/lib/data/types";
-import {
-  getPersistenceMode,
-  isSupabaseConfigured,
-} from "@/lib/supabase/env";
+import { getPersistenceMode } from "@/lib/persistence-mode";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
