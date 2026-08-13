@@ -1,74 +1,90 @@
-# Vercel Production Setup (Phase 2 prep)
+# Vercel Production Setup
 
-**Do not deploy automatically from this document.**  
-Configure these values when you are ready to put an authenticated Lume build on Vercel.
+Lume is prepared for hosted deployment.  
+**Do not deploy until env vars and Supabase Auth URLs are set.**
 
-Never paste secrets into Cursor chat. Enter them only in the Vercel dashboard (or your password manager → Vercel).
+Full click-by-click remaining work: [`docs/PHASE_2_5_3_MANUAL_STEPS.md`](./PHASE_2_5_3_MANUAL_STEPS.md)
 
 ---
 
-## 1. Environment variables
+## Production contract
 
-In Vercel → your project → **Settings → Environment Variables**, add:
+| Concern | Production behaviour |
+|---|---|
+| Auth | Supabase only |
+| Persistence | Supabase only |
+| AI | OpenAI required (no silent local fallback) |
+| Demo seed | Disabled |
+| Developer tools | Hidden (`NODE_ENV !== development`) |
 
-| Name | Where | Notes |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Production (+ Preview if used) | Supabase Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Production (+ Preview) | anon / publishable key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Production (+ Preview) | **Server only**. Do not expose to the browser. |
-| `OPENAI_API_KEY` | Production (+ Preview) | Server only; Capture / Coach |
-| `NEXT_PUBLIC_SITE_URL` | Production | Exact public URL, e.g. `https://lume.example.com` |
-| `LUME_AUTH` | Optional | Prefer unset (auto). Or `supabase`. Never `demo` in production. |
-| `LUME_PERSISTENCE` | Optional | Prefer unset (auto → supabase when configured). Do **not** set `local` in production. |
+Validate structurally:
 
-Optional:
+```bash
+npm run verify:production-config
+```
+
+---
+
+## Environment variables
+
+### Public / browser-safe
+
+| Name | Required |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes |
+| `NEXT_PUBLIC_SITE_URL` | Yes (exact public origin) |
+
+### Server-only
+
+| Name | Required |
+|---|---|
+| `OPENAI_API_KEY` | Yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes |
+| `STRIPE_SECRET_KEY` | Later (billing) |
+| `STRIPE_WEBHOOK_SECRET` | Later |
+| `STRIPE_PRICE_ID` | Later |
+
+### Optional config
 
 | Name | Notes |
 |---|---|
-| `OPENAI_MODEL` | Override default model |
-| `AUTH_REQUIRED` | Usually leave unset |
+| `OPENAI_MODEL` | Defaults to gpt-4o-mini |
+| `LUME_TRIAL_DAYS` | Defaults to 14 |
+| `LUME_RATE_LIMIT_*_PER_HOUR` | AI abuse limits |
 
-Do **not** set production:
+### Never set in production
 
 - `DEMO_USERS`
-- `AUTH_SECRET` (demo cookie gate)
-- `LUME_PERSISTENCE=local`
 - `LUME_AUTH=demo`
+- `LUME_PERSISTENCE=local`
+- `AUTH_REQUIRED=false`
+- any `NEXT_PUBLIC_*` wrapping Stripe secrets or service role
 
 ---
 
-## 2. Supabase Auth URLs for the deployed host
+## Supabase Auth URLs
 
-In Supabase → **Authentication → URL Configuration**:
+After you know the Vercel URL:
 
-1. **Site URL** = your production URL (`NEXT_PUBLIC_SITE_URL`)
-2. **Redirect URLs** include:
-   - `https://YOUR-DOMAIN/auth/callback`
-   - `https://YOUR-DOMAIN/reset-password`
-   - Preview URLs if you use Vercel previews for auth testing
+1. Authentication → URL Configuration  
+2. Site URL = `NEXT_PUBLIC_SITE_URL`  
+3. Redirect URLs include `/auth/callback` and `/reset-password` for that host  
 
 ---
 
-## 3. Recommended first deploy checklist
+## First deploy smoke checklist
 
-1. Phase 1 + Phase 2 SQL migrations applied on the Lume Supabase project
-2. Env vars set in Vercel (above)
-3. Auth redirect URLs updated
-4. Deploy a non-production branch first if possible
-5. Sign up a fresh test user
-6. Confirm zero-project onboarding (no ATLAS/HORIZON/RELOPS)
-7. Create a project → refresh → still present
-8. Logout → login → same project
-9. Confirm `/dev/*` tools are not linked in production navigation
+1. Fresh signup + email confirm + login  
+2. Zero demo projects  
+3. Create project → refresh → still present  
+4. Logout/login → still present  
+5. `/account` shows trial/subscription status (after billing migration)  
+6. No Golden Test / AI Cockpit / Reset Demo in nav  
 
 ---
 
-## 4. Persistence behaviour (summary)
+## Billing note
 
-| Environment | Typical mode |
-|---|---|
-| Local with Supabase keys | Supabase Auth + Supabase persistence |
-| Local regression / golden demos | `LUME_AUTH=demo` + `LUME_PERSISTENCE=local` |
-| Vercel production | Supabase Auth + Supabase persistence |
-
-MissionState remains an in-memory / UI cache. Supabase is the source of truth for authenticated production users.
+Checkout / portal / webhooks are implemented but return `billing_not_configured` until Stripe env vars exist.  
+Trials can start without Stripe once the billing SQL migration is applied.
