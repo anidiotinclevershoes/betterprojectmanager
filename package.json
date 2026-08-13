@@ -21,7 +21,8 @@
     "verify:rls-policies": "npx --yes tsx scripts/verify-rls-policies.ts",
     "verify:tenant-isolation": "npx --yes tsx scripts/verify-tenant-isolation.ts",
     "verify:phase2-auth": "npx --yes tsx scripts/verify-phase2-auth.ts",
-    "verify:phase2-persistence": "npx --yes tsx scripts/verify-phase2-persistence.ts"
+    "verify:phase2-persistence": "npx --yes tsx scripts/verify-phase2-persistence.ts",
+    "verify:production-config": "npx --yes tsx scripts/verify-production-config.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
@@ -29,7 +30,8 @@
     "js-tiktoken": "^1.0.21",
     "next": "16.2.11",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "stripe": "^18.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

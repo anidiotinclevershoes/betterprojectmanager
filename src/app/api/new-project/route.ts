@@ -7,6 +7,8 @@ import {
   type InterviewAnswers,
 } from "@/lib/create-project";
 import { getOpenAIKey, isOpenAIConfigured } from "@/lib/openai";
+import { requireAiCaller } from "@/lib/ai-gate";
+import { isProductionRuntime } from "@/lib/runtime-config";
 
 export const runtime = "nodejs";
 
@@ -21,6 +23,9 @@ type Body = {
 
 export async function POST(request: Request) {
   try {
+    const gate = await requireAiCaller("new-project");
+    if (!gate.ok) return gate.response;
+
     const body = (await request.json()) as Body;
     const kind = body.kind ?? "delivery";
 
@@ -29,6 +34,12 @@ export async function POST(request: Request) {
       const local = assembleFromNarrative(body.content, kind, sourceMode);
 
       if (!isOpenAIConfigured()) {
+        if (isProductionRuntime()) {
+          return NextResponse.json(
+            { error: "AI is not configured for this environment." },
+            { status: 503 },
+          );
+        }
         return NextResponse.json({
           draft: local,
           provider: "local" as const,

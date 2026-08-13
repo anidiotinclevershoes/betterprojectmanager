@@ -27,6 +27,9 @@ import type {
   Recommendation,
   TodoItem,
 } from "@/lib/types";
+import { requireAiCaller } from "@/lib/ai-gate";
+import { isProductionRuntime } from "@/lib/runtime-config";
+import { serverLog } from "@/lib/server-log";
 
 export const runtime = "nodejs";
 
@@ -66,12 +69,25 @@ export async function GET() {
 export async function POST(request: Request) {
   const startedAt = Date.now();
   try {
+    const gate = await requireAiCaller("capture");
+    if (!gate.ok) return gate.response;
+
     const body = (await request.json()) as Body;
     const content = body.content?.trim();
     if (!content) {
       return NextResponse.json(
         { error: "Capture content is required." },
         { status: 400 },
+      );
+    }
+
+    if (isProductionRuntime() && !isOpenAIConfigured()) {
+      serverLog.error("capture.openai_missing_in_production", {
+        userId: gate.userId,
+      });
+      return NextResponse.json(
+        { error: "AI is not configured for this environment." },
+        { status: 503 },
       );
     }
 
