@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AppearanceToggle } from "@/components/app-shell/AppearanceToggle";
 import { HeaderCoachButton } from "@/components/coach/HeaderCoachButton";
 
@@ -8,6 +9,7 @@ export function TopHeader({
   subtitle,
   onOpenMobileNav,
   userName,
+  userEmail,
   onSignOut,
   quiet = false,
 }: {
@@ -15,6 +17,7 @@ export function TopHeader({
   subtitle?: string;
   onOpenMobileNav: () => void;
   userName?: string | null;
+  userEmail?: string | null;
   onSignOut?: () => void;
   /** Hide page title block (project pages place identity below Capture). */
   quiet?: boolean;
@@ -43,7 +46,13 @@ export function TopHeader({
         <AppearanceToggle />
         {userName ? (
           <div className="header-user">
-            <span className="header-user-name">{userName}</span>
+            <Link
+              href="/account"
+              className="header-user-name"
+              title={userEmail || userName}
+            >
+              {userName}
+            </Link>
             {onSignOut ? (
               <button type="button" className="ghost-btn" onClick={onSignOut}>
                 Sign out

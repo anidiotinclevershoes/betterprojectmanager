@@ -35,6 +35,11 @@ export function currentMonthKey() {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
+/**
+ * Soft client-side informational meter only.
+ * NOT security, NOT billing entitlement, NOT enforceable usage control.
+ * Future: replace with server-side workspace_usage / billing meters.
+ */
 export const ANALYSIS_MONTHLY_LIMIT = 50;
 
 export function analysesRemaining(state: MissionState): {

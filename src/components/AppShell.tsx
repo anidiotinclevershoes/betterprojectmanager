@@ -11,6 +11,7 @@ import {
   CoachSessionProvider,
   useCoachSession,
 } from "@/components/coach/CoachSessionContext";
+import { EntitlementGate } from "@/components/billing/EntitlementGate";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import { useMission } from "@/lib/store";
 import { MISSION_MESSAGE } from "@/lib/mission";
@@ -22,7 +23,8 @@ function isAuthChromePath(pathname: string) {
     pathname === "/login" ||
     pathname === "/signup" ||
     pathname === "/forgot-password" ||
-    pathname === "/reset-password"
+    pathname === "/reset-password" ||
+    pathname === "/account"
   );
 }
 
@@ -43,9 +45,10 @@ function AppShellInner({ children }: { children: ReactNode }) {
   const { drawerOpen, openDrawer } = useCoachSession();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [user, setUser] = useState<{ email: string; name: string } | null>(
-    null,
-  );
+  const [user, setUser] = useState<{
+    email: string;
+    name: string;
+  } | null>(null);
 
   const onAuthPage = isAuthChromePath(pathname);
 
@@ -204,6 +207,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
           subtitle={header.subtitle}
           onOpenMobileNav={() => setMobileOpen(true)}
           userName={user?.name}
+          userEmail={user?.email}
           onSignOut={() => void signOut()}
           quiet={!header.title}
         />
@@ -211,7 +215,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
           <div className="mb-4">
             <CoachResultsCard />
           </div>
-          {children}
+          <EntitlementGate>{children}</EntitlementGate>
         </main>
       </div>
 

@@ -20,6 +20,8 @@ function isPublicPath(pathname: string) {
   if (PUBLIC_PATHS.has(pathname)) return true;
   if (pathname.startsWith("/api/auth/")) return true;
   if (pathname.startsWith("/auth/")) return true;
+  // Stripe webhooks authenticate via signature, not user session.
+  if (pathname === "/api/billing/webhook") return true;
   return false;
 }
 

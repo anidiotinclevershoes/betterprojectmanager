@@ -54,7 +54,10 @@ import {
   pushHistory,
 } from "./workspace/history";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { loadMissionStateFromSupabase } from "@/lib/data/supabase/load-mission-state";
+import {
+  emptyMissionState,
+  loadMissionStateFromSupabase,
+} from "@/lib/data/supabase/load-mission-state";
 import {
   persistCaptureSession,
   persistHistoryEvent,
@@ -201,6 +204,10 @@ function normaliseState(raw: MissionState): MissionState {
 }
 
 function readStoredState(): MissionState {
+  // Production must never hydrate ATLAS/HORIZON/RELOPS seed data.
+  if (process.env.NODE_ENV === "production") {
+    return emptyMissionState();
+  }
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return createSeedState();
@@ -270,7 +277,7 @@ function id(prefix: string) {
 }
 
 export function MissionProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<MissionState>(createSeedState);
+  const [state, setState] = useState<MissionState>(emptyMissionState);
   const [hydrated, setHydrated] = useState(false);
   const [openaiConfigured, setOpenaiConfigured] = useState<boolean | null>(
     null,
@@ -322,7 +329,21 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         }
       } catch (err) {
         console.error("[MissionProvider] supabase hydrate failed", err);
-        // Fall through to local only when not in supabase auth session
+        if (process.env.NODE_ENV === "production") {
+          if (cancelled) return;
+          persistMetaRef.current = {
+            mode: "supabase",
+            workspaceId: null,
+            userId: null,
+          };
+          setPersistenceMode("supabase");
+          setState(emptyMissionState());
+          setSaveStatus("error");
+          setSaveError("Could not load your workspace. Please refresh.");
+          setHydrated(true);
+          return;
+        }
+        // Development: fall through to local only when not in supabase auth session
       }
       if (cancelled) return;
       persistMetaRef.current = {
@@ -334,7 +355,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       try {
         setState(withProactiveCoaching(readStoredState()));
       } catch {
-        /* keep seed state */
+        setState(emptyMissionState());
       }
       setHydrated(true);
     }
