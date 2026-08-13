@@ -42,7 +42,9 @@ export async function POST(request: Request) {
         );
       }
       try {
-        await ensurePersonalWorkspace(supabase);
+        const { workspaceId } = await ensurePersonalWorkspace(supabase);
+        const { ensureWorkspaceTrial } = await import("@/lib/billing/service");
+        await ensureWorkspaceTrial(supabase, workspaceId);
       } catch (bootErr) {
         console.error("[auth/login] workspace bootstrap", bootErr);
       }
