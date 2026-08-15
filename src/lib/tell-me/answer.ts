@@ -178,7 +178,10 @@ export async function answerTellMeQuestion(args: {
     throw new Error("Tell Me returned a malformed response");
   }
 
-  const sources = pickSources(bundle.sourceCatalogue, parsed.sourceIds ?? []);
+  const sources = pickSources(bundle.sourceCatalogue, parsed.sourceIds ?? [], {
+    confidence: normaliseConfidence(parsed.confidence),
+    question,
+  });
   const coachHandoff = questionLooksAdvisory(question);
 
   let answerText =
@@ -245,9 +248,17 @@ function normaliseConfidence(
   return "related_context";
 }
 
-function pickSources(
+/**
+ * Select evidence that actually supports the answer.
+ * Never fall back to arbitrary catalogue records.
+ */
+export function pickSources(
   catalogue: TellMeSourceRef[],
   ids: string[],
+  opts?: {
+    confidence?: TellMeAnswerConfidence;
+    question?: string;
+  },
 ): TellMeSourceRef[] {
   const byId = new Map(catalogue.map((s) => [s.id, s]));
   const picked: TellMeSourceRef[] = [];
@@ -255,8 +266,46 @@ function pickSources(
     const hit = byId.get(id);
     if (hit) picked.push(hit);
   }
-  if (picked.length) return picked.slice(0, 6);
-  return catalogue.slice(0, 3);
+
+  if (opts?.confidence === "not_found") {
+    // Unsupported answers must not cite unrelated project records.
+    return [];
+  }
+
+  if (picked.length) {
+    if (opts?.question) {
+      return filterRelevantSources(picked, opts.question).slice(0, 6);
+    }
+    return picked.slice(0, 6);
+  }
+
+  // No model-cited ids — do not invent evidence from the catalogue.
+  return [];
+}
+
+function relevanceTokens(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t.length >= 4);
+}
+
+/** Keep sources that share meaningful tokens with the question/answer topic. */
+export function filterRelevantSources(
+  sources: TellMeSourceRef[],
+  question: string,
+): TellMeSourceRef[] {
+  const qTokens = new Set(relevanceTokens(question));
+  if (!qTokens.size) return sources;
+  const scored = sources
+    .map((s) => {
+      const hay = relevanceTokens(`${s.label} ${s.detail ?? ""}`);
+      const overlap = hay.filter((t) => qTokens.has(t)).length;
+      return { s, overlap };
+    })
+    .filter((row) => row.overlap > 0);
+  if (!scored.length) return [];
+  return scored.sort((a, b) => b.overlap - a.overlap).map((row) => row.s);
 }
 
 function isProjectEmpty(state: MissionState, projectId: string | null): boolean {
@@ -392,7 +441,10 @@ function localGroundedAnswer(args: {
   return {
     answer,
     confidence,
-    sources: sources.slice(0, 6),
+    sources:
+      confidence === "not_found"
+        ? []
+        : filterRelevantSources(sources, args.question).slice(0, 6),
     scope: {
       mode: args.bundle.scope.mode,
       projectId: args.bundle.scope.projectId,
