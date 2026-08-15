@@ -142,10 +142,16 @@ export function NewProjectExperience({
       ) : null}
 
       {success ? (
-        <p className="np-success" role="status">
-          {success} Lume has created your starting project from what you
-          provided.
-        </p>
+        <div className="np-success-block" role="status">
+          <p className="np-success">
+            {success} Lume has created your starting project from what you
+            provided.
+          </p>
+          <p className="np-tell-me-nudge">
+            Lume has started learning your project. Try asking Tell Me: “What
+            are the biggest risks I mentioned?”
+          </p>
+        </div>
       ) : null}
     </div>
   );

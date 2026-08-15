@@ -25,7 +25,7 @@ export type AiGateFail = {
 };
 
 export async function requireAiCaller(
-  feature: "capture" | "coach" | "transcribe" | "new-project",
+  feature: "capture" | "coach" | "transcribe" | "new-project" | "tell-me",
 ): Promise<AiGateOk | AiGateFail> {
   const mode = getAuthMode();
 
@@ -80,7 +80,9 @@ export async function requireAiCaller(
         ? limits.coachPerHour
         : feature === "transcribe"
           ? limits.transcribePerHour
-          : limits.newProjectPerHour;
+          : feature === "tell-me"
+            ? limits.tellMePerHour
+            : limits.newProjectPerHour;
 
   const result = checkRateLimit({
     key: `${feature}:${userId}`,

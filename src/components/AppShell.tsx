@@ -11,6 +11,8 @@ import {
   CoachSessionProvider,
   useCoachSession,
 } from "@/components/coach/CoachSessionContext";
+import { TellMePanel } from "@/components/tell-me/TellMePanel";
+import { TellMeSessionProvider } from "@/components/tell-me/TellMeSessionContext";
 import { EntitlementGate } from "@/components/billing/EntitlementGate";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import { useMission } from "@/lib/store";
@@ -32,9 +34,37 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <CaptureSessionProvider>
       <CoachSessionProvider>
-        <AppShellInner>{children}</AppShellInner>
+        <AppShellWithTellMe>{children}</AppShellWithTellMe>
       </CoachSessionProvider>
     </CaptureSessionProvider>
+  );
+}
+
+function AppShellWithTellMe({ children }: { children: ReactNode }) {
+  const [userName, setUserName] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = (await res.json()) as {
+          user?: { name?: string } | null;
+        };
+        if (!cancelled) setUserName(data.user?.name ?? null);
+      } catch {
+        if (!cancelled) setUserName(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <TellMeSessionProvider userDisplayName={userName}>
+      <AppShellInner>{children}</AppShellInner>
+      <TellMePanel />
+    </TellMeSessionProvider>
   );
 }
 

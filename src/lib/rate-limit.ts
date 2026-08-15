@@ -69,6 +69,7 @@ export function getAiRateLimits(env: NodeJS.ProcessEnv = process.env) {
     coachPerHour: n("LUME_RATE_LIMIT_COACH_PER_HOUR", 60),
     transcribePerHour: n("LUME_RATE_LIMIT_TRANSCRIBE_PER_HOUR", 40),
     newProjectPerHour: n("LUME_RATE_LIMIT_NEW_PROJECT_PER_HOUR", 30),
+    tellMePerHour: n("LUME_RATE_LIMIT_TELL_ME_PER_HOUR", 60),
     windowMs: 60 * 60 * 1000,
   };
 }

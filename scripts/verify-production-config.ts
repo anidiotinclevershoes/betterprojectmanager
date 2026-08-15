@@ -249,6 +249,8 @@ check("AI routes import requireAiCaller", () => {
     "src/app/api/coach/route.ts",
     "src/app/api/transcribe/route.ts",
     "src/app/api/new-project/route.ts",
+    "src/app/api/tell-me/route.ts",
+    "src/app/api/tell-me/refresh/route.ts",
   ]) {
     const src = fs.readFileSync(path.join(root, rel), "utf8");
     assert.match(src, /requireAiCaller/);
