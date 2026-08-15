@@ -123,3 +123,17 @@ Local/demo still works with deterministic snapshots in localStorage if the table
 ## Product outcome
 
 Users can see **Capture → Lume learns → Tell Me**, ask grounded questions, get evidence cues, and keep Knowledge scannable — without continuous AI spend.
+
+## Screenshots
+
+See `docs/tell-me-v1/`:
+
+1. `01-capture-learn-tell-me-strip.png`
+2. `02-tell-me-default.png`
+3. `03-tell-me-suggestions.png`
+4. `04-direct-answer-with-sources.png`
+5. `05-cannot-find-answer.png`
+6. `06-freshness-refresh.png`
+7. `07-knowledge-section-frames.png`
+8. `08-knowledge-search-highlight.png`
+9. `09-narrow-laptop.png`
