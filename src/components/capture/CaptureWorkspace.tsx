@@ -105,7 +105,6 @@ export function CaptureWorkspace({
     updateSuggestion,
     maximized,
     minimiseCapture,
-    expandCapture,
     restoreCapture,
   } = session;
 
