@@ -8,7 +8,7 @@ export type {
   TellMeSuggestedQuestion,
 } from "@/lib/tell-me/types";
 
-export { answerTellMeQuestion } from "@/lib/tell-me/answer";
+export { answerTellMeQuestion, pickSources, filterRelevantSources } from "@/lib/tell-me/answer";
 export { buildTellMeContext } from "@/lib/tell-me/context";
 export {
   assessFreshness,

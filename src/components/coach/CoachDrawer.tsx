@@ -63,7 +63,7 @@ export function CoachDrawer() {
       >
         <header className="coach-drawer-header">
           <div>
-            <p className="eyebrow">Coach</p>
+            <p className="eyebrow coach-drawer-kicker">Coach · optional guidance</p>
             <h2>{title || "Ready when you are"}</h2>
             <p className="meta">
               {provider

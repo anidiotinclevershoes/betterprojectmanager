@@ -12,6 +12,7 @@ import {
   searchProjectKnowledge,
   highlightMatches,
   answerTellMeQuestion,
+  pickSources,
 } from "../src/lib/tell-me";
 import { emptyKnowledge } from "../src/lib/knowledge";
 import type { MissionState, Project } from "../src/lib/types";
@@ -247,6 +248,14 @@ async function main() {
   });
   assert.match(ownership.answer, /Nina/i);
 
+  const related = await answerTellMeQuestion({
+    question: "Has Finance approved the budget?",
+    state,
+    selectedProjectId: "p-atlas",
+  });
+  assert.match(related.answer, /outstanding|Finance/i);
+
+  // Evidence relevance: unsupported Finance must not cite Nina rollback
   const noEvidence = await answerTellMeQuestion({
     question: "Has Finance approved the budget?",
     state: {
@@ -254,21 +263,45 @@ async function main() {
       knowledge: [
         {
           ...knowledge,
-          sections: { ...knowledge.sections, openLoops: [] },
+          sections: {
+            ...knowledge.sections,
+            openLoops: [],
+            now: knowledge.sections.now.filter((b) => !/Finance|approv/i.test(b)),
+          },
         },
       ],
-      todos: state.todos.filter((t) => !/Finance/i.test(t.title)),
+      todos: state.todos.filter((t) => !/Finance|approv|budget/i.test(t.title)),
     },
     selectedProjectId: "p-atlas",
   });
   assert.match(noEvidence.answer, /can.?t find confirmation/i);
+  assert.equal(noEvidence.confidence, "not_found");
+  assert.equal(noEvidence.sources.length, 0);
+  assert.ok(
+    !noEvidence.sources.some((s) => /Nina|rollback/i.test(s.label)),
+    "must not cite unrelated Nina rollback evidence",
+  );
 
-  const related = await answerTellMeQuestion({
-    question: "Has Finance approved the budget?",
-    state,
-    selectedProjectId: "p-atlas",
-  });
-  assert.match(related.answer, /outstanding|Finance/i);
+  // pickSources never falls back to arbitrary catalogue on not_found
+  const bogus = pickSources(
+    [
+      {
+        id: "k1",
+        kind: "knowledge",
+        label: "Nina owns the rollback plan for Release 9",
+      },
+    ],
+    ["k1"],
+    {
+      confidence: "not_found",
+      question: "Has Finance approved the budget?",
+    },
+  );
+  assert.equal(bogus.length, 0);
+
+  // Scope includes real project identity
+  assert.equal(scoped.projectCode, "ATLAS");
+  assert.match(scoped.projectName ?? "", /Atlas/i);
 
   const empty = await answerTellMeQuestion({
     question: "What do we know?",

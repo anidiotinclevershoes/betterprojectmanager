@@ -11,7 +11,6 @@ import {
   CoachSessionProvider,
   useCoachSession,
 } from "@/components/coach/CoachSessionContext";
-import { TellMePanel } from "@/components/tell-me/TellMePanel";
 import { TellMeSessionProvider } from "@/components/tell-me/TellMeSessionContext";
 import { EntitlementGate } from "@/components/billing/EntitlementGate";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
@@ -63,7 +62,6 @@ function AppShellWithTellMe({ children }: { children: ReactNode }) {
   return (
     <TellMeSessionProvider userDisplayName={userName}>
       <AppShellInner>{children}</AppShellInner>
-      <TellMePanel />
     </TellMeSessionProvider>
   );
 }
