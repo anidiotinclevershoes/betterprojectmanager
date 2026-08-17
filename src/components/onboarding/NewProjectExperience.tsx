@@ -35,6 +35,7 @@ export function NewProjectExperience({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
+  const buildAbortRef = useRef<AbortController | null>(null);
 
   const createFromDraft = useCallback(
     async (input: CreateProjectInput) => {
@@ -63,30 +64,63 @@ export function NewProjectExperience({
   ) {
     setBusy(true);
     setError(null);
+    buildAbortRef.current?.abort();
+    const controller = new AbortController();
+    buildAbortRef.current = controller;
     try {
       const local = assembleFromNarrative(content, "delivery", sourceMode);
       const res = await fetch("/api/new-project", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({ content, sourceMode, kind: "delivery" }),
       });
+      if (controller.signal.aborted) return;
       if (!res.ok) {
+        const fail = (await res.json().catch(() => null)) as {
+          error?: string;
+          code?: string;
+        } | null;
         setDraft(local);
         setPath("review");
+        setError(
+          fail?.error ||
+            "Could not use AI for this build. Showing a local draft instead — review carefully before creating.",
+        );
         return;
       }
       const data = (await res.json()) as {
         draft?: CreateProjectInput;
         note?: string;
+        provider?: string;
       };
       setDraft(data.draft ?? local);
       setPath("review");
-    } catch {
+      if (data.note) {
+        setError(data.note);
+      }
+    } catch (err) {
+      if ((err as Error).name === "AbortError") {
+        setError(null);
+        return;
+      }
       setDraft(assembleFromNarrative(content, "delivery", sourceMode));
       setPath("review");
+      setError(
+        "Build request failed. Showing a local draft instead — review carefully before creating.",
+      );
     } finally {
+      if (buildAbortRef.current === controller) {
+        buildAbortRef.current = null;
+      }
       setBusy(false);
     }
+  }
+
+  function cancelBuild() {
+    buildAbortRef.current?.abort();
+    buildAbortRef.current = null;
+    setBusy(false);
   }
 
   return (
@@ -107,6 +141,7 @@ export function NewProjectExperience({
           openaiConfigured={openaiConfigured}
           onBack={() => setPath("choose")}
           onBuild={(transcript) => void analyseNarrative(transcript, "talk")}
+          onCancelBuild={cancelBuild}
         />
       ) : null}
 
@@ -225,11 +260,13 @@ function TalkPath({
   openaiConfigured,
   onBack,
   onBuild,
+  onCancelBuild,
 }: {
   busy: boolean;
   openaiConfigured: boolean | null;
   onBack: () => void;
   onBuild: (transcript: string) => void;
+  onCancelBuild: () => void;
 }) {
   const [transcript, setTranscript] = useState("");
   const [recording, setRecording] = useState(false);
@@ -468,14 +505,25 @@ function TalkPath({
                 ? "Local extraction — OpenAI key not configured."
                 : "Lume will organise what you shared into a reviewable project."}
             </p>
-            <button
-              type="button"
-              className="primary-btn"
-              disabled={busy || !transcript.trim()}
-              onClick={() => onBuild(transcript.trim())}
-            >
-              {busy ? "Building…" : "Build My Project"}
-            </button>
+            {busy ? (
+              <button
+                type="button"
+                className="ghost-btn"
+                onClick={onCancelBuild}
+              >
+                Cancel
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="primary-btn"
+                disabled={!transcript.trim()}
+                onClick={() => onBuild(transcript.trim())}
+              >
+                Build My Project
+              </button>
+            )}
+            <span className="ai-use-hint">Uses AI when configured</span>
           </div>
         </div>
 

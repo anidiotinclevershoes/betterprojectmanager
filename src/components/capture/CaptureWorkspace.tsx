@@ -87,6 +87,7 @@ export function CaptureWorkspace({
     statusMessage,
     announce,
     analyse: runAnalyse,
+    cancelAnalyse,
     applyOne,
     dismissOne,
     clearSession,
@@ -502,40 +503,24 @@ export function CaptureWorkspace({
             <button
               type="button"
               className="capture-window-btn"
-              onClick={minimiseCapture}
-              aria-label="Minimise Capture"
-              title="Minimise Capture"
-            >
-              ─
-            </button>
-            <button
-              type="button"
-              className="capture-window-btn"
               onClick={() => {
                 if (collapsed) restoreCapture();
-                else if (maximized) restoreCapture();
-                else expandCapture();
+                else minimiseCapture();
               }}
-              aria-label={
-                collapsed
-                  ? "Restore Capture"
-                  : maximized
-                    ? "Restore Capture"
-                    : "Expand Capture"
-              }
-              title={
-                collapsed
-                  ? "Restore Capture"
-                  : maximized
-                    ? "Restore Capture"
-                    : "Expand Capture"
-              }
+              aria-label={collapsed ? "Restore Capture" : "Minimise Capture"}
+              title={collapsed ? "Restore Capture" : "Minimise Capture"}
             >
-              {maximized && !collapsed ? "❐" : "□"}
+              {collapsed ? "□" : "─"}
             </button>
           </div>
         </div>
       </div>
+
+      {collapsed ? (
+        <p className="capture-minimise-restore">
+          Capture minimised — click □ to restore your notes.
+        </p>
+      ) : null}
 
       {/* Transcript stays visible after analysis (read-only), including when collapsed. */}
       <section
@@ -551,21 +536,35 @@ export function CaptureWorkspace({
           <label className="sr-only" htmlFor="capture-input">
             Capture notes
           </label>
-          <div className="capture-blocks" aria-label="Capture notes">
-            {blocks.map((block, index) => (
-              <div
-                key={block.id}
-                className={`capture-block is-${block.source}`}
-              >
-                {index > 0 ? (
-                  <div className="capture-block-break" role="separator">
-                    <span className="capture-block-break-rule" aria-hidden />
-                    <span className="capture-block-break-label">
-                      {block.source === "recorded"
-                        ? "Recording"
-                        : "Continued"}
-                    </span>
-                    {!isAnalysed ? (
+          <div className={!isAnalysed ? "capture-compose-row" : undefined}>
+            <div className="capture-blocks" aria-label="Capture notes">
+              {blocks.map((block, index) => (
+                <div
+                  key={block.id}
+                  className={`capture-block is-${block.source}`}
+                >
+                  {index > 0 ? (
+                    <div className="capture-block-break" role="separator">
+                      <span className="capture-block-break-rule" aria-hidden />
+                      <span className="capture-block-break-label">
+                        {block.source === "recorded"
+                          ? "Recording"
+                          : "Continued"}
+                      </span>
+                      {!isAnalysed ? (
+                        <button
+                          type="button"
+                          className="ghost-btn capture-block-delete"
+                          onClick={() => deleteBlock(block.id)}
+                          aria-label="Delete this section"
+                          title="Delete this section"
+                        >
+                          Delete
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : blocks.length > 1 && !isAnalysed ? (
+                    <div className="capture-block-break is-leading">
                       <button
                         type="button"
                         className="ghost-btn capture-block-delete"
@@ -575,41 +574,29 @@ export function CaptureWorkspace({
                       >
                         Delete
                       </button>
-                    ) : null}
-                  </div>
-                ) : blocks.length > 1 && !isAnalysed ? (
-                  <div className="capture-block-break is-leading">
-                    <button
-                      type="button"
-                      className="ghost-btn capture-block-delete"
-                      onClick={() => deleteBlock(block.id)}
-                      aria-label="Delete this section"
-                      title="Delete this section"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ) : null}
-                <CaptureAutoTextarea
-                  id={index === blocks.length - 1 ? "capture-input" : undefined}
-                  value={block.text}
-                  readOnly={isAnalysed}
-                  disabled={busy === "analysing"}
-                  placeholder={
-                    index === 0
-                      ? "What happened? Type notes or press Record…"
-                      : block.source === "recorded"
-                        ? "Recording transcript…"
-                        : "Continue typing…"
-                  }
-                  onChange={(text) => {
-                    if (!isAnalysed) updateBlockText(block.id, text);
-                  }}
-                />
-              </div>
-            ))}
+                    </div>
+                  ) : null}
+                  <CaptureAutoTextarea
+                    id={index === blocks.length - 1 ? "capture-input" : undefined}
+                    value={block.text}
+                    readOnly={isAnalysed}
+                    disabled={busy === "analysing"}
+                    placeholder={
+                      index === 0
+                        ? "What happened? Type notes or press Record…"
+                        : block.source === "recorded"
+                          ? "Recording transcript…"
+                          : "Continue typing…"
+                    }
+                    onChange={(text) => {
+                      if (!isAnalysed) updateBlockText(block.id, text);
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+            {!isAnalysed ? <CaptureBestPractice /> : null}
           </div>
-          {!isAnalysed ? <CaptureBestPractice /> : null}
 
           <div className="capture-toolbar">
             <div className="capture-toolbar-left">
@@ -685,18 +672,31 @@ export function CaptureWorkspace({
               ) : null}
 
               {!isAnalysed && !showPreWarn ? (
-                <button
-                  type="submit"
-                  className="primary-btn analyse-btn"
-                  disabled={
-                    busy !== "idle" ||
-                    recording.active ||
-                    !content.trim() ||
-                    usage.remaining <= 0
-                  }
-                >
-                  Analyse
-                </button>
+                <>
+                  {busy === "analysing" ? (
+                    <button
+                      type="button"
+                      className="ghost-btn"
+                      onClick={cancelAnalyse}
+                    >
+                      Cancel
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="primary-btn analyse-btn"
+                      disabled={
+                        busy !== "idle" ||
+                        recording.active ||
+                        !content.trim() ||
+                        usage.remaining <= 0
+                      }
+                    >
+                      Analyse
+                    </button>
+                  )}
+                  <span className="ai-use-hint">Uses AI</span>
+                </>
               ) : null}
             </div>
           </div>

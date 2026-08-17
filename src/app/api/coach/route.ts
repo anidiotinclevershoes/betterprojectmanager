@@ -44,7 +44,11 @@ export async function POST(request: Request) {
             type: "ready",
             openaiConfigured: isOpenAIConfigured(),
           });
-          for await (const event of streamPmCoaching(body.state, body.scope)) {
+          for await (const event of streamPmCoaching(
+            body.state,
+            body.scope,
+            gate.displayName,
+          )) {
             send(event);
           }
         } catch (error) {

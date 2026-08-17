@@ -112,11 +112,12 @@ export function TellMeWorkspace() {
         />
         <button
           type="submit"
-          className="primary tell-me-ask-btn"
+          className="primary-btn tell-me-ask-btn"
           disabled={busy || !question.trim()}
         >
           {busy ? "Thinking…" : "Ask Lume"}
         </button>
+        <p className="ai-use-hint">Uses AI</p>
       </form>
 
       {error ? <p className="tell-me-error">{error}</p> : null}

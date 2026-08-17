@@ -257,6 +257,38 @@ check("AI routes import requireAiCaller", () => {
   }
 });
 
+check("ai-gate enforces entitlement for supabase callers", () => {
+  const gate = fs.readFileSync(path.join(root, "src/lib/ai-gate.ts"), "utf8");
+  assert.match(gate, /getWorkspaceEntitlement/);
+  assert.match(gate, /canUseLume/);
+  assert.match(gate, /entitlement_required/);
+  assert.match(gate, /403/);
+});
+
+check("coach prompt is not hard-coded to Tom", () => {
+  const coach = fs.readFileSync(path.join(root, "src/lib/pm-coach.ts"), "utf8");
+  assert.doesNotMatch(coach, /\bTom\b/);
+  assert.match(coach, /resolveCoachManagerLabel/);
+  assert.match(coach, /the project manager/);
+});
+
+check("past_due remains soft-allowed (grace)", () => {
+  const pastDue = evaluateEntitlement(
+    "ws",
+    {
+      workspace_id: "ws",
+      status: "past_due",
+      trial_started_at: null,
+      trial_ends_at: null,
+      current_period_end: "2026-09-01T00:00:00.000Z",
+      cancel_at_period_end: false,
+    },
+    { now: new Date("2026-08-13T12:00:00.000Z") },
+  );
+  assert.equal(pastDue.canUseLume, true);
+  assert.equal(pastDue.reason, "past_due_grace");
+});
+
 check("env example documents public vs server vars", () => {
   const env = fs.readFileSync(path.join(root, ".env.local.example"), "utf8");
   assert.match(env, /NEXT_PUBLIC_SUPABASE_URL/);

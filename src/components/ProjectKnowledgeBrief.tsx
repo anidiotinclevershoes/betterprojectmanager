@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   KNOWLEDGE_SECTIONS,
   emptyKnowledge,
@@ -17,6 +17,28 @@ import {
 } from "@/lib/tell-me/knowledge-search";
 import { openTellMePanel } from "@/components/tell-me/TellMeSessionContext";
 
+function collapseStorageKey(projectId: string) {
+  return `lume-knowledge-collapsed-v1:${projectId}`;
+}
+
+/** Lightweight scanability for people bullets without inventing fields. */
+function parsePersonBullet(bullet: string): {
+  person: string;
+  detail: string | null;
+} {
+  const separators = [" — ", " – ", " - ", ": ", " | "];
+  for (const sep of separators) {
+    const idx = bullet.indexOf(sep);
+    if (idx > 0) {
+      return {
+        person: bullet.slice(0, idx).trim(),
+        detail: bullet.slice(idx + sep.length).trim() || null,
+      };
+    }
+  }
+  return { person: bullet.trim(), detail: null };
+}
+
 export function ProjectKnowledgeBrief({ projectId }: { projectId: string }) {
   const { state, addKnowledgeBullet, replaceKnowledge } = useMission();
   const knowledge =
@@ -29,6 +51,35 @@ export function ProjectKnowledgeBrief({ projectId }: { projectId: string }) {
   const [quickSection, setQuickSection] =
     useState<KnowledgeSectionId>("now");
   const [search, setSearch] = useState("");
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    try {
+      const raw = window.sessionStorage.getItem(collapseStorageKey(projectId));
+      if (!raw) {
+        setCollapsed({});
+        return;
+      }
+      setCollapsed(JSON.parse(raw) as Record<string, boolean>);
+    } catch {
+      setCollapsed({});
+    }
+  }, [projectId]);
+
+  function toggleSection(sectionId: string) {
+    setCollapsed((prev) => {
+      const next = { ...prev, [sectionId]: !prev[sectionId] };
+      try {
+        window.sessionStorage.setItem(
+          collapseStorageKey(projectId),
+          JSON.stringify(next),
+        );
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }
 
   const query = search.trim();
   const hits = useMemo(
@@ -194,53 +245,121 @@ export function ProjectKnowledgeBrief({ projectId }: { projectId: string }) {
               if (matchingSections && !matchingSections.has(section.id)) {
                 return null;
               }
+              const isCollapsed = Boolean(collapsed[section.id]);
               return (
                 <article
                   key={section.id}
-                  className="knowledge-section-frame"
+                  className={`knowledge-section-frame ${isCollapsed ? "is-collapsed" : ""}`}
                   data-section={section.id}
                 >
                   <header className="knowledge-section-frame-header">
-                    <h4>{section.label}</h4>
-                    <span className="knowledge-section-count">
-                      {bullets.length}
-                    </span>
+                    <button
+                      type="button"
+                      className="knowledge-section-toggle"
+                      onClick={() => toggleSection(section.id)}
+                      aria-expanded={!isCollapsed}
+                    >
+                      <span aria-hidden>{isCollapsed ? "▸" : "▾"}</span>
+                      <h4>{section.label}</h4>
+                      <span className="knowledge-section-count">
+                        {bullets.length}
+                      </span>
+                    </button>
                   </header>
-                  <ul>
-                    {bullets.map((bullet, index) => {
-                      const hit = hitKey(section.id, index);
-                      const parts = hit
-                        ? highlightMatches(bullet, hit.matchRanges)
-                        : [{ text: bullet, hit: false }];
-                      return (
-                        <li key={`${section.id}-${index}`}>
-                          <span>
-                            {parts.map((part, i) =>
-                              part.hit ? (
-                                <mark key={i} className="knowledge-hit">
-                                  {part.text}
-                                </mark>
-                              ) : (
-                                <span key={i}>{part.text}</span>
-                              ),
-                            )}
+                  {!isCollapsed ? (
+                    section.id === "people" ? (
+                      <div className="knowledge-people-table" role="table">
+                        <div className="knowledge-people-head" role="row">
+                          <span role="columnheader">Person</span>
+                          <span role="columnheader">Role / context</span>
+                          <span role="columnheader" className="sr-only">
+                            Ask
                           </span>
-                          <button
-                            type="button"
-                            className="knowledge-ask-link"
-                            onClick={() =>
-                              openTellMePanel({
-                                projectId,
-                                prefill: `What do you know about ${bullet.slice(0, 80)}?`,
-                              })
-                            }
-                          >
-                            Ask Tell Me
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                        </div>
+                        {bullets.map((bullet, index) => {
+                          const hit = hitKey(section.id, index);
+                          const parsed = parsePersonBullet(bullet);
+                          const parts = hit
+                            ? highlightMatches(bullet, hit.matchRanges)
+                            : null;
+                          return (
+                            <div
+                              key={`${section.id}-${index}`}
+                              className="knowledge-people-row"
+                              role="row"
+                            >
+                              <span role="cell" className="knowledge-people-name">
+                                {parsed.person}
+                              </span>
+                              <span role="cell" className="knowledge-people-detail">
+                                {parts ? (
+                                  parts.map((part, i) =>
+                                    part.hit ? (
+                                      <mark key={i} className="knowledge-hit">
+                                        {part.text}
+                                      </mark>
+                                    ) : (
+                                      <span key={i}>{part.text}</span>
+                                    ),
+                                  )
+                                ) : (
+                                  parsed.detail ?? "—"
+                                )}
+                              </span>
+                              <button
+                                type="button"
+                                className="knowledge-ask-link"
+                                onClick={() =>
+                                  openTellMePanel({
+                                    projectId,
+                                    prefill: `What do you know about ${bullet.slice(0, 80)}?`,
+                                  })
+                                }
+                              >
+                                Ask Tell Me
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <ul>
+                        {bullets.map((bullet, index) => {
+                          const hit = hitKey(section.id, index);
+                          const parts = hit
+                            ? highlightMatches(bullet, hit.matchRanges)
+                            : [{ text: bullet, hit: false }];
+                          return (
+                            <li key={`${section.id}-${index}`}>
+                              <span>
+                                {parts.map((part, i) =>
+                                  part.hit ? (
+                                    <mark key={i} className="knowledge-hit">
+                                      {part.text}
+                                    </mark>
+                                  ) : (
+                                    <span key={i}>{part.text}</span>
+                                  ),
+                                )}
+                              </span>
+                              <button
+                                type="button"
+                                className="knowledge-ask-link"
+                                onClick={() =>
+                                  openTellMePanel({
+                                    projectId,
+                                    prefill: `What do you know about ${bullet.slice(0, 80)}?`,
+                                  })
+                                }
+                              >
+                                Ask Tell Me
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )
+                  ) : null}
                 </article>
               );
             })

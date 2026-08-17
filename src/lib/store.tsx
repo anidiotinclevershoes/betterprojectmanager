@@ -125,7 +125,10 @@ type MissionContextValue = {
   capture: (input: CaptureInput) => CaptureResult;
   captureWithAI: (input: CaptureInput) => Promise<CaptureResult>;
   /** Analyse without writing — user confirms additions in Capture review. */
-  analyzeCaptureWithAI: (input: CaptureInput) => Promise<{
+  analyzeCaptureWithAI: (
+    input: CaptureInput,
+    signal?: AbortSignal,
+  ) => Promise<{
     result: CaptureResult;
     contextManifest: CaptureContextManifest | null;
     requestId: string | null;
@@ -588,11 +591,13 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     return result;
   }, []);
 
-  const requestCaptureAnalysis = useCallback(async (input: CaptureInput) => {
+  const requestCaptureAnalysis = useCallback(
+    async (input: CaptureInput, signal?: AbortSignal) => {
     const latest = stateRef.current;
     const response = await fetch("/api/capture", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal,
       body: JSON.stringify({
         content: input.content,
         projectId: input.projectId,
@@ -655,9 +660,12 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const analyzeCaptureWithAI = useCallback(
-    async (input: CaptureInput) => {
+    async (input: CaptureInput, signal?: AbortSignal) => {
       const { result, contextManifest, requestId, reliability } =
-        await requestCaptureAnalysis(input);
+        await requestCaptureAnalysis(input, signal);
+      if (signal?.aborted) {
+        throw new DOMException("Aborted", "AbortError");
+      }
       setState((prev) =>
         pushHistory(bumpAnalysisUsage(prev), makeHistoryEvent({
           type: "capture_analysed",
@@ -1225,6 +1233,16 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           memories: setupMemory
             ? [setupMemory, ...(prev.memories ?? [])]
             : prev.memories,
+          history: [
+            makeHistoryEvent({
+              type: "project_created",
+              title: `Created ${persisted.project.name}`,
+              detail: persisted.project.code,
+              projectId: persisted.project.id,
+              source: "user",
+            }),
+            ...(prev.history ?? []),
+          ],
           lastAnalyzedAt: new Date().toISOString(),
         }));
         setSaveStatus("saved");
@@ -1270,7 +1288,16 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           memories: [memory, ...(next.memories ?? [])],
         };
       }
-      return next;
+      return pushHistory(
+        next,
+        makeHistoryEvent({
+          type: "project_created",
+          title: `Created ${bundle.project.name}`,
+          detail: bundle.project.code,
+          projectId: bundle.project.id,
+          source: "user",
+        }),
+      );
     });
     return bundle.project.id;
   }, []);

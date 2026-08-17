@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -83,6 +84,7 @@ type CaptureSessionValue = {
     scopedProjectId?: string,
     options?: { force?: boolean },
   ) => Promise<void>;
+  cancelAnalyse: () => void;
   applyOne: (item: PendingSuggestion, scopedProjectId?: string) => void;
   dismissOne: (id: string) => void;
   clearSession: () => void;
@@ -203,6 +205,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [busy, setBusy] = useState<Busy>("idle");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const analyseAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const persisted = readPersisted();
@@ -404,6 +407,9 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       if (!trimmed) return;
       // Do not re-analyse an already analysed Capture unless forced (Analyse again).
       if (slice.result && !options?.force) return;
+      analyseAbortRef.current?.abort();
+      const controller = new AbortController();
+      analyseAbortRef.current = controller;
       setBusy("analysing");
       setSlice((prev) => ({
         ...prev,
@@ -425,11 +431,15 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           result: next,
           contextManifest,
           reliability,
-        } = await analyzeCaptureWithAI({
-          content: trimmed,
-          projectId: effective,
-          sourceType,
-        });
+        } = await analyzeCaptureWithAI(
+          {
+            content: trimmed,
+            projectId: effective,
+            sourceType,
+          },
+          controller.signal,
+        );
+        if (controller.signal.aborted) return;
         const openTodos = (state.todos ?? [])
           .filter((t) => !t.done)
           .map((t) => ({
@@ -477,16 +487,29 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
               : "Capture analysis complete. Review suggested actions.",
         );
       } catch (err) {
+        if ((err as Error).name === "AbortError") {
+          announce("Analysis cancelled.");
+          return;
+        }
         setSlice((prev) => ({
           ...prev,
           error: err instanceof Error ? err.message : "Capture failed",
         }));
       } finally {
+        if (analyseAbortRef.current === controller) {
+          analyseAbortRef.current = null;
+        }
         setBusy("idle");
       }
     },
     [analyzeCaptureWithAI, announce, slice.projectId, slice.result, slice.source, state.todos],
   );
+
+  const cancelAnalyse = useCallback(() => {
+    analyseAbortRef.current?.abort();
+    analyseAbortRef.current = null;
+    setBusy("idle");
+  }, []);
 
   const applyOne = useCallback(
     (item: PendingSuggestion, scopedProjectId?: string) => {
@@ -703,6 +726,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       statusMessage,
       announce,
       analyse,
+      cancelAnalyse,
       applyOne,
       dismissOne,
       clearSession,
@@ -723,6 +747,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     [
       addFileName,
       analyse,
+      cancelAnalyse,
       announce,
       applyOne,
       busy,

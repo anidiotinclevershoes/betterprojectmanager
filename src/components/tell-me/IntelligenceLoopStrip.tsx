@@ -133,7 +133,7 @@ export function IntelligenceLoopStrip({
         aria-pressed={mode === "coach"}
       >
         <span className="intelligence-mode-kicker">Optional</span>
-        <span className="intelligence-mode-title">Coach</span>
+        <span className="intelligence-mode-title">Advise</span>
         <span className="intelligence-mode-copy">
           PM guidance when you want it
         </span>

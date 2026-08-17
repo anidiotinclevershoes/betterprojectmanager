@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
-import { TrialExpiredPanel } from "@/components/billing/TrialExpiredPanel";
-import { useMission } from "@/lib/store";
-import type { WorkspaceEntitlement } from "@/lib/billing/types";
-
 /**
  * Soft production gate: when Supabase-backed and trial/subscription expired,
  * block the main workspace with the entitlement panel.
  * Development local mode is never blocked.
+ * past_due is soft-allowed (grace) with a lightweight warning banner.
  */
+import { useEffect, useState, type ReactNode } from "react";
+import { TrialExpiredPanel } from "@/components/billing/TrialExpiredPanel";
+import { useMission } from "@/lib/store";
+import type { WorkspaceEntitlement } from "@/lib/billing/types";
+import Link from "next/link";
+
 export function EntitlementGate({ children }: { children: ReactNode }) {
   const { persistenceMode, hydrated } = useMission();
   const [entitlement, setEntitlement] = useState<WorkspaceEntitlement | null>(
@@ -17,13 +19,12 @@ export function EntitlementGate({ children }: { children: ReactNode }) {
   );
   const [billingConfigured, setBillingConfigured] = useState(false);
   const [checked, setChecked] = useState(false);
+  const needsBillingCheck = hydrated && persistenceMode === "supabase";
 
   useEffect(() => {
-    if (!hydrated || persistenceMode !== "supabase") {
-      setChecked(true);
-      return;
-    }
+    if (!needsBillingCheck) return;
     let cancelled = false;
+    setChecked(false);
     fetch("/api/billing/status")
       .then((r) => r.json())
       .then(
@@ -43,10 +44,11 @@ export function EntitlementGate({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [hydrated, persistenceMode]);
+  }, [needsBillingCheck]);
 
-  if (!hydrated || !checked) return <>{children}</>;
+  if (!hydrated) return <>{children}</>;
   if (persistenceMode !== "supabase") return <>{children}</>;
+  if (!checked) return <>{children}</>;
   if (entitlement && !entitlement.canUseLume) {
     return (
       <div className="login-page">
@@ -59,5 +61,20 @@ export function EntitlementGate({ children }: { children: ReactNode }) {
       </div>
     );
   }
-  return <>{children}</>;
+
+  return (
+    <>
+      {entitlement?.status === "past_due" && entitlement.canUseLume ? (
+        <div className="billing-grace-banner" role="status">
+          <p>
+            Payment issue on your subscription — Lume still works during a short
+            grace period.{" "}
+            <Link href="/account">Update billing</Link>
+            {billingConfigured ? " to avoid interruption." : "."}
+          </p>
+        </div>
+      ) : null}
+      {children}
+    </>
+  );
 }

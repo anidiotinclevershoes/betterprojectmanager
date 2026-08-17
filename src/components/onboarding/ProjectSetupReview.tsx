@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import {
   countSetupItems,
   includedItemCount,
+  newSetupClientKey,
   suggestCode,
   type CreateProjectInput,
   type SetupDateDraft,
@@ -291,7 +292,7 @@ function TodoList({
     <div className="np-compact-list">
       {items.map((item, index) => (
         <div
-          key={`${item.title}-${index}`}
+          key={item.clientKey ?? `todo-${index}`}
           className={`np-compact-row ${item.needsReview ? "is-needs-review" : ""}`}
         >
           <input
@@ -332,9 +333,11 @@ function TodoList({
               onChange(next);
             }}
           />
-          {item.needsReview ? (
-            <span className="np-needs-review">Needs Review</span>
-          ) : null}
+          <span className="np-needs-review-slot" aria-hidden={!item.needsReview}>
+            {item.needsReview ? (
+              <span className="np-needs-review">Needs Review</span>
+            ) : null}
+          </span>
           <button
             type="button"
             className="ghost-btn"
@@ -348,7 +351,14 @@ function TodoList({
         type="button"
         className="ghost-btn"
         onClick={() =>
-          onChange([...items, { title: "New To Do", kind: "ACTION" }])
+          onChange([
+            ...items,
+            {
+              clientKey: newSetupClientKey(),
+              title: "New To Do",
+              kind: "ACTION",
+            },
+          ])
         }
       >
         + Add
@@ -368,7 +378,7 @@ function RiskList({
     <div className="np-compact-list">
       {items.map((item, index) => (
         <div
-          key={`${item.title}-${index}`}
+          key={item.clientKey ?? `risk-${index}`}
           className={`np-compact-row ${item.needsReview ? "is-needs-review" : ""}`}
         >
           <input
@@ -380,9 +390,11 @@ function RiskList({
               onChange(next);
             }}
           />
-          {item.needsReview ? (
-            <span className="np-needs-review">Needs Review</span>
-          ) : null}
+          <span className="np-needs-review-slot" aria-hidden={!item.needsReview}>
+            {item.needsReview ? (
+              <span className="np-needs-review">Needs Review</span>
+            ) : null}
+          </span>
           <button
             type="button"
             className="ghost-btn"
@@ -395,7 +407,12 @@ function RiskList({
       <button
         type="button"
         className="ghost-btn"
-        onClick={() => onChange([...items, { title: "New risk" }])}
+        onClick={() =>
+          onChange([
+            ...items,
+            { clientKey: newSetupClientKey(), title: "New risk" },
+          ])
+        }
       >
         + Add Risk
       </button>
@@ -414,7 +431,7 @@ function StakeholderList({
     <div className="np-compact-list np-stakeholder-list">
       {items.map((item, index) => (
         <div
-          key={`${item.name}-${index}`}
+          key={item.clientKey ?? `stakeholder-${index}`}
           className={`np-compact-row ${item.needsReview ? "is-needs-review" : ""}`}
         >
           <input
@@ -440,13 +457,15 @@ function StakeholderList({
               onChange(next);
             }}
           />
-          {item.needsReview ? (
-            <span className="np-needs-review">
-              {item.role && item.role !== item.name
-                ? `${item.role}?`
-                : "Needs Review"}
-            </span>
-          ) : null}
+          <span className="np-needs-review-slot" aria-hidden={!item.needsReview}>
+            {item.needsReview ? (
+              <span className="np-needs-review">
+                {item.role && item.role !== item.name
+                  ? `${item.role}?`
+                  : "Needs Review"}
+              </span>
+            ) : null}
+          </span>
           <button
             type="button"
             className="ghost-btn"
@@ -460,7 +479,14 @@ function StakeholderList({
         type="button"
         className="ghost-btn"
         onClick={() =>
-          onChange([...items, { name: "", role: "Stakeholder" }])
+          onChange([
+            ...items,
+            {
+              clientKey: newSetupClientKey(),
+              name: "",
+              role: "Stakeholder",
+            },
+          ])
         }
       >
         + Add
@@ -480,7 +506,7 @@ function DateList({
     <div className="np-compact-list np-date-list">
       {items.map((item, index) => (
         <div
-          key={`${item.label}-${index}`}
+          key={item.clientKey ?? `date-${index}`}
           className={`np-compact-row ${item.needsReview ? "is-needs-review" : ""}`}
         >
           <input
@@ -505,9 +531,11 @@ function DateList({
               onChange(next);
             }}
           />
-          {item.needsReview ? (
-            <span className="np-needs-review">Needs Review</span>
-          ) : null}
+          <span className="np-needs-review-slot" aria-hidden={!item.needsReview}>
+            {item.needsReview ? (
+              <span className="np-needs-review">Needs Review</span>
+            ) : null}
+          </span>
           <button
             type="button"
             className="ghost-btn"
@@ -520,7 +548,12 @@ function DateList({
       <button
         type="button"
         className="ghost-btn"
-        onClick={() => onChange([...items, { label: "New date" }])}
+        onClick={() =>
+          onChange([
+            ...items,
+            { clientKey: newSetupClientKey(), label: "New date" },
+          ])
+        }
       >
         + Add
       </button>
@@ -544,7 +577,7 @@ function KnowledgeList({
     <div className="np-remember-list">
       {items.map((item, index) => (
         <div
-          key={`${item.text}-${index}`}
+          key={item.clientKey ?? `know-${index}`}
           className={`np-remember-row ${item.remember === false ? "is-skipped" : ""}`}
         >
           <span className="np-remember-check" aria-hidden>
@@ -610,7 +643,14 @@ function KnowledgeList({
         type="button"
         className="ghost-btn"
         onClick={() =>
-          onChange([...items, { text: "New durable fact", remember: true }])
+          onChange([
+            ...items,
+            {
+              clientKey: newSetupClientKey(),
+              text: "New durable fact",
+              remember: true,
+            },
+          ])
         }
       >
         + Add

@@ -10,6 +10,8 @@ import type {
 } from "./types";
 
 export type SetupTodoDraft = {
+  /** Stable React key for review editing — never persisted. */
+  clientKey?: string;
   title: string;
   dueAt?: string;
   kind?: TodoKind;
@@ -18,12 +20,14 @@ export type SetupTodoDraft = {
 };
 
 export type SetupDateDraft = {
+  clientKey?: string;
   label: string;
   date?: string;
   needsReview?: boolean;
 };
 
 export type SetupStakeholderDraft = {
+  clientKey?: string;
   name: string;
   role?: string;
   concerns?: string[];
@@ -32,15 +36,21 @@ export type SetupStakeholderDraft = {
 };
 
 export type SetupRiskDraft = {
+  clientKey?: string;
   title: string;
   needsReview?: boolean;
 };
 
 export type SetupKnowledgeDraft = {
+  clientKey?: string;
   text: string;
   /** When false, excluded from create. Default true. */
   remember?: boolean;
 };
+
+export function newSetupClientKey() {
+  return `setup-${Math.random().toString(36).slice(2, 10)}`;
+}
 
 /**
  * Structured project-setup draft shared by Talk and Paste pathways.

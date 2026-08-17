@@ -18,6 +18,7 @@ export function CoachDrawer() {
     lastRunAt,
     markdown,
     runCoach,
+    cancelCoach,
   } = useCoachSession();
   const { state } = useMission();
   const project = projectId
@@ -110,6 +111,12 @@ export function CoachDrawer() {
           >
             {busy ? "Coaching…" : markdown ? "Run again" : "Run coaching"}
           </button>
+          {busy ? (
+            <button type="button" className="ghost-btn" onClick={cancelCoach}>
+              Cancel
+            </button>
+          ) : null}
+          <p className="ai-use-hint">Uses AI</p>
           <p className="meta">
             Running coaching closes this drawer and opens results in the
             workspace.

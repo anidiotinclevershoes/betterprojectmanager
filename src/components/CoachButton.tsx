@@ -311,7 +311,7 @@ export function CoachBanner({
             ) : null}
             {busy && !markdown ? (
               <p className="empty">
-                Evaluating situation, gaps, risks, and what Tom should do next…
+                Evaluating situation, gaps, risks, and what to do next…
               </p>
             ) : null}
             {markdown ? (

@@ -42,6 +42,7 @@ type CoachSessionValue = {
   actions: CoachAction[];
   showResults: boolean;
   runCoach: () => Promise<void>;
+  cancelCoach: () => void;
   acceptAction: (
     action: CoachAction,
     mode: "todo" | "suggestion" | "knowledge",
@@ -243,12 +244,27 @@ export function CoachSessionProvider({ children }: { children: ReactNode }) {
         });
       }
     } catch (err) {
-      if ((err as Error).name === "AbortError") return;
+      if ((err as Error).name === "AbortError") {
+        setError(null);
+        setMarkdown("");
+        setTitle("");
+        return;
+      }
       setError(err instanceof Error ? err.message : "Coach failed");
     } finally {
       setBusy(false);
     }
   }, [projectId, scope, state]);
+
+  const cancelCoach = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setBusy(false);
+    setMarkdown("");
+    setTitle("");
+    setError(null);
+    setShowResults(false);
+  }, []);
 
   const acceptAction = useCallback(
     (action: CoachAction, mode: "todo" | "suggestion" | "knowledge") => {
@@ -346,6 +362,7 @@ export function CoachSessionProvider({ children }: { children: ReactNode }) {
       actions,
       showResults,
       runCoach,
+      cancelCoach,
       acceptAction,
       dismissResults,
     }),
@@ -364,6 +381,7 @@ export function CoachSessionProvider({ children }: { children: ReactNode }) {
       projectId,
       provider,
       runCoach,
+      cancelCoach,
       scope,
       showResults,
       title,
