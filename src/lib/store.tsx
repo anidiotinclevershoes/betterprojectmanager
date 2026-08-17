@@ -54,6 +54,7 @@ import {
   pushHistory,
 } from "./workspace/history";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { waitForBrowserUser } from "@/lib/supabase/wait-for-browser-user";
 import {
   emptyMissionState,
   loadMissionStateFromSupabase,
@@ -69,6 +70,10 @@ import {
   persistTodoDelete,
   persistTodoUpdate,
 } from "@/lib/data/supabase/persist-mutations";
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const STORAGE_KEY = "mission-control-state-v5";
 
@@ -304,48 +309,50 @@ export function MissionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    async function hydrate() {
+    let hydrateSucceeded = false;
+    let hydrateInFlight = false;
+    let authUnsub: (() => void) | undefined;
+
+    async function hydrateFromSupabase(): Promise<boolean> {
+      if (hydrateInFlight) return false;
+      hydrateInFlight = true;
       try {
-        const me = await fetch("/api/auth/me").then((r) => r.json()) as {
-          persistence?: string;
-          mode?: string;
-          user?: { id?: string } | null;
+        const client = createBrowserSupabaseClient();
+        await waitForBrowserUser(client);
+        if (cancelled) return false;
+        const loaded = await loadMissionStateFromSupabase(client);
+        if (cancelled) return false;
+        persistMetaRef.current = {
+          mode: "supabase",
+          workspaceId: loaded.workspaceId,
+          userId: loaded.userId,
         };
-        const useSupabase =
-          me.persistence === "supabase" && Boolean(me.user?.id);
-        if (useSupabase) {
-          const client = createBrowserSupabaseClient();
-          const loaded = await loadMissionStateFromSupabase(client);
-          if (cancelled) return;
-          persistMetaRef.current = {
-            mode: "supabase",
-            workspaceId: loaded.workspaceId,
-            userId: loaded.userId,
-          };
-          setPersistenceMode("supabase");
-          setState(normaliseState(loaded.state));
-          setHydrated(true);
-          return;
-        }
-      } catch (err) {
-        console.error("[MissionProvider] supabase hydrate failed", err);
-        if (process.env.NODE_ENV === "production") {
-          if (cancelled) return;
-          persistMetaRef.current = {
-            mode: "supabase",
-            workspaceId: null,
-            userId: null,
-          };
-          setPersistenceMode("supabase");
-          setState(emptyMissionState());
-          setSaveStatus("error");
-          setSaveError("Could not load your workspace. Please refresh.");
-          setHydrated(true);
-          return;
-        }
-        // Development: fall through to local only when not in supabase auth session
+        setPersistenceMode("supabase");
+        setState(normaliseState(loaded.state));
+        setSaveStatus("idle");
+        setSaveError(null);
+        setHydrated(true);
+        hydrateSucceeded = true;
+        return true;
+      } finally {
+        hydrateInFlight = false;
       }
-      if (cancelled) return;
+    }
+
+    function applySupabaseHydrateFailure(userId: string | null, message: string) {
+      persistMetaRef.current = {
+        mode: "supabase",
+        workspaceId: null,
+        userId,
+      };
+      setPersistenceMode("supabase");
+      setState(emptyMissionState());
+      setSaveStatus("error");
+      setSaveError(message);
+      setHydrated(true);
+    }
+
+    function applyLocalHydrate() {
       persistMetaRef.current = {
         mode: "local",
         workspaceId: null,
@@ -359,9 +366,91 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       }
       setHydrated(true);
     }
+
+    async function hydrate() {
+      try {
+        const me = (await fetch("/api/auth/me").then((r) => r.json())) as {
+          persistence?: string;
+          mode?: string;
+          user?: { id?: string } | null;
+        };
+        const useSupabase =
+          me.persistence === "supabase" && Boolean(me.user?.id);
+
+        if (useSupabase) {
+          let lastError: unknown = null;
+          for (let attempt = 0; attempt < 4; attempt += 1) {
+            try {
+              const ok = await hydrateFromSupabase();
+              if (cancelled || ok) return;
+            } catch (err) {
+              lastError = err;
+              console.error(
+                `[MissionProvider] supabase hydrate attempt ${attempt + 1} failed`,
+                err,
+              );
+              if (cancelled) return;
+              if (attempt < 3) await sleep(250 * (attempt + 1));
+            }
+          }
+
+          if (cancelled) return;
+          console.error(
+            "[MissionProvider] supabase hydrate failed after retries",
+            lastError,
+          );
+          applySupabaseHydrateFailure(
+            me.user?.id ?? null,
+            "Could not load your workspace. Please refresh.",
+          );
+
+          // Recover if the browser session becomes ready after we gave up.
+          try {
+            const client = createBrowserSupabaseClient();
+            const {
+              data: { subscription },
+            } = client.auth.onAuthStateChange((event, session) => {
+              if (cancelled || hydrateSucceeded || !session?.user) return;
+              if (
+                event !== "INITIAL_SESSION" &&
+                event !== "SIGNED_IN" &&
+                event !== "TOKEN_REFRESHED"
+              ) {
+                return;
+              }
+              void hydrateFromSupabase().catch((err) => {
+                console.error(
+                  "[MissionProvider] supabase hydrate recovery failed",
+                  err,
+                );
+              });
+            });
+            authUnsub = () => subscription.unsubscribe();
+          } catch {
+            /* client unavailable */
+          }
+          return;
+        }
+      } catch (err) {
+        console.error("[MissionProvider] hydrate bootstrap failed", err);
+        if (process.env.NODE_ENV === "production") {
+          if (cancelled) return;
+          applySupabaseHydrateFailure(
+            null,
+            "Could not load your workspace. Please refresh.",
+          );
+          return;
+        }
+      }
+
+      if (cancelled) return;
+      applyLocalHydrate();
+    }
+
     void hydrate();
     return () => {
       cancelled = true;
+      authUnsub?.();
     };
   }, []);
 
