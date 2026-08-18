@@ -5,11 +5,16 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ReactNode,
 } from "react";
+import {
+  readMissionSupabaseCache,
+  writeMissionSupabaseCache,
+} from "@/lib/mission-cache";
 import {
   analyseCapture,
   generateProactiveRecommendations,
@@ -305,10 +310,26 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     workspaceId: null,
     userId: null,
   });
+  const cachePaintedRef = useRef(false);
 
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
+
+  // Paint last-known projects before the browser draws — avoids sidebar flash.
+  useLayoutEffect(() => {
+    if (cachePaintedRef.current) return;
+    cachePaintedRef.current = true;
+    const cached = readMissionSupabaseCache();
+    if (!cached || cached.state.projects.length === 0) return;
+    persistMetaRef.current = {
+      mode: "supabase",
+      workspaceId: cached.workspaceId,
+      userId: cached.userId,
+    };
+    setPersistenceMode("supabase");
+    setState(cached.state);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -332,6 +353,11 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       setSaveError(null);
       setHydrated(true);
       hydrateSucceeded = true;
+      writeMissionSupabaseCache({
+        userId: payload.userId,
+        workspaceId: payload.workspaceId,
+        state: normaliseState(payload.state),
+      });
     }
 
     async function hydrateFromServerCookies(): Promise<boolean> {
@@ -516,6 +542,18 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     if (!hydrated) return;
     if (persistMetaRef.current.mode === "supabase") return;
     persist(state);
+  }, [state, hydrated]);
+
+  // Keep refresh paint cache warm after successful supabase hydrate/mutations.
+  useEffect(() => {
+    if (!hydrated) return;
+    const meta = persistMetaRef.current;
+    if (meta.mode !== "supabase" || !meta.workspaceId || !meta.userId) return;
+    writeMissionSupabaseCache({
+      userId: meta.userId,
+      workspaceId: meta.workspaceId,
+      state,
+    });
   }, [state, hydrated]);
 
   useEffect(() => {

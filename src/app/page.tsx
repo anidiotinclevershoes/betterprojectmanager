@@ -19,7 +19,9 @@ export default function OverviewPage() {
   } = useWorkspaceLayout("overview");
   const [customiseOpen, setCustomiseOpen] = useState(false);
 
-  if (!hydrated) {
+  const hasCachedProjects = state.projects.length > 0;
+  // Stay on Loading only when we have nothing to show yet.
+  if (!hydrated && !hasCachedProjects) {
     return (
       <div className="workspace-page">
         <p className="empty-copy">Loading workspace…</p>
@@ -27,7 +29,7 @@ export default function OverviewPage() {
     );
   }
 
-  const zeroProjects = state.projects.length === 0;
+  const zeroProjects = hydrated && state.projects.length === 0;
   // Only replace empty onboarding when load/save failed — never hide a
   // successfully hydrated workspace because a later mutation errored.
   const hydrateProblem =

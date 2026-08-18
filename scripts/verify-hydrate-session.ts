@@ -51,6 +51,9 @@ async function main() {
     assert.match(store, /Project was not saved to your account/);
     // Must keep Loading (not fail-fast) while supabase session settles.
     assert.match(store, /keep showing "Loading/);
+    // Refresh paint cache — avoid empty sidebar flash.
+    assert.match(store, /readMissionSupabaseCache|writeMissionSupabaseCache/);
+    assert.match(store, /useLayoutEffect/);
   });
 
   await check("workspace state API route exists", () => {
@@ -67,6 +70,23 @@ async function main() {
     const src = fs.readFileSync(route, "utf8");
     assert.match(src, /persistNewProject/);
     assert.match(src, /ensurePersonalWorkspace/);
+  });
+
+  await check("mission supabase cache helper exists", () => {
+    const cachePath = path.join(root, "src/lib/mission-cache.ts");
+    assert.equal(fs.existsSync(cachePath), true);
+    const src = fs.readFileSync(cachePath, "utf8");
+    assert.match(src, /MISSION_SUPABASE_CACHE_KEY/);
+    assert.match(src, /readMissionSupabaseCache/);
+    assert.match(src, /writeMissionSupabaseCache/);
+  });
+
+  await check("logout clears mission supabase cache", () => {
+    const cleanup = fs.readFileSync(
+      path.join(root, "src/lib/session-cleanup.ts"),
+      "utf8",
+    );
+    assert.match(cleanup, /lume-mission-supabase-cache-v1/);
   });
 
   await check("waitForBrowserUser resolves from auth event", async () => {

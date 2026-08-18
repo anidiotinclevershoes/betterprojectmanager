@@ -14,7 +14,7 @@ import { useWorkspaceLayout } from "@/lib/workspace/useWorkspaceLayout";
 
 export default function ProjectDashboardPage() {
   const params = useParams<{ id: string }>();
-  const { state, hydrated } = useMission();
+  const { state } = useMission();
   const project = state.projects.find((p) => p.id === params.id);
   const [customiseOpen, setCustomiseOpen] = useState(false);
   const layoutScope = project ? `project:${project.id}` : "overview";
@@ -75,11 +75,7 @@ export default function ProjectDashboardPage() {
         </header>
 
         <div className="project-owned-frames">
-          {!hydrated ? (
-            <p className="empty-copy">Loading…</p>
-          ) : (
-            <WorkspaceFrameRow frames={frames} projectId={project.id} />
-          )}
+          <WorkspaceFrameRow frames={frames} projectId={project.id} />
 
           <WorkspaceFrame type="knowledge" title="Knowledge">
             <ProjectKnowledgeBrief projectId={project.id} />

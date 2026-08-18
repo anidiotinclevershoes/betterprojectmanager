@@ -3,6 +3,7 @@ export function clearAuthenticatedBrowserState() {
   if (typeof window === "undefined") return;
   const keys = [
     "mission-control-state-v5",
+    "lume-mission-supabase-cache-v1",
     "lume-capture-sessions-v1",
     "lume-coaching-sessions-v1",
     "lume-capture-session-v1",
