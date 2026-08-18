@@ -1,10 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { EvalCaseResult, EvalRunRecord, ManualVerdict } from "@/lib/evals/types";
 import { EVAL_DIMENSION_LABELS } from "@/lib/evals/types";
+
+function setDetailsOpen(root: HTMLElement | null, open: boolean) {
+  if (!root) return;
+  root.querySelectorAll("details").forEach((el) => {
+    (el as HTMLDetailsElement).open = open;
+  });
+}
 
 function AnswerBlock({
   title,
@@ -27,7 +34,7 @@ function AnswerBlock({
       {record.error ? <p className="error-copy">{record.error}</p> : null}
       <div className="evals-answer-body">{record.answer || "—"}</div>
       {record.sources?.length ? (
-        <details>
+        <details className="evals-extra">
           <summary>Sources ({record.sources.length})</summary>
           <ul>
             {record.sources.map((s) => (
@@ -50,6 +57,7 @@ export function EvalsRunDetailClient() {
   const [run, setRun] = useState<EvalRunRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filterHard, setFilterHard] = useState(false);
+  const casesRootRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/evals/runs/${id}`);
@@ -158,24 +166,44 @@ export function EvalsRunDetailClient() {
           {" · "}
           <Link href="/evals/compare">Compare with another run</Link>
         </p>
-        <label className="evals-check">
-          <input
-            type="checkbox"
-            checked={filterHard}
-            onChange={(e) => setFilterHard(e.target.checked)}
-          />
-          Show hard failures only
-        </label>
+        <div className="evals-case-toolbar">
+          <label className="evals-check">
+            <input
+              type="checkbox"
+              checked={filterHard}
+              onChange={(e) => setFilterHard(e.target.checked)}
+            />
+            Show hard failures only
+          </label>
+          <div className="evals-expand-actions">
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => setDetailsOpen(casesRootRef.current, true)}
+            >
+              Expand all extras
+            </button>
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => setDetailsOpen(casesRootRef.current, false)}
+            >
+              Collapse all extras
+            </button>
+          </div>
+        </div>
       </section>
 
-      {cases.map((c) => (
-        <CaseCard
-          key={c.caseId}
-          runId={run.id}
-          caseResult={c}
-          onReview={saveReview}
-        />
-      ))}
+      <div ref={casesRootRef} className="evals-cases">
+        {cases.map((c) => (
+          <CaseCard
+            key={c.caseId}
+            runId={run.id}
+            caseResult={c}
+            onReview={saveReview}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -235,7 +263,7 @@ function CaseCard({
         <AnswerBlock title="Generic GPT baseline" record={c.baseline} />
       </div>
 
-      <details>
+      <details className="evals-extra">
         <summary>Dimension scores</summary>
         <ul className="evals-dim-list">
           {c.dimensionScores
