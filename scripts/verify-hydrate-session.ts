@@ -42,11 +42,15 @@ async function main() {
     assert.match(store, /hydrate recovery failed|hydrateFromSupabase/);
     // Must not silently fall through to empty local on first supabase failure
     // without retries when /api/auth/me already returned a user.
-    assert.match(store, /attempt < 3/);
+    assert.match(store, /attempt < 7/);
     // Server cookie path is the primary hydrate (avoids browser session race).
     assert.match(store, /\/api\/workspace\/state/);
+    // Server create path — must not rely only on browser RLS.
+    assert.match(store, /\/api\/workspace\/projects/);
     // Production must not silently create local-only projects.
     assert.match(store, /Project was not saved to your account/);
+    // Must keep Loading (not fail-fast) while supabase session settles.
+    assert.match(store, /keep showing "Loading/);
   });
 
   await check("workspace state API route exists", () => {
@@ -55,6 +59,14 @@ async function main() {
     const src = fs.readFileSync(route, "utf8");
     assert.match(src, /loadMissionStateFromSupabase/);
     assert.match(src, /createServerSupabaseClient/);
+  });
+
+  await check("workspace projects create API route exists", () => {
+    const route = path.join(root, "src/app/api/workspace/projects/route.ts");
+    assert.equal(fs.existsSync(route), true);
+    const src = fs.readFileSync(route, "utf8");
+    assert.match(src, /persistNewProject/);
+    assert.match(src, /ensurePersonalWorkspace/);
   });
 
   await check("waitForBrowserUser resolves from auth event", async () => {

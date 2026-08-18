@@ -19,7 +19,15 @@ export default function OverviewPage() {
   } = useWorkspaceLayout("overview");
   const [customiseOpen, setCustomiseOpen] = useState(false);
 
-  const zeroProjects = hydrated && state.projects.length === 0;
+  if (!hydrated) {
+    return (
+      <div className="workspace-page">
+        <p className="empty-copy">Loading workspace…</p>
+      </div>
+    );
+  }
+
+  const zeroProjects = state.projects.length === 0;
   // Only replace empty onboarding when load/save failed — never hide a
   // successfully hydrated workspace because a later mutation errored.
   const hydrateProblem =
@@ -42,6 +50,9 @@ export default function OverviewPage() {
           >
             Refresh
           </button>
+          <p className="empty-copy">
+            Still stuck? <a href="/login">Sign in again</a>
+          </p>
         </div>
       </div>
     );
@@ -69,11 +80,7 @@ export default function OverviewPage() {
         </button>
       </div>
 
-      {!hydrated ? (
-        <p className="empty-copy">Loading workspace…</p>
-      ) : (
-        <WorkspaceFrameRow frames={frames} />
-      )}
+      <WorkspaceFrameRow frames={frames} />
 
       <WorkspaceCustomiser
         open={customiseOpen}

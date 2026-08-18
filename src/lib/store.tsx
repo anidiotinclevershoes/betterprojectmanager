@@ -316,51 +316,62 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     let hydrateInFlight = false;
     let authUnsub: (() => void) | undefined;
 
+    function applyLoadedWorkspace(payload: {
+      workspaceId: string;
+      userId: string;
+      state: MissionState;
+    }) {
+      persistMetaRef.current = {
+        mode: "supabase",
+        workspaceId: payload.workspaceId,
+        userId: payload.userId,
+      };
+      setPersistenceMode("supabase");
+      setState(normaliseState(payload.state));
+      setSaveStatus("idle");
+      setSaveError(null);
+      setHydrated(true);
+      hydrateSucceeded = true;
+    }
+
+    async function hydrateFromServerCookies(): Promise<boolean> {
+      const serverRes = await fetch("/api/workspace/state", {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      if (!serverRes.ok) return false;
+      const payload = (await serverRes.json()) as {
+        workspaceId: string;
+        userId: string;
+        state: MissionState;
+      };
+      if (cancelled) return false;
+      applyLoadedWorkspace(payload);
+      return true;
+    }
+
+    async function hydrateFromBrowserClient(): Promise<boolean> {
+      const client = createBrowserSupabaseClient();
+      await waitForBrowserUser(client, { timeoutMs: 8_000 });
+      if (cancelled) return false;
+      const loaded = await loadMissionStateFromSupabase(client);
+      if (cancelled) return false;
+      applyLoadedWorkspace({
+        workspaceId: loaded.workspaceId,
+        userId: loaded.userId,
+        state: loaded.state,
+      });
+      return true;
+    }
+
     async function hydrateFromSupabase(): Promise<boolean> {
       if (hydrateInFlight) return false;
       hydrateInFlight = true;
       try {
         // Prefer server cookie load — reliable on hard refresh.
-        const serverRes = await fetch("/api/workspace/state");
-        if (serverRes.ok) {
-          const payload = (await serverRes.json()) as {
-            workspaceId: string;
-            userId: string;
-            state: MissionState;
-          };
-          if (cancelled) return false;
-          persistMetaRef.current = {
-            mode: "supabase",
-            workspaceId: payload.workspaceId,
-            userId: payload.userId,
-          };
-          setPersistenceMode("supabase");
-          setState(normaliseState(payload.state));
-          setSaveStatus("idle");
-          setSaveError(null);
-          setHydrated(true);
-          hydrateSucceeded = true;
-          return true;
-        }
-
-        // Fallback: browser client (after session is ready).
-        const client = createBrowserSupabaseClient();
-        await waitForBrowserUser(client);
-        if (cancelled) return false;
-        const loaded = await loadMissionStateFromSupabase(client);
-        if (cancelled) return false;
-        persistMetaRef.current = {
-          mode: "supabase",
-          workspaceId: loaded.workspaceId,
-          userId: loaded.userId,
-        };
-        setPersistenceMode("supabase");
-        setState(normaliseState(loaded.state));
-        setSaveStatus("idle");
-        setSaveError(null);
-        setHydrated(true);
-        hydrateSucceeded = true;
-        return true;
+        if (await hydrateFromServerCookies()) return true;
+        // Fallback: browser client once its session is ready.
+        return await hydrateFromBrowserClient();
       } finally {
         hydrateInFlight = false;
       }
@@ -394,6 +405,33 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       setHydrated(true);
     }
 
+    function attachAuthRecovery() {
+      try {
+        const client = createBrowserSupabaseClient();
+        const {
+          data: { subscription },
+        } = client.auth.onAuthStateChange((event, session) => {
+          if (cancelled || hydrateSucceeded || !session?.user) return;
+          if (
+            event !== "INITIAL_SESSION" &&
+            event !== "SIGNED_IN" &&
+            event !== "TOKEN_REFRESHED"
+          ) {
+            return;
+          }
+          void hydrateFromSupabase().catch((err) => {
+            console.error(
+              "[MissionProvider] supabase hydrate recovery failed",
+              err,
+            );
+          });
+        });
+        authUnsub = () => subscription.unsubscribe();
+      } catch {
+        /* client unavailable */
+      }
+    }
+
     async function hydrate() {
       try {
         let me: {
@@ -402,35 +440,29 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           user?: { id?: string } | null;
         } | null = null;
 
-        for (let i = 0; i < 4; i += 1) {
-          me = (await fetch("/api/auth/me").then((r) => r.json())) as {
+        for (let i = 0; i < 6; i += 1) {
+          me = (await fetch("/api/auth/me", {
+            credentials: "same-origin",
+            cache: "no-store",
+          }).then((r) => r.json())) as {
             persistence?: string;
             mode?: string;
             user?: { id?: string } | null;
           };
           if (me.persistence !== "supabase") break;
           if (me.user?.id) break;
-          await sleep(200 * (i + 1));
+          await sleep(250 * (i + 1));
         }
 
-        const useSupabase =
-          me?.persistence === "supabase" && Boolean(me?.user?.id);
+        // Supabase persistence: keep showing "Loading…" and retry — never
+        // fail-fast into the error/empty screens while the session is settling.
+        if (me?.persistence === "supabase") {
+          attachAuthRecovery();
 
-        // Production supabase mode without a user yet: do not fall back to
-        // empty local state (that permanently loses the UI after refresh).
-        if (me?.persistence === "supabase" && !me.user?.id) {
-          if (cancelled) return;
-          applySupabaseHydrateFailure(
-            null,
-            "Could not restore your session. Please sign in again.",
-          );
-          return;
-        }
-
-        if (useSupabase) {
           let lastError: unknown = null;
-          for (let attempt = 0; attempt < 4; attempt += 1) {
+          for (let attempt = 0; attempt < 8; attempt += 1) {
             try {
+              // Even without /api/auth/me.user yet, cookies may already work.
               const ok = await hydrateFromSupabase();
               if (cancelled || ok) return;
             } catch (err) {
@@ -439,9 +471,9 @@ export function MissionProvider({ children }: { children: ReactNode }) {
                 `[MissionProvider] supabase hydrate attempt ${attempt + 1} failed`,
                 err,
               );
-              if (cancelled) return;
-              if (attempt < 3) await sleep(250 * (attempt + 1));
             }
+            if (cancelled) return;
+            if (attempt < 7) await sleep(350 * (attempt + 1));
           }
 
           if (cancelled) return;
@@ -451,34 +483,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           );
           applySupabaseHydrateFailure(
             me?.user?.id ?? null,
-            "Could not load your workspace. Please refresh.",
+            me?.user?.id
+              ? "Could not load your workspace. Please refresh."
+              : "Could not restore your session. Please sign in again.",
           );
-
-          // Recover if the browser session becomes ready after we gave up.
-          try {
-            const client = createBrowserSupabaseClient();
-            const {
-              data: { subscription },
-            } = client.auth.onAuthStateChange((event, session) => {
-              if (cancelled || hydrateSucceeded || !session?.user) return;
-              if (
-                event !== "INITIAL_SESSION" &&
-                event !== "SIGNED_IN" &&
-                event !== "TOKEN_REFRESHED"
-              ) {
-                return;
-              }
-              void hydrateFromSupabase().catch((err) => {
-                console.error(
-                  "[MissionProvider] supabase hydrate recovery failed",
-                  err,
-                );
-              });
-            });
-            authUnsub = () => subscription.unsubscribe();
-          } catch {
-            /* client unavailable */
-          }
           return;
         }
       } catch (err) {
@@ -1252,6 +1260,59 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   const createProject = useCallback(async (input: CreateProjectInput) => {
     let meta = persistMetaRef.current;
 
+    // Supabase mode: create via server cookies so we never depend on the
+    // browser client session being ready (that race caused vanish-on-refresh).
+    if (meta.mode === "supabase") {
+      setSaveStatus("saving");
+      setSaveError(null);
+      try {
+        const res = await fetch("/api/workspace/projects", {
+          method: "POST",
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ input }),
+        });
+        if (!res.ok) {
+          const fail = (await res.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          throw new Error(
+            fail?.error || "Could not save project to your account.",
+          );
+        }
+        const payload = (await res.json()) as {
+          workspaceId: string;
+          userId: string;
+          projectId: string;
+          state: MissionState;
+        };
+        persistMetaRef.current = {
+          mode: "supabase",
+          workspaceId: payload.workspaceId,
+          userId: payload.userId,
+        };
+        setState(normaliseState(payload.state));
+        setSaveStatus("saved");
+        setSaveError(null);
+        return payload.projectId;
+      } catch (err) {
+        // Fall back to browser persist only if we already have a workspace.
+        meta = persistMetaRef.current;
+        if (!(meta.mode === "supabase" && meta.workspaceId)) {
+          const message =
+            err instanceof Error ? err.message : "Could not save project";
+          setSaveStatus("error");
+          setSaveError(message);
+          throw err instanceof Error ? err : new Error(message);
+        }
+        console.error(
+          "[MissionProvider] server create failed; trying browser persist",
+          err,
+        );
+      }
+    }
+
     // If we're in supabase mode but hydrate failed to attach a workspace,
     // bootstrap via the server cookie path before creating — never silently
     // create a local-only project that vanishes on refresh.
@@ -1259,7 +1320,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       setSaveStatus("saving");
       setSaveError(null);
       try {
-        const boot = await fetch("/api/workspace/state");
+        const boot = await fetch("/api/workspace/state", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
         if (!boot.ok) {
           const fail = (await boot.json().catch(() => null)) as {
             error?: string;
