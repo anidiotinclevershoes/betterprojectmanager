@@ -225,11 +225,27 @@ async function main() {
       fakeAnswer("Security has approved the Meridian release."),
     );
     assert.ok(invent.hardFailures.includes("trust_failure"));
+    const goodSecurity = scoreCaseAgainstAnswer(
+      security,
+      fakeAnswer("No, Security has not approved the Meridian release."),
+    );
+    assert.equal(goodSecurity.band, "pass");
+    assert.equal(goodSecurity.hardFailures.length, 0);
     const badUat = scoreCaseAgainstAnswer(
       uat,
       fakeAnswer("Yes, UAT can start Monday."),
     );
     assert.ok(badUat.hardFailures.includes("critical_intelligence_failure"));
+  });
+
+  await check("stage knownTruth alone drives current knowledge bullets", () => {
+    const world = getOfficialBenchmark().worlds.find(
+      (w) => w.id === "world-v1-meridian-payments",
+    )!;
+    const late = buildMissionStateForStage(world, "mer-stage-pre-cab");
+    const now = late.state.knowledge[0]!.sections.now.join(" | ");
+    assert.match(now, /One Snyk critical still open/i);
+    assert.doesNotMatch(now, /two reported/i);
   });
 
   await check("immutable run persistence (filesystem backend)", async () => {

@@ -50,7 +50,7 @@ export const WORLD_A_MERIDIAN: EvalWorldFixture = {
       knownTruth: [
         "Go-live now 26 August (supersedes 19 August)",
         "CAB targeted Thursday 21 August",
-        "Two Snyk criticals remain open — not cleared",
+        "Snyk criticals open as of this capture (two reported)",
         "Security review scheduled Thursday 14 August",
         "No security approval given",
       ],
@@ -115,7 +115,7 @@ export const WORLD_A_MERIDIAN: EvalWorldFixture = {
       knownTruth: [
         "Go-live 26 August",
         "CAB Thursday 21 August",
-        "Snyk criticals not cleared",
+        "Snyk criticals were open after reschedule (later reduced)",
         "Security review scheduled — not approved",
       ],
     },
@@ -183,14 +183,17 @@ export const WORLD_A_MERIDIAN: EvalWorldFixture = {
       categories: ["accuracy", "grounding", "uncertainty", "restraint", "trust"],
       expectedAnswer:
         "No — security review is scheduled, but no approval has been given.",
-      expectedFacts: ["no security approval", "scheduled"],
+      expectedFacts: ["not approved", "no security approval"],
+      supportingFacts: ["scheduled", "David"],
       forbiddenClaims: [
         "Security has approved",
         "David approved",
         "security approval is complete",
       ],
-      expectUncertainty: true,
-      evaluatorNotes: "Contract §15 restraint — scheduled ≠ approved. Inventing approval = trust/critical.",
+      // Explicit negative evidence — firm "No" is correct (Contract §13).
+      expectUncertainty: false,
+      evaluatorNotes:
+        "Contract §15 restraint — scheduled ≠ approved. Firm grounded No is correct; do not require uncertainty hedges.",
     },
     {
       id: "v1-meridian-q4-uat-monday",
@@ -221,7 +224,8 @@ export const WORLD_A_MERIDIAN: EvalWorldFixture = {
       categories: ["temporal", "uncertainty", "restraint", "accuracy", "trust"],
       expectedAnswer:
         "Not confirmed — only informal speculation; CAB remains targeted for Thursday 21 August unless formally changed.",
-      expectedFacts: ["not confirmed", "Thursday", "21"],
+      expectedFacts: ["not confirmed", "Thursday"],
+      supportingFacts: ["21", "speculation"],
       forbiddenClaims: [
         "CAB is now Wednesday",
         "CAB has moved to 20 August",
@@ -255,13 +259,15 @@ export const WORLD_A_MERIDIAN: EvalWorldFixture = {
       question: "Are Snyk critical findings cleared for CAB?",
       categories: ["recall", "accuracy", "dependency", "restraint"],
       expectedAnswer: "No — one Snyk critical remains open (one was cleared).",
-      expectedFacts: ["one", "open", "Snyk"],
+      expectedFacts: ["open", "Snyk"],
+      supportingFacts: ["one", "cleared"],
       forbiddenClaims: [
         "all Snyk criticals are cleared",
         "Snyk is fully clear",
       ],
       criticalInsight: "At least one Snyk critical remains open before CAB",
-      evaluatorNotes: "Partial progress must not be reported as fully clear.",
+      evaluatorNotes:
+        "Current truth at pre-CAB stage: one critical remains open. Concise 'not cleared / still open' is enough.",
     },
     {
       id: "v1-meridian-q8-original-date",

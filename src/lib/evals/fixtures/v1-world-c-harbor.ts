@@ -257,12 +257,15 @@ export const WORLD_C_HARBOR: EvalWorldFixture = {
       expectedAnswer:
         "No — 15 September was only suggested; no formal replan recorded. Formal target remains 8 September unless changed.",
       expectedFacts: ["not formal", "8 September"],
+      supportingFacts: ["suggested", "15 September"],
       forbiddenClaims: [
         "Officially moved to 15 September",
         "Target is now 15 September",
+        "integration start is now 15 September",
       ],
       expectUncertainty: true,
-      evaluatorNotes: "Contract §5.",
+      evaluatorNotes:
+        "Contract §5. Negated 'has not officially moved' must not match forbidden 'Officially moved…'.",
     },
     {
       id: "v1-harbor-q9-credentials-received",
