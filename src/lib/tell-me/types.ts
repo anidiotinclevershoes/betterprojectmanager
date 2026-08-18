@@ -89,8 +89,13 @@ export type TellMeAnswer = {
     completion_tokens?: number;
     total_tokens?: number;
   } | null;
+  /** Model id sent in the request (pinned snapshot when using defaults). */
+  modelRequested?: string | null;
+  /** Model id from the API response when present. */
   model?: string | null;
   provider: "openai" | "local";
+  /** Eval/debug only — estimated prompt component tokens. */
+  tokenBreakdown?: Record<string, number | null> | null;
   contextStats: {
     projectsConsidered: number;
     recordsSelected: number;

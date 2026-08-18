@@ -3,6 +3,8 @@
  * Same project information as Lume for the stage; no extra project facts.
  */
 import { getOpenAIKey, isOpenAIConfigured } from "@/lib/openai";
+import { resolveOpenAIChatModel } from "@/lib/openai-model";
+import { estimateBaselineTokenBreakdown } from "@/lib/evals/token-breakdown";
 import type { SystemAnswerRecord, TokenUsage } from "@/lib/evals/types";
 
 export const BASELINE_PROMPT_VERSION = "gpt-baseline-v1";
@@ -16,9 +18,11 @@ Be concise and practical.`;
 export async function runGptBaseline(args: {
   question: string;
   contextDocument: string;
+  /** Eval/debug — estimate prompt component tokens. */
+  debugTokenBreakdown?: boolean;
 }): Promise<SystemAnswerRecord> {
   const started = Date.now();
-  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+  const modelRequested = resolveOpenAIChatModel({ forEval: true });
 
   if (!isOpenAIConfigured()) {
     return {
@@ -28,6 +32,7 @@ export async function runGptBaseline(args: {
       confidence: null,
       sources: [],
       model: null,
+      modelRequested,
       provider: "none",
       usage: null,
       durationMs: Date.now() - started,
@@ -44,7 +49,7 @@ export async function runGptBaseline(args: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model,
+        model: modelRequested,
         temperature: 0.2,
         messages: [
           { role: "system", content: BASELINE_SYSTEM_PROMPT },
@@ -63,7 +68,8 @@ export async function runGptBaseline(args: {
         answer: "",
         confidence: null,
         sources: [],
-        model,
+        model: modelRequested,
+        modelRequested,
         provider: "openai",
         usage: null,
         durationMs: Date.now() - started,
@@ -90,15 +96,27 @@ export async function runGptBaseline(args: {
         }
       : null;
 
+    const modelResolved = data.model ?? modelRequested;
+    const tokenBreakdown = args.debugTokenBreakdown
+      ? estimateBaselineTokenBreakdown({
+          systemPrompt: BASELINE_SYSTEM_PROMPT,
+          contextDocument: args.contextDocument,
+          question: args.question,
+          apiUsage: usage,
+        })
+      : null;
+
     return {
       system: "gpt_baseline",
       answer,
       confidence: null,
       sources: [],
-      model: data.model ?? model,
+      model: modelResolved,
+      modelRequested,
       provider: "openai",
       usage,
       durationMs: Date.now() - started,
+      raw: tokenBreakdown ? { tokenBreakdown } : undefined,
       error: answer ? null : "empty_baseline_answer",
     };
   } catch (err) {
@@ -107,7 +125,8 @@ export async function runGptBaseline(args: {
       answer: "",
       confidence: null,
       sources: [],
-      model,
+      model: modelRequested,
+      modelRequested,
       provider: "openai",
       usage: null,
       durationMs: Date.now() - started,

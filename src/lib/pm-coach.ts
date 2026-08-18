@@ -1,4 +1,5 @@
 import { getOpenAIKey, isOpenAIConfigured } from "./openai";
+import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import type { MissionState, Project } from "./types";
 
 /** Prefer first name from display name; never invent a specific person. */
@@ -266,7 +267,7 @@ ${JSON.stringify(context, null, 2)}`;
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      model: resolveOpenAIChatModel(),
       temperature: 0.35,
       messages: [
         { role: "system", content: buildPmCoachSystemPrompt(who) },
@@ -338,7 +339,7 @@ ${JSON.stringify(context, null, 2)}`;
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      model: resolveOpenAIChatModel(),
       temperature: 0.35,
       stream: true,
       messages: [

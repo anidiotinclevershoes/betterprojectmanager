@@ -12,6 +12,7 @@ import {
   localCaptureFallback,
   tidyAndCoachWithOpenAI,
 } from "@/lib/openai";
+import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { logPromptAssemblyDiagnostic } from "@/ai/domain";
 import { recordCaptureMetricsSafe } from "@/lib/dev/cockpit";
 import {
@@ -59,7 +60,7 @@ export async function GET() {
   const diagnostics = getOpenAIKeyDiagnostics();
   return NextResponse.json({
     openaiConfigured: diagnostics.openaiConfigured,
-    model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    model: resolveOpenAIChatModel(),
     keyPrefix: diagnostics.prefix,
     keyLength: diagnostics.length,
     reason: diagnostics.reason,

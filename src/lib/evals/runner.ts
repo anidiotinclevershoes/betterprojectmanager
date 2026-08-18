@@ -18,6 +18,10 @@ import {
   finaliseSummaryWithBaseline,
 } from "@/lib/evals/compare";
 import { insertEvalRun, updateEvalRun } from "@/lib/evals/store";
+import {
+  modelsAlignedForComparison,
+  resolveOpenAIChatModel,
+} from "@/lib/openai-model";
 import type {
   EvalCaseResult,
   EvalDimension,
@@ -71,6 +75,7 @@ async function runLumeAnswer(args: {
       snapshot: null,
       conversation: [],
       userDisplayName: "Evaluator",
+      debugTokenBreakdown: true,
     });
     return {
       system: "lume",
@@ -83,6 +88,7 @@ async function runLumeAnswer(args: {
         detail: s.detail ?? null,
       })),
       model: result.model ?? null,
+      modelRequested: result.modelRequested ?? null,
       provider: result.provider,
       usage: result.usage
         ? {
@@ -96,6 +102,8 @@ async function runLumeAnswer(args: {
         freshness: result.freshness,
         contextStats: result.contextStats,
         refreshRecommended: result.refreshRecommended,
+        tokenBreakdown: result.tokenBreakdown ?? null,
+        modelRequested: result.modelRequested ?? null,
       },
       error: null,
     };
@@ -106,6 +114,7 @@ async function runLumeAnswer(args: {
       confidence: null,
       sources: [],
       model: null,
+      modelRequested: resolveOpenAIChatModel({ forEval: true }),
       provider: null,
       usage: null,
       durationMs: Date.now() - started,
@@ -131,6 +140,7 @@ export async function runBenchmark(
     );
   }
 
+  const modelRequested = resolveOpenAIChatModel({ forEval: true });
   const runId = randomUUID();
   const createdAt = new Date().toISOString();
   let run: EvalRunRecord = {
@@ -144,11 +154,13 @@ export async function runBenchmark(
     lumeVersion: resolveLumeVersion(),
     fixtureVersion: benchmark.version,
     fixtureLabel: benchmark.label,
-    lumeModel: process.env.OPENAI_MODEL || "gpt-4o-mini",
-    baselineModel: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    lumeModel: modelRequested,
+    baselineModel: modelRequested,
     baselinePromptVersion: BASELINE_PROMPT_VERSION,
     createdByEmail: options.createdByEmail,
-    notes: options.notes ?? null,
+    notes:
+      options.notes ??
+      `Same-model control request: ${modelRequested}. Historical runs may show floating alias gpt-4o-mini vs snapshot in metadata only.`,
     worldFilter: options.worldIds ?? null,
     categoryFilter: options.categories ?? null,
     summary: {
@@ -170,6 +182,9 @@ export async function runBenchmark(
       dimensionAverages: {},
       lumeTotalTokens: null,
       baselineTotalTokens: null,
+      lumeTokenBreakdown: null,
+      baselineTokenBreakdown: null,
+      sameModelControl: true,
     },
     cases: [],
   };
@@ -196,6 +211,7 @@ export async function runBenchmark(
       runGptBaseline({
         question: fixture.question,
         contextDocument: built.contextDocument,
+        debugTokenBreakdown: true,
       }),
     ]);
 
@@ -242,6 +258,10 @@ export async function runBenchmark(
       lumeModel: lume.model || run.lumeModel,
       baselineModel: baseline.model || run.baselineModel,
     };
+    run.summary.sameModelControl = modelsAlignedForComparison(
+      run.lumeModel,
+      run.baselineModel,
+    );
     await updateEvalRun(run);
   }
 
@@ -251,6 +271,10 @@ export async function runBenchmark(
     cases: results,
     summary: finaliseSummaryWithBaseline(results),
   };
+  run.summary.sameModelControl = modelsAlignedForComparison(
+    run.lumeModel,
+    run.baselineModel,
+  );
   await updateEvalRun(run);
   return run;
 }
