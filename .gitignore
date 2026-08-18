@@ -46,3 +46,4 @@ artifacts/
 # Supabase
 supabase/.branches
 supabase/.temp
+.data/

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { LumeLogo } from "@/components/brand/LumeLogo";
 import { useMission } from "@/lib/store";
 import { ResetDemoDataButton } from "@/components/dev/ResetDemoDataButton";
+import { EvalsNavLink } from "@/components/evals/EvalsNavLink";
 
 export function Sidebar({
   collapsed,
@@ -149,6 +150,7 @@ export function Sidebar({
             </span>
             {!collapsed ? <span>Coaching</span> : null}
           </Link>
+          <EvalsNavLink collapsed={collapsed} onNavigate={onCloseMobile} />
           {process.env.NODE_ENV === "development" ? (
             <>
               <Link
