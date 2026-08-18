@@ -119,6 +119,8 @@ async function main() {
     );
     assert.match(layout, /requireEvalAccess/);
     assert.match(layout, /redirect/);
+    assert.match(layout, /Evals access denied/);
+    assert.match(layout, /LUME_EVAL_ALLOWED_EMAILS/);
   });
 
   await check("sample fixture has stable case ids + stages", () => {
