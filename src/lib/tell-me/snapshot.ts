@@ -2,6 +2,7 @@
  * AI snapshot refresh — server-only. Do not import from client components.
  */
 import { getOpenAIKey, isOpenAIConfigured } from "@/lib/openai";
+import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { buildDeterministicSnapshot } from "@/lib/tell-me/snapshot-deterministic";
 import type { MissionState } from "@/lib/types";
 import type { ProjectIntelligenceSnapshot } from "@/lib/tell-me/types";
@@ -35,7 +36,7 @@ export async function refreshSnapshotWithAi(args: {
   }
 
   const key = getOpenAIKey();
-  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+  const model = resolveOpenAIChatModel();
   const project = args.state.projects.find((p) => p.id === args.projectId);
 
   const userPrompt = [

@@ -29,6 +29,10 @@ export function summariseCaseResults(cases: EvalCaseResult[]): EvalRunSummary {
   let baselineTokens = 0;
   let lumeTokenN = 0;
   let baselineTokenN = 0;
+  const lumeBreakdownAcc: Record<string, number> = {};
+  const baselineBreakdownAcc: Record<string, number> = {};
+  let lumeBreakdownN = 0;
+  let baselineBreakdownN = 0;
 
   for (const c of cases) {
     if (c.lume.error) errorCases += 1;
@@ -79,6 +83,29 @@ export function summariseCaseResults(cases: EvalCaseResult[]): EvalRunSummary {
       baselineTokens += c.baseline.usage.total_tokens;
       baselineTokenN += 1;
     }
+
+    const lumeBd = (
+      c.lume.raw as { tokenBreakdown?: Record<string, number | null> } | undefined
+    )?.tokenBreakdown;
+    if (lumeBd) {
+      lumeBreakdownN += 1;
+      for (const [k, v] of Object.entries(lumeBd)) {
+        if (typeof v === "number") {
+          lumeBreakdownAcc[k] = (lumeBreakdownAcc[k] ?? 0) + v;
+        }
+      }
+    }
+    const baseBd = (
+      c.baseline.raw as { tokenBreakdown?: Record<string, number | null> } | undefined
+    )?.tokenBreakdown;
+    if (baseBd) {
+      baselineBreakdownN += 1;
+      for (const [k, v] of Object.entries(baseBd)) {
+        if (typeof v === "number") {
+          baselineBreakdownAcc[k] = (baselineBreakdownAcc[k] ?? 0) + v;
+        }
+      }
+    }
   }
 
   const dimensionAverages: Partial<Record<EvalDimension, number | null>> = {};
@@ -106,6 +133,9 @@ export function summariseCaseResults(cases: EvalCaseResult[]): EvalRunSummary {
     dimensionAverages,
     lumeTotalTokens: lumeTokenN ? lumeTokens : null,
     baselineTotalTokens: baselineTokenN ? baselineTokens : null,
+    lumeTokenBreakdown: lumeBreakdownN ? lumeBreakdownAcc : null,
+    baselineTokenBreakdown: baselineBreakdownN ? baselineBreakdownAcc : null,
+    sameModelControl: null,
   };
 }
 

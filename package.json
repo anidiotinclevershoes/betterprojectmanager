@@ -29,7 +29,10 @@
     "verify:eval-calibration": "npx --yes tsx scripts/verify-eval-calibration.ts",
     "verify:trust-intelligence": "npx --yes tsx scripts/verify-trust-intelligence.ts",
     "verify:context-integrity": "npx --yes tsx scripts/verify-context-integrity.ts",
-    "evals:pre-baseline": "npx --yes tsx scripts/run-pre-intelligence-baseline.ts"
+    "verify:model-tidy": "npx --yes tsx scripts/verify-model-tidy.ts",
+    "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",
+    "evals:pre-baseline": "npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
+    "evals:model-tidy": "LUME_EVAL_RUN_LABEL='Model Tidy - Same Model Control' npx --yes tsx scripts/run-pre-intelligence-baseline.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

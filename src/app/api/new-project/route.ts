@@ -7,6 +7,7 @@ import {
   type InterviewAnswers,
 } from "@/lib/create-project";
 import { getOpenAIKey, isOpenAIConfigured } from "@/lib/openai";
+import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { requireAiCaller } from "@/lib/ai-gate";
 import { isProductionRuntime } from "@/lib/runtime-config";
 
@@ -161,7 +162,7 @@ ${JSON.stringify(fallback, null, 2)}`;
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      model: resolveOpenAIChatModel(),
       temperature: 0.2,
       response_format: { type: "json_object" },
       messages: [
@@ -235,7 +236,7 @@ ${JSON.stringify(fallback, null, 2)}`;
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      model: resolveOpenAIChatModel(),
       temperature: 0.2,
       response_format: { type: "json_object" },
       messages: [

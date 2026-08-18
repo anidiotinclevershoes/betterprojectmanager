@@ -3,6 +3,7 @@
  */
 import { knowledgeHasContent } from "@/lib/knowledge";
 import { getOpenAIKey, isOpenAIConfigured } from "@/lib/openai";
+import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { buildTellMeContext } from "@/lib/tell-me/context";
 import {
   assessFreshness,
@@ -23,7 +24,7 @@ import type {
   TellMeSourceRef,
 } from "@/lib/tell-me/types";
 
-const TELL_ME_SYSTEM = `You are Tell Me for Lume — a project memory recall assistant for project managers.
+export const TELL_ME_SYSTEM = `You are Tell Me for Lume — a project memory recall assistant for project managers.
 
 You answer questions using ONLY the provided project records and snapshot.
 You are READ-ONLY. Never create, update, or delete project state.
@@ -62,6 +63,8 @@ export async function answerTellMeQuestion(args: {
   snapshot?: ProjectIntelligenceSnapshot | null;
   conversation?: TellMeConversationTurn[];
   userDisplayName?: string | null;
+  /** Eval/debug only — estimate prompt component tokens (tiktoken). */
+  debugTokenBreakdown?: boolean;
 }): Promise<TellMeAnswer> {
   const question = args.question.trim();
   const bundle = buildTellMeContext({
@@ -97,6 +100,8 @@ export async function answerTellMeQuestion(args: {
       capturePrefill: null,
       usage: null,
       model: null,
+      modelRequested: null,
+      tokenBreakdown: null,
       provider: "local",
       contextStats: {
         projectsConsidered: bundle.scope.projectIdsForDeepContext.length,
@@ -127,21 +132,26 @@ export async function answerTellMeQuestion(args: {
   }
 
   const key = getOpenAIKey();
-  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+  const modelRequested = resolveOpenAIChatModel({
+    forEval: Boolean(args.debugTokenBreakdown),
+  });
   const conversation = (args.conversation ?? []).slice(-6);
 
-  const userContent = [
-    bundle.promptBlock,
-    "",
+  const freshnessBlock = [
     `FRESHNESS: ${freshness.isStale ? "STALE snapshot vs live records" : "aligned or no snapshot"}`,
     freshness.message ? `NOTE: ${freshness.message}` : "",
     refreshRecommended
       ? "If the user asked for latest/current position and live records are incomplete for synthesis, say you can answer from what you know but recommend Refresh Lume — do not pretend certainty."
       : "",
-    conversation.length
-      ? `RECENT TURNS:\n${conversation.map((t) => `${t.role}: ${t.content}`).join("\n")}`
-      : "",
   ]
+    .filter(Boolean)
+    .join("\n");
+
+  const conversationBlock = conversation.length
+    ? `RECENT TURNS:\n${conversation.map((t) => `${t.role}: ${t.content}`).join("\n")}`
+    : "";
+
+  const userContent = [bundle.promptBlock, "", freshnessBlock, conversationBlock]
     .filter(Boolean)
     .join("\n");
 
@@ -152,7 +162,7 @@ export async function answerTellMeQuestion(args: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model,
+      model: modelRequested,
       temperature: 0.2,
       response_format: { type: "json_object" },
       messages: [
@@ -174,6 +184,7 @@ export async function answerTellMeQuestion(args: {
       completion_tokens?: number;
       total_tokens?: number;
     };
+    model?: string;
   };
   const content = data.choices?.[0]?.message?.content;
   if (!content) {
@@ -214,6 +225,22 @@ export async function answerTellMeQuestion(args: {
   );
   const structuredItems = Math.max(0, bundle.recordsSelected - knowledgeItems);
 
+  const modelResolved = data.model ?? modelRequested;
+
+  let tokenBreakdown: TellMeAnswer["tokenBreakdown"] = undefined;
+  if (args.debugTokenBreakdown) {
+    const { estimateLumeTokenBreakdown } = await import(
+      "@/lib/evals/token-breakdown"
+    );
+    tokenBreakdown = estimateLumeTokenBreakdown({
+      systemPrompt: TELL_ME_SYSTEM,
+      promptBlock: bundle.promptBlock,
+      conversationBlock,
+      freshnessBlock,
+      apiUsage: data.usage ?? null,
+    });
+  }
+
   return {
     answer: answerText,
     confidence: normaliseConfidence(parsed.confidence),
@@ -235,8 +262,10 @@ export async function answerTellMeQuestion(args: {
     capturePrefill:
       typeof parsed.capturePrefill === "string" ? parsed.capturePrefill : null,
     usage: data.usage ?? null,
-    model,
+    model: modelResolved,
+    modelRequested,
     provider: "openai",
+    tokenBreakdown: tokenBreakdown ?? null,
     contextStats: {
       projectsConsidered: bundle.scope.projectIdsForDeepContext.length || 1,
       recordsSelected: bundle.recordsSelected,
@@ -478,6 +507,8 @@ function localGroundedAnswer(args: {
     capturePrefill: null,
     usage: null,
     model: null,
+    modelRequested: null,
+    tokenBreakdown: null,
     provider: "local",
     contextStats: {
       projectsConsidered: args.bundle.scope.projectIdsForDeepContext.length || 1,

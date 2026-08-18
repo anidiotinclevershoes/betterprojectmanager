@@ -14,6 +14,7 @@ import {
 import { logPromptAssemblyDiagnostic } from "@/ai/domain";
 import { recordCaptureMetricsSafe } from "@/lib/dev/cockpit";
 import { COACHING_SYSTEM_PROMPT } from "@/lib/mission";
+import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import {
   buildCapturePromptAssembly,
   buildCaptureResultFromAi,
@@ -45,7 +46,7 @@ export async function GET() {
       description: s.description,
       available: s.available,
     })),
-    model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    model: resolveOpenAIChatModel(),
     openaiConfigured: isOpenAIConfigured(),
   });
 }
@@ -242,7 +243,7 @@ export async function POST(request: Request) {
         contextRecordCount: promptAssembly.diagnostics.contextRecordCount,
         dictionaryEntryCount: promptAssembly.diagnostics.dictionaryEntryCount,
         promptSections: promptAssembly.sections.map((s) => s.label),
-        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+        model: resolveOpenAIChatModel(),
         elapsedMs,
         openaiConfigured,
         provider: result.provider,

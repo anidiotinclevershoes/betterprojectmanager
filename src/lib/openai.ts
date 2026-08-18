@@ -12,6 +12,7 @@ import {
   runFindingsPipeline,
 } from "./capture/findings";
 import { COACHING_SYSTEM_PROMPT, MEMORY_TYPES } from "./mission";
+import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import type {
   CaptureInput,
   CaptureResult,
@@ -197,7 +198,7 @@ export async function tidyAndCoachWithOpenAI(
 
   const promptAssembly = buildCapturePromptAssembly(args);
   logPromptAssemblyDiagnostic(promptAssembly);
-  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+  const model = resolveOpenAIChatModel();
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",

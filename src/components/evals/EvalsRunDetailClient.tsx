@@ -122,14 +122,37 @@ export function EvalsRunDetailClient() {
             <p className="evals-stat-value">
               {run.summary.lumeTotalTokens ?? "—"}
             </p>
+            <p className="evals-stat-note">
+              {run.lumeModel ?? "—"}
+              {run.summary.sameModelControl === false
+                ? " · model mismatch"
+                : run.summary.sameModelControl
+                  ? " · same-model control"
+                  : ""}
+            </p>
           </div>
           <div className="evals-stat">
             <p className="evals-stat-label">GPT tokens</p>
             <p className="evals-stat-value">
               {run.summary.baselineTotalTokens ?? "—"}
             </p>
+            <p className="evals-stat-note">{run.baselineModel ?? "—"}</p>
           </div>
         </div>
+        {run.summary.lumeTokenBreakdown || run.summary.baselineTokenBreakdown ? (
+          <p className="evals-stat-note" style={{ marginTop: "0.5rem" }}>
+            {run.summary.lumeTokenBreakdown
+              ? `Lume est. in — sys ${run.summary.lumeTokenBreakdown.systemInstructions ?? "—"} · now ${run.summary.lumeTokenBreakdown.knowledgeNow ?? "—"} · hist ${run.summary.lumeTokenBreakdown.history ?? "—"} · people ${run.summary.lumeTokenBreakdown.knowledgePeople ?? "—"} · risks ${run.summary.lumeTokenBreakdown.knowledgeRisks ?? "—"} · todos ${run.summary.lumeTokenBreakdown.todos ?? "—"} · decisions ${run.summary.lumeTokenBreakdown.knowledgeDecisions ?? "—"} · turns ${run.summary.lumeTokenBreakdown.conversation ?? "—"} · snap ${run.summary.lumeTokenBreakdown.snapshot ?? "—"}`
+              : null}
+            {run.summary.lumeTokenBreakdown &&
+            run.summary.baselineTokenBreakdown
+              ? " · "
+              : null}
+            {run.summary.baselineTokenBreakdown
+              ? `GPT est. in — sys ${run.summary.baselineTokenBreakdown.systemInstructions ?? "—"} · ctx ${run.summary.baselineTokenBreakdown.contextDocument ?? "—"}`
+              : null}
+          </p>
+        ) : null}
         <p>
           <Link href="/evals/runs">← All runs</Link>
           {" · "}

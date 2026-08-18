@@ -135,7 +135,10 @@ export type SystemAnswerRecord = {
   answer: string;
   confidence?: string | null;
   sources?: Array<{ id: string; kind: string; label: string; detail?: string | null }>;
+  /** API-reported model id when available. */
   model: string | null;
+  /** Model id requested (pinned snapshot after model tidy). */
+  modelRequested?: string | null;
   provider: string | null;
   usage: TokenUsage | null;
   durationMs: number | null;
@@ -183,6 +186,12 @@ export type EvalRunSummary = {
   dimensionAverages: Partial<Record<EvalDimension, number | null>>;
   lumeTotalTokens: number | null;
   baselineTotalTokens: number | null;
+  /** Estimated Lume prompt-component totals (tiktoken); null if not instrumented. */
+  lumeTokenBreakdown?: Record<string, number | null> | null;
+  /** Estimated baseline prompt-component totals; null if not instrumented. */
+  baselineTokenBreakdown?: Record<string, number | null> | null;
+  /** True when Lume and GPT used the same resolved/requested model family. */
+  sameModelControl?: boolean | null;
 };
 
 export type EvalRunRecord = {
