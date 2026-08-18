@@ -39,6 +39,9 @@ export type EvalAccessFail = {
   ok: false;
   status: 401 | 403;
   error: string;
+  /** Why access failed — safe to show to the signed-in user. */
+  reason?: "unauthenticated" | "allowlist_empty" | "not_allowlisted";
+  email?: string | null;
 };
 
 /**
@@ -78,14 +81,33 @@ export async function requireEvalAccess(): Promise<
   }
 
   if (!email || !userId) {
-    return { ok: false, status: 401, error: "Sign in required." };
+    return {
+      ok: false,
+      status: 401,
+      error: "Sign in required.",
+      reason: "unauthenticated",
+    };
+  }
+
+  const allowed = parseEvalAllowedEmails();
+  if (allowed.length === 0) {
+    return {
+      ok: false,
+      status: 403,
+      email,
+      reason: "allowlist_empty",
+      error:
+        "Evaluation access is not configured. Set LUME_EVAL_ALLOWED_EMAILS in Vercel (Production), then redeploy.",
+    };
   }
 
   if (!isEmailAllowedForEvals(email)) {
     return {
       ok: false,
       status: 403,
-      error: "You are not authorised to access Lume evaluations.",
+      email,
+      reason: "not_allowlisted",
+      error: `Signed in as ${email}, but that address is not on LUME_EVAL_ALLOWED_EMAILS.`,
     };
   }
 
@@ -93,5 +115,8 @@ export async function requireEvalAccess(): Promise<
 }
 
 export function evalAccessDeniedResponse(fail: EvalAccessFail) {
-  return NextResponse.json({ error: fail.error }, { status: fail.status });
+  return NextResponse.json(
+    { error: fail.error, reason: fail.reason ?? null },
+    { status: fail.status },
+  );
 }

@@ -16,7 +16,45 @@ export default async function EvalsLayout({
     if (access.status === 401) {
       redirect(`/login?next=${encodeURIComponent("/evals")}`);
     }
-    redirect("/");
+
+    return (
+      <div className="evals-shell">
+        <main className="evals-main">
+          <div className="evals-panel" role="alert">
+            <p className="evals-kicker">Internal only</p>
+            <h1 className="evals-title">Evals access denied</h1>
+            <p className="evals-sub">{access.error}</p>
+            {access.reason === "allowlist_empty" ? (
+              <ol className="evals-notes">
+                <li>
+                  Vercel → Project → Settings → Environment Variables
+                </li>
+                <li>
+                  Add{" "}
+                  <code>LUME_EVAL_ALLOWED_EMAILS=spud.hughes@gmail.com</code>{" "}
+                  for Production (and Preview if you use it)
+                </li>
+                <li>Redeploy the Production deployment</li>
+                <li>
+                  Sign in with that exact email, then open{" "}
+                  <code>/evals</code>
+                </li>
+              </ol>
+            ) : null}
+            {access.reason === "not_allowlisted" ? (
+              <p className="evals-meta">
+                Add your signed-in email to{" "}
+                <code>LUME_EVAL_ALLOWED_EMAILS</code> in Vercel, redeploy, then
+                retry.
+              </p>
+            ) : null}
+            <p className="evals-meta">
+              <Link href="/">← Back to Lume</Link>
+            </p>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   return (
