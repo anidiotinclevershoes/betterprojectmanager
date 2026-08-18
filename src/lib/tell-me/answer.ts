@@ -8,6 +8,11 @@ import {
   assessFreshness,
   questionImpliesLatest,
 } from "@/lib/tell-me/freshness";
+import {
+  ownershipTopicTokens,
+  questionLooksOwnership,
+  recordMentionsOwnershipOfTopic,
+} from "@/lib/tell-me/question-shape";
 import { questionLooksAdvisory } from "@/lib/tell-me/scope";
 import type { MissionState } from "@/lib/types";
 import type {
@@ -37,6 +42,9 @@ Rules:
 - If evidence is missing, say you can't find confirmation.
 - If related outstanding work exists (e.g. awaiting approval), say so without inventing the approval.
 - Distinguish recorded fact from inference. Inference must be labelled in the prose.
+- Ownership: only state an owner when a record explicitly assigns that responsibility. Involvement, discussion, nearby roles, or owning a related topic is not ownership. If no owner is recorded, say so — do not guess.
+- Current vs history: for current-state questions, prefer Current position / Decisions over older History or superseded risk notes. Keep historical facts for historical questions.
+- Epistemic status: informal, unofficial, suggested, rumoured, assumed, or casually mentioned items are not official/confirmed/approved fact. Answer "official / confirmed?" questions with the status first.
 - For advisory "what should I do" questions, give factual context only and set confidence accordingly; the product may hand off to Coach.
 - Do not expose chain-of-thought.
 - Cite sourceIds from the evidence ids provided in brackets like [id].`;
@@ -334,22 +342,26 @@ function localGroundedAnswer(args: {
   const todos = args.bundle.contexts.flatMap((c) => c.todos);
   const risks = args.bundle.contexts.flatMap((c) => c.risks);
 
-  if (/who owns|owner of|owns /.test(q)) {
-    const hit =
-      knowledge.find((k) => /own/i.test(k.title) || /own/i.test(k.summary ?? "")) ||
-      todos.find((t) => /own|rollback|plan/i.test(t.title));
+  if (questionLooksOwnership(args.question)) {
+    const topic = ownershipTopicTokens(args.question);
+    const pool = [...knowledge, ...todos];
+    const hit = pool.find((k) =>
+      recordMentionsOwnershipOfTopic(`${k.title} ${k.summary ?? ""}`, topic),
+    );
     if (hit) {
-      answer = hit.summary
-        ? `${hit.title}. ${hit.summary}`
-        : hit.title;
-      confidence = "related_context";
+      answer = hit.summary ? `${hit.title}. ${hit.summary}` : hit.title;
+      confidence = "direct_confirmation";
       sources.push({
         id: hit.id,
-        kind: "todo",
+        kind: hit.type.startsWith("knowledge") ? "knowledge" : "todo",
         label: hit.title,
         projectId: args.bundle.scope.projectId,
         projectCode: args.bundle.scope.projectCode,
       });
+    } else {
+      answer =
+        "I don't have a confirmed owner for that in the project records.";
+      confidence = "not_found";
     }
   }
 

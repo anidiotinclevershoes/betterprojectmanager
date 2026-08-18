@@ -26,23 +26,37 @@ function extractPeopleLines(texts: string[]): string[] {
   const out: string[] = [];
   const seen = new Set<string>();
   for (const text of texts) {
-    // "Alice owns X" / "Alice — …" / "Alice is away"
-    const nameOwns = text.match(
-      /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:owns|is\s+away|returns|drafting|covering|approves|promised|confirmed)/,
+    // Keep explicit ownership / leave phrasing — do not collapse to bare name
+    // (bare "Ava mentioned" invites inventing unrelated ownership).
+    const ownership = text.match(
+      /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(owns|does not own|doesn't own)\b[^.]{0,120}/,
     );
-    if (nameOwns) {
-      const name = nameOwns[1]!;
-      if (!seen.has(name)) {
-        seen.add(name);
-        out.push(`${name} — mentioned in project records`);
+    if (ownership) {
+      const line = ownership[0]!.trim();
+      const key = line.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(line.slice(0, 240));
+      }
+    }
+    const leave = text.match(
+      /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:is\s+away|returns|covering|promised|confirmed)\b[^.]{0,100}/,
+    );
+    if (leave) {
+      const line = leave[0]!.trim();
+      const key = line.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(line.slice(0, 240));
       }
     }
     const dash = text.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+[—-]/);
     if (dash) {
-      const name = dash[1]!;
-      if (!seen.has(name)) {
-        seen.add(name);
-        out.push(text.slice(0, 240));
+      const line = text.slice(0, 240);
+      const key = line.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(line);
       }
     }
   }
@@ -96,26 +110,31 @@ export function buildMissionStateForStage(
 
   for (const truth of stage.knownTruth) {
     knowledgeBullets.now.push(truth);
+    // Surface stage-current risks / open loops as structured bullets — not
+    // superseded full capture narratives (those belong in History).
+    if (
+      /risk|incomplete|away|must not|blocked|outstanding|conflict|unconfirmed|no .+ approval|still open|remain open|not authorised|not authorized|unsigned|not ready|sole |SPOF|single point/i.test(
+        truth,
+      )
+    ) {
+      knowledgeBullets.risks.push(truth);
+    }
+    if (
+      /waiting|promised|chase|await|due|outstanding|requested|owed|owes/i.test(
+        truth,
+      )
+    ) {
+      knowledgeBullets.openLoops.push(truth);
+    }
   }
   // Only stage.knownTruth is "current" structured knowledge (Contract §4).
-  // Capture knownTruth remains in chronological capture/memory text — do not
-  // flatten every historical capture truth into "now" (that created false conflicts).
+  // Capture knownTruth / content remain in chronological history & memories —
+  // do not flatten historical capture text into current risks (that resurfaced
+  // superseded counts such as "two Snyk open" beside current "one open").
   const truthBag: string[] = [...stage.knownTruth];
   for (const cap of captures) {
     for (const t of cap.knownTruth ?? []) {
       truthBag.push(t);
-    }
-    if (
-      /risk|incomplete|away|must not|blocked|outstanding|conflict|unconfirmed|no .+ approval/i.test(
-        cap.content,
-      )
-    ) {
-      knowledgeBullets.risks.push(cap.content.slice(0, 240));
-    }
-    if (
-      /waiting|promised|chase|await|due|outstanding|requested/i.test(cap.content)
-    ) {
-      knowledgeBullets.openLoops.push(cap.content.slice(0, 240));
     }
   }
   knowledgeBullets.people = extractPeopleLines([
