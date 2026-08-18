@@ -320,6 +320,30 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       if (hydrateInFlight) return false;
       hydrateInFlight = true;
       try {
+        // Prefer server cookie load — reliable on hard refresh.
+        const serverRes = await fetch("/api/workspace/state");
+        if (serverRes.ok) {
+          const payload = (await serverRes.json()) as {
+            workspaceId: string;
+            userId: string;
+            state: MissionState;
+          };
+          if (cancelled) return false;
+          persistMetaRef.current = {
+            mode: "supabase",
+            workspaceId: payload.workspaceId,
+            userId: payload.userId,
+          };
+          setPersistenceMode("supabase");
+          setState(normaliseState(payload.state));
+          setSaveStatus("idle");
+          setSaveError(null);
+          setHydrated(true);
+          hydrateSucceeded = true;
+          return true;
+        }
+
+        // Fallback: browser client (after session is ready).
         const client = createBrowserSupabaseClient();
         await waitForBrowserUser(client);
         if (cancelled) return false;
@@ -372,13 +396,36 @@ export function MissionProvider({ children }: { children: ReactNode }) {
 
     async function hydrate() {
       try {
-        const me = (await fetch("/api/auth/me").then((r) => r.json())) as {
+        let me: {
           persistence?: string;
           mode?: string;
           user?: { id?: string } | null;
-        };
+        } | null = null;
+
+        for (let i = 0; i < 4; i += 1) {
+          me = (await fetch("/api/auth/me").then((r) => r.json())) as {
+            persistence?: string;
+            mode?: string;
+            user?: { id?: string } | null;
+          };
+          if (me.persistence !== "supabase") break;
+          if (me.user?.id) break;
+          await sleep(200 * (i + 1));
+        }
+
         const useSupabase =
-          me.persistence === "supabase" && Boolean(me.user?.id);
+          me?.persistence === "supabase" && Boolean(me?.user?.id);
+
+        // Production supabase mode without a user yet: do not fall back to
+        // empty local state (that permanently loses the UI after refresh).
+        if (me?.persistence === "supabase" && !me.user?.id) {
+          if (cancelled) return;
+          applySupabaseHydrateFailure(
+            null,
+            "Could not restore your session. Please sign in again.",
+          );
+          return;
+        }
 
         if (useSupabase) {
           let lastError: unknown = null;
@@ -403,7 +450,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
             lastError,
           );
           applySupabaseHydrateFailure(
-            me.user?.id ?? null,
+            me?.user?.id ?? null,
             "Could not load your workspace. Please refresh.",
           );
 
@@ -1203,12 +1250,55 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const createProject = useCallback(async (input: CreateProjectInput) => {
-    const meta = persistMetaRef.current;
+    let meta = persistMetaRef.current;
+
+    // If we're in supabase mode but hydrate failed to attach a workspace,
+    // bootstrap via the server cookie path before creating — never silently
+    // create a local-only project that vanishes on refresh.
+    if (meta.mode === "supabase" && !meta.workspaceId) {
+      setSaveStatus("saving");
+      setSaveError(null);
+      try {
+        const boot = await fetch("/api/workspace/state");
+        if (!boot.ok) {
+          const fail = (await boot.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          throw new Error(
+            fail?.error || "Could not open your workspace. Please refresh.",
+          );
+        }
+        const payload = (await boot.json()) as {
+          workspaceId: string;
+          userId: string;
+          state: MissionState;
+        };
+        persistMetaRef.current = {
+          mode: "supabase",
+          workspaceId: payload.workspaceId,
+          userId: payload.userId,
+        };
+        meta = persistMetaRef.current;
+        // Adopt server state if we somehow had stale empty client state.
+        if (stateRef.current.projects.length === 0 && payload.state.projects.length) {
+          setState(normaliseState(payload.state));
+        }
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Could not open workspace";
+        setSaveStatus("error");
+        setSaveError(message);
+        throw err;
+      }
+    }
+
     if (meta.mode === "supabase" && meta.workspaceId) {
       setSaveStatus("saving");
       setSaveError(null);
       try {
         const client = createBrowserSupabaseClient();
+        // Ensure browser session exists for RLS writes.
+        await waitForBrowserUser(client);
         const persisted = await persistNewProject(
           client,
           meta.workspaceId,
@@ -1254,6 +1344,14 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         setSaveError(message);
         throw err;
       }
+    }
+
+    if (process.env.NODE_ENV === "production") {
+      const message =
+        "Project was not saved to your account. Please refresh and try again.";
+      setSaveStatus("error");
+      setSaveError(message);
+      throw new Error(message);
     }
 
     const bundle = buildNewProject(input);

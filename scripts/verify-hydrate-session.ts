@@ -43,6 +43,18 @@ async function main() {
     // Must not silently fall through to empty local on first supabase failure
     // without retries when /api/auth/me already returned a user.
     assert.match(store, /attempt < 3/);
+    // Server cookie path is the primary hydrate (avoids browser session race).
+    assert.match(store, /\/api\/workspace\/state/);
+    // Production must not silently create local-only projects.
+    assert.match(store, /Project was not saved to your account/);
+  });
+
+  await check("workspace state API route exists", () => {
+    const route = path.join(root, "src/app/api/workspace/state/route.ts");
+    assert.equal(fs.existsSync(route), true);
+    const src = fs.readFileSync(route, "utf8");
+    assert.match(src, /loadMissionStateFromSupabase/);
+    assert.match(src, /createServerSupabaseClient/);
   });
 
   await check("waitForBrowserUser resolves from auth event", async () => {
