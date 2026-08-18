@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -94,12 +95,21 @@ export function TellMeSessionProvider({
   const [answer, setAnswer] = useState<TellMeAnswer | null>(null);
   const [conversation, setConversation] = useState<TellMeConversationTurn[]>([]);
   const [snapshots, setSnapshots] = useState<SnapshotMap>({});
+  const conversationProjectRef = useRef<string | null>(routeProjectId);
 
   useEffect(() => {
     setSnapshots(loadLocalSnapshots());
   }, []);
 
+  // Project isolation: never carry conversation turns across projects.
   useEffect(() => {
+    if (conversationProjectRef.current !== routeProjectId) {
+      conversationProjectRef.current = routeProjectId;
+      setConversation([]);
+      setAnswer(null);
+      setError(null);
+      setQuestion("");
+    }
     setProjectId(routeProjectId);
   }, [routeProjectId]);
 
@@ -107,7 +117,15 @@ export function TellMeSessionProvider({
     const onOpen = (event: Event) => {
       const detail = (event as CustomEvent<{ prefill?: string; projectId?: string }>)
         .detail;
-      setProjectId(detail?.projectId ?? routeProjectId);
+      const nextId = detail?.projectId ?? routeProjectId ?? null;
+      if (conversationProjectRef.current !== nextId) {
+        conversationProjectRef.current = nextId;
+        setConversation([]);
+        setAnswer(null);
+        setError(null);
+        if (!detail?.prefill) setQuestion("");
+      }
+      setProjectId(nextId);
       if (detail?.prefill) setQuestion(detail.prefill);
       setOpen(true);
       setError(null);
@@ -141,7 +159,15 @@ export function TellMeSessionProvider({
 
   const openTellMe = useCallback(
     (opts?: { prefill?: string; projectId?: string | null }) => {
-      setProjectId(opts?.projectId ?? routeProjectId);
+      const nextId = opts?.projectId ?? routeProjectId ?? null;
+      if (conversationProjectRef.current !== nextId) {
+        conversationProjectRef.current = nextId;
+        setConversation([]);
+        setAnswer(null);
+        setError(null);
+        if (!opts?.prefill) setQuestion("");
+      }
+      setProjectId(nextId);
       if (opts?.prefill) setQuestion(opts.prefill);
       setOpen(true);
       setError(null);

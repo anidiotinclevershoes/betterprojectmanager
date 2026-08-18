@@ -8,6 +8,7 @@ import {
   detectMentionedProjects,
   buildProjectIndex,
 } from "@/lib/capture/projectResolve";
+import { truncatePreservingMeaning } from "@/lib/text/semantic-truncate";
 import type {
   MissionState,
   Project,
@@ -512,7 +513,9 @@ export function buildCaptureContext(args: {
         type: `history:${h.type}`,
         title: h.title,
         date: h.createdAt,
-        summary: h.detail?.slice(0, 160),
+        summary: h.detail
+          ? truncatePreservingMeaning(h.detail, 220)
+          : undefined,
         updatedAt: h.createdAt,
       }),
     "History",

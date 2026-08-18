@@ -10,11 +10,14 @@ import {
 } from "@/lib/capture/context";
 import { KNOWLEDGE_SECTIONS } from "@/lib/knowledge";
 import {
+  isAdjacentOwnershipStatement,
+  ownershipTopicTokens,
   questionLooksCurrentState,
   questionLooksHistorical,
   questionLooksOwnership,
 } from "@/lib/tell-me/question-shape";
 import { resolveTellMeScope } from "@/lib/tell-me/scope";
+import { truncatePreservingMeaning } from "@/lib/text/semantic-truncate";
 import type { MissionState } from "@/lib/types";
 import type {
   ProjectIntelligenceSnapshot,
@@ -70,6 +73,37 @@ function orderKnowledgeForQuestion(
   return [...records].sort((a, b) => {
     if (!preferCurrent) return 0;
     return sectionRank(a.type) - sectionRank(b.type);
+  });
+}
+
+/**
+ * For ownership questions, drop adjacent "X owns Y" lines that do not match the
+ * asked responsibility — prevents UX→Security expansion from prompt pollution.
+ */
+export function filterKnowledgeForOwnershipQuestion(
+  records: CaptureContextRecord[],
+  question: string,
+): CaptureContextRecord[] {
+  if (!questionLooksOwnership(question)) return records;
+  const topic = ownershipTopicTokens(question);
+  return records.filter((r) => {
+    const text = `${r.title} ${r.summary ?? ""}`;
+    return !isAdjacentOwnershipStatement(text, topic);
+  });
+}
+
+/** Re-apply semantic truncation to history summaries (may arrive hard-cut at 160). */
+function retruncateHistorySummaries(
+  history: CaptureContextRecord[],
+): CaptureContextRecord[] {
+  return history.map((h) => {
+    if (!h.summary) return h;
+    // If already short and ends mid-qualifier, we cannot recover lost text here.
+    // Prefer truncatePreservingMeaning when the full detail is still present.
+    return {
+      ...h,
+      summary: truncatePreservingMeaning(h.summary, 220),
+    };
   });
 }
 
@@ -133,9 +167,12 @@ export function buildTellMeContext(args: {
       captureText: args.question,
       limits,
     });
-    const knowledge = orderKnowledgeForQuestion(ctx.knowledge, args.question);
+    const knowledge = filterKnowledgeForOwnershipQuestion(
+      orderKnowledgeForQuestion(ctx.knowledge, args.question),
+      args.question,
+    );
     const history = refineHistoryForQuestion(
-      ctx.history,
+      retruncateHistorySummaries(ctx.history),
       knowledge,
       args.question,
     );

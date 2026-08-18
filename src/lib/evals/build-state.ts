@@ -3,6 +3,7 @@
  * Uses only information from captures up to that stage — fair to both Lume and GPT.
  */
 import { emptyKnowledge } from "@/lib/knowledge";
+import { truncatePreservingMeaning } from "@/lib/text/semantic-truncate";
 import type { MissionState, Project } from "@/lib/types";
 import type { EvalCaptureEvent, EvalStage, EvalWorldFixture } from "@/lib/evals/types";
 
@@ -36,7 +37,7 @@ function extractPeopleLines(texts: string[]): string[] {
       const key = line.toLowerCase();
       if (!seen.has(key)) {
         seen.add(key);
-        out.push(line.slice(0, 240));
+        out.push(truncatePreservingMeaning(line, 240));
       }
     }
     const leave = text.match(
@@ -47,12 +48,12 @@ function extractPeopleLines(texts: string[]): string[] {
       const key = line.toLowerCase();
       if (!seen.has(key)) {
         seen.add(key);
-        out.push(line.slice(0, 240));
+        out.push(truncatePreservingMeaning(line, 240));
       }
     }
     const dash = text.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+[—-]/);
     if (dash) {
-      const line = text.slice(0, 240);
+      const line = truncatePreservingMeaning(text, 240);
       const key = line.toLowerCase();
       if (!seen.has(key)) {
         seen.add(key);
@@ -61,6 +62,37 @@ function extractPeopleLines(texts: string[]): string[] {
     }
   }
   return out;
+}
+
+/**
+ * Promote compact qualified decisions from capture knownTruth when stage `now`
+ * does not already cover the subject (avoids resurrecting superseded Snyk counts).
+ */
+function shouldPromoteQualifiedDecision(
+  truth: string,
+  stageBlobLower: string,
+): boolean {
+  const t = truth.toLowerCase();
+  // Must carry a restriction / epistemic / scope qualifier
+  if (
+    !/\b(only|require|requires|required|cannot|can't|must not|informal|unofficial|unconfirmed|speculation|not authorised|not authorized|not a decision|jointly|both own|unit tests|real staging)\b/i.test(
+      truth,
+    )
+  ) {
+    return false;
+  }
+  // Status/count lines about topics already in stage now → leave to Current position
+  const statusTopics = ["snyk", "go-live", "cab "] as const;
+  for (const topic of statusTopics) {
+    if (t.includes(topic.trim()) && stageBlobLower.includes(topic.trim())) {
+      if (/\b(one|two|three|\d+|remain|open|cleared|target)\b/i.test(truth)) {
+        return false;
+      }
+    }
+  }
+  // Already present in stage truth
+  if (stageBlobLower.includes(t.slice(0, Math.min(48, t.length)))) return false;
+  return true;
 }
 
 export function capturesForStage(
@@ -127,14 +159,18 @@ export function buildMissionStateForStage(
       knowledgeBullets.openLoops.push(truth);
     }
   }
-  // Only stage.knownTruth is "current" structured knowledge (Contract §4).
-  // Capture knownTruth / content remain in chronological history & memories —
-  // do not flatten historical capture text into current risks (that resurfaced
-  // superseded counts such as "two Snyk open" beside current "one open").
+  // Only stage.knownTruth is "current" structured knowledge for status (Contract §4).
+  // Promote concise *qualified decisions* from capture knownTruth when the stage
+  // does not already cover that subject — preserves restrictions without dumping
+  // full historical capture narratives (2C.1 token win).
   const truthBag: string[] = [...stage.knownTruth];
+  const stageBlob = stage.knownTruth.join("\n").toLowerCase();
   for (const cap of captures) {
     for (const t of cap.knownTruth ?? []) {
       truthBag.push(t);
+      if (shouldPromoteQualifiedDecision(t, stageBlob)) {
+        knowledgeBullets.decisions.push(t);
+      }
     }
   }
   knowledgeBullets.people = extractPeopleLines([
@@ -169,7 +205,7 @@ export function buildMissionStateForStage(
       id: `eval-hist-${cap.id}`,
       type: "capture_analysed" as const,
       title: cap.title,
-      detail: cap.content.slice(0, 160),
+      detail: truncatePreservingMeaning(cap.content, 220),
       projectId,
       createdAt: cap.at,
       source: "ai" as const,

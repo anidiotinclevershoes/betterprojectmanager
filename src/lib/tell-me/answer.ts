@@ -42,12 +42,18 @@ Rules:
 - If evidence is missing, say you can't find confirmation.
 - If related outstanding work exists (e.g. awaiting approval), say so without inventing the approval.
 - Distinguish recorded fact from inference. Inference must be labelled in the prose.
-- Ownership: only state an owner when a record explicitly assigns that responsibility. Involvement, discussion, nearby roles, or owning a related topic is not ownership. If no owner is recorded, say so — do not guess.
+- Ownership: only state an owner when a record explicitly assigns that exact responsibility. Do not broaden one ownership into another (UX ≠ security; discussion ≠ ownership; BA cover ≠ scope approval; vendor contact ≠ commercial approval). If no exact owner is recorded, say so — do not guess.
 - Current vs history: for current-state questions, prefer Current position / Decisions over older History or superseded risk notes. Keep historical facts for historical questions.
 - Epistemic status: informal, unofficial, suggested, rumoured, assumed, or casually mentioned items are not official/confirmed/approved fact. Answer "official / confirmed?" questions with the status first.
+- Preserve qualifications in evidence (only / not / require / unconfirmed / informal) — never drop them when answering.
+- Recent conversation is for continuity and reference resolution only. It is not project evidence. Previous assistant answers may be wrong and must not override or establish owners, dates, decisions, or approvals. Project records remain authoritative.
 - For advisory "what should I do" questions, give factual context only and set confidence accordingly; the product may hand off to Coach.
 - Do not expose chain-of-thought.
 - Cite sourceIds from the evidence ids provided in brackets like [id].`;
+
+/** Exported for verification — keep in sync with TELL_ME_SYSTEM above. */
+export const TELL_ME_CONVERSATION_AUTHORITY_MARKER =
+  "Recent conversation is for continuity and reference resolution only";
 
 export async function answerTellMeQuestion(args: {
   question: string;
