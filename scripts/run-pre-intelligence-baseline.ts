@@ -7,11 +7,17 @@ import {
   getOfficialBenchmark,
   summarizeBenchmark,
 } from "../src/lib/evals/fixtures";
-import { OFFICIAL_BENCHMARK_DEFAULT_LABEL } from "../src/lib/evals/fixtures/v1-benchmark";
+import { OFFICIAL_BENCHMARK_DEFAULT_LABEL, FINAL_BASELINE_LABEL } from "../src/lib/evals/fixtures/v1-benchmark";
 import { isOpenAIConfigured } from "../src/lib/openai";
 
 async function main() {
   process.env.LUME_EVAL_FORCE_FILESTORE = "1";
+
+  const label =
+    process.env.LUME_EVAL_RUN_LABEL?.trim() ||
+    (process.argv.includes("--final-baseline")
+      ? FINAL_BASELINE_LABEL
+      : OFFICIAL_BENCHMARK_DEFAULT_LABEL);
 
   const summary = summarizeBenchmark(getOfficialBenchmark());
   console.log(
@@ -19,7 +25,7 @@ async function main() {
       {
         suite: summary,
         openaiConfigured: isOpenAIConfigured(),
-        label: OFFICIAL_BENCHMARK_DEFAULT_LABEL,
+        label,
       },
       null,
       2,
@@ -28,17 +34,18 @@ async function main() {
 
   if (!isOpenAIConfigured()) {
     console.error(
-      "OPENAI_API_KEY is not configured — cannot execute Pre-Intelligence-Changes v1 in this environment.",
+      `OPENAI_API_KEY is not configured — cannot execute ${label} in this environment.`,
     );
     process.exit(2);
   }
 
   const run = await runBenchmark({
-    label: OFFICIAL_BENCHMARK_DEFAULT_LABEL,
+    label,
     createdByEmail: "baseline-runner@local",
     benchmarkVersion: "lume-intelligence-benchmark-v1",
-    notes:
-      "Official untouched-Lume baseline for Phase 2B. Do not treat as intelligence improvement.",
+    notes: process.argv.includes("--final-baseline")
+      ? "Frozen pre-Phase-2C baseline after final evaluator calibration. Lume intelligence unchanged."
+      : "Official untouched-Lume baseline for Phase 2B. Do not treat as intelligence improvement.",
     onProgress: ({ done, total, caseId }) => {
       console.log(`[${done}/${total}] ${caseId}`);
     },

@@ -23,3 +23,6 @@ export const V1_INTELLIGENCE_BENCHMARK: EvalBenchmarkManifest = {
 };
 
 export const OFFICIAL_BENCHMARK_DEFAULT_LABEL = "Pre-Intelligence-Changes v1";
+
+/** Suggested label for the frozen pre-Phase-2C baseline after final evaluator calibration. */
+export const FINAL_BASELINE_LABEL = "Pre-Intelligence-Changes v1 - FINAL BASELINE";

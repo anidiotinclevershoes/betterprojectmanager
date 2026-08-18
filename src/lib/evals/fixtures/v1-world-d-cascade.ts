@@ -186,12 +186,15 @@ export const WORLD_D_CASCADE: EvalWorldFixture = {
       categories: ["temporal", "accuracy", "restraint", "trust"],
       expectedAnswer:
         "No — Nadia decided Wave 1 also includes HR Shared Services; Finance-only is invalidated.",
-      expectedFacts: ["HR", "invalidated"],
+      expectedFacts: ["HR"],
+      supportingFacts: ["invalidated", "Nadia", "Finance"],
       forbiddenClaims: [
         "Wave 1 is still Finance only",
         "Scope remains Finance Shared Services only",
       ],
       criticalInsight: "Finance-only Wave 1 assumption was invalidated by Nadia's HR decision",
+      evaluatorNotes:
+        "Contract §1 — naming HR expansion answers the question; 'invalidated' is supporting.",
     },
     {
       id: "v1-cascade-q4-omar-stale",
@@ -239,12 +242,14 @@ export const WORLD_D_CASCADE: EvalWorldFixture = {
       expectedAnswer:
         "Overlapping — Helen and Omar jointly own it; ownership is not cleanly split.",
       expectedFacts: ["Helen", "Omar", "joint"],
+      supportingFacts: ["overlapping"],
       forbiddenClaims: [
         "Only Helen owns HR onboarding process design",
         "Only Omar owns HR onboarding process design",
       ],
       expectContradiction: true,
-      evaluatorNotes: "Contract §7 overlapping responsibility.",
+      evaluatorNotes:
+        "Contract §7 — 'both own' ≡ joint. Naming both without exclusive claim is correct.",
     },
     {
       id: "v1-cascade-q8-chase-vikram",

@@ -20,7 +20,37 @@ import type {
 import { EVAL_DIMENSIONS } from "@/lib/evals/types";
 
 const NEGATION_CUES =
-  /\b(not|no|never|n't|cannot|can't|without|unconfirmed|unsigned|unknown|none|neither)\b/i;
+  /\b(not|never|n't|cannot|can't|without|unconfirmed|unsigned|unknown|none|neither)\b/i;
+
+/**
+ * True when `before` locally negates a claim that starts immediately after it.
+ * Bare sentence-initial "no" (answer polarity) is NOT local negation of what follows.
+ */
+function isLocalNegationBefore(before: string): boolean {
+  const b = before.trimEnd();
+  if (!b) return false;
+  if (/\b(has|have|is|was|were|been|are)\s+not\s*$/i.test(b)) return true;
+  if (/\b(not|never|n't|without)\s*$/i.test(b)) return true;
+  if (/\b(not|never|n't)\s+\w+\s*$/i.test(b)) return true;
+  // Determiner "no <claim>" ("there is no approval") — not bare answer "No, …"
+  if (/\bno\s*$/i.test(b)) {
+    const trimmed = b.trim();
+    if (/^no$/i.test(trimmed)) return false;
+    return true;
+  }
+  // Broader cues in a short window, excluding bare leading "no …"
+  if (NEGATION_CUES.test(b) && b.length <= 28) {
+    const trimmed = b.trim();
+    if (
+      /^no\b/i.test(trimmed) &&
+      !/\b(not|never|n't|without|cannot|can't)\b/i.test(trimmed)
+    ) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
 
 function norm(s: string) {
   return s
@@ -38,13 +68,6 @@ function tokens(s: string): string[] {
     .filter((t) => t.length > 0);
 }
 
-/** Window around a match used to detect local negation. */
-function windowAround(haystack: string, index: number, length: number): string {
-  const start = Math.max(0, index - 48);
-  const end = Math.min(haystack.length, index + length + 24);
-  return haystack.slice(start, end);
-}
-
 /**
  * True if `needle` occurs in `haystack` as a positive claim (not locally negated).
  * Handles "has not officially moved" vs forbidden "officially moved".
@@ -57,66 +80,67 @@ export function claimPresentPositively(
   const needle = norm(needleRaw);
   if (!needle) return false;
 
-  // Exact / contiguous substring with negation window check
+  // Currency / amount claims: only hit if the answer asserts a numeric amount.
+  if (/[£$€]/.test(needleRaw) || /\b(gbp|usd|eur)\b/i.test(needleRaw)) {
+    if (!/\d/.test(haystackRaw)) return false;
+  }
+
+  // Exact / contiguous substring with negation window check.
+  // Sentence-initial answer polarity ("No — …") must NOT negate a later positive claim
+  // (e.g. "No — two Snyk critical findings remain open" still asserts two open).
   let from = 0;
   while (from <= haystack.length) {
     const idx = haystack.indexOf(needle, from);
     if (idx < 0) break;
-    const ctx = windowAround(haystack, idx, needle.length);
     const before = haystack.slice(Math.max(0, idx - 28), idx);
-    // Negation immediately before the claim (e.g. "has not ", "never ", "no ")
-    if (
-      /\b(not|never|no|without|n't)\s*$/i.test(before) ||
-      /\b(has|have|is|was|were|been)\s+not\s+$/i.test(before) ||
-      /\bnot\s+(been|yet|officially|formally|actually|been\s+)?$/i.test(before)
-    ) {
+    if (isLocalNegationBefore(before)) {
       from = idx + needle.length;
       continue;
     }
-    // Broader: "not ... <needle>" within a short window before the match
-    if (NEGATION_CUES.test(before) && before.length <= 28) {
-      from = idx + needle.length;
-      continue;
-    }
-    // "No, ..." answering style then later repeating the claim positively —
-    // only skip if the needle itself starts with a polarity word already handled.
-    void ctx;
     return true;
   }
 
-  // Flexible token match: all significant needle tokens appear in order with small gaps
-  const needleToks = tokens(needle).filter((t) => t.length > 2 || /^\d/.test(t));
-  if (needleToks.length >= 2) {
-    const hayToks = tokens(haystack);
-    let hi = 0;
-    let first = -1;
-    let last = -1;
-    for (const nt of needleToks) {
-      let found = -1;
-      for (let i = hi; i < hayToks.length; i += 1) {
-        if (hayToks[i] === nt || (nt.length > 4 && hayToks[i]!.startsWith(nt))) {
-          found = i;
-          break;
-        }
-      }
-      if (found < 0) {
-        first = -1;
+  // Flexible token match — skip ultra-generic needles (e.g. "the budget is" after £ strip)
+  const needleToks = tokens(needle).filter(
+    (t) => (t.length > 2 || /^\d/.test(t)) && !["the", "a", "an", "is", "are", "was", "were", "be", "to", "of", "for", "and", "or"].includes(t),
+  );
+  if (needleToks.length < 2) return false;
+
+  const hayToks = tokens(haystack);
+  let hi = 0;
+  let first = -1;
+  let last = -1;
+  for (const nt of needleToks) {
+    let found = -1;
+    for (let i = hi; i < hayToks.length; i += 1) {
+      if (hayToks[i] === nt || (nt.length > 4 && hayToks[i]!.startsWith(nt))) {
+        found = i;
         break;
       }
-      if (first < 0) first = found;
-      last = found;
-      hi = found + 1;
     }
-    if (first >= 0 && last >= first) {
-      // Span too wide → likely not the same claim
-      if (last - first > needleToks.length + 6) return false;
-      // Only inspect tokens from first match through last (not leading "No, …")
-      const inner = hayToks.slice(first, last + 1).join(" ");
-      const prefix = hayToks.slice(Math.max(0, first - 2), first).join(" ");
-      if (/\b(not|never|n't|without)\b/.test(inner)) return false;
-      if (/\b(not|never|no|n't)\b/.test(prefix)) return false;
-      return true;
+    if (found < 0) {
+      first = -1;
+      break;
     }
+    if (first < 0) first = found;
+    last = found;
+    hi = found + 1;
+  }
+  if (first >= 0 && last >= first) {
+    if (last - first > needleToks.length + 6) return false;
+    const inner = hayToks.slice(first, last + 1).join(" ");
+    const prefix = hayToks.slice(Math.max(0, first - 2), first).join(" ");
+    if (/\b(not|never|n't|without)\b/.test(inner)) return false;
+    if (/\b(not|never|n't)\b/.test(prefix)) return false;
+    // Adjacent "no" is determiner negation ("no official…") unless the claim
+    // starts with a number ("No — two Snyk…") where "No" is answer polarity.
+    const prev = first > 0 ? hayToks[first - 1] : "";
+    if (prev === "no") {
+      if (!/^\d/.test(hayToks[first] ?? "")) return false;
+    } else if (/\bno\b/.test(prefix)) {
+      return false;
+    }
+    return true;
   }
 
   return false;
@@ -125,10 +149,15 @@ export function claimPresentPositively(
 const FACT_SYNONYMS: Array<[RegExp, RegExp]> = [
   [/not selected|has not been selected|not been selected|is not a selected/i, /not selected|has not been selected|not been selected|is not (a )?selected|wasn't selected|was not selected/i],
   [/no security approval|not approved|has not approved|security has not/i, /no security approval|not approved|has not approved|security has not|never approved|not been approved|no approval/i],
-  [/not confirmed|unconfirmed|not officially|has not officially/i, /not confirmed|unconfirmed|not officially|has not officially|no formal|not a formal/i],
+  [/not confirmed|unconfirmed|not officially|has not officially/i, /not confirmed|unconfirmed|not officially|has not officially|no formal|not a formal|informal/i],
   [/not received|still not received|have not received/i, /not received|still not|haven't received|have not received|no .+ credentials/i],
-  [/not authorised|not authorized|not authorized|unsigned/i, /not authorised|not authorized|unsigned|no authorisation|no authorization/i],
-  [/not recorded|not named|no .+ recorded|unknown/i, /not recorded|not named|no .+ recorded|unknown|not (yet )?known|isn't recorded|is not recorded/i],
+  [/not authorised|not authorized|unsigned/i, /not authorised|not authorized|unsigned|no authorisation|no authorization|cannot approve|can't approve|not able to approve|may not approve/i],
+  [/not recorded|not named|no .+ recorded|unknown/i, /not recorded|not named|no .+ recorded|unknown|not (yet )?known|isn't recorded|is not recorded|can'?t find|cannot find|no confirmation/i],
+  [/\bjoint\b|jointly|both own|both owns|shared ownership|overlapping/i, /\bjoint\b|jointly|both own|both owns|owned by both|shared ownership|overlapping/i],
+  [/does not own|doesn't own|do not own/i, /does not own|doesn't own|do not own|is not the .+ owner|not the owner/i],
+  [/not ready|is not ready|aren't ready/i, /not ready|is not ready|aren't ready|not yet ready|prerequisites remain|still outstanding/i],
+  [/\binvalidated\b|no longer finance-only|now includes hr/i, /\binvalidated\b|no longer|now includes\s+hr|includes hr|hr (shared )?services as well|also includes hr/i],
+  [/\btbc\b|to be confirmed/i, /\btbc\b|to be confirmed|not (yet )?known|no (approved )?budget|can'?t find|cannot find confirmation/i],
 ];
 
 /**
@@ -216,7 +245,7 @@ function isFirmGroundedNegative(answer: string): boolean {
 function expressesUncertainty(answer: string, confidence?: string | null): boolean {
   const text = `${answer} ${confidence ?? ""}`;
   return (
-    /not (enough|clear|sure)|no evidence|unknown|unclear|cannot confirm|can't confirm|i don't (know|have)|insufficient|conflict|contradict|two (different|conflicting)|unconfirmed|speculation|hope,? not|rumour|rumor/i.test(
+    /not (enough|clear|sure)|no evidence|unknown|unclear|cannot confirm|can't confirm|can'?t find|cannot find|no confirmation|i don't (know|have)|insufficient|conflict|contradict|two (different|conflicting)|unconfirmed|speculation|hope,? not|rumour|rumor|not (yet )?known|tbc|to be confirmed/i.test(
       text,
     ) ||
     confidence === "not_found" ||
@@ -313,7 +342,7 @@ export function scoreCaseAgainstAnswer(
     notes.push(`Forbidden claim(s) present: ${foundForbidden.join("; ")}`);
     if (
       foundForbidden.some((f) =>
-        /approved|can start|go-live is still 19|has been selected|officially moved|is ready|committed to november|msa is signed/i.test(
+        /approved|can start|go-live is still 19|has been selected|officially moved|is ready|committed to november|msa is signed|owns security|owns the security|owns ux|rate limit is 100|two snyk|two critical/i.test(
           f,
         ),
       )
@@ -458,11 +487,11 @@ export function scoreCaseAgainstAnswer(
     } else if (dimension === "contradiction") {
       if (fixture.expectContradiction) {
         const contrad =
-          /conflict|contradict|inconsistent|two (different|conflicting)|disagree|not (been )?decided|unclear which/i.test(
+          /conflict|contradict|inconsistent|two (different|conflicting)|disagree|not (been )?decided|unclear which|overlapping|jointly|both own|both owns|shared/i.test(
             text,
           );
         band = contrad || uncertainish(answer.answer) ? "pass" : "fail";
-        rationale = "Contradiction handling heuristic";
+        rationale = "Contradiction / overlapping-ownership handling heuristic";
       } else {
         band = required.length
           ? bandFromRatio(foundExpected.length, required.length)

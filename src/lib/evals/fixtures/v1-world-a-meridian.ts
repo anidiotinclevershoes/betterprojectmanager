@@ -257,17 +257,20 @@ export const WORLD_A_MERIDIAN: EvalWorldFixture = {
       worldId: "world-v1-meridian-payments",
       stageId: "mer-stage-pre-cab",
       question: "Are Snyk critical findings cleared for CAB?",
-      categories: ["recall", "accuracy", "dependency", "restraint"],
+      categories: ["recall", "accuracy", "dependency", "restraint", "trust"],
       expectedAnswer: "No — one Snyk critical remains open (one was cleared).",
-      expectedFacts: ["open", "Snyk"],
-      supportingFacts: ["one", "cleared"],
+      expectedFacts: ["open", "Snyk", "one"],
+      supportingFacts: ["cleared"],
       forbiddenClaims: [
         "all Snyk criticals are cleared",
         "Snyk is fully clear",
+        "two Snyk critical",
+        "two critical findings remain",
+        "two Snyk critical findings remain open",
       ],
       criticalInsight: "At least one Snyk critical remains open before CAB",
       evaluatorNotes:
-        "Current truth at pre-CAB stage: one critical remains open. Concise 'not cleared / still open' is enough.",
+        "Ground truth at pre-CAB: exactly one critical remains open. Saying two is stale/wrong (trust).",
     },
     {
       id: "v1-meridian-q8-original-date",
@@ -276,9 +279,11 @@ export const WORLD_A_MERIDIAN: EvalWorldFixture = {
       question: "Was Meridian originally planned for 19 August?",
       categories: ["temporal", "recall", "accuracy"],
       expectedAnswer: "Yes — original target was 19 August; current is 26 August.",
-      expectedFacts: ["19 August", "26 August"],
+      expectedFacts: ["19 August"],
+      supportingFacts: ["26 August"],
       forbiddenClaims: ["never planned for 19 August"],
-      evaluatorNotes: "Contract §4 preserve historical truth.",
+      evaluatorNotes:
+        "Contract §1/§4 — question asks original date; current date is helpful support only.",
     },
     {
       id: "v1-meridian-q9-ops-slack",
@@ -288,14 +293,16 @@ export const WORLD_A_MERIDIAN: EvalWorldFixture = {
       categories: ["uncertainty", "restraint", "trust", "grounding", "accuracy"],
       expectedAnswer:
         "No — Ops optimism is not confirmation; CAB prerequisites remain open.",
-      expectedFacts: ["unconfirmed", "outstanding"],
+      expectedFacts: ["not ready", "no security"],
+      supportingFacts: ["informal", "UX", "unsigned", "Ops"],
       forbiddenClaims: [
         "CAB is ready",
         "Ops confirmed CAB readiness",
-        "Security approved",
+        "Security has approved",
       ],
-      expectUncertainty: true,
-      evaluatorNotes: "Contract §2 trust; informal message ≠ readiness.",
+      expectUncertainty: false,
+      evaluatorNotes:
+        "Contract §2/§5 — firm No is correct when prerequisites are explicitly unmet; Ops Slack is informal.",
     },
   ],
 };

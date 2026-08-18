@@ -230,12 +230,16 @@ export const WORLD_E_QUIET: EvalWorldFixture = {
       categories: ["uncertainty", "restraint", "accuracy", "trust"],
       expectedAnswer: "Not known — budget is TBC after discovery.",
       expectedFacts: ["TBC"],
+      supportingFacts: ["discovery", "estimate"],
       forbiddenClaims: [
         "Budget is approved at",
         "The budget is £",
+        "budget is £",
         "Budget is confirmed",
       ],
       expectUncertainty: true,
+      evaluatorNotes:
+        "Forbidden currency amount only when a numeric budget is asserted — not when answering not found. TBC synonyms include can't find / not known.",
     },
     {
       id: "v1-quiet-q9-will-we-hit",
