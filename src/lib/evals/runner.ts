@@ -4,7 +4,12 @@
  */
 import { randomUUID } from "node:crypto";
 import { answerTellMeQuestion } from "@/lib/tell-me/answer";
-import { getActiveBenchmark, listAllCases, getWorld } from "@/lib/evals/fixtures";
+import {
+  getActiveBenchmark,
+  getBenchmark,
+  listAllCases,
+  getWorld,
+} from "@/lib/evals/fixtures";
 import { buildMissionStateForStage } from "@/lib/evals/build-state";
 import { runGptBaseline, BASELINE_PROMPT_VERSION } from "@/lib/evals/baseline";
 import { scoreCaseAgainstAnswer } from "@/lib/evals/scoring";
@@ -23,6 +28,8 @@ import type {
 export type RunBenchmarkOptions = {
   label?: string;
   createdByEmail: string;
+  /** Prefer official V1; pass sample-0.1.0 for harness regression only. */
+  benchmarkVersion?: string;
   worldIds?: string[];
   categories?: EvalDimension[];
   notes?: string;
@@ -110,11 +117,19 @@ async function runLumeAnswer(args: {
 export async function runBenchmark(
   options: RunBenchmarkOptions,
 ): Promise<EvalRunRecord> {
-  const benchmark = getActiveBenchmark();
+  const benchmark =
+    getBenchmark(options.benchmarkVersion) ?? getActiveBenchmark();
   const cases = listAllCases({
+    benchmarkVersion: benchmark.version,
     worldIds: options.worldIds,
     categories: options.categories,
   });
+
+  if (cases.length === 0) {
+    throw new Error(
+      `No evaluation cases found for benchmark ${benchmark.version}.`,
+    );
+  }
 
   const runId = randomUUID();
   const createdAt = new Date().toISOString();

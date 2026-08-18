@@ -6,7 +6,8 @@ import type { EvalBenchmarkManifest } from "@/lib/evals/types";
 
 export const SAMPLE_BENCHMARK: EvalBenchmarkManifest = {
   version: "sample-0.1.0",
-  label: "Sample harness world (not the real V1 suite)",
+  label: "Harness Samples — ATLAS Cutover (not scored in V1)",
+  kind: "sample",
   worlds: [
     {
       id: "world-sample-atlas-cutover",

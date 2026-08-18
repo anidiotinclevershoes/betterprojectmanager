@@ -40,6 +40,7 @@ export async function POST(request: Request) {
 
   const body = (await request.json().catch(() => ({}))) as {
     label?: string;
+    benchmarkVersion?: string;
     worldIds?: string[];
     categories?: string[];
     notes?: string;
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
   try {
     const run = await runBenchmark({
       label: body.label,
+      benchmarkVersion: body.benchmarkVersion,
       createdByEmail: access.email,
       worldIds: body.worldIds?.length ? body.worldIds : undefined,
       categories: categories.length ? categories : undefined,

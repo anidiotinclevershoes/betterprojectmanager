@@ -3,7 +3,13 @@ import {
   evalAccessDeniedResponse,
   requireEvalAccess,
 } from "@/lib/evals/access";
-import { getActiveBenchmark, getWorld, listBenchmarks } from "@/lib/evals/fixtures";
+import {
+  getActiveBenchmark,
+  getBenchmark,
+  getWorld,
+  listBenchmarks,
+  summarizeBenchmark,
+} from "@/lib/evals/fixtures";
 
 export const runtime = "nodejs";
 
@@ -21,13 +27,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ world });
   }
 
+  const requested = url.searchParams.get("benchmarkVersion");
+  const active =
+    getBenchmark(requested) ?? getActiveBenchmark();
+
   return NextResponse.json({
-    benchmarks: listBenchmarks().map((b) => ({
-      version: b.version,
-      label: b.label,
-      worldCount: b.worlds.length,
-      caseCount: b.worlds.reduce((n, w) => n + w.cases.length, 0),
-    })),
-    active: getActiveBenchmark(),
+    benchmarks: listBenchmarks().map((b) => summarizeBenchmark(b)),
+    active,
+    activeSummary: summarizeBenchmark(active),
   });
 }

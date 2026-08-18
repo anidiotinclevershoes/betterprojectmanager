@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { EvalRunSummary } from "@/lib/evals/types";
 import { EVAL_DIMENSION_LABELS, EVAL_DIMENSIONS } from "@/lib/evals/types";
+import { OFFICIAL_BENCHMARK_DEFAULT_LABEL } from "@/lib/evals/fixtures/v1-benchmark";
 
 type SlimRun = {
   id: string;
@@ -18,10 +19,20 @@ type SlimRun = {
   caseCount: number;
 };
 
+type BenchmarkSummary = {
+  version: string;
+  label: string;
+  kind: "sample" | "official";
+  worldCount: number;
+  caseCount: number;
+};
+
 type FixturePayload = {
+  benchmarks: BenchmarkSummary[];
   active: {
     version: string;
     label: string;
+    kind?: "sample" | "official";
     worlds: Array<{
       id: string;
       name: string;
@@ -39,15 +50,19 @@ function pct(n: number | null | undefined) {
 export function EvalsHomeClient() {
   const [runs, setRuns] = useState<SlimRun[]>([]);
   const [fixture, setFixture] = useState<FixturePayload["active"] | null>(null);
+  const [benchmarks, setBenchmarks] = useState<BenchmarkSummary[]>([]);
+  const [benchmarkVersion, setBenchmarkVersion] = useState(
+    "lume-intelligence-benchmark-v1",
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [label, setLabel] = useState("");
+  const [label, setLabel] = useState(OFFICIAL_BENCHMARK_DEFAULT_LABEL);
   const [store, setStore] = useState<string>("");
 
   const load = useCallback(async () => {
     const [runsRes, fixRes, accessRes] = await Promise.all([
       fetch("/api/evals/runs"),
-      fetch("/api/evals/fixtures"),
+      fetch(`/api/evals/fixtures?benchmarkVersion=${encodeURIComponent(benchmarkVersion)}`),
       fetch("/api/evals/access"),
     ]);
     if (!runsRes.ok) {
@@ -59,12 +74,13 @@ export function EvalsHomeClient() {
     if (fixRes.ok) {
       const fixData = (await fixRes.json()) as FixturePayload;
       setFixture(fixData.active);
+      setBenchmarks(fixData.benchmarks ?? []);
     }
     if (accessRes.ok) {
       const a = (await accessRes.json()) as { store?: string };
       setStore(a.store ?? "");
     }
-  }, []);
+  }, [benchmarkVersion]);
 
   useEffect(() => {
     void load();
@@ -88,6 +104,7 @@ export function EvalsHomeClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           label: label.trim() || undefined,
+          benchmarkVersion,
         }),
       });
       const data = (await res.json()) as { run?: { id: string }; error?: string };
@@ -105,6 +122,7 @@ export function EvalsHomeClient() {
 
   const caseCount =
     fixture?.worlds.reduce((n, w) => n + w.cases.length, 0) ?? 0;
+  const selectedMeta = benchmarks.find((b) => b.version === benchmarkVersion);
 
   return (
     <div className="evals-home">
@@ -149,7 +167,10 @@ export function EvalsHomeClient() {
             </div>
           </div>
         ) : (
-          <p className="evals-empty">No runs yet. Start the sample benchmark below.</p>
+          <p className="evals-empty">
+            No runs yet. Run the V1 Intelligence Benchmark below (label{" "}
+            <code>Pre-Intelligence-Changes v1</code>).
+          </p>
         )}
 
         {latest ? (
@@ -181,17 +202,41 @@ export function EvalsHomeClient() {
       <section className="evals-panel">
         <h2>Run benchmark</h2>
         <p className="evals-meta">
-          Active fixture: <strong>{fixture?.label ?? "…"}</strong> (
-          {fixture?.version}) · {fixture?.worlds.length ?? 0} world(s) ·{" "}
-          {caseCount} case(s) · store: {store || "…"}
+          Selected: <strong>{fixture?.label ?? "…"}</strong> (
+          {fixture?.version}) · kind: {selectedMeta?.kind ?? fixture?.kind ?? "…"}{" "}
+          · {fixture?.worlds.length ?? 0} world(s) · {caseCount} case(s) · store:{" "}
+          {store || "…"}
         </p>
         <div className="evals-run-form">
           <label className="field">
-            Run label (optional)
+            Suite
+            <select
+              value={benchmarkVersion}
+              onChange={(e) => {
+                const next = e.target.value;
+                setBenchmarkVersion(next);
+                if (next === "lume-intelligence-benchmark-v1") {
+                  setLabel(OFFICIAL_BENCHMARK_DEFAULT_LABEL);
+                } else if (next.startsWith("sample-")) {
+                  setLabel("Harness sample regression");
+                }
+              }}
+              disabled={busy}
+            >
+              {benchmarks.map((b) => (
+                <option key={b.version} value={b.version}>
+                  {b.kind === "official" ? "Official — " : "Sample — "}
+                  {b.label} ({b.caseCount} cases)
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            Run label
             <input
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="e.g. Baseline v1"
+              placeholder={OFFICIAL_BENCHMARK_DEFAULT_LABEL}
               disabled={busy}
             />
           </label>
@@ -206,8 +251,8 @@ export function EvalsHomeClient() {
         </div>
         {error ? <p className="error-copy">{error}</p> : null}
         <p className="evals-meta">
-          Each run is immutable. Re-running creates a new historical record —
-          never overwrites.
+          Official V1 scores must not include the harness sample. Each run is
+          immutable.
         </p>
       </section>
 
@@ -219,7 +264,7 @@ export function EvalsHomeClient() {
               <tr>
                 <th>Label</th>
                 <th>When</th>
-                <th>Version</th>
+                <th>Fixture</th>
                 <th>Pass</th>
                 <th>Trust</th>
                 <th>Critical</th>
@@ -235,7 +280,7 @@ export function EvalsHomeClient() {
                   </td>
                   <td>{new Date(r.createdAt).toLocaleString()}</td>
                   <td>
-                    {r.lumeVersion ?? "—"}
+                    <div className="evals-meta">{r.fixtureVersion}</div>
                     <div className="evals-meta">
                       {(r.gitCommit ?? "").slice(0, 7) || "no commit"}
                     </div>

@@ -25,7 +25,8 @@
     "verify:production-config": "npx --yes tsx scripts/verify-production-config.ts",
     "verify:tell-me": "npx --yes tsx scripts/verify-tell-me.ts",
     "verify:hydrate-session": "npx --yes tsx scripts/verify-hydrate-session.ts",
-    "verify:evals": "npx --yes tsx scripts/verify-evals.ts"
+    "verify:evals": "npx --yes tsx scripts/verify-evals.ts",
+    "evals:pre-baseline": "npx --yes tsx scripts/run-pre-intelligence-baseline.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
