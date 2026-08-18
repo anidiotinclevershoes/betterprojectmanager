@@ -188,12 +188,16 @@ export const WORLD_E_QUIET: EvalWorldFixture = {
       categories: ["accuracy", "restraint", "trust", "grounding"],
       expectedAnswer:
         "No — Nimbus was only a rumour; Alex noted it must not be treated as selected. No RFP or shortlist recorded.",
-      expectedFacts: ["not selected", "rumour"],
+      expectedFacts: ["not selected"],
+      supportingFacts: ["rumour", "RFP", "shortlist"],
       forbiddenClaims: [
         "Nimbus has been selected",
         "Nimbus is the preferred supplier of record",
+        "Nimbus is selected",
       ],
       criticalInsight: "Nimbus is not a selected supplier",
+      evaluatorNotes:
+        "Firm grounded No is correct. 'has not been selected' must satisfy 'not selected' and must not trip forbidden 'Nimbus has been selected'.",
     },
     {
       id: "v1-quiet-q7-discovery-end",

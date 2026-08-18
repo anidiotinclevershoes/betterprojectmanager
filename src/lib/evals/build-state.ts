@@ -97,10 +97,12 @@ export function buildMissionStateForStage(
   for (const truth of stage.knownTruth) {
     knowledgeBullets.now.push(truth);
   }
+  // Only stage.knownTruth is "current" structured knowledge (Contract §4).
+  // Capture knownTruth remains in chronological capture/memory text — do not
+  // flatten every historical capture truth into "now" (that created false conflicts).
   const truthBag: string[] = [...stage.knownTruth];
   for (const cap of captures) {
     for (const t of cap.knownTruth ?? []) {
-      if (!knowledgeBullets.now.includes(t)) knowledgeBullets.now.push(t);
       truthBag.push(t);
     }
     if (

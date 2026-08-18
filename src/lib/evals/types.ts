@@ -89,10 +89,18 @@ export type EvalCaseFixture = {
   question: string;
   categories: EvalDimension[];
   expectedAnswer?: string | null;
+  /** Required facts for a correct narrow answer (Contract §1). */
   expectedFacts?: string[];
+  /** Optional supporting context — missing these alone must not demote a correct answer. */
+  supportingFacts?: string[];
   expectedImplications?: string[];
   forbiddenClaims?: string[];
   criticalInsight?: string | null;
+  /**
+   * When true, reward uncertainty/clarification if evidence is incomplete/ambiguous.
+   * Do NOT require hedge language when the fixture supports a firm grounded answer
+   * (see Contract §13). Prefer omitting this flag for explicit negatives.
+   */
   expectUncertainty?: boolean;
   expectContradiction?: boolean;
   presentationNotes?: string | null;
