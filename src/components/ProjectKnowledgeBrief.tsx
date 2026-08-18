@@ -16,6 +16,9 @@ import {
   sectionsMatchingQuery,
 } from "@/lib/tell-me/knowledge-search";
 import { openTellMePanel } from "@/components/tell-me/TellMeSessionContext";
+import { PersonEntity } from "@/components/intelligence/PersonEntity";
+import { EpistemicChip } from "@/components/intelligence/EpistemicChip";
+import { EvidenceReveal } from "@/components/intelligence/EvidenceReveal";
 
 function collapseStorageKey(projectId: string) {
   return `lume-knowledge-collapsed-v1:${projectId}`;
@@ -289,7 +292,10 @@ export function ProjectKnowledgeBrief({ projectId }: { projectId: string }) {
                               role="row"
                             >
                               <span role="cell" className="knowledge-people-name">
-                                {parsed.person}
+                                <PersonEntity
+                                  name={parsed.person}
+                                  scope={parsed.detail}
+                                />
                               </span>
                               <span role="cell" className="knowledge-people-detail">
                                 {parts ? (
@@ -408,6 +414,34 @@ export function ProjectKnowledgeBrief({ projectId }: { projectId: string }) {
             Add
           </button>
         </form>
+      ) : null}
+
+      {!editing && (knowledge.structured?.length ?? 0) > 0 ? (
+        <div className="knowledge-structured-panel">
+          <p className="knowledge-structured-label">Confirmed responsibilities</p>
+          <ul>
+            {knowledge.structured!
+              .filter(
+                (i) =>
+                  i.lifecycle === "current" &&
+                  i.kind === "responsibility" &&
+                  i.meta?.responsibility?.ownerConfirmed,
+              )
+              .map((item) => {
+                const resp = item.meta!.responsibility!;
+                return (
+                  <li key={item.id}>
+                    <PersonEntity
+                      name={resp.personName ?? "?"}
+                      scope={resp.scope}
+                    />{" "}
+                    <EpistemicChip status={item.epistemic} />
+                    <EvidenceReveal provenance={item.provenance} />
+                  </li>
+                );
+              })}
+          </ul>
+        </div>
       ) : null}
 
       {knowledge.updatedAt ? (

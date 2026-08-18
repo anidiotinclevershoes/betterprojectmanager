@@ -20,6 +20,7 @@ import {
   generateProactiveRecommendations,
 } from "./coach";
 import { extractKnowledgePatchFromText, emptyKnowledge, mergeKnowledge } from "./knowledge";
+import { confirmResponsibilityOwner as applyConfirmResponsibilityOwner } from "@/lib/canonical-truth/confirm-responsibility";
 import {
   buildNewProject,
   type CreateProjectInput,
@@ -188,6 +189,14 @@ type MissionContextValue = {
     bullet: string,
   ) => void;
   replaceKnowledge: (knowledge: ProjectKnowledge) => void;
+  /** Slice 1: confirm scoped responsibility owner (explicit UI mutation). */
+  confirmResponsibilityOwner: (input: {
+    projectId: string;
+    scope: string;
+    personName: string;
+    personId?: string | null;
+    resolveTruthItemId?: string | null;
+  }) => void;
   addTimelineItem: (
     projectId: string,
     item: TimelineItemInput & { source?: TimelineItem["source"] },
@@ -1609,6 +1618,87 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const confirmResponsibilityOwner = useCallback(
+    (input: {
+      projectId: string;
+      scope: string;
+      personName: string;
+      personId?: string | null;
+      resolveTruthItemId?: string | null;
+    }) => {
+      const bag: {
+        peopleBullet: string;
+        itemId: string;
+        kind: string;
+        epistemic: string;
+        lifecycle: string;
+        supersedesId: string | null;
+        meta: Record<string, unknown>;
+        provenance: unknown[];
+      } = {
+        peopleBullet: "",
+        itemId: "",
+        kind: "responsibility",
+        epistemic: "confirmed",
+        lifecycle: "current",
+        supersedesId: null,
+        meta: {},
+        provenance: [],
+      };
+
+      setState((prev) => {
+        const result = applyConfirmResponsibilityOwner({
+          state: prev,
+          ...input,
+        });
+        bag.peopleBullet = result.peopleBullet;
+        bag.itemId = result.item.id;
+        bag.kind = result.item.kind;
+        bag.epistemic = result.item.epistemic ?? "confirmed";
+        bag.lifecycle = result.item.lifecycle;
+        bag.supersedesId = result.item.supersedesId ?? null;
+        bag.meta = (result.item.meta as Record<string, unknown>) ?? {};
+        bag.provenance = result.item.provenance ?? [];
+        return result.state;
+      });
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId && bag.peopleBullet) {
+        void (async () => {
+          try {
+            const client = createBrowserSupabaseClient();
+            await persistKnowledgeBullet(
+              client,
+              meta.workspaceId!,
+              input.projectId,
+              "people",
+              bag.peopleBullet,
+              meta.userId,
+              {
+                id: bag.itemId,
+                kind: bag.kind,
+                epistemic: bag.epistemic,
+                lifecycle: bag.lifecycle,
+                supersedesId: bag.supersedesId,
+                meta: bag.meta,
+                provenance: bag.provenance,
+              },
+            );
+          } catch (err) {
+            console.error("[confirmResponsibilityOwner] persist failed", err);
+            setSaveStatus("error");
+            setSaveError(
+              err instanceof Error
+                ? err.message
+                : "Could not save confirmed owner",
+            );
+          }
+        })();
+      }
+    },
+    [],
+  );
+
   const addTimelineItem = useCallback(
     (
       projectId: string,
@@ -1732,6 +1822,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateKnowledgeSection,
       addKnowledgeBullet,
       replaceKnowledge,
+      confirmResponsibilityOwner,
       addTimelineItem,
       refreshCoaching,
       resetDemo,
@@ -1768,6 +1859,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateKnowledgeSection,
       addKnowledgeBullet,
       replaceKnowledge,
+      confirmResponsibilityOwner,
       addTimelineItem,
       refreshCoaching,
       resetDemo,

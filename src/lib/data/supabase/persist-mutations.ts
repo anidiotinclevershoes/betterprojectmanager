@@ -370,15 +370,33 @@ export async function persistKnowledgeBullet(
   section: string,
   body: string,
   userId: string | null,
+  meta?: {
+    id?: string | null;
+    kind?: string | null;
+    epistemic?: string | null;
+    lifecycle?: string | null;
+    supersedesId?: string | null;
+    meta?: Record<string, unknown> | null;
+    provenance?: unknown[] | null;
+  },
 ): Promise<void> {
-  const { error } = await client.from("knowledge_items").insert({
+  const row: Record<string, unknown> = {
     workspace_id: workspaceId,
     project_id: projectId,
     section,
     body,
     position: 0,
     created_by: userId,
-  });
+  };
+  if (meta?.id) row.id = meta.id;
+  if (meta?.kind != null) row.kind = meta.kind;
+  if (meta?.epistemic != null) row.epistemic = meta.epistemic;
+  if (meta?.lifecycle != null) row.lifecycle = meta.lifecycle;
+  if (meta?.supersedesId != null) row.supersedes_id = meta.supersedesId;
+  if (meta?.meta != null) row.meta = meta.meta;
+  if (meta?.provenance != null) row.provenance = meta.provenance;
+
+  const { error } = await client.from("knowledge_items").insert(row);
   if (error) throw new Error(`[supabase] create knowledge: ${error.message}`);
 
   if (section === "risks") {

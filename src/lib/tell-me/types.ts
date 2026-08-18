@@ -73,6 +73,16 @@ export type TellMeAnswer = {
   answer: string;
   confidence: TellMeAnswerConfidence;
   sources: TellMeSourceRef[];
+  /** Slice 1: optional supported implications (not auto-written to Knowledge). */
+  noticed?: string[];
+  /** Slice 1: material gaps for explicit UI confirmation. */
+  needsConfirmation?: Array<{
+    id: string;
+    kind: "unknown_owner" | "conflict" | "ambiguity";
+    summary: string;
+    scope?: string | null;
+    truthItemId?: string | null;
+  }>;
   scope: {
     mode: TellMeScopeMode;
     projectId: string | null;
@@ -96,6 +106,8 @@ export type TellMeAnswer = {
   provider: "openai" | "local";
   /** Eval/debug only — estimated prompt component tokens. */
   tokenBreakdown?: Record<string, number | null> | null;
+  /** Slice 1: whether canonical truth serialiser was used. */
+  usedCanonicalTruth?: boolean;
   contextStats: {
     projectsConsidered: number;
     recordsSelected: number;

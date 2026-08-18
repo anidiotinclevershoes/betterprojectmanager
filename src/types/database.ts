@@ -201,6 +201,12 @@ export type Database = {
           section: KnowledgeSection;
           body: string;
           position: number;
+          kind: string | null;
+          epistemic: string | null;
+          lifecycle: string;
+          supersedes_id: string | null;
+          meta: Json;
+          provenance: Json;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -212,6 +218,12 @@ export type Database = {
           section: KnowledgeSection;
           body: string;
           position?: number;
+          kind?: string | null;
+          epistemic?: string | null;
+          lifecycle?: string;
+          supersedes_id?: string | null;
+          meta?: Json;
+          provenance?: Json;
           created_by?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["knowledge_items"]["Insert"]>;
