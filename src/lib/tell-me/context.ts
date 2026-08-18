@@ -23,6 +23,8 @@ import type {
   ProjectIntelligenceSnapshot,
   TellMeSourceRef,
 } from "@/lib/tell-me/types";
+import { isCanonicalTruthEnabled } from "@/lib/canonical-truth/flag";
+import { serializeCanonicalTruth } from "@/lib/canonical-truth/serialize";
 
 export type TellMeContextBundle = {
   scope: ReturnType<typeof resolveTellMeScope>;
@@ -32,6 +34,9 @@ export type TellMeContextBundle = {
   approxChars: number;
   promptBlock: string;
   sourceCatalogue: TellMeSourceRef[];
+  /** Slice 1: true when canonical serialiser was used. */
+  usedCanonicalTruth?: boolean;
+  needsConfirmationHints?: import("@/lib/canonical-truth/types").NeedsConfirmationItem[];
 };
 
 /** Cap history/risks for current-state asks so superseded narrative is less dominant. */
@@ -151,12 +156,47 @@ export function buildTellMeContext(args: {
   question: string;
   selectedProjectId?: string | null;
   snapshot?: ProjectIntelligenceSnapshot | null;
+  /** Slice 1 — force canonical path on/off; default from env/eval flag. */
+  useCanonicalTruth?: boolean;
+  forEval?: boolean;
 }): TellMeContextBundle {
   const scope = resolveTellMeScope({
     question: args.question,
     selectedProjectId: args.selectedProjectId,
     state: args.state,
   });
+
+  const useCanonical = isCanonicalTruthEnabled({
+    forEval: args.forEval,
+    explicit: args.useCanonicalTruth,
+  });
+
+  if (useCanonical && scope.projectId) {
+    const canon = serializeCanonicalTruth({
+      state: args.state,
+      projectId: scope.projectId,
+      question: args.question,
+    });
+    const sourceCatalogue: TellMeSourceRef[] = canon.items.map((item) => ({
+      id: item.id,
+      kind: "knowledge" as const,
+      label: item.body.slice(0, 80),
+      projectId: item.projectId,
+      projectCode: scope.projectCode,
+      detail: `${item.kind}/${item.epistemic ?? "legacy"}`,
+    }));
+    return {
+      scope,
+      contexts: [],
+      snapshot: null,
+      recordsSelected: canon.items.length,
+      approxChars: canon.approxChars,
+      promptBlock: canon.promptBlock,
+      sourceCatalogue,
+      usedCanonicalTruth: true,
+      needsConfirmationHints: canon.needsConfirmationHints,
+    };
+  }
 
   const limits = tellMeContextLimitsForQuestion(args.question);
 
@@ -271,6 +311,8 @@ export function buildTellMeContext(args: {
     approxChars: promptBlock.length,
     promptBlock,
     sourceCatalogue,
+    usedCanonicalTruth: false,
+    needsConfirmationHints: [],
   };
 }
 

@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   handoffToCoach,
   useTellMeSession,
 } from "@/components/tell-me/TellMeSessionContext";
+import { ConfirmOwnerDialog } from "@/components/intelligence/ConfirmOwnerDialog";
 import { useMission } from "@/lib/store";
 
 const CONFIDENCE_LABEL: Record<string, string> = {
@@ -128,10 +129,44 @@ export function TellMeWorkspace() {
             {CONFIDENCE_LABEL[answer.confidence] ?? answer.confidence}
           </p>
           <div className="tell-me-answer-body">
+            <p className="tell-me-block-label">Answer</p>
             {answer.answer.split("\n").map((line, i) => (
               <p key={`${i}-${line.slice(0, 12)}`}>{line || "\u00a0"}</p>
             ))}
           </div>
+
+          {answer.noticed && answer.noticed.length > 0 ? (
+            <div className="tell-me-noticed">
+              <p className="tell-me-block-label">Lume noticed</p>
+              <ul>
+                {answer.noticed.map((n, i) => (
+                  <li key={`noticed-${i}`}>{n}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {answer.needsConfirmation && answer.needsConfirmation.length > 0 ? (
+            <div className="tell-me-needs-confirmation">
+              <p className="tell-me-block-label">Needs confirmation</p>
+              <ul>
+                {answer.needsConfirmation.map((nc) => (
+                  <li key={nc.id}>
+                    <span>{nc.summary}</span>
+                    {nc.kind === "unknown_owner" &&
+                    nc.scope &&
+                    answer.scope.projectId ? (
+                      <ConfirmOwnerInline
+                        projectId={answer.scope.projectId}
+                        scope={nc.scope}
+                        truthItemId={nc.truthItemId}
+                      />
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           {answer.sources.length ? (
             <div className="tell-me-sources">
@@ -250,6 +285,43 @@ export function TellMeWorkspace() {
         </div>
       )}
     </section>
+  );
+}
+
+function ConfirmOwnerInline({
+  projectId,
+  scope,
+  truthItemId,
+}: {
+  projectId: string;
+  scope: string;
+  truthItemId?: string | null;
+}) {
+  const [open, setOpen] = useState(false);
+  const { ask } = useTellMeSession();
+  if (!open) {
+    return (
+      <button
+        type="button"
+        className="primary-btn"
+        style={{ marginLeft: "0.5rem" }}
+        onClick={() => setOpen(true)}
+      >
+        Confirm owner
+      </button>
+    );
+  }
+  return (
+    <ConfirmOwnerDialog
+      projectId={projectId}
+      scope={scope}
+      truthItemId={truthItemId}
+      onCancel={() => setOpen(false)}
+      onDone={() => {
+        setOpen(false);
+        void ask(`Who owns ${scope}?`);
+      }}
+    />
   );
 }
 

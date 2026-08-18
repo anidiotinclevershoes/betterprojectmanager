@@ -230,6 +230,15 @@ export function createSupabaseRepositories(client: Client): LumeDataRepositories
           body: requireNonEmptyString(input.body, "body"),
           position: input.position ?? 0,
           created_by: input.createdBy ?? null,
+          ...(input.id ? { id: input.id } : {}),
+          ...(input.kind != null ? { kind: input.kind } : {}),
+          ...(input.epistemic != null ? { epistemic: input.epistemic } : {}),
+          ...(input.lifecycle != null ? { lifecycle: input.lifecycle } : {}),
+          ...(input.supersedesId != null
+            ? { supersedes_id: input.supersedesId }
+            : {}),
+          ...(input.meta != null ? { meta: input.meta } : {}),
+          ...(input.provenance != null ? { provenance: input.provenance } : {}),
         })
         .select("id")
         .single();

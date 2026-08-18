@@ -30,9 +30,11 @@
     "verify:trust-intelligence": "npx --yes tsx scripts/verify-trust-intelligence.ts",
     "verify:context-integrity": "npx --yes tsx scripts/verify-context-integrity.ts",
     "verify:model-tidy": "npx --yes tsx scripts/verify-model-tidy.ts",
+    "verify:canonical-truth": "npx --yes tsx scripts/verify-canonical-truth.ts",
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",
     "evals:pre-baseline": "npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
-    "evals:model-tidy": "LUME_EVAL_RUN_LABEL='Model Tidy - Same Model Control' npx --yes tsx scripts/run-pre-intelligence-baseline.ts"
+    "evals:model-tidy": "LUME_EVAL_RUN_LABEL='Model Tidy - Same Model Control' npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
+    "evals:canonical-slice1": "LUME_CANONICAL_TRUTH=1 LUME_EVAL_RUN_LABEL='Canonical Truth Slice 1' npx --yes tsx scripts/run-pre-intelligence-baseline.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

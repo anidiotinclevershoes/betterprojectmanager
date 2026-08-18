@@ -76,6 +76,7 @@ async function runLumeAnswer(args: {
       conversation: [],
       userDisplayName: "Evaluator",
       debugTokenBreakdown: true,
+      useCanonicalTruth: true,
     });
     return {
       system: "lume",

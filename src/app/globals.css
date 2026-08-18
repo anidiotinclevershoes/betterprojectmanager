@@ -7587,3 +7587,119 @@ body {
 .evals-empty {
   color: var(--text-muted);
 }
+
+/* Slice 1 — intelligent entity foundation (calm, sparse) */
+.lume-person-entity {
+  display: inline;
+  font-weight: 500;
+}
+.lume-person-at {
+  color: var(--accent-knowledge, #6b5ce7);
+}
+.lume-person-scope {
+  color: var(--text-secondary, #a7b0bf);
+  font-weight: 400;
+}
+.lume-epistemic-chip {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  background: transparent;
+}
+.lume-epistemic-chip.is-unknown,
+.lume-epistemic-chip.is-conflicting {
+  color: var(--warning, #e4a23b);
+  border-color: rgba(228, 162, 59, 0.35);
+}
+.lume-epistemic-chip.is-informal,
+.lume-epistemic-chip.is-suggested {
+  color: var(--text-muted);
+}
+.lume-evidence-btn {
+  margin-left: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.lume-evidence-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.lume-confirm-owner {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: var(--bg-surface-raised, #1a2230);
+}
+.lume-confirm-owner-title {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+}
+.lume-confirm-owner-hint,
+.lume-confirm-owner-preview {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.lume-confirm-owner-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+.lume-confirm-owner-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.tell-me-block-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.tell-me-noticed,
+.tell-me-needs-confirmation {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.tell-me-noticed ul,
+.tell-me-needs-confirmation ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.knowledge-structured-panel {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.knowledge-structured-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.knowledge-structured-panel ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+.knowledge-structured-panel li {
+  margin-bottom: 0.35rem;
+}

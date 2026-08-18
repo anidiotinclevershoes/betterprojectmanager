@@ -53,6 +53,14 @@ export type CreateKnowledgeInput = {
   body: string;
   position?: number;
   createdBy?: string | null;
+  /** Slice 1 canonical metadata (optional). */
+  kind?: string | null;
+  epistemic?: string | null;
+  lifecycle?: string | null;
+  supersedesId?: string | null;
+  meta?: Record<string, unknown> | null;
+  provenance?: unknown[] | null;
+  id?: string | null;
 };
 
 export type CreateCaptureSessionInput = {

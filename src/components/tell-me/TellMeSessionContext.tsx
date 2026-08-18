@@ -19,6 +19,7 @@ import {
   buildPersonalisedHint,
   buildSuggestedQuestions,
 } from "@/lib/tell-me/suggestions";
+import { buildCanonicalSuggestions } from "@/lib/canonical-truth/suggestions";
 import type {
   ProjectIntelligenceSnapshot,
   TellMeAnswer,
@@ -137,15 +138,33 @@ export function TellMeSessionProvider({
 
   const snapshot = projectId ? snapshots[projectId] ?? null : null;
 
-  const suggestions = useMemo(
-    () =>
-      buildSuggestedQuestions({
-        state,
-        projectId,
-        userDisplayName,
-      }),
-    [state, projectId, userDisplayName],
-  );
+  const suggestions = useMemo(() => {
+    const legacy = buildSuggestedQuestions({
+      state,
+      projectId,
+      userDisplayName,
+      limit: 6,
+    });
+    const canonical = buildCanonicalSuggestions({
+      state,
+      projectId,
+      limit: 6,
+    });
+    // Prefer canonical Knowledge-driven suggestions first; fill with legacy.
+    const merged: TellMeSuggestedQuestion[] = [];
+    for (const s of [...canonical, ...legacy]) {
+      if (merged.length >= 6) break;
+      if (
+        merged.some(
+          (m) => m.question.toLowerCase() === s.question.toLowerCase(),
+        )
+      ) {
+        continue;
+      }
+      merged.push(s);
+    }
+    return merged;
+  }, [state, projectId, userDisplayName]);
 
   const personalHint = useMemo(
     () =>

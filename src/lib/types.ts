@@ -242,6 +242,11 @@ export interface ProjectKnowledge {
   isSeeded?: boolean;
   updatedAt: string;
   sections: Record<KnowledgeSectionId, string[]>;
+  /**
+   * Slice 1+: structured canonical truth overlay (responsibilities, epistemic, etc.).
+   * Legacy section strings remain the display/capture body store.
+   */
+  structured?: import("./canonical-truth/types").CanonicalTruthItem[];
 }
 
 export interface CaptureResult {

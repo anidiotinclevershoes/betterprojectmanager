@@ -23,6 +23,8 @@ import type {
   TellMeConversationTurn,
   TellMeSourceRef,
 } from "@/lib/tell-me/types";
+import { findConfirmedOwner } from "@/lib/canonical-truth/confirm-responsibility";
+import { isCanonicalTruthEnabled } from "@/lib/canonical-truth/flag";
 
 export const TELL_ME_SYSTEM = `You are Tell Me for Lume — a project memory recall assistant for project managers.
 
@@ -52,6 +54,36 @@ Rules:
 - Do not expose chain-of-thought.
 - Cite sourceIds from the evidence ids provided in brackets like [id].`;
 
+/** Slice 1 canonical path — same trust rules + structured Answer / noticed / needsConfirmation. */
+export const TELL_ME_SYSTEM_CANONICAL = `You are Tell Me for Lume — read-only project recall over CANONICAL PROJECT TRUTH.
+
+You are READ-ONLY. Never create, update, or delete project state.
+Never invent approvals, owners, dates, or decisions that are not evidenced.
+Use only the canonical facts provided. Epistemic tags travel with facts (informal ≠ confirmed; legacy = unknown certainty).
+
+Response JSON schema:
+{
+  "answer": string,
+  "noticed": string[] | null,
+  "needsConfirmation": Array<{ "id": string, "kind": "unknown_owner" | "conflict" | "ambiguity", "summary": string, "scope": string | null }> | null,
+  "confidence": "direct_confirmation" | "related_context" | "not_found" | "inference",
+  "sourceIds": string[],
+  "capturePrefill": string | null
+}
+
+Rules:
+- "answer" is required: direct, narrow, grounded.
+- "noticed" is optional: useful supported implications/connections. Interpretation only — not new project truth.
+- "needsConfirmation" is optional: only material gaps. Prefer the KNOWN GAPS list when present. Do not invent owners to fill gaps.
+- Ownership: only state an owner when a responsibility fact explicitly assigns that exact scope (@Person → scope). Do not broaden (UX ≠ security).
+- Current vs history: MODE:current excludes superseded; MODE:historical may include it.
+- Epistemic: informal/suggested/unknown/legacy are not official confirmation.
+- Preserve qualifications (only / not / unconfirmed / informal).
+- Recent conversation is for continuity and reference resolution only. It is not project evidence. Previous assistant answers may be wrong and must not override or establish owners, dates, decisions, or approvals. Project records remain authoritative.
+- For advisory "what should I do" questions, give factual context only and set confidence accordingly; the product may hand off to Coach.
+- Do not expose chain-of-thought.
+- Cite sourceIds from the evidence ids provided in brackets like [id].`;
+
 /** Exported for verification — keep in sync with TELL_ME_SYSTEM above. */
 export const TELL_ME_CONVERSATION_AUTHORITY_MARKER =
   "Recent conversation is for continuity and reference resolution only";
@@ -65,14 +97,28 @@ export async function answerTellMeQuestion(args: {
   userDisplayName?: string | null;
   /** Eval/debug only — estimate prompt component tokens (tiktoken). */
   debugTokenBreakdown?: boolean;
+  /** Slice 1: force canonical truth path. */
+  useCanonicalTruth?: boolean;
 }): Promise<TellMeAnswer> {
   const question = args.question.trim();
+  const forEval = Boolean(args.debugTokenBreakdown);
+  const useCanonical = isCanonicalTruthEnabled({
+    forEval,
+    explicit: args.useCanonicalTruth,
+  });
+
   const bundle = buildTellMeContext({
     state: args.state,
     question,
     selectedProjectId: args.selectedProjectId,
     snapshot: args.snapshot,
+    useCanonicalTruth: useCanonical,
+    forEval,
   });
+
+  const systemPrompt = bundle.usedCanonicalTruth
+    ? TELL_ME_SYSTEM_CANONICAL
+    : TELL_ME_SYSTEM;
 
   const freshness = assessFreshness({
     state: args.state,
@@ -87,6 +133,8 @@ export async function answerTellMeQuestion(args: {
         "Lume doesn’t know much about this project yet.\n\nUse Capture to tell me what’s happening, and I’ll be able to answer more useful questions.",
       confidence: "not_found",
       sources: [],
+      noticed: [],
+      needsConfirmation: [],
       scope: {
         mode: bundle.scope.mode,
         projectId: bundle.scope.projectId,
@@ -102,6 +150,7 @@ export async function answerTellMeQuestion(args: {
       model: null,
       modelRequested: null,
       tokenBreakdown: null,
+      usedCanonicalTruth: Boolean(bundle.usedCanonicalTruth),
       provider: "local",
       contextStats: {
         projectsConsidered: bundle.scope.projectIdsForDeepContext.length,
@@ -119,6 +168,60 @@ export async function answerTellMeQuestion(args: {
     Boolean(bundle.snapshot) &&
     freshness.isStale &&
     (latestQuestion || freshness.changeCountHint >= 2);
+
+  // Deterministic owner from confirmed structured responsibility.
+  if (questionLooksOwnership(question) && bundle.scope.projectId) {
+    const knowledge = args.state.knowledge.find(
+      (k) => k.projectId === bundle.scope.projectId,
+    );
+    const tokens = ownershipTopicTokens(question);
+    for (const token of tokens) {
+      const hit = findConfirmedOwner(knowledge, token);
+      if (hit) {
+        return {
+          answer: `${hit.personName} owns ${hit.scope}.`,
+          confidence: "direct_confirmation",
+          sources: [
+            {
+              id: hit.item.id,
+              kind: "knowledge",
+              label: hit.item.body,
+              projectId: bundle.scope.projectId,
+              projectCode: bundle.scope.projectCode,
+              detail: "confirmed responsibility",
+            },
+          ],
+          noticed: [],
+          needsConfirmation: [],
+          scope: {
+            mode: bundle.scope.mode,
+            projectId: bundle.scope.projectId,
+            projectCode: bundle.scope.projectCode,
+            projectName: bundle.scope.projectName,
+          },
+          freshness,
+          refreshRecommended: false,
+          refreshReason: null,
+          coachHandoff: false,
+          capturePrefill: null,
+          usage: null,
+          model: null,
+          modelRequested: null,
+          tokenBreakdown: null,
+          usedCanonicalTruth: Boolean(bundle.usedCanonicalTruth),
+          provider: "local",
+          contextStats: {
+            projectsConsidered: 1,
+            recordsSelected: bundle.recordsSelected,
+            snapshotUsed: false,
+            knowledgeItems: 1,
+            structuredItems: 1,
+            approxChars: bundle.approxChars,
+          },
+        };
+      }
+    }
+  }
 
   // Structured fast path for simple open-risks style questions (still may use AI for tone when configured)
   if (!isOpenAIConfigured()) {
@@ -166,7 +269,7 @@ export async function answerTellMeQuestion(args: {
       temperature: 0.2,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: TELL_ME_SYSTEM },
+        { role: "system", content: systemPrompt },
         { role: "user", content: userContent },
       ],
     }),
@@ -193,6 +296,8 @@ export async function answerTellMeQuestion(args: {
 
   let parsed: {
     answer?: string;
+    noticed?: string[] | null;
+    needsConfirmation?: TellMeAnswer["needsConfirmation"];
     confidence?: TellMeAnswerConfidence;
     sourceIds?: string[];
     capturePrefill?: string | null;
@@ -233,7 +338,7 @@ export async function answerTellMeQuestion(args: {
       "@/lib/evals/token-breakdown"
     );
     tokenBreakdown = estimateLumeTokenBreakdown({
-      systemPrompt: TELL_ME_SYSTEM,
+      systemPrompt,
       promptBlock: bundle.promptBlock,
       conversationBlock,
       freshnessBlock,
@@ -241,10 +346,23 @@ export async function answerTellMeQuestion(args: {
     });
   }
 
+  const noticed = Array.isArray(parsed.noticed)
+    ? parsed.noticed
+        .filter((s) => typeof s === "string" && s.trim())
+        .map((s) => s.trim())
+    : [];
+
+  const needsConfirmation = mergeNeedsConfirmation(
+    Array.isArray(parsed.needsConfirmation) ? parsed.needsConfirmation : [],
+    bundle.needsConfirmationHints ?? [],
+  );
+
   return {
     answer: answerText,
     confidence: normaliseConfidence(parsed.confidence),
     sources,
+    noticed,
+    needsConfirmation,
     scope: {
       mode: bundle.scope.mode,
       projectId: bundle.scope.projectId,
@@ -266,15 +384,46 @@ export async function answerTellMeQuestion(args: {
     modelRequested,
     provider: "openai",
     tokenBreakdown: tokenBreakdown ?? null,
+    usedCanonicalTruth: Boolean(bundle.usedCanonicalTruth),
     contextStats: {
       projectsConsidered: bundle.scope.projectIdsForDeepContext.length || 1,
       recordsSelected: bundle.recordsSelected,
       snapshotUsed: Boolean(bundle.snapshot),
-      knowledgeItems,
-      structuredItems,
+      knowledgeItems: bundle.usedCanonicalTruth
+        ? bundle.recordsSelected
+        : knowledgeItems,
+      structuredItems: bundle.usedCanonicalTruth
+        ? bundle.recordsSelected
+        : structuredItems,
       approxChars: bundle.approxChars,
     },
   };
+}
+
+function mergeNeedsConfirmation(
+  fromModel: NonNullable<TellMeAnswer["needsConfirmation"]>,
+  hints: NonNullable<TellMeAnswer["needsConfirmation"]>,
+): NonNullable<TellMeAnswer["needsConfirmation"]> {
+  const out = [...hints];
+  for (const item of fromModel) {
+    if (!item?.summary) continue;
+    const key = `${item.kind}|${(item.scope ?? item.summary).toLowerCase()}`;
+    if (
+      out.some(
+        (o) => `${o.kind}|${(o.scope ?? o.summary).toLowerCase()}` === key,
+      )
+    ) {
+      continue;
+    }
+    out.push({
+      id: item.id || `nc-model-${out.length}`,
+      kind: item.kind || "ambiguity",
+      summary: item.summary,
+      scope: item.scope ?? null,
+      truthItemId: item.truthItemId ?? null,
+    });
+  }
+  return out;
 }
 
 function normaliseConfidence(
@@ -400,6 +549,26 @@ function localGroundedAnswer(args: {
     }
   }
 
+  const needsConfirmation = [
+    ...(args.bundle.needsConfirmationHints ?? []),
+  ];
+  if (
+    questionLooksOwnership(args.question) &&
+    confidence === "not_found" &&
+    !needsConfirmation.length
+  ) {
+    const tokens = ownershipTopicTokens(args.question);
+    if (tokens.length) {
+      needsConfirmation.push({
+        id: `nc-local-${tokens.join("-")}`,
+        kind: "unknown_owner",
+        summary: `${tokens.join(" ")} owner is not recorded.`,
+        scope: tokens.join(" "),
+        truthItemId: null,
+      });
+    }
+  }
+
   if (!answer && /risk/.test(q)) {
     if (!risks.length && !knowledge.some((k) => /risk/i.test(k.title))) {
       answer = "I can’t find open risks recorded for this scope.";
@@ -492,6 +661,8 @@ function localGroundedAnswer(args: {
       confidence === "not_found"
         ? []
         : filterRelevantSources(sources, args.question).slice(0, 6),
+    noticed: [],
+    needsConfirmation,
     scope: {
       mode: args.bundle.scope.mode,
       projectId: args.bundle.scope.projectId,
@@ -509,6 +680,7 @@ function localGroundedAnswer(args: {
     model: null,
     modelRequested: null,
     tokenBreakdown: null,
+    usedCanonicalTruth: Boolean(args.bundle.usedCanonicalTruth),
     provider: "local",
     contextStats: {
       projectsConsidered: args.bundle.scope.projectIdsForDeepContext.length || 1,
