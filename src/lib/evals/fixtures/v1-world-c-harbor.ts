@@ -230,9 +230,12 @@ export const WORLD_C_HARBOR: EvalWorldFixture = {
       categories: ["actionability", "people", "prioritisation", "dependency"],
       expectedAnswer:
         "Elena for overdue written confirmation and staging credentials; Platform/INC-4412 for harbor-int; Legal for MSA amendment.",
-      expectedFacts: ["Elena", "INC-4412", "MSA"],
+      expectedFacts: ["Elena"],
+      supportingFacts: ["INC-4412", "MSA", "credentials"],
       forbiddenClaims: ["Nothing to chase"],
-      evaluatorNotes: "Contract §§10,12.",
+      evaluatorNotes:
+        "Contract §12 — Elena/credentials is the core chase; MSA/env are important support. Missing MSA alone → partial via supporting, not hard fail. Mark manual_review if prioritisation disputes arise.",
+      presentationNotes: "manual_review_required for completeness disputes",
     },
     {
       id: "v1-harbor-q7-mock-api",

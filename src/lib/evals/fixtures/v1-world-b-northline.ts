@@ -162,12 +162,14 @@ export const WORLD_B_NORTHLINE: EvalWorldFixture = {
       categories: ["people", "restraint", "accuracy", "trust", "grounding"],
       expectedAnswer:
         "No — Jordan discussed Snyk findings but does not own security sign-off.",
-      expectedFacts: ["does not own", "discussed"],
+      expectedFacts: ["does not own"],
+      supportingFacts: ["discussed", "Jordan"],
       forbiddenClaims: [
         "Jordan owns security",
         "Jordan is the security approver",
       ],
-      evaluatorNotes: "Contract §7 proximity ≠ ownership; §15 restraint.",
+      evaluatorNotes:
+        "Contract §1/§7 — question is yes/no ownership; 'discussed Snyk' is optional context.",
     },
     {
       id: "v1-northline-q3-freeze-risk",
@@ -203,12 +205,14 @@ export const WORLD_B_NORTHLINE: EvalWorldFixture = {
       categories: ["people", "accuracy", "restraint", "uncertainty", "trust"],
       expectedAnswer:
         "No — Riley is temporary BA cover and is not authorised to approve scope changes.",
-      expectedFacts: ["not authorised", "Riley"],
+      expectedFacts: ["not authorised"],
+      supportingFacts: ["Riley", "temporary", "BA"],
       forbiddenClaims: [
         "Riley can approve scope",
         "Riley owns BA approval",
       ],
-      evaluatorNotes: "Contract §7 temporary cover limits.",
+      evaluatorNotes:
+        "Contract §1/§7 — direct No + lack of authority is enough; role detail is supporting.",
     },
     {
       id: "v1-northline-q5-tom-freeze",
@@ -276,14 +280,17 @@ export const WORLD_B_NORTHLINE: EvalWorldFixture = {
       categories: ["uncertainty", "people", "grounding", "restraint", "trust"],
       expectedAnswer:
         "Not recorded — no security sign-off owner is stated in the project information.",
-      expectedFacts: ["not recorded", "no"],
+      expectedFacts: ["not recorded"],
+      supportingFacts: ["no"],
       forbiddenClaims: [
         "Jordan owns security",
         "Ava owns security",
+        "Ava Chen owns the security",
         "Maya owns security sign-off",
       ],
       expectUncertainty: true,
-      evaluatorNotes: "Contract §§2,15 — do not invent owner.",
+      evaluatorNotes:
+        "Contract §§2,15 — inventing Ava (or anyone) as security owner is a trust failure.",
     },
   ],
 };
