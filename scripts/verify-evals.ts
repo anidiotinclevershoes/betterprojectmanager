@@ -8,7 +8,7 @@ import {
   isEmailAllowedForEvals,
   parseEvalAllowedEmails,
 } from "../src/lib/evals/access";
-import { getActiveBenchmark, listAllCases } from "../src/lib/evals/fixtures";
+import { getActiveBenchmark, listAllCases, getSampleBenchmark, getOfficialBenchmark, listBenchmarks, summarizeBenchmark } from "../src/lib/evals/fixtures";
 import { buildMissionStateForStage } from "../src/lib/evals/build-state";
 import { scoreCaseAgainstAnswer } from "../src/lib/evals/scoring";
 import {
@@ -123,18 +123,46 @@ async function main() {
     assert.match(layout, /LUME_EVAL_ALLOWED_EMAILS/);
   });
 
-  await check("sample fixture has stable case ids + stages", () => {
-    const b = getActiveBenchmark();
-    assert.ok(b.version);
-    assert.ok(b.worlds.length >= 1);
+  await check("official V1 benchmark is default active suite", () => {
+    const active = getActiveBenchmark();
+    assert.equal(active.version, "lume-intelligence-benchmark-v1");
+    assert.equal(active.kind, "official");
+    assert.ok(active.worlds.length >= 5);
     const cases = listAllCases();
-    assert.ok(cases.length >= 5);
+    assert.ok(cases.length >= 40 && cases.length <= 55);
     const ids = new Set(cases.map((c) => c.id));
     assert.equal(ids.size, cases.length);
+    const summary = summarizeBenchmark(active);
+    assert.ok(summary.multiEvidenceCases >= Math.floor(cases.length * 0.25));
+    assert.ok(summary.uncertaintyCases >= 8);
+    assert.ok(summary.criticalCases >= 5);
   });
 
-  await check("stage state only includes captures up to stage", () => {
-    const world = getActiveBenchmark().worlds[0]!;
+  await check("sample harness world remains separate", () => {
+    const sample = getSampleBenchmark();
+    assert.equal(sample.kind, "sample");
+    assert.equal(sample.version, "sample-0.1.0");
+    const sampleCases = listAllCases({
+      benchmarkVersion: "sample-0.1.0",
+    });
+    assert.equal(sampleCases.length, 5);
+    const official = getOfficialBenchmark();
+    assert.ok(!official.worlds.some((w) => w.id === "world-sample-atlas-cutover"));
+    assert.ok(listBenchmarks().length >= 2);
+  });
+
+  await check("intelligence contract file is present verbatim", () => {
+    const contract = path.join(root, "docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md");
+    assert.equal(fs.existsSync(contract), true);
+    const src = fs.readFileSync(contract, "utf8");
+    assert.match(src, /Lume Intelligence Contract v0\.2/);
+    assert.match(src, /Think broadly\. Answer narrowly\./);
+    assert.match(src, /Trust Before Cleverness/);
+    assert.match(src, /Generic GPT Comparison/);
+  });
+
+  await check("sample fixture stages remain deterministic", () => {
+    const world = getSampleBenchmark().worlds[0]!;
     const early = buildMissionStateForStage(world, "stage-kickoff");
     const late = buildMissionStateForStage(world, "stage-risk");
     assert.ok(early.captures.length < late.captures.length);
@@ -142,10 +170,23 @@ async function main() {
     assert.doesNotMatch(early.contextDocument, /Nina is drafting/);
   });
 
+  await check("V1 meridian stage supersession is deterministic", () => {
+    const world = getOfficialBenchmark().worlds.find(
+      (w) => w.id === "world-v1-meridian-payments",
+    )!;
+    const early = buildMissionStateForStage(world, "mer-stage-kickoff");
+    const late = buildMissionStateForStage(world, "mer-stage-pre-cab");
+    assert.match(early.contextDocument, /19 August/);
+    assert.match(late.contextDocument, /26 August/);
+    assert.doesNotMatch(early.contextDocument, /One Snyk critical still open/);
+  });
+
   await check("trust failure + critical failure detection", () => {
-    const cases = listAllCases();
-    const security = cases.find((c) => c.id.includes("security"))!;
-    const monday = cases.find((c) => c.id.includes("dev-monday"))!;
+    const sampleCases = listAllCases({
+      benchmarkVersion: "sample-0.1.0",
+    });
+    const security = sampleCases.find((c) => c.id.includes("security"))!;
+    const monday = sampleCases.find((c) => c.id.includes("dev-monday"))!;
 
     const badSecurity = scoreCaseAgainstAnswer(
       security,
@@ -171,6 +212,24 @@ async function main() {
       goodMonday.hardFailures.includes("critical_intelligence_failure"),
       false,
     );
+  });
+
+  await check("V1 critical / restraint scoring smoke", () => {
+    const cases = listAllCases({
+      benchmarkVersion: "lume-intelligence-benchmark-v1",
+    });
+    const security = cases.find((c) => c.id === "v1-meridian-q3-security-approved")!;
+    const uat = cases.find((c) => c.id === "v1-meridian-q4-uat-monday")!;
+    const invent = scoreCaseAgainstAnswer(
+      security,
+      fakeAnswer("Security has approved the Meridian release."),
+    );
+    assert.ok(invent.hardFailures.includes("trust_failure"));
+    const badUat = scoreCaseAgainstAnswer(
+      uat,
+      fakeAnswer("Yes, UAT can start Monday."),
+    );
+    assert.ok(badUat.hardFailures.includes("critical_intelligence_failure"));
   });
 
   await check("immutable run persistence (filesystem backend)", async () => {

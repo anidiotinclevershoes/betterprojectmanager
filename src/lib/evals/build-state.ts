@@ -21,6 +21,34 @@ function emptyState(): MissionState {
   };
 }
 
+/** Extract "Name — role…" style people lines from knownTruth / capture text. */
+function extractPeopleLines(texts: string[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const text of texts) {
+    // "Alice owns X" / "Alice — …" / "Alice is away"
+    const nameOwns = text.match(
+      /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:owns|is\s+away|returns|drafting|covering|approves|promised|confirmed)/,
+    );
+    if (nameOwns) {
+      const name = nameOwns[1]!;
+      if (!seen.has(name)) {
+        seen.add(name);
+        out.push(`${name} — mentioned in project records`);
+      }
+    }
+    const dash = text.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+[—-]/);
+    if (dash) {
+      const name = dash[1]!;
+      if (!seen.has(name)) {
+        seen.add(name);
+        out.push(text.slice(0, 240));
+      }
+    }
+  }
+  return out;
+}
+
 export function capturesForStage(
   world: EvalWorldFixture,
   stage: EvalStage,
@@ -69,30 +97,31 @@ export function buildMissionStateForStage(
   for (const truth of stage.knownTruth) {
     knowledgeBullets.now.push(truth);
   }
+  const truthBag: string[] = [...stage.knownTruth];
   for (const cap of captures) {
     for (const t of cap.knownTruth ?? []) {
       if (!knowledgeBullets.now.includes(t)) knowledgeBullets.now.push(t);
+      truthBag.push(t);
     }
-    // Heuristic bucket from capture text for people/dates/risks (fixture-assisted)
-    if (/Sarah|Marcus|Nina/i.test(cap.content)) {
-      if (/Sarah/.test(cap.content) && !knowledgeBullets.people.some((p) => /Sarah/.test(p))) {
-        knowledgeBullets.people.push(
-          "Sarah — owns UX sign-off; availability may be constrained in later captures",
-        );
-      }
-      if (/Marcus/.test(cap.content) && !knowledgeBullets.people.some((p) => /Marcus/.test(p))) {
-        knowledgeBullets.people.push("Marcus — owns release notes");
-      }
-      if (/Nina/.test(cap.content) && !knowledgeBullets.people.some((p) => /Nina/.test(p))) {
-        knowledgeBullets.people.push("Nina — drafting CDN rollback plan");
-      }
-    }
-    if (/risk|incomplete|away|must not/i.test(cap.content)) {
+    if (
+      /risk|incomplete|away|must not|blocked|outstanding|conflict|unconfirmed|no .+ approval/i.test(
+        cap.content,
+      )
+    ) {
       knowledgeBullets.risks.push(cap.content.slice(0, 240));
     }
+    if (
+      /waiting|promised|chase|await|due|outstanding|requested/i.test(cap.content)
+    ) {
+      knowledgeBullets.openLoops.push(cap.content.slice(0, 240));
+    }
   }
+  knowledgeBullets.people = extractPeopleLines([
+    ...truthBag,
+    ...captures.map((c) => c.content),
+  ]);
 
-  const memories = captures.map((cap, i) => ({
+  const memories = captures.map((cap) => ({
     id: `eval-mem-${cap.id}`,
     type: "conversation" as const,
     projectId,

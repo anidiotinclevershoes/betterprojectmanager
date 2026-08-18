@@ -111,9 +111,14 @@ export type EvalWorldFixture = {
   cases: EvalCaseFixture[];
 };
 
+export type EvalBenchmarkKind = "sample" | "official";
+
 export type EvalBenchmarkManifest = {
+  /** Stable version id, e.g. lume-intelligence-benchmark-v1 */
   version: string;
   label: string;
+  /** sample = harness regression only; official = scored intelligence suite */
+  kind: EvalBenchmarkKind;
   worlds: EvalWorldFixture[];
 };
 
