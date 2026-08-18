@@ -27,6 +27,7 @@
     "verify:hydrate-session": "npx --yes tsx scripts/verify-hydrate-session.ts",
     "verify:evals": "npx --yes tsx scripts/verify-evals.ts",
     "verify:eval-calibration": "npx --yes tsx scripts/verify-eval-calibration.ts",
+    "verify:trust-intelligence": "npx --yes tsx scripts/verify-trust-intelligence.ts",
     "evals:pre-baseline": "npx --yes tsx scripts/run-pre-intelligence-baseline.ts"
   },
   "dependencies": {
