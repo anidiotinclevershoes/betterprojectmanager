@@ -20,8 +20,10 @@ export default function OverviewPage() {
   const [customiseOpen, setCustomiseOpen] = useState(false);
 
   const zeroProjects = hydrated && state.projects.length === 0;
+  // Only replace empty onboarding when load/save failed — never hide a
+  // successfully hydrated workspace because a later mutation errored.
   const hydrateProblem =
-    hydrated &&
+    zeroProjects &&
     persistenceMode === "supabase" &&
     saveStatus === "error" &&
     Boolean(saveError);
