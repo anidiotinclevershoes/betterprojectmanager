@@ -42,7 +42,7 @@ A green benchmark does **not** prove product safety. A deterministic regression 
 | Knowledge add | PARTIAL | Capture remember + live; reconcile inserts characterised |
 | Knowledge edit | STRONG | `verify-knowledge-reconcile` + `verify-project-truth-safety` |
 | Knowledge delete/reconcile | STRONG | Same |
-| Knowledge stable identity | PARTIAL | Wording edits preserve id; unrelated same-index replace = known gap (1A.1) |
+| Knowledge stable identity | COVERED | Exact body + stable id + unique wording-edit; unrelated same-index → insert+delete (Slice 1A.1) |
 | provenance/metadata preservation | STRONG | Reconcile + remap tests |
 | Capture input | PARTIAL | Context/prompt verifies |
 | Capture analysis boundary | PARTIAL→STRONG | Findings/golden + new trust-boundary characterisation |
@@ -70,7 +70,7 @@ A green benchmark does **not** prove product safety. A deterministic regression 
 3. Suggestion accept/dismiss memory-only  
 4. Invisible save failures  
 5. Live hydrate/edit round-trip without credentials in CI  
-6. Slice 1A.1 unrelated replacement identity  
+6. Slice 1A.1 unrelated replacement identity — covered by `verify:knowledge-reconcile` / `verify:project-truth-safety`  
 
 ---
 
