@@ -17,8 +17,7 @@ This folder contains the canonical product, UI, development and evaluation refer
    The anti-whack-a-mole development process, workstreams, current benchmark interpretation, longitudinal Lume-vs-GPT evaluation strategy, success measures and stopping/reassessment rules.
 
 4. **`LUME_V1_UI_BASELINE_OCEAN.png`**  
-   The approved Knowledge Centre visual baseline. Treat this image as the visual parent for other V1 screens. Functional requirements should be applied as controlled deltas rather than used to redesign the visual language.  
-   **Status:** Not yet committed in this pack. Add the approved Ocean mockup binary at this exact path when available; until then, follow `LUME_V1_UI_BASELINE_OCEAN.md` and do not invent a substitute visual source of truth.
+   The approved Knowledge Centre visual baseline. Treat this image as the visual parent for other V1 screens. Functional requirements should be applied as controlled deltas rather than used to redesign the visual language.
 
 ## Relationship to other docs
 
