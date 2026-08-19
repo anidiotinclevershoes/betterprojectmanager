@@ -7541,6 +7541,29 @@ body {
   margin-top: 8px;
 }
 
+.evals-case-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 8px;
+}
+
+.evals-case-toolbar .evals-check {
+  margin-top: 0;
+}
+
+.evals-expand-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.evals-cases {
+  display: contents;
+}
+
 .evals-compare-pick {
   display: grid;
   grid-template-columns: 1fr 1fr auto;
