@@ -6,13 +6,21 @@ import { useFrameExpand } from "@/components/workspace/FrameExpandContext";
 import type { FrameSize } from "@/lib/workspace/layout";
 import { itemLimitFor } from "@/lib/workspace/packing";
 import { useMission } from "@/lib/store";
+import {
+  isClosedRiskStatus,
+  isOpenRiskStatus,
+  isResolvedProse,
+  stripResolvedPrefix,
+} from "@/lib/risks/lifecycle";
 
 export type RiskRow = {
   id: string;
   title: string;
   status: "open" | "resolved";
   projectId: string;
-  source: "knowledge" | "recommendation";
+  source: "risk" | "knowledge" | "recommendation";
+  /** Present when source === "risk" — stable risks.id */
+  riskId?: string;
 };
 
 export function RiskFrame({
@@ -24,8 +32,13 @@ export function RiskFrame({
   size?: FrameSize | string;
   frameId?: string;
 }) {
-  const { state, addKnowledgeBullet, replaceKnowledge, setRecommendationStatus } =
-    useMission();
+  const {
+    state,
+    addKnowledgeBullet,
+    setRiskStatus,
+    setKnowledgeOnlyRiskResolved,
+    setRecommendationStatus,
+  } = useMission();
   const { isExpanded, expand, collapse } = useFrameExpand();
   const expanded = isExpanded(frameId);
   const [draft, setDraft] = useState("");
@@ -34,25 +47,58 @@ export function RiskFrame({
 
   const risks = useMemo(() => {
     const rows: RiskRow[] = [];
-    const knowledgeList = state.knowledge ?? [];
-    for (const k of knowledgeList) {
+    const domainRisks = state.risks ?? [];
+    const domainTitlesByProject = new Map<string, Set<string>>();
+
+    for (const risk of domainRisks) {
+      if (projectId && risk.projectId !== projectId) continue;
+      const key = stripResolvedPrefix(risk.title).toLowerCase();
+      if (!domainTitlesByProject.has(risk.projectId)) {
+        domainTitlesByProject.set(risk.projectId, new Set());
+      }
+      domainTitlesByProject.get(risk.projectId)!.add(key);
+
+      const closed = isClosedRiskStatus(risk.status);
+      // Hide closed unless expanded (matches prior open-first frame behaviour).
+      if (closed && !expanded) continue;
+      if (!closed && !isOpenRiskStatus(risk.status)) continue;
+
+      rows.push({
+        id: risk.id,
+        riskId: risk.id,
+        title: risk.title,
+        status: closed ? "resolved" : "open",
+        projectId: risk.projectId,
+        source: "risk",
+      });
+    }
+
+    // Legacy Knowledge-only bullets (no matching risks-domain row).
+    for (const k of state.knowledge ?? []) {
       if (projectId && k.projectId !== projectId) continue;
+      const claimed = domainTitlesByProject.get(k.projectId) ?? new Set();
       for (const [index, title] of (k.sections.risks ?? []).entries()) {
-        const resolved = /^\s*\[resolved\]/i.test(title);
+        const cleaned = stripResolvedPrefix(title);
+        if (!cleaned) continue;
+        if (claimed.has(cleaned.toLowerCase())) continue;
+        const resolved = isResolvedProse(title);
+        if (resolved && !expanded) continue;
         rows.push({
           id: `know-risk-${k.projectId}-${index}`,
-          title: title.replace(/^\s*\[resolved\]\s*/i, "").trim(),
+          title: cleaned,
           status: resolved ? "resolved" : "open",
           projectId: k.projectId,
           source: "knowledge",
         });
       }
     }
+
     for (const rec of state.recommendations ?? []) {
       if (rec.kind !== "risk") continue;
       if (!rec.projectId) continue;
       if (projectId && rec.projectId !== projectId) continue;
       if (rec.status === "done" || rec.status === "dismissed") continue;
+      // Do not treat recommendations as maintained Risks.
       rows.push({
         id: rec.id,
         title: rec.title,
@@ -61,11 +107,12 @@ export function RiskFrame({
         source: "recommendation",
       });
     }
+
     return rows.sort((a, b) => {
       if (a.status !== b.status) return a.status === "open" ? -1 : 1;
       return a.title.localeCompare(b.title);
     });
-  }, [state.knowledge, state.recommendations, projectId]);
+  }, [state.knowledge, state.risks, state.recommendations, projectId, expanded]);
 
   const openRisks = risks.filter((r) => r.status === "open");
   const visible = expanded ? risks : openRisks.slice(0, limit);
@@ -83,37 +130,21 @@ export function RiskFrame({
       setRecommendationStatus(row.id, "done");
       return;
     }
-    const knowledge = (state.knowledge ?? []).find(
-      (k) => k.projectId === row.projectId,
-    );
-    if (!knowledge) return;
-    const nextRisks = (knowledge.sections.risks ?? []).map((r) => {
-      const cleaned = r.replace(/^\s*\[resolved\]\s*/i, "").trim();
-      if (cleaned.toLowerCase() === row.title.toLowerCase()) {
-        return `[Resolved] ${cleaned}`;
-      }
-      return r;
-    });
-    replaceKnowledge({
-      ...knowledge,
-      sections: { ...knowledge.sections, risks: nextRisks },
-    });
+    if (row.source === "risk" && row.riskId) {
+      setRiskStatus(row.riskId, "resolved", row.projectId);
+      return;
+    }
+    // Legacy Knowledge-only — no Risk-domain fabrication.
+    setKnowledgeOnlyRiskResolved(row.projectId, row.title, true);
   }
 
   function reopenRisk(row: RiskRow) {
-    const knowledge = (state.knowledge ?? []).find(
-      (k) => k.projectId === row.projectId,
-    );
-    if (!knowledge) return;
-    const nextRisks = (knowledge.sections.risks ?? []).map((r) => {
-      const cleaned = r.replace(/^\s*\[resolved\]\s*/i, "").trim();
-      if (cleaned.toLowerCase() === row.title.toLowerCase()) return cleaned;
-      return r;
-    });
-    replaceKnowledge({
-      ...knowledge,
-      sections: { ...knowledge.sections, risks: nextRisks },
-    });
+    if (row.source === "recommendation") return;
+    if (row.source === "risk" && row.riskId) {
+      setRiskStatus(row.riskId, "open", row.projectId);
+      return;
+    }
+    setKnowledgeOnlyRiskResolved(row.projectId, row.title, false);
   }
 
   return (
@@ -223,6 +254,11 @@ export function RiskFrame({
           <p className="meta">
             Destination: Risks frame ·{" "}
             {edit.status === "open" ? "Open" : "Resolved"}
+            {edit.source === "recommendation"
+              ? " · Suggestion"
+              : edit.source === "knowledge"
+                ? " · Knowledge only"
+                : ""}
           </p>
         </DetailModal>
       ) : null}

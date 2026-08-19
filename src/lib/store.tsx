@@ -71,6 +71,7 @@ import {
   persistKnowledgeBullet,
   persistMemory,
   persistNewProject,
+  persistRiskStatus,
   persistTimelineItem,
   persistTodoCreate,
   persistTodoDelete,
@@ -81,6 +82,24 @@ import {
   remapStructuredForSections,
   alignSectionItemIds,
 } from "@/lib/data/supabase/reconcile-knowledge";
+import {
+  findProjectRisk,
+  resolveKnowledgeOnlyRiskBullet,
+  reopenKnowledgeOnlyRiskBullet,
+  syncKnowledgeRiskProjection,
+} from "@/lib/risks/lifecycle";
+import type { RiskStatus } from "@/types/database";
+
+function newClientId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -194,6 +213,24 @@ type MissionContextValue = {
     bullet: string,
   ) => void;
   replaceKnowledge: (knowledge: ProjectKnowledge) => void;
+  /**
+   * Slice 1B: set lifecycle on a genuine Risk (by stable risks.id).
+   * Syncs Knowledge projection; does not create duplicate Risk rows.
+   */
+  setRiskStatus: (
+    riskId: string,
+    status: RiskStatus,
+    projectId: string,
+  ) => void;
+  /**
+   * Slice 1B: resolve/reopen a legacy Knowledge-only risk bullet (no risks row).
+   * Does not fabricate a Risk-domain record.
+   */
+  setKnowledgeOnlyRiskResolved: (
+    projectId: string,
+    title: string,
+    resolved: boolean,
+  ) => void;
   /** Slice 1: confirm scoped responsibility owner (explicit UI mutation). */
   confirmResponsibilityOwner: (input: {
     projectId: string;
@@ -223,6 +260,7 @@ function normaliseState(raw: MissionState): MissionState {
     ...raw,
     todos: raw.todos ?? [],
     knowledge: raw.knowledge ?? [],
+    risks: raw.risks ?? [],
     timeline: raw.timeline ?? [],
     history: raw.history ?? [],
     analysesThisMonth: raw.analysesThisMonth ?? 0,
@@ -250,6 +288,7 @@ function withProactiveCoaching(state: MissionState): MissionState {
     ...state,
     todos: state.todos ?? [],
     knowledge: state.knowledge ?? [],
+    risks: state.risks ?? [],
     timeline: state.timeline ?? [],
     recommendations: [...extras, ...state.recommendations],
     lastAnalyzedAt: new Date().toISOString(),
@@ -283,6 +322,37 @@ function mergeCapture(prev: MissionState, result: CaptureResult): MissionState {
       "capture",
     );
   }
+
+  // Slice 1B: Capture risk adds mint genuine Risk-domain rows (stable ids).
+  // Do not mint for [Resolved] prose — that is legacy Knowledge-only display.
+  const priorRisks = prev.risks ?? [];
+  const mintedRisks: import("@/lib/types").ProjectRisk[] = [];
+  if (projectId && result.knowledgePatch?.risks?.length) {
+    for (const raw of result.knowledgePatch.risks) {
+      const title = raw.trim();
+      if (!title) continue;
+      if (/^\s*\[resolved\]/i.test(title)) continue;
+      const exists = priorRisks.some(
+        (r) =>
+          r.projectId === projectId &&
+          r.title.trim().toLowerCase() === title.toLowerCase(),
+      );
+      if (exists) continue;
+      const alreadyMinted = mintedRisks.some(
+        (r) => r.title.trim().toLowerCase() === title.toLowerCase(),
+      );
+      if (alreadyMinted) continue;
+      mintedRisks.push({
+        id: newClientId(),
+        projectId,
+        title,
+        status: "open",
+        source: "capture",
+        createdAt: new Date().toISOString(),
+      });
+    }
+  }
+
   const next: MissionState = {
     ...prev,
     todos: prev.todos ?? [],
@@ -291,6 +361,7 @@ function mergeCapture(prev: MissionState, result: CaptureResult): MissionState {
       projectId ?? "",
       result.knowledgePatch,
     ),
+    risks: [...priorRisks, ...mintedRisks],
     timeline,
     memories: [result.memory, ...prev.memories],
     recommendations: [...result.recommendations, ...prev.recommendations],
@@ -606,7 +677,17 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applyCaptureResult = useCallback((result: CaptureResult) => {
-    setState((prev) => mergeCapture(prev, result));
+    let mintedRiskIds = new Map<string, string>();
+    setState((prev) => {
+      const priorIds = new Set((prev.risks ?? []).map((r) => r.id));
+      const next = mergeCapture(prev, result);
+      mintedRiskIds = new Map(
+        (next.risks ?? [])
+          .filter((r) => !priorIds.has(r.id))
+          .map((r) => [r.title.trim().toLowerCase(), r.id]),
+      );
+      return next;
+    });
     const meta = persistMetaRef.current;
     if (meta.mode !== "supabase" || !meta.workspaceId) return;
     void (async () => {
@@ -627,13 +708,19 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           )) {
             for (const body of bullets ?? []) {
               if (!body?.trim()) continue;
+              const trimmed = body.trim();
+              const riskId =
+                section === "risks"
+                  ? mintedRiskIds.get(trimmed.toLowerCase())
+                  : undefined;
               await persistKnowledgeBullet(
                 client,
                 workspaceId,
                 projectId,
                 section,
-                body.trim(),
+                trimmed,
                 userId,
+                riskId ? { riskId } : undefined,
               );
             }
           }
@@ -1607,23 +1694,41 @@ export function MissionProvider({ children }: { children: ReactNode }) {
 
   const addKnowledgeBullet = useCallback(
     (projectId: string, sectionId: KnowledgeSectionId, bullet: string) => {
+      const trimmed = bullet.trim();
+      if (!trimmed) return;
+      const riskId = sectionId === "risks" ? newClientId() : null;
       setState((prev) => {
         const current =
           (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
           emptyKnowledge(projectId);
         const merged = mergeKnowledge(current, projectId, {
-          [sectionId]: [bullet],
+          [sectionId]: [trimmed],
         });
+        const nextRisks =
+          sectionId === "risks" && riskId
+            ? [
+                ...(prev.risks ?? []),
+                {
+                  id: riskId,
+                  projectId,
+                  title: trimmed,
+                  status: "open" as const,
+                  source: "manual" as const,
+                  createdAt: new Date().toISOString(),
+                },
+              ]
+            : prev.risks ?? [];
         return {
           ...prev,
           knowledge: [
             ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
             merged,
           ],
+          risks: nextRisks,
         };
       });
       const meta = persistMetaRef.current;
-      if (meta.mode === "supabase" && meta.workspaceId && bullet.trim()) {
+      if (meta.mode === "supabase" && meta.workspaceId) {
         void (async () => {
           try {
             const client = createBrowserSupabaseClient();
@@ -1632,14 +1737,126 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               meta.workspaceId!,
               projectId,
               sectionId,
-              bullet.trim(),
+              trimmed,
               meta.userId,
+              riskId ? { riskId } : undefined,
             );
           } catch (err) {
             console.error("[addKnowledgeBullet] persist failed", err);
             setSaveStatus("error");
             setSaveError(
               err instanceof Error ? err.message : "Could not save knowledge",
+            );
+          }
+        })();
+      }
+    },
+    [],
+  );
+
+  const setRiskStatus = useCallback(
+    (riskId: string, status: RiskStatus, projectId: string) => {
+      let syncedKnowledge: ProjectKnowledge | null = null;
+      setState((prev) => {
+        const existing = findProjectRisk(prev.risks, riskId, projectId);
+        if (!existing) return prev;
+        const updatedRisk = { ...existing, status, updatedAt: new Date().toISOString() };
+        const risks = (prev.risks ?? []).map((r) =>
+          r.id === riskId && r.projectId === projectId ? updatedRisk : r,
+        );
+        const current =
+          (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
+          emptyKnowledge(projectId);
+        const nextKnowledge = syncKnowledgeRiskProjection(current, updatedRisk);
+        syncedKnowledge = nextKnowledge;
+        return {
+          ...prev,
+          risks,
+          knowledge: [
+            ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
+            nextKnowledge,
+          ],
+        };
+      });
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        void (async () => {
+          try {
+            const client = createBrowserSupabaseClient();
+            await persistRiskStatus(
+              client,
+              meta.workspaceId!,
+              projectId,
+              riskId,
+              status,
+            );
+            if (syncedKnowledge) {
+              await persistKnowledgeReconcile(
+                client,
+                meta.workspaceId!,
+                projectId,
+                syncedKnowledge,
+                meta.userId,
+                ["risks"],
+              );
+            }
+          } catch (err) {
+            console.error("[setRiskStatus] persist failed", err);
+            setSaveStatus("error");
+            setSaveError(
+              err instanceof Error
+                ? err.message
+                : "Could not save risk status",
+            );
+          }
+        })();
+      }
+    },
+    [],
+  );
+
+  const setKnowledgeOnlyRiskResolved = useCallback(
+    (projectId: string, title: string, resolved: boolean) => {
+      let nextKnowledge: ProjectKnowledge | null = null;
+      setState((prev) => {
+        const current =
+          (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
+          emptyKnowledge(projectId);
+        const next = resolved
+          ? resolveKnowledgeOnlyRiskBullet(current, title)
+          : reopenKnowledgeOnlyRiskBullet(current, title);
+        nextKnowledge = next;
+        return {
+          ...prev,
+          knowledge: [
+            ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
+            next,
+          ],
+        };
+      });
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId && nextKnowledge) {
+        const desired = nextKnowledge;
+        void (async () => {
+          try {
+            const client = createBrowserSupabaseClient();
+            await persistKnowledgeReconcile(
+              client,
+              meta.workspaceId!,
+              projectId,
+              desired,
+              meta.userId,
+              ["risks"],
+            );
+          } catch (err) {
+            console.error("[setKnowledgeOnlyRiskResolved] persist failed", err);
+            setSaveStatus("error");
+            setSaveError(
+              err instanceof Error
+                ? err.message
+                : "Could not save knowledge risk",
             );
           }
         })();
@@ -1907,6 +2124,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateKnowledgeSection,
       addKnowledgeBullet,
       replaceKnowledge,
+      setRiskStatus,
+      setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,
       refreshCoaching,
@@ -1944,6 +2163,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateKnowledgeSection,
       addKnowledgeBullet,
       replaceKnowledge,
+      setRiskStatus,
+      setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,
       refreshCoaching,

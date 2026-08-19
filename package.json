@@ -36,6 +36,7 @@
     "verify:canonical-truth": "npx --yes tsx scripts/verify-canonical-truth.ts",
     "verify:knowledge-reconcile": "npx --yes tsx scripts/verify-knowledge-reconcile.ts",
     "verify:project-truth-safety": "npx --yes tsx scripts/verify-project-truth-safety.ts",
+    "verify:risk-lifecycle": "npx --yes tsx scripts/verify-risk-lifecycle.ts",
     "verify:capture-trust-boundary": "npx --yes tsx scripts/verify-capture-trust-boundary.ts",
     "typecheck": "tsc --noEmit",
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",

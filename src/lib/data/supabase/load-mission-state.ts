@@ -35,6 +35,7 @@ function emptyMissionState(): MissionState {
     releases: [],
     todos: [],
     knowledge: [],
+    risks: [],
     timeline: [],
     history: [],
     analysesThisMonth: 0,
@@ -242,6 +243,18 @@ export async function loadMissionStateFromSupabase(
     }
   }
 
+  const risks: import("@/lib/types").ProjectRisk[] = (risksRes.data ?? []).map(
+    (row) => ({
+      id: row.id,
+      projectId: row.project_id,
+      title: row.title,
+      status: (row.status as import("@/types/database").RiskStatus) || "open",
+      source: (row.source as "manual" | "capture" | "seed") || "manual",
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }),
+  );
+
   const timeline: TimelineItem[] = (milestonesRes.data ?? []).map((row) => ({
     id: row.id,
     projectId: row.project_id,
@@ -330,6 +343,7 @@ export async function loadMissionStateFromSupabase(
     projects,
     todos,
     knowledge: Array.from(knowledgeMap.values()),
+    risks,
     timeline,
     memories,
     recommendations,

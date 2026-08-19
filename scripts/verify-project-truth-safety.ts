@@ -12,6 +12,7 @@ import {
   remapStructuredForSections,
   type KnowledgeItemRow,
 } from "../src/lib/data/supabase/reconcile-knowledge";
+import { foldOpenRisksIntoKnowledge } from "../src/lib/risks/lifecycle";
 import { buildCaptureContext } from "../src/lib/capture/context";
 import {
   searchProjectKnowledge,
@@ -293,14 +294,33 @@ check("Unrelated same-index replacement must not inherit prior metadata", () => 
   assert.deepEqual(plan.deleteIds, [ID_A1]);
 });
 
+check("Resolved risk must not resurrect from risks table on hydrate", () => {
+  const risks = [
+    {
+      id: ID_A1,
+      projectId: PROJECT_A,
+      title: "Security sign-off may miss CAB",
+      status: "resolved" as const,
+    },
+    {
+      id: ID_A2,
+      projectId: PROJECT_A,
+      title: "Other open risk",
+      status: "open" as const,
+    },
+  ];
+  const knowledge = emptyKnowledge(PROJECT_A);
+  knowledge.sections.risks = ["[Resolved] Security sign-off may miss CAB"];
+  const folded = foldOpenRisksIntoKnowledge([knowledge], risks);
+  assert.ok(
+    !folded[0]!.sections.risks.includes("Security sign-off may miss CAB"),
+  );
+  assert.ok(folded[0]!.sections.risks.includes("Other open risk"));
+});
+
 knownGap(
   "Confirm Owner persist must use UUID knowledge_items.id",
   "confirm-responsibility.ts still mints resp-* ids; store passes them to insert. Documented trust bug — do not greenwash.",
-);
-
-knownGap(
-  "Resolved risk must not resurrect from risks table on hydrate",
-  "RiskFrame [Resolved] + open risks fold-in. Risk authority slice — not encoded as correct.",
 );
 
 // --- Capture trust boundary (deterministic) ---

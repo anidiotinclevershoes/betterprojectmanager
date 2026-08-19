@@ -342,6 +342,21 @@ export interface HistoryEvent {
   source?: "user" | "ai" | "system";
 }
 
+/**
+ * Slice 1B: maintained Risk domain record (`risks` table / local mirror).
+ * Lifecycle authority for genuine Risks — Knowledge may project titles but
+ * must not compete on status for the same record.
+ */
+export interface ProjectRisk {
+  id: string;
+  projectId: string;
+  title: string;
+  status: import("@/types/database").RiskStatus;
+  source?: "manual" | "capture" | "seed";
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface MissionState {
   projects: Project[];
   memories: MemoryEntry[];
@@ -350,6 +365,11 @@ export interface MissionState {
   releases: Release[];
   todos: TodoItem[];
   knowledge: ProjectKnowledge[];
+  /**
+   * Maintained Risk domain records. Absent/empty in older local snapshots —
+   * normalise to []. Knowledge-only risk bullets remain transitional.
+   */
+  risks?: ProjectRisk[];
   timeline: TimelineItem[];
   history?: HistoryEvent[];
   lastAnalyzedAt?: string;
