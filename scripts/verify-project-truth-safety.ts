@@ -201,7 +201,7 @@ check("Unaffected section survives partial reconcile", () => {
       id: ID_A1,
       project_id: PROJECT_A,
       section: "now",
-      body: "Now old",
+      body: "Now status is blocked on vendor",
     }),
     row({
       id: ID_A2,
@@ -211,7 +211,7 @@ check("Unaffected section survives partial reconcile", () => {
     }),
   ];
   const desired = emptyKnowledge(PROJECT_A);
-  desired.sections.now = ["Now new"];
+  desired.sections.now = ["Now status is clear for launch"];
   desired.sections.decisions = ["Decision stays"];
 
   const plan = planKnowledgeReconcile({
@@ -228,13 +228,14 @@ check("Unaffected section survives partial reconcile", () => {
 
 check("Structured remap preserves identity on wording edit", () => {
   const previous = emptyKnowledge(PROJECT_A);
-  previous.sections.now = ["Old wording"];
+  previous.sections.now = ["CAB approval is due 21 August"];
+  previous.sectionItemIds = { now: [ID_A1] };
   previous.structured = [
     {
       id: ID_A1,
       projectId: PROJECT_A,
       section: "now",
-      body: "Old wording",
+      body: "CAB approval is due 21 August",
       kind: "fact",
       epistemic: "confirmed",
       lifecycle: "current",
@@ -244,11 +245,11 @@ check("Structured remap preserves identity on wording edit", () => {
   ];
   const remapped = remapStructuredForSections(previous, {
     ...previous.sections,
-    now: ["New wording"],
+    now: ["CAB approval is due on 22 August"],
   });
   assert.equal(remapped![0]!.id, ID_A1);
   assert.equal(remapped![0]!.epistemic, "confirmed");
-  assert.equal(remapped![0]!.body, "New wording");
+  assert.equal(remapped![0]!.body, "CAB approval is due on 22 August");
 });
 
 check("isKnowledgeUuid rejects non-UUID confirm-owner style ids", () => {
@@ -256,10 +257,41 @@ check("isKnowledgeUuid rejects non-UUID confirm-owner style ids", () => {
   assert.equal(isKnowledgeUuid(ID_A1), true);
 });
 
-knownGap(
-  "Unrelated same-index replacement must not inherit prior metadata",
-  "Slice 1A limitation: positional match UPDATEs the old row. Tracked for Slice 1A.1 Stable Knowledge Identity.",
-);
+check("Unrelated same-index replacement must not inherit prior metadata", () => {
+  const existing = [
+    row({
+      id: ID_A1,
+      project_id: PROJECT_A,
+      section: "now",
+      body: "CAB approval is due 21 August",
+      position: 0,
+      kind: "decision",
+      epistemic: "confirmed",
+      meta: { source: "cab" },
+      provenance: [{ type: "capture", note: "cab" }],
+    }),
+  ];
+  const desired = emptyKnowledge(PROJECT_A);
+  desired.sections.now = ["Ava is away next week"];
+
+  const plan = planKnowledgeReconcile({
+    projectId: PROJECT_A,
+    workspaceId: WS,
+    desired,
+    existingRows: existing,
+    sections: ["now"],
+  });
+
+  assert.equal(plan.updates.length, 0, "must not UPDATE prior row");
+  assert.equal(plan.inserts.length, 1);
+  assert.notEqual(plan.inserts[0]!.id, ID_A1);
+  assert.equal(plan.inserts[0]!.kind, null);
+  assert.equal(plan.inserts[0]!.epistemic, null);
+  assert.deepEqual(plan.inserts[0]!.meta, {});
+  const prov = plan.inserts[0]!.provenance as Array<{ type: string }>;
+  assert.ok(!prov.some((p) => p.type === "capture"));
+  assert.deepEqual(plan.deleteIds, [ID_A1]);
+});
 
 knownGap(
   "Confirm Owner persist must use UUID knowledge_items.id",

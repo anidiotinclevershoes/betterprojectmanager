@@ -243,6 +243,11 @@ export interface ProjectKnowledge {
   updatedAt: string;
   sections: Record<KnowledgeSectionId, string[]>;
   /**
+   * Parallel stable ids for section bullets (knowledge_items.id when known).
+   * Same length/order as `sections[section]` when present. Null = new/unidentified line.
+   */
+  sectionItemIds?: Partial<Record<KnowledgeSectionId, Array<string | null>>>;
+  /**
    * Slice 1+: structured canonical truth overlay (responsibilities, epistemic, etc.).
    * Legacy section strings remain the display/capture body store.
    */

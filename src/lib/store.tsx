@@ -79,6 +79,7 @@ import {
 import {
   persistKnowledgeReconcile,
   remapStructuredForSections,
+  alignSectionItemIds,
 } from "@/lib/data/supabase/reconcile-knowledge";
 
 function sleep(ms: number) {
@@ -1547,6 +1548,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           ...current,
           updatedAt: new Date().toISOString(),
           sections,
+          sectionItemIds: alignSectionItemIds(current, sections, [sectionId]),
           structured: remapStructuredForSections(current, sections, [
             sectionId,
           ]),
@@ -1656,6 +1658,9 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       const next: ProjectKnowledge = {
         ...knowledge,
         updatedAt: new Date().toISOString(),
+        sectionItemIds:
+          knowledge.sectionItemIds ??
+          alignSectionItemIds(previous, sections),
         structured:
           knowledge.structured ??
           remapStructuredForSections(previous, sections),

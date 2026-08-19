@@ -181,49 +181,51 @@ export async function loadMissionStateFromSupabase(
       knowledgeMap.get(row.project_id) ?? emptyKnowledge(row.project_id);
     const section = row.section as keyof ProjectKnowledge["sections"];
     if (section in current.sections) {
-      current.sections[section] = [
-        ...current.sections[section],
-        row.body,
-      ].slice(0, 24);
+      const nextBodies = [...current.sections[section], row.body].slice(0, 24);
+      const priorIds = current.sectionItemIds?.[section] ?? [];
+      const nextIds = [...priorIds, row.id].slice(0, 24);
+      current.sections[section] = nextBodies;
+      current.sectionItemIds = {
+        ...(current.sectionItemIds ?? {}),
+        [section]: nextIds,
+      };
       current.updatedAt = row.updated_at ?? current.updatedAt;
-      // Slice 1: restore structured overlay when metadata columns present
+      // Slice 1 / 1A.1: restore structured overlay + stable ids for every row
       const kind = (row as { kind?: string | null }).kind;
       const epistemic = (row as { epistemic?: string | null }).epistemic;
       const lifecycle =
         (row as { lifecycle?: string }).lifecycle ?? "current";
       const meta = (row as { meta?: Record<string, unknown> }).meta;
       const provenance = (row as { provenance?: unknown }).provenance;
-      if (kind || epistemic || (meta && Object.keys(meta).length > 0)) {
-        current.structured = [
-          ...(current.structured ?? []),
-          {
-            id: row.id,
-            projectId: row.project_id,
-            section: section as
-              | "now"
-              | "decisions"
-              | "risks"
-              | "people"
-              | "openLoops",
-            body: row.body,
-            kind: (kind as import("@/lib/canonical-truth/types").CanonicalTruthKind) ||
-              "fact",
-            epistemic:
-              (epistemic as import("@/lib/canonical-truth/types").EpistemicStatus) ||
-              null,
-            lifecycle: (lifecycle as
-              | "current"
-              | "superseded"
-              | "historical") || "current",
-            supersedesId:
-              (row as { supersedes_id?: string | null }).supersedes_id ?? null,
-            meta: (meta as CanonicalTruthItem["meta"]) ?? null,
-            provenance: Array.isArray(provenance)
-              ? (provenance as CanonicalTruthItem["provenance"])
-              : null,
-          },
-        ];
-      }
+      current.structured = [
+        ...(current.structured ?? []),
+        {
+          id: row.id,
+          projectId: row.project_id,
+          section: section as
+            | "now"
+            | "decisions"
+            | "risks"
+            | "people"
+            | "openLoops",
+          body: row.body,
+          kind: (kind as import("@/lib/canonical-truth/types").CanonicalTruthKind) ||
+            "fact",
+          epistemic:
+            (epistemic as import("@/lib/canonical-truth/types").EpistemicStatus) ||
+            null,
+          lifecycle: (lifecycle as
+            | "current"
+            | "superseded"
+            | "historical") || "current",
+          supersedesId:
+            (row as { supersedes_id?: string | null }).supersedes_id ?? null,
+          meta: (meta as CanonicalTruthItem["meta"]) ?? null,
+          provenance: Array.isArray(provenance)
+            ? (provenance as CanonicalTruthItem["provenance"])
+            : null,
+        },
+      ];
       knowledgeMap.set(row.project_id, current);
     }
   }

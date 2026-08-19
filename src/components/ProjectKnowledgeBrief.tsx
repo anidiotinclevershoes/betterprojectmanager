@@ -7,6 +7,7 @@ import {
   knowledgeHasContent,
   normaliseBullet,
 } from "@/lib/knowledge";
+import { alignSectionItemIds } from "@/lib/knowledge-identity";
 import { formatWhen } from "@/lib/selectors";
 import { useMission } from "@/lib/store";
 import type { KnowledgeSectionId, ProjectKnowledge } from "@/lib/types";
@@ -100,16 +101,19 @@ export function ProjectKnowledgeBrief({ projectId }: { projectId: string }) {
   }
 
   function saveEdit() {
+    const sections = {
+      now: parseLines(draft.sections.now),
+      decisions: parseLines(draft.sections.decisions),
+      risks: parseLines(draft.sections.risks),
+      people: parseLines(draft.sections.people),
+      openLoops: parseLines(draft.sections.openLoops),
+    };
     const cleaned: ProjectKnowledge = {
       projectId,
       updatedAt: new Date().toISOString(),
-      sections: {
-        now: parseLines(draft.sections.now),
-        decisions: parseLines(draft.sections.decisions),
-        risks: parseLines(draft.sections.risks),
-        people: parseLines(draft.sections.people),
-        openLoops: parseLines(draft.sections.openLoops),
-      },
+      sections,
+      // Carry stable ids through edit via deterministic alignment (not index-alone).
+      sectionItemIds: alignSectionItemIds(knowledge, sections),
       // Omit structured: replaceKnowledge remaps prior overlay onto new bodies.
     };
     replaceKnowledge(cleaned);

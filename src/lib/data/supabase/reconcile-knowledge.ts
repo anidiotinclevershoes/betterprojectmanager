@@ -1,27 +1,30 @@
 /**
- * Slice 1A: reconcile MissionState Knowledge sections → knowledge_items rows.
+ * Slice 1A / 1A.1: reconcile MissionState Knowledge → knowledge_items.
  *
- * Pure plan + Supabase apply. Prefer UPDATE over wipe/recreate.
- * Does not touch the risks table (out of scope for Slice 1A).
+ * Prefer UPDATE over wipe/recreate. Match by exact body, then stable id,
+ * then unique wording-edit pairs — never by array index alone.
+ * Does not touch the risks table.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import type { KnowledgeSectionId, ProjectKnowledge } from "@/lib/types";
+import {
+  alignSectionLines,
+  alignSectionItemIds,
+  isKnowledgeUuid,
+  isLikelyWordingEdit,
+  KNOWLEDGE_SECTION_IDS,
+  remapStructuredForSections,
+} from "@/lib/knowledge-identity";
 
-export const KNOWLEDGE_SECTION_IDS: KnowledgeSectionId[] = [
-  "now",
-  "decisions",
-  "risks",
-  "people",
-  "openLoops",
-];
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-export function isKnowledgeUuid(value: string | null | undefined): boolean {
-  return Boolean(value && UUID_RE.test(value));
-}
+export {
+  alignSectionLines,
+  alignSectionItemIds,
+  isKnowledgeUuid,
+  isLikelyWordingEdit,
+  KNOWLEDGE_SECTION_IDS,
+  remapStructuredForSections,
+};
 
 export type KnowledgeItemRow = {
   id: string;
@@ -85,84 +88,10 @@ function appendManualEditProvenance(
   return next;
 }
 
-/**
- * Remap structured overlay when section string bodies change.
- * Prefer same-index mapping within a section so edits keep identity/metadata.
- */
-export function remapStructuredForSections(
-  previous: ProjectKnowledge | undefined,
-  nextSections: ProjectKnowledge["sections"],
-  sectionsToRemap: KnowledgeSectionId[] = KNOWLEDGE_SECTION_IDS,
-): CanonicalTruthItem[] | undefined {
-  if (!previous?.structured?.length) {
-    return previous?.structured;
-  }
-
-  const used = new Set<string>();
-  const result: CanonicalTruthItem[] = [];
-  const remapSet = new Set(sectionsToRemap);
-
-  for (const sectionId of KNOWLEDGE_SECTION_IDS) {
-    if (!remapSet.has(sectionId)) {
-      for (const item of previous.structured) {
-        if (item.section === sectionId && !used.has(item.id)) {
-          used.add(item.id);
-          result.push(item);
-        }
-      }
-      continue;
-    }
-
-    const oldBullets = previous.sections[sectionId] ?? [];
-    const newBullets = nextSections[sectionId] ?? [];
-
-    for (let i = 0; i < newBullets.length; i++) {
-      const newBody = newBullets[i]!;
-      const oldBody = oldBullets[i];
-
-      if (oldBody != null) {
-        const byIndex = previous.structured.find(
-          (s) =>
-            s.section === sectionId &&
-            s.body === oldBody &&
-            !used.has(s.id),
-        );
-        if (byIndex) {
-          used.add(byIndex.id);
-          result.push({ ...byIndex, body: newBody });
-          continue;
-        }
-      }
-
-      const byBody = previous.structured.find(
-        (s) =>
-          s.section === sectionId &&
-          s.body === newBody &&
-          !used.has(s.id),
-      );
-      if (byBody) {
-        used.add(byBody.id);
-        result.push(byBody);
-      }
-    }
-  }
-
-  // Retain superseded/historical items not present in current section strings.
-  for (const item of previous.structured) {
-    if (used.has(item.id)) continue;
-    if (item.lifecycle === "superseded" || item.lifecycle === "historical") {
-      result.push(item);
-    }
-  }
-
-  return result;
-}
-
 function newRowId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
-  // Fallback for older runtimes in tests
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
@@ -170,14 +99,43 @@ function newRowId(): string {
   });
 }
 
+function desiredIdsForSection(
+  desired: ProjectKnowledge,
+  section: KnowledgeSectionId,
+  bodies: string[],
+): Array<string | null> {
+  const explicit = desired.sectionItemIds?.[section];
+  if (explicit && explicit.length === bodies.length) {
+    return explicit.map((id) => (id && isKnowledgeUuid(id) ? id : null));
+  }
+  const structured = desired.structured ?? [];
+  const used = new Set<string>();
+  return bodies.map((body) => {
+    const hit = structured.find(
+      (s) =>
+        s.section === section &&
+        s.body === body &&
+        isKnowledgeUuid(s.id) &&
+        !used.has(s.id),
+    );
+    if (hit) {
+      used.add(hit.id);
+      return hit.id;
+    }
+    return null;
+  });
+}
+
 /**
  * Build a reconcile plan for one or more Knowledge sections.
  *
  * Matching order within each section:
- * 1. Exact body match to an unmatched existing row
- * 2. Structured UUID hint for the desired bullet (when available)
- * 3. Positional match among remaining rows (in-place edit)
- * 4. Insert leftovers; delete unmatched existing rows in those sections only
+ * 1. Exact body match
+ * 2. Stable id from sectionItemIds / structured
+ * 3. Unique wording-edit pairing among leftovers (deterministic overlap)
+ * 4. Insert unmatched desired; delete unmatched existing
+ *
+ * Never uses array index alone.
  */
 export function planKnowledgeReconcile(args: {
   projectId: string;
@@ -194,16 +152,20 @@ export function planKnowledgeReconcile(args: {
   const inserts: KnowledgeReconcileInsert[] = [];
   const deleteIds: string[] = [];
 
-  const structuredByBody = new Map<string, CanonicalTruthItem>();
+  const structuredById = new Map<string, CanonicalTruthItem>();
   for (const item of args.desired.structured ?? []) {
-    if (!item.section) continue;
-    structuredByBody.set(`${item.section}::${item.body}`, item);
+    if (isKnowledgeUuid(item.id)) structuredById.set(item.id, item);
   }
 
   for (const section of sections) {
     const desiredBullets = (args.desired.sections[section] ?? [])
       .map((b) => b.trim())
       .filter(Boolean);
+    const desiredIds = desiredIdsForSection(
+      args.desired,
+      section,
+      desiredBullets,
+    );
     const existing = args.existingRows
       .filter((r) => r.section === section)
       .slice()
@@ -218,47 +180,114 @@ export function planKnowledgeReconcile(args: {
           position: number;
           structured?: CanonicalTruthItem;
         };
+    const slots: Slot[] = desiredBullets.map(() => ({
+      kind: "insert",
+      body: "",
+      position: 0,
+    }));
 
-    const slots: Slot[] = [];
-
+    // Pass 1: exact body
     for (let i = 0; i < desiredBullets.length; i++) {
       const body = desiredBullets[i]!;
       const exactIdx = unmatchedRows.findIndex((r) => r.body === body);
       if (exactIdx >= 0) {
         const [row] = unmatchedRows.splice(exactIdx, 1);
-        slots.push({ kind: "keep", row: row!, body, position: i });
-        continue;
+        slots[i] = { kind: "keep", row: row!, body, position: i };
+      } else {
+        slots[i] = {
+          kind: "insert",
+          body,
+          position: i,
+          structured: desiredIds[i]
+            ? structuredById.get(desiredIds[i]!)
+            : undefined,
+        };
       }
-
-      const structured = structuredByBody.get(`${section}::${body}`);
-      if (structured && isKnowledgeUuid(structured.id)) {
-        const byIdIdx = unmatchedRows.findIndex((r) => r.id === structured.id);
-        if (byIdIdx >= 0) {
-          const [row] = unmatchedRows.splice(byIdIdx, 1);
-          slots.push({ kind: "keep", row: row!, body, position: i });
-          continue;
-        }
-      }
-
-      slots.push({ kind: "insert", body, position: i, structured });
     }
 
-    // Positional salvage: pair remaining "insert" slots with leftover rows in order.
-    const leftover = [...unmatchedRows];
-    for (let s = 0; s < slots.length; s++) {
-      const slot = slots[s]!;
+    // Pass 2: stable id hints on still-insert slots
+    for (let i = 0; i < slots.length; i++) {
+      const slot = slots[i]!;
       if (slot.kind !== "insert") continue;
-      if (leftover.length === 0) break;
-      const row = leftover.shift()!;
-      const unmatchedIdx = unmatchedRows.findIndex((r) => r.id === row.id);
-      if (unmatchedIdx >= 0) unmatchedRows.splice(unmatchedIdx, 1);
-      slots[s] = {
+      const id = desiredIds[i];
+      if (!id || !isKnowledgeUuid(id)) continue;
+      const byIdIdx = unmatchedRows.findIndex((r) => r.id === id);
+      if (byIdIdx < 0) continue;
+      const [row] = unmatchedRows.splice(byIdIdx, 1);
+      slots[i] = {
+        kind: "keep",
+        row: row!,
+        body: slot.body,
+        position: slot.position,
+      };
+    }
+
+    // Pass 3: unique wording-edit pairs among leftovers (no index salvage)
+    const insertIdxs = slots
+      .map((s, i) => (s.kind === "insert" ? i : -1))
+      .filter((i) => i >= 0);
+    type Edge = { slotIndex: number; rowIndex: number; score: number };
+    const edges: Edge[] = [];
+    for (const slotIndex of insertIdxs) {
+      const body = (slots[slotIndex] as { body: string }).body;
+      unmatchedRows.forEach((row, rowIndex) => {
+        if (!isLikelyWordingEdit(row.body, body)) return;
+        const tokens = (t: string) =>
+          new Set(
+            t
+              .toLowerCase()
+              .replace(/[^a-z0-9\s]/gi, " ")
+              .split(/\s+/)
+              .filter((x) => x.length > 1),
+          );
+        const A = tokens(row.body);
+        const B = tokens(body);
+        let inter = 0;
+        for (const t of A) if (B.has(t)) inter += 1;
+        const score =
+          A.size + B.size === 0 ? 1 : inter / (A.size + B.size - inter || 1);
+        edges.push({ slotIndex, rowIndex, score });
+      });
+    }
+    edges.sort((a, b) => b.score - a.score);
+    const usedSlots = new Set<number>();
+    const usedRows = new Set<number>();
+    for (const edge of edges) {
+      if (usedSlots.has(edge.slotIndex) || usedRows.has(edge.rowIndex)) continue;
+      const rivalSlots = edges.filter(
+        (e) =>
+          e.slotIndex === edge.slotIndex &&
+          e.rowIndex !== edge.rowIndex &&
+          e.score >= edge.score - 1e-9,
+      );
+      const rivalRows = edges.filter(
+        (e) =>
+          e.rowIndex === edge.rowIndex &&
+          e.slotIndex !== edge.slotIndex &&
+          e.score >= edge.score - 1e-9,
+      );
+      if (rivalSlots.some((e) => !usedRows.has(e.rowIndex))) continue;
+      if (rivalRows.some((e) => !usedSlots.has(e.slotIndex))) continue;
+
+      usedSlots.add(edge.slotIndex);
+      usedRows.add(edge.rowIndex);
+      const row = unmatchedRows[edge.rowIndex]!;
+      const slot = slots[edge.slotIndex] as {
+        kind: "insert";
+        body: string;
+        position: number;
+      };
+      slots[edge.slotIndex] = {
         kind: "keep",
         row,
         body: slot.body,
         position: slot.position,
       };
     }
+    // Remove used rows from unmatched (highest index first)
+    [...usedRows]
+      .sort((a, b) => b - a)
+      .forEach((idx) => unmatchedRows.splice(idx, 1));
 
     for (const slot of slots) {
       if (slot.kind === "keep") {
@@ -279,25 +308,26 @@ export function planKnowledgeReconcile(args: {
           });
         }
       } else {
+        // New item: never inherit metadata from an unrelated prior row.
         const structured = slot.structured;
+        const safeStructured =
+          structured &&
+          isKnowledgeUuid(structured.id) &&
+          structured.body === slot.body
+            ? structured
+            : undefined;
         inserts.push({
-          id:
-            structured && isKnowledgeUuid(structured.id)
-              ? structured.id
-              : newRowId(),
+          id: newRowId(),
           section,
           body: slot.body,
           position: slot.position,
-          kind: structured?.kind ?? null,
-          epistemic: structured?.epistemic ?? null,
-          lifecycle: structured?.lifecycle ?? "current",
-          supersedes_id:
-            structured?.supersedesId && isKnowledgeUuid(structured.supersedesId)
-              ? structured.supersedesId
-              : null,
-          meta: (structured?.meta as Record<string, unknown>) ?? {},
+          kind: safeStructured?.kind ?? null,
+          epistemic: safeStructured?.epistemic ?? null,
+          lifecycle: safeStructured?.lifecycle ?? "current",
+          supersedes_id: null,
+          meta: {},
           provenance: appendManualEditProvenance(
-            structured?.provenance ?? [],
+            [],
             "Knowledge item created via Knowledge Centre correction",
             at,
           ),
@@ -432,4 +462,13 @@ export async function persistKnowledgeReconcile(
   );
 
   return plan;
+}
+
+/** @deprecated use alignSectionLines from knowledge-identity — kept for tests */
+export function planWithAlignmentHelper(
+  previousBodies: string[],
+  previousIds: Array<string | null>,
+  nextBodies: string[],
+) {
+  return alignSectionLines(previousBodies, previousIds, nextBodies);
 }
