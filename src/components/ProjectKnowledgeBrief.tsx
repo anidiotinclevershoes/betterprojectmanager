@@ -110,6 +110,7 @@ export function ProjectKnowledgeBrief({ projectId }: { projectId: string }) {
         people: parseLines(draft.sections.people),
         openLoops: parseLines(draft.sections.openLoops),
       },
+      // Omit structured: replaceKnowledge remaps prior overlay onto new bodies.
     };
     replaceKnowledge(cleaned);
     setEditing(false);

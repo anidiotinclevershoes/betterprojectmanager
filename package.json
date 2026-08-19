@@ -31,6 +31,7 @@
     "verify:context-integrity": "npx --yes tsx scripts/verify-context-integrity.ts",
     "verify:model-tidy": "npx --yes tsx scripts/verify-model-tidy.ts",
     "verify:canonical-truth": "npx --yes tsx scripts/verify-canonical-truth.ts",
+    "verify:knowledge-reconcile": "npx --yes tsx scripts/verify-knowledge-reconcile.ts",
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",
     "evals:pre-baseline": "npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
     "evals:model-tidy": "LUME_EVAL_RUN_LABEL='Model Tidy - Same Model Control' npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
