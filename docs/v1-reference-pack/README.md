@@ -26,6 +26,7 @@ This folder contains the canonical product, UI, development and evaluation refer
 | This pack | Canonical authority for V1 product philosophy, Ocean UI baseline, and development/evaluation process |
 | `docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md` | Existing behavioural contract for intelligence/eval work; do not silently replace it — reconcile conflicts by stopping and reporting |
 | Historical phase handovers under `docs/` | Context only; prefer this pack for new V1 work |
+| `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` | Read-only map of current project-truth stores/paths; use with this pack for implementation planning |
 
 ## How to use this pack with Cursor
 
