@@ -555,3 +555,70 @@ The question is always:
 not:
 
 > **Did one more automated case turn green?**
+
+---
+
+# 18. Test-driven / behaviour-first development
+
+The regression suite exists to **preserve trust** as the codebase evolves.
+
+A new feature is not successfully implemented if it quietly breaks something the user was already entitled to trust.
+
+## Default commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm test` / `npm run verify:regression` | Deterministic product regression (no OpenAI) |
+| `npm run typecheck` | TypeScript |
+| `npm run verify:phase2-persistence` | Live Supabase (skips without creds) |
+| `npm run evals:pre-baseline` | Live AI benchmark (separate) |
+
+See `docs/LUME_TEST_SAFETY_NET_AUDIT.md`.
+
+## Future Cursor task template
+
+Every meaningful implementation prompt should contain:
+
+### Behaviour to protect
+
+What must remain true after this change?
+
+### Pre-change impact check
+
+What existing behaviours/contracts could this affect?
+
+### Failing specification / test
+
+What test demonstrates the intended change **before** implementation (or why a characterisation test is the right first step)?
+
+### Implementation
+
+Smallest correct change at the right layer.
+
+### Focused tests
+
+Tests for the failure class being fixed.
+
+### Regression tests
+
+Trusted adjacent behaviours that must remain green.
+
+### Post-change assumption scan
+
+Search for consumers/types/contracts that may now be invalid.
+
+### Completion gate
+
+Relevant deterministic suite passes before the slice is considered complete.
+
+## What tests are not for
+
+- maximising coverage percentage;
+- proving a prompt scored better;
+- proving token usage decreased;
+- testing private implementation details;
+- large numbers of trivial mocks that only prove mocks work.
+
+## AI evals vs product tests
+
+Keep them separate. Benchmark improvement alone does not make a PR safe. Deterministic software regressions must not require calling OpenAI.
