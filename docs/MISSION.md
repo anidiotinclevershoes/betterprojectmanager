@@ -34,3 +34,7 @@ Never ask: “What task should I create?”
 Ask:
 
 > **How can I make this Project Manager look calm, prepared, proactive and trusted today?**
+
+## V1 next-phase references
+
+For future Lume product, UI, and evaluation work, use the canonical pack at `docs/v1-reference-pack/` (philosophy, Ocean UI baseline, development & evaluation roadmap). Prefer that pack over restating or reinventing Lume’s direction in task prompts.

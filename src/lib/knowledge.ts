@@ -7,27 +7,27 @@ export const KNOWLEDGE_SECTIONS: Array<{
 }> = [
   {
     id: "now",
-    label: "What is true now?",
+    label: "Current position",
     hint: "What is true about the project right now",
   },
   {
     id: "decisions",
-    label: "What have we decided?",
-    hint: "Agreed calls and trade-offs",
+    label: "Decisions",
+    hint: "Agreed calls, trade-offs, and constraints",
   },
   {
     id: "risks",
-    label: "What might surprise me?",
+    label: "Risks & blockers",
     hint: "What could surprise stakeholders",
   },
   {
     id: "people",
-    label: "Who matters?",
+    label: "People & context",
     hint: "Stakeholder preferences, concerns, relationships",
   },
   {
     id: "openLoops",
-    label: "What is still open?",
+    label: "Waiting & open loops",
     hint: "Waiting on, chases, unconfirmed assumptions",
   },
 ];

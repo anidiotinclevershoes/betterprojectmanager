@@ -311,7 +311,7 @@ export function CoachBanner({
             ) : null}
             {busy && !markdown ? (
               <p className="empty">
-                Evaluating situation, gaps, risks, and what Tom should do next…
+                Evaluating situation, gaps, risks, and what to do next…
               </p>
             ) : null}
             {markdown ? (
@@ -321,7 +321,7 @@ export function CoachBanner({
 
           <aside className="coach-banner-actions">
             <header>
-              <h3>Accept into Mission Control</h3>
+              <h3>Accept into Lume</h3>
               <p>Add coaching lines into To do, Suggestions, or Knowledge.</p>
             </header>
             {actions.length === 0 ? (

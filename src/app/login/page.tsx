@@ -2,16 +2,28 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
+import {
+  AuthLinkRow,
+  AuthNavLink,
+  AuthShell,
+} from "@/components/auth/AuthShell";
+import { friendlyAuthError } from "@/lib/auth-password";
 
 function LoginForm() {
   const router = useRouter();
   const search = useSearchParams();
   const next = search.get("next") || "/";
+  const notice = search.get("notice");
+  const urlError = search.get("error");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    urlError === "auth_callback"
+      ? "That sign-in link is invalid or expired. Try again."
+      : null,
+  );
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -23,9 +35,12 @@ function LoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as {
+        error?: string;
+        mode?: string;
+      };
       if (!response.ok) {
-        throw new Error(data.error || "Sign-in failed");
+        throw new Error(friendlyAuthError(data.error));
       }
       router.replace(next.startsWith("/") ? next : "/");
       router.refresh();
@@ -37,52 +52,67 @@ function LoginForm() {
   }
 
   return (
-    <div className="login-page">
-      <div className="login-card">
-        <p className="eyebrow">Mission Control</p>
-        <h1>Demo sign-in</h1>
-        <p className="lede">
-          Private preview for testers. Use the demo email and password you were
-          sent.
+    <AuthShell
+      title="Sign in"
+      lede="Access your Lume workspace."
+      footer={
+        <>
+          <AuthLinkRow>
+            <AuthNavLink href="/forgot-password">Forgot password?</AuthNavLink>
+          </AuthLinkRow>
+          <AuthLinkRow>
+            New here? <AuthNavLink href="/signup">Create an account</AuthNavLink>
+          </AuthLinkRow>
+        </>
+      }
+    >
+      {notice === "check-email" ? (
+        <p className="auth-notice" role="status">
+          Check your email for a confirmation link, then sign in.
         </p>
-
-        <form onSubmit={onSubmit} className="login-form">
-          <label className="field">
-            <span>Email</span>
-            <input
-              type="email"
-              autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-            />
-          </label>
-          <label className="field">
-            <span>Password</span>
-            <input
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
-          </label>
-
-          {error ? <p className="login-error">{error}</p> : null}
-
-          <button type="submit" className="primary-btn login-submit" disabled={busy}>
-            {busy ? "Signing in…" : "Sign in"}
-          </button>
-        </form>
-
-        <p className="login-footnote">
-          This is a lightweight gate for demos — not a full account system yet.
-          Your project data stays in this browser.
+      ) : null}
+      {notice === "password-updated" ? (
+        <p className="auth-notice" role="status">
+          Your password was updated. You can sign in now.
         </p>
-      </div>
-    </div>
+      ) : null}
+      {notice === "reset-sent" ? (
+        <p className="auth-notice" role="status">
+          If that email is registered, we sent a reset link.
+        </p>
+      ) : null}
+
+      <form onSubmit={onSubmit} className="login-form">
+        <label className="field">
+          <span>Email</span>
+          <input
+            type="email"
+            autoComplete="username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            required
+          />
+        </label>
+        <label className="field">
+          <span>Password</span>
+          <input
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+          />
+        </label>
+
+        {error ? <p className="login-error">{error}</p> : null}
+
+        <button type="submit" className="primary-btn login-submit" disabled={busy}>
+          {busy ? "Signing in…" : "Sign in"}
+        </button>
+      </form>
+    </AuthShell>
   );
 }
 
@@ -90,11 +120,9 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="login-page">
-          <div className="login-card">
-            <p className="lede">Loading sign-in…</p>
-          </div>
-        </div>
+        <AuthShell title="Sign in" lede="Loading…">
+          <p className="lede">Loading sign-in…</p>
+        </AuthShell>
       }
     >
       <LoginForm />

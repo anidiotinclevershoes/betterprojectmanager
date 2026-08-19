@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { isOpenAIConfigured, transcribeWithWhisper } from "@/lib/openai";
+import { requireAiCaller } from "@/lib/ai-gate";
+import { serverLog } from "@/lib/server-log";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const gate = await requireAiCaller("transcribe");
+  if (!gate.ok) return gate.response;
+
   if (!isOpenAIConfigured()) {
     return NextResponse.json(
       {
@@ -34,6 +39,10 @@ export async function POST(request: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Transcription failed";
+    serverLog.error("transcribe.failed", {
+      userId: gate.userId,
+      error: message,
+    });
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

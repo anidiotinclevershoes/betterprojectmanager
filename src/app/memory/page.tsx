@@ -38,9 +38,9 @@ export default function MemoryPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Memory"
-        title="Institutional memory"
-        description="Conversations, decisions, risks, preferences and release history — still answerable months later."
+        eyebrow="Knowledge"
+        title="Knowledge"
+        description="Decisions, risks, stakeholders, patterns and preferences — still answerable months later."
       />
 
       <Panel title="Ask your second brain" className="mb-5">

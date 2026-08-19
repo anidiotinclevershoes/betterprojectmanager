@@ -26,7 +26,7 @@ export function parseCoachActions(markdown: string): CoachAction[] {
   const sections = splitSections(markdown);
   const actions: CoachAction[] = [];
 
-  for (const item of listItems(sections["2"] ?? sections["What Tom Should Do Now"] ?? "")) {
+  for (const item of listItems(sections["2"] ?? sections["What Tom Should Do Now"] ?? sections["Recommended Actions"] ?? "")) {
     actions.push(makeAction(item, "do_now", "todo"));
   }
 

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { DetailModal } from "@/components/DetailModal";
+import { mergeReleaseDateError } from "@/lib/dates";
 import { useMission } from "@/lib/store";
 import { toDateInputValue } from "@/lib/selectors";
 
@@ -24,6 +25,13 @@ export function CloneRelOpsButton({ projectId }: { projectId: string }) {
   const [mergeDate, setMergeDate] = useState(defaults.mergeDate);
   const [releaseDate, setReleaseDate] = useState(defaults.releaseDate);
 
+  const dateError = mergeReleaseDateError(mergeDate, releaseDate);
+  const canSubmit =
+    Boolean(monthName.trim()) &&
+    Boolean(mergeDate) &&
+    Boolean(releaseDate) &&
+    !dateError;
+
   const openModal = () => {
     setMonthName(defaults.monthName);
     setMergeDate("");
@@ -32,11 +40,40 @@ export function CloneRelOpsButton({ projectId }: { projectId: string }) {
     setOpen(true);
   };
 
+  const onMergeChange = (value: string) => {
+    setMergeDate(value);
+    setError(null);
+    // If release becomes invalid, keep it but show inline error via dateError.
+    if (releaseDate && value && releaseDate < value) {
+      // Block impossible pairing where practical by clamping release up.
+      setReleaseDate(value);
+    }
+  };
+
+  const onReleaseChange = (value: string) => {
+    setReleaseDate(value);
+    setError(null);
+  };
+
   const submit = () => {
+    const inline = mergeReleaseDateError(mergeDate, releaseDate);
+    if (!monthName.trim()) {
+      setError("Release month name is required.");
+      return;
+    }
+    if (!mergeDate) {
+      setError("Merge date is required.");
+      return;
+    }
+    if (!releaseDate) {
+      setError("Release date is required.");
+      return;
+    }
+    if (inline) {
+      setError(inline);
+      return;
+    }
     try {
-      if (!monthName.trim()) throw new Error("Release month name is required.");
-      if (!mergeDate) throw new Error("Merge date is required.");
-      if (!releaseDate) throw new Error("Release date is required.");
       cloneRelOps({
         monthName: monthName.trim(),
         mergeDate,
@@ -60,10 +97,19 @@ export function CloneRelOpsButton({ projectId }: { projectId: string }) {
         onClose={() => setOpen(false)}
         footer={
           <div className="flex justify-end gap-2">
-            <button type="button" className="muted-btn" onClick={() => setOpen(false)}>
+            <button
+              type="button"
+              className="muted-btn"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </button>
-            <button type="button" className="primary-btn" onClick={submit}>
+            <button
+              type="button"
+              className="primary-btn"
+              onClick={submit}
+              disabled={!canSubmit}
+            >
               Create month
             </button>
           </div>
@@ -86,7 +132,8 @@ export function CloneRelOpsButton({ projectId }: { projectId: string }) {
           <input
             type="date"
             value={mergeDate}
-            onChange={(e) => setMergeDate(e.target.value)}
+            onChange={(e) => onMergeChange(e.target.value)}
+            required
           />
         </label>
         <label className="field">
@@ -95,10 +142,21 @@ export function CloneRelOpsButton({ projectId }: { projectId: string }) {
             type="date"
             value={releaseDate}
             min={mergeDate || undefined}
-            onChange={(e) => setReleaseDate(e.target.value)}
+            onChange={(e) => onReleaseChange(e.target.value)}
+            required
+            aria-invalid={Boolean(dateError) || undefined}
           />
         </label>
-        {error ? <p className="mt-2 text-xs text-signal">{error}</p> : null}
+        {dateError ? (
+          <p className="field-error" role="alert">
+            {dateError}
+          </p>
+        ) : null}
+        {error && error !== dateError ? (
+          <p className="field-error" role="alert">
+            {error}
+          </p>
+        ) : null}
       </DetailModal>
     </>
   );

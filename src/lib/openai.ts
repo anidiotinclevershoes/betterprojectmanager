@@ -1,18 +1,25 @@
 import { analyseCapture } from "./coach";
-import { extractKnowledgePatchFromText } from "./knowledge";
+import {
+  buildCaptureAssembledPrompt,
+  logPromptAssemblyDiagnostic,
+  type AssembledPrompt,
+} from "@/ai/domain";
+import type { CaptureProjectContext } from "./capture/context";
+import {
+  attachFindingsToResult,
+  knowledgePatchFromOperations,
+  recommendationsFromOperations,
+  runFindingsPipeline,
+} from "./capture/findings";
 import { COACHING_SYSTEM_PROMPT, MEMORY_TYPES } from "./mission";
-import { extractTimelinePatchFromText } from "./timeline";
+import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import type {
   CaptureInput,
   CaptureResult,
   MissionState,
   Project,
   ProjectKnowledge,
-  Recommendation,
-  RecommendationKind,
-  RecommendationUrgency,
   TimelineItem,
-  TimelineItemInput,
 } from "./types";
 
 /**
@@ -89,18 +96,9 @@ export type AiCapturePayload = {
   people: string[];
   insights: string[];
   assumptions: string[];
-  recommendations: Array<{
-    kind: RecommendationKind;
-    urgency: RecommendationUrgency;
-    title: string;
-    action: string;
-    why: string;
-    leadershipImpact: string;
-    suggestedScript?: string;
-  }>;
+  /** Phase 1.6: structured findings — not final operations. */
+  findings?: unknown[];
   suggestedProjectId?: string | null;
-  knowledgePatch?: Partial<ProjectKnowledge["sections"]>;
-  timelinePatch?: TimelineItemInput[];
 };
 
 const CAPTURE_JSON_SCHEMA_HINT = `{
@@ -109,99 +107,98 @@ const CAPTURE_JSON_SCHEMA_HINT = `{
   "memoryType": one of ${JSON.stringify(MEMORY_TYPES)},
   "tags": ["short", "tags"],
   "people": ["Full Names if known"],
-  "insights": ["what changed / what this means"],
+  "insights": ["short factual bullets of what happened"],
   "assumptions": ["explicit assumptions when info is missing"],
-  "recommendations": [
+  "findings": [
     {
-      "kind": "stakeholder_update|escalation|conversation|meeting|decision|risk|dependency|release|meeting_prep|leadership|assumption",
-      "urgency": "now|today|this_week|watch",
-      "title": "leadership move title",
-      "action": "what the PM should do",
-      "why": "why this matters",
-      "leadershipImpact": "how this makes them look calm, prepared, proactive and trusted",
-      "suggestedScript": "optional short script"
+      "fact": "one concrete fact from the Capture",
+      "evidence": "short quote or paraphrase from Capture supporting the fact",
+      "findingType": "ENTITY_COMPLETED|ENTITY_UPDATED|ENTITY_BLOCKED|ENTITY_REOPENED|NEW_INFORMATION|NO_CHANGE|AMBIGUOUS",
+      "target": {
+        "entityType": "todo|risk|knowledge|stakeholder|meeting|milestone|nudge|release",
+        "entityId": "exact id from the supplied Existing records list — never invent",
+        "title": "exact title from that record"
+      },
+      "changes": {
+        "fieldName": { "previous": "optional prior value", "proposed": "new value" }
+      },
+      "confidence": 0-100,
+      "requiresClarification": false,
+      "clarificationQuestion": "only when ambiguous",
+      "reasoningSummary": "one or two sentences linking evidence to the finding"
     }
   ],
-  "suggestedProjectId": "project id if clear, else null",
-  "knowledgePatch": {
-    "now": ["0-3 short bullets: what is newly true"],
-    "decisions": ["0-2 short bullets: decisions / trade-offs only if stated"],
-    "risks": ["0-3 short bullets: risks / blockers only if relevant"],
-    "people": ["0-2 short bullets: stakeholder prefs/concerns only if relevant"],
-    "openLoops": ["0-3 short bullets: waiting on / unconfirmed only if relevant"]
-  },
-  "timelinePatch": [
-    {
-      "label": "short milestone/meeting/deadline label",
-      "type": "phase|milestone|meeting|deadline|submission",
-      "startAt": "ISO date if explicitly stated or clearly implied",
-      "endAt": "optional ISO end for phases",
-      "notes": "optional short note"
-    }
-  ]
-}`;
+  "suggestedProjectId": "project id if clear, else null"
+}
 
-export async function tidyAndCoachWithOpenAI(args: {
+Important:
+- Do NOT return recommendations, operations, knowledgePatch, or timelinePatch.
+- Do NOT invent record IDs. If no record matches, omit target or use AMBIGUOUS / NEW_INFORMATION.
+- Prefer matching an existing record over creating duplicate Knowledge.
+- Do not create Knowledge merely to record a transient status update (e.g. a To Do completed).
+- Mark uncertainty as AMBIGUOUS rather than guessing.`;
+
+
+export type CapturePromptBuildArgs = {
   rawText: string;
   projectId?: string;
   sourceType?: CaptureInput["sourceType"];
   projects: Project[];
   existingKnowledge?: ProjectKnowledge | null;
   existingTimeline?: TimelineItem[];
-}): Promise<AiCapturePayload> {
+  openTodos?: Array<{
+    id: string;
+    title: string;
+    projectId?: string | null;
+    dueAt?: string;
+  }>;
+  captureContext?: CaptureProjectContext | null;
+};
+
+export type CapturePromptAssembly = AssembledPrompt;
+
+/**
+ * Modular Capture prompt assembly (Role → Domain → Dictionary → Context → Capture → Schema).
+ * Response JSON schema is unchanged from Phase 1.
+ */
+export function buildCapturePromptAssembly(
+  args: CapturePromptBuildArgs,
+): AssembledPrompt {
+  return buildCaptureAssembledPrompt({
+    ...args,
+    schemaHint: CAPTURE_JSON_SCHEMA_HINT,
+  });
+}
+
+/**
+ * Pure prompt construction for Capture analysis.
+ * Used by the OpenAI caller and by path tests that assert context inclusion.
+ */
+export function buildCaptureUserPrompt(args: CapturePromptBuildArgs): string {
+  return buildCapturePromptAssembly(args).text;
+}
+
+export async function tidyAndCoachWithOpenAI(
+  args: CapturePromptBuildArgs,
+): Promise<{
+  ai: AiCapturePayload;
+  promptAssembly: AssembledPrompt;
+  providerUsage: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  } | null;
+  responseText: string;
+  model: string;
+}> {
   const key = getOpenAIKey();
   if (!key) {
     throw new Error("OPENAI_API_KEY is not configured");
   }
 
-  const projectContext = args.projects.map((p) => ({
-    id: p.id,
-    code: p.code,
-    name: p.name,
-    status: p.status,
-    currentFocus: p.currentFocus,
-    stakeholders: p.stakeholders.map((s) => `${s.name} (${s.role})`),
-  }));
-
-  const userPrompt = `The user captured a raw note (possibly a voice ramble). Tidy it into institutional memory, produce proactive coaching recommendations, and extract ONLY project-relevant bullets for the knowledge brief.
-
-Source type: ${args.sourceType ?? "note"}
-Preferred project id (may be empty): ${args.projectId ?? ""}
-Projects:
-${JSON.stringify(projectContext, null, 2)}
-
-Existing knowledge brief for this project (do not repeat these; only add genuinely new or changed facts):
-${JSON.stringify(args.existingKnowledge?.sections ?? {}, null, 2)}
-
-Existing timeline items (APPEND only — never rebuild or delete the calendar):
-${JSON.stringify(
-  (args.existingTimeline ?? []).map((t) => ({
-    id: t.id,
-    label: t.label,
-    type: t.type,
-    startAt: t.startAt,
-    endAt: t.endAt,
-  })),
-  null,
-  2,
-)}
-
-Raw capture:
-"""
-${args.rawText}
-"""
-
-Return ONLY valid JSON matching this shape:
-${CAPTURE_JSON_SCHEMA_HINT}
-
-Rules:
-- Preserve all factual content; do not invent meetings, dates or approvals.
-- If uncertain, put uncertainty in assumptions.
-- Produce 1–4 high-signal recommendations, not a task dump.
-- Prefer leadership moves over administrative chores.
-- knowledgePatch must stay sparse: max a few short bullets total, only facts relevant to running the project. Skip trivia, filler and duplicates of existing knowledge.
-- timelinePatch: ONLY add dates explicitly stated or clearly implied. Do not invent a full calendar. Prefer 0–3 new items. Never remove existing timeline items.
-- Use empty arrays for sections / timelinePatch when nothing new.`;
+  const promptAssembly = buildCapturePromptAssembly(args);
+  logPromptAssemblyDiagnostic(promptAssembly);
+  const model = resolveOpenAIChatModel();
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -210,12 +207,12 @@ Rules:
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      model,
       temperature: 0.3,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: COACHING_SYSTEM_PROMPT },
-        { role: "user", content: userPrompt },
+        { role: "user", content: promptAssembly.text },
       ],
     }),
   });
@@ -227,13 +224,24 @@ Rules:
 
   const data = (await response.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+    };
   };
   const content = data.choices?.[0]?.message?.content;
   if (!content) {
     throw new Error("OpenAI returned an empty capture response");
   }
 
-  return JSON.parse(content) as AiCapturePayload;
+  return {
+    ai: JSON.parse(content) as AiCapturePayload,
+    promptAssembly,
+    providerUsage: data.usage ?? null,
+    responseText: content,
+    model,
+  };
 }
 
 export async function transcribeWithWhisper(
@@ -282,6 +290,9 @@ export function buildCaptureResultFromAi(args: {
   projectId?: string;
   sourceType?: CaptureInput["sourceType"];
   ai: AiCapturePayload;
+  captureContext?: CaptureProjectContext | null;
+  /** Open todos across projects — used for PROJECT_UNCERTAIN detection. */
+  allOpenTodos?: Array<{ id: string; title: string; projectId?: string | null }>;
 }): CaptureResult {
   const memoryType = (MEMORY_TYPES as readonly string[]).includes(
     args.ai.memoryType,
@@ -295,24 +306,27 @@ export function buildCaptureResultFromAi(args: {
   const now = new Date().toISOString();
   const projectId = args.ai.suggestedProjectId || args.projectId || undefined;
 
-  const recommendations: Recommendation[] = (
-    args.ai.recommendations ?? []
-  ).map((rec) => ({
-    id: id("rec"),
-    kind: rec.kind,
-    urgency: rec.urgency,
-    title: rec.title,
-    action: rec.action,
-    why: rec.why,
-    leadershipImpact: rec.leadershipImpact,
-    suggestedScript: rec.suggestedScript,
-    projectId,
-    relatedMemoryIds: [memoryId],
-    createdAt: now,
-    status: "active",
-  }));
+  const pipeline = runFindingsPipeline({
+    rawFindings: args.ai.findings,
+    captureText: args.rawText,
+    captureContext: args.captureContext,
+    allowLocalFallback: false,
+    projects: args.captureContext?.projectIndex,
+    softHintProjectId: args.projectId,
+    allOpenTodos: args.allOpenTodos,
+  });
 
-  return {
+  const recommendations = recommendationsFromOperations(
+    pipeline.operations,
+    projectId,
+    memoryId,
+  );
+  const knowledgePatch = knowledgePatchFromOperations(
+    pipeline.operations,
+    pipeline.findings,
+  );
+
+  const base: CaptureResult = {
     memory: {
       id: memoryId,
       type: memoryType,
@@ -325,38 +339,96 @@ export function buildCaptureResultFromAi(args: {
       createdAt: now,
       source: "capture",
     },
-    insights: [
-      ...(args.ai.insights ?? []),
-      "Tidied from raw capture with OpenAI.",
-    ],
+    insights: [...(args.ai.insights ?? [])],
     assumptions: args.ai.assumptions ?? [],
     recommendations,
     rawContent: args.rawText,
     tidied: true,
     provider: "openai",
-    knowledgePatch: args.ai.knowledgePatch,
+    knowledgePatch,
     knowledgeProjectId: projectId,
-    timelinePatch: args.ai.timelinePatch,
+    timelinePatch: undefined,
+    findingsValidation: {
+      ok: pipeline.validation.ok,
+      errors: pipeline.validation.errors,
+      warnings: pipeline.validation.warnings,
+      invalidTargetCount: pipeline.validation.invalidTargetCount,
+    },
   };
+
+  return attachFindingsToResult(
+    base,
+    pipeline.findings,
+    pipeline.operations,
+    pipeline.coverage,
+  );
 }
 
 export function localCaptureFallback(
   input: CaptureInput,
   state: MissionState,
+  captureContext?: CaptureProjectContext | null,
 ): CaptureResult {
-  const result = analyseCapture(input, state);
-  const projectId = result.memory.projectId || input.projectId;
-  return {
-    ...result,
+  const analysed = analyseCapture(input, state);
+  const projectId = analysed.memory.projectId || input.projectId;
+
+  const pipeline = runFindingsPipeline({
+    rawFindings: null,
+    captureText: input.content,
+    captureContext: captureContext ?? null,
+    allowLocalFallback: true,
+    projects: (state.projects ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      code: p.code,
+    })),
+    softHintProjectId: input.projectId,
+    allOpenTodos: (state.todos ?? [])
+      .filter((t) => !t.done)
+      .map((t) => ({
+        id: t.id,
+        title: t.title,
+        projectId: t.projectId,
+      })),
+  });
+
+  const memoryId = analysed.memory.id;
+  const recommendations = recommendationsFromOperations(
+    pipeline.operations,
+    projectId,
+    memoryId,
+  );
+  const knowledgePatch = knowledgePatchFromOperations(
+    pipeline.operations,
+    pipeline.findings,
+  );
+
+  const base: CaptureResult = {
+    ...analysed,
+    recommendations,
     rawContent: input.content,
     tidied: false,
     provider: "local",
-    knowledgePatch: projectId
-      ? extractKnowledgePatchFromText(input.content)
-      : undefined,
+    knowledgePatch,
     knowledgeProjectId: projectId,
-    timelinePatch: projectId
-      ? extractTimelinePatchFromText(input.content)
-      : undefined,
+    timelinePatch: undefined,
+    insights: [
+      ...pipeline.findings.map((f) => f.fact),
+      ...(analysed.insights ?? []).slice(0, 2),
+    ],
+    findingsValidation: {
+      ok: pipeline.validation.ok,
+      errors: pipeline.validation.errors,
+      warnings: pipeline.validation.warnings,
+      invalidTargetCount: pipeline.validation.invalidTargetCount,
+    },
   };
+
+  return attachFindingsToResult(
+    base,
+    pipeline.findings,
+    pipeline.operations,
+    pipeline.coverage,
+  );
 }
+

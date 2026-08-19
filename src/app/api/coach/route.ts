@@ -1,6 +1,8 @@
 import { isOpenAIConfigured } from "@/lib/openai";
 import { streamPmCoaching, type CoachScope } from "@/lib/pm-coach";
 import type { MissionState } from "@/lib/types";
+import { requireAiCaller } from "@/lib/ai-gate";
+import { isProductionRuntime } from "@/lib/runtime-config";
 
 export const runtime = "nodejs";
 
@@ -11,6 +13,16 @@ type Body = {
 
 export async function POST(request: Request) {
   try {
+    const gate = await requireAiCaller("coach");
+    if (!gate.ok) return gate.response;
+
+    if (isProductionRuntime() && !isOpenAIConfigured()) {
+      return new Response(
+        JSON.stringify({ error: "AI is not configured for this environment." }),
+        { status: 503, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     const body = (await request.json()) as Body;
     if (!body?.state || !body?.scope) {
       return new Response(JSON.stringify({ error: "Missing scope or state." }), {
@@ -32,7 +44,11 @@ export async function POST(request: Request) {
             type: "ready",
             openaiConfigured: isOpenAIConfigured(),
           });
-          for await (const event of streamPmCoaching(body.state, body.scope)) {
+          for await (const event of streamPmCoaching(
+            body.state,
+            body.scope,
+            gate.displayName,
+          )) {
             send(event);
           }
         } catch (error) {

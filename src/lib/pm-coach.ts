@@ -1,15 +1,28 @@
 import { getOpenAIKey, isOpenAIConfigured } from "./openai";
+import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import type { MissionState, Project } from "./types";
 
-export const PM_COACH_SYSTEM_PROMPT = `SYSTEM ROLE — Assistant Project Manager Coach
-You are Tom’s Assistant Project Manager Coach, embedded inside an application.
+/** Prefer first name from display name; never invent a specific person. */
+export function resolveCoachManagerLabel(
+  displayName?: string | null,
+): string {
+  const trimmed = displayName?.trim();
+  if (!trimmed) return "the project manager";
+  const first = trimmed.split(/\s+/)[0];
+  return first || "the project manager";
+}
+
+export function buildPmCoachSystemPrompt(managerLabel: string): string {
+  const who = managerLabel.trim() || "the project manager";
+  return `SYSTEM ROLE — Assistant Project Manager Coach
+You are an Assistant Project Manager Coach for ${who}, embedded inside an application.
 You do not initiate coaching on your own.
 You only respond when the app requests guidance.
 
-Your purpose is to help Tom operate like a high‑performing, proactive, structured, and reliable project manager by analysing the project context provided to you and advising what Tom should do next.
+Your purpose is to help ${who} operate like a high‑performing, proactive, structured, and reliable project manager by analysing the project context provided to you and advising what ${who} should do next.
 
 You always think:
-“Given the current project situation, what should Tom do right now to look like an exceptional project manager?”
+“Given the current project situation, what should ${who} do right now to look like an exceptional project manager?”
 
 CONTEXT AWARENESS
 You have access to:
@@ -28,13 +41,13 @@ You do not assume or invent missing details — you ask for clarification if nee
 
 CORE COACHING BEHAVIOURS
 When the app requests coaching, you provide:
-- Clear next actions Tom should take
+- Clear next actions ${who} should take
 - Meeting guidance (how to lead, what to ask, what to clarify)
 - Risk identification based on provided context
-- Communication scripts Tom can use
+- Communication scripts ${who} can use
 - Checklists for processes (testing, releases, dev handovers, etc.)
-- Corrections if Tom’s understanding is wrong
-- Structured breakdowns of what’s happening and what Tom should do
+- Corrections if ${who}'s understanding is wrong
+- Structured breakdowns of what’s happening and what ${who} should do
 
 You do not generate daily summaries or proactive alerts unless explicitly requested.
 
@@ -59,35 +72,40 @@ Before responding, you silently evaluate:
 - What communication needs tightening?
 - What would a senior PM do next?
 
-Then you tell Tom exactly what to do.
+Then you tell ${who} exactly what to do.
 
 OUTPUT FORMAT
 Your responses MUST follow this structure exactly:
 
-## 1. Situational Assessment
-A concise summary of what’s going on based on the provided context.
+## Leadership
+What an exceptional PM would do to lead with confidence now — framing, stakeholder presence, ownership moments.
 
-## 2. What Tom Should Do Now
-A clear numbered list of actions Tom should take immediately.
+## Risks
+Emerging or under-tracked risks grounded in the provided project knowledge. Prefer evidence over speculation.
 
-## 3. Risks / Gaps to Address
-Anything Tom might be missing or overlooking.
+## Strategic Actions
+Proactive moves that advance the programme, not merely overdue tasks.
 
-## 4. Communication Guidance
-Scripts or phrasing Tom can use with stakeholders or teams.
+## Disruptive Opportunity
+Always include this section. Highlight one non-obvious, high-leverage opportunity grounded in existing project knowledge (patterns, stakeholder preferences, release history, open loops). Explain why it is disruptive and what concrete first step unlocks it. Never leave this section empty.
 
-## 5. Optional: Checklist
-If relevant, provide a short checklist Tom can follow. If not relevant, write "None needed right now."
+## Recommended Actions
+A short numbered list of concrete next actions the user can accept into To Do / Knowledge.
 
 PRIMARY GOAL
-Make Tom look like:
+Help ${who} look like:
 - The person who always knows what’s going on
 - The person who spots issues early
 - The person who leads meetings with clarity
 - The person who drives progress
 - The person others trust
 - The person who never gets blindsided again`;
+}
 
+/** @deprecated Prefer buildPmCoachSystemPrompt(resolveCoachManagerLabel(...)) */
+export const PM_COACH_SYSTEM_PROMPT = buildPmCoachSystemPrompt(
+  "the project manager",
+);
 export type CoachScope = {
   mode: "overview" | "project";
   projectId?: string;
@@ -174,7 +192,9 @@ function projectBundle(state: MissionState, project: Project) {
 export function buildCoachContext(
   state: MissionState,
   scope: CoachScope,
+  managerLabel: string = "the project manager",
 ): { title: string; context: unknown } {
+  const who = managerLabel.trim() || "the project manager";
   if (scope.mode === "project" && scope.projectId) {
     const project = state.projects.find((p) => p.id === scope.projectId);
     if (!project) {
@@ -184,7 +204,7 @@ export function buildCoachContext(
       };
     }
     return {
-      title: `Coach Tom on ${project.code} — ${project.name}`,
+      title: `Coach ${who} on ${project.code} — ${project.name}`,
       context: {
         scope: "single_project",
         ...projectBundle(state, project),
@@ -197,7 +217,7 @@ export function buildCoachContext(
   );
 
   return {
-    title: "Coach Tom across all active projects",
+    title: `Coach ${who} across all active projects`,
     context: {
       scope: "overview_all_projects",
       projects: projects.map((p) => projectBundle(state, p)),
@@ -215,8 +235,10 @@ export type CoachResult = {
 export async function requestPmCoaching(
   state: MissionState,
   scope: CoachScope,
+  managerLabel: string = "the project manager",
 ): Promise<CoachResult> {
-  const { title, context } = buildCoachContext(state, scope);
+  const who = resolveCoachManagerLabel(managerLabel);
+  const { title, context } = buildCoachContext(state, scope, who);
 
   if (!isOpenAIConfigured()) {
     return {
@@ -230,9 +252,10 @@ export async function requestPmCoaching(
   const key = getOpenAIKey();
   const userPrompt = `${title}
 
-Use ONLY the project context JSON below. Do not invent missing facts. If something critical is missing, say what Tom should confirm.
+Use ONLY the project context JSON below. Do not invent missing facts. If something critical is missing, say what ${who} should confirm.
 
 Respond in the required coaching sections.
+Always include a highlighted ## Disruptive Opportunity section grounded in project knowledge.
 
 CONTEXT JSON:
 ${JSON.stringify(context, null, 2)}`;
@@ -244,10 +267,10 @@ ${JSON.stringify(context, null, 2)}`;
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      model: resolveOpenAIChatModel(),
       temperature: 0.35,
       messages: [
-        { role: "system", content: PM_COACH_SYSTEM_PROMPT },
+        { role: "system", content: buildPmCoachSystemPrompt(who) },
         { role: "user", content: userPrompt },
       ],
     }),
@@ -279,8 +302,10 @@ export type CoachStreamEvent =
 export async function* streamPmCoaching(
   state: MissionState,
   scope: CoachScope,
+  managerLabel: string = "the project manager",
 ): AsyncGenerator<CoachStreamEvent> {
-  const { title, context } = buildCoachContext(state, scope);
+  const who = resolveCoachManagerLabel(managerLabel);
+  const { title, context } = buildCoachContext(state, scope, who);
 
   if (!isOpenAIConfigured()) {
     const markdown = localCoachFallback(state, scope);
@@ -296,12 +321,11 @@ export async function* streamPmCoaching(
   const key = getOpenAIKey();
   const userPrompt = `${title}
 
-Use ONLY the project context JSON below. Do not invent missing facts. If something critical is missing, say what Tom should confirm.
+Use ONLY the project context JSON below. Do not invent missing facts. If something critical is missing, say what ${who} should confirm.
 
 Respond in the required coaching sections.
-In section 2, put each action on its own numbered line.
-In section 3, put each risk/gap on its own bullet.
-In section 5, use checklist lines like "- [ ] …".
+Always include a highlighted ## Disruptive Opportunity section grounded in project knowledge.
+Under ## Recommended Actions, put each action on its own numbered line.
 
 CONTEXT JSON:
 ${JSON.stringify(context, null, 2)}`;
@@ -315,11 +339,11 @@ ${JSON.stringify(context, null, 2)}`;
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      model: resolveOpenAIChatModel(),
       temperature: 0.35,
       stream: true,
       messages: [
-        { role: "system", content: PM_COACH_SYSTEM_PROMPT },
+        { role: "system", content: buildPmCoachSystemPrompt(who) },
         { role: "user", content: userPrompt },
       ],
     }),
@@ -384,21 +408,28 @@ function localCoachFallback(state: MissionState, scope: CoachScope): string {
       : state.projects;
 
   const lines: string[] = [];
-  lines.push("## 1. Situational Assessment");
+  lines.push("## Leadership");
   for (const p of projects) {
-    const openTodos = (state.todos ?? []).filter(
-      (t) => t.projectId === p.id && !t.done,
-    ).length;
-    const recs = state.recommendations.filter(
-      (r) => r.status === "active" && r.projectId === p.id,
-    ).length;
     lines.push(
-      `- **${p.code}**: ${p.currentFocus}. Status ${p.status}. ${openTodos} open to-dos, ${recs} active coaching suggestions.`,
+      `- **${p.code}**: Lead with a crisp narrative on “${p.currentFocus}”. Own the next conversation before stakeholders ask.`,
     );
   }
 
   lines.push("");
-  lines.push("## 2. What Tom Should Do Now");
+  lines.push("## Risks");
+  for (const p of projects) {
+    const knowledge = state.knowledge.find((k) => k.projectId === p.id);
+    const risks = knowledge?.sections.risks ?? [];
+    const loops = knowledge?.sections.openLoops ?? [];
+    if (risks[0]) lines.push(`- (${p.code}) ${risks[0]}`);
+    if (loops[0]) lines.push(`- (${p.code}) Open loop: ${loops[0]}`);
+  }
+  if (lines[lines.length - 1] === "## Risks") {
+    lines.push("- No explicit risks in knowledge yet — confirm testing/release evidence is current.");
+  }
+
+  lines.push("");
+  lines.push("## Strategic Actions");
   let n = 1;
   for (const p of projects) {
     const top = state.recommendations.find(
@@ -420,39 +451,30 @@ function localCoachFallback(state: MissionState, scope: CoachScope): string {
   }
 
   lines.push("");
-  lines.push("## 3. Risks / Gaps to Address");
-  for (const p of projects) {
-    const knowledge = state.knowledge.find((k) => k.projectId === p.id);
-    const risks = knowledge?.sections.risks ?? [];
-    const loops = knowledge?.sections.openLoops ?? [];
-    if (risks[0]) lines.push(`- (${p.code}) ${risks[0]}`);
-    if (loops[0]) lines.push(`- (${p.code}) Open loop: ${loops[0]}`);
-  }
-  if (lines[lines.length - 1] === "## 3. Risks / Gaps to Address") {
-    lines.push("- No explicit risks in knowledge yet — confirm testing/release evidence is current.");
-  }
-
-  lines.push("");
-  lines.push("## 4. Communication Guidance");
-  const meeting = state.meetings.find(
-    (m) =>
-      m.phase === "upcoming" &&
-      (!scope.projectId || m.projectId === scope.projectId),
-  );
-  if (meeting) {
-    lines.push(`Use this opening for **${meeting.title}**:`);
-    lines.push(`> ${meeting.prep.openingScript}`);
+  lines.push("## Disruptive Opportunity");
+  const disruptProject = projects[0];
+  const knowledge = disruptProject
+    ? state.knowledge.find((k) => k.projectId === disruptProject.id)
+    : undefined;
+  const preference =
+    disruptProject?.stakeholders.find((s) => s.preferences?.[0])?.preferences?.[0] ??
+    knowledge?.sections.people?.[0] ??
+    knowledge?.sections.decisions?.[0];
+  if (disruptProject && preference) {
+    lines.push(
+      `Use ${disruptProject.code} knowledge (“${preference}”) to pre-empt the next difficult conversation — send a short written brief before the meeting so you set the frame instead of reacting to it.`,
+    );
   } else {
     lines.push(
-      '> "I want to align on evidence, owners, and dates — not status. What is still unsigned, who owns it, and when will it be in the tracker?"',
+      "Turn silent stakeholders into an early-warning system: schedule a 15-minute pre-brief with the least-contacted sponsor and ask what would surprise them in the next steering conversation.",
     );
   }
 
   lines.push("");
-  lines.push("## 5. Optional: Checklist");
-  lines.push("- [ ] Open to-dos reviewed and dated");
-  lines.push("- [ ] Next meeting opening script ready");
-  lines.push("- [ ] Risks/open loops confirmed with owners");
+  lines.push("## Recommended Actions");
+  lines.push("1. Draft the disruptive brief and add it to To Do");
+  lines.push("2. Confirm owners for the top risk in Knowledge");
+  lines.push("3. Rehearse the next meeting opening out loud once");
   lines.push("");
   lines.push(
     "_Local coach mode — add OPENAI_API_KEY for full Assistant PM Coach responses._",

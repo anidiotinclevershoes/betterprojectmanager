@@ -84,7 +84,7 @@ export default function MeetingDetailPage() {
 
       <Panel title="After the meeting" className="mt-5">
         <p className="text-sm text-ink-soft">
-          Capture notes and Mission Control will file summary, actions,
+          Capture notes and Lume will file summary, actions,
           decisions, risks and follow-ups into institutional memory.
         </p>
         <Link
