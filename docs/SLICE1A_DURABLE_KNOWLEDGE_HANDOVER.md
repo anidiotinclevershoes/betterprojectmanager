@@ -40,7 +40,9 @@ Reconcile (not wipe/recreate):
 
 People/stakeholders, Confirm Owner, Capture extraction, Ask/Tell Me, canonical flag, UI redesign, Advise, portfolio.
 
-Risks table / `[Resolved]` authority → addressed in Slice 1B (`docs/SLICE1B_RISK_LIFECYCLE_AUTHORITY_HANDOVER.md`).
+**Risks table / `[Resolved]` authority → addressed in Slice 1B (`docs/SLICE1B_RISK_LIFECYCLE_AUTHORITY_HANDOVER.md`).**
+
+Adjacent defects discovered during 1A/1A.1/1B: `docs/LUME_V1_KNOWN_DISCOVERIES.md`.
 
 ## Verification
 

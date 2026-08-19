@@ -41,3 +41,7 @@ npm run verify:project-truth-safety
 npm run typecheck
 npm test
 ```
+
+## Adjacent discoveries
+
+Not fixed in this slice — tracked in `docs/LUME_V1_KNOWN_DISCOVERIES.md` (e.g. D-001 Confirm Owner UUID, D-003 suggestion persist, D-006 `source: "setup"`, D-015 historical `[Resolved]` open rows).

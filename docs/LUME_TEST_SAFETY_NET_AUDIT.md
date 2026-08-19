@@ -50,7 +50,7 @@ A green benchmark does **not** prove product safety. A deterministic regression 
 | Capture review-before-write | STRONG | Review counts/ready + trust-boundary |
 | Capture apply | PARTIAL | Local review; live apply round-trip = known gap without creds |
 | To Do CRUD | PARTIAL | Findings/workspace; live todo when creds |
-| Risk lifecycle | NONE→known gap | Documented skip — do not encode `[Resolved]` resurrection as OK |
+| Risk lifecycle | COVERED | `verify:risk-lifecycle` + project-truth-safety (Slice 1B) |
 | People/stakeholders | PARTIAL | Onboarding + confirm-owner scope tests |
 | scoped responsibility | STRONG | `verify-canonical-truth` + safety script |
 | milestones/dates | PARTIAL | Context/Tell Me; no dedicated CRUD suite |
@@ -66,13 +66,16 @@ A green benchmark does **not** prove product safety. A deterministic regression 
 
 ## C. Trust-critical gaps (prioritised)
 
-1. Confirm Owner non-UUID persist  
-2. Risk resolve / hydrate resurrection  
-3. Suggestion accept/dismiss memory-only  
-4. Invisible save failures  
-5. Live hydrate/edit round-trip without credentials in CI  
-6. Slice 1A.1 unrelated replacement identity — covered by `verify:knowledge-reconcile` / `verify:project-truth-safety`
-7. Slice 1B resolved risk resurrection — covered by `verify:risk-lifecycle` / `verify:project-truth-safety`  
+Living detail: **`docs/LUME_V1_KNOWN_DISCOVERIES.md`**.
+
+1. Confirm Owner non-UUID persist + stakeholders dual-write (D-001, D-002)  
+2. Suggestion accept/dismiss memory-only (D-003)  
+3. Invisible save failures (D-005)  
+4. Live hydrate/edit / Capture apply round-trip without credentials in CI (D-014)  
+5. ~~Slice 1A.1 unrelated replacement identity~~ — fixed  
+6. ~~Slice 1B resolved risk resurrection~~ — fixed  
+
+When a slice finds a new adjacent defect, add it to the Known Discoveries backlog (do not greenwash).  
 
 ---
 
