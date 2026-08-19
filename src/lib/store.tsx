@@ -76,6 +76,10 @@ import {
   persistTodoDelete,
   persistTodoUpdate,
 } from "@/lib/data/supabase/persist-mutations";
+import {
+  persistKnowledgeReconcile,
+  remapStructuredForSections,
+} from "@/lib/data/supabase/reconcile-knowledge";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -1529,6 +1533,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       sectionId: KnowledgeSectionId,
       bullets: string[],
     ) => {
+      let nextKnowledge: ProjectKnowledge | null = null;
       setState((prev) => {
         const current =
           (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
@@ -1537,11 +1542,16 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           .map((b) => b.trim())
           .filter(Boolean)
           .slice(0, 8);
+        const sections = { ...current.sections, [sectionId]: cleaned };
         const next: ProjectKnowledge = {
           ...current,
           updatedAt: new Date().toISOString(),
-          sections: { ...current.sections, [sectionId]: cleaned },
+          sections,
+          structured: remapStructuredForSections(current, sections, [
+            sectionId,
+          ]),
         };
+        nextKnowledge = next;
         return pushHistory(
           {
             ...prev,
@@ -1559,6 +1569,36 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           }),
         );
       });
+
+      const meta = persistMetaRef.current;
+      if (
+        meta.mode === "supabase" &&
+        meta.workspaceId &&
+        nextKnowledge
+      ) {
+        const desired = nextKnowledge;
+        void (async () => {
+          try {
+            const client = createBrowserSupabaseClient();
+            await persistKnowledgeReconcile(
+              client,
+              meta.workspaceId!,
+              projectId,
+              desired,
+              meta.userId,
+              [sectionId],
+            );
+          } catch (err) {
+            console.error("[updateKnowledgeSection] persist failed", err);
+            setSaveStatus("error");
+            setSaveError(
+              err instanceof Error
+                ? err.message
+                : "Could not save knowledge correction",
+            );
+          }
+        })();
+      }
     },
     [],
   );
@@ -1607,15 +1647,55 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   );
 
   const replaceKnowledge = useCallback((knowledge: ProjectKnowledge) => {
-    setState((prev) => ({
-      ...prev,
-      knowledge: [
-        ...(prev.knowledge ?? []).filter(
-          (k) => k.projectId !== knowledge.projectId,
-        ),
-        { ...knowledge, updatedAt: new Date().toISOString() },
-      ],
-    }));
+    let nextKnowledge: ProjectKnowledge | null = null;
+    setState((prev) => {
+      const previous =
+        (prev.knowledge ?? []).find((k) => k.projectId === knowledge.projectId) ??
+        emptyKnowledge(knowledge.projectId);
+      const sections = knowledge.sections;
+      const next: ProjectKnowledge = {
+        ...knowledge,
+        updatedAt: new Date().toISOString(),
+        structured:
+          knowledge.structured ??
+          remapStructuredForSections(previous, sections),
+      };
+      nextKnowledge = next;
+      return {
+        ...prev,
+        knowledge: [
+          ...(prev.knowledge ?? []).filter(
+            (k) => k.projectId !== knowledge.projectId,
+          ),
+          next,
+        ],
+      };
+    });
+
+    const meta = persistMetaRef.current;
+    if (meta.mode === "supabase" && meta.workspaceId && nextKnowledge) {
+      const desired = nextKnowledge;
+      void (async () => {
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistKnowledgeReconcile(
+            client,
+            meta.workspaceId!,
+            knowledge.projectId,
+            desired,
+            meta.userId,
+          );
+        } catch (err) {
+          console.error("[replaceKnowledge] persist failed", err);
+          setSaveStatus("error");
+          setSaveError(
+            err instanceof Error
+              ? err.message
+              : "Could not save knowledge correction",
+          );
+        }
+      })();
+    }
   }, []);
 
   const confirmResponsibilityOwner = useCallback(
