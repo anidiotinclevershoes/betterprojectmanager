@@ -4,7 +4,8 @@
 **Date:** 19 August 2026  
 **Branch observed:** `main` (post PR #43 V1 reference pack)  
 **Authority:** `docs/v1-reference-pack/` (philosophy, Ocean UI baseline, development/evaluation roadmap)  
-**Behavioural contract (reconcile, do not silently replace):** `docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`
+**Behavioural contract (reconcile, do not silently replace):** `docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`  
+**Living defect backlog (post-audit fixes/findings):** `docs/LUME_V1_KNOWN_DISCOVERIES.md`
 
 This audit maps how Lume currently stores, mutates, reads and assembles **project truth**. It does not change code, migrations, prompts, tests, schemas or UI.
 

@@ -378,8 +378,10 @@ export async function persistKnowledgeBullet(
     supersedesId?: string | null;
     meta?: Record<string, unknown> | null;
     provenance?: unknown[] | null;
+    /** Stable risks.id when dual-writing a genuine Risk (Slice 1B). */
+    riskId?: string | null;
   },
-): Promise<void> {
+): Promise<{ riskId?: string }> {
   const row: Record<string, unknown> = {
     workspace_id: workspaceId,
     project_id: projectId,
@@ -400,7 +402,15 @@ export async function persistKnowledgeBullet(
   if (error) throw new Error(`[supabase] create knowledge: ${error.message}`);
 
   if (section === "risks") {
-    await client.from("risks").insert({
+    const riskId =
+      meta?.riskId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        meta.riskId,
+      )
+        ? meta.riskId
+        : crypto.randomUUID();
+    const { error: riskError } = await client.from("risks").insert({
+      id: riskId,
       workspace_id: workspaceId,
       project_id: projectId,
       title: body,
@@ -408,6 +418,35 @@ export async function persistKnowledgeBullet(
       source: "capture",
       created_by: userId,
     });
+    if (riskError) {
+      throw new Error(`[supabase] create risk: ${riskError.message}`);
+    }
+    return { riskId };
+  }
+
+  return {};
+}
+
+/**
+ * Slice 1B: update authoritative Risk lifecycle status.
+ * Scoped by project + workspace to preserve tenant isolation.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRiskStatus(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  riskId: string,
+  status: "open" | "watch" | "resolved" | "accepted",
+): Promise<void> {
+  const { error } = await client
+    .from("risks")
+    .update({ status })
+    .eq("id", riskId)
+    .eq("project_id", projectId)
+    .eq("workspace_id", workspaceId);
+  if (error) {
+    throw new Error(`[supabase] update risk status: ${error.message}`);
   }
 }
 

@@ -1137,6 +1137,8 @@ export function createSeedState(): MissionState {
     releases: DEMO_RELEASES,
     todos: DEMO_TODOS,
     knowledge: DEMO_KNOWLEDGE,
+    // Seed demo risks remain Knowledge-only (legacy transitional). New adds mint ProjectRisk.
+    risks: [],
     timeline: DEMO_TIMELINE,
     history: [
       {

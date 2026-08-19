@@ -12,6 +12,9 @@ import {
 } from "react";
 import { useMission } from "@/lib/store";
 import {
+  findProjectRiskByExactTitle,
+} from "@/lib/risks/lifecycle";
+import {
   buildSuggestions,
   CAPTURE_SESSION_KEY,
   destinationFor,
@@ -198,7 +201,8 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     toggleTodo,
     removeTodo,
     updateTodo,
-    replaceKnowledge,
+    setRiskStatus,
+    setKnowledgeOnlyRiskResolved,
   } = useMission();
 
   const [slice, setSlice] = useState<CapturePersistSlice>(emptySlice);
@@ -581,31 +585,13 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         });
       } else if (item.kind === "risk" && pid) {
         if (item.op === "complete") {
-          const knowledge = state.knowledge?.find((k) => k.projectId === pid);
-          if (knowledge) {
-            let matched = false;
-            const nextRisks = (knowledge.sections.risks ?? []).map((r) => {
-              const cleaned = r.replace(/^\s*\[resolved\]\s*/i, "").trim();
-              if (
-                cleaned.toLowerCase() === text.toLowerCase() ||
-                text.toLowerCase().includes(cleaned.toLowerCase().slice(0, 24))
-              ) {
-                matched = true;
-                return `[Resolved] ${cleaned}`;
-              }
-              return r;
-            });
-            replaceKnowledge({
-              ...knowledge,
-              sections: {
-                ...knowledge.sections,
-                risks: matched
-                  ? nextRisks
-                  : [...nextRisks, `[Resolved] ${text}`],
-              },
-            });
+          // Prefer Risk-domain authority via exact title match (no fuzzy matching).
+          const domain = findProjectRiskByExactTitle(state.risks, pid, text);
+          if (domain) {
+            setRiskStatus(domain.id, "resolved", pid);
           } else {
-            addKnowledgeBullet(pid, "risks", `[Resolved] ${text}`);
+            // Legacy Knowledge-only — do not fabricate a risks row.
+            setKnowledgeOnlyRiskResolved(pid, text, true);
           }
         } else {
           addKnowledgeBullet(pid, "risks", text);
@@ -657,11 +643,13 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       announce,
       applyCaptureResult,
       removeTodo,
-      replaceKnowledge,
+      setKnowledgeOnlyRiskResolved,
+      setRiskStatus,
       slice.editing,
       slice.projectId,
       slice.result,
       state.knowledge,
+      state.risks,
       state.todos,
       toggleTodo,
       updateTodo,
