@@ -914,6 +914,33 @@ Future Cursor work should treat this document as binding product philosophy.
 - distinguish genuine regressions from evaluator artefacts;
 - challenge implementation requests that conflict with this philosophy.
 
+## Test-driven / behaviour-first development
+
+For meaningful Lume behaviour changes, define the expected behaviour and regression risk **before** implementation.
+
+Where practical:
+
+1. write or update a test that fails for the intended reason;
+2. implement the smallest correct change;
+3. make the focused test pass;
+4. run relevant adjacent regression tests;
+5. run the broader deterministic suite (`npm test`);
+6. perform a post-change scan for broken assumptions;
+7. do not consider the task complete while relevant tests are failing.
+
+Tests should protect **user-visible behaviour, project truth, persistence, identity, lifecycle, trust boundaries and data isolation** — not implementation trivia, mock choreography, or benchmark score chasing.
+
+### Rules
+
+- Do not casually rewrite tests merely because new implementation causes them to fail.
+- First decide whether the code changed intentionally or a regression occurred.
+- Expected behaviour changes require an explicit product decision.
+- Known defects must not be enshrined as correct behaviour merely to make the suite green (use explicit skips / known-gap markers).
+- Test burden should scale with change blast radius.
+- Tiny visual/copy changes do not require disproportionate testing.
+- Persistence / truth / identity / intelligence architecture changes require strong regression coverage.
+- Keep AI evaluation separate from software regression testing.
+
 ## Cursor should not
 
 - independently redefine or redesign Lume;
