@@ -69,6 +69,8 @@ import {
   persistCaptureSession,
   persistHistoryEvent,
   persistKnowledgeBullet,
+  persistKnowledgeLifecycle,
+  persistEnsureStakeholder,
   persistMemory,
   persistNewProject,
   persistRiskStatus,
@@ -238,6 +240,8 @@ type MissionContextValue = {
     personName: string;
     personId?: string | null;
     resolveTruthItemId?: string | null;
+    /** Explicitly supersede this person's current ownership of the same scope. */
+    replacePersonId?: string | null;
   }) => void;
   addTimelineItem: (
     projectId: string,
@@ -1927,6 +1931,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       personName: string;
       personId?: string | null;
       resolveTruthItemId?: string | null;
+      replacePersonId?: string | null;
     }) => {
       const bag: {
         peopleBullet: string;
@@ -1937,6 +1942,11 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         supersedesId: string | null;
         meta: Record<string, unknown>;
         provenance: unknown[];
+        personId: string;
+        personName: string;
+        personRole: string;
+        supersededIds: string[];
+        responsibilityCreated: boolean;
       } = {
         peopleBullet: "",
         itemId: "",
@@ -1946,6 +1956,11 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         supersedesId: null,
         meta: {},
         provenance: [],
+        personId: "",
+        personName: "",
+        personRole: "Stakeholder",
+        supersededIds: [],
+        responsibilityCreated: false,
       };
 
       setState((prev) => {
@@ -1961,6 +1976,11 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         bag.supersedesId = result.item.supersedesId ?? null;
         bag.meta = (result.item.meta as Record<string, unknown>) ?? {};
         bag.provenance = result.item.provenance ?? [];
+        bag.personId = result.person.id;
+        bag.personName = result.person.name;
+        bag.personRole = result.person.role;
+        bag.supersededIds = result.supersededIds;
+        bag.responsibilityCreated = result.responsibilityCreated;
         return result.state;
       });
 
@@ -1969,23 +1989,48 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         void (async () => {
           try {
             const client = createBrowserSupabaseClient();
-            await persistKnowledgeBullet(
+            await persistEnsureStakeholder(
               client,
               meta.workspaceId!,
               input.projectId,
-              "people",
-              bag.peopleBullet,
-              meta.userId,
               {
-                id: bag.itemId,
-                kind: bag.kind,
-                epistemic: bag.epistemic,
-                lifecycle: bag.lifecycle,
-                supersedesId: bag.supersedesId,
-                meta: bag.meta,
-                provenance: bag.provenance,
+                id: bag.personId,
+                name: bag.personName,
+                role: bag.personRole,
               },
             );
+            if (bag.supersededIds.length) {
+              await persistKnowledgeLifecycle(
+                client,
+                meta.workspaceId!,
+                input.projectId,
+                bag.supersededIds.filter((id) =>
+                  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+                    id,
+                  ),
+                ),
+                "superseded",
+              );
+            }
+            if (bag.responsibilityCreated) {
+              await persistKnowledgeBullet(
+                client,
+                meta.workspaceId!,
+                input.projectId,
+                "people",
+                bag.peopleBullet,
+                meta.userId,
+                {
+                  id: bag.itemId,
+                  kind: bag.kind,
+                  epistemic: bag.epistemic,
+                  lifecycle: bag.lifecycle,
+                  supersedesId: bag.supersedesId,
+                  meta: bag.meta,
+                  provenance: bag.provenance,
+                },
+              );
+            }
           } catch (err) {
             console.error("[confirmResponsibilityOwner] persist failed", err);
             setSaveStatus("error");

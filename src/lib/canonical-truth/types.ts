@@ -41,9 +41,22 @@ export type ProvenanceEntry = {
 
 export type ResponsibilityMeta = {
   personName?: string | null;
+  /** Stable project-scoped stakeholder/person id when known (Slice 1C). */
   personId?: string | null;
   scope: string;
   ownerConfirmed?: boolean;
+};
+
+/**
+ * Intended structured home for project-relevant availability (Slice 1C).
+ * Full calendar/holiday subsystem is out of scope — link via personId.
+ */
+export type AvailabilityMeta = {
+  personId?: string | null;
+  personName?: string | null;
+  label?: string | null;
+  awayFromIso?: string | null;
+  awayToIso?: string | null;
 };
 
 export type DateMeta = {
@@ -72,6 +85,7 @@ export type CanonicalTruthItem = {
   meta?: {
     responsibility?: ResponsibilityMeta | null;
     date?: DateMeta | null;
+    availability?: AvailabilityMeta | null;
     [key: string]: unknown;
   } | null;
   provenance?: ProvenanceEntry[] | null;

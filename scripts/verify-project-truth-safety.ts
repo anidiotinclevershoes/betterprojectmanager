@@ -318,10 +318,32 @@ check("Resolved risk must not resurrect from risks table on hydrate", () => {
   assert.ok(folded[0]!.sections.risks.includes("Other open risk"));
 });
 
-knownGap(
-  "Confirm Owner persist must use UUID knowledge_items.id",
-  "confirm-responsibility.ts still mints resp-* ids; store passes them to insert. Documented trust bug — do not greenwash.",
-);
+check("Confirm Owner persists UUID responsibility id and stakeholder personId", () => {
+  const state = emptyState();
+  state.projects = [
+    baseProject({
+      id: PROJECT_A,
+      name: "Alpha",
+      code: "ALP",
+      stakeholders: [],
+    }),
+  ];
+  state.knowledge = [emptyKnowledge(PROJECT_A)];
+
+  const result = confirmResponsibilityOwner({
+    state,
+    projectId: PROJECT_A,
+    scope: "Security sign-off",
+    personName: "Nina",
+  });
+
+  assert.equal(isKnowledgeUuid(result.item.id), true);
+  assert.equal(isKnowledgeUuid(result.person.id), true);
+  assert.equal(result.item.meta?.responsibility?.personId, result.person.id);
+  assert.ok(
+    result.state.projects[0]!.stakeholders.some((s) => s.id === result.person.id),
+  );
+});
 
 // --- Capture trust boundary (deterministic) ---
 

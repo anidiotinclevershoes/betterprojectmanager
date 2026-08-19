@@ -15,6 +15,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "knowledge-reconcile", script: "scripts/verify-knowledge-reconcile.ts" },
   { name: "project-truth-safety", script: "scripts/verify-project-truth-safety.ts" },
   { name: "risk-lifecycle", script: "scripts/verify-risk-lifecycle.ts" },
+  { name: "people-entities", script: "scripts/verify-people-entities.ts" },
   { name: "capture-trust-boundary", script: "scripts/verify-capture-trust-boundary.ts" },
   { name: "canonical-truth", script: "scripts/verify-canonical-truth.ts" },
   { name: "tell-me", script: "scripts/verify-tell-me.ts" },

@@ -44,6 +44,7 @@ A green benchmark does **not** prove product safety. A deterministic regression 
 | Knowledge delete/reconcile | STRONG | Same |
 | Knowledge stable identity | COVERED | Exact body + stable id + unique wording-edit; unrelated same-index → insert+delete (Slice 1A.1) |
 | Risk lifecycle authority | COVERED | `risks.status` authoritative; resolve → reload does not resurrect (Slice 1B) |
+| People / Confirm Owner identity | COVERED | stakeholders UUID + responsibility personId; shared/replace ownership (Slice 1C) |
 | provenance/metadata preservation | STRONG | Reconcile + remap tests |
 | Capture input | PARTIAL | Context/prompt verifies |
 | Capture analysis boundary | PARTIAL→STRONG | Findings/golden + new trust-boundary characterisation |

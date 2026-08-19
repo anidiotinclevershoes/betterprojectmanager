@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 19 August 2026 (revisit-point field + Capture 1B validation entry)  
+**Last housekeeping:** 19 August 2026 (Slice 1C People — D-001/D-002 fixed; D-007 partial; D-018/D-019 added)  
 **Authority:** `docs/v1-reference-pack/` + project-truth architecture audit  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
@@ -61,46 +61,6 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 ---
 
 ## Open discoveries
-
-### D-001 — Confirm Owner persists non-UUID `resp-*` ids
-
-| Field | Value |
-| --- | --- |
-| **Status** | open |
-| **Severity** | high |
-| **Domain** | People / Knowledge |
-| **Found in** | Architecture audit; Test safety net (Aug 2026); still open after Slice 1B |
-| **Failure class** | Confirm Owner mints client ids like `resp-…` that are not UUIDs; Supabase `knowledge_items.id` expects UUID → persist can fail or leave structured overlay out of sync with DB |
-| **Evidence / repro** | Confirm a scoped responsibility owner in UI; inspect `confirmResponsibilityOwner` output `itemId`; `isKnowledgeUuid("resp-…") === false`. Safety net: `knownGap("Confirm Owner persist must use UUID…")` in `scripts/verify-project-truth-safety.ts` |
-| **Likely files** | `src/lib/canonical-truth/confirm-responsibility.ts`; `src/lib/store.tsx` (`confirmResponsibilityOwner`); `src/lib/data/supabase/persist-mutations.ts` (`persistKnowledgeBullet`) |
-| **Proposed fix direction** | Mint UUID for new responsibility `knowledge_items` rows; keep supersession links on UUID ids; await/surface persist errors |
-| **Explicit non-goals** | Full People/stakeholder consolidation; person relationship graph; Ocean UI redesign |
-| **Regression test to add** | Retire knownGap; assert Confirm Owner insert uses UUID; reload retains confirmed owner |
-| **Target resolution / validation point** | People slice; must be resolved before V1 launch |
-| **Related docs** | `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` §3.1.5; `docs/LUME_TEST_SAFETY_NET_AUDIT.md` |
-| **Notes** | Stakeholder table dual-write is also incomplete (see D-002) — may fix together in People slice |
-
----
-
-### D-002 — Confirm Owner does not insert `stakeholders` row
-
-| Field | Value |
-| --- | --- |
-| **Status** | open |
-| **Severity** | high |
-| **Domain** | People |
-| **Found in** | Architecture audit §3.1.5 |
-| **Failure class** | Confirm Owner updates in-memory stakeholders + knowledge people bullet, but does not insert into `stakeholders` table → reload may drop picker/list identity while knowledge prose remains |
-| **Evidence / repro** | Confirm owner → soft refresh / rehydrate → stakeholder list missing person that still appears in Knowledge people |
-| **Likely files** | `src/lib/canonical-truth/confirm-responsibility.ts`; `src/lib/store.tsx`; `src/lib/data/supabase/persist-mutations.ts`; stakeholders repository |
-| **Proposed fix direction** | Single write API: ensure `stakeholders` row exists (create-or-get by project+name) when confirming; Knowledge/structured remain projection + epistemic overlay |
-| **Explicit non-goals** | Full CRM; relationship edges; Advise |
-| **Regression test to add** | Confirm Owner → simulated hydrate keeps stakeholder + structured responsibility |
-| **Target resolution / validation point** | People slice; must be resolved before V1 launch |
-| **Related docs** | Architecture audit People authority table; philosophy scoped ownership |
-| **Notes** | Natural home: People entity/relationship slice after Risk authority |
-
----
 
 ### D-003 — Suggestion accept/dismiss is memory-only
 
@@ -186,19 +146,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open (domain slice planned) |
-| **Severity** | high |
+| **Status** | open (partially addressed in Slice 1C) |
+| **Severity** | medium (down from high after 1C foundation) |
 | **Domain** | People |
 | **Found in** | Architecture audit §3.2.2 |
-| **Failure class** | Same person/role can exist in one, two, or three stores with asymmetric write coverage → Tell Me / KC / picker disagree |
-| **Evidence / repro** | Create project stakeholders vs Capture people bullets vs Confirm Owner structured responsibilities |
-| **Likely files** | `stakeholders` table; `knowledge.sections.people`; `structured` responsibilities; load-mission-state; Confirm Owner |
-| **Proposed fix direction** | People entity authority slice: `stakeholders` (or equivalent) as identity home; Knowledge projects; structured holds scoped responsibility epistemic |
-| **Explicit non-goals** | Portfolio org chart; Advise |
-| **Regression test to add** | Project isolation + confirm owner + hydrate consistency |
-| **Target resolution / validation point** | People slice; must be resolved before V1 launch |
-| **Related docs** | Architecture audit recommended People authority; Slice 1B recommendation to proceed to People slice |
-| **Notes** | Includes D-001/D-002 as first concrete fixes inside this domain |
+| **Failure class** | Legacy/Capture People prose can still exist without a stakeholder link; Tell Me / KC may show unpromoted free-text people |
+| **Evidence / repro** | Capture people bullets vs Confirm Owner structured responsibilities vs stakeholders picker |
+| **Likely files** | Capture people apply; Knowledge Edit people section; `getPersonBundle` |
+| **Proposed fix direction** | Promote known people prose to stakeholders when identity is explicit; keep legacy bullets as projection; richer People & Context UI later |
+| **Explicit non-goals** | Portfolio org chart; Advise; Ocean redesign in foundation slices |
+| **Regression test to add** | Capture→promote path once specified |
+| **Target resolution / validation point** | Capture hardening (promotion) + richer People & Context UI later; identity/responsibility foundation delivered in Slice 1C |
+| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
+| **Notes** | Slice 1C made stakeholders the durable identity authority and linked responsibilities via personId. Remaining gap is prose that never went through Confirm Owner. Not overdue — planned 1C foundation is done. |
 
 ---
 
@@ -402,6 +362,46 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
+### D-018 — Tell Me singular owner answer for shared responsibilities
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Ask/Tell Me |
+| **Found in** | Slice 1C |
+| **Failure class** | Domain now supports multiple current owners for one scope (`findConfirmedOwners`), but Tell Me answer path still uses singular `findConfirmedOwner` / phrasing |
+| **Evidence / repro** | Confirm Mark + Bruno for same scope; Ask who owns that scope under canonical local path |
+| **Likely files** | `src/lib/tell-me/answer.ts`; serialize / owner fast-path |
+| **Proposed fix direction** | Answer with all current confirmed owners for the scope; do not invent exclusivity |
+| **Explicit non-goals** | Enabling canonical Ask in production without evals |
+| **Regression test to add** | Shared owners → answer names both; no false single-owner claim |
+| **Target resolution / validation point** | Ask/canonical convergence |
+| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
+| **Notes** | Data model is ready; retrieval UI/Ask wording is the remaining gap |
+
+---
+
+### D-019 — Confirm Owner UI lacks explicit replace-vs-share choice
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | People |
+| **Found in** | Slice 1C |
+| **Failure class** | API supports `replacePersonId` for time-varying ownership, but Confirm Owner dialog always ADDs/shares. Users cannot explicitly replace Bob with Mary from the current dialog |
+| **Evidence / repro** | `ConfirmOwnerDialog.tsx` only passes personId + resolveTruthItemId; no replace control |
+| **Likely files** | `src/components/intelligence/ConfirmOwnerDialog.tsx`; People & Context UI later |
+| **Proposed fix direction** | When another current owner exists for the scope, offer Share vs Replace (Needs clarification) rather than silent replace |
+| **Explicit non-goals** | Full People drawer redesign beyond the confirm flow |
+| **Regression test to add** | UI/integration later; API already covered in `verify:people-entities` |
+| **Target resolution / validation point** | Richer People & Context UI later; must be checked before V1 launch if Confirm Owner is a primary correction path |
+| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
+| **Notes** | Default share (no silent overwrite) is intentional and safer than pre-1C supersede-all |
+
+---
+
 ## Resolved discoveries (reference)
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
@@ -439,16 +439,40 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ---
 
+### D-R04 — Confirm Owner non-UUID `resp-*` ids (Slice 1C)
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Slice 1C — `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
+| **Failure class** | Confirm Owner minted `resp-*` ids incompatible with UUID `knowledge_items.id` |
+| **Fix summary** | Responsibility + person ids use `crypto.randomUUID()` / durable stakeholder UUID; safety-net knownGap retired |
+
+---
+
+### D-R05 — Confirm Owner missing stakeholder persist (Slice 1C)
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Slice 1C — `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
+| **Failure class** | Confirm Owner only updated in-memory stakeholders |
+| **Fix summary** | `persistEnsureStakeholder` + in-memory `ensurePersonOnProject`; personId on responsibility meta |
+
+---
+
 ## Suggested fix order (non-binding)
 
 1. **D-006** — next New Project/persistence touchpoint (before V1 launch)  
-2. **D-001 + D-002 + D-007** — People slice  
-3. **D-017** — validate during Capture hardening (before Capture V1-ready)  
-4. **D-003** — suggestion persist (V1 product hardening)  
-5. **D-005** — save-error visibility (V1 product hardening, incremental OK)  
-6. **D-004** — history persist gaps (V1 product hardening)  
-7. **D-009 / D-010** — Ask/canonical convergence  
-8. **D-008, D-011–D-015** — as their domains are scheduled; D-008 timing remains ambiguous  
+2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
+3. **D-019** — Confirm Owner replace-vs-share UI (People UI later / before V1 launch)  
+4. **D-007** remainder — Capture promote + People UI  
+5. **D-017** — validate during Capture hardening (before Capture V1-ready)  
+6. **D-003** — suggestion persist (V1 product hardening)  
+7. **D-005** — save-error visibility (V1 product hardening, incremental OK)  
+8. **D-004** — history persist gaps (V1 product hardening)  
+9. **D-009 / D-010 / D-018** — Ask/canonical convergence  
+10. **D-008, D-011–D-015** — as their domains are scheduled; D-008 timing remains ambiguous  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 
