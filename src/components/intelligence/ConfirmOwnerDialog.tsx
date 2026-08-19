@@ -30,8 +30,13 @@ export function ConfirmOwnerDialog({
   const [error, setError] = useState<string | null>(null);
 
   const options = useMemo(
-    () => stakeholders.map((s) => s.name),
+    () => stakeholders.map((s) => ({ id: s.id, name: s.name })),
     [stakeholders],
+  );
+
+  const selectedStakeholder = useMemo(
+    () => stakeholders.find((s) => s.name === personName),
+    [stakeholders, personName],
   );
 
   return (
@@ -41,6 +46,8 @@ export function ConfirmOwnerDialog({
       </p>
       <p className="lume-confirm-owner-hint">
         This records a scoped responsibility, not a global project owner.
+        Adding another person for the same scope shares ownership unless you
+        explicitly replace someone elsewhere.
       </p>
       {options.length ? (
         <label className="lume-confirm-owner-field">
@@ -49,9 +56,9 @@ export function ConfirmOwnerDialog({
             value={personName}
             onChange={(e) => setPersonName(e.target.value)}
           >
-            {options.map((name) => (
-              <option key={name} value={name}>
-                {name}
+            {options.map((s) => (
+              <option key={s.id} value={s.name}>
+                {s.name}
               </option>
             ))}
             <option value="__other">Someone else…</option>
@@ -89,6 +96,7 @@ export function ConfirmOwnerDialog({
                 projectId,
                 scope,
                 personName: personName.trim(),
+                personId: selectedStakeholder?.id ?? null,
                 resolveTruthItemId: truthItemId,
               });
               onDone?.();

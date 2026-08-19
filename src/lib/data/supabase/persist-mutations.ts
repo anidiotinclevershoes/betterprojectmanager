@@ -450,6 +450,89 @@ export async function persistRiskStatus(
   }
 }
 
+/**
+ * Slice 1C: ensure a durable project-scoped Person (stakeholders row).
+ * Inserts when missing; returns the durable UUID. Exact id preferred;
+ * otherwise insert with provided/new UUID (caller must have deduped in memory).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistEnsureStakeholder(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  stakeholder: {
+    id: string;
+    name: string;
+    role?: string;
+  },
+): Promise<{ id: string; created: boolean }> {
+  const { data: existing, error: lookupError } = await client
+    .from("stakeholders")
+    .select("id, name")
+    .eq("workspace_id", workspaceId)
+    .eq("project_id", projectId)
+    .eq("id", stakeholder.id)
+    .maybeSingle();
+  if (lookupError) {
+    throw new Error(`[supabase] lookup stakeholder: ${lookupError.message}`);
+  }
+  if (existing?.id) {
+    return { id: existing.id as string, created: false };
+  }
+
+  // Exact name match within project (no fuzzy merge)
+  const { data: byName, error: nameError } = await client
+    .from("stakeholders")
+    .select("id, name")
+    .eq("workspace_id", workspaceId)
+    .eq("project_id", projectId);
+  if (nameError) {
+    throw new Error(`[supabase] list stakeholders: ${nameError.message}`);
+  }
+  const needle = stakeholder.name.trim().toLowerCase();
+  const nameHit = (byName ?? []).find(
+    (row) => String(row.name).trim().toLowerCase() === needle,
+  );
+  if (nameHit?.id) {
+    return { id: nameHit.id as string, created: false };
+  }
+
+  const { error: insertError } = await client.from("stakeholders").insert({
+    id: stakeholder.id,
+    workspace_id: workspaceId,
+    project_id: projectId,
+    name: stakeholder.name.trim(),
+    role: stakeholder.role?.trim() || "Stakeholder",
+  });
+  if (insertError) {
+    throw new Error(`[supabase] create stakeholder: ${insertError.message}`);
+  }
+  return { id: stakeholder.id, created: true };
+}
+
+/**
+ * Slice 1C: mark knowledge_items lifecycle (e.g. superseded responsibility).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistKnowledgeLifecycle(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  itemIds: string[],
+  lifecycle: "current" | "superseded" | "historical",
+): Promise<void> {
+  if (!itemIds.length) return;
+  const { error } = await client
+    .from("knowledge_items")
+    .update({ lifecycle })
+    .in("id", itemIds)
+    .eq("project_id", projectId)
+    .eq("workspace_id", workspaceId);
+  if (error) {
+    throw new Error(`[supabase] update knowledge lifecycle: ${error.message}`);
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function persistTimelineItem(
   client: SupabaseClient<any>,

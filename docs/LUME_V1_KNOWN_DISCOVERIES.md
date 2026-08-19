@@ -2,6 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
+**Last housekeeping:** 19 August 2026 (Slice 1C People — D-001/D-002 fixed; D-007 partial; D-018/D-019 added)  
 **Authority:** `docs/v1-reference-pack/` + project-truth architecture audit  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
@@ -18,6 +19,20 @@ When a slice finds an adjacent defect it must **not** silently fix:
 2. Fill every field in the template below.
 3. If a deterministic test would falsely encode the bug as correct behaviour, add or keep a `knownGap(...)` skip in the relevant verify script and link it here.
 4. When fixed, move the entry to **Resolved discoveries**, set **Fixed in**, and flip any `knownGap` into a real assertion.
+
+### Target resolution vocabulary
+
+Do **not** invent calendar dates. Use roadmap stages such as:
+
+- People slice  
+- Capture hardening  
+- Ask/canonical convergence  
+- New Project/persistence touchpoint  
+- V1 product hardening  
+- before V1 launch  
+- post-V1 / accepted limitation  
+
+If timing is genuinely unclear, set **Target resolution / validation point** to `ambiguous — see Notes` and explain why.
 
 ### Entry template
 
@@ -36,6 +51,7 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Smallest safe approach — not a full redesign |
 | **Explicit non-goals** | What not to broaden into while fixing |
 | **Regression test to add** | What must turn green / what knownGap to retire |
+| **Target resolution / validation point** | Roadmap stage(s) when this must be fixed or explicitly validated |
 | **Related docs** | Audit / handover links |
 | **Notes** | Edge cases, data cleanup, migration risk |
 ```
@@ -45,44 +61,6 @@ When a slice finds an adjacent defect it must **not** silently fix:
 ---
 
 ## Open discoveries
-
-### D-001 — Confirm Owner persists non-UUID `resp-*` ids
-
-| Field | Value |
-| --- | --- |
-| **Status** | open |
-| **Severity** | high |
-| **Domain** | People / Knowledge |
-| **Found in** | Architecture audit; Test safety net (Aug 2026); still open after Slice 1B |
-| **Failure class** | Confirm Owner mints client ids like `resp-…` that are not UUIDs; Supabase `knowledge_items.id` expects UUID → persist can fail or leave structured overlay out of sync with DB |
-| **Evidence / repro** | Confirm a scoped responsibility owner in UI; inspect `confirmResponsibilityOwner` output `itemId`; `isKnowledgeUuid("resp-…") === false`. Safety net: `knownGap("Confirm Owner persist must use UUID…")` in `scripts/verify-project-truth-safety.ts` |
-| **Likely files** | `src/lib/canonical-truth/confirm-responsibility.ts`; `src/lib/store.tsx` (`confirmResponsibilityOwner`); `src/lib/data/supabase/persist-mutations.ts` (`persistKnowledgeBullet`) |
-| **Proposed fix direction** | Mint UUID for new responsibility `knowledge_items` rows; keep supersession links on UUID ids; await/surface persist errors |
-| **Explicit non-goals** | Full People/stakeholder consolidation; person relationship graph; Ocean UI redesign |
-| **Regression test to add** | Retire knownGap; assert Confirm Owner insert uses UUID; reload retains confirmed owner |
-| **Related docs** | `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` §3.1.5; `docs/LUME_TEST_SAFETY_NET_AUDIT.md` |
-| **Notes** | Stakeholder table dual-write is also incomplete (see D-002) — may fix together in People slice |
-
----
-
-### D-002 — Confirm Owner does not insert `stakeholders` row
-
-| Field | Value |
-| --- | --- |
-| **Status** | open |
-| **Severity** | high |
-| **Domain** | People |
-| **Found in** | Architecture audit §3.1.5 |
-| **Failure class** | Confirm Owner updates in-memory stakeholders + knowledge people bullet, but does not insert into `stakeholders` table → reload may drop picker/list identity while knowledge prose remains |
-| **Evidence / repro** | Confirm owner → soft refresh / rehydrate → stakeholder list missing person that still appears in Knowledge people |
-| **Likely files** | `src/lib/canonical-truth/confirm-responsibility.ts`; `src/lib/store.tsx`; `src/lib/data/supabase/persist-mutations.ts`; stakeholders repository |
-| **Proposed fix direction** | Single write API: ensure `stakeholders` row exists (create-or-get by project+name) when confirming; Knowledge/structured remain projection + epistemic overlay |
-| **Explicit non-goals** | Full CRM; relationship edges; Advise |
-| **Regression test to add** | Confirm Owner → simulated hydrate keeps stakeholder + structured responsibility |
-| **Related docs** | Architecture audit People authority table; philosophy scoped ownership |
-| **Notes** | Natural home: People entity/relationship slice after Risk authority |
-
----
 
 ### D-003 — Suggestion accept/dismiss is memory-only
 
@@ -98,8 +76,9 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Persist status update by recommendation id (workspace+project scoped); local mode keeps MissionState-only |
 | **Explicit non-goals** | Auto-converting suggestions into Risks/Todos without explicit user action |
 | **Regression test to add** | Accept/dismiss plan does not resurrect after hydrate simulation |
+| **Target resolution / validation point** | V1 product hardening; must be resolved before V1 launch |
 | **Related docs** | Architecture audit §3.1; RiskFrame recommendation path (Slice 1B left this intentional) |
-| **Notes** | Risk recommendations must remain suggestions until explicitly converted (Slice 1B product rule) |
+| **Notes** | Risk recommendations must remain suggestions until explicitly converted (Slice 1B product rule). No dedicated “Suggestions slice” is named yet — revisit under general V1 product hardening. |
 
 ---
 
@@ -117,8 +96,9 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Audit `pushHistory` call sites; persist on trust-critical mutations; do not make History authoritative for current state |
 | **Explicit non-goals** | History-as-truth; History UI redesign |
 | **Regression test to add** | Selected mutations emit durable history rows in plan/fake client |
+| **Target resolution / validation point** | V1 product hardening |
 | **Related docs** | Architecture audit; philosophy (History = evidence/chronology) |
-| **Notes** | Prefer sparse, high-signal events over logging everything |
+| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. |
 
 ---
 
@@ -136,8 +116,9 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Surface durable toast/banner on save error; consider optimistic rollback or “not saved” badge on affected frames |
 | **Explicit non-goals** | Full offline sync engine |
 | **Regression test to add** | Hard without UI; at least ensure error paths set `saveStatus` and do not claim success |
+| **Target resolution / validation point** | V1 product hardening; must be checked before V1 launch (incremental per write path is OK) |
 | **Related docs** | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` §C.4 |
-| **Notes** | Cross-cutting — fix incrementally per write path when touching that path |
+| **Notes** | Cross-cutting — fix incrementally when touching a write path; full UX polish belongs in V1 product hardening |
 
 ---
 
@@ -155,8 +136,9 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Change to `source: "manual"` (or extend enum via migration if product wants `setup` — prefer allowed value first) |
 | **Explicit non-goals** | Risk UI redesign |
 | **Regression test to add** | Static assert allowed source values; or new-project persist unit with mocked client |
+| **Target resolution / validation point** | Fix at the next New Project/persistence touchpoint; must be resolved before V1 launch |
 | **Related docs** | Slice 1B completion discoveries |
-| **Notes** | Small one-line fix; safe anytime |
+| **Notes** | Small one-line fix; do not wait for a dedicated Risks slice — fix opportunistically at the next New Project/persistence touch |
 
 ---
 
@@ -164,18 +146,19 @@ When a slice finds an adjacent defect it must **not** silently fix:
 
 | Field | Value |
 | --- | --- |
-| **Status** | open (domain slice planned) |
-| **Severity** | high |
+| **Status** | open (partially addressed in Slice 1C) |
+| **Severity** | medium (down from high after 1C foundation) |
 | **Domain** | People |
 | **Found in** | Architecture audit §3.2.2 |
-| **Failure class** | Same person/role can exist in one, two, or three stores with asymmetric write coverage → Tell Me / KC / picker disagree |
-| **Evidence / repro** | Create project stakeholders vs Capture people bullets vs Confirm Owner structured responsibilities |
-| **Likely files** | `stakeholders` table; `knowledge.sections.people`; `structured` responsibilities; load-mission-state; Confirm Owner |
-| **Proposed fix direction** | People entity authority slice: `stakeholders` (or equivalent) as identity home; Knowledge projects; structured holds scoped responsibility epistemic |
-| **Explicit non-goals** | Portfolio org chart; Advise |
-| **Regression test to add** | Project isolation + confirm owner + hydrate consistency |
-| **Related docs** | Architecture audit recommended People authority; Slice 1B recommendation to proceed to People slice |
-| **Notes** | Includes D-001/D-002 as first concrete fixes inside this domain |
+| **Failure class** | Legacy/Capture People prose can still exist without a stakeholder link; Tell Me / KC may show unpromoted free-text people |
+| **Evidence / repro** | Capture people bullets vs Confirm Owner structured responsibilities vs stakeholders picker |
+| **Likely files** | Capture people apply; Knowledge Edit people section; `getPersonBundle` |
+| **Proposed fix direction** | Promote known people prose to stakeholders when identity is explicit; keep legacy bullets as projection; richer People & Context UI later |
+| **Explicit non-goals** | Portfolio org chart; Advise; Ocean redesign in foundation slices |
+| **Regression test to add** | Capture→promote path once specified |
+| **Target resolution / validation point** | Capture hardening (promotion) + richer People & Context UI later; identity/responsibility foundation delivered in Slice 1C |
+| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
+| **Notes** | Slice 1C made stakeholders the durable identity authority and linked responsibilities via personId. Remaining gap is prose that never went through Confirm Owner. Not overdue — planned 1C foundation is done. |
 
 ---
 
@@ -193,8 +176,9 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Decide single authority for waiting (likely todos); Knowledge openLoops as projection/narrative only |
 | **Explicit non-goals** | Full GTD redesign |
 | **Regression test to add** | Authority rule characterisation once decided |
+| **Target resolution / validation point** | ambiguous — see Notes |
 | **Related docs** | Architecture audit |
-| **Notes** | Do not fix opportunistically inside unrelated slices |
+| **Notes** | Could land under open-loop/To Do architecture, Capture hardening (if Capture writes both), or Ask/canonical convergence (if only retrieval suffers). Do not fix opportunistically inside unrelated slices until authority is decided. |
 
 ---
 
@@ -212,6 +196,7 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Only emit unknown-owner when question requires it **and** absence is evidenced; never invent false gaps |
 | **Explicit non-goals** | Enabling canonical flag by default without eval proof |
 | **Regression test to add** | Fixture: joint ownership / named people must not yield false known-gap |
+| **Target resolution / validation point** | Ask/canonical convergence; must be checked before V1 launch if canonical Ask is enabled |
 | **Related docs** | Philosophy; Phase2C trust handovers |
 | **Notes** | Trust-critical; fix under Ask/canonical workstream, not Risk/People persistence alone |
 
@@ -231,6 +216,7 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Tighten history injection to historical questions only; prefer domain authority for current-state |
 | **Explicit non-goals** | Deleting History feature |
 | **Regression test to add** | Context-integrity: current-state question excludes superseded history as truth |
+| **Target resolution / validation point** | Ask/canonical convergence |
 | **Related docs** | Philosophy; Phase2C2 context integrity |
 | **Notes** | Canonical path already narrower — production flag still legacy |
 
@@ -250,6 +236,7 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Limit extractors to structural parsing; stop name-hardcoding; prefer AI propose + human confirm for semantics |
 | **Explicit non-goals** | Building a larger regex NLP stack |
 | **Regression test to add** | Extractor does not invent stakeholders from demo name list on unrelated text |
+| **Target resolution / validation point** | Capture hardening; also check at next New Project/persistence touchpoint if create-project extractors are touched |
 | **Related docs** | Philosophy §20 |
 | **Notes** | Adjacent to Capture interpretation — only touch when Capture slice allows |
 
@@ -269,8 +256,9 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Regenerate or manually sync types; CI check optional later |
 | **Explicit non-goals** | Runtime behaviour change |
 | **Regression test to add** | Optional schema drift script |
+| **Target resolution / validation point** | post-V1 / accepted limitation (ops hygiene); elevate to V1 product hardening only if it blocks a ship gate |
 | **Related docs** | Architecture audit |
-| **Notes** | Ops hygiene |
+| **Notes** | Ops hygiene — not a user-visible truth defect |
 
 ---
 
@@ -288,6 +276,7 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Decide authority; migrate durable session metadata to Supabase when logged in |
 | **Explicit non-goals** | Capture interpretation redesign |
 | **Regression test to add** | Later |
+| **Target resolution / validation point** | Capture hardening |
 | **Related docs** | Architecture audit |
 | **Notes** | Not blocking domain-authority slices |
 
@@ -307,6 +296,7 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Persistence fake or CI secrets for live job; keep deterministic suite credential-free |
 | **Explicit non-goals** | Weakening review-before-write |
 | **Regression test to add** | Fake client apply round-trip OR separate live workflow |
+| **Target resolution / validation point** | Capture hardening; must be checked before Capture is declared V1-ready |
 | **Related docs** | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` |
 | **Notes** | Testing debt, not product ambiguity |
 
@@ -326,8 +316,9 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | One-off cleanup: mark such rows resolved or rename titles; do not broad-rewrite all historical Knowledge strings in product code |
 | **Explicit non-goals** | Broad prose cleanup in Slice 1B (explicitly deferred) |
 | **Regression test to add** | Optional invariant: new creates never insert `[Resolved]` prefix as open risk title |
+| **Target resolution / validation point** | V1 product hardening / data cleanup before V1 launch if production rows exist; otherwise post-V1 ops cleanup |
 | **Related docs** | `docs/SLICE1B_RISK_LIFECYCLE_AUTHORITY_HANDOVER.md` |
-| **Notes** | New code paths avoid this; cleanup is ops/data |
+| **Notes** | New code paths avoid this; cleanup is ops/data. Timing depends on whether any live workspaces still have tainted rows — check before launch. |
 
 ---
 
@@ -345,8 +336,69 @@ When a slice finds an adjacent defect it must **not** silently fix:
 | **Proposed fix direction** | Prefer carrying `sectionItemIds` through edit UI (already done); only tighten detector with structural evidence — never fuzzy AI matching |
 | **Explicit non-goals** | Semantic AI identity matching |
 | **Regression test to add** | Already covered: unrelated same-index must not inherit metadata |
+| **Target resolution / validation point** | post-V1 / accepted limitation |
 | **Related docs** | `docs/SLICE1A_DURABLE_KNOWLEDGE_HANDOVER.md` |
 | **Notes** | Prefer safe loss over incorrect metadata transfer — intentional |
+
+---
+
+### D-017 — Capture risk-complete path: exact-title domain match (Slice 1B transitional)
+
+| Field | Value |
+| --- | --- |
+| **Status** | open (validation required — not a silent product expansion) |
+| **Severity** | medium (trust / architecture guardrail) |
+| **Domain** | Capture / Risks |
+| **Found in** | Slice 1B — `CaptureSessionContext.tsx` risk `op === "complete"` path |
+| **Failure class** | Capture complete now routes genuine Risks via `findProjectRiskByExactTitle` → `setRiskStatus`, else Knowledge-only resolve. This must remain **identity carriage** (exact title ↔ domain row), not a growing semantic/fuzzy Risk interpreter |
+| **Evidence / repro** | `src/components/capture/CaptureSessionContext.tsx` (risk complete branch); `src/lib/risks/lifecycle.ts` `findProjectRiskByExactTitle` (exact match only; no substring/fuzzy). Slice 1B intentionally removed prior fuzzy `includes(…slice(0, 24))` matching |
+| **Likely files** | `src/components/capture/CaptureSessionContext.tsx`; `src/lib/risks/lifecycle.ts`; Capture review apply path |
+| **Proposed fix direction** | During Capture hardening: prefer carrying stable `risks.id` through Capture review items when available; keep exact-title only as transitional fallback; **never** reintroduce fuzzy/NLP matching; assert recommendations are not auto-resolved as domain Risks |
+| **Explicit non-goals** | Capture interpretation redesign; AI risk linking; expanding title heuristics |
+| **Regression test to add** | Capture complete: (1) domain risk with exact title → status resolved by id; (2) near-miss title does **not** resolve domain risk; (3) no `risks` row → Knowledge-only path; (4) recommendation kind risk unchanged unless explicit convert |
+| **Target resolution / validation point** | Validate during Capture hardening; must be checked before Capture is declared V1-ready |
+| **Related docs** | `docs/SLICE1B_RISK_LIFECYCLE_AUTHORITY_HANDOVER.md`; `docs/LUME_V1_KNOWN_DISCOVERIES.md` D-003 (suggestions remain suggestions) |
+| **Notes** | This entry is a **guardrail**, not permission to grow Capture NLP. Exact-title matching is transitional identity evidence until Capture review carries `riskId` end-to-end. |
+
+---
+
+### D-018 — Tell Me singular owner answer for shared responsibilities
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Ask/Tell Me |
+| **Found in** | Slice 1C |
+| **Failure class** | Domain now supports multiple current owners for one scope (`findConfirmedOwners`), but Tell Me answer path still uses singular `findConfirmedOwner` / phrasing |
+| **Evidence / repro** | Confirm Mark + Bruno for same scope; Ask who owns that scope under canonical local path |
+| **Likely files** | `src/lib/tell-me/answer.ts`; serialize / owner fast-path |
+| **Proposed fix direction** | Answer with all current confirmed owners for the scope; do not invent exclusivity |
+| **Explicit non-goals** | Enabling canonical Ask in production without evals |
+| **Regression test to add** | Shared owners → answer names both; no false single-owner claim |
+| **Target resolution / validation point** | Ask/canonical convergence |
+| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
+| **Notes** | Data model is ready; retrieval UI/Ask wording is the remaining gap |
+
+---
+
+### D-019 — Confirm Owner UI lacks explicit replace-vs-share choice
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | People |
+| **Found in** | Slice 1C |
+| **Failure class** | API supports `replacePersonId` for time-varying ownership, but Confirm Owner dialog always ADDs/shares. Users cannot explicitly replace Bob with Mary from the current dialog |
+| **Evidence / repro** | `ConfirmOwnerDialog.tsx` only passes personId + resolveTruthItemId; no replace control |
+| **Likely files** | `src/components/intelligence/ConfirmOwnerDialog.tsx`; People & Context UI later |
+| **Proposed fix direction** | When another current owner exists for the scope, offer Share vs Replace (Needs clarification) rather than silent replace |
+| **Explicit non-goals** | Full People drawer redesign beyond the confirm flow |
+| **Regression test to add** | UI/integration later; API already covered in `verify:people-entities` |
+| **Target resolution / validation point** | Richer People & Context UI later; must be checked before V1 launch if Confirm Owner is a primary correction path |
+| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
+| **Notes** | Default share (no silent overwrite) is intentional and safer than pre-1C supersede-all |
 
 ---
 
@@ -387,15 +439,40 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ---
 
+### D-R04 — Confirm Owner non-UUID `resp-*` ids (Slice 1C)
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Slice 1C — `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
+| **Failure class** | Confirm Owner minted `resp-*` ids incompatible with UUID `knowledge_items.id` |
+| **Fix summary** | Responsibility + person ids use `crypto.randomUUID()` / durable stakeholder UUID; safety-net knownGap retired |
+
+---
+
+### D-R05 — Confirm Owner missing stakeholder persist (Slice 1C)
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Slice 1C — `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
+| **Failure class** | Confirm Owner only updated in-memory stakeholders |
+| **Fix summary** | `persistEnsureStakeholder` + in-memory `ensurePersonOnProject`; personId on responsibility meta |
+
+---
+
 ## Suggested fix order (non-binding)
 
-1. **D-006** — tiny schema-value bug (anytime)  
-2. **D-001 + D-002 + D-007** — People / Confirm Owner domain slice  
-3. **D-003** — suggestion persist (small, high user-visible ROI)  
-4. **D-005** — save-error visibility (cross-cutting, incremental)  
-5. **D-004** — history persist gaps  
-6. **D-009 / D-010** — Ask trust / history injection (with canonical eval discipline)  
-7. **D-008, D-011–D-015** — as their domains are scheduled  
+1. **D-006** — next New Project/persistence touchpoint (before V1 launch)  
+2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
+3. **D-019** — Confirm Owner replace-vs-share UI (People UI later / before V1 launch)  
+4. **D-007** remainder — Capture promote + People UI  
+5. **D-017** — validate during Capture hardening (before Capture V1-ready)  
+6. **D-003** — suggestion persist (V1 product hardening)  
+7. **D-005** — save-error visibility (V1 product hardening, incremental OK)  
+8. **D-004** — history persist gaps (V1 product hardening)  
+9. **D-009 / D-010 / D-018** — Ask/canonical convergence  
+10. **D-008, D-011–D-015** — as their domains are scheduled; D-008 timing remains ambiguous  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 
@@ -407,3 +484,4 @@ Do **not** treat this order as a mandate to broaden an in-flight slice.
 - Do not delete resolved entries; move them to **Resolved discoveries**.
 - Do not encode open discoveries as green tests; use `knownGap` until fixed.
 - Prefer linking PRs and handover docs over duplicating long design prose here.
+- Always set **Target resolution / validation point** using the vocabulary above (or mark ambiguous).
