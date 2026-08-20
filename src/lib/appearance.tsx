@@ -10,6 +10,10 @@ import {
   type ReactNode,
 } from "react";
 
+/**
+ * V1 is dark-only (Ocean). Light mode is not offered in product chrome.
+ * Appearance type retained for compatibility; setters force dark.
+ */
 export type Appearance = "light" | "dark";
 
 type AppearanceContextValue = {
@@ -22,43 +26,33 @@ type AppearanceContextValue = {
 const STORAGE_KEY = "mc-appearance-v1";
 const AppearanceContext = createContext<AppearanceContextValue | null>(null);
 
-function resolveInitial(): Appearance {
-  if (typeof window === "undefined") return "dark";
+function forceDarkDocument() {
+  if (typeof document === "undefined") return;
+  document.documentElement.dataset.theme = "dark";
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "light" || stored === "dark") return stored;
+    window.localStorage.setItem(STORAGE_KEY, "dark");
   } catch {
     /* ignore */
   }
-  return window.matchMedia("(prefers-color-scheme: light)").matches
-    ? "light"
-    : "dark";
 }
 
 export function AppearanceProvider({ children }: { children: ReactNode }) {
-  const [appearance, setAppearanceState] = useState<Appearance>("dark");
+  const [appearance] = useState<Appearance>("dark");
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const next = resolveInitial();
-    setAppearanceState(next);
-    document.documentElement.dataset.theme = next;
+    forceDarkDocument();
     setHydrated(true);
   }, []);
 
-  const setAppearance = useCallback((value: Appearance) => {
-    setAppearanceState(value);
-    document.documentElement.dataset.theme = value;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, value);
-    } catch {
-      /* ignore */
-    }
+  const setAppearance = useCallback((_value: Appearance) => {
+    // V1 dark-only — ignore light requests from leftover callers.
+    forceDarkDocument();
   }, []);
 
   const toggleAppearance = useCallback(() => {
-    setAppearance(appearance === "dark" ? "light" : "dark");
-  }, [appearance, setAppearance]);
+    forceDarkDocument();
+  }, []);
 
   const value = useMemo(
     () => ({ appearance, setAppearance, toggleAppearance, hydrated }),

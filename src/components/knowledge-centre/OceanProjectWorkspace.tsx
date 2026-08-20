@@ -13,7 +13,7 @@ import type { Project } from "@/lib/types";
 
 /**
  * Ocean V1 selected-project workspace.
- * Knowledge Centre is the default central mode.
+ * Capture and Knowledge Centre are modes of one shell — not separate apps.
  */
 export function OceanProjectWorkspace({ project }: { project: Project }) {
   const [mode, setMode] = useState<OceanProjectMode>("knowledge");
@@ -51,10 +51,14 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
 
       {mode === "capture" ? (
         <div
-          className="ocean-capture-mode"
+          className="ocean-capture-mode is-active"
           data-testid="ocean-capture-mode"
+          data-mode="capture"
         >
-          <CaptureWorkspace defaultProjectId={project.id} />
+          <CaptureWorkspace
+            defaultProjectId={project.id}
+            variant="ocean"
+          />
         </div>
       ) : null}
 

@@ -19,14 +19,9 @@ export const metadata: Metadata = {
 const themeBootScript = `
 (function(){
   try {
-    var stored = localStorage.getItem('mc-appearance-v1');
-    var theme = stored === 'light' || stored === 'dark'
-      ? stored
-      : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-    document.documentElement.dataset.theme = theme;
-  } catch (e) {
-    document.documentElement.dataset.theme = 'dark';
-  }
+    localStorage.setItem('mc-appearance-v1', 'dark');
+  } catch (e) {}
+  document.documentElement.dataset.theme = 'dark';
 })();
 `;
 

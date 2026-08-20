@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { AppearanceToggle } from "@/components/app-shell/AppearanceToggle";
 
 export function TopHeader({
   title,
@@ -41,7 +40,6 @@ export function TopHeader({
       </div>
 
       <div className="top-header-right">
-        <AppearanceToggle />
         {userName ? (
           <div className="header-user">
             <Link

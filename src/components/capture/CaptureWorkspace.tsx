@@ -63,8 +63,11 @@ function formatAnalysedAt(iso: string | null) {
 
 export function CaptureWorkspace({
   defaultProjectId,
+  variant = "legacy",
 }: {
   defaultProjectId?: string;
+  /** Ocean project-mode embed — presentation only; lifecycle unchanged. */
+  variant?: "legacy" | "ocean";
 }) {
   const { state, openaiConfigured } = useMission();
   const usage = analysesRemaining(state);
@@ -456,9 +459,11 @@ export function CaptureWorkspace({
   }
 
   const analysedLabel = formatAnalysedAt(analysedAt);
+  const isOcean = variant === "ocean";
   const panelClass = [
     "capture-workspace",
     "capture-compact",
+    isOcean ? "ocean-capture-workspace" : "",
     maximized ? "is-maximized" : "",
     collapsed ? "is-minimised" : "",
   ]
@@ -466,16 +471,34 @@ export function CaptureWorkspace({
     .join(" ");
 
   return (
-    <section className={panelClass} aria-labelledby={titleId}>
+    <section
+      className={panelClass}
+      aria-labelledby={titleId}
+      data-testid={isOcean ? "ocean-capture-workspace" : "capture-workspace"}
+      data-capture-variant={variant}
+      data-capture-stage={
+        reviewOpen ? "review" : busy === "analysing" ? "analysing" : "input"
+      }
+    >
       <div className="capture-workspace-head">
         <div className="capture-head-copy">
           <h2 id={titleId} className="capture-title">
-            Capture anything
+            {isOcean ? (
+              <>
+                <span className="ocean-ai-glyph" aria-hidden>
+                  ✦
+                </span>{" "}
+                Capture
+              </>
+            ) : (
+              "Capture anything"
+            )}
           </h2>
           {!showSessionActions ? (
             <p className="capture-support">
-              Type an update or record your thoughts — Lume will organise what
-              you share.
+              {isOcean
+                ? "Type an update or record your thoughts. Lume proposes changes — nothing is saved until you review and approve."
+                : "Type an update or record your thoughts — Lume will organise what you share."}
             </p>
           ) : analysedLabel ? (
             <p className="capture-support meta">Last analysed {analysedLabel}</p>
@@ -487,7 +510,7 @@ export function CaptureWorkspace({
           ) : null}
           <button
             type="button"
-            className="capture-new-btn"
+            className={isOcean ? "ghost-btn capture-new-btn" : "capture-new-btn"}
             onClick={clearSession}
             title="New Capture"
             aria-label="New Capture"
@@ -497,7 +520,7 @@ export function CaptureWorkspace({
           <div
             className="capture-window-controls"
             role="group"
-            aria-label="Capture window"
+            aria-label="Capture panel"
           >
             <button
               type="button"
@@ -508,8 +531,9 @@ export function CaptureWorkspace({
               }}
               aria-label={collapsed ? "Restore Capture" : "Minimise Capture"}
               title={collapsed ? "Restore Capture" : "Minimise Capture"}
+              data-testid="ocean-capture-minimise"
             >
-              {collapsed ? "□" : "─"}
+              {collapsed ? "Expand" : "Minimise"}
             </button>
           </div>
         </div>
@@ -590,6 +614,11 @@ export function CaptureWorkspace({
                     onChange={(text) => {
                       if (!isAnalysed) updateBlockText(block.id, text);
                     }}
+                    testId={
+                      index === blocks.length - 1
+                        ? "ocean-capture-input"
+                        : undefined
+                    }
                   />
                 </div>
               ))}
@@ -623,6 +652,7 @@ export function CaptureWorkspace({
                       className="ghost-btn"
                       onClick={() => void recording.start()}
                       disabled={busy === "analysing" || busy === "transcribing"}
+                      data-testid="ocean-capture-record"
                     >
                       Record
                     </button>
@@ -683,7 +713,9 @@ export function CaptureWorkspace({
                   ) : (
                     <button
                       type="submit"
-                      className="primary-btn analyse-btn"
+                      className="primary-btn analyse-btn ocean-analyse-btn"
+                      data-testid="ocean-capture-analyse"
+                      data-ai="true"
                       disabled={
                         busy !== "idle" ||
                         recording.active ||
@@ -691,6 +723,9 @@ export function CaptureWorkspace({
                         usage.remaining <= 0
                       }
                     >
+                      <span className="ocean-ai-glyph" aria-hidden>
+                        ✦
+                      </span>{" "}
                       Analyse
                     </button>
                   )}
@@ -729,7 +764,14 @@ export function CaptureWorkspace({
       ) : null}
 
       {reviewOpen ? (
-        <div className="capture-review capture-review-workspace">
+        <div
+          className="capture-review capture-review-workspace"
+          data-testid="ocean-capture-review"
+        >
+          <p className="ocean-capture-review-boundary" role="note">
+            Review every finding below. Nothing enters maintained project truth
+            until you approve it (Approve / Apply Ready / Remember).
+          </p>
           <CaptureSummary
             observations={observations}
             changesDetected={counts.changesDetected}
@@ -803,6 +845,7 @@ function CaptureAutoTextarea({
   readOnly,
   disabled,
   placeholder,
+  testId,
 }: {
   id?: string;
   value: string;
@@ -810,6 +853,7 @@ function CaptureAutoTextarea({
   readOnly?: boolean;
   disabled?: boolean;
   placeholder?: string;
+  testId?: string;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -830,6 +874,8 @@ function CaptureAutoTextarea({
       readOnly={readOnly}
       disabled={disabled}
       placeholder={placeholder}
+      data-testid={testId}
+      data-ai="false"
       className={`capture-textarea capture-textarea-idle capture-textarea-auto ${readOnly ? "is-readonly" : ""}`}
       aria-readonly={readOnly || undefined}
     />
