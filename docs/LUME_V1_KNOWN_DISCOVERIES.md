@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 20 August 2026 (Slice 2C Knowledge item detail — D-023 fixed; D-005/D-004/D-007 partial honesty)  
+**Last housekeeping:** 20 August 2026 (Slice 2D People & Context UI — D-019 fixed; D-007/D-020 partial)  
 **Authority:** `docs/v1-reference-pack/` + project-truth architecture audit  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
@@ -158,7 +158,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Capture→promote path once specified |
 | **Target resolution / validation point** | Capture hardening (promotion) + richer People & Context UI later; identity/responsibility foundation delivered in Slice 1C |
 | **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md`; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
-| **Notes** | Slice 1C made stakeholders the durable identity authority and linked responsibilities via personId. Slice 2A People frame renders stakeholders + current responsibilities (+ availability meta when structured). Slice 2C adds reusable person detail via `getPersonBundle` (current/historical/shared distinguishable). Remaining gap: prose that never went through Confirm Owner; D-019 replace-vs-share handover UI; dedicated People UX polish. Not overdue. |
+| **Notes** | Slice 1C made stakeholders the durable identity authority and linked responsibilities via personId. Slice 2A People frame renders stakeholders + current responsibilities (+ availability meta when structured). Slice 2C adds reusable person detail via `getPersonBundle`. Slice 2D polishes People frame + person detail (shared/handover UI, waiting/availability display). **Remaining gap:** Capture still does not consistently promote discovered People prose into durable stakeholders — that remains Capture hardening, not UI. Not overdue. |
 
 ---
 
@@ -366,19 +366,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | open (partial UI display in Slice 2D) |
 | **Severity** | low |
 | **Domain** | Ask/Tell Me · People · Knowledge |
 | **Found in** | Slice 1D Ask context authority |
 | **Failure class** | Ask can surface `kind=dependency` / `kind=availability` structured Knowledge rows when present, but there is no dedicated dependency graph or availability calendar domain. Gaps are easy to miss if only prose exists |
 | **Evidence / repro** | Cross-domain person+risk fixture works when structured availability exists; no structured dependency inventory in MissionState beyond Knowledge kinds |
-| **Likely files** | `src/lib/canonical-truth/serialize.ts`; future People/availability UI |
+| **Likely files** | `src/lib/canonical-truth/serialize.ts`; People/availability UI |
 | **Proposed fix direction** | Keep exposing structured kinds; do not invent brittle prose heuristics. Add dedicated modelling only when product requires it |
 | **Explicit non-goals** | Building a universal graph or calendar in Ask convergence |
-| **Regression test to add** | Already covered lightly in `verify:ask-context-authority` when structured availability present |
-| **Target resolution / validation point** | Dependencies / availability modelling + People UI follow-up — not blocking Ocean baseline |
-| **Related docs** | `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md`; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
-| **Notes** | Slice 2A Dependencies frame shows structured `kind=dependency` only; strip says “Dependencies not structured yet” when count is 0 rather than inventing prose counts. |
+| **Regression test to add** | Already covered lightly in `verify:ask-context-authority` when structured availability present; People UI shows structured availability only |
+| **Target resolution / validation point** | Dependencies / availability modelling + Capture availability ingestion — Ask domain still open; People UI display partial in 2D |
+| **Related docs** | `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md`; `docs/SLICE2D_PEOPLE_CONTEXT_UI_HANDOVER.md` |
+| **Notes** | Slice 2A Dependencies frame shows structured `kind=dependency` only. Slice 2D People frame/detail renders structured availability when present and refuses to invent Away labels. Capture→availability creation path still incomplete. |
 
 ---
 
@@ -545,22 +545,33 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ---
 
+### D-R10 — Confirm Owner share vs replace / People Context UI (Slice 2D)
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Slice 2D — `docs/SLICE2D_PEOPLE_CONTEXT_UI_HANDOVER.md` |
+| **Failure class** | Confirm Owner always shared; users could not explicitly replace/hand over ownership |
+| **Fix summary** | Confirm Owner asks share vs replace when other current owners exist; handover actions on person detail; People frame shows shared/availability/waiting from durable data only |
+
+---
+
 ## Suggested fix order (non-binding)
 
 1. **D-006** — next New Project/persistence touchpoint (before V1 launch)  
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
-3. **D-019** — Confirm Owner replace-vs-share UI (People UI follow-up / before V1 launch)  
-4. **D-007** remainder — Capture promote + People UI polish (detail foundation landed in 2C)  
+3. ~~**D-019**~~ — fixed in Slice 2D (D-R10)  
+4. **D-007** remainder — Capture People promotion only (People UI polish landed in 2D)  
 5. ~~**D-023**~~ — fixed in Slice 2C (D-R09)  
 6. ~~**D-022**~~ — fixed in Slice 2B; residual **D-025** Capture §16 visual depth  
 7. **D-017** — validate during Capture hardening (before Capture V1-ready)  
 8. **D-014** — Capture apply → Supabase round-trip before Capture V1-ready  
 9. **D-011** — demo-name extractors at Capture hardening (not UI)  
 10. **D-003** — suggestion persist (V1 product hardening)  
-11. **D-005** remainder — app-wide save-error UX (V1 product hardening; drawer path partial in 2C)  
-12. **D-004** — history persist gaps (V1 product hardening; 2C honesty notes only)  
+11. **D-005** remainder — app-wide save-error UX (V1 product hardening; drawer/confirm paths partial)  
+12. **D-004** — history persist gaps (V1 product hardening; honesty notes only)  
 13. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
-14. **D-008 / D-021**, **D-012–D-015**, **D-020**, **D-024** — as their domains are scheduled  
+14. **D-008 / D-021**, **D-012–D-015**, **D-020** remainder (Ask/ingestion), **D-024** — as scheduled  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 

@@ -3,6 +3,7 @@
  */
 import { emptyKnowledge } from "@/lib/knowledge";
 import {
+  formatAwayRange,
   formatDueLabel,
   formatMilestoneLabel,
   type PriorityDot,
@@ -102,17 +103,55 @@ export function buildPeopleRows(state: MissionState, projectId: string) {
     id: string;
     title: string;
     epistemic: string | null;
+    meta: string | null;
+    personId: string | null;
   }> = [];
 
   for (const person of project?.stakeholders ?? []) {
     const bundle = getPersonBundle(state, projectId, person.id);
     if (!bundle) continue;
+
+    const away = bundle.availability[0];
+    const awayMeta = away
+      ? formatAwayRange(
+          (
+            away.item.meta as {
+              availability?: { awayFromIso?: string; awayToIso?: string };
+            } | null
+          )?.availability?.awayFromIso,
+          (
+            away.item.meta as {
+              availability?: { awayFromIso?: string; awayToIso?: string };
+            } | null
+          )?.availability?.awayToIso,
+        ) ?? away.body
+      : null;
+
+    const waitingCount = (state.todos ?? []).filter(
+      (t) =>
+        t.projectId === projectId &&
+        !t.done &&
+        t.waitingOn?.trim().toLowerCase() === person.name.trim().toLowerCase(),
+    ).length;
+    const waitingMeta =
+      waitingCount > 0
+        ? waitingCount === 1
+          ? "1 waiting item"
+          : `${waitingCount} waiting items`
+        : null;
+
+    const metaParts = [awayMeta, waitingMeta].filter(Boolean);
+    const meta = metaParts.length ? metaParts.join(" · ") : null;
+
     if (bundle.currentResponsibilities.length) {
       for (const resp of bundle.currentResponsibilities) {
+        const shared = bundle.sharedScopes.find((s) => s.scope === resp.scope);
         cards.push({
           id: `${person.id}-${resp.scope}`,
           title: `@${person.name} · ${resp.scope}`,
-          epistemic: null,
+          epistemic: shared ? "Shared" : null,
+          meta,
+          personId: person.id,
         });
       }
     } else {
@@ -120,6 +159,8 @@ export function buildPeopleRows(state: MissionState, projectId: string) {
         id: person.id,
         title: `@${person.name}${person.role ? ` · ${person.role}` : ""}`,
         epistemic: null,
+        meta,
+        personId: person.id,
       });
     }
   }
@@ -132,6 +173,8 @@ export function buildPeopleRows(state: MissionState, projectId: string) {
       id: item.id,
       title: `${resp.scope} · Owner not confirmed`,
       epistemic: "Unconfirmed",
+      meta: null,
+      personId: resp.personId ?? null,
     });
   }
 

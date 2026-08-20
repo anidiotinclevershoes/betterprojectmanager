@@ -91,6 +91,15 @@ export type KnowledgeDetailModel = {
   canConfirmOwner: boolean;
   confirmOwnerScope?: string;
   confirmOwnerTruthItemId?: string;
+  /** Prefill replace target when handing over from this person. */
+  confirmOwnerDefaultReplacePersonId?: string;
+  /** Person detail: open Confirm Owner with editable scope. */
+  canAssignResponsibility?: boolean;
+  allowConfirmScopeEdit?: boolean;
+  /** Waiting todos linked by exact waitingOn name match. */
+  waitingLines?: string[];
+  /** Legacy people prose that mentions this person (supporting context only). */
+  legacyContext?: string[];
   honestyNotes: string[];
   domain: KnowledgeDetailDomain;
   riskStatus?: RiskStatus;
@@ -513,8 +522,14 @@ export function resolveKnowledgeItemDetail(
   if (ref.kind === "person") {
     const bundle = getPersonBundle(state, projectId, ref.personId);
     if (!bundle) return null;
-    const { person, currentResponsibilities, historicalResponsibilities, sharedScopes } =
-      bundle;
+    const {
+      person,
+      currentResponsibilities,
+      historicalResponsibilities,
+      sharedScopes,
+      availability,
+      legacyPeopleBullets,
+    } = bundle;
     const relations: KnowledgeDetailRelation[] = currentResponsibilities.map(
       (r) => ({
         kind: "knowledge" as const,
@@ -522,6 +537,37 @@ export function resolveKnowledgeItemDetail(
         label: r.scope,
       }),
     );
+
+    // Waiting: exact waitingOn name match only (no fuzzy inference).
+    const waitingLines: string[] = [];
+    for (const todo of state.todos ?? []) {
+      if (todo.projectId !== projectId || todo.done) continue;
+      if (!todo.waitingOn?.trim()) continue;
+      if (
+        todo.waitingOn.trim().toLowerCase() !== person.name.trim().toLowerCase()
+      ) {
+        continue;
+      }
+      waitingLines.push(todo.title);
+      relations.push({
+        kind: "todo",
+        id: todo.id,
+        label: `Waiting · ${todo.title}`,
+      });
+    }
+
+    // Dependencies: only when body explicitly names this person (exact includes).
+    // Do not invent graph edges from weak heuristics.
+    for (const item of knowledge.structured ?? []) {
+      if (item.kind !== "dependency" || item.lifecycle !== "current") continue;
+      if (!item.body.toLowerCase().includes(person.name.toLowerCase())) continue;
+      relations.push({
+        kind: "dependency",
+        id: item.id,
+        label: item.body,
+      });
+    }
+
     const assumptions: string[] = [];
     if (sharedScopes.length) {
       for (const s of sharedScopes) {
@@ -530,12 +576,29 @@ export function resolveKnowledgeItemDetail(
         );
       }
     }
+    if (!availability.length) {
+      honestyNotes.push(
+        "No structured availability for this person. Away dates are shown only when stored.",
+      );
+    }
+    honestyNotes.push(historyHonestyNote());
+
     const previousValue =
       historicalResponsibilities.length > 0
         ? historicalResponsibilities
             .map((r) => `${r.scope} (${r.lifecycle})`)
             .join("; ")
         : undefined;
+
+    // Collect provenance from current responsibilities (dedupe by line).
+    const provenanceSet = new Set<string>();
+    for (const r of currentResponsibilities) {
+      for (const line of formatProvenanceLines(r.item.provenance)) {
+        provenanceSet.add(line);
+      }
+    }
+    const provenanceLines = Array.from(provenanceSet);
+
     return {
       ref,
       projectId,
@@ -547,23 +610,27 @@ export function resolveKnowledgeItemDetail(
       subtitle: person.role || undefined,
       epistemic: null,
       epistemicLabel: null,
-      provenanceLines: formatProvenanceLines(
-        currentResponsibilities[0]?.item.provenance,
-      ),
+      provenanceLines,
       previousValue,
       previousLabel: previousValue
         ? "Previous responsibilities"
         : undefined,
       relations,
       assumptions,
+      waitingLines,
+      legacyContext: legacyPeopleBullets.length
+        ? legacyPeopleBullets
+        : undefined,
       canEditBody: false,
       canToggleTodo: false,
       canResolveRisk: false,
       canResolveKnowledgeRisk: false,
-      canConfirmOwner: false,
-      honestyNotes: [
-        "Person identity is the project stakeholder UUID. Full handover UI is a later People slice (D-019).",
-      ],
+      canConfirmOwner: true,
+      canAssignResponsibility: true,
+      allowConfirmScopeEdit: true,
+      confirmOwnerScope:
+        currentResponsibilities[0]?.scope ?? "",
+      honestyNotes,
       domain: "person",
       personBundle: bundle,
     };
@@ -624,8 +691,9 @@ export function resolveKnowledgeItemDetail(
       canConfirmOwner: true,
       confirmOwnerScope: resp.scope,
       confirmOwnerTruthItemId: item.id,
+      allowConfirmScopeEdit: false,
       honestyNotes: [
-        "Replace-vs-share choice remains for People UI (D-019). Confirm adds/shares unless replace is used elsewhere.",
+        "If another owner already holds this scope, Confirm Owner asks whether to share or replace.",
       ],
       domain: "person",
     };

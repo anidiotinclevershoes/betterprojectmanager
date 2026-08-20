@@ -4,10 +4,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { KnowledgeItemCard } from "@/components/knowledge-centre/KnowledgeItemCard";
 import { KnowledgeItemDetailDrawer } from "@/components/knowledge-centre/KnowledgeItemDetailDrawer";
 import { emptyKnowledge } from "@/lib/knowledge";
-import {
-  formatAwayRange,
-  type PriorityDot,
-} from "@/lib/knowledge-centre/format-date-label";
+import { type PriorityDot } from "@/lib/knowledge-centre/format-date-label";
 import {
   knowledgeDetailEquals,
   personIdFromPeopleCardId,
@@ -28,7 +25,6 @@ import {
   buildTodoRows,
 } from "@/lib/knowledge-centre/ocean-frames";
 import { isKnowledgeUuid } from "@/lib/knowledge-identity";
-import { getPersonBundle } from "@/lib/people/identity";
 import { useMission } from "@/lib/store";
 import { MeetingPrepFrame } from "@/components/frames/MeetingPrepFrame";
 import { TimelineFrame } from "@/components/frames/TimelineFrame";
@@ -67,6 +63,7 @@ function epistemicLabel(
   if (epistemic === "unknown") return "Unconfirmed";
   if (epistemic === "conflicting") return "Conflicting";
   if (epistemic === "suggested") return "Unconfirmed";
+  if (epistemic === "Shared" || epistemic === "Unconfirmed") return epistemic;
   return null;
 }
 
@@ -151,37 +148,20 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
     const base = buildPeopleRows(state, projectId);
     const stakeholderIds = (project?.stakeholders ?? []).map((s) => s.id);
     return base.map((card) => {
-      const personId = personIdFromPeopleCardId(card.id, stakeholderIds);
+      const personId =
+        card.personId ??
+        personIdFromPeopleCardId(card.id, stakeholderIds);
       let ref: KnowledgeItemRef | null = null;
       if (personId) {
         ref = refForPerson(personId);
       } else if (isKnowledgeUuid(card.id)) {
-        // Unconfirmed owner structured item
         ref = refForUnconfirmedOwner(card.id);
       }
-      const person = personId
-        ? project?.stakeholders.find((s) => s.id === personId)
-        : undefined;
-      let meta: string | null = null;
-      if (person) {
-        const bundle = getPersonBundle(state, projectId, person.id);
-        const away = bundle?.availability[0];
-        meta = away
-          ? formatAwayRange(
-              (
-                away.item.meta as {
-                  availability?: { awayFromIso?: string; awayToIso?: string };
-                } | null
-              )?.availability?.awayFromIso,
-              (
-                away.item.meta as {
-                  availability?: { awayFromIso?: string; awayToIso?: string };
-                } | null
-              )?.availability?.awayToIso,
-            ) ?? away.body
-          : null;
-      }
-      return { ...card, meta, ref };
+      return {
+        ...card,
+        meta: card.meta,
+        ref,
+      };
     });
   }, [state, projectId, project]);
 
