@@ -141,12 +141,18 @@ function AppShellInner({ children }: { children: ReactNode }) {
   const header = useMemo(() => {
     if (pathname === "/") {
       return {
-        title: "Lume Overview",
+        title: "Lume",
         subtitle: MISSION_MESSAGE,
       };
     }
     if (pathname.startsWith("/memory")) {
       return { title: "Knowledge", subtitle: "Organisational and project memory" };
+    }
+    if (pathname.startsWith("/todos")) {
+      return {
+        title: "Master To Do",
+        subtitle: "Open actions across your projects",
+      };
     }
     if (pathname.startsWith("/history")) {
       return { title: "History", subtitle: "Everything that happened in Lume" };

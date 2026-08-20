@@ -1,26 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { CaptureCoachRow } from "@/components/capture/CaptureCoachRow";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { NewProjectExperience } from "@/components/onboarding/NewProjectExperience";
-import { WorkspaceCustomiser } from "@/components/workspace/WorkspaceCustomiser";
-import { WorkspaceFrameRow } from "@/components/workspace/WorkspaceGrid";
-import { useWorkspaceLayout } from "@/lib/workspace/useWorkspaceLayout";
 import { useMission } from "@/lib/store";
 
-export default function OverviewPage() {
+/**
+ * V1: no Overview dashboard. With projects, land on the first project's
+ * Knowledge Centre. Zero projects keeps New Project onboarding.
+ */
+export default function HomePage() {
+  const router = useRouter();
   const { hydrated, state, saveError, saveStatus, persistenceMode } = useMission();
-  const {
-    frames,
-    toggleFrame,
-    moveFrame,
-    setFrameSize,
-    resetLayout,
-  } = useWorkspaceLayout("overview");
-  const [customiseOpen, setCustomiseOpen] = useState(false);
 
   const hasCachedProjects = state.projects.length > 0;
-  // Stay on Loading only when we have nothing to show yet.
+  const zeroProjects = hydrated && state.projects.length === 0;
+  const hydrateProblem =
+    zeroProjects &&
+    persistenceMode === "supabase" &&
+    saveStatus === "error" &&
+    Boolean(saveError);
+
+  useEffect(() => {
+    if (!hydrated && !hasCachedProjects) return;
+    if (state.projects[0]?.id) {
+      router.replace(`/projects/${state.projects[0].id}`);
+    }
+  }, [hydrated, hasCachedProjects, state.projects, router]);
+
   if (!hydrated && !hasCachedProjects) {
     return (
       <div className="workspace-page">
@@ -28,15 +35,6 @@ export default function OverviewPage() {
       </div>
     );
   }
-
-  const zeroProjects = hydrated && state.projects.length === 0;
-  // Only replace empty onboarding when load/save failed — never hide a
-  // successfully hydrated workspace because a later mutation errored.
-  const hydrateProblem =
-    zeroProjects &&
-    persistenceMode === "supabase" &&
-    saveStatus === "error" &&
-    Boolean(saveError);
 
   if (hydrateProblem) {
     return (
@@ -70,29 +68,7 @@ export default function OverviewPage() {
 
   return (
     <div className="workspace-page">
-      <CaptureCoachRow />
-
-      <div className="workspace-toolbar workspace-toolbar-end">
-        <button
-          type="button"
-          className="ghost-btn"
-          onClick={() => setCustomiseOpen(true)}
-        >
-          Customise workspace
-        </button>
-      </div>
-
-      <WorkspaceFrameRow frames={frames} />
-
-      <WorkspaceCustomiser
-        open={customiseOpen}
-        onClose={() => setCustomiseOpen(false)}
-        frames={frames}
-        onToggle={toggleFrame}
-        onMove={moveFrame}
-        onSize={setFrameSize}
-        onReset={resetLayout}
-      />
+      <p className="empty-copy">Opening Knowledge Centre…</p>
     </div>
   );
 }

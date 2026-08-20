@@ -7726,3 +7726,599 @@ body {
 .knowledge-structured-panel li {
   margin-bottom: 0.35rem;
 }
+
+/* ==========================================================================
+   Ocean Knowledge Centre — Slice 2A visual baseline
+   Image leads; requirements constrain.
+   ========================================================================== */
+
+.ocean-project-page {
+  gap: 0;
+}
+
+.ocean-project-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+}
+
+.ocean-intel-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: rgba(16, 22, 34, 0.9);
+}
+
+.ocean-intel-strip-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.35rem;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.ocean-intel-stat strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.ocean-intel-stat-muted {
+  color: var(--text-muted);
+}
+
+.ocean-intel-stat-ico {
+  color: var(--info);
+  margin-right: 0.2rem;
+}
+
+.ocean-intel-strip-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ocean-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(108, 140, 255, 0.45);
+  background: rgba(108, 140, 255, 0.12);
+  color: #d7e0ff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ocean-refresh-btn:hover:not(:disabled) {
+  background: rgba(108, 140, 255, 0.2);
+}
+
+.ocean-refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.ocean-ai-glyph {
+  color: #6c8cff;
+  font-weight: 700;
+}
+
+.ocean-actions-left {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  pointer-events: none;
+  user-select: none;
+}
+
+.ocean-project-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ocean-project-title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.ocean-project-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.ocean-mode-selector {
+  display: inline-flex;
+  gap: 0.35rem;
+  padding: 0.28rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ocean-mode-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  font-weight: 560;
+  cursor: pointer;
+}
+
+.ocean-mode-tab.is-selected {
+  background: rgba(108, 140, 255, 0.18);
+  border-color: rgba(108, 140, 255, 0.35);
+  color: var(--text-primary);
+}
+
+.ocean-mode-tab.is-disabled,
+.ocean-mode-tab:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ocean-coming-soon {
+  margin-left: 0.25rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.ocean-search-ask {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ocean-search-ask-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.15fr);
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.ocean-search-field,
+.ocean-ask-field {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.6rem;
+  padding: 0 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.ocean-ask-field {
+  border-color: rgba(108, 140, 255, 0.28);
+}
+
+.ocean-search-field input,
+.ocean-ask-field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+}
+
+.ocean-search-ico {
+  color: var(--text-muted);
+}
+
+.ocean-search-or {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.ocean-ask-send {
+  border: 0;
+  background: transparent;
+  color: #6c8cff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.ocean-ask-send:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ocean-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.ocean-suggestion-link,
+.ocean-suggestion-more {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 450;
+}
+
+.ocean-suggestion-link:hover,
+.ocean-suggestion-more:hover {
+  color: var(--text-secondary);
+  border-color: var(--border-strong);
+}
+
+.ocean-search-results {
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-surface);
+  font-size: 0.85rem;
+}
+
+.ocean-search-results ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ocean-search-section {
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ocean-search-results mark {
+  background: rgba(108, 140, 255, 0.28);
+  color: inherit;
+  border-radius: 2px;
+}
+
+.ocean-ask-answer {
+  border: 1px solid rgba(108, 140, 255, 0.25);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  background: rgba(108, 140, 255, 0.06);
+}
+
+.ocean-ask-answer-text {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.ocean-ask-noticed,
+.ocean-ask-needs {
+  margin-top: 0.75rem;
+}
+
+.ocean-ask-noticed-label,
+.ocean-ask-needs-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.ocean-ask-clear {
+  margin-top: 0.65rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.ocean-knowledge-frames {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ocean-knowledge-frames-primary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  align-items: stretch;
+  min-height: 28rem;
+}
+
+.ocean-knowledge-frames-secondary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.ocean-knowledge-frame {
+  display: flex;
+  flex-direction: column;
+  min-height: 22rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.ocean-knowledge-frame-header {
+  padding: 0.75rem 0.9rem 0.55rem;
+  border-bottom: 1px solid var(--border-subtle);
+  border-top: 2px solid transparent;
+}
+
+.ocean-knowledge-frame-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 620;
+  color: var(--text-primary);
+}
+
+.ocean-knowledge-frame.accent-position .ocean-knowledge-frame-header {
+  border-top-color: #8b6cff;
+}
+.ocean-knowledge-frame.accent-risks .ocean-knowledge-frame-header {
+  border-top-color: #e45b5b;
+}
+.ocean-knowledge-frame.accent-todo .ocean-knowledge-frame-header {
+  border-top-color: #5b8def;
+}
+.ocean-knowledge-frame.accent-people .ocean-knowledge-frame-header {
+  border-top-color: #35b97f;
+}
+.ocean-knowledge-frame.accent-deps .ocean-knowledge-frame-header {
+  border-top-color: #2eb7c9;
+}
+.ocean-knowledge-frame.accent-decisions .ocean-knowledge-frame-header {
+  border-top-color: #8a93a5;
+}
+.ocean-knowledge-frame.accent-dates .ocean-knowledge-frame-header {
+  border-top-color: #e4a23b;
+}
+.ocean-knowledge-frame.accent-waiting .ocean-knowledge-frame-header {
+  border-top-color: #e4a23b;
+}
+.ocean-knowledge-frame.accent-meeting .ocean-knowledge-frame-header {
+  border-top-color: #9b7bff;
+}
+.ocean-knowledge-frame.accent-timeline .ocean-knowledge-frame-header {
+  border-top-color: #5a9bb8;
+}
+
+.ocean-knowledge-frame-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.65rem 0.75rem 0.85rem;
+  overflow: auto;
+  flex: 1;
+}
+
+.ocean-frame-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.ocean-knowledge-item {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.02);
+  color: inherit;
+  cursor: default;
+}
+
+.ocean-knowledge-item.is-selectable {
+  cursor: pointer;
+}
+
+.ocean-knowledge-item.is-selectable:hover {
+  border-color: var(--border-strong);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ocean-knowledge-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.ocean-knowledge-item-title {
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ocean-knowledge-item-meta {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.ocean-knowledge-item-epistemic {
+  align-self: flex-start;
+  margin-top: 0.1rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  color: var(--warning);
+  font-size: 0.68rem;
+}
+
+.ocean-priority-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-top: 0.4rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  background: #6b7280;
+}
+
+.ocean-priority-dot.is-high {
+  background: #e45b5b;
+}
+.ocean-priority-dot.is-medium {
+  background: #e4a23b;
+}
+.ocean-priority-dot.is-low {
+  background: #35b97f;
+}
+.ocean-priority-dot.is-none {
+  background: #6b7280;
+}
+
+.ocean-embed-frame .frame-body {
+  padding: 0;
+}
+
+.ocean-sidebar .ocean-wordmark {
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  text-transform: lowercase;
+}
+
+.ocean-wordmark-me {
+  font-weight: 750;
+  color: #c9d4ff;
+}
+
+.ocean-wordmark-compact {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ocean-sidebar-projects-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.15rem 0.55rem 0.35rem;
+}
+
+.ocean-new-project {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: #35b97f;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ocean-new-project:hover {
+  color: #4fd198;
+}
+
+.ocean-sidebar .sidebar-project {
+  /* No health dots */
+}
+
+.ocean-sidebar .sidebar-link.sidebar-project.is-active.is-project-owned {
+  background: rgba(108, 140, 255, 0.12);
+}
+
+.ocean-utility-header {
+  margin-bottom: 1rem;
+}
+
+.ocean-utility-header h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.ocean-utility-lede {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+}
+
+.ocean-capture-mode {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+.ocean-advise-soon {
+  padding: 2rem;
+  border: 1px dashed var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .ocean-knowledge-frames-primary,
+  .ocean-knowledge-frames-secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 0;
+  }
+  .ocean-search-ask-row {
+    grid-template-columns: 1fr;
+  }
+  .ocean-search-or {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .ocean-knowledge-frames-primary,
+  .ocean-knowledge-frames-secondary {
+    grid-template-columns: 1fr;
+  }
+  .ocean-mode-selector {
+    width: 100%;
+    overflow-x: auto;
+  }
+}
