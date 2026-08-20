@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 20 August 2026 (Slice 1D Ask context — D-009/D-018 fixed; D-010 partial on canonical)  
+**Last housekeeping:** 20 August 2026 (Slice 2A Ocean Knowledge Centre UI)  
 **Authority:** `docs/v1-reference-pack/` + project-truth architecture audit  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
@@ -157,8 +157,8 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Explicit non-goals** | Portfolio org chart; Advise; Ocean redesign in foundation slices |
 | **Regression test to add** | Capture→promote path once specified |
 | **Target resolution / validation point** | Capture hardening (promotion) + richer People & Context UI later; identity/responsibility foundation delivered in Slice 1C |
-| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
-| **Notes** | Slice 1C made stakeholders the durable identity authority and linked responsibilities via personId. Remaining gap is prose that never went through Confirm Owner. Not overdue — planned 1C foundation is done. |
+| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md`; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
+| **Notes** | Slice 1C made stakeholders the durable identity authority and linked responsibilities via personId. Slice 2A People frame renders stakeholders + current responsibilities (+ availability meta when structured). Remaining gap: prose that never went through Confirm Owner; no rich person drawer yet. Not overdue. |
 
 ---
 
@@ -356,9 +356,9 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Proposed fix direction** | When another current owner exists for the scope, offer Share vs Replace (Needs clarification) rather than silent replace |
 | **Explicit non-goals** | Full People drawer redesign beyond the confirm flow |
 | **Regression test to add** | UI/integration later; API already covered in `verify:people-entities` |
-| **Target resolution / validation point** | Richer People & Context UI later; must be checked before V1 launch if Confirm Owner is a primary correction path |
-| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
-| **Notes** | Default share (no silent overwrite) is intentional and safer than pre-1C supersede-all |
+| **Target resolution / validation point** | Dedicated People UI follow-up before V1 launch (Confirm Owner is a primary correction path) |
+| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md`; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
+| **Notes** | Explicitly **not** broadened into Slice 2A Ocean baseline. Default share (no silent overwrite) remains intentional. |
 
 ---
 
@@ -376,9 +376,9 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Proposed fix direction** | Keep exposing structured kinds; do not invent brittle prose heuristics. Add dedicated modelling only when product requires it |
 | **Explicit non-goals** | Building a universal graph or calendar in Ask convergence |
 | **Regression test to add** | Already covered lightly in `verify:ask-context-authority` when structured availability present |
-| **Target resolution / validation point** | Richer People & Context UI / later domain modelling — not blocking Ask UI integration |
-| **Related docs** | `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
-| **Notes** | Documented rather than compensated with heuristics in 1D |
+| **Target resolution / validation point** | Dependencies / availability modelling + People UI follow-up — not blocking Ocean baseline |
+| **Related docs** | `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md`; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
+| **Notes** | Slice 2A Dependencies frame shows structured `kind=dependency` only; strip says “Dependencies not structured yet” when count is 0 rather than inventing prose counts. |
 
 ---
 
@@ -398,7 +398,67 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | After authority decision — not encoded as green “deduped” behaviour yet |
 | **Target resolution / validation point** | Open-loop / To Do architecture slice (same family as D-008) |
 | **Related docs** | D-008; `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
-| **Notes** | 1D intentionally did not force a full dedupe redesign |
+| **Notes** | 1D intentionally did not force a full dedupe redesign. Slice 2A Waiting frame may surface both todo waiting/chase and Knowledge openLoops — UI does not invent dedupe. |
+
+---
+
+### D-022 — Ocean Capture mode still uses pre-Ocean Capture chrome
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | Capture UI |
+| **Found in** | Slice 2A |
+| **Failure class** | Selecting Capture in the Ocean mode selector embeds existing `CaptureWorkspace` without the full Ocean Capture empty/review visual states from the UI baseline §16 |
+| **Evidence / repro** | Open project → Capture mode |
+| **Likely files** | `OceanProjectWorkspace.tsx`; `CaptureWorkspace.tsx` |
+| **Proposed fix direction** | Dedicated Capture Ocean UI slice inheriting shell/typography |
+| **Explicit non-goals** | Changing Capture interpretation/review semantics in UI baseline |
+| **Regression test to add** | Capture UI visual/behaviour suite later |
+| **Target resolution / validation point** | Capture Ocean UI follow-up |
+| **Related docs** | `docs/v1-reference-pack/LUME_V1_UI_BASELINE_OCEAN.md` §16 |
+| **Notes** | Intentionally deferred in 2A |
+
+---
+
+### D-023 — Knowledge item rich detail drawer not implemented
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Knowledge Centre UI |
+| **Found in** | Slice 2A |
+| **Failure class** | Items are visually selectable; To Do can toggle; full provenance/person/risk detail drawer from Ocean §12 is not built |
+| **Evidence / repro** | Click Current position / Risk / People cards |
+| **Likely files** | `KnowledgeItemCard.tsx`; future detail drawer |
+| **Proposed fix direction** | Dedicated item-detail UI slice using existing evidence/person helpers |
+| **Explicit non-goals** | Blocking Ocean baseline on drawer architecture |
+| **Regression test to add** | Item detail open/close + project isolation |
+| **Target resolution / validation point** | Knowledge item detail UI follow-up before V1 launch if selection is primary correction path |
+| **Related docs** | Ocean baseline §12; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
+| **Notes** | Baseline implementation must not wait on this |
+
+---
+
+### D-024 — “Actions left” uses local analysis meter, not billing entitlement
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | Billing / UI |
+| **Found in** | Slice 2A |
+| **Failure class** | Ocean strip shows `analysesRemaining` local monthly meter labelled “actions left” — truthful existing behaviour, not server billing entitlement |
+| **Evidence / repro** | Inspect `ProjectIntelligenceStrip` + `analysesRemaining` |
+| **Likely files** | `ProjectIntelligenceStrip.tsx`; `src/lib/workspace/history.ts` |
+| **Proposed fix direction** | Wire to real entitlement when billing meters exist; keep non-button pill treatment |
+| **Explicit non-goals** | Fabricating usage to match mockup count |
+| **Regression test to add** | Entitlement display once server meter exists |
+| **Target resolution / validation point** | Billing / entitlement hardening |
+| **Related docs** | Ocean baseline §5; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
+| **Notes** | Documented rather than inventing a fake 36 |
 
 ---
 
@@ -487,14 +547,16 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 1. **D-006** — next New Project/persistence touchpoint (before V1 launch)  
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
-3. **D-019** — Confirm Owner replace-vs-share UI (People UI later / before V1 launch)  
-4. **D-007** remainder — Capture promote + People UI  
-5. **D-017** — validate during Capture hardening (before Capture V1-ready)  
-6. **D-003** — suggestion persist (V1 product hardening)  
-7. **D-005** — save-error visibility (V1 product hardening, incremental OK)  
-8. **D-004** — history persist gaps (V1 product hardening)  
-9. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
-10. **D-008 / D-021**, **D-011–D-015**, **D-020** — as their domains are scheduled  
+3. **D-019** — Confirm Owner replace-vs-share UI (People UI follow-up / before V1 launch)  
+4. **D-007** remainder — Capture promote + People UI drawer  
+5. **D-023** — Knowledge item detail drawer  
+6. **D-022** — Capture Ocean UI polish  
+7. **D-017** — validate during Capture hardening (before Capture V1-ready)  
+8. **D-003** — suggestion persist (V1 product hardening)  
+9. **D-005** — save-error visibility (V1 product hardening, incremental OK)  
+10. **D-004** — history persist gaps (V1 product hardening)  
+11. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
+12. **D-008 / D-021**, **D-011–D-015**, **D-020**, **D-024** — as their domains are scheduled  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 
