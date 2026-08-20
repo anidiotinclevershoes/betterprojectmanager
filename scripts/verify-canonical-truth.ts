@@ -96,7 +96,7 @@ async function main() {
     assert.equal(bundle.includedHistoryEvidence, false);
   });
 
-  await check("serialize: ownership question surfaces needsConfirmation", () => {
+  await check("serialize: ownership question does not invent unknown_owner from absence", () => {
     const f = getCase("v1-northline-q9-security-owner")!;
     const world = getOfficialBenchmark().worlds.find((w) => w.id === f.worldId)!;
     const { state, projectId } = buildMissionStateForStage(world, f.stageId);
@@ -105,9 +105,78 @@ async function main() {
       projectId,
       question: f.question,
     });
+    // D-009: missing match ≠ stored known gap
+    assert.equal(
+      bundle.needsConfirmationHints.filter((h) => h.kind === "unknown_owner")
+        .length,
+      0,
+      "must not invent owner-not-recorded from topic tokens alone",
+    );
+  });
+
+  await check("serialize: stored unconfirmed responsibility still surfaces as gap", () => {
+    const projectId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const state: MissionState = {
+      projects: [
+        {
+          id: projectId,
+          name: "Gap",
+          code: "GAP",
+          summary: "",
+          status: "healthy",
+          currentFocus: "",
+          stakeholders: [],
+        },
+      ],
+      memories: [],
+      recommendations: [],
+      meetings: [],
+      releases: [],
+      todos: [],
+      knowledge: [
+        {
+          projectId,
+          updatedAt: new Date().toISOString(),
+          sections: {
+            now: [],
+            decisions: [],
+            risks: [],
+            people: [],
+            openLoops: [],
+          },
+          structured: [
+            {
+              id: "11111111-1111-4111-8111-111111111111",
+              projectId,
+              section: "people",
+              body: "Security sign-off — unconfirmed",
+              kind: "responsibility",
+              epistemic: "unknown",
+              lifecycle: "current",
+              meta: {
+                responsibility: {
+                  scope: "Security sign-off",
+                  personName: null,
+                  personId: null,
+                  ownerConfirmed: false,
+                },
+              },
+            },
+          ],
+        },
+      ],
+      risks: [],
+      timeline: [],
+      history: [],
+    };
+    const bundle = serializeCanonicalTruth({
+      state,
+      projectId,
+      question: "Who owns Security sign-off?",
+    });
     assert.ok(
       bundle.needsConfirmationHints.some((h) => h.kind === "unknown_owner"),
-      "expected unknown_owner hint",
+      "stored unconfirmed responsibility remains a real gap",
     );
   });
 
@@ -240,7 +309,7 @@ async function main() {
     assert.ok(!harborQs.some((q) => /UniqueNorthScopeXYZ/i.test(q.question)));
   });
 
-  await check("canonical context is more compact than legacy for current Q", () => {
+  await check("canonical current Q uses authoritative domains without History dump", () => {
     const f = getCase("v1-meridian-q7-snyk-status")!;
     const world = getOfficialBenchmark().worlds.find((w) => w.id === f.worldId)!;
     const { state, projectId } = buildMissionStateForStage(world, f.stageId);
@@ -262,10 +331,12 @@ async function main() {
     delete process.env.LUME_CANONICAL_TRUTH;
 
     assert.equal(canon.usedCanonicalTruth, true);
-    assert.ok(
-      canon.approxChars < legacy.approxChars,
-      `canonical ${canon.approxChars} should be < legacy ${legacy.approxChars}`,
-    );
+    assert.equal(Boolean(legacy.usedCanonicalTruth), false);
+    // Slice 1D: authority over token-minimisation — do not require canon < legacy size
+    assert.match(canon.promptBlock, /AUTHORITATIVE PROJECT STATE/);
+    assert.match(canon.promptBlock, /MODE: current/);
+    assert.match(canon.promptBlock, /RISKS \(domain lifecycle\)/);
+    assert.ok(!/EVIDENCE \(history/i.test(canon.promptBlock));
     assert.ok(!/History:/i.test(canon.promptBlock));
   });
 

@@ -38,6 +38,7 @@
     "verify:project-truth-safety": "npx --yes tsx scripts/verify-project-truth-safety.ts",
     "verify:risk-lifecycle": "npx --yes tsx scripts/verify-risk-lifecycle.ts",
     "verify:people-entities": "npx --yes tsx scripts/verify-people-entities.ts",
+    "verify:ask-context-authority": "npx --yes tsx scripts/verify-ask-context-authority.ts",
     "verify:capture-trust-boundary": "npx --yes tsx scripts/verify-capture-trust-boundary.ts",
     "typecheck": "tsc --noEmit",
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",
