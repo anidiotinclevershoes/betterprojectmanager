@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 19 August 2026 (Slice 1C People — D-001/D-002 fixed; D-007 partial; D-018/D-019 added)  
+**Last housekeeping:** 20 August 2026 (Slice 1D Ask context — D-009/D-018 fixed; D-010 partial on canonical)  
 **Authority:** `docs/v1-reference-pack/` + project-truth architecture audit  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
@@ -182,31 +182,11 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
-### D-009 — Canonical serialize can invent false “owner not recorded” gaps
-
-| Field | Value |
-| --- | --- |
-| **Status** | open |
-| **Severity** | high (trust) |
-| **Domain** | Ask/Tell Me |
-| **Found in** | Architecture audit §3.3.3; philosophy Helen/Omar example |
-| **Failure class** | `findUnknownOwnerHints` may emit “owner is not recorded” for ownership questions without confirmed responsibility → poisons answers / invents known gaps |
-| **Evidence / repro** | Ownership question when people exist but no structured responsibility; inspect serialize hints |
-| **Likely files** | `src/lib/canonical-truth/serialize.ts` (~findUnknownOwnerHints) |
-| **Proposed fix direction** | Only emit unknown-owner when question requires it **and** absence is evidenced; never invent false gaps |
-| **Explicit non-goals** | Enabling canonical flag by default without eval proof |
-| **Regression test to add** | Fixture: joint ownership / named people must not yield false known-gap |
-| **Target resolution / validation point** | Ask/canonical convergence; must be checked before V1 launch if canonical Ask is enabled |
-| **Related docs** | Philosophy; Phase2C trust handovers |
-| **Notes** | Trust-critical; fix under Ask/canonical workstream, not Risk/People persistence alone |
-
----
-
 ### D-010 — Legacy Ask path still injects History as competing truth
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | partial |
 | **Severity** | medium |
 | **Domain** | Ask/Tell Me |
 | **Found in** | Architecture audit §3.3.4 |
@@ -216,9 +196,9 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Proposed fix direction** | Tighten history injection to historical questions only; prefer domain authority for current-state |
 | **Explicit non-goals** | Deleting History feature |
 | **Regression test to add** | Context-integrity: current-state question excludes superseded history as truth |
-| **Target resolution / validation point** | Ask/canonical convergence |
-| **Related docs** | Philosophy; Phase2C2 context integrity |
-| **Notes** | Canonical path already narrower — production flag still legacy |
+| **Target resolution / validation point** | Canonical production default decision (after Ask UI integration + eval evidence); residual legacy path until then |
+| **Related docs** | Philosophy; Phase2C2 context integrity; `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
+| **Notes** | **Slice 1D validated/fixed on canonical path:** current-state MODE omits History evidence; historical/change questions retrieve scoped evidence. Production still defaults to legacy — residual risk remains until flag default changes. Do not remove legacy rollback yet. |
 
 ---
 
@@ -362,26 +342,6 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
-### D-018 — Tell Me singular owner answer for shared responsibilities
-
-| Field | Value |
-| --- | --- |
-| **Status** | open |
-| **Severity** | medium |
-| **Domain** | Ask/Tell Me |
-| **Found in** | Slice 1C |
-| **Failure class** | Domain now supports multiple current owners for one scope (`findConfirmedOwners`), but Tell Me answer path still uses singular `findConfirmedOwner` / phrasing |
-| **Evidence / repro** | Confirm Mark + Bruno for same scope; Ask who owns that scope under canonical local path |
-| **Likely files** | `src/lib/tell-me/answer.ts`; serialize / owner fast-path |
-| **Proposed fix direction** | Answer with all current confirmed owners for the scope; do not invent exclusivity |
-| **Explicit non-goals** | Enabling canonical Ask in production without evals |
-| **Regression test to add** | Shared owners → answer names both; no false single-owner claim |
-| **Target resolution / validation point** | Ask/canonical convergence |
-| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
-| **Notes** | Data model is ready; retrieval UI/Ask wording is the remaining gap |
-
----
-
 ### D-019 — Confirm Owner UI lacks explicit replace-vs-share choice
 
 | Field | Value |
@@ -399,6 +359,46 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Target resolution / validation point** | Richer People & Context UI later; must be checked before V1 launch if Confirm Owner is a primary correction path |
 | **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md` |
 | **Notes** | Default share (no silent overwrite) is intentional and safer than pre-1C supersede-all |
+
+---
+
+### D-020 — Dependencies / availability lack dedicated Ask domains
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | Ask/Tell Me · People · Knowledge |
+| **Found in** | Slice 1D Ask context authority |
+| **Failure class** | Ask can surface `kind=dependency` / `kind=availability` structured Knowledge rows when present, but there is no dedicated dependency graph or availability calendar domain. Gaps are easy to miss if only prose exists |
+| **Evidence / repro** | Cross-domain person+risk fixture works when structured availability exists; no structured dependency inventory in MissionState beyond Knowledge kinds |
+| **Likely files** | `src/lib/canonical-truth/serialize.ts`; future People/availability UI |
+| **Proposed fix direction** | Keep exposing structured kinds; do not invent brittle prose heuristics. Add dedicated modelling only when product requires it |
+| **Explicit non-goals** | Building a universal graph or calendar in Ask convergence |
+| **Regression test to add** | Already covered lightly in `verify:ask-context-authority` when structured availability present |
+| **Target resolution / validation point** | Richer People & Context UI / later domain modelling — not blocking Ask UI integration |
+| **Related docs** | `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
+| **Notes** | Documented rather than compensated with heuristics in 1D |
+
+---
+
+### D-021 — Todo vs Knowledge open-loop dual representation still unresolved for Ask
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Ask/Tell Me · Todos · Knowledge |
+| **Found in** | Slice 1D (related to D-008) |
+| **Failure class** | Canonical Ask now includes Todo-domain open items + WAITING/CHASE and may still include Knowledge `openLoops` / open_loop structured facts. Soft overlap can remain when the same loop exists in both stores |
+| **Evidence / repro** | Project with matching todo title and openLoops bullet; inspect AUTHORITATIVE PROJECT STATE sections |
+| **Likely files** | `src/lib/canonical-truth/serialize.ts`; Todo/open-loop authority slice |
+| **Proposed fix direction** | Dedicated open-loop/Todo authority decision (see D-008); optional deterministic dedupe only after authority is clear |
+| **Explicit non-goals** | Fully resolving D-008 inside Ask context convergence |
+| **Regression test to add** | After authority decision — not encoded as green “deduped” behaviour yet |
+| **Target resolution / validation point** | Open-loop / To Do architecture slice (same family as D-008) |
+| **Related docs** | D-008; `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
+| **Notes** | 1D intentionally did not force a full dedupe redesign |
 
 ---
 
@@ -461,6 +461,28 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ---
 
+### D-R06 — Canonical invents false “owner not recorded” gaps (Slice 1D)
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Slice 1D — `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
+| **Failure class** | `findUnknownOwnerHints` invented unknown-owner from ownership topic tokens / missing match |
+| **Fix summary** | Unknown-owner only from stored unconfirmed responsibility rows; ownership fast-path uses `findConfirmedOwners`; no fabricated Needs you from absence |
+
+---
+
+### D-R07 — Tell Me singular owner for shared responsibilities (Slice 1D)
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Slice 1D — `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
+| **Failure class** | Ask/Tell Me collapsed multi-owner scopes to one person |
+| **Fix summary** | Serialize emits all current `@Person → scope` rows; local ownership answer names all confirmed owners |
+
+---
+
 ## Suggested fix order (non-binding)
 
 1. **D-006** — next New Project/persistence touchpoint (before V1 launch)  
@@ -471,8 +493,8 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 6. **D-003** — suggestion persist (V1 product hardening)  
 7. **D-005** — save-error visibility (V1 product hardening, incremental OK)  
 8. **D-004** — history persist gaps (V1 product hardening)  
-9. **D-009 / D-010 / D-018** — Ask/canonical convergence  
-10. **D-008, D-011–D-015** — as their domains are scheduled; D-008 timing remains ambiguous  
+9. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
+10. **D-008 / D-021**, **D-011–D-015**, **D-020** — as their domains are scheduled  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 

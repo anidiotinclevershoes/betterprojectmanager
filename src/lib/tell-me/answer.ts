@@ -23,8 +23,9 @@ import type {
   TellMeConversationTurn,
   TellMeSourceRef,
 } from "@/lib/tell-me/types";
-import { findConfirmedOwner } from "@/lib/canonical-truth/confirm-responsibility";
+import { findConfirmedOwners } from "@/lib/canonical-truth/confirm-responsibility";
 import { isCanonicalTruthEnabled } from "@/lib/canonical-truth/flag";
+import { isOpenRiskStatus } from "@/lib/risks/lifecycle";
 
 export const TELL_ME_SYSTEM = `You are Tell Me for Lume — a project memory recall assistant for project managers.
 
@@ -55,7 +56,7 @@ Rules:
 - Cite sourceIds from the evidence ids provided in brackets like [id].`;
 
 /** Slice 1 canonical path — same trust rules + structured Answer / noticed / needsConfirmation. */
-export const TELL_ME_SYSTEM_CANONICAL = `You are Tell Me for Lume — read-only project recall over CANONICAL PROJECT TRUTH.
+export const TELL_ME_SYSTEM_CANONICAL = `You are Tell Me for Lume — read-only project recall over AUTHORITATIVE PROJECT STATE.
 
 You are READ-ONLY. Never create, update, or delete project state.
 Never invent approvals, owners, dates, or decisions that are not evidenced.
@@ -74,7 +75,7 @@ Response JSON schema:
 Rules:
 - "answer" is required: direct, narrow, grounded.
 - "noticed" is optional: useful supported implications/connections. Interpretation only — not new project truth.
-- "needsConfirmation" is optional: only material gaps. Prefer the KNOWN GAPS list when present. Do not invent owners to fill gaps.
+- "needsConfirmation" is optional: only material gaps. Prefer the STORED AMBIGUITIES list when present. Do not invent owners or gaps from absence alone.
 - Ownership: only state an owner when a responsibility fact explicitly assigns that exact scope (@Person → scope). Do not broaden (UX ≠ security).
 - Current vs history: MODE:current excludes superseded; MODE:historical may include it.
 - Epistemic: informal/suggested/unknown/legacy are not official confirmation.
@@ -169,28 +170,33 @@ export async function answerTellMeQuestion(args: {
     freshness.isStale &&
     (latestQuestion || freshness.changeCountHint >= 2);
 
-  // Deterministic owner from confirmed structured responsibility.
+  // Deterministic owners from confirmed structured responsibilities (Slice 1C/1D).
+  // Supports multiple concurrent owners for the same scope — never invent exclusivity.
   if (questionLooksOwnership(question) && bundle.scope.projectId) {
     const knowledge = args.state.knowledge.find(
       (k) => k.projectId === bundle.scope.projectId,
     );
     const tokens = ownershipTopicTokens(question);
     for (const token of tokens) {
-      const hit = findConfirmedOwner(knowledge, token);
-      if (hit) {
+      const hits = findConfirmedOwners(knowledge, token);
+      if (hits.length) {
+        const names = hits.map((h) => h.personName);
+        const scopeLabel = hits[0]!.scope;
+        const answerText =
+          names.length === 1
+            ? `${names[0]} owns ${scopeLabel}.`
+            : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]} own ${scopeLabel}.`;
         return {
-          answer: `${hit.personName} owns ${hit.scope}.`,
+          answer: answerText,
           confidence: "direct_confirmation",
-          sources: [
-            {
-              id: hit.item.id,
-              kind: "knowledge",
-              label: hit.item.body,
-              projectId: bundle.scope.projectId,
-              projectCode: bundle.scope.projectCode,
-              detail: "confirmed responsibility",
-            },
-          ],
+          sources: hits.map((hit) => ({
+            id: hit.item.id,
+            kind: "knowledge" as const,
+            label: hit.item.body,
+            projectId: bundle.scope.projectId,
+            projectCode: bundle.scope.projectCode,
+            detail: "confirmed responsibility",
+          })),
           noticed: [],
           needsConfirmation: [],
           scope: {
@@ -214,8 +220,8 @@ export async function answerTellMeQuestion(args: {
             projectsConsidered: 1,
             recordsSelected: bundle.recordsSelected,
             snapshotUsed: false,
-            knowledgeItems: 1,
-            structuredItems: 1,
+            knowledgeItems: hits.length,
+            structuredItems: hits.length,
             approxChars: bundle.approxChars,
           },
         };
@@ -552,34 +558,40 @@ function localGroundedAnswer(args: {
   const needsConfirmation = [
     ...(args.bundle.needsConfirmationHints ?? []),
   ];
-  if (
-    questionLooksOwnership(args.question) &&
-    confidence === "not_found" &&
-    !needsConfirmation.length
-  ) {
-    const tokens = ownershipTopicTokens(args.question);
-    if (tokens.length) {
-      needsConfirmation.push({
-        id: `nc-local-${tokens.join("-")}`,
-        kind: "unknown_owner",
-        summary: `${tokens.join(" ")} owner is not recorded.`,
-        scope: tokens.join(" "),
-        truthItemId: null,
-      });
-    }
-  }
+  // Slice 1D / D-009: do not invent unknown_owner from topic tokens alone.
+  // Only surface stored ambiguities already present in needsConfirmationHints.
 
   if (!answer && /risk/.test(q)) {
-    if (!risks.length && !knowledge.some((k) => /risk/i.test(k.title))) {
+    const domainOpen = (args.state.risks ?? []).filter(
+      (r) =>
+        (!args.bundle.scope.projectId ||
+          r.projectId === args.bundle.scope.projectId) &&
+        isOpenRiskStatus(r.status),
+    );
+    if (
+      !domainOpen.length &&
+      !risks.length &&
+      !knowledge.some((k) => /risk/i.test(k.title))
+    ) {
       answer = "I can’t find open risks recorded for this scope.";
       confidence = "not_found";
     } else {
       const lines = [
+        ...domainOpen.map((r) => r.title),
         ...risks.map((r) => r.title),
         ...knowledge.filter((k) => /risk/i.test(k.title)).map((k) => k.title),
       ].slice(0, 8);
       answer = `Open risks I can see:\n${lines.map((l) => `• ${l}`).join("\n")}`;
       confidence = "direct_confirmation";
+      for (const r of domainOpen.slice(0, 4)) {
+        sources.push({
+          id: r.id,
+          kind: "risk",
+          label: r.title,
+          projectId: args.bundle.scope.projectId,
+          projectCode: args.bundle.scope.projectCode,
+        });
+      }
       for (const r of risks.slice(0, 4)) {
         sources.push({
           id: r.id,

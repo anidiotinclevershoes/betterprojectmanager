@@ -1,22 +1,32 @@
 /**
  * Compact canonical truth serialiser for Tell Me / Knowledge Q&A.
+ * Slice 1D: assemble from authoritative MissionState domains (Knowledge,
+ * risks.status, stakeholders, responsibilities, todos, milestones).
  * Does not determine new truth — only projects stored state.
  */
 import { emptyKnowledge } from "@/lib/knowledge";
 import {
   questionLooksHistorical,
   questionLooksCurrentState,
-  questionLooksOwnership,
-  ownershipTopicTokens,
 } from "@/lib/tell-me/question-shape";
-import type { MissionState, ProjectKnowledge } from "@/lib/types";
+import type { HistoryEvent, MissionState, ProjectKnowledge } from "@/lib/types";
 import type {
   CanonicalTruthBundle,
   CanonicalTruthItem,
   NeedsConfirmationItem,
 } from "@/lib/canonical-truth/types";
+import {
+  isClosedRiskStatus,
+  isOpenRiskStatus,
+  isResolvedProse,
+  stripResolvedPrefix,
+  titlesMatch,
+} from "@/lib/risks/lifecycle";
 
 function newId(prefix: string): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
@@ -58,23 +68,89 @@ export function deriveLegacyStructured(
 
 function formatItemLine(item: CanonicalTruthItem): string {
   const ep = item.epistemic ?? "legacy";
+  const life =
+    item.lifecycle && item.lifecycle !== "current"
+      ? `, ${item.lifecycle}`
+      : "";
   const resp = item.meta?.responsibility;
   if (item.kind === "responsibility" && resp?.scope) {
     if (resp.ownerConfirmed && resp.personName) {
-      return `[${item.id}] (responsibility, ${ep}) @${resp.personName} → ${resp.scope}`;
+      return `[${item.id}] (responsibility, ${ep}${life}) @${resp.personName} → ${resp.scope}`;
     }
-    return `[${item.id}] (responsibility, ${ep}) ${resp.scope} · Owner: Not confirmed`;
+    return `[${item.id}] (responsibility, ${ep}${life}) ${resp.scope} · Owner: Not confirmed`;
   }
   if (item.kind === "date" && item.meta?.date) {
     const d = item.meta.date;
-    return `[${item.id}] (date, ${ep}) ${d.label}${d.dateIso ? `: ${d.dateIso.slice(0, 10)}` : ""}`;
+    return `[${item.id}] (date, ${ep}${life}) ${d.label}${d.dateIso ? `: ${d.dateIso.slice(0, 10)}` : ""}`;
   }
-  return `[${item.id}] (${item.kind}, ${ep}) ${item.body}`;
+  if (item.kind === "availability") {
+    return `[${item.id}] (availability, ${ep}${life}) ${item.body}`;
+  }
+  if (item.kind === "dependency") {
+    return `[${item.id}] (dependency, ${ep}${life}) ${item.body}`;
+  }
+  return `[${item.id}] (${item.kind}, ${ep}${life}) ${item.body}`;
 }
 
-function findUnknownOwnerHints(
-  items: CanonicalTruthItem[],
+const HISTORY_STOP = new Set([
+  "the",
+  "and",
+  "for",
+  "what",
+  "when",
+  "who",
+  "why",
+  "how",
+  "did",
+  "was",
+  "were",
+  "about",
+  "with",
+  "this",
+  "that",
+  "from",
+  "into",
+  "have",
+  "has",
+  "had",
+  "our",
+  "you",
+  "your",
+]);
+
+/**
+ * Prefer history rows that share tokens with the question; fall back to recent
+ * project history for open-ended change questions.
+ */
+function selectHistoryEvidenceForQuestion(
+  history: HistoryEvent[],
+  projectId: string,
   question: string,
+): HistoryEvent[] {
+  const scoped = history.filter((h) => !h.projectId || h.projectId === projectId);
+  if (!scoped.length) return [];
+  const tokens = (question.toLowerCase().match(/\b[a-z0-9][a-z0-9-]{2,}\b/g) ?? [])
+    .map((t) => t.replace(/^-+|-+$/g, ""))
+    .filter((t) => t.length >= 3 && !HISTORY_STOP.has(t));
+  if (!tokens.length) return scoped.slice(-6);
+  const scored = scoped
+    .map((h) => {
+      const text = `${h.title} ${h.detail ?? ""}`.toLowerCase();
+      const hits = tokens.filter((t) => text.includes(t)).length;
+      return { h, hits };
+    })
+    .filter((row) => row.hits > 0)
+    .sort((a, b) => b.hits - a.hits);
+  if (scored.length) return scored.slice(0, 6).map((row) => row.h);
+  return scoped.slice(-6);
+}
+
+/**
+ * Slice 1D / D-009: only emit unknown-owner from **stored** unconfirmed
+ * responsibility rows. Never invent "owner is not recorded" from topic tokens.
+ */
+export function findUnknownOwnerHints(
+  items: CanonicalTruthItem[],
 ): NeedsConfirmationItem[] {
   const hints: NeedsConfirmationItem[] = [];
   for (const item of items) {
@@ -94,41 +170,12 @@ function findUnknownOwnerHints(
       });
     }
   }
-
-  // Ownership question with no matching confirmed responsibility for the topic.
-  if (questionLooksOwnership(question)) {
-    const tokens = ownershipTopicTokens(question);
-    const hasConfirmed = items.some((item) => {
-      if (item.lifecycle !== "current") return false;
-      if (item.kind !== "responsibility") return false;
-      const resp = item.meta?.responsibility;
-      if (!resp?.ownerConfirmed || !resp.personName) return false;
-      const scope = resp.scope.toLowerCase();
-      return tokens.some((t) => scope.includes(t) || t.includes(scope));
-    });
-    if (!hasConfirmed && tokens.length) {
-      const scopeLabel = tokens
-        .map((t) => t.replace(/\b\w/g, (c) => c.toUpperCase()))
-        .join(" ");
-      const already = hints.some((h) =>
-        (h.scope ?? "").toLowerCase().includes(tokens[0]!),
-      );
-      if (!already) {
-        hints.push({
-          id: `nc-owner-${tokens.join("-")}`,
-          kind: "unknown_owner",
-          summary: `${scopeLabel} owner is not recorded.`,
-          scope: scopeLabel,
-          truthItemId: null,
-        });
-      }
-    }
-  }
   return hints;
 }
 
 /**
  * One compact representation of relevant current project truth.
+ * Assembles from authoritative MissionState domains (Slice 1D).
  */
 export function serializeCanonicalTruth(args: {
   state: MissionState;
@@ -161,6 +208,13 @@ export function serializeCanonicalTruth(args: {
   const currentState =
     questionLooksCurrentState(args.question) && !historical;
 
+  const domainRisks = (args.state.risks ?? []).filter(
+    (r) => r.projectId === args.projectId,
+  );
+  const closedRiskTitles = domainRisks
+    .filter((r) => isClosedRiskStatus(r.status))
+    .map((r) => r.title);
+
   const visible = items.filter((i) => {
     if (historical) {
       return (
@@ -169,7 +223,17 @@ export function serializeCanonicalTruth(args: {
         i.lifecycle === "superseded"
       );
     }
-    return i.lifecycle === "current";
+    if (i.lifecycle !== "current") return false;
+    // Current-state: do not surface resolved Risk prose as open facts
+    if (i.kind === "risk" || i.section === "risks") {
+      if (isResolvedProse(i.body)) return false;
+      if (
+        closedRiskTitles.some((t) => titlesMatch(t, stripResolvedPrefix(i.body)))
+      ) {
+        return false;
+      }
+    }
+    return true;
   });
 
   // Deduplicate identical bodies (keep first — prefer structured order).
@@ -182,35 +246,57 @@ export function serializeCanonicalTruth(args: {
     deduped.push(item);
   }
 
-  const needsConfirmationHints = findUnknownOwnerHints(
-    deduped,
-    args.question,
-  );
+  const needsConfirmationHints = findUnknownOwnerHints(deduped);
 
   const project = args.state.projects.find((p) => p.id === args.projectId);
   const header = [
-    "CANONICAL PROJECT TRUTH",
+    "AUTHORITATIVE PROJECT STATE",
     `PROJECT: ${project?.code ?? ""} · ${project?.name ?? args.projectId}`,
+    project?.status ? `STATUS: ${project.status}` : null,
+    project?.currentFocus ? `FOCUS: ${project.currentFocus}` : null,
+    project?.summary ? `OBJECTIVE: ${project.summary.slice(0, 200)}` : null,
     historical
-      ? "MODE: historical — includes superseded/historical facts"
-      : "MODE: current — superseded/historical excluded",
+      ? "MODE: historical — includes superseded/historical facts + history evidence"
+      : "MODE: current — superseded/historical excluded; History omitted",
+    "NOTE: Multiple people may share the same responsibility scope.",
     "",
-  ];
+  ].filter((l): l is string => Boolean(l));
 
   const lines = deduped.map(formatItemLine);
 
-  // Thin open waiting (not duplicated if already in open_loop items)
-  const waiting = args.state.todos.filter(
-    (t) =>
-      t.projectId === args.projectId &&
-      !t.done &&
-      (t.kind === "WAITING" || t.kind === "CHASE" || Boolean(t.waitingOn)),
+  // Slice 1B/1D: Risk domain lifecycle (open/watch only for current mode)
+  const openDomainRisks = domainRisks.filter((r) =>
+    historical ? true : isOpenRiskStatus(r.status),
   );
-  const waitingLines = waiting.slice(0, 8).map((t) => {
-    return `[todo-${t.id}] (open_loop, legacy) ${t.title}${t.waitingOn ? ` · waiting on ${t.waitingOn}` : ""}`;
+  const riskLines = openDomainRisks.slice(0, 12).map((r) => {
+    return `[risk-${r.id}] (risk, ${r.status}) ${r.title}`;
   });
 
-  // Milestones as compact dates (current questions)
+  // Stakeholders — durable Person identity (Slice 1C)
+  const stakeholders = project?.stakeholders ?? [];
+  const stakeholderLines = stakeholders.slice(0, 16).map((s) => {
+    return `[person-${s.id}] (person) ${s.name}${s.role ? ` · ${s.role}` : ""}`;
+  });
+
+  // Waiting + general open todos (avoid dumping done)
+  const projectTodos = args.state.todos.filter(
+    (t) => t.projectId === args.projectId && !t.done,
+  );
+  const waiting = projectTodos.filter(
+    (t) =>
+      t.kind === "WAITING" || t.kind === "CHASE" || Boolean(t.waitingOn),
+  );
+  const generalTodos = projectTodos.filter(
+    (t) =>
+      t.kind !== "WAITING" && t.kind !== "CHASE" && !t.waitingOn,
+  );
+  const waitingLines = waiting.slice(0, 8).map((t) => {
+    return `[todo-${t.id}] (waiting, legacy) ${t.title}${t.waitingOn ? ` · waiting on ${t.waitingOn}` : ""}`;
+  });
+  const todoLines = generalTodos.slice(0, 10).map((t) => {
+    return `[todo-${t.id}] (todo, ${t.kind ?? "ACTION"}) ${t.title}`;
+  });
+
   const milestones = args.state.timeline
     .filter((t) => t.projectId === args.projectId)
     .slice(0, 8)
@@ -222,14 +308,16 @@ export function serializeCanonicalTruth(args: {
   let evidenceBlock = "";
   let includedHistoryEvidence = false;
   if (historical) {
-    const history = (args.state.history ?? [])
-      .filter((h) => !h.projectId || h.projectId === args.projectId)
-      .slice(0, 6);
+    const history = selectHistoryEvidenceForQuestion(
+      args.state.history ?? [],
+      args.projectId,
+      args.question,
+    );
     if (history.length) {
       includedHistoryEvidence = true;
       evidenceBlock = [
         "",
-        "EVIDENCE (history — for historical questions only):",
+        "EVIDENCE (history — for historical/change questions only):",
         ...history.map(
           (h) =>
             `[hist-${h.id}] ${h.title}${h.detail ? ` — ${h.detail.slice(0, 160)}` : ""}`,
@@ -237,14 +325,13 @@ export function serializeCanonicalTruth(args: {
       ].join("\n");
     }
   } else if (currentState) {
-    // Explicitly omit History dump for current-state questions.
     includedHistoryEvidence = false;
   }
 
   const ambiguityBlock = needsConfirmationHints.length
     ? [
         "",
-        "KNOWN GAPS (do not invent answers for these — use needsConfirmation):",
+        "STORED AMBIGUITIES (do not invent further gaps):",
         ...needsConfirmationHints.map((h) => `- ${h.summary}`),
       ].join("\n")
     : "";
@@ -254,10 +341,19 @@ export function serializeCanonicalTruth(args: {
     "CURRENT FACTS:",
     ...(lines.length ? lines : ["(none recorded)"]),
     "",
+    "RISKS (domain lifecycle):",
+    ...(riskLines.length ? riskLines : ["(none open)"]),
+    "",
+    "PEOPLE (stakeholders):",
+    ...(stakeholderLines.length ? stakeholderLines : ["(none)"]),
+    "",
     "MILESTONES:",
     ...(milestones.length ? milestones : ["(none)"]),
     "",
-    "WAITING / OPEN:",
+    "TODOS:",
+    ...(todoLines.length ? todoLines : ["(none)"]),
+    "",
+    "WAITING / CHASE:",
     ...(waitingLines.length ? waitingLines : ["(none)"]),
     evidenceBlock,
     ambiguityBlock,
