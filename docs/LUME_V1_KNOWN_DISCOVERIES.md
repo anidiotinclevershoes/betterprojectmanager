@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 20 August 2026 (Slice 2B Capture Ocean integration — D-022 fixed; dark-only V1)  
+**Last housekeeping:** 20 August 2026 (Slice 2C Knowledge item detail — D-023 fixed; D-005/D-004/D-007 partial honesty)  
 **Authority:** `docs/v1-reference-pack/` + project-truth architecture audit  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
@@ -98,7 +98,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Selected mutations emit durable history rows in plan/fake client |
 | **Target resolution / validation point** | V1 product hardening |
 | **Related docs** | Architecture audit; philosophy (History = evidence/chronology) |
-| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. |
+| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. |
 
 ---
 
@@ -118,7 +118,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Hard without UI; at least ensure error paths set `saveStatus` and do not claim success |
 | **Target resolution / validation point** | V1 product hardening; must be checked before V1 launch (incremental per write path is OK) |
 | **Related docs** | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` §C.4 |
-| **Notes** | Cross-cutting — fix incrementally when touching a write path; full UX polish belongs in V1 product hardening |
+| **Notes** | Cross-cutting — fix incrementally when touching a write path; full UX polish belongs in V1 product hardening. Slice 2C **partially** surfaces `saveStatus`/`saveError` inside the Knowledge item detail drawer on correction paths so a failed durable save is not silent there. App-wide toast/banner and optimistic rollback remain open. |
 
 ---
 
@@ -158,7 +158,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Capture→promote path once specified |
 | **Target resolution / validation point** | Capture hardening (promotion) + richer People & Context UI later; identity/responsibility foundation delivered in Slice 1C |
 | **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md`; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
-| **Notes** | Slice 1C made stakeholders the durable identity authority and linked responsibilities via personId. Slice 2A People frame renders stakeholders + current responsibilities (+ availability meta when structured). Remaining gap: prose that never went through Confirm Owner; no rich person drawer yet. Not overdue. |
+| **Notes** | Slice 1C made stakeholders the durable identity authority and linked responsibilities via personId. Slice 2A People frame renders stakeholders + current responsibilities (+ availability meta when structured). Slice 2C adds reusable person detail via `getPersonBundle` (current/historical/shared distinguishable). Remaining gap: prose that never went through Confirm Owner; D-019 replace-vs-share handover UI; dedicated People UX polish. Not overdue. |
 
 ---
 
@@ -402,46 +402,6 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
-### D-022 — Ocean Capture mode still uses pre-Ocean Capture chrome
-
-| Field | Value |
-| --- | --- |
-| **Status** | fixed — see D-R08 |
-| **Severity** | low |
-| **Domain** | Capture UI |
-| **Found in** | Slice 2A |
-| **Failure class** | Selecting Capture in the Ocean mode selector embeds existing `CaptureWorkspace` without the full Ocean Capture empty/review visual states from the UI baseline §16 |
-| **Evidence / repro** | Open project → Capture mode |
-| **Likely files** | `OceanProjectWorkspace.tsx`; `CaptureWorkspace.tsx` |
-| **Proposed fix direction** | Dedicated Capture Ocean UI slice inheriting shell/typography |
-| **Explicit non-goals** | Changing Capture interpretation/review semantics in UI baseline |
-| **Regression test to add** | Capture UI visual/behaviour suite later |
-| **Target resolution / validation point** | Capture Ocean UI follow-up |
-| **Related docs** | `docs/v1-reference-pack/LUME_V1_UI_BASELINE_OCEAN.md` §16 |
-| **Notes** | Fixed in Slice 2B — see D-R08. Residual discrete §16 empty/recording chrome polish tracked as D-025. |
-
----
-
-### D-023 — Knowledge item rich detail drawer not implemented
-
-| Field | Value |
-| --- | --- |
-| **Status** | open |
-| **Severity** | medium |
-| **Domain** | Knowledge Centre UI |
-| **Found in** | Slice 2A |
-| **Failure class** | Items are visually selectable; To Do can toggle; full provenance/person/risk detail drawer from Ocean §12 is not built |
-| **Evidence / repro** | Click Current position / Risk / People cards |
-| **Likely files** | `KnowledgeItemCard.tsx`; future detail drawer |
-| **Proposed fix direction** | Dedicated item-detail UI slice using existing evidence/person helpers |
-| **Explicit non-goals** | Blocking Ocean baseline on drawer architecture |
-| **Regression test to add** | Item detail open/close + project isolation |
-| **Target resolution / validation point** | Knowledge item detail UI follow-up before V1 launch if selection is primary correction path |
-| **Related docs** | Ocean baseline §12; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
-| **Notes** | Baseline implementation must not wait on this |
-
----
-
 ### D-024 — “Actions left” uses local analysis meter, not billing entitlement
 
 | Field | Value |
@@ -574,20 +534,31 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ---
 
+### D-R09 — Knowledge item rich detail drawer (Slice 2C)
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Slice 2C — `docs/SLICE2C_KNOWLEDGE_ITEM_DETAIL_HANDOVER.md` |
+| **Failure class** | Ocean Knowledge cards were opaque / To Do click only toggled done — no inspection of evidence, supersession, relations, or correction |
+| **Fix summary** | Reusable Ocean side drawer keyed by stable Knowledge/domain ids; provenance humanized from stored entries only; current vs superseded; Risk/Todo/Person/section correction via existing durable store paths; save-error surfaced in drawer |
+
+---
+
 ## Suggested fix order (non-binding)
 
 1. **D-006** — next New Project/persistence touchpoint (before V1 launch)  
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
 3. **D-019** — Confirm Owner replace-vs-share UI (People UI follow-up / before V1 launch)  
-4. **D-007** remainder — Capture promote + People UI drawer  
-5. **D-023** — Knowledge item detail drawer  
+4. **D-007** remainder — Capture promote + People UI polish (detail foundation landed in 2C)  
+5. ~~**D-023**~~ — fixed in Slice 2C (D-R09)  
 6. ~~**D-022**~~ — fixed in Slice 2B; residual **D-025** Capture §16 visual depth  
 7. **D-017** — validate during Capture hardening (before Capture V1-ready)  
 8. **D-014** — Capture apply → Supabase round-trip before Capture V1-ready  
 9. **D-011** — demo-name extractors at Capture hardening (not UI)  
 10. **D-003** — suggestion persist (V1 product hardening)  
-11. **D-005** — save-error visibility (V1 product hardening, incremental OK)  
-12. **D-004** — history persist gaps (V1 product hardening)  
+11. **D-005** remainder — app-wide save-error UX (V1 product hardening; drawer path partial in 2C)  
+12. **D-004** — history persist gaps (V1 product hardening; 2C honesty notes only)  
 13. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
 14. **D-008 / D-021**, **D-012–D-015**, **D-020**, **D-024** — as their domains are scheduled  
 
