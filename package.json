@@ -40,6 +40,7 @@
     "verify:people-entities": "npx --yes tsx scripts/verify-people-entities.ts",
     "verify:ask-context-authority": "npx --yes tsx scripts/verify-ask-context-authority.ts",
     "verify:ocean-knowledge-centre": "npx --yes tsx scripts/verify-ocean-knowledge-centre.ts",
+    "verify:ocean-capture": "npx --yes tsx scripts/verify-ocean-capture.ts",
     "verify:capture-trust-boundary": "npx --yes tsx scripts/verify-capture-trust-boundary.ts",
     "typecheck": "tsc --noEmit",
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",

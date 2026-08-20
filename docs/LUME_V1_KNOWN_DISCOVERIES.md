@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 20 August 2026 (Slice 2A Ocean Knowledge Centre UI)  
+**Last housekeeping:** 20 August 2026 (Slice 2B Capture Ocean integration — D-022 fixed; dark-only V1)  
 **Authority:** `docs/v1-reference-pack/` + project-truth architecture audit  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
@@ -406,7 +406,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | fixed — see D-R08 |
 | **Severity** | low |
 | **Domain** | Capture UI |
 | **Found in** | Slice 2A |
@@ -418,7 +418,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Capture UI visual/behaviour suite later |
 | **Target resolution / validation point** | Capture Ocean UI follow-up |
 | **Related docs** | `docs/v1-reference-pack/LUME_V1_UI_BASELINE_OCEAN.md` §16 |
-| **Notes** | Intentionally deferred in 2A |
+| **Notes** | Fixed in Slice 2B — see D-R08. Residual discrete §16 empty/recording chrome polish tracked as D-025. |
 
 ---
 
@@ -459,6 +459,26 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Target resolution / validation point** | Billing / entitlement hardening |
 | **Related docs** | Ocean baseline §5; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
 | **Notes** | Documented rather than inventing a fake 36 |
+
+---
+
+### D-025 — Capture Ocean discrete §16 visual states still coarse
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | Capture UI |
+| **Found in** | Slice 2B |
+| **Failure class** | Capture is Ocean-embedded with ✦ Analyse and review-boundary copy, but baseline §16 discrete screens (empty / live transcription / transcript-complete / post-analyse full review chrome) are not separately redesigned — existing Capture stages are restyled in place |
+| **Evidence / repro** | Compare Capture input vs recording vs review against Ocean §16 checklist |
+| **Likely files** | `CaptureWorkspace.tsx`; Capture review components |
+| **Proposed fix direction** | Optional Capture visual polish pass once item-detail/People UI land; do not change lifecycle |
+| **Explicit non-goals** | Changing Capture extraction/review-before-write |
+| **Regression test to add** | Visual/state markers per §16 stage if redesigned |
+| **Target resolution / validation point** | Capture visual polish follow-up — not blocking Capture↔KC coherence |
+| **Related docs** | Ocean baseline §16; `docs/SLICE2B_CAPTURE_OCEAN_HANDOVER.md` |
+| **Notes** | Slice 2B closed D-022 integration; this tracks remaining visual depth only |
 
 ---
 
@@ -543,6 +563,17 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ---
 
+### D-R08 — Ocean Capture chrome / workspace integration (Slice 2B)
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Slice 2B — `docs/SLICE2B_CAPTURE_OCEAN_HANDOVER.md` |
+| **Failure class** | Capture felt bolted-on / pre-Ocean when selected as project mode |
+| **Fix summary** | `variant="ocean"` CaptureWorkspace in Ocean shell; ✦ Analyse; review-before-write banner; dark-only V1 (AppearanceToggle removed); no Capture sidebar destination |
+
+---
+
 ## Suggested fix order (non-binding)
 
 1. **D-006** — next New Project/persistence touchpoint (before V1 launch)  
@@ -550,13 +581,15 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 3. **D-019** — Confirm Owner replace-vs-share UI (People UI follow-up / before V1 launch)  
 4. **D-007** remainder — Capture promote + People UI drawer  
 5. **D-023** — Knowledge item detail drawer  
-6. **D-022** — Capture Ocean UI polish  
+6. ~~**D-022**~~ — fixed in Slice 2B; residual **D-025** Capture §16 visual depth  
 7. **D-017** — validate during Capture hardening (before Capture V1-ready)  
-8. **D-003** — suggestion persist (V1 product hardening)  
-9. **D-005** — save-error visibility (V1 product hardening, incremental OK)  
-10. **D-004** — history persist gaps (V1 product hardening)  
-11. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
-12. **D-008 / D-021**, **D-011–D-015**, **D-020**, **D-024** — as their domains are scheduled  
+8. **D-014** — Capture apply → Supabase round-trip before Capture V1-ready  
+9. **D-011** — demo-name extractors at Capture hardening (not UI)  
+10. **D-003** — suggestion persist (V1 product hardening)  
+11. **D-005** — save-error visibility (V1 product hardening, incremental OK)  
+12. **D-004** — history persist gaps (V1 product hardening)  
+13. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
+14. **D-008 / D-021**, **D-012–D-015**, **D-020**, **D-024** — as their domains are scheduled  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 

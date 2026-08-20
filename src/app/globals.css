@@ -8290,6 +8290,72 @@ body {
   background: var(--bg-surface);
 }
 
+.ocean-capture-mode.is-active {
+  border-color: rgba(108, 140, 255, 0.28);
+}
+
+/* Slice 2B: Capture embeds inside Ocean shell — avoid double chrome */
+.ocean-capture-mode .ocean-capture-workspace {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 1rem 1.1rem 1.15rem;
+}
+
+.ocean-capture-workspace .capture-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 650;
+}
+
+.ocean-capture-workspace .capture-support {
+  max-width: 42rem;
+  color: var(--text-muted);
+}
+
+.ocean-capture-workspace .capture-new-btn {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.ocean-capture-workspace .capture-window-btn {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.ocean-analyse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ocean-capture-review-boundary {
+  margin: 0 0 0.85rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(108, 140, 255, 0.28);
+  background: rgba(108, 140, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.ocean-capture-workspace .capture-best-practice {
+  border-color: var(--border-subtle);
+  background: rgba(255, 255, 255, 0.02);
+}
+
 .ocean-advise-soon {
   padding: 2rem;
   border: 1px dashed var(--border-subtle);
