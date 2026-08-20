@@ -198,7 +198,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Context-integrity: current-state question excludes superseded history as truth |
 | **Target resolution / validation point** | Canonical production default decision (after Ask UI integration + eval evidence); residual legacy path until then |
 | **Related docs** | Philosophy; Phase2C2 context integrity; `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
-| **Notes** | **Slice 1D validated/fixed on canonical path:** current-state MODE omits History evidence; historical/change questions retrieve scoped evidence. Production still defaults to legacy — residual risk remains until flag default changes. Do not remove legacy rollback yet. |
+| **Notes** | **Slice 1D validated/fixed on canonical path:** current-state MODE omits History evidence; historical/change questions retrieve scoped evidence. **Slice 2A** wires Ask into Ocean Knowledge Centre via existing Tell Me session without flipping production default. Residual risk remains on legacy path until flag default changes. Do not remove legacy rollback yet. |
 
 ---
 
