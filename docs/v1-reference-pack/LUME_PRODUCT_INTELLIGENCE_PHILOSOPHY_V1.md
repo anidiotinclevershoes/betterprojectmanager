@@ -6,6 +6,8 @@
 
 This is **not** an implementation plan. Individual PRs should comply with it rather than reinterpret Lume from scratch.
 
+Mutable implementation status (what the code does now, which flags are on, which persistence gaps remain) lives in `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` and `docs/LUME_V1_KNOWN_DISCOVERIES.md`, not in this constitution. See `docs/README.md`.
+
 ---
 
 ## Executive overview
@@ -582,18 +584,18 @@ Consequences include:
 - unclear authority;
 - inconsistent persistence.
 
-Known implementation debt includes:
+Durable principles (do not freeze temporary implementation status here):
 
-- full Knowledge editing is not consistently persisted to Supabase;
-- some risk/todo edit paths have persistence gaps;
-- people may become Knowledge prose without consistently becoming stakeholder/domain data;
-- legacy and canonical Tell Me paths diverge;
-- production currently defaults to legacy while evals force canonical;
-- canonical token telemetry buckets are incomplete/mislabelled;
-- legacy regex/heuristic interpretation has created polarity errors;
-- some local/API fallback behaviour differs;
-- internal code still contains Coach naming while UI direction is Advise;
-- UI accumulated bolted-on elements before the current visual reset.
+- **Maintained Knowledge must persist durably and survive reload.** The primary Knowledge edit/replace path now does this. Remaining persistence gaps belong in Known Discoveries, not as a permanent rule that Knowledge editing is not persisted.
+- **Explicit people identity belongs in durable stakeholder/person records.** Remaining Capture promotion of people prose is open debt (D-007), not a product decision to keep people as Knowledge-only.
+- History remains evidence/chronology, not competing current truth.
+
+Live implementation debt (Ask path defaults, feature flags, save-error UX, some risk/todo/new-project persist gaps, dual-store leftovers, telemetry labelling, Coach vs Advise naming) is tracked in:
+
+- `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`
+- `docs/LUME_V1_KNOWN_DISCOVERIES.md`
+
+Those snapshots will change. Do not copy them back into this constitution.
 
 These are architecture/product-debt issues, not an invitation to restart prompt whack-a-mole.
 

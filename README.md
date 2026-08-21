@@ -1,5 +1,8 @@
 # Mission Control
 
+> **Current Lume development documentation begins at [`docs/README.md`](docs/README.md).**  
+> This root README still describes an older Overview / localStorage-era product surface. Do not treat it as current product or architecture authority.
+
 **AI Chief Project Officer · Executive Coach · Second Brain**
 
 Mission Control is not a project management application.

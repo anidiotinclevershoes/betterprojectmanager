@@ -3,9 +3,10 @@
 **Status:** Documentation of CURRENT implementation (not an ideal architecture)  
 **Date:** 21 August 2026  
 **Code observed:** `main` at Slice 2D (`07817df` — People & Context UI)  
+**Docs entry point:** `docs/README.md`  
 **Governing product authority:** `docs/v1-reference-pack/`  
 **Living defect backlog:** `docs/LUME_V1_KNOWN_DISCOVERIES.md`  
-**Stale relative to this document:** `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` (19 Aug 2026 — written before Slices 1A–2D; several claims are now false; see Part B § discrepancies)
+**Historical (not current implementation map):** `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` (19 Aug 2026 — written before Slices 1A–2D; several claims are now false; see Part B § discrepancies)
 
 This document has two parts:
 
@@ -188,7 +189,7 @@ Use this section as working context for future product/development decisions and
 
 **GAP D-007 remainder:** Capture still often writes people **prose** without promoting a stakeholder. UI will not invent identity from that. Target: Capture hardening.
 
-**Docs hygiene:** `docs/LUME_V1_KNOWN_DISCOVERIES.md` still has an **open D-019 section** *and* **resolved D-R10**. **CURRENT CODE implements share vs replace (D-R10).** Treat D-019 as fixed in implementation; the open copy is a documentation inconsistency, not missing UI.
+**D-019:** resolved as **D-R10**. CURRENT CODE implements Confirm Owner share vs replace. That UI is not missing.
 
 **Key files:** `src/lib/people/identity.ts`, `src/lib/people/confirm-owner-choice.ts`, `src/lib/canonical-truth/confirm-responsibility.ts` (re-export), Confirm Owner dialog, `buildPeopleRows` in `ocean-frames.ts`.
 
@@ -447,7 +448,7 @@ Significance: ✦ marks model judgement. Confirmed Knowledge should look normal,
 
 ## 20. Known architecture debt / unresolved seams
 
-From `docs/LUME_V1_KNOWN_DISCOVERIES.md` as of this handoff. **Do not treat resolved D-R* as open.** Implementation of D-019 is **done (D-R10)** despite a leftover open D-019 heading in that file.
+From `docs/LUME_V1_KNOWN_DISCOVERIES.md` as of this handoff. **Do not treat resolved D-R* as open.** D-019 is **resolved (D-R10)** — share-vs-replace UI shipped in Slice 2D.
 
 | ID | Problem | Current impact | Target stage |
 | --- | --- | --- | --- |
