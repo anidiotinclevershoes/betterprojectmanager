@@ -42,6 +42,10 @@ export function KnowledgeItemDetailDrawer({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [confirmOwnerOpen, setConfirmOwnerOpen] = useState(false);
+  const [handoverScope, setHandoverScope] = useState<string | null>(null);
+  const [handoverReplacePersonId, setHandoverReplacePersonId] = useState<
+    string | null
+  >(null);
   const [localError, setLocalError] = useState<string | null>(null);
 
   const detail = useMemo(() => {
@@ -53,6 +57,8 @@ export function KnowledgeItemDetailDrawer({
     setEditing(false);
     setDraft(detail?.body ?? "");
     setConfirmOwnerOpen(false);
+    setHandoverScope(null);
+    setHandoverReplacePersonId(null);
     setLocalError(null);
   }, [selected, detail?.body]);
 
@@ -286,12 +292,59 @@ export function KnowledgeItemDetailDrawer({
                   {detail.personBundle.availability.length ? (
                     <>
                       <h4>Availability</h4>
-                      <ul>
+                      <ul data-testid="ocean-item-detail-availability">
                         {detail.personBundle.availability.map((a) => (
                           <li key={a.item.id}>{a.body}</li>
                         ))}
                       </ul>
                     </>
+                  ) : null}
+                  {detail.waitingLines?.length ? (
+                    <>
+                      <h4>Waiting on them</h4>
+                      <ul data-testid="ocean-item-detail-waiting">
+                        {detail.waitingLines.map((line, i) => (
+                          <li key={`${line}-${i}`}>{line}</li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : null}
+                  {detail.legacyContext?.length ? (
+                    <>
+                      <h4>Legacy people notes</h4>
+                      <ul data-testid="ocean-item-detail-legacy">
+                        {detail.legacyContext.map((line, i) => (
+                          <li key={`${line}-${i}`}>{line}</li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : null}
+                  {detail.personBundle.currentResponsibilities.length ? (
+                    <div className="ocean-item-detail-handover-list">
+                      <h4>Hand over</h4>
+                      <ul data-testid="ocean-item-detail-handover">
+                        {detail.personBundle.currentResponsibilities.map(
+                          (r) => (
+                            <li key={`hand-${r.item.id}`}>
+                              <button
+                                type="button"
+                                className="ghost-btn"
+                                data-testid={`ocean-item-detail-handover-${r.item.id}`}
+                                onClick={() => {
+                                  setHandoverScope(r.scope);
+                                  setHandoverReplacePersonId(
+                                    detail.personBundle!.person.id,
+                                  );
+                                  setConfirmOwnerOpen(true);
+                                }}
+                              >
+                                Hand over {r.scope}…
+                              </button>
+                            </li>
+                          ),
+                        )}
+                      </ul>
+                    </div>
                   ) : null}
                 </section>
               ) : null}
@@ -338,15 +391,34 @@ export function KnowledgeItemDetailDrawer({
                 </section>
               ) : null}
 
-              {confirmOwnerOpen &&
-              detail.canConfirmOwner &&
-              detail.confirmOwnerScope ? (
+              {confirmOwnerOpen && detail.canConfirmOwner ? (
                 <ConfirmOwnerDialog
                   projectId={projectId}
-                  scope={detail.confirmOwnerScope}
-                  truthItemId={detail.confirmOwnerTruthItemId}
-                  onDone={() => setConfirmOwnerOpen(false)}
-                  onCancel={() => setConfirmOwnerOpen(false)}
+                  scope={
+                    handoverScope ??
+                    detail.confirmOwnerScope ??
+                    ""
+                  }
+                  truthItemId={
+                    handoverScope ? null : detail.confirmOwnerTruthItemId
+                  }
+                  allowScopeEdit={
+                    Boolean(detail.allowConfirmScopeEdit) && !handoverScope
+                  }
+                  defaultReplacePersonId={
+                    handoverReplacePersonId ??
+                    detail.confirmOwnerDefaultReplacePersonId
+                  }
+                  onDone={() => {
+                    setConfirmOwnerOpen(false);
+                    setHandoverScope(null);
+                    setHandoverReplacePersonId(null);
+                  }}
+                  onCancel={() => {
+                    setConfirmOwnerOpen(false);
+                    setHandoverScope(null);
+                    setHandoverReplacePersonId(null);
+                  }}
                 />
               ) : null}
 
@@ -471,10 +543,16 @@ export function KnowledgeItemDetailDrawer({
                   <button
                     type="button"
                     className="primary-btn"
-                    onClick={() => setConfirmOwnerOpen(true)}
+                    onClick={() => {
+                      setHandoverScope(null);
+                      setHandoverReplacePersonId(null);
+                      setConfirmOwnerOpen(true);
+                    }}
                     data-testid="ocean-item-detail-confirm-owner"
                   >
-                    Confirm owner
+                    {detail.canAssignResponsibility
+                      ? "Assign ownership"
+                      : "Confirm owner"}
                   </button>
                 ) : null}
               </>

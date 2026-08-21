@@ -42,6 +42,7 @@
     "verify:ocean-knowledge-centre": "npx --yes tsx scripts/verify-ocean-knowledge-centre.ts",
     "verify:ocean-capture": "npx --yes tsx scripts/verify-ocean-capture.ts",
     "verify:ocean-item-detail": "npx --yes tsx scripts/verify-ocean-item-detail.ts",
+    "verify:people-context-ui": "npx --yes tsx scripts/verify-people-context-ui.ts",
     "verify:capture-trust-boundary": "npx --yes tsx scripts/verify-capture-trust-boundary.ts",
     "typecheck": "tsc --noEmit",
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",
