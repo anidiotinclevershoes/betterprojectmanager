@@ -1,11 +1,17 @@
 # Lume V1 Project Truth Architecture Audit
 
-**Status:** Read-only audit (no implementation)  
+> **HISTORICAL — not current implementation authority.**  
+> This is an architecture snapshot from **19 August 2026**. It predates Slices 1A–2D. Several implementation statements are now superseded.  
+> For **CURRENT** implementation architecture use `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`.  
+> Retain this audit for historical rationale and original failure analysis. Do not rewrite the body to pretend it always described today’s system.
+
+**Status:** Historical read-only audit (no implementation)  
 **Date:** 19 August 2026  
 **Branch observed:** `main` (post PR #43 V1 reference pack)  
 **Authority:** `docs/v1-reference-pack/` (philosophy, Ocean UI baseline, development/evaluation roadmap)  
 **Behavioural contract (reconcile, do not silently replace):** `docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`  
-**Living defect backlog (post-audit fixes/findings):** `docs/LUME_V1_KNOWN_DISCOVERIES.md`
+**Living defect backlog (post-audit fixes/findings):** `docs/LUME_V1_KNOWN_DISCOVERIES.md`  
+**Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`
 
 This audit maps how Lume currently stores, mutates, reads and assembles **project truth**. It does not change code, migrations, prompts, tests, schemas or UI.
 

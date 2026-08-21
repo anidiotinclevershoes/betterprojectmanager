@@ -1,5 +1,8 @@
 # Lume Current State
 
+> **HISTORICAL — not current product or architecture authority.**  
+> This is an **11 August 2026** UI/application snapshot. It predates the current Supabase / Ocean implementation. It is retained as visual and development history. Several statements (for example “database not implemented”, Overview as home, localStorage as the live path) are **no longer true**. For current implementation use `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`. For documentation authority use `docs/README.md`.
+
 **Audit date:** 2026-08-11  
 **Branch observed:** `cursor/capture-coach-layout-c9f3` (working tree at audit time)  
 **Viewport primary:** 1440×900  

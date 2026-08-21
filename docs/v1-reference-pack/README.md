@@ -21,14 +21,21 @@ This folder contains the canonical product, UI, development and evaluation refer
 
 ## Relationship to other docs
 
+This pack is the **product / trust / UI constitution**. It is not replaced by the architecture handoff.
+
+The architecture handoff describes **implementation reality**. It does not replace this constitution.
+
+Start at `docs/README.md` for the full authority map.
+
 | Document | Role |
 | --- | --- |
 | This pack | Canonical authority for V1 product philosophy, Ocean UI baseline, and development/evaluation process |
+| `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` | **CURRENT** implementation architecture map (stores, paths, flags, seams as of Slice 2D / 21 Aug 2026) |
+| `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` | **HISTORICAL** architecture snapshot from 19 August 2026, before Slices 1A–2D. Keep for original failure analysis. Do **not** use as the current implementation map. |
+| `docs/LUME_V1_KNOWN_DISCOVERIES.md` | Living defect/debt authority (open vs resolved) |
 | `docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md` | Existing behavioural contract for intelligence/eval work; do not silently replace it — reconcile conflicts by stopping and reporting |
-| `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` | Read-only map of current project-truth stores/paths |
 | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` | Regression safety-net audit, coverage map, and commands |
-| `docs/LUME_V1_KNOWN_DISCOVERIES.md` | Living backlog of adjacent defects found during V1 slices (identify + fix later; do not greenwash) |
-| Historical phase handovers under `docs/` | Context only; prefer this pack for new V1 work |
+| Historical phase/slice handovers under `docs/` | Context only; prefer this pack for product intent and the Current Architecture Handoff for what the code does now |
 
 ## How to use this pack with Cursor
 

@@ -2,8 +2,10 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 20 August 2026 (Slice 2D People & Context UI — D-019 fixed; D-007/D-020 partial)  
-**Authority:** `docs/v1-reference-pack/` + project-truth architecture audit  
+**Last housekeeping:** 21 August 2026 (Documentation Governance Cleanup — D-019 recorded as resolved by D-R10; D-007 remaining scope = Capture people promotion only)  
+**Product/trust constitution:** `docs/v1-reference-pack/`  
+**Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
+**Docs entry point:** `docs/README.md`  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
 
@@ -146,19 +148,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open (partially addressed in Slice 1C) |
+| **Status** | open (Capture people promotion only) |
 | **Severity** | medium (down from high after 1C foundation) |
 | **Domain** | People |
 | **Found in** | Architecture audit §3.2.2 |
-| **Failure class** | Legacy/Capture People prose can still exist without a stakeholder link; Tell Me / KC may show unpromoted free-text people |
+| **Failure class** | Capture / legacy People prose can still exist without a stakeholder link; Tell Me / KC may show unpromoted free-text people |
 | **Evidence / repro** | Capture people bullets vs Confirm Owner structured responsibilities vs stakeholders picker |
 | **Likely files** | Capture people apply; Knowledge Edit people section; `getPersonBundle` |
-| **Proposed fix direction** | Promote known people prose to stakeholders when identity is explicit; keep legacy bullets as projection; richer People & Context UI later |
-| **Explicit non-goals** | Portfolio org chart; Advise; Ocean redesign in foundation slices |
+| **Proposed fix direction** | Promote known people prose to stakeholders when identity is explicit; keep leftover bullets as projection. Do **not** treat person-detail or share-vs-replace UI as still missing. |
+| **Explicit non-goals** | Portfolio org chart; Advise; redoing People UI already shipped in 2C/2D |
 | **Regression test to add** | Capture→promote path once specified |
-| **Target resolution / validation point** | Capture hardening (promotion) + richer People & Context UI later; identity/responsibility foundation delivered in Slice 1C |
-| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md`; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
-| **Notes** | Slice 1C made stakeholders the durable identity authority and linked responsibilities via personId. Slice 2A People frame renders stakeholders + current responsibilities (+ availability meta when structured). Slice 2C adds reusable person detail via `getPersonBundle`. Slice 2D polishes People frame + person detail (shared/handover UI, waiting/availability display). **Remaining gap:** Capture still does not consistently promote discovered People prose into durable stakeholders — that remains Capture hardening, not UI. Not overdue. |
+| **Target resolution / validation point** | Capture hardening (people promotion into durable stakeholder/person identity) |
+| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md`; `docs/SLICE2C_KNOWLEDGE_ITEM_DETAIL_HANDOVER.md`; `docs/SLICE2D_PEOPLE_CONTEXT_UI_HANDOVER.md` |
+| **Notes** | **Already delivered (do not re-open as missing UI):** Slice 1C durable stakeholder identity + `personId` on responsibilities; Slice 2C reusable person detail (`getPersonBundle` / Ocean drawer); Slice 2D People frame polish + Confirm Owner share-vs-replace (D-019 → D-R10). **Remaining open scope:** Capture still does not consistently promote discovered People prose into durable stakeholders. That is Capture hardening, not a People UI gap. |
 
 ---
 
@@ -339,26 +341,6 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Target resolution / validation point** | Validate during Capture hardening; must be checked before Capture is declared V1-ready |
 | **Related docs** | `docs/SLICE1B_RISK_LIFECYCLE_AUTHORITY_HANDOVER.md`; `docs/LUME_V1_KNOWN_DISCOVERIES.md` D-003 (suggestions remain suggestions) |
 | **Notes** | This entry is a **guardrail**, not permission to grow Capture NLP. Exact-title matching is transitional identity evidence until Capture review carries `riskId` end-to-end. |
-
----
-
-### D-019 — Confirm Owner UI lacks explicit replace-vs-share choice
-
-| Field | Value |
-| --- | --- |
-| **Status** | open |
-| **Severity** | medium |
-| **Domain** | People |
-| **Found in** | Slice 1C |
-| **Failure class** | API supports `replacePersonId` for time-varying ownership, but Confirm Owner dialog always ADDs/shares. Users cannot explicitly replace Bob with Mary from the current dialog |
-| **Evidence / repro** | `ConfirmOwnerDialog.tsx` only passes personId + resolveTruthItemId; no replace control |
-| **Likely files** | `src/components/intelligence/ConfirmOwnerDialog.tsx`; People & Context UI later |
-| **Proposed fix direction** | When another current owner exists for the scope, offer Share vs Replace (Needs clarification) rather than silent replace |
-| **Explicit non-goals** | Full People drawer redesign beyond the confirm flow |
-| **Regression test to add** | UI/integration later; API already covered in `verify:people-entities` |
-| **Target resolution / validation point** | Dedicated People UI follow-up before V1 launch (Confirm Owner is a primary correction path) |
-| **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md`; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
-| **Notes** | Explicitly **not** broadened into Slice 2A Ocean baseline. Default share (no silent overwrite) remains intentional. |
 
 ---
 
@@ -545,14 +527,26 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ---
 
+### D-019 — Confirm Owner UI lacks explicit replace-vs-share choice
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed (resolved by D-R10) |
+| **Fixed in** | Slice 2D — `docs/SLICE2D_PEOPLE_CONTEXT_UI_HANDOVER.md` |
+| **Failure class** | API already supported `replacePersonId` for time-varying ownership, but Confirm Owner always ADDed/shared. Users could not explicitly replace Bob with Mary from the dialog |
+| **Evidence / repro (historical)** | Pre-2D `ConfirmOwnerDialog.tsx` passed personId + resolveTruthItemId with no replace control |
+| **Fix summary** | Implemented as **D-R10**. Confirm Owner now asks share vs replace when other current owners exist. **Do not treat share-vs-replace UI as still missing.** Remaining People debt is D-007 (Capture promotion), not this dialog. |
+
+---
+
 ### D-R10 — Confirm Owner share vs replace / People Context UI (Slice 2D)
 
 | Field | Value |
 | --- | --- |
 | **Status** | fixed |
 | **Fixed in** | Slice 2D — `docs/SLICE2D_PEOPLE_CONTEXT_UI_HANDOVER.md` |
-| **Failure class** | Confirm Owner always shared; users could not explicitly replace/hand over ownership |
-| **Fix summary** | Confirm Owner asks share vs replace when other current owners exist; handover actions on person detail; People frame shows shared/availability/waiting from durable data only |
+| **Failure class** | Confirm Owner always shared; users could not explicitly replace/hand over ownership (original D-019) |
+| **Fix summary** | Confirm Owner asks share vs replace when other current owners exist; handover actions on person detail; People frame shows shared/availability/waiting from durable data only. This is the implementation record for D-019. |
 
 ---
 
