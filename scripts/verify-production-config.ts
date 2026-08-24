@@ -7,6 +7,10 @@ import path from "node:path";
 import { auditProductionConfig } from "../src/lib/runtime-config";
 import { getAuthMode } from "../src/lib/auth-mode";
 import { getPersistenceMode } from "../src/lib/persistence-mode";
+import {
+  getSupabaseAnonKey,
+  getSupabaseUrl,
+} from "../src/lib/supabase/env";
 import { evaluateEntitlement, mapStripeSubscriptionStatus } from "../src/lib/billing/entitlements";
 import { mapStripeSubscriptionToLume } from "../src/lib/billing/stripe-map";
 import { checkRateLimit, resetRateLimitStoreForTests } from "../src/lib/rate-limit";
@@ -298,6 +302,25 @@ check("env example documents public vs server vars", () => {
   assert.match(env, /STRIPE_PRICE_ID/);
   assert.doesNotMatch(env, /NEXT_PUBLIC_STRIPE_SECRET/);
   assert.doesNotMatch(env, /NEXT_PUBLIC_SUPABASE_SERVICE/);
+});
+
+check("browser supabase helpers use static NEXT_PUBLIC process.env access", () => {
+  const src = fs.readFileSync(
+    path.join(root, "src/lib/supabase/env.ts"),
+    "utf8",
+  );
+  assert.match(src, /process\.env\.NEXT_PUBLIC_SUPABASE_URL/);
+  assert.match(src, /process\.env\.NEXT_PUBLIC_SUPABASE_ANON_KEY/);
+  assert.match(src, /process\.env\.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
+});
+
+check("supabase public env helpers honour an explicit overlay for tests", () => {
+  const overlay = {
+    NEXT_PUBLIC_SUPABASE_URL: "https://overlay.supabase.co",
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-overlay",
+  } as NodeJS.ProcessEnv;
+  assert.equal(getSupabaseUrl(overlay), "https://overlay.supabase.co");
+  assert.equal(getSupabaseAnonKey(overlay), "anon-overlay");
 });
 
 console.log(`\n${passed} production/billing readiness checks passed.`);
