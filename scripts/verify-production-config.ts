@@ -316,6 +316,7 @@ check("browser supabase helpers use static NEXT_PUBLIC process.env access", () =
 
 check("supabase public env helpers honour an explicit overlay for tests", () => {
   const overlay = {
+    NODE_ENV: "test",
     NEXT_PUBLIC_SUPABASE_URL: "https://overlay.supabase.co",
     NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-overlay",
   } as NodeJS.ProcessEnv;
