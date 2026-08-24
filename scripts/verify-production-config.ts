@@ -14,6 +14,7 @@ import {
 import { evaluateEntitlement, mapStripeSubscriptionStatus } from "../src/lib/billing/entitlements";
 import { mapStripeSubscriptionToLume } from "../src/lib/billing/stripe-map";
 import { checkRateLimit, resetRateLimitStoreForTests } from "../src/lib/rate-limit";
+import { readOpenaiConfiguredFlag } from "../src/lib/openai-configured-flag";
 
 let passed = 0;
 function check(name: string, fn: () => void) {
@@ -312,6 +313,42 @@ check("browser supabase helpers use static NEXT_PUBLIC process.env access", () =
   assert.match(src, /process\.env\.NEXT_PUBLIC_SUPABASE_URL/);
   assert.match(src, /process\.env\.NEXT_PUBLIC_SUPABASE_ANON_KEY/);
   assert.match(src, /process\.env\.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
+});
+
+check("openaiConfigured probe does not treat failed GET as unconfigured", () => {
+  assert.equal(readOpenaiConfiguredFlag(true, { openaiConfigured: true }), true);
+  assert.equal(readOpenaiConfiguredFlag(true, { openaiConfigured: false }), false);
+  assert.equal(readOpenaiConfiguredFlag(false, { openaiConfigured: false }), null);
+  assert.equal(
+    readOpenaiConfiguredFlag(false, { error: "Sign in required." }),
+    null,
+  );
+  assert.equal(
+    readOpenaiConfiguredFlag(true, { error: "Sign in required." }),
+    null,
+  );
+  assert.equal(readOpenaiConfiguredFlag(true, null), null);
+
+  const store = fs.readFileSync(path.join(root, "src/lib/store.tsx"), "utf8");
+  assert.match(store, /readOpenaiConfiguredFlag/);
+  assert.match(store, /credentials: "same-origin"/);
+  assert.doesNotMatch(
+    store,
+    /setOpenaiConfigured\(Boolean\(data\.openaiConfigured\)\)/,
+  );
+
+  const onboarding = fs.readFileSync(
+    path.join(root, "src/components/onboarding/NewProjectExperience.tsx"),
+    "utf8",
+  );
+  assert.match(onboarding, /applyOpenaiConfigured/);
+  assert.match(onboarding, /openaiConfigured === false/);
+
+  const captureRoute = fs.readFileSync(
+    path.join(root, "src/app/api/capture/route.ts"),
+    "utf8",
+  );
+  assert.match(captureRoute, /Cache-Control": "no-store"/);
 });
 
 check("supabase public env helpers honour an explicit overlay for tests", () => {

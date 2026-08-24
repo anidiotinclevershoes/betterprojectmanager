@@ -29,7 +29,7 @@ export function NewProjectExperience({
   variant?: "first-run" | "page";
 }) {
   const router = useRouter();
-  const { createProject, openaiConfigured } = useMission();
+  const { createProject, openaiConfigured, applyOpenaiConfigured } = useMission();
   const [path, setPath] = useState<Path>("choose");
   const [draft, setDraft] = useState<CreateProjectInput | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +72,8 @@ export function NewProjectExperience({
       const res = await fetch("/api/new-project", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        cache: "no-store",
         signal: controller.signal,
         body: JSON.stringify({ content, sourceMode, kind: "delivery" }),
       });
@@ -93,7 +95,11 @@ export function NewProjectExperience({
         draft?: CreateProjectInput;
         note?: string;
         provider?: string;
+        openaiConfigured?: boolean;
       };
+      if (typeof data.openaiConfigured === "boolean") {
+        applyOpenaiConfigured(data.openaiConfigured);
+      }
       setDraft(data.draft ?? local);
       setPath("review");
       if (data.note) {

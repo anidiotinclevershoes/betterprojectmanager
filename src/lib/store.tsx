@@ -59,6 +59,7 @@ import {
   makeHistoryEvent,
   pushHistory,
 } from "./workspace/history";
+import { readOpenaiConfiguredFlag } from "@/lib/openai-configured-flag";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { waitForBrowserUser } from "@/lib/supabase/wait-for-browser-user";
 import {
@@ -154,6 +155,8 @@ type MissionContextValue = {
   hydrated: boolean;
   openaiConfigured: boolean | null;
   openaiDiagnostics: OpenAIDiagnostics | null;
+  /** Sync the OpenAI-configured flag from a successful AI route response. */
+  applyOpenaiConfigured: (value: boolean) => void;
   capture: (input: CaptureInput) => CaptureResult;
   captureWithAI: (input: CaptureInput) => Promise<CaptureResult>;
   /** Analyse without writing — user confirms additions in Capture review. */
@@ -646,38 +649,56 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, [state, hydrated]);
 
   useEffect(() => {
+    if (!hydrated) return;
     let cancelled = false;
-    fetch("/api/capture")
-      .then((res) => res.json())
-      .then(
-        (data: {
+    let attempts = 0;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+
+    async function probe() {
+      try {
+        const res = await fetch("/api/capture", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        const data = (await res.json().catch(() => null)) as {
           openaiConfigured?: boolean;
           keyPrefix?: string | null;
           keyLength?: number;
           reason?: string | null;
-        }) => {
-          if (cancelled) return;
-          setOpenaiConfigured(Boolean(data.openaiConfigured));
+        } | null;
+        if (cancelled) return;
+        const flag = readOpenaiConfiguredFlag(res.ok, data);
+        if (flag !== null) {
+          setOpenaiConfigured(flag);
           setOpenaiDiagnostics({
-            keyPrefix: data.keyPrefix ?? null,
-            keyLength: data.keyLength ?? 0,
-            reason: data.reason ?? null,
+            keyPrefix: data?.keyPrefix ?? null,
+            keyLength: data?.keyLength ?? 0,
+            reason: data?.reason ?? null,
           });
-        },
-      )
-      .catch(() => {
-        if (!cancelled) {
-          setOpenaiConfigured(false);
-          setOpenaiDiagnostics({
-            keyPrefix: null,
-            keyLength: 0,
-            reason: "Could not reach /api/capture",
-          });
+          return;
         }
-      });
+        // Session cookies can lag hydrate; retry 401 instead of claiming
+        // the OpenAI key is missing.
+        if (res.status === 401 && attempts < 4) {
+          attempts += 1;
+          retryTimer = setTimeout(() => {
+            if (!cancelled) void probe();
+          }, 300 * attempts);
+        }
+      } catch {
+        // Keep unknown. Do not treat network failure as a missing key.
+      }
+    }
+
+    void probe();
     return () => {
       cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
     };
+  }, [hydrated]);
+
+  const applyOpenaiConfigured = useCallback((value: boolean) => {
+    setOpenaiConfigured(value);
   }, []);
 
   const applyCaptureResult = useCallback((result: CaptureResult) => {
@@ -795,6 +816,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     const response = await fetch("/api/capture", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      cache: "no-store",
       signal,
       body: JSON.stringify({
         content: input.content,
@@ -2148,6 +2171,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       hydrated,
       openaiConfigured,
       openaiDiagnostics,
+      applyOpenaiConfigured,
       capture,
       captureWithAI,
       analyzeCaptureWithAI,
@@ -2184,6 +2208,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       hydrated,
       openaiConfigured,
       openaiDiagnostics,
+      applyOpenaiConfigured,
       persistenceMode,
       saveStatus,
       saveError,

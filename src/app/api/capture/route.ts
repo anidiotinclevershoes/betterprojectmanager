@@ -33,6 +33,7 @@ import { isProductionRuntime } from "@/lib/runtime-config";
 import { serverLog } from "@/lib/server-log";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 type Body = {
   content: string;
@@ -58,13 +59,20 @@ function requestId() {
 
 export async function GET() {
   const diagnostics = getOpenAIKeyDiagnostics();
-  return NextResponse.json({
-    openaiConfigured: diagnostics.openaiConfigured,
-    model: resolveOpenAIChatModel(),
-    keyPrefix: diagnostics.prefix,
-    keyLength: diagnostics.length,
-    reason: diagnostics.reason,
-  });
+  return NextResponse.json(
+    {
+      openaiConfigured: diagnostics.openaiConfigured,
+      model: resolveOpenAIChatModel(),
+      keyPrefix: diagnostics.prefix,
+      keyLength: diagnostics.length,
+      reason: diagnostics.reason,
+    },
+    {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    },
+  );
 }
 
 export async function POST(request: Request) {
