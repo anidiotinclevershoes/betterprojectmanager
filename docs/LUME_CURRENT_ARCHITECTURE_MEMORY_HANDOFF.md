@@ -467,6 +467,10 @@ From `docs/LUME_V1_KNOWN_DISCOVERIES.md` as of this handoff. **Do not treat reso
 | D-015 | Historical `[Resolved]` titles as open risk rows | Possible leftover data | Data cleanup / V1 hardening |
 | D-020 | Dependencies/availability under-modelled | Capture writes structured availability; Ask still has no calendar/graph | Ask/modelling remainder |
 | D-024 | “Actions left” is local analysis meter | Not Stripe entitlement | Billing hardening |
+| D-025 | Capture Ocean §16 visual depth | Review counts / session chrome | Phase 3D |
+| D-029 | Milestone complete has no status column | Capture complete-date is Needs you | later date-lifecycle slice |
+| D-030 | Leftover Knowledge prose vs domain after Capture apply | KC may still show old risk/date sentences | KC projection / reconcile |
+| D-031 | Coach drawer auto-opens over Capture/KC | Overlay can hide Analyse | Ocean/QOL |
 | D-025 | Capture Ocean §16 visual depth | Cosmetic vs baseline | Phase 3D |
 | D-026 | No unique `(workspace_id, code)` | Two projects may share a code; 3A retry uses UUID not code | New Project product decision |
 | D-027 | No archive/undo after project delete | Permanent by design until a product Archive decision | post-V1 / accepted limitation |

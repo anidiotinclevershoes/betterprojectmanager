@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 25 August 2026 (Phase 3B — Conservative Capture Mutation Boundary: D-R13; D-017/D-011 Capture path resolved; D-007/D-014/D-020 narrowed; D-013/D-025/D-029 deferred to 3D)  
+**Last housekeeping:** 25 August 2026 (Phase 3B fail-closed follow-up: D-030 leftover KC prose vs domain; D-031 Coach overlay)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
@@ -466,6 +466,46 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
+### D-030 — Leftover Knowledge prose can disagree with domain after Capture apply
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium (trust/readability, not a wrong-domain write) |
+| **Domain** | Knowledge Centre / Capture |
+| **Found in** | Phase 3B visual/browser pass (25 Aug 2026) |
+| **Failure class** | After a legal Capture apply, domain truth updates (Risk resolved, date moved) but leftover Knowledge section bullets with *different wording* still show in KC. Intelligence may say 0 risks while Risks & blockers still shows an old “remains open” sentence. Current position may still name the old date while Important dates is correct. |
+| **Evidence / repro** | Candyland: resolve “Gumdrop Bridge icing” → `risks.status=resolved` and intelligence “I see 0 risks”, but `knowledge.sections.risks` still contains “Gumdrop Bridge icing remains open.” Ocean frames only skip knowledge bullets whose stripped title *equals* the domain title. |
+| **Likely files** | `src/lib/knowledge-centre/ocean-frames.ts`; Capture apply knowledge projection (not the 3B dispatcher) |
+| **Proposed fix direction** | When Capture legally resolves/updates a domain record, retire or rewrite the matching Knowledge projection using carried IDs — not fuzzy title match. Until then, testers should trust the domain frame + intelligence strip over leftover sentences. |
+| **Explicit non-goals** | Fuzzy matching leftover bullets to domain titles; treating Knowledge prose as Risk authority |
+| **Regression test to add** | After Capture Risk resolve, KC open-risk rows exclude leftover prose for that durable Risk ID |
+| **Target resolution / validation point** | KC projection / knowledge reconcile — not Phase 3D session UX |
+| **Related docs** | D-R13; D-015 |
+| **Notes** | Does not mean the 3B dispatcher wrote the wrong object. It makes manual regression easy to misread if the reviewer only looks at leftover bullets. |
+
+---
+
+### D-031 — Coach drawer auto-opens over Capture / Knowledge Centre
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | Ocean / Coach |
+| **Found in** | Phase 3B visual pass (25 Aug 2026) |
+| **Failure class** | On project load the Coach dialog overlays Capture and KC, including the Capture Analyse control. Close is outside the default viewport in some layouts. |
+| **Evidence / repro** | Open `/projects/:id` in local mode; Coach “Ready when you are” dialog is present before any Capture action |
+| **Likely files** | Coach drawer / Ocean shell |
+| **Proposed fix direction** | Do not auto-open Coach on Capture/KC entry; keep it opt-in. Do not redesign Ocean in 3B. |
+| **Explicit non-goals** | Coach product revival; Ocean redesign |
+| **Regression test to add** | Capture mode is usable without dismissing Coach |
+| **Target resolution / validation point** | Ocean/QOL — not Phase 3B or 3D Capture session |
+| **Related docs** | D-025 |
+| **Notes** | 3B testing dismissed the overlay; it did not cause a wrong-domain write. |
+
+---
+
 ## Resolved discoveries (reference)
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
@@ -654,7 +694,7 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 14. **D-026** — product decision on project-code uniqueness  
 15. **D-028** — optional later bundle RPC for delete (same class as create)  
 16. **D-027** — Archive/undo only if product asks; not required for V1 hygiene  
-17. **D-008 / D-021**, **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029** — as scheduled  
+17. **D-008 / D-021**, **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031** — as scheduled  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 
