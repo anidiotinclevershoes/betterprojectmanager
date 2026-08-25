@@ -212,6 +212,28 @@ export function clearActiveCaptureIfSeeded(
   return false;
 }
 
+export function pruneSessionsForProject(projectId: string): {
+  captureRemoved: number;
+  coachingRemoved: number;
+} {
+  if (!projectId) {
+    return { captureRemoved: 0, coachingRemoved: 0 };
+  }
+
+  const captures = listCaptureSessions();
+  const nextCaptures = captures.filter((s) => s.projectId !== projectId);
+  writeList(CAPTURE_HISTORY_KEY, nextCaptures);
+
+  const coaching = listCoachingSessions();
+  const nextCoaching = coaching.filter((s) => s.projectId !== projectId);
+  writeList(COACHING_HISTORY_KEY, nextCoaching);
+
+  return {
+    captureRemoved: captures.length - nextCaptures.length,
+    coachingRemoved: coaching.length - nextCoaching.length,
+  };
+}
+
 export function statusLabel(status: CaptureSessionStatus) {
   switch (status) {
     case "in_review":

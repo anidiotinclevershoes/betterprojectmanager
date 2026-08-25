@@ -136,6 +136,23 @@ export function TellMeSessionProvider({
       window.removeEventListener("lume:open-tell-me", onOpen as EventListener);
   }, [routeProjectId]);
 
+  useEffect(() => {
+    const onDeleted = (event: Event) => {
+      const deletedId = (event as CustomEvent<{ projectId?: string }>).detail
+        ?.projectId;
+      if (!deletedId) return;
+      setSnapshots((prev) => {
+        if (!(deletedId in prev)) return prev;
+        const next = { ...prev };
+        delete next[deletedId];
+        saveLocalSnapshots(next);
+        return next;
+      });
+    };
+    window.addEventListener("lume:project-deleted", onDeleted);
+    return () => window.removeEventListener("lume:project-deleted", onDeleted);
+  }, []);
+
   const snapshot = projectId ? snapshots[projectId] ?? null : null;
 
   const suggestions = useMemo(() => {

@@ -218,6 +218,25 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const onDeleted = (event: Event) => {
+      const deletedId = (event as CustomEvent<{ projectId?: string }>).detail
+        ?.projectId;
+      if (!deletedId) return;
+      setSlice((prev) => {
+        if (prev.projectId !== deletedId) return prev;
+        try {
+          window.sessionStorage.removeItem(CAPTURE_SESSION_KEY);
+        } catch {
+          /* ignore */
+        }
+        return emptySlice();
+      });
+    };
+    window.addEventListener("lume:project-deleted", onDeleted);
+    return () => window.removeEventListener("lume:project-deleted", onDeleted);
+  }, []);
+
+  useEffect(() => {
     if (!hydrated) return;
     try {
       window.sessionStorage.setItem(CAPTURE_SESSION_KEY, JSON.stringify(slice));

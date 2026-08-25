@@ -7919,6 +7919,24 @@ body {
   font-size: 0.88rem;
 }
 
+.ocean-delete-project {
+  margin-top: 0.7rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 520;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.ocean-delete-project:hover,
+.ocean-delete-project:focus-visible {
+  color: #f0a0a0;
+}
+
 .ocean-mode-selector {
   display: inline-flex;
   gap: 0.35rem;

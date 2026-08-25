@@ -22,10 +22,13 @@ import {
 } from "./coach";
 import { extractKnowledgePatchFromText, emptyKnowledge, mergeKnowledge } from "./knowledge";
 import { confirmResponsibilityOwner as applyConfirmResponsibilityOwner } from "@/lib/canonical-truth/confirm-responsibility";
+import { buildNewProject, type CreateProjectInput } from "./create-project";
+import { pruneBrowserResidueForDeletedProject } from "@/lib/workspace/prune-deleted-project-residue";
 import {
-  buildNewProject,
-  type CreateProjectInput,
-} from "./create-project";
+  projectDeleteResult,
+  removeProjectFromMissionState,
+  type ProjectDeleteResult,
+} from "@/lib/workspace/project-delete";
 import {
   clampDueToWindow,
   cloneRelOpsProject,
@@ -202,6 +205,7 @@ type MissionContextValue = {
   ) => void;
   addSuggestion: (input: AddSuggestionInput) => string | null;
   createProject: (input: CreateProjectInput) => Promise<string>;
+  deleteProject: (projectId: string) => Promise<ProjectDeleteResult>;
   cloneRelOps: (input: CloneRelOpsInput) => void;
   refreshSuggestions: (projectId: string) => void;
   updateKnowledgeSection: (
@@ -401,6 +405,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   });
   const cachePaintedRef = useRef(false);
   const createProjectInFlightRef = useRef(false);
+  const deleteProjectInFlightRef = useRef(false);
 
   useEffect(() => {
     stateRef.current = state;
@@ -1612,6 +1617,105 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     }
   }, [applyDurableWorkspace]);
 
+  const deleteProject = useCallback(async (projectId: string) => {
+    if (deleteProjectInFlightRef.current) {
+      throw new Error("Project deletion is already in progress.");
+    }
+    deleteProjectInFlightRef.current = true;
+
+    try {
+      let meta = persistMetaRef.current;
+
+      if (meta.mode === "supabase" && !meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        const boot = await fetch("/api/workspace/state", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (!boot.ok) {
+          const fail = (await boot.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          throw new Error(
+            fail?.error || "Could not open your workspace. Please refresh.",
+          );
+        }
+        const bootPayload = (await boot.json()) as {
+          workspaceId: string;
+          userId: string;
+          state: MissionState;
+        };
+        persistMetaRef.current = {
+          mode: "supabase",
+          workspaceId: bootPayload.workspaceId,
+          userId: bootPayload.userId,
+        };
+        meta = persistMetaRef.current;
+      }
+
+      if (meta.mode === "supabase") {
+        setSaveStatus("saving");
+        setSaveError(null);
+        const res = await fetch(
+          `/api/workspace/projects/${encodeURIComponent(projectId)}`,
+          {
+            method: "DELETE",
+            credentials: "same-origin",
+            cache: "no-store",
+          },
+        );
+        if (!res.ok) {
+          const fail = (await res.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          throw new Error(
+            fail?.error || "Could not delete this project.",
+          );
+        }
+        const payload = (await res.json()) as {
+          workspaceId: string;
+          userId: string;
+          projectId: string;
+          state: MissionState;
+        };
+        applyDurableWorkspace({
+          workspaceId: payload.workspaceId,
+          userId: payload.userId,
+          state: payload.state,
+        });
+        setSaveStatus("saved");
+        setSaveError(null);
+        pruneBrowserResidueForDeletedProject(projectId);
+        return projectDeleteResult(
+          projectId,
+          payload.state.projects.map((project) => project.id),
+        );
+      }
+
+      if (process.env.NODE_ENV === "production") {
+        const message =
+          "Project was not deleted from your account. Please refresh and try again.";
+        setSaveStatus("error");
+        setSaveError(message);
+        throw new Error(message);
+      }
+
+      const next = removeProjectFromMissionState(stateRef.current, projectId);
+      setState(next);
+      pruneBrowserResidueForDeletedProject(projectId);
+      return projectDeleteResult(
+        projectId,
+        next.projects.map((project) => project.id),
+      );
+    } catch (err) {
+      reportPersistFailure(err, "Could not delete this project.");
+      throw err instanceof Error ? err : new Error("Could not delete this project.");
+    } finally {
+      deleteProjectInFlightRef.current = false;
+    }
+  }, [applyDurableWorkspace, reportPersistFailure]);
+
   const cloneRelOps = useCallback((input: CloneRelOpsInput) => {
     setState((prev) => cloneRelOpsProject(prev, input));
   }, []);
@@ -2145,6 +2249,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateMeeting,
       addSuggestion,
       createProject,
+      deleteProject,
       cloneRelOps,
       refreshSuggestions,
       updateKnowledgeSection,
@@ -2184,6 +2289,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateMeeting,
       addSuggestion,
       createProject,
+      deleteProject,
       cloneRelOps,
       refreshSuggestions,
       updateKnowledgeSection,

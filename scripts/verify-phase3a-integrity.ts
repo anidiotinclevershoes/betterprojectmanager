@@ -459,7 +459,7 @@ async function main() {
     assert.equal(snapshotBBefore.projects, 0);
     assert.equal(snapshotBBefore.risks, 0);
 
-    await cleanupFailedNewProjectBundle(asClient(fake), PROJECT_A_ID);
+    await cleanupFailedNewProjectBundle(asClient(fake), fake.workspaceId, PROJECT_A_ID);
     assert.equal(fake.tables.projects.some((p) => p.id === PROJECT_A_ID), false);
     assert.ok(fake.tables.projects.some((p) => p.id === PROJECT_B_ID));
     assert.ok(

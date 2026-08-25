@@ -1,8 +1,9 @@
 /**
  * In-memory Supabase-shaped client for credential-free persistence tests.
- * Models the Phase 3A FK contract:
- * - CASCADE on project delete for stakeholders/risks/knowledge/milestones/meetings/releases
+ * Models the Phase 3A/3A.1 FK contract:
+ * - CASCADE on project delete for stakeholders/risks/knowledge/milestones/meetings/releases/snapshots
  * - SET NULL on project delete for todos/memories/recommendations/history/capture/coach
+ * - projects.cloned_from_id SET NULL (clones survive)
  */
 
 export type FakeRow = Record<string, unknown>;
@@ -14,6 +15,7 @@ const CASCADE_ON_PROJECT_DELETE = [
   "milestones",
   "meetings",
   "releases",
+  "project_intelligence_snapshots",
 ] as const;
 
 const SET_NULL_ON_PROJECT_DELETE = [
@@ -32,6 +34,8 @@ export type FakeWorkspaceOptions = {
   failAfterInserts?: number;
   /** Fail the first insert into this table. */
   failOnTable?: string;
+  /** Fail delete() operations against this table. */
+  failOnDeleteTable?: string;
 };
 
 export class FakeWorkspaceClient {
@@ -41,12 +45,14 @@ export class FakeWorkspaceClient {
   insertCount = 0;
   private readonly failAfterInserts?: number;
   private readonly failOnTable?: string;
+  private readonly failOnDeleteTable?: string;
 
   constructor(options: FakeWorkspaceOptions = {}) {
     this.workspaceId = options.workspaceId ?? "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
     this.userId = options.userId ?? "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
     this.failAfterInserts = options.failAfterInserts;
     this.failOnTable = options.failOnTable;
+    this.failOnDeleteTable = options.failOnDeleteTable;
     this.tables = {
       projects: [],
       stakeholders: [],
@@ -61,6 +67,7 @@ export class FakeWorkspaceClient {
       history_events: [],
       capture_sessions: [],
       coach_sessions: [],
+      project_intelligence_snapshots: [],
       workspace_members: [
         {
           workspace_id: this.workspaceId,
@@ -91,6 +98,13 @@ export class FakeWorkspaceClient {
       this.insertCount >= this.failAfterInserts
     ) {
       return `injected failure after ${this.insertCount} inserts`;
+    }
+    return null;
+  }
+
+  nextDeleteFailure(table: string): string | null {
+    if (this.failOnDeleteTable === table) {
+      return `injected delete failure on ${table}`;
     }
     return null;
   }
@@ -138,6 +152,11 @@ export class FakeWorkspaceClient {
     this.tables.projects = this.tables.projects.filter(
       (row) => !projectIds.includes(String(row.id)),
     );
+    for (const row of this.tables.projects) {
+      if (row.cloned_from_id && projectIds.includes(String(row.cloned_from_id))) {
+        row.cloned_from_id = null;
+      }
+    }
   }
 }
 
@@ -243,6 +262,13 @@ class FakeQuery {
     }
 
     if (this.deleting) {
+      const injected = this.db.nextDeleteFailure(this.table);
+      if (injected) {
+        return {
+          data: null,
+          error: { message: injected, code: "PGRST" },
+        };
+      }
       const removing = tableRows.filter((row) => this.matches(row));
       if (this.table === "projects") {
         this.db.applyProjectDelete(removing.map((row) => String(row.id)));

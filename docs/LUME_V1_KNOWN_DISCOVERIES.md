@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 25 August 2026 (Phase 3A — Data Integrity & Reactive-State Foundation: D-006 fixed; Ocean save-failure visibility; paint-cache + create idempotency)  
+**Last housekeeping:** 25 August 2026 (Phase 3A.1 — Safe Project Deletion: D-R12; D-027 archive/undo deferred; D-028 non-transactional delete residual)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
@@ -120,7 +120,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Hard without UI; at least ensure error paths set `saveStatus` and do not claim success |
 | **Target resolution / validation point** | V1 product hardening; must be checked before V1 launch (incremental per write path is OK) |
 | **Related docs** | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` §C.4 |
-| **Notes** | **Phase 3A (partial):** Ocean chrome now shows `saveStatus=error` via `ocean-save-error` (does not require opening a drawer or devtools). Failed persist paths call `reportPersistFailure`, which reconciles MissionState from `/api/workspace/state` and does not write dirty state to the paint cache. Success of a later persist clears the banner (`markPersistSaved`). **Still open:** most mutations remain optimistic-then-persist rather than persist-first; concurrent in-flight mutations can be overwritten by a coarse rehydrate; Capture apply is still optimistic (Phase 3B). App-wide per-field “not saved” badges remain out of scope. |
+| **Notes** | **Phase 3A (partial):** Ocean chrome now shows `saveStatus=error` via `ocean-save-error` (does not require opening a drawer or devtools). Failed persist paths call `reportPersistFailure`, which reconciles MissionState from `/api/workspace/state` and does not write dirty state to the paint cache. Success of a later persist clears the banner (`markPersistSaved`). **Phase 3A.1:** project deletion is persist-first (same failure banner; MissionState is not stripped until the server confirms). **Still open:** most other mutations remain optimistic-then-persist rather than persist-first; concurrent in-flight mutations can be overwritten by a coarse rehydrate; Capture apply is still optimistic (Phase 3B). App-wide per-field “not saved” badges remain out of scope. |
 
 ---
 
@@ -140,7 +140,47 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | If the product rule becomes “codes unique per workspace”, assert unique-violation surfaces a code-already-used error |
 | **Target resolution / validation point** | New Project/product hardening — do not silently add the constraint in an integrity slice |
 | **Related docs** | Phase 3A PR; this file D-R11 |
-| **Notes** | Phase 3A implements retry idempotency via `clientProjectId` (same user action / same UUID). That is not a product rule that two projects cannot share a code. |
+| **Notes** | Phase 3A implements retry idempotency via `clientProjectId` (same user action / same UUID). That is not a product rule that two projects cannot share a code. **Phase 3A.1 delete** is keyed by durable project UUID, not code or name. |
+
+---
+
+### D-027 — No archive / undo after project deletion
+
+| Field | Value |
+| --- | --- |
+| **Status** | deferred |
+| **Severity** | low |
+| **Domain** | Projects |
+| **Found in** | Phase 3A.1 Safe Project Deletion (Aug 2026) |
+| **Failure class** | Confirmed Delete Project is permanent. There is no archive, recycle bin, or undo. Disposable/test projects can be cleaned; a mistaken confirmation cannot be reversed from Lume. |
+| **Evidence / repro** | Delete Project confirmation → durable rows are removed; reload does not restore the project |
+| **Likely files** | `persistProjectDelete`; `DeleteProjectButton.tsx` |
+| **Proposed fix direction** | If product later wants Archive, add an explicit archived flag / restore path. Do not silently soften 3A.1 deletion. |
+| **Explicit non-goals** | Recycle bin, bulk project management, settings redesign in 3A.1 |
+| **Regression test to add** | If Archive ships: archived projects hidden from Ocean selection and restorable |
+| **Target resolution / validation point** | post-V1 / accepted limitation until a product decision asks for Archive |
+| **Related docs** | This file D-R12 |
+| **Notes** | Recorded because Archive felt desirable during regression hygiene. 3A.1 kept deletion permanent and confirmation explicit instead of expanding scope. |
+
+---
+
+### D-028 — Project delete is sequential, not a single database transaction
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | Infra / Projects |
+| **Found in** | Phase 3A.1 Safe Project Deletion (Aug 2026) |
+| **Failure class** | `persistProjectDelete` first deletes SET NULL children, then the project row. If the project-row delete fails after children were removed, the project can remain visible with some of its todos/history/sessions already gone. The UI does not fake success. Retrying delete is the recovery. |
+| **Evidence / repro** | Fake client `failOnDeleteTable: "projects"` after SET NULL deletes have succeeded |
+| **Likely files** | `src/lib/data/supabase/persist-mutations.ts` (`deleteProjectScopedBundle`) |
+| **Proposed fix direction** | A single Postgres RPC/transaction for the bundle, same class of follow-up as New Project create |
+| **Explicit non-goals** | Inventing a generic mutation framework in 3A.1 |
+| **Regression test to add** | Keep the injected project-delete failure test: A remains in `projects` and UI must not claim success |
+| **Target resolution / validation point** | V1 product hardening (bundle RPC) — not Phase 3B Capture dispatcher |
+| **Related docs** | Phase 3A compensating cleanup; this file D-R12 |
+| **Notes** | SET NULL-first is required so a successful project delete cannot leave workspace orphans. The residual is failure-after-partial-cleanup, not silent cross-project damage. |
 
 ---
 
@@ -260,7 +300,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Later |
 | **Target resolution / validation point** | Capture hardening |
 | **Related docs** | Architecture audit |
-| **Notes** | Not blocking domain-authority slices |
+| **Notes** | Not blocking domain-authority slices. **Phase 3A.1:** durable `capture_sessions` / `coach_sessions` rows for a deleted project are removed with the SET NULL bundle, and matching browser Capture/Coach lists plus the active Capture draft are pruned so they cannot attach to the next project. Session *authority* (client lists vs Supabase tables) remains a Phase 3D / Capture hardening concern. |
 
 ---
 
@@ -572,6 +612,17 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ---
 
+### D-R12 — Phase 3A.1 Safe Project Deletion & regression hygiene
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Phase 3A.1 — Safe Project Deletion & Regression Hygiene |
+| **Failure class** | There was no user-facing way to delete a disposable/test project. `repositories.projects.delete` existed unused and would only delete the `projects` row (SET NULL children would become workspace orphans). No workspace+UUID scoping. |
+| **Fix summary** | Confirmed Delete Project on the Ocean project header; one server path `DELETE /api/workspace/projects/[id]` → `persistProjectDelete` (membership + exact UUID, SET NULL children removed, then project row). MissionState/cache update only after confirmed success. Failure stays visible and does not hide the project. After delete, selection follows Home: first remaining project, or New Project onboarding if none remain. Project-scoped History rows are removed with the bundle (no new retention model). Adjacent residuals: D-027 (no archive/undo), D-028 (sequential delete), D-013 remainder (session authority → Phase 3D). |
+
+---
+
 ## Suggested fix order (non-binding)
 
 1. ~~**D-006**~~ — fixed in Phase 3A (D-R11)  
@@ -588,7 +639,9 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 12. **D-004** remainder — history persist gaps outside New Project create (create-path coupling decided in 3A)  
 13. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
 14. **D-026** — product decision on project-code uniqueness  
-15. **D-008 / D-021**, **D-012–D-015**, **D-020** remainder (Ask/ingestion), **D-024** — as scheduled  
+15. **D-028** — optional later bundle RPC for delete (same class as create)  
+16. **D-027** — Archive/undo only if product asks; not required for V1 hygiene  
+17. **D-008 / D-021**, **D-012–D-015**, **D-020** remainder (Ask/ingestion), **D-024** — as scheduled  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 
