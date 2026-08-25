@@ -2,7 +2,7 @@
 
 **Status:** Documentation of CURRENT implementation (not an ideal architecture)  
 **Date:** 25 August 2026  
-**Code observed:** `main` plus Phase 3A integrity work (`persistNewProject` compensating cleanup, durable paint cache, Ocean save-error chrome)  
+**Code observed:** `main` plus Phase 3A.1 project deletion (`persistProjectDelete`, Ocean Delete Project, SET NULL cleanup)  
 **Docs entry point:** `docs/README.md`  
 **Governing product authority:** `docs/v1-reference-pack/`  
 **Living defect backlog:** `docs/LUME_V1_KNOWN_DISCOVERIES.md`  
@@ -103,7 +103,7 @@ Use this section as working context for future product/development decisions and
 
 | Concept | Runtime | Durable table | Stable identity | Authoritative lifecycle/state | KC projection | Helper / path | Caveat |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Projects** | `MissionState.projects` | `projects` | UUID | `status` healthy/watch/at_risk; `currentFocus` | Header + strip | `createProject` / `persistNewProject` | Workspace-scoped |
+| **Projects** | `MissionState.projects` | `projects` | UUID | `status` healthy/watch/at_risk; `currentFocus` | Header + strip | `createProject` / `persistNewProject`; `deleteProject` / `persistProjectDelete` | Workspace-scoped; delete is persist-first |
 | **Knowledge / current facts** | `knowledge[].sections.now` + `structured` | `knowledge_items` | UUID (`sectionItemIds` / structured `id`) | `lifecycle` current/superseded/historical | Current position frame | `updateKnowledgeSection`, `persistKnowledgeReconcile`, `alignSectionLines` | Wording-edit preserves id; unrelated replacement **new** id |
 | **People identity** | `projects[].stakeholders` | `stakeholders` | Project-scoped UUID | Name + role | People frame cards | `ensurePersonOnProject`, `persistEnsureStakeholder`, `getPersonBundle` | **Not** a workspace-global CRM. Capture prose may still lack a stakeholder (**GAP D-007**) |
 | **Responsibilities** | `structured` `kind=responsibility` | `knowledge_items` meta | Item UUID + `personId` | current vs superseded; `ownerConfirmed` | People cards + person detail | `confirmResponsibilityOwner` | Many-to-many. Share is default. Replace needs explicit `replacePersonId` |
@@ -382,6 +382,8 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 
 **Phase 3A New Project persist:** `persistNewProject` inserts the reviewed bundle, then a secondary `history_events` row. Illegal risk source `setup` is gone (`manual`). There is no Postgres RPC transaction for this bundle. On child-insert failure the function deletes SET NULL children for that new `project_id` then deletes the project (CASCADE removes stakeholders/risks/knowledge/milestones). Client retries reuse `clientProjectId` (PK idempotency). Server `POST /api/workspace/projects` is the only supabase create path — store must not fall through to a second browser persist.
 
+**Phase 3A.1 project delete:** User-facing Delete Project on the Ocean project header. Confirmation is `DetailModal` + Cancel + destructive button (same pattern as Reset demo; no type-the-name). Server `DELETE /api/workspace/projects/[id]` is the only supabase delete path. `persistProjectDelete` requires the exact project UUID in the authenticated workspace, deletes SET NULL children (`todos`, `memories`, `recommendations`, `history_events`, `capture_sessions`, `coach_sessions`) scoped by `workspace_id` + `project_id`, then deletes the project row (CASCADE removes stakeholders/risks/knowledge/milestones/meetings/releases/snapshots). Clones survive (`cloned_from_id` SET NULL). Workspace-level rows without that `project_id` are left alone. History belonging only to the deleted project is removed with the bundle — no workspace “project deleted” audit row is invented. After success, `applyDurableWorkspace` refreshes MissionState and paint cache; selection follows Home (`projects[0]` or `/` New Project onboarding). Failure uses `reportPersistFailure` and does not hide the project. Residual: **D-028** sequential non-transactional delete; **D-027** no archive/undo; Capture session *authority* remains **D-013** / Phase 3D.
+
 ---
 
 ## 15. Authentication / tenant isolation
@@ -467,9 +469,11 @@ From `docs/LUME_V1_KNOWN_DISCOVERIES.md` as of this handoff. **Do not treat reso
 | D-024 | “Actions left” is local analysis meter | Not Stripe entitlement | Billing hardening |
 | D-025 | Capture Ocean §16 visual depth | Cosmetic vs baseline | Capture visual polish |
 | D-026 | No unique `(workspace_id, code)` | Two projects may share a code; 3A retry uses UUID not code | New Project product decision |
+| D-027 | No archive/undo after project delete | Permanent by design until a product Archive decision | post-V1 / accepted limitation |
+| D-028 | Project delete is sequential, not one DB transaction | Failure after SET NULL cleanup can leave a visible project with some children already gone; UI does not fake success | V1 product hardening (bundle RPC) |
 | D-017 | (if still open in file) Capture validation item | See Known Discoveries | Capture hardening |
 
-**Resolved (do not reopen as missing architecture):** D-R01 durable Knowledge, D-R02 stable identity, D-R03 risk resurrection, D-R04/R05 Confirm Owner persist/UUIDs, D-R06 false unknown-owner, D-R07 multi-owner Ask, D-R08 Ocean Capture, D-R09 item detail, D-R10 share vs replace, D-R11 Phase 3A New Project integrity (includes D-006).
+**Resolved (do not reopen as missing architecture):** D-R01 durable Knowledge, D-R02 stable identity, D-R03 risk resurrection, D-R04/R05 Confirm Owner persist/UUIDs, D-R06 false unknown-owner, D-R07 multi-owner Ask, D-R08 Ocean Capture, D-R09 item detail, D-R10 share vs replace, D-R11 Phase 3A New Project integrity (includes D-006), D-R12 Phase 3A.1 Safe Project Deletion.
 
 ---
 
@@ -568,6 +572,7 @@ Parallel writes:
   Confirm Owner (share | replace)
   Todo complete / Risk resolve
   New Project persistNewProject
+  Delete Project persistProjectDelete
 ```
 
 ---
@@ -579,9 +584,9 @@ Parallel writes:
 - Types: `Project` in `src/lib/types.ts`
 - UI: `OceanProjectWorkspace`, `Sidebar`, `NewProjectExperience`
 - Table: `projects`
-- Writes: `createProject` → `POST /api/workspace/projects` → `persistNewProject` (compensating cleanup + `clientProjectId` idempotency)
-- Tests: `verify-new-project.ts`, `verify-phase3a-integrity.ts`
-- GAP: **D-026** product rule for unique project codes is unresolved; retry safety does not use code matching
+- Writes: `createProject` → `POST /api/workspace/projects` → `persistNewProject` (compensating cleanup + `clientProjectId` idempotency); `deleteProject` → `DELETE /api/workspace/projects/[id]` → `persistProjectDelete` (SET NULL children then project; persist-first)
+- Tests: `verify-new-project.ts`, `verify-phase3a-integrity.ts`, `verify-project-delete.ts`
+- GAP: **D-026** product rule for unique project codes is unresolved; retry safety does not use code matching. **D-027** no archive/undo. **D-028** sequential delete.
 
 ### Knowledge
 
@@ -703,6 +708,7 @@ Parallel writes:
 | Confirm Owner replace | same + `replacePersonId` | plus `persistKnowledgeLifecycle` superseded |
 | Todo edit/complete | `updateTodo` / `toggleTodo` | `persistTodoUpdate` (+ some history persist) |
 | New Project | `createProject` (persist first, then MissionState from returned hydrate) | `persistNewProject` via `/api/workspace/projects` only |
+| Delete Project | `deleteProject` (persist first, then MissionState from returned hydrate) | `persistProjectDelete` via `DELETE /api/workspace/projects/[id]` only |
 
 Optimistic UI: many updates still change MissionState immediately; persist errors set `saveStatus=error`, show Ocean save failure, and reconcile from durable workspace state (**D-005 partial**). Paint cache must not store unconfirmed state.
 

@@ -117,6 +117,8 @@ export function createSupabaseRepositories(client: Client): LumeDataRepositories
       if (error) throw new Error(`[supabase] update project: ${error.message}`);
     },
     async delete(projectId) {
+      // Unsafe for user-facing delete: no workspace scope, no SET NULL cleanup.
+      // Production deletion goes through persistProjectDelete only.
       const { error } = await client.from("projects").delete().eq("id", projectId);
       if (error) throw new Error(`[supabase] delete project: ${error.message}`);
     },

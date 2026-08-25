@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CaptureWorkspace } from "@/components/capture/CaptureWorkspace";
+import { DeleteProjectButton } from "@/components/knowledge-centre/DeleteProjectButton";
 import { KnowledgeSearchAskBar } from "@/components/knowledge-centre/KnowledgeSearchAskBar";
 import { OceanKnowledgeFrames } from "@/components/knowledge-centre/OceanKnowledgeFrames";
 import { ProjectIntelligenceStrip } from "@/components/knowledge-centre/ProjectIntelligenceStrip";
@@ -35,6 +36,7 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
               project.summary?.trim() ||
               "Project intelligence at a glance."}
           </p>
+          <DeleteProjectButton project={project} />
         </div>
         <ProjectModeSelector mode={mode} onChange={setMode} />
       </header>

@@ -76,6 +76,15 @@ async function main() {
     assert.match(src, /ensurePersonalWorkspace/);
   });
 
+  await check("workspace project delete API route exists", () => {
+    const route = path.join(root, "src/app/api/workspace/projects/[id]/route.ts");
+    assert.equal(fs.existsSync(route), true);
+    const src = fs.readFileSync(route, "utf8");
+    assert.match(src, /persistProjectDelete/);
+    assert.match(src, /ensurePersonalWorkspace/);
+    assert.match(src, /export async function DELETE/);
+  });
+
   await check("mission supabase cache helper exists", () => {
     const cachePath = path.join(root, "src/lib/mission-cache.ts");
     assert.equal(fs.existsSync(cachePath), true);

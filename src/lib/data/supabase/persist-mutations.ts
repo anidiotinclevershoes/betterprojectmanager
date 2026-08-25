@@ -6,6 +6,7 @@ import type { BuiltProjectBundle } from "@/lib/create-project";
 import type { CreateProjectInput } from "@/lib/create-project";
 import { buildNewProject } from "@/lib/create-project";
 import { isoToDateOnly } from "@/lib/data/supabase/load-mission-state";
+import { requireUuid } from "@/lib/data/validate";
 import type {
   HistoryEvent,
   MemoryEntry,
@@ -74,42 +75,99 @@ function requireLegalRiskSource(source: string): LegalRiskSource {
 }
 
 /**
- * Remove a project created by a failed New Project attempt.
+ * Schema evidence (`20260812002748_workspace_schema.sql` + snapshots migration):
+ * - CASCADE: stakeholders, risks, knowledge_items, milestones, meetings, releases,
+ *   project_intelligence_snapshots
+ * - SET NULL: todos, memories, recommendations, history_events, capture_sessions,
+ *   coach_sessions
+ * - projects.cloned_from_id SET NULL (deleting a template must not delete clones)
  *
- * Schema evidence (`20260812002748_workspace_schema.sql`):
- * - CASCADE: stakeholders, risks, knowledge_items, milestones, meetings, releases
- * - SET NULL: todos, memories, recommendations, history_events, capture_sessions, coach_sessions
- *
- * Only rows with this `project_id` are deleted. Pre-existing / other-project
- * data cannot match a freshly minted project id.
+ * Deleting only the `projects` row would orphan SET NULL children in the workspace.
+ * Always remove those project-scoped rows first, then delete the project.
+ * Workspace-wide rows (no matching project_id) are left alone.
  */
-export async function cleanupFailedNewProjectBundle(
+async function deleteProjectScopedBundle(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   client: SupabaseClient<any>,
+  workspaceId: string,
   projectId: string,
 ): Promise<void> {
-  if (!projectId || !UUID_RE.test(projectId)) {
-    throw new Error("[supabase] cleanup refused: missing or invalid project id");
-  }
   const errors: string[] = [];
   for (const table of PROJECT_BUNDLE_SET_NULL_TABLES) {
-    const { error } = await client.from(table).delete().eq("project_id", projectId);
+    const { error } = await client
+      .from(table)
+      .delete()
+      .eq("workspace_id", workspaceId)
+      .eq("project_id", projectId);
     if (error) {
       errors.push(`${table}: ${error.message}`);
+      break;
     }
-  }
-  const { error: projectError } = await client
-    .from("projects")
-    .delete()
-    .eq("id", projectId);
-  if (projectError) {
-    errors.push(`projects: ${projectError.message}`);
   }
   if (errors.length) {
     throw new Error(
       `[supabase] cleanup failed project ${projectId}: ${errors.join("; ")}`,
     );
   }
+  const { error: projectError } = await client
+    .from("projects")
+    .delete()
+    .eq("id", projectId)
+    .eq("workspace_id", workspaceId);
+  if (projectError) {
+    throw new Error(
+      `[supabase] cleanup failed project ${projectId}: projects: ${projectError.message}`,
+    );
+  }
+}
+
+/**
+ * Remove a project created by a failed New Project attempt.
+ * Same SET NULL-then-project contract as user-facing delete; does not require
+ * the project row to still exist (partial insert / retry).
+ */
+export async function cleanupFailedNewProjectBundle(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+): Promise<void> {
+  const scopedWorkspaceId = requireUuid(workspaceId, "workspaceId");
+  const scopedProjectId = requireUuid(projectId, "projectId");
+  await deleteProjectScopedBundle(client, scopedWorkspaceId, scopedProjectId);
+}
+
+/**
+ * User-facing project deletion. One deliberate persistence path:
+ * exact durable project UUID + authenticated workspace membership.
+ * Never keyed by name, label, or client-only order.
+ */
+export async function persistProjectDelete(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+): Promise<{ projectId: string; workspaceId: string }> {
+  const scopedWorkspaceId = requireUuid(workspaceId, "workspaceId");
+  const scopedProjectId = requireUuid(projectId, "projectId");
+
+  const { data, error } = await client
+    .from("projects")
+    .select("id")
+    .eq("id", scopedProjectId)
+    .eq("workspace_id", scopedWorkspaceId)
+    .maybeSingle();
+  if (error) {
+    throw new Error(`[supabase] delete project: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error(
+      `[supabase] delete project: not found in this workspace`,
+    );
+  }
+
+  await deleteProjectScopedBundle(client, scopedWorkspaceId, scopedProjectId);
+  return { projectId: scopedProjectId, workspaceId: scopedWorkspaceId };
 }
 
 function mapTodoRows(rows: Array<Record<string, unknown>>): TodoItem[] {
@@ -550,7 +608,7 @@ export async function persistNewProject(
   } catch (err) {
     if (createdThisCall && projectId) {
       try {
-        await cleanupFailedNewProjectBundle(client, projectId);
+        await cleanupFailedNewProjectBundle(client, workspaceId, projectId);
       } catch (cleanupErr) {
         const origin = err instanceof Error ? err.message : String(err);
         const cleanup =
