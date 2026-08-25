@@ -65,7 +65,7 @@ export function extractLocalFindings(
       const titleKey = record.title.toLowerCase();
       const generic =
         titleKey.length > 6 &&
-        (text.includes(titleKey) || significantTitleOverlap(text, titleKey)) &&
+        text.includes(titleKey) &&
         /\b(resolv\w*|fix\w*|cleared|closed|mitigated)\b/.test(text);
       if (generic) {
         findings.push({
@@ -90,9 +90,7 @@ export function extractLocalFindings(
 
     if (record.entityType === "milestone") {
       const titleKey = record.title.toLowerCase();
-      const mentioned =
-        titleKey.length > 4 &&
-        (text.includes(titleKey) || significantTitleOverlap(text, titleKey));
+      const mentioned = titleKey.length > 4 && text.includes(titleKey);
       const moved = /\b(moved|move|now|changed|pushed|brought forward)\b/.test(text);
       if (mentioned && moved) {
         const proposed = extractIsoDateHint(captureText);
@@ -131,7 +129,7 @@ export function extractLocalFindings(
             requiresClarification: false,
             reasoningSummary: `Existing Milestone "${record.title}" should move to the stated date.`,
           });
-        } else if (moved && significantTitleOverlap(text, titleKey)) {
+        } else if (moved) {
           findings.push({
             id: nextId(),
             fact: `${record.title} date change is unclear`,
@@ -157,9 +155,7 @@ export function extractLocalFindings(
       record.status !== "done"
     ) {
       const titleKey = record.title.toLowerCase();
-      const titleHit =
-        titleKey.length > 10 &&
-        (text.includes(titleKey) || significantTitleOverlap(text, titleKey));
+      const titleHit = titleKey.length > 10 && text.includes(titleKey);
       const updateCue =
         /\b(move|moved|due date|push(?:ed)?(?:\s+that)?\s+due|deadline)\b/.test(
           text,
@@ -620,14 +616,6 @@ function extractRoleScope(text: string, personName: string): string | undefined 
     }
   }
   return undefined;
-}
-
-function significantTitleOverlap(haystack: string, title: string): boolean {
-  const tokens = titleTokens(title);
-  if (tokens.length < 2) return false;
-  const hits = tokens.filter((t) => tokenAppears(haystack, t)).length;
-  const needed = Math.max(2, Math.ceil(tokens.length * 0.7));
-  return hits >= needed;
 }
 
 function titleTokens(title: string): string[] {

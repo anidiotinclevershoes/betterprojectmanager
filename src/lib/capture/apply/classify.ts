@@ -1,6 +1,10 @@
 /**
  * Phase 3B — map a review finding onto one legal mutation domain.
  * Unknown combinations become `unsupported` (Needs you), never Todo.
+ *
+ * `kind` is the primary authority. `legalDomain` / ownership / availability
+ * may only *refine* a compatible kind. They must never retarget Risk,
+ * milestone, or Todo into another domain.
  */
 
 import type { PendingSuggestion, SuggestionKind } from "@/lib/capture/suggestions";
@@ -66,21 +70,44 @@ function kindToDomain(kind: SuggestionKind): CaptureLegalDomain {
   }
 }
 
+function canRefineToAvailability(fromKind: CaptureLegalDomain): boolean {
+  return fromKind === "availability" || fromKind === "person" || fromKind === "knowledge";
+}
+
+function canRefineToResponsibility(fromKind: CaptureLegalDomain): boolean {
+  return fromKind === "person" || fromKind === "knowledge";
+}
+
+/**
+ * Classify the single legal domain this finding may mutate.
+ * Conflicting stickers fail closed (`unsupported`) instead of falling through.
+ */
 export function classifyCaptureLegalDomain(
   item: PendingSuggestion,
 ): CaptureLegalDomain {
-  if (item.legalDomain && isCaptureLegalDomain(item.legalDomain)) {
-    return item.legalDomain;
+  const fromKind = kindToDomain(item.kind);
+
+  if (hasAvailabilityPayload(item)) {
+    return canRefineToAvailability(fromKind) ? "availability" : "unsupported";
   }
 
   const semantics = item.ownershipSemantics as OwnershipSemantics | undefined;
-  if (semantics) return "responsibility";
-
-  if (hasAvailabilityPayload(item)) return "availability";
-
   const proposed = proposedKind(item);
-  if (proposed === "availability") return "availability";
-  if (proposed === "responsibility") return "responsibility";
+  if (semantics || proposed === "responsibility") {
+    return canRefineToResponsibility(fromKind) ? "responsibility" : "unsupported";
+  }
 
-  return kindToDomain(item.kind);
+  if (item.legalDomain && isCaptureLegalDomain(item.legalDomain)) {
+    if (item.legalDomain === fromKind) return fromKind;
+    if (fromKind === "person" && item.legalDomain === "responsibility") {
+      return "responsibility";
+    }
+    if (fromKind === "knowledge" && item.legalDomain === "availability") {
+      return "availability";
+    }
+    // A sticker must not retarget an incompatible kind (e.g. Risk → Todo).
+    return "unsupported";
+  }
+
+  return fromKind;
 }

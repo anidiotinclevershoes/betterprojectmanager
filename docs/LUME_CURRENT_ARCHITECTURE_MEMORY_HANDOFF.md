@@ -232,7 +232,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 | --- | --- | --- | --- | --- | --- | --- |
 | Dates / milestones | `TimelineItem` | `milestones` | First-class | `buildDateRows` | Canonical `MILESTONES` from timeline | Prior date only if structured supersession exists |
 | Dependencies | `kind=dependency` structured | `knowledge_items` | Structured only in KC frame | Empty state if none | Canonical if structured present | **No graph.** Do not infer edges. **GAP D-020** |
-| Availability | `kind=availability` + `AvailabilityMeta` | `knowledge_items` | Structured only | Away meta on people cards | Canonical if structured | No calendar/holiday/rota. Capture may not create these rows. **GAP D-020** |
+| Availability | `kind=availability` + `AvailabilityMeta` | `knowledge_items` | Structured only | Away meta on people cards | Canonical if structured | No calendar/holiday/rota. Capture writes structured availability when Person + dates are known; otherwise Needs you. Ask remainder: **GAP D-020** |
 
 ---
 
@@ -245,17 +245,17 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 1. Input (text / transcription) in `CaptureWorkspace` `variant="ocean"`
 2. ✦ **Analyse** → `analyzeCaptureWithAI` → `/api/capture` — findings/proposals only; **history event `capture_analysed`; no domain writes**
 3. Review cards / ambiguity / correction (`buildReviewChangeViewModels`)
-4. Per-item **`applyOne`** (`CaptureSessionContext`) — then store mutations persist
+4. Per-item **`applyOne`** (`CaptureSessionContext`) — `planCaptureApply` then `executeCaptureApply`. Illegal/unresolved findings are **Needs you / no write**. Persist-first for Risk, milestone create/update, Person, availability.
 
-**`applyOne` can update (post-approval):** todos (add/update/toggle/remove), genuine risks (`setRiskStatus`) or knowledge-only resolve or `addKnowledgeBullet("risks")`, Knowledge sections (`now/decisions/people/risks/openLoops`), timeline, suggestions, memory-only apply.
+**`applyOne` legal domains (post-approval):** Todo authority; Risk authority; milestone/date authority (update yes, complete → Needs you / D-029); Person via `ensurePersonOnProject`; responsibility via Confirm Owner / share-vs-replace; structured availability; knowledge/memory. Unsupported/unknown → Needs you. **There is no generic Todo fallback.** Project scope uses Capture entry project only when the finding is not uncertain. A supplied durable ID that is not on the project does not fuzzy- or title-fallback onto another record.
 
 **LEGACY still in store (do not use as the Ocean path):** `capture()` local heuristic and `captureWithAI()` **merge immediately** without review. Ocean UI uses analyse + `applyOne`.
 
-**People gap:** applying a people bullet typically writes Knowledge prose; it does **not** consistently call `ensurePersonOnProject` / Confirm Owner. **GAP D-007.**
+**People:** Capture apply reuses existing Person UUIDs. Duplicate-stakeholder on mention is closed. Leftover Knowledge people *prose* (never a finding) may still lack a stakeholder. **GAP D-007 remainder.**
 
-**Other Capture GAPs:** D-013 session tables vs client lists; D-014 no CI Capture→Supabase round-trip; D-011 demo-name regex extractors; D-005 save visibility; D-025 Ocean §16 visual depth (not semantics).
+**Other Capture GAPs:** D-013 session tables vs client lists / New Capture transcript (Phase 3D); D-014 hosted Capture apply → Supabase not in CI; D-011 New Project extractors only; D-005 remaining optimistic paths (Todo / Confirm Owner); D-025 Ocean §16 visual depth (not semantics).
 
-**Key files:** `src/components/capture/CaptureWorkspace.tsx`, `CaptureSessionContext.tsx`, `src/lib/store.tsx` (`analyzeCaptureWithAI`, `applyCaptureResult`, `mergeCapture`), `src/lib/capture/*`, `persistCaptureSession`.
+**Key files:** `src/components/capture/CaptureWorkspace.tsx`, `CaptureSessionContext.tsx`, `src/lib/capture/apply/*`, `src/lib/store.tsx` (`analyzeCaptureWithAI`, persist-first Capture helpers), `src/lib/capture/*`, `persistCaptureSession`.
 
 ---
 
@@ -514,7 +514,7 @@ Inspect/extend these **before** creating parallel implementations:
 | Item detail | `knowledge-item-detail.ts` + `KnowledgeItemDetailDrawer` | Inspection/correction UX |
 | Canonical Ask | `serializeCanonicalTruth` | Ask context — do not rebuild a third assembler |
 | Legacy Ask | `buildTellMeContext` / `buildCaptureContext` | Rollback path only |
-| Capture apply | `src/lib/capture/apply` (`planCaptureApply` / `executeCaptureApply`) via `CaptureSessionContext.applyOne` | Capture writes — exhaustive domain dispatcher; no generic Todo fallback |
+| Capture apply | `src/lib/capture/apply` (`planCaptureApply` / `executeCaptureApply`) via `CaptureSessionContext.applyOne` | Capture writes — exhaustive domain dispatcher; no generic Todo fallback; unknown op / foreign ID / conflicting `legalDomain` fail closed |
 | Search | `src/lib/tell-me/knowledge-search.ts` | Deterministic search |
 | Ocean shell | `OceanProjectWorkspace` | Project UI modes |
 | Drawer pattern | item-detail / CoachDrawer | Side inspection, not new pages |

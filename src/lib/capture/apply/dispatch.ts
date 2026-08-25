@@ -75,7 +75,7 @@ function requireTodoOnProject(
   todoId: string,
 ) {
   const todo = world.todos.find((t) => t.id === todoId);
-  if (!todo || (todo.projectId && todo.projectId !== projectId)) {
+  if (!todo || todo.projectId !== projectId) {
     return null;
   }
   return todo;
@@ -165,10 +165,9 @@ function planRisk(
 
   const resolveExisting = () => {
     if (id) {
-      const byId = projectRisks.find((r) => r.id === id);
-      if (byId) return byId;
+      return projectRisks.find((r) => r.id === id);
     }
-    // Exact title only, and only when unique. Never fuzzy.
+    // Exact title only when no durable id was supplied, and only when unique.
     const needle = text.trim().toLowerCase();
     if (!needle) return undefined;
     const titleMatches = projectRisks.filter(
@@ -352,6 +351,9 @@ function planPerson(
   projectId: string,
   world: CaptureApplyWorld,
 ): CaptureApplyDecision {
+  if (item.op !== "create" && item.op !== "update") {
+    return needsYou("person", "This person operation is not supported.");
+  }
   const resolved = resolvePerson(projectId, world, item, text);
   if (resolved.status === "missing_project") {
     return needsYou("person", "This person cannot be saved — the project is missing.");
@@ -412,6 +414,12 @@ function planResponsibility(
   projectId: string,
   world: CaptureApplyWorld,
 ): CaptureApplyDecision {
+  if (item.op !== "create" && item.op !== "update") {
+    return needsYou(
+      "responsibility",
+      "This ownership operation is not supported.",
+    );
+  }
   const values = proposedValues(item);
   const scope =
     item.responsibilityScope?.trim() ||
@@ -429,10 +437,13 @@ function planResponsibility(
   }
 
   const person = resolvePerson(projectId, world, item, personName);
-  const personId =
-    person.status === "known"
-      ? person.person.id
-      : item.personId ?? undefined;
+  const personId = person.status === "known" ? person.person.id : undefined;
+  if (item.personId?.trim() && person.status !== "known") {
+    return needsYou(
+      "responsibility",
+      "This person is not on this project. Lume will not change ownership.",
+    );
+  }
 
   if (
     semantics === "continue" ||
@@ -548,6 +559,12 @@ function planAvailability(
   projectId: string,
   world: CaptureApplyWorld,
 ): CaptureApplyDecision {
+  if (item.op !== "create" && item.op !== "update") {
+    return needsYou(
+      "availability",
+      "This availability operation is not supported.",
+    );
+  }
   const values = proposedValues(item);
   const person = resolvePerson(projectId, world, item, text);
   if (person.status === "ambiguous" || person.status === "unknown" || person.status === "missing_project") {
@@ -611,6 +628,9 @@ function planKnowledge(
   text: string,
   projectId: string,
 ): CaptureApplyDecision {
+  if (item.op !== "create" && item.op !== "update") {
+    return needsYou("knowledge", "This knowledge operation is not supported.");
+  }
   if (!text) {
     return needsYou("knowledge", "This knowledge item has no text.");
   }
@@ -633,6 +653,9 @@ function planKnowledge(
 }
 
 function planMemory(item: PendingSuggestion, text: string, projectId: string): CaptureApplyDecision {
+  if (item.op !== "create" && item.op !== "update") {
+    return needsYou("memory", "This memory operation is not supported.");
+  }
   if (!text) {
     return needsYou("memory", "This memory has no text.");
   }

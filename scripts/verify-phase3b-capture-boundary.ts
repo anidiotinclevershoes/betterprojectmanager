@@ -17,7 +17,12 @@ import {
 } from "../src/lib/capture/apply";
 import type { PendingSuggestion } from "../src/lib/capture/suggestions";
 import { mapFindingToOperation } from "../src/lib/capture/findings/map";
-import type { CaptureFinding } from "../src/lib/capture/findings";
+import {
+  extractLocalFindings,
+  type CaptureFinding,
+  type IndexedContextRecord,
+} from "../src/lib/capture/findings";
+import { validateCaptureFindings } from "../src/lib/capture/findings/validate";
 
 let passed = 0;
 
@@ -468,6 +473,18 @@ await check("17. share-vs-replace ambiguity cannot silently replace ownership", 
 });
 
 await check("18. Confirm Owner pathway is the write used for legal replacement", async () => {
+  const shared = world({
+    projects: [
+      {
+        id: "proj-candy",
+        name: "Candyland",
+        stakeholders: [
+          { id: "person-gumdrop", name: "Pippa Gumdrop", role: "UAT lead" },
+          { id: "person-brick", name: "Brick Oakley", role: "Sponsor" },
+        ],
+      },
+    ],
+  });
   const { decision, writes } = await apply(
     suggestion({
       id: "resp-rep",
@@ -482,6 +499,7 @@ await check("18. Confirm Owner pathway is the write used for legal replacement",
       responsibilityScope: "UAT lead",
       replacePersonId: "person-gumdrop",
     }),
+    { world: shared },
   );
   assert.equal(decision.kind, "write");
   assert.equal(writes[0]?.type, "confirm_responsibility");
@@ -842,6 +860,225 @@ await check("ambiguous ownership maps to clarification, not a Todo", () => {
   assert.notEqual(op!.entityType, "todo");
   assert.equal(op!.requiresClarification, true);
   assert.equal(op!.proposedValues?.ownershipSemantics, "ambiguous");
+});
+
+await check("unassigned Todo cannot be deleted from Project A", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "del-unassigned",
+      kind: "action",
+      op: "delete",
+      content: "Orphan chore",
+      projectId: "proj-candy",
+      targetTodoId: "todo-loose",
+    }),
+    {
+      world: world({
+        todos: [
+          {
+            id: "todo-loose",
+            projectId: null,
+            title: "Orphan chore",
+          },
+        ],
+      }),
+    },
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("unknown person/availability/knowledge ops cannot write", async () => {
+  const cases: Array<{
+    kind: "stakeholder" | "availability" | "knowledge";
+    extra?: Partial<PendingSuggestion>;
+  }> = [
+    { kind: "stakeholder", extra: { personName: "Pippa Gumdrop" } },
+    {
+      kind: "availability",
+      extra: {
+        personId: "person-gumdrop",
+        personName: "Pippa Gumdrop",
+        proposedValues: {
+          awayFromIso: "2026-10-03T12:00:00.000Z",
+          awayToIso: "2026-10-03T12:00:00.000Z",
+        },
+      },
+    },
+    { kind: "knowledge" },
+  ];
+  for (const row of cases) {
+    const item = suggestion({
+      id: `bad-${row.kind}`,
+      kind: row.kind,
+      op: "create",
+      content: "Remember the carnival seating plan",
+      projectId: "proj-candy",
+      ...row.extra,
+    });
+    (item as { op: string }).op = "explode";
+    const { decision, writes } = await apply(item);
+    assert.equal(decision.kind, "needs_you", row.kind);
+    assert.equal(writes.length, 0, row.kind);
+  }
+});
+
+await check("typoed Risk id does not title-fallback onto another Risk", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "typo-title-fallback",
+      kind: "risk",
+      op: "complete",
+      content: "Gumdrop Bridge icing",
+      projectId: "proj-candy",
+      targetEntityId: "risk-typo",
+    }),
+    {
+      world: world({
+        risks: [
+          {
+            id: "risk-bridge",
+            projectId: "proj-candy",
+            title: "Gumdrop Bridge icing",
+            status: "open",
+          },
+          {
+            id: "risk-icing-alias",
+            projectId: "proj-candy",
+            title: "Icing on the parade route",
+            status: "open",
+          },
+        ],
+      }),
+    },
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("foreign Person id cannot change Project A ownership", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "foreign-owner",
+      kind: "stakeholder",
+      op: "update",
+      content: "Brick Oakley replaces Pippa as UAT lead",
+      projectId: "proj-candy",
+      legalDomain: "responsibility",
+      ownershipSemantics: "replace",
+      personName: "Brick Oakley",
+      personId: "person-brick",
+      responsibilityScope: "UAT lead",
+      replacePersonId: "person-gumdrop",
+    }),
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("NEW_INFORMATION with unknown Risk id is invalid, not CREATE", () => {
+  const index = new Map<string, IndexedContextRecord>();
+  index.set("risk-bridge", {
+    entityType: "risk",
+    id: "risk-bridge",
+    title: "Gumdrop Bridge icing",
+    rawType: "risk",
+    status: "open",
+  });
+  const report = validateCaptureFindings(
+    [
+      {
+        fact: "Raise a new risk about gumdrop icing",
+        evidence: "The existing icing risk is still open.",
+        findingType: "NEW_INFORMATION",
+        target: {
+          entityType: "risk",
+          entityId: "risk-not-in-context",
+          title: "Gumdrop Bridge icing",
+        },
+        changes: {
+          entityType: { proposed: "risk" },
+          title: { proposed: "Gumdrop Bridge icing" },
+        },
+        confidence: 90,
+        requiresClarification: false,
+        reasoningSummary: "AI invented an id and asked to create",
+      },
+    ],
+    index,
+  );
+  assert.equal(report.findings.length, 1);
+  assert.equal(report.findings[0]?.findingType, "AMBIGUOUS");
+  assert.equal(report.findings[0]?.invalidTarget, true);
+  assert.equal(report.invalidTargetCount, 1);
+  assert.equal(report.findings[0]?.target, undefined);
+  const op = mapFindingToOperation(report.findings[0]!);
+  assert.equal(op, null);
+});
+
+await check("overlapping title tokens do not auto-update an unrelated Todo", () => {
+  const index = new Map<string, IndexedContextRecord>();
+  index.set("todo-pack", {
+    entityType: "todo",
+    id: "todo-pack",
+    title: "Prepare the jelly pack",
+    rawType: "todo",
+    status: "open",
+  });
+  index.set("todo-cab", {
+    entityType: "todo",
+    id: "todo-cab",
+    title: "Finalise CAB pack artefacts",
+    rawType: "todo",
+    status: "open",
+  });
+  const findings = extractLocalFindings(
+    "Move the carnival pack deadline and mention cab seating.",
+    index,
+  );
+  assert.equal(
+    findings.some(
+      (f) =>
+        f.target?.entityId === "todo-pack" &&
+        (f.findingType === "ENTITY_UPDATED" || f.findingType === "ENTITY_COMPLETED"),
+    ),
+    false,
+  );
+  assert.equal(
+    findings.some(
+      (f) =>
+        f.target?.entityId === "todo-cab" &&
+        (f.findingType === "ENTITY_UPDATED" || f.findingType === "ENTITY_COMPLETED"),
+    ),
+    false,
+  );
+});
+
+await check("Risk kind cannot be retargeted to Todo via legalDomain sticker", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "sticker",
+      kind: "risk",
+      op: "create",
+      content: "Gumdrop Bridge icing",
+      projectId: "proj-candy",
+      legalDomain: "todo",
+    }),
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+  assert.equal(
+    classifyCaptureLegalDomain(
+      suggestion({
+        id: "sticker2",
+        kind: "risk",
+        op: "create",
+        content: "x",
+        legalDomain: "todo",
+      }),
+    ),
+    "unsupported",
+  );
 });
 
 console.log(`\nverify-phase3b-capture-boundary: ${passed} passed`);
