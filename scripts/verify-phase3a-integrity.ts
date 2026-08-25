@@ -137,7 +137,7 @@ async function main() {
       assert.equal(project!.code, persisted.project.code);
       assert.ok(project!.stakeholders.some((s) => s.name === "Ava Chen"));
 
-      const risks = loaded.state.risks.filter((r) => r.projectId === PROJECT_A_ID);
+      const risks = (loaded.state.risks ?? []).filter((r) => r.projectId === PROJECT_A_ID);
       assert.ok(risks.some((r) => /vendor lock-in/i.test(r.title)));
       assert.equal(risks.length, persisted.risks.length);
 
@@ -328,7 +328,7 @@ async function main() {
       );
       const loaded = await loadMissionStateFromSupabase(asClient(fake));
       const pid = PROJECT_A_ID;
-      assert.ok(loaded.state.risks.some((r) => r.projectId === pid));
+      assert.ok((loaded.state.risks ?? []).some((r) => r.projectId === pid));
       assert.ok(loaded.state.timeline.some((t) => t.projectId === pid));
       assert.ok(
         loaded.state.projects
@@ -442,8 +442,8 @@ async function main() {
       }),
     );
     const loaded = await loadMissionStateFromSupabase(asClient(fake));
-    const aRisks = loaded.state.risks.filter((r) => r.projectId === PROJECT_A_ID);
-    const bRisks = loaded.state.risks.filter((r) => r.projectId === PROJECT_B_ID);
+    const aRisks = (loaded.state.risks ?? []).filter((r) => r.projectId === PROJECT_A_ID);
+    const bRisks = (loaded.state.risks ?? []).filter((r) => r.projectId === PROJECT_B_ID);
     assert.ok(aRisks.every((r) => /A-only/.test(r.title)));
     assert.ok(bRisks.every((r) => /B-only/.test(r.title)));
     assert.ok(

@@ -401,16 +401,6 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   });
   const cachePaintedRef = useRef(false);
   const createProjectInFlightRef = useRef(false);
-  const applyDurableWorkspaceRef = useRef<
-    (
-      payload: {
-        workspaceId: string;
-        userId: string;
-        state: MissionState;
-      },
-      options?: { preserveSaveError?: boolean },
-    ) => void
-  >(() => {});
 
   useEffect(() => {
     stateRef.current = state;
@@ -455,7 +445,6 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
-  applyDurableWorkspaceRef.current = applyDurableWorkspace;
 
   const reconcileFromDurableAuthority = useCallback(async () => {
     if (persistMetaRef.current.mode !== "supabase") return;
@@ -470,11 +459,11 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         userId: string;
         state: MissionState;
       };
-      applyDurableWorkspaceRef.current(payload, { preserveSaveError: true });
+      applyDurableWorkspace(payload, { preserveSaveError: true });
     } catch (err) {
       console.error("[MissionProvider] durable reconcile failed", err);
     }
-  }, []);
+  }, [applyDurableWorkspace]);
 
   const reportPersistFailure = useCallback(
     (err: unknown, fallback: string) => {

@@ -39,9 +39,8 @@ export class FakeWorkspaceClient {
   readonly userId: string;
   readonly tables: Record<string, FakeRow[]>;
   insertCount = 0;
-  private readonly failAfterInserts?: number;
-  private readonly failOnTable?: string;
-  private failedOnTable = false;
+  failAfterInserts?: number;
+  failOnTable?: string;
 
   constructor(options: FakeWorkspaceOptions = {}) {
     this.workspaceId = options.workspaceId ?? "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
