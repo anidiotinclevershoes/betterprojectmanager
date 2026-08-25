@@ -47,6 +47,12 @@ Ocean is **not** deprecated. Desert is an additional token theme.
 | Persist | `localStorage` key `mc-appearance-v1` (`ocean` \| `desert`; legacy `dark` reads as Ocean) |
 | Components | No Desert-specific screen forks |
 
-## Verdicts (filled at programme close)
+## Verdicts (independent review + builder)
 
-See the pull request body for the running checkpoint and the final three independent verdicts (Adopt / Reject / further iteration).
+Independent review used a different model from the builder. First pass **BLOCK**ed Capture V2 (needs_you serialized as CREATE; observation `projectId` could retarget) and New Project V2 (stale categorisation approval). Those were fixed and re-reviewed.
+
+| Workstream | Verdict | Notes |
+| --- | --- | --- |
+| Capture V2 | **Adopt behind `LUME_CAPTURE_V2`** | Gate A/C: PASS WITH LOW-RISK FOLLOW-UPS after fixes. Do not delete legacy in this PR (D-032). |
+| New Project V2 | **Adopt behind `LUME_NEW_PROJECT_V2`** | Gate B: PASS WITH LOW-RISK FOLLOW-UPS after `createUnlocked` reset. |
+| Desert | **Adopt** | Ocean remains; Desert is selectable in Account; preference persists. No component forks. |
