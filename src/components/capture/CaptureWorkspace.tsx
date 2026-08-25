@@ -430,7 +430,11 @@ export function CaptureWorkspace({
   function onCreateNew(id: string) {
     const model = reviewModels.find((m) => m.id === id);
     if (!model) return;
-    updateSuggestion(id, { op: "create", targetTodoId: undefined });
+    updateSuggestion(id, {
+      op: "create",
+      targetTodoId: undefined,
+      targetEntityId: undefined,
+    });
     setReviewOverride(id, {
       accepted: true,
       readiness: "ready",

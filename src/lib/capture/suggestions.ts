@@ -290,7 +290,7 @@ export function buildSuggestions(
       continue;
     }
     const inferred = inferOpFromText(rec.title, rec.action);
-    let op: SuggestionOp = fromSchema ?? inferred ?? "create";
+    const op: SuggestionOp = fromSchema ?? inferred ?? "create";
 
     if (
       (op === "complete" ||
@@ -409,23 +409,29 @@ function buildSuggestionsFromProposedOps(
       op.entityType === "meeting" ||
       op.entityType === "milestone" ||
       op.entityType === "nudge";
-    const kind: SuggestionKind = availabilityHint
-      ? "availability"
-      : op.entityType === "todo"
-        ? "action"
-        : op.entityType === "risk"
-          ? "risk"
-          : op.entityType === "knowledge"
-            ? "knowledge"
-            : op.entityType === "stakeholder"
-              ? "stakeholder"
-              : op.entityType === "meeting"
-                ? "meeting"
-                : op.entityType === "milestone"
-                  ? "milestone"
-                  : op.entityType === "nudge"
-                    ? "action"
-                    : "meeting";
+    const availabilityCompatible =
+      op.entityType === "stakeholder" || op.entityType === "knowledge";
+    const conflictingAvailability = availabilityHint && !availabilityCompatible;
+    // Availability may refine Person/Knowledge. It must not retarget Risk,
+    // To Do, milestone, or an unknown entity into an Away write.
+    const kind: SuggestionKind =
+      availabilityHint && availabilityCompatible
+        ? "availability"
+        : op.entityType === "todo"
+          ? "action"
+          : op.entityType === "risk"
+            ? "risk"
+            : op.entityType === "knowledge"
+              ? "knowledge"
+              : op.entityType === "stakeholder"
+                ? "stakeholder"
+                : op.entityType === "meeting"
+                  ? "meeting"
+                  : op.entityType === "milestone"
+                    ? "milestone"
+                    : op.entityType === "nudge"
+                      ? "action"
+                      : "meeting";
     const parsedOp = parseSuggestionOp(op.operation, op.id);
     const suggestionOp: SuggestionOp = parsedOp ?? "create";
     const matched =
@@ -500,7 +506,10 @@ function buildSuggestionsFromProposedOps(
         ? String(op.proposedValues.replacePersonId)
         : undefined;
     const legalDomain =
-      !knownEntity || parsedOp === null || unknownOwnership
+      !knownEntity ||
+      parsedOp === null ||
+      unknownOwnership ||
+      conflictingAvailability
         ? ("unsupported" as const)
         : availabilityHint
           ? ("availability" as const)

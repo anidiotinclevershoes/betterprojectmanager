@@ -98,6 +98,11 @@ function canRefineToResponsibility(fromKind: CaptureLegalDomain): boolean {
 export function classifyCaptureLegalDomain(
   item: PendingSuggestion,
 ): CaptureLegalDomain {
+  // Mapping already failed closed. Refinements must not reopen a write.
+  if (item.legalDomain === "unsupported") {
+    return "unsupported";
+  }
+
   const fromKind = kindToDomain(item.kind);
   const ownershipRaw = ownershipSemanticsRaw(item);
 

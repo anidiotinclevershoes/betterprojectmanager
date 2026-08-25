@@ -166,6 +166,38 @@ async function apply(
   return { decision, executed, writes };
 }
 
+function productionCapture(
+  op: NonNullable<CaptureResult["proposedOperations"]>[number],
+): CaptureResult {
+  return {
+    memory: {
+      id: "mem-prod",
+      type: "voice_note",
+      title: "Capture",
+      content: op.evidence || op.targetTitle || "Capture",
+      tags: [],
+      occurredAt: "2026-08-25T00:00:00.000Z",
+      createdAt: "2026-08-25T00:00:00.000Z",
+      source: "capture",
+      projectId: op.projectId ?? "proj-candy",
+    },
+    insights: [],
+    assumptions: [],
+    recommendations: [],
+    proposedOperations: [op],
+  };
+}
+
+async function applyProposed(
+  op: NonNullable<CaptureResult["proposedOperations"]>[number],
+) {
+  const suggestions = buildSuggestions(productionCapture(op), []);
+  assert.equal(suggestions.length, 1);
+  const item = suggestions[0]!;
+  const applied = await apply(item);
+  return { item, ...applied };
+}
+
 const ACTIVE_CAPTURE_PATHS = [
   "src/lib/capture/apply/dispatch.ts",
   "src/lib/capture/apply/classify.ts",
@@ -1306,6 +1338,88 @@ await check("Risk CREATE without id does not duplicate an exact existing title",
   );
   assert.equal(decision.kind, "no_change");
   assert.equal(writes.length, 0);
+});
+
+await check("typed Risk with availability fields cannot write Away", async () => {
+  const { item, decision, writes } = await applyProposed({
+    id: "op-risk-away",
+    sourceFindingId: "f-risk-away",
+    operation: "CREATE",
+    entityType: "risk",
+    targetTitle: "Gumdrop Bridge icing",
+    projectId: "proj-candy",
+    proposedValues: {
+      kind: "availability",
+      awayFromIso: "2026-10-03T12:00:00.000Z",
+      awayToIso: "2026-10-03T12:00:00.000Z",
+      personName: "Pippa Gumdrop",
+      personId: "person-gumdrop",
+    },
+    reason: "Risk mentioned with an away date",
+    evidence: "Gumdrop Bridge icing; Pippa is away 3 October",
+    confidence: 80,
+    destructive: false,
+    requiresClarification: false,
+  });
+  assert.equal(item.kind, "risk");
+  assert.equal(item.legalDomain, "unsupported");
+  assert.equal(classifyCaptureLegalDomain(item), "unsupported");
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+  assert.ok(writes.every((w) => w.type !== "write_availability"));
+});
+
+await check("unknown stakeholder operation cannot coerce into Confirm Owner", async () => {
+  const { item, decision, writes } = await applyProposed({
+    id: "op-explode",
+    sourceFindingId: "f-explode",
+    operation: "EXPLODE" as unknown as "CREATE",
+    entityType: "stakeholder",
+    targetTitle: "Fizz Caramel",
+    projectId: "proj-candy",
+    proposedValues: {
+      ownershipSemantics: "replace",
+      personName: "Fizz Caramel",
+      scope: "UAT lead",
+    },
+    reason: "Malformed ownership operation",
+    evidence: "Fizz Caramel takes UAT lead",
+    confidence: 80,
+    destructive: false,
+    requiresClarification: false,
+  });
+  assert.equal(item.legalDomain, "unsupported");
+  assert.equal(classifyCaptureLegalDomain(item), "unsupported");
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+  assert.ok(writes.every((w) => w.type !== "confirm_responsibility"));
+  assert.ok(writes.every((w) => w.type !== "ensure_person"));
+});
+
+await check("Person availability through the production pipeline still writes Away", async () => {
+  const { decision, writes } = await applyProposed({
+    id: "op-away",
+    sourceFindingId: "f-away",
+    operation: "CREATE",
+    entityType: "stakeholder",
+    targetTitle: "Pippa Gumdrop",
+    targetId: "person-gumdrop",
+    projectId: "proj-candy",
+    proposedValues: {
+      kind: "availability",
+      awayFromIso: "2026-10-03T12:00:00.000Z",
+      awayToIso: "2026-10-03T12:00:00.000Z",
+      personName: "Pippa Gumdrop",
+      personId: "person-gumdrop",
+    },
+    reason: "Pippa is away",
+    evidence: "Pippa Gumdrop is away 2026-10-03",
+    confidence: 84,
+    destructive: false,
+    requiresClarification: false,
+  });
+  assert.equal(decision.kind, "write");
+  assert.equal(writes[0]?.type, "write_availability");
 });
 
 console.log(`\nverify-phase3b-capture-boundary: ${passed} passed`);
