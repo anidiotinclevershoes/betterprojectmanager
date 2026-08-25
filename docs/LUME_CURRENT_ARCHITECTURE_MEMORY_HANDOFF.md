@@ -516,7 +516,7 @@ Inspect/extend these **before** creating parallel implementations:
 | Item detail | `knowledge-item-detail.ts` + `KnowledgeItemDetailDrawer` | Inspection/correction UX |
 | Canonical Ask | `serializeCanonicalTruth` | Ask context — do not rebuild a third assembler |
 | Legacy Ask | `buildTellMeContext` / `buildCaptureContext` | Rollback path only |
-| Capture apply | `src/lib/capture/apply` (`planCaptureApply` / `executeCaptureApply`) via `CaptureSessionContext.applyOne` | Capture writes — exhaustive domain dispatcher; no generic Todo fallback; unknown op / foreign ID / conflicting `legalDomain` fail closed |
+| Capture apply | `src/lib/capture/apply` (`planCaptureApply` / `executeCaptureApply`) via `CaptureSessionContext.applyOne` | Capture writes — exhaustive domain dispatcher; no generic Todo fallback; unknown op / foreign ID / conflicting `legalDomain` / unknown ownership semantics fail closed; CREATE against an existing on-project identity is no-change |
 | Search | `src/lib/tell-me/knowledge-search.ts` | Deterministic search |
 | Ocean shell | `OceanProjectWorkspace` | Project UI modes |
 | Drawer pattern | item-detail / CoachDrawer | Side inspection, not new pages |

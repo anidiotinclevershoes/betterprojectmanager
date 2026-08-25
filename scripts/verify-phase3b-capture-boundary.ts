@@ -16,6 +16,8 @@ import {
   type CaptureLegalOperation,
 } from "../src/lib/capture/apply";
 import type { PendingSuggestion } from "../src/lib/capture/suggestions";
+import { buildSuggestions } from "../src/lib/capture/suggestions";
+import type { CaptureResult } from "../src/lib/types";
 import { mapFindingToOperation } from "../src/lib/capture/findings/map";
 import {
   extractLocalFindings,
@@ -1073,6 +1075,70 @@ await check("completion cue without exact title does not complete an unrelated T
   );
 });
 
+await check("exact title plus an unrelated completion cue elsewhere does not complete", () => {
+  const index = new Map<string, IndexedContextRecord>();
+  index.set("todo-pack", {
+    entityType: "todo",
+    id: "todo-pack",
+    title: "Prepare the jelly pack",
+    rawType: "todo",
+    status: "open",
+  });
+  const findings = extractLocalFindings(
+    "Prepare the jelly pack remains outstanding. The venue booking is done.",
+    index,
+  );
+  assert.equal(
+    findings.some(
+      (f) =>
+        f.target?.entityId === "todo-pack" && f.findingType === "ENTITY_COMPLETED",
+    ),
+    false,
+  );
+});
+
+await check("exact title and completion cue in the same sentence still completes", () => {
+  const index = new Map<string, IndexedContextRecord>();
+  index.set("todo-pack", {
+    entityType: "todo",
+    id: "todo-pack",
+    title: "Prepare the jelly pack",
+    rawType: "todo",
+    status: "open",
+  });
+  const findings = extractLocalFindings("Prepare the jelly pack is done.", index);
+  assert.equal(
+    findings.some(
+      (f) =>
+        f.target?.entityId === "todo-pack" && f.findingType === "ENTITY_COMPLETED",
+    ),
+    true,
+  );
+});
+
+await check("Risk title plus unrelated resolution cue elsewhere does not resolve", () => {
+  const index = new Map<string, IndexedContextRecord>();
+  index.set("risk-bridge", {
+    entityType: "risk",
+    id: "risk-bridge",
+    title: "Gumdrop Bridge icing",
+    rawType: "risk",
+    status: "open",
+  });
+  const findings = extractLocalFindings(
+    "Gumdrop Bridge icing remains open. The other issue was resolved.",
+    index,
+  );
+  assert.equal(
+    findings.some(
+      (f) =>
+        f.target?.entityId === "risk-bridge" &&
+        f.findingType === "ENTITY_COMPLETED",
+    ),
+    false,
+  );
+});
+
 await check("Risk kind cannot be retargeted to Todo via legalDomain sticker", async () => {
   const { decision, writes } = await apply(
     suggestion({
@@ -1148,6 +1214,97 @@ await check("unknown ownership semantics cannot silently write", async () => {
   (item as { ownershipSemantics: string }).ownershipSemantics = "explode";
   const { decision, writes } = await apply(item);
   assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("unknown ownership semantics through the production pipeline cannot write a Person", async () => {
+  const result: CaptureResult = {
+    memory: {
+      id: "mem-transfer",
+      type: "voice_note",
+      title: "Capture",
+      content: "Fizz Caramel takes UAT lead",
+      tags: [],
+      occurredAt: "2026-08-25T00:00:00.000Z",
+      createdAt: "2026-08-25T00:00:00.000Z",
+      source: "capture",
+      projectId: "proj-candy",
+    },
+    insights: [],
+    assumptions: [],
+    recommendations: [],
+    proposedOperations: [
+      {
+        id: "op-transfer",
+        sourceFindingId: "f-transfer",
+        operation: "CREATE",
+        entityType: "stakeholder",
+        targetTitle: "Fizz Caramel",
+        projectId: "proj-candy",
+        proposedValues: {
+          ownershipSemantics: "transfer",
+          personName: "Fizz Caramel",
+        },
+        reason: "Ownership transfer mentioned",
+        evidence: "Fizz Caramel takes UAT lead",
+        confidence: 80,
+        destructive: false,
+        requiresClarification: false,
+      },
+    ],
+  };
+  const suggestions = buildSuggestions(result, []);
+  assert.equal(suggestions.length, 1);
+  const item = suggestions[0]!;
+  assert.equal(item.legalDomain, "unsupported");
+  assert.equal(classifyCaptureLegalDomain(item), "unsupported");
+  const { decision, writes } = await apply(item);
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+  assert.ok(writes.every((w) => w.type !== "ensure_person"));
+});
+
+await check("CREATE with an existing on-project To Do id does not duplicate", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "dup-todo",
+      kind: "action",
+      op: "create",
+      content: "Prepare the jelly pack",
+      projectId: "proj-candy",
+      targetTodoId: "todo-pack",
+    }),
+  );
+  assert.equal(decision.kind, "no_change");
+  assert.equal(writes.length, 0);
+});
+
+await check("CREATE with an existing on-project milestone id does not duplicate", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "dup-ms",
+      kind: "milestone",
+      op: "create",
+      content: "Parade day",
+      projectId: "proj-candy",
+      targetEntityId: "ms-parade",
+    }),
+  );
+  assert.equal(decision.kind, "no_change");
+  assert.equal(writes.length, 0);
+});
+
+await check("Risk CREATE without id does not duplicate an exact existing title", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "dup-risk",
+      kind: "risk",
+      op: "create",
+      content: "Gumdrop Bridge icing",
+      projectId: "proj-candy",
+    }),
+  );
+  assert.equal(decision.kind, "no_change");
   assert.equal(writes.length, 0);
 });
 

@@ -11,6 +11,8 @@ import { classifyCaptureLegalDomain } from "./classify";
 import { resolveCaptureProjectScope } from "./project-scope";
 import {
   assertNever,
+  hasInvalidOwnershipSemantics,
+  isOwnershipSemantics,
   type CaptureApplyDecision,
   type CaptureApplyWorld,
   type CaptureLegalDomain,
@@ -137,11 +139,14 @@ function planTodo(
   if (!text) {
     return needsYou("todo", "This To Do has no title.");
   }
-  if (todoId && !requireTodoOnProject(world, projectId, todoId)) {
-    return needsYou(
-      "todo",
-      "This To Do target is not on this project. Lume will not create a replacement.",
-    );
+  if (todoId) {
+    if (!requireTodoOnProject(world, projectId, todoId)) {
+      return needsYou(
+        "todo",
+        "This To Do target is not on this project. Lume will not create a replacement.",
+      );
+    }
+    return noChange("todo", "This To Do is already on the project.");
   }
   return write("todo", {
     type: "create_todo",
@@ -217,6 +222,19 @@ function planRisk(
   if (!text) {
     return needsYou("risk", "This Risk has no title.");
   }
+  const needle = text.trim().toLowerCase();
+  const exactTitle = projectRisks.filter(
+    (r) => r.title.trim().toLowerCase() === needle,
+  );
+  if (exactTitle.length === 1) {
+    return noChange("risk", "This Risk is already on the project.");
+  }
+  if (exactTitle.length > 1) {
+    return needsYou(
+      "risk",
+      "More than one existing Risk matches this title. Lume will not create another.",
+    );
+  }
   return write("risk", { type: "create_risk", projectId, title: text });
 }
 
@@ -276,11 +294,14 @@ function planMilestone(
   if (item.op !== "create") {
     return needsYou("milestone", "This date operation is not supported.");
   }
-  if (id && !byId) {
-    return needsYou(
-      "milestone",
-      "This date target is not on this project. Lume will not create another date.",
-    );
+  if (id) {
+    if (!byId) {
+      return needsYou(
+        "milestone",
+        "This date target is not on this project. Lume will not create another date.",
+      );
+    }
+    return noChange("milestone", "This date is already on the project.");
   }
   if (!text) {
     return needsYou("milestone", "This date has no label.");
@@ -344,6 +365,18 @@ function planPerson(
 ): CaptureApplyDecision {
   if (item.op !== "create" && item.op !== "update") {
     return needsYou("person", "This person operation is not supported.");
+  }
+  const values = proposedValues(item);
+  const ownershipRaw = item.ownershipSemantics ?? values.ownershipSemantics;
+  if (
+    hasInvalidOwnershipSemantics(ownershipRaw) ||
+    item.responsibilityScope?.trim() ||
+    asString(values.scope)
+  ) {
+    return needsYou(
+      "person",
+      "This looks like an ownership change, not a new person. Lume will not write a stakeholder.",
+    );
   }
   const resolved = resolvePerson(projectId, world, item, text);
   if (resolved.status === "missing_project") {
@@ -417,21 +450,18 @@ function planResponsibility(
     asString(values.scope) ||
     "";
   const personName = item.personName?.trim() || asString(values.personName) || "";
-  const semanticsRaw =
-    item.ownershipSemantics || asString(values.ownershipSemantics);
-  const semantics: OwnershipSemantics | undefined =
-    semanticsRaw === "share" ||
-    semanticsRaw === "replace" ||
-    semanticsRaw === "continue" ||
-    semanticsRaw === "ambiguous"
-      ? semanticsRaw
-      : undefined;
-  if (semanticsRaw && !semantics) {
+  const semanticsRaw = item.ownershipSemantics ?? values.ownershipSemantics;
+  if (hasInvalidOwnershipSemantics(semanticsRaw)) {
     return needsYou(
       "responsibility",
       "This ownership change is not specific enough to apply automatically.",
     );
   }
+  const semantics: OwnershipSemantics | undefined = isOwnershipSemantics(
+    semanticsRaw,
+  )
+    ? semanticsRaw
+    : undefined;
 
   if (!scope || !personName) {
     return needsYou(

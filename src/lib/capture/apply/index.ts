@@ -9,8 +9,11 @@ export type {
 } from "./types";
 export {
   CAPTURE_LEGAL_DOMAINS,
+  OWNERSHIP_SEMANTICS,
   assertNever,
+  hasInvalidOwnershipSemantics,
   isCaptureLegalDomain,
+  isOwnershipSemantics,
 } from "./types";
 export { classifyCaptureLegalDomain } from "./classify";
 export { resolveCaptureProjectScope } from "./project-scope";

@@ -35,16 +35,22 @@ export function extractLocalFindings(
   let n = 0;
   const nextId = () => `local-finding-${++n}`;
 
+  const TODO_COMPLETE_CUE =
+    /\b(?:is\s+done|are\s+done|is\s+complete|completed|finished|received|resolved|closed\s+off|close\s+that|been\s+approved)\b/;
+  const RISK_RESOLVE_CUE = /\b(resolv\w*|fix\w*|cleared|closed|mitigated)\b/;
+  const MILESTONE_MOVED_CUE =
+    /\b(moved|move|now|changed|pushed|brought forward)\b/;
+  const UPDATE_CUE =
+    /\b(move|moved|due date|push(?:ed)?(?:\s+that)?\s+due|deadline)\b/;
+
   for (const record of contextIndex.values()) {
     if (record.entityType === "todo" && record.status !== "done") {
       const titleKey = record.title.toLowerCase();
-      const genericComplete =
-        titleKey.length > 8 &&
-        text.includes(titleKey) &&
-        /\b(?:is\s+done|are\s+done|is\s+complete|completed|finished|received|resolved|closed\s+off|close\s+that|been\s+approved)\b/.test(
-          text,
-        );
-      if (genericComplete) {
+      const completeClause =
+        titleKey.length > 8
+          ? titleAndCueInSameClause(text, titleKey, TODO_COMPLETE_CUE)
+          : undefined;
+      if (completeClause) {
         findings.push({
           id: nextId(),
           fact: `${record.title} is complete`,
@@ -67,11 +73,11 @@ export function extractLocalFindings(
 
     if (record.entityType === "risk") {
       const titleKey = record.title.toLowerCase();
-      const generic =
-        titleKey.length > 6 &&
-        text.includes(titleKey) &&
-        /\b(resolv\w*|fix\w*|cleared|closed|mitigated)\b/.test(text);
-      if (generic) {
+      const resolveClause =
+        titleKey.length > 6
+          ? titleAndCueInSameClause(text, titleKey, RISK_RESOLVE_CUE)
+          : undefined;
+      if (resolveClause) {
         findings.push({
           id: nextId(),
           fact: `${record.title} is resolved`,
@@ -94,10 +100,13 @@ export function extractLocalFindings(
 
     if (record.entityType === "milestone") {
       const titleKey = record.title.toLowerCase();
-      const mentioned = titleKey.length > 4 && text.includes(titleKey);
-      const moved = /\b(moved|move|now|changed|pushed|brought forward)\b/.test(text);
-      if (mentioned && moved) {
-        const proposed = extractIsoDateHint(captureText);
+      const moveClause =
+        titleKey.length > 4
+          ? titleAndCueInSameClause(text, titleKey, MILESTONE_MOVED_CUE)
+          : undefined;
+      if (moveClause) {
+        const proposed =
+          extractIsoDateHint(moveClause) || extractIsoDateHint(captureText);
         const previous = record.date ?? undefined;
         if (proposed && previous && isoDay(proposed) === isoDay(previous)) {
           findings.push({
@@ -133,7 +142,7 @@ export function extractLocalFindings(
             requiresClarification: false,
             reasoningSummary: `Existing Milestone "${record.title}" should move to the stated date.`,
           });
-        } else if (moved) {
+        } else {
           findings.push({
             id: nextId(),
             fact: `${record.title} date change is unclear`,
@@ -159,11 +168,10 @@ export function extractLocalFindings(
       record.status !== "done"
     ) {
       const titleKey = record.title.toLowerCase();
-      const titleHit = titleKey.length > 10 && text.includes(titleKey);
-      const updateCue =
-        /\b(move|moved|due date|push(?:ed)?(?:\s+that)?\s+due|deadline)\b/.test(
-          text,
-        );
+      const updateClause =
+        titleKey.length > 10
+          ? titleAndCueInSameClause(text, titleKey, UPDATE_CUE)
+          : undefined;
       const already =
         findings.some(
           (f) =>
@@ -171,9 +179,9 @@ export function extractLocalFindings(
             (f.findingType === "ENTITY_UPDATED" ||
               f.findingType === "ENTITY_COMPLETED"),
         );
-      if (titleHit && updateCue && !already) {
-        const friday = /\bfriday\b/.test(text);
-        const tuesday = /\btuesday\b/.test(text);
+      if (updateClause && !already) {
+        const friday = /\bfriday\b/.test(updateClause);
+        const tuesday = /\btuesday\b/.test(updateClause);
         findings.push({
           id: nextId(),
           fact: friday
@@ -484,6 +492,30 @@ function isoDay(value: string | undefined): string | undefined {
   if (!value) return undefined;
   const m = value.match(/^(\d{4}-\d{2}-\d{2})/);
   return m?.[1];
+}
+
+/** Split Capture into sentence/clause units so cues cannot attach across facts. */
+function clausesOf(text: string): string[] {
+  return text
+    .split(/[.!?\n]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Title and cue must share a sentence/clause. Presence of the title anywhere
+ * plus a completion/move cue elsewhere must not mutate the named record.
+ */
+function titleAndCueInSameClause(
+  text: string,
+  titleKey: string,
+  cue: RegExp,
+): string | undefined {
+  if (!titleKey) return undefined;
+  for (const clause of clausesOf(text)) {
+    if (clause.includes(titleKey) && cue.test(clause)) return clause;
+  }
+  return undefined;
 }
 
 const MONTHS: Record<string, string> = {

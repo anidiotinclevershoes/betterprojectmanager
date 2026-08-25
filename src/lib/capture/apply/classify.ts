@@ -9,10 +9,23 @@
 
 import type { PendingSuggestion, SuggestionKind } from "@/lib/capture/suggestions";
 import {
+  hasInvalidOwnershipSemantics,
   isCaptureLegalDomain,
+  isOwnershipSemantics,
   type CaptureLegalDomain,
-  type OwnershipSemantics,
 } from "./types";
+
+function proposedValues(item: PendingSuggestion): Record<string, unknown> {
+  return (
+    (item as PendingSuggestion & { proposedValues?: Record<string, unknown> })
+      .proposedValues ?? {}
+  );
+}
+
+function ownershipSemanticsRaw(item: PendingSuggestion): unknown {
+  if (item.ownershipSemantics !== undefined) return item.ownershipSemantics;
+  return proposedValues(item).ownershipSemantics;
+}
 
 function proposedKind(item: PendingSuggestion): string | undefined {
   const values = item.recommendation
@@ -86,12 +99,18 @@ export function classifyCaptureLegalDomain(
   item: PendingSuggestion,
 ): CaptureLegalDomain {
   const fromKind = kindToDomain(item.kind);
+  const ownershipRaw = ownershipSemanticsRaw(item);
+
+  // Unknown ownership language is not a Person or Todo. Fail closed.
+  if (hasInvalidOwnershipSemantics(ownershipRaw)) {
+    return "unsupported";
+  }
 
   if (hasAvailabilityPayload(item)) {
     return canRefineToAvailability(fromKind) ? "availability" : "unsupported";
   }
 
-  const semantics = item.ownershipSemantics as OwnershipSemantics | undefined;
+  const semantics = isOwnershipSemantics(ownershipRaw) ? ownershipRaw : undefined;
   const proposed = proposedKind(item);
   if (semantics || proposed === "responsibility") {
     return canRefineToResponsibility(fromKind) ? "responsibility" : "unsupported";

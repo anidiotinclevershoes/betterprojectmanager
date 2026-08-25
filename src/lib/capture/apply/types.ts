@@ -23,11 +23,27 @@ export const CAPTURE_LEGAL_DOMAINS = [
 
 export type CaptureLegalDomain = (typeof CAPTURE_LEGAL_DOMAINS)[number];
 
-export type OwnershipSemantics =
-  | "share"
-  | "replace"
-  | "continue"
-  | "ambiguous";
+export const OWNERSHIP_SEMANTICS = [
+  "share",
+  "replace",
+  "continue",
+  "ambiguous",
+] as const;
+
+export type OwnershipSemantics = (typeof OWNERSHIP_SEMANTICS)[number];
+
+export function isOwnershipSemantics(value: unknown): value is OwnershipSemantics {
+  return (
+    typeof value === "string" &&
+    (OWNERSHIP_SEMANTICS as readonly string[]).includes(value)
+  );
+}
+
+/** Present but not a legal enum — fail closed; do not discard into another domain. */
+export function hasInvalidOwnershipSemantics(value: unknown): boolean {
+  if (value == null || value === "") return false;
+  return !isOwnershipSemantics(value);
+}
 
 export type CaptureLegalOperation =
   | {

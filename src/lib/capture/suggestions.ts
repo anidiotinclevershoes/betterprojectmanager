@@ -6,6 +6,10 @@ import type {
 } from "@/lib/types";
 import type { CaptureContextManifest } from "@/lib/capture/context";
 import type { CaptureReliabilityAssessment } from "@/lib/capture/reliability";
+import {
+  hasInvalidOwnershipSemantics,
+  isOwnershipSemantics,
+} from "@/lib/capture/apply/types";
 
 export type SuggestionKind =
   | "action"
@@ -473,13 +477,10 @@ function buildSuggestionsFromProposedOps(
         ? String(op.proposedValues.waitingOn)
         : undefined;
     const ownershipRaw = op.proposedValues?.ownershipSemantics;
-    const ownershipSemantics =
-      ownershipRaw === "share" ||
-      ownershipRaw === "replace" ||
-      ownershipRaw === "continue" ||
-      ownershipRaw === "ambiguous"
-        ? ownershipRaw
-        : undefined;
+    const unknownOwnership = hasInvalidOwnershipSemantics(ownershipRaw);
+    const ownershipSemantics = isOwnershipSemantics(ownershipRaw)
+      ? ownershipRaw
+      : undefined;
     const personName =
       typeof op.proposedValues?.personName === "string"
         ? String(op.proposedValues.personName)
@@ -499,7 +500,7 @@ function buildSuggestionsFromProposedOps(
         ? String(op.proposedValues.replacePersonId)
         : undefined;
     const legalDomain =
-      !knownEntity || parsedOp === null
+      !knownEntity || parsedOp === null || unknownOwnership
         ? ("unsupported" as const)
         : availabilityHint
           ? ("availability" as const)
