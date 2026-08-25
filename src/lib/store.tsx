@@ -13,6 +13,7 @@ import {
 } from "react";
 import {
   readMissionSupabaseCache,
+  shouldWriteDurableMissionCache,
   writeMissionSupabaseCache,
 } from "@/lib/mission-cache";
 import {
@@ -72,7 +73,6 @@ import {
   persistKnowledgeLifecycle,
   persistEnsureStakeholder,
   persistMemory,
-  persistNewProject,
   persistRiskStatus,
   persistTimelineItem,
   persistTodoCreate,
@@ -400,10 +400,96 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     userId: null,
   });
   const cachePaintedRef = useRef(false);
+  const createProjectInFlightRef = useRef(false);
+  const applyDurableWorkspaceRef = useRef<
+    (
+      payload: {
+        workspaceId: string;
+        userId: string;
+        state: MissionState;
+      },
+      options?: { preserveSaveError?: boolean },
+    ) => void
+  >(() => {});
 
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
+
+  const applyDurableWorkspace = useCallback(
+    (
+      payload: {
+        workspaceId: string;
+        userId: string;
+        state: MissionState;
+      },
+      options?: { preserveSaveError?: boolean },
+    ) => {
+      persistMetaRef.current = {
+        mode: "supabase",
+        workspaceId: payload.workspaceId,
+        userId: payload.userId,
+      };
+      setPersistenceMode("supabase");
+      const normalised = normaliseState(payload.state);
+      setState(normalised);
+      setHydrated(true);
+      if (!options?.preserveSaveError) {
+        setSaveStatus("idle");
+        setSaveError(null);
+      }
+      if (
+        shouldWriteDurableMissionCache({
+          reason: "hydrate",
+          persistenceMode: "supabase",
+          workspaceId: payload.workspaceId,
+          userId: payload.userId,
+        })
+      ) {
+        writeMissionSupabaseCache({
+          userId: payload.userId,
+          workspaceId: payload.workspaceId,
+          state: normalised,
+        });
+      }
+    },
+    [],
+  );
+  applyDurableWorkspaceRef.current = applyDurableWorkspace;
+
+  const reconcileFromDurableAuthority = useCallback(async () => {
+    if (persistMetaRef.current.mode !== "supabase") return;
+    try {
+      const serverRes = await fetch("/api/workspace/state", {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      if (!serverRes.ok) return;
+      const payload = (await serverRes.json()) as {
+        workspaceId: string;
+        userId: string;
+        state: MissionState;
+      };
+      applyDurableWorkspaceRef.current(payload, { preserveSaveError: true });
+    } catch (err) {
+      console.error("[MissionProvider] durable reconcile failed", err);
+    }
+  }, []);
+
+  const reportPersistFailure = useCallback(
+    (err: unknown, fallback: string) => {
+      const message = err instanceof Error ? err.message : fallback;
+      setSaveStatus("error");
+      setSaveError(message);
+      void reconcileFromDurableAuthority();
+    },
+    [reconcileFromDurableAuthority],
+  );
+
+  const markPersistSaved = useCallback(() => {
+    setSaveStatus("saved");
+    setSaveError(null);
+  }, []);
 
   // Paint last-known projects before the browser draws — avoids sidebar flash.
   useLayoutEffect(() => {
@@ -431,22 +517,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       userId: string;
       state: MissionState;
     }) {
-      persistMetaRef.current = {
-        mode: "supabase",
-        workspaceId: payload.workspaceId,
-        userId: payload.userId,
-      };
-      setPersistenceMode("supabase");
-      setState(normaliseState(payload.state));
-      setSaveStatus("idle");
-      setSaveError(null);
-      setHydrated(true);
+      applyDurableWorkspace(payload);
       hydrateSucceeded = true;
-      writeMissionSupabaseCache({
-        userId: payload.userId,
-        workspaceId: payload.workspaceId,
-        state: normaliseState(payload.state),
-      });
     }
 
     async function hydrateFromServerCookies(): Promise<boolean> {
@@ -633,17 +705,27 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     persist(state);
   }, [state, hydrated]);
 
-  // Keep refresh paint cache warm after successful supabase hydrate/mutations.
+  // Durable paint cache only after confirmed persist (not on every state change).
   useEffect(() => {
     if (!hydrated) return;
+    if (saveStatus !== "saved") return;
     const meta = persistMetaRef.current;
-    if (meta.mode !== "supabase" || !meta.workspaceId || !meta.userId) return;
+    if (
+      !shouldWriteDurableMissionCache({
+        reason: "confirmed-persist",
+        persistenceMode: meta.mode,
+        workspaceId: meta.workspaceId,
+        userId: meta.userId,
+      })
+    ) {
+      return;
+    }
     writeMissionSupabaseCache({
-      userId: meta.userId,
-      workspaceId: meta.workspaceId,
-      state,
+      userId: meta.userId!,
+      workspaceId: meta.workspaceId!,
+      state: stateRef.current,
     });
-  }, [state, hydrated]);
+  }, [saveStatus, hydrated]);
 
   useEffect(() => {
     let cancelled = false;
@@ -755,13 +837,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           projectId,
           source: "ai",
         });
-        setSaveStatus("saved");
+        markPersistSaved();
       } catch (err) {
         console.error("[applyCaptureResult] persist failed", err);
-        setSaveStatus("error");
-        setSaveError(
-          err instanceof Error ? err.message : "Could not save Capture changes",
-        );
+        reportPersistFailure(err, "Could not save Capture changes");
       }
     })();
   }, []);
@@ -986,12 +1065,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
             projectId,
             source: "user",
           });
+          markPersistSaved();
         } catch (err) {
           console.error("[toggleTodo] persist failed", err);
-          setSaveStatus("error");
-          setSaveError(
-            err instanceof Error ? err.message : "Could not save To Do",
-          );
+          reportPersistFailure(err, "Could not save To Do");
         }
       })();
     }
@@ -1008,12 +1085,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         try {
           const client = createBrowserSupabaseClient();
           await persistTodoDelete(client, todoId);
+          markPersistSaved();
         } catch (err) {
           console.error("[removeTodo] persist failed", err);
-          setSaveStatus("error");
-          setSaveError(
-            err instanceof Error ? err.message : "Could not delete To Do",
-          );
+          reportPersistFailure(err, "Could not delete To Do");
         }
       })();
     }
@@ -1078,13 +1153,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
             projectId: input.projectId ?? null,
             source: "user",
           });
-          setSaveStatus("saved");
+          markPersistSaved();
         } catch (err) {
           console.error("[addTodo] persist failed", err);
-          setSaveStatus("error");
-          setSaveError(
-            err instanceof Error ? err.message : "Could not save To Do",
-          );
+          reportPersistFailure(err, "Could not save To Do");
         }
       })();
       return;
@@ -1222,12 +1294,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
             kind: patch.kind,
             waitingOn: patch.waitingOn,
           });
+          markPersistSaved();
         } catch (err) {
           console.error("[updateTodo] persist failed", err);
-          setSaveStatus("error");
-          setSaveError(
-            err instanceof Error ? err.message : "Could not save To Do",
-          );
+          reportPersistFailure(err, "Could not save To Do");
         }
       })();
     }
@@ -1401,20 +1471,68 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const createProject = useCallback(async (input: CreateProjectInput) => {
-    let meta = persistMetaRef.current;
+    if (createProjectInFlightRef.current) {
+      throw new Error("Project creation is already in progress.");
+    }
+    createProjectInFlightRef.current = true;
 
-    // Supabase mode: create via server cookies so we never depend on the
-    // browser client session being ready (that race caused vanish-on-refresh).
-    if (meta.mode === "supabase") {
-      setSaveStatus("saving");
-      setSaveError(null);
-      try {
+    const clientProjectId =
+      input.clientProjectId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        input.clientProjectId,
+      )
+        ? input.clientProjectId
+        : crypto.randomUUID();
+    const scopedInput: CreateProjectInput = { ...input, clientProjectId };
+
+    try {
+      let meta = persistMetaRef.current;
+
+      if (meta.mode === "supabase" && !meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        const boot = await fetch("/api/workspace/state", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (!boot.ok) {
+          const fail = (await boot.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          throw new Error(
+            fail?.error || "Could not open your workspace. Please refresh.",
+          );
+        }
+        const bootPayload = (await boot.json()) as {
+          workspaceId: string;
+          userId: string;
+          state: MissionState;
+        };
+        persistMetaRef.current = {
+          mode: "supabase",
+          workspaceId: bootPayload.workspaceId,
+          userId: bootPayload.userId,
+        };
+        meta = persistMetaRef.current;
+        if (
+          stateRef.current.projects.length === 0 &&
+          bootPayload.state.projects.length
+        ) {
+          setState(normaliseState(bootPayload.state));
+        }
+      }
+
+      // One deliberate persistence path: server cookies → persistNewProject.
+      // Never fall through to a second browser persist after server failure.
+      if (meta.mode === "supabase") {
+        setSaveStatus("saving");
+        setSaveError(null);
         const res = await fetch("/api/workspace/projects", {
           method: "POST",
           credentials: "same-origin",
           cache: "no-store",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ input }),
+          body: JSON.stringify({ input: scopedInput }),
         });
         if (!res.ok) {
           const fail = (await res.json().catch(() => null)) as {
@@ -1430,182 +1548,80 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           projectId: string;
           state: MissionState;
         };
-        persistMetaRef.current = {
-          mode: "supabase",
+        applyDurableWorkspace({
           workspaceId: payload.workspaceId,
           userId: payload.userId,
-        };
-        setState(normaliseState(payload.state));
+          state: payload.state,
+        });
         setSaveStatus("saved");
         setSaveError(null);
         return payload.projectId;
-      } catch (err) {
-        // Fall back to browser persist only if we already have a workspace.
-        meta = persistMetaRef.current;
-        if (!(meta.mode === "supabase" && meta.workspaceId)) {
-          const message =
-            err instanceof Error ? err.message : "Could not save project";
-          setSaveStatus("error");
-          setSaveError(message);
-          throw err instanceof Error ? err : new Error(message);
-        }
-        console.error(
-          "[MissionProvider] server create failed; trying browser persist",
-          err,
-        );
       }
-    }
 
-    // If we're in supabase mode but hydrate failed to attach a workspace,
-    // bootstrap via the server cookie path before creating — never silently
-    // create a local-only project that vanishes on refresh.
-    if (meta.mode === "supabase" && !meta.workspaceId) {
-      setSaveStatus("saving");
-      setSaveError(null);
-      try {
-        const boot = await fetch("/api/workspace/state", {
-          credentials: "same-origin",
-          cache: "no-store",
-        });
-        if (!boot.ok) {
-          const fail = (await boot.json().catch(() => null)) as {
-            error?: string;
-          } | null;
-          throw new Error(
-            fail?.error || "Could not open your workspace. Please refresh.",
-          );
-        }
-        const payload = (await boot.json()) as {
-          workspaceId: string;
-          userId: string;
-          state: MissionState;
-        };
-        persistMetaRef.current = {
-          mode: "supabase",
-          workspaceId: payload.workspaceId,
-          userId: payload.userId,
-        };
-        meta = persistMetaRef.current;
-        // Adopt server state if we somehow had stale empty client state.
-        if (stateRef.current.projects.length === 0 && payload.state.projects.length) {
-          setState(normaliseState(payload.state));
-        }
-      } catch (err) {
+      if (process.env.NODE_ENV === "production") {
         const message =
-          err instanceof Error ? err.message : "Could not open workspace";
+          "Project was not saved to your account. Please refresh and try again.";
         setSaveStatus("error");
         setSaveError(message);
-        throw err;
+        throw new Error(message);
       }
-    }
 
-    if (meta.mode === "supabase" && meta.workspaceId) {
-      setSaveStatus("saving");
-      setSaveError(null);
-      try {
-        const client = createBrowserSupabaseClient();
-        // Ensure browser session exists for RLS writes.
-        await waitForBrowserUser(client);
-        const persisted = await persistNewProject(
-          client,
-          meta.workspaceId,
-          meta.userId,
-          input,
-        );
-        const setupMemory = (
-          persisted as typeof persisted & {
-            setupMemory?: import("@/lib/types").MemoryEntry;
-          }
-        ).setupMemory;
-        setState((prev) => ({
+      const bundle = buildNewProject(scopedInput);
+      setState((prev) => {
+        let next = {
           ...prev,
-          projects: [...prev.projects, persisted.project],
-          knowledge: [...(prev.knowledge ?? []), persisted.knowledge],
+          projects: [...prev.projects, bundle.project],
+          knowledge: [...(prev.knowledge ?? []), bundle.knowledge],
           recommendations: [
-            ...persisted.recommendations,
+            ...bundle.recommendations,
             ...prev.recommendations,
           ],
-          todos: [...persisted.todos, ...(prev.todos ?? [])],
-          timeline: [...(persisted.timeline ?? []), ...(prev.timeline ?? [])],
-          memories: setupMemory
-            ? [setupMemory, ...(prev.memories ?? [])]
-            : prev.memories,
-          history: [
-            makeHistoryEvent({
-              type: "project_created",
-              title: `Created ${persisted.project.name}`,
-              detail: persisted.project.code,
-              projectId: persisted.project.id,
-              source: "user",
-            }),
-            ...(prev.history ?? []),
-          ],
+          todos: [...bundle.todos, ...(prev.todos ?? [])],
+          timeline: [...(bundle.timeline ?? []), ...(prev.timeline ?? [])],
           lastAnalyzedAt: new Date().toISOString(),
-        }));
-        setSaveStatus("saved");
-        return persisted.project.id;
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Could not save project";
-        setSaveStatus("error");
-        setSaveError(message);
-        throw err;
-      }
-    }
-
-    if (process.env.NODE_ENV === "production") {
+        };
+        if (input.sourceNarrative?.trim()) {
+          const memory = {
+            id: `mem-setup-${bundle.project.id}`,
+            type: "conversation" as const,
+            projectId: bundle.project.id,
+            title: `Project setup — ${bundle.project.code}`,
+            content: input.sourceNarrative.trim(),
+            tags: ["project-setup", input.sourceMode ?? "setup"],
+            people: (input.stakeholders ?? [])
+              .map((s) => s.name)
+              .filter(Boolean),
+            occurredAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            source: "capture" as const,
+          };
+          next = {
+            ...next,
+            memories: [memory, ...(next.memories ?? [])],
+          };
+        }
+        return pushHistory(
+          next,
+          makeHistoryEvent({
+            type: "project_created",
+            title: `Created ${bundle.project.name}`,
+            detail: bundle.project.code,
+            projectId: bundle.project.id,
+            source: "user",
+          }),
+        );
+      });
+      return bundle.project.id;
+    } catch (err) {
       const message =
-        "Project was not saved to your account. Please refresh and try again.";
+        err instanceof Error ? err.message : "Could not save project";
       setSaveStatus("error");
       setSaveError(message);
-      throw new Error(message);
+      throw err instanceof Error ? err : new Error(message);
+    } finally {
+      createProjectInFlightRef.current = false;
     }
-
-    const bundle = buildNewProject(input);
-    setState((prev) => {
-      let next = {
-        ...prev,
-        projects: [...prev.projects, bundle.project],
-        knowledge: [...(prev.knowledge ?? []), bundle.knowledge],
-        recommendations: [
-          ...bundle.recommendations,
-          ...prev.recommendations,
-        ],
-        todos: [...bundle.todos, ...(prev.todos ?? [])],
-        timeline: [...(bundle.timeline ?? []), ...(prev.timeline ?? [])],
-        lastAnalyzedAt: new Date().toISOString(),
-      };
-      if (input.sourceNarrative?.trim()) {
-        const memory = {
-          id: `mem-setup-${bundle.project.id}`,
-          type: "conversation" as const,
-          projectId: bundle.project.id,
-          title: `Project setup — ${bundle.project.code}`,
-          content: input.sourceNarrative.trim(),
-          tags: ["project-setup", input.sourceMode ?? "setup"],
-          people: (input.stakeholders ?? []).map((s) => s.name).filter(Boolean),
-          occurredAt: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          source: "capture" as const,
-        };
-        next = {
-          ...next,
-          memories: [memory, ...(next.memories ?? [])],
-        };
-      }
-      return pushHistory(
-        next,
-        makeHistoryEvent({
-          type: "project_created",
-          title: `Created ${bundle.project.name}`,
-          detail: bundle.project.code,
-          projectId: bundle.project.id,
-          source: "user",
-        }),
-      );
-    });
-    return bundle.project.id;
-  }, []);
+  }, [applyDurableWorkspace]);
 
   const cloneRelOps = useCallback((input: CloneRelOpsInput) => {
     setState((prev) => cloneRelOpsProject(prev, input));
@@ -1681,14 +1697,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               meta.userId,
               [sectionId],
             );
+            markPersistSaved();
           } catch (err) {
             console.error("[updateKnowledgeSection] persist failed", err);
-            setSaveStatus("error");
-            setSaveError(
-              err instanceof Error
-                ? err.message
-                : "Could not save knowledge correction",
-            );
+            reportPersistFailure(err, "Could not save knowledge correction");
           }
         })();
       }
@@ -1745,12 +1757,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               meta.userId,
               riskId ? { riskId } : undefined,
             );
+            markPersistSaved();
           } catch (err) {
             console.error("[addKnowledgeBullet] persist failed", err);
-            setSaveStatus("error");
-            setSaveError(
-              err instanceof Error ? err.message : "Could not save knowledge",
-            );
+            reportPersistFailure(err, "Could not save knowledge");
           }
         })();
       }
@@ -1805,14 +1815,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
                 ["risks"],
               );
             }
+            markPersistSaved();
           } catch (err) {
             console.error("[setRiskStatus] persist failed", err);
-            setSaveStatus("error");
-            setSaveError(
-              err instanceof Error
-                ? err.message
-                : "Could not save risk status",
-            );
+            reportPersistFailure(err, "Could not save risk status");
           }
         })();
       }
@@ -1854,14 +1860,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               meta.userId,
               ["risks"],
             );
+            markPersistSaved();
           } catch (err) {
             console.error("[setKnowledgeOnlyRiskResolved] persist failed", err);
-            setSaveStatus("error");
-            setSaveError(
-              err instanceof Error
-                ? err.message
-                : "Could not save knowledge risk",
-            );
+            reportPersistFailure(err, "Could not save knowledge risk");
           }
         })();
       }
@@ -1911,14 +1913,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
             desired,
             meta.userId,
           );
+          markPersistSaved();
         } catch (err) {
           console.error("[replaceKnowledge] persist failed", err);
-          setSaveStatus("error");
-          setSaveError(
-            err instanceof Error
-              ? err.message
-              : "Could not save knowledge correction",
-          );
+          reportPersistFailure(err, "Could not save knowledge correction");
         }
       })();
     }
@@ -2031,14 +2029,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
                 },
               );
             }
+            markPersistSaved();
           } catch (err) {
             console.error("[confirmResponsibilityOwner] persist failed", err);
-            setSaveStatus("error");
-            setSaveError(
-              err instanceof Error
-                ? err.message
-                : "Could not save confirmed owner",
-            );
+            reportPersistFailure(err, "Could not save confirmed owner");
           }
         })();
       }
@@ -2073,12 +2067,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               ...prev,
               timeline: [...(prev.timeline ?? []), created],
             }));
+            markPersistSaved();
           } catch (err) {
             console.error("[addTimelineItem] persist failed", err);
-            setSaveStatus("error");
-            setSaveError(
-              err instanceof Error ? err.message : "Could not save date",
-            );
+            reportPersistFailure(err, "Could not save date");
           }
         })();
         return;

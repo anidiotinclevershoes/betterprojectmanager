@@ -1,8 +1,8 @@
 # Lume — Current Architecture Memory Handoff
 
 **Status:** Documentation of CURRENT implementation (not an ideal architecture)  
-**Date:** 21 August 2026  
-**Code observed:** `main` at Slice 2D (`07817df` — People & Context UI)  
+**Date:** 25 August 2026  
+**Code observed:** `main` plus Phase 3A integrity work (`persistNewProject` compensating cleanup, durable paint cache, Ocean save-error chrome)  
 **Docs entry point:** `docs/README.md`  
 **Governing product authority:** `docs/v1-reference-pack/`  
 **Living defect backlog:** `docs/LUME_V1_KNOWN_DISCOVERIES.md`  
@@ -91,7 +91,7 @@ Use this section as working context for future product/development decisions and
 
 **Hydration (`MissionProvider`):** poll `/api/auth/me` → if supabase, load via `/api/workspace/state` / `loadMissionStateFromSupabase` (`src/lib/data/supabase/load-mission-state.ts`). Flash-prevention cache: `src/lib/mission-cache.ts` (`lume-mission-supabase-cache-v1`). Production hydrate failure → empty state + error, **not** silent local seed.
 
-**Mutations:** optimistic `setState` then `void` async persist. Soft `saveStatus` / `saveError` (**GAP D-005** — many failures look like success outside the item-detail / Confirm Owner surfaces).
+**Mutations:** mixed. New Project and some creates persist first, then `setState` with durable ids. Many updates remain optimistic `setState` then `void` async persist. Failures set `saveStatus=error`, show Ocean `ocean-save-error`, and reconcile from `/api/workspace/state` (**D-005 partial**). Paint cache is written only on hydrate or confirmed persist — not on every MissionState change.
 
 **Project scoping:** almost every domain row has `projectId`. App filters by selected project. RLS is **workspace membership**, not per-user project ownership. Future multi-project retrieval must stay permission-aware.
 
@@ -305,7 +305,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 - Provenance: humanized from stored `ProvenanceEntry` only (`capture` → “Learned from Capture”, `user_confirmation` → “Confirmed by you”, `manual_edit` → “Manually edited”, …). Empty provenance → honesty notes, **no invention**.
 - Current vs previous: `supersedesId` / person historical responsibilities.
 - Corrections: `buildCorrectedSectionBullets` (id/body, never index-only), `updateTodo`, `setRiskStatus`, Confirm Owner.
-- Save errors: drawer + Confirm Owner surface `saveStatus`/`saveError` (**partial D-005**).
+- Save errors: Ocean chrome `ocean-save-error` plus drawer + Confirm Owner (`saveStatus`/`saveError`) (**partial D-005**).
 - History incompleteness: honesty notes cite **D-004**. Do not pretend History is complete after reload.
 
 ---
@@ -352,7 +352,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 | **Lifecycle / supersession** | What is current vs previous truth? | `lifecycle` + `supersedes_id` |
 | **History** (`history_events`) | What happened, in time? | Chronology / evidence — **not competing current truth** |
 
-**GAP D-004:** `pushHistory` often updates MissionState without `persistHistoryEvent`. After reload, History is incomplete. UI must not fabricate completeness.
+**GAP D-004:** `pushHistory` often updates MissionState without `persistHistoryEvent`. After reload, History is incomplete. UI must not fabricate completeness. New Project `project_created` is secondary evidence after authoritative bundle success (Phase 3A); History insert failure does not roll back the project.
 
 ---
 
@@ -380,7 +380,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 
 **Canonical metadata migration:** `supabase/migrations/20260818230000_knowledge_canonical_metadata.sql` (additive columns on `knowledge_items`). Core schema: `20260812002748_workspace_schema.sql`.
 
-**GAP D-006:** `persistNewProject` still inserts risk `source: "setup"`; DB check allows `manual | capture | seed`. Fix at next New Project/persistence touch.
+**Phase 3A New Project persist:** `persistNewProject` inserts the reviewed bundle, then a secondary `history_events` row. Illegal risk source `setup` is gone (`manual`). There is no Postgres RPC transaction for this bundle. On child-insert failure the function deletes SET NULL children for that new `project_id` then deletes the project (CASCADE removes stakeholders/risks/knowledge/milestones). Client retries reuse `clientProjectId` (PK idempotency). Server `POST /api/workspace/projects` is the only supabase create path — store must not fall through to a second browser persist.
 
 ---
 
@@ -453,9 +453,8 @@ From `docs/LUME_V1_KNOWN_DISCOVERIES.md` as of this handoff. **Do not treat reso
 | ID | Problem | Current impact | Target stage |
 | --- | --- | --- | --- |
 | D-003 | Suggestion accept/dismiss often MissionState-only | Reload resurrects suggestions | V1 product hardening |
-| D-004 | Many History events never `persistHistoryEvent` | Evidence missing after reload | V1 product hardening |
-| D-005 | Soft save failures | User may think persist succeeded | V1 product hardening (drawer/confirm partial) |
-| D-006 | New project risk `source: "setup"` invalid | Insert may fail | Next New Project/persistence touch |
+| D-004 | Many History events never `persistHistoryEvent` | Evidence missing after reload (New Project create-path decided in 3A) | V1 product hardening |
+| D-005 | Soft save failures | Ocean banner + reconcile landed; many mutations still optimistic | V1 product hardening / Phase 3B Capture |
 | D-007 | Capture people prose not promoted to stakeholders | Split identity; Tell Me/KC may miss durable person | Capture hardening (UI polish done 2D) |
 | D-008 / D-021 | Todo waiting vs Knowledge openLoops | Duplicate/contradictory loops in KC/Ask | Open-loop / To Do architecture slice |
 | D-010 | Legacy Ask injects History as competing truth | Residual until canonical default | Canonical production default decision |
@@ -467,9 +466,10 @@ From `docs/LUME_V1_KNOWN_DISCOVERIES.md` as of this handoff. **Do not treat reso
 | D-020 | Dependencies/availability under-modelled | Ask/KC miss prose-only facts; no graph/calendar | Modelling + Capture ingestion (UI display partial 2D) |
 | D-024 | “Actions left” is local analysis meter | Not Stripe entitlement | Billing hardening |
 | D-025 | Capture Ocean §16 visual depth | Cosmetic vs baseline | Capture visual polish |
+| D-026 | No unique `(workspace_id, code)` | Two projects may share a code; 3A retry uses UUID not code | New Project product decision |
 | D-017 | (if still open in file) Capture validation item | See Known Discoveries | Capture hardening |
 
-**Resolved (do not reopen as missing architecture):** D-R01 durable Knowledge, D-R02 stable identity, D-R03 risk resurrection, D-R04/R05 Confirm Owner persist/UUIDs, D-R06 false unknown-owner, D-R07 multi-owner Ask, D-R08 Ocean Capture, D-R09 item detail, D-R10 share vs replace.
+**Resolved (do not reopen as missing architecture):** D-R01 durable Knowledge, D-R02 stable identity, D-R03 risk resurrection, D-R04/R05 Confirm Owner persist/UUIDs, D-R06 false unknown-owner, D-R07 multi-owner Ask, D-R08 Ocean Capture, D-R09 item detail, D-R10 share vs replace, D-R11 Phase 3A New Project integrity (includes D-006).
 
 ---
 
@@ -578,10 +578,10 @@ Parallel writes:
 
 - Types: `Project` in `src/lib/types.ts`
 - UI: `OceanProjectWorkspace`, `Sidebar`, `NewProjectExperience`
-- Writes: `createProject`, `persistNewProject`
 - Table: `projects`
-- Tests: `verify-new-project.ts`
-- GAP: D-006 risk source on create
+- Writes: `createProject` → `POST /api/workspace/projects` → `persistNewProject` (compensating cleanup + `clientProjectId` idempotency)
+- Tests: `verify-new-project.ts`, `verify-phase3a-integrity.ts`
+- GAP: **D-026** product rule for unique project codes is unresolved; retry safety does not use code matching
 
 ### Knowledge
 
@@ -702,9 +702,9 @@ Parallel writes:
 | Confirm Owner share | `confirmResponsibilityOwner` without `replacePersonId` | `persistEnsureStakeholder` + knowledge insert/update |
 | Confirm Owner replace | same + `replacePersonId` | plus `persistKnowledgeLifecycle` superseded |
 | Todo edit/complete | `updateTodo` / `toggleTodo` | `persistTodoUpdate` (+ some history persist) |
-| New Project | `createProject` | `persistNewProject` (**GAP D-006** on risk source) |
+| New Project | `createProject` (persist first, then MissionState from returned hydrate) | `persistNewProject` via `/api/workspace/projects` only |
 
-Optimistic UI: MissionState updates immediately; persist errors set `saveStatus=error` without automatic rollback (**D-005**).
+Optimistic UI: many updates still change MissionState immediately; persist errors set `saveStatus=error`, show Ocean save failure, and reconcile from durable workspace state (**D-005 partial**). Paint cache must not store unconfirmed state.
 
 ---
 

@@ -51,6 +51,29 @@ export function readMissionSupabaseCache(): MissionSupabaseCache | null {
   }
 }
 
+/**
+ * Paint-cache eligibility. The cache may accelerate paint of known durable
+ * workspace state. It must not store unconfirmed optimistic or failed state
+ * as if it were durable authority.
+ *
+ * Allowed reasons:
+ * - `hydrate` — server/workspace load (including post-failure reconcile)
+ * - `confirmed-persist` — a mutation whose durable write has succeeded
+ *
+ * `state-change` is never eligible (that was the previous unsafe contract).
+ */
+export function shouldWriteDurableMissionCache(input: {
+  reason: "hydrate" | "confirmed-persist" | "state-change";
+  persistenceMode: "local" | "supabase";
+  workspaceId: string | null;
+  userId: string | null;
+}): boolean {
+  if (input.reason === "state-change") return false;
+  if (input.persistenceMode !== "supabase") return false;
+  if (!input.workspaceId || !input.userId) return false;
+  return input.reason === "hydrate" || input.reason === "confirmed-persist";
+}
+
 export function writeMissionSupabaseCache(input: {
   userId: string;
   workspaceId: string;

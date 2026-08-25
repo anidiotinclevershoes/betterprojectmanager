@@ -618,6 +618,8 @@ check("UI: save error surface present for corrections (D-005 partial)", () => {
   );
   assert.match(drawer, /saveStatus === "error"/);
   assert.match(drawer, /ocean-item-detail-save-error/);
+  const shell = readSrc("src/components/AppShell.tsx");
+  assert.match(shell, /ocean-save-error/);
 });
 
 check("Unconfirmed owner detail exposes confirm path without inventing evidence", () => {

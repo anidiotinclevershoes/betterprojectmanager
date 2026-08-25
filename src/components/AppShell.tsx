@@ -69,7 +69,7 @@ function AppShellWithTellMe({ children }: { children: ReactNode }) {
 function AppShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { state } = useMission();
+  const { state, saveStatus, saveError } = useMission();
   const { drawerOpen, openDrawer } = useCoachSession();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -246,6 +246,16 @@ function AppShellInner({ children }: { children: ReactNode }) {
           quiet={!header.title}
         />
         <main className="app-content">
+          {saveStatus === "error" && saveError ? (
+            <div
+              className="ocean-save-error"
+              role="alert"
+              data-testid="ocean-save-error"
+            >
+              Could not save your last change. Lume has not treated it as
+              maintained project truth. {saveError}
+            </div>
+          ) : null}
           <div className="mb-4">
             <CoachResultsCard />
           </div>

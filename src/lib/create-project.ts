@@ -82,6 +82,11 @@ export type CreateProjectInput = {
   /** Original Talk/Paste source for history. */
   sourceNarrative?: string;
   sourceMode?: "talk" | "paste" | "blank" | "interview";
+  /**
+   * Client-generated UUID for this create attempt (retry/idempotency only).
+   * Not a product field — ignored by `buildNewProject`.
+   */
+  clientProjectId?: string;
 };
 
 export type BuiltProjectBundle = {

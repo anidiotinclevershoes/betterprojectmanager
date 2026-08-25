@@ -9,10 +9,39 @@ import { isoToDateOnly } from "@/lib/data/supabase/load-mission-state";
 import type {
   HistoryEvent,
   MemoryEntry,
+  ProjectRisk,
   Recommendation,
   TimelineItem,
   TodoItem,
 } from "@/lib/types";
+import { emptyKnowledge } from "@/lib/knowledge";
+
+/** DB check on `risks.source` — do not invent values (D-006). */
+export const LEGAL_RISK_SOURCES = ["manual", "capture", "seed"] as const;
+export type LegalRiskSource = (typeof LEGAL_RISK_SOURCES)[number];
+
+/**
+ * New Project risks are human-reviewed setup, not Capture and not seed.
+ * Map to the legal `manual` source rather than expanding the enum.
+ */
+export const NEW_PROJECT_RISK_SOURCE: LegalRiskSource = "manual";
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Child tables whose `project_id` is ON DELETE SET NULL.
+ * Deleting only the project row would orphan these in the workspace.
+ * Compensating cleanup must delete them by this project id first.
+ */
+export const PROJECT_BUNDLE_SET_NULL_TABLES = [
+  "todos",
+  "memories",
+  "recommendations",
+  "history_events",
+  "capture_sessions",
+  "coach_sessions",
+] as const;
 
 function requireData<T>(
   data: T | null | undefined,
@@ -26,7 +55,234 @@ function requireData<T>(
 
 export type PersistedProjectBundle = BuiltProjectBundle & {
   workspaceId: string;
+  risks: ProjectRisk[];
 };
+
+function isUniqueViolation(error: { code?: string; message?: string } | null) {
+  if (!error) return false;
+  if (error.code === "23505") return true;
+  return /duplicate key|unique constraint/i.test(error.message ?? "");
+}
+
+function requireLegalRiskSource(source: string): LegalRiskSource {
+  if ((LEGAL_RISK_SOURCES as readonly string[]).includes(source)) {
+    return source as LegalRiskSource;
+  }
+  throw new Error(
+    `[supabase] invalid risk source "${source}" (allowed: ${LEGAL_RISK_SOURCES.join(", ")})`,
+  );
+}
+
+/**
+ * Remove a project created by a failed New Project attempt.
+ *
+ * Schema evidence (`20260812002748_workspace_schema.sql`):
+ * - CASCADE: stakeholders, risks, knowledge_items, milestones, meetings, releases
+ * - SET NULL: todos, memories, recommendations, history_events, capture_sessions, coach_sessions
+ *
+ * Only rows with this `project_id` are deleted. Pre-existing / other-project
+ * data cannot match a freshly minted project id.
+ */
+export async function cleanupFailedNewProjectBundle(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  projectId: string,
+): Promise<void> {
+  if (!projectId || !UUID_RE.test(projectId)) {
+    throw new Error("[supabase] cleanup refused: missing or invalid project id");
+  }
+  const errors: string[] = [];
+  for (const table of PROJECT_BUNDLE_SET_NULL_TABLES) {
+    const { error } = await client.from(table).delete().eq("project_id", projectId);
+    if (error) {
+      errors.push(`${table}: ${error.message}`);
+    }
+  }
+  const { error: projectError } = await client
+    .from("projects")
+    .delete()
+    .eq("id", projectId);
+  if (projectError) {
+    errors.push(`projects: ${projectError.message}`);
+  }
+  if (errors.length) {
+    throw new Error(
+      `[supabase] cleanup failed project ${projectId}: ${errors.join("; ")}`,
+    );
+  }
+}
+
+function mapTodoRows(rows: Array<Record<string, unknown>>): TodoItem[] {
+  return rows.map((row) => ({
+    id: String(row.id),
+    projectId: (row.project_id as string | null) ?? undefined,
+    title: String(row.title),
+    detail: (row.detail as string | null) ?? undefined,
+    done: Boolean(row.done),
+    createdAt: String(row.created_at),
+    dueAt: row.due_on ? `${row.due_on}T12:00:00.000Z` : undefined,
+    kind: row.kind as TodoItem["kind"],
+    waitingOn: (row.waiting_on as string | null) ?? undefined,
+  }));
+}
+
+function mapRiskRows(rows: Array<Record<string, unknown>>): ProjectRisk[] {
+  return rows.map((row) => ({
+    id: String(row.id),
+    projectId: String(row.project_id),
+    title: String(row.title),
+    status: (row.status as ProjectRisk["status"]) || "open",
+    source: requireLegalRiskSource(String(row.source || NEW_PROJECT_RISK_SOURCE)),
+    createdAt: row.created_at ? String(row.created_at) : undefined,
+    updatedAt: row.updated_at ? String(row.updated_at) : undefined,
+  }));
+}
+
+function mapMilestoneRows(rows: Array<Record<string, unknown>>): TimelineItem[] {
+  return rows.map((row) => ({
+    id: String(row.id),
+    projectId: String(row.project_id),
+    label: String(row.label),
+    type: row.type as TimelineItem["type"],
+    startAt: row.start_on
+      ? `${row.start_on}T12:00:00.000Z`
+      : String(row.created_at),
+    endAt: row.end_on ? `${row.end_on}T12:00:00.000Z` : undefined,
+    notes: (row.notes as string | null) ?? undefined,
+    source: (row.source as TimelineItem["source"]) || "manual",
+  }));
+}
+
+function mapRecommendationRows(
+  rows: Array<Record<string, unknown>>,
+): Recommendation[] {
+  return rows.map((row) => ({
+    id: String(row.id),
+    kind: row.kind as Recommendation["kind"],
+    urgency: row.urgency as Recommendation["urgency"],
+    title: String(row.title),
+    action: (row.action as string | null) ?? String(row.title),
+    why: (row.why as string | null) ?? "",
+    leadershipImpact: (row.leadership_impact as string | null) ?? "",
+    projectId: (row.project_id as string | null) ?? undefined,
+    createdAt: String(row.created_at),
+    status: row.status as Recommendation["status"],
+  }));
+}
+
+async function loadExistingProjectBundle(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+): Promise<PersistedProjectBundle | null> {
+  const { data: projectRow, error: projectError } = await client
+    .from("projects")
+    .select("*")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (projectError) {
+    throw new Error(`[supabase] load project: ${projectError.message}`);
+  }
+  if (!projectRow || projectRow.workspace_id !== workspaceId) return null;
+
+  const [
+    stakeholdersRes,
+    todosRes,
+    risksRes,
+    knowledgeRes,
+    milestonesRes,
+    recommendationsRes,
+    memoriesRes,
+  ] = await Promise.all([
+    client.from("stakeholders").select("*").eq("project_id", projectId),
+    client.from("todos").select("*").eq("project_id", projectId),
+    client.from("risks").select("*").eq("project_id", projectId),
+    client.from("knowledge_items").select("*").eq("project_id", projectId),
+    client.from("milestones").select("*").eq("project_id", projectId),
+    client.from("recommendations").select("*").eq("project_id", projectId),
+    client.from("memories").select("*").eq("project_id", projectId),
+  ]);
+
+  for (const res of [
+    stakeholdersRes,
+    todosRes,
+    risksRes,
+    knowledgeRes,
+    milestonesRes,
+    recommendationsRes,
+    memoriesRes,
+  ]) {
+    if (res.error) {
+      throw new Error(`[supabase] load project bundle: ${res.error.message}`);
+    }
+  }
+
+  const stakeholders = (stakeholdersRes.data ?? []).map(
+    (row: Record<string, unknown>) => ({
+      id: String(row.id),
+      name: String(row.name),
+      role: String(row.role || "Stakeholder"),
+      preferences: Array.isArray(row.preferences) ? row.preferences : [],
+      concerns: Array.isArray(row.concerns) ? row.concerns : [],
+    }),
+  );
+
+  const knowledge = emptyKnowledge(projectId);
+  for (const row of knowledgeRes.data ?? []) {
+    const section = row.section as keyof typeof knowledge.sections;
+    if (section in knowledge.sections) {
+      knowledge.sections[section] = [
+        ...knowledge.sections[section],
+        String(row.body),
+      ];
+    }
+  }
+
+  return {
+    workspaceId,
+    project: {
+      id: projectId,
+      name: String(projectRow.name),
+      code: String(projectRow.code),
+      summary: String(projectRow.summary ?? ""),
+      status: projectRow.status,
+      kind: projectRow.kind,
+      currentFocus: String(projectRow.current_focus ?? ""),
+      nextMilestone: projectRow.next_milestone ?? undefined,
+      nextMilestoneAt: projectRow.next_milestone_on
+        ? `${projectRow.next_milestone_on}T12:00:00.000Z`
+        : undefined,
+      stakeholders,
+    },
+    knowledge,
+    recommendations: mapRecommendationRows(recommendationsRes.data ?? []),
+    todos: mapTodoRows(todosRes.data ?? []),
+    timeline: mapMilestoneRows(milestonesRes.data ?? []),
+    risks: mapRiskRows(risksRes.data ?? []),
+    ...(memoriesRes.data?.[0]
+      ? {
+          setupMemory: {
+            id: String(memoriesRes.data[0].id),
+            type: "conversation" as const,
+            projectId,
+            title: String(memoriesRes.data[0].title),
+            content: String(memoriesRes.data[0].content ?? ""),
+            tags: Array.isArray(memoriesRes.data[0].tags)
+              ? memoriesRes.data[0].tags
+              : [],
+            people: Array.isArray(memoriesRes.data[0].people)
+              ? memoriesRes.data[0].people
+              : undefined,
+            occurredAt:
+              memoriesRes.data[0].occurred_at ?? memoriesRes.data[0].created_at,
+            createdAt: String(memoriesRes.data[0].created_at),
+            source: "capture" as const,
+          } satisfies MemoryEntry,
+        }
+      : {}),
+  } as PersistedProjectBundle & { setupMemory?: MemoryEntry };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function persistNewProject(
@@ -35,12 +291,17 @@ export async function persistNewProject(
   userId: string | null,
   input: CreateProjectInput,
 ): Promise<PersistedProjectBundle> {
-  // Build locally first for structure, then replace ids with Supabase UUIDs.
   const local = buildNewProject(input);
+  const requestedId =
+    input.clientProjectId && UUID_RE.test(input.clientProjectId)
+      ? input.clientProjectId
+      : undefined;
 
-  const { data: projectRow, error: projectError } = await client
-    .from("projects")
-    .insert({
+  let projectId: string | null = null;
+  let createdThisCall = false;
+
+  try {
+    const projectInsert: Record<string, unknown> = {
       workspace_id: workspaceId,
       name: local.project.name,
       code: local.project.code,
@@ -51,241 +312,256 @@ export async function persistNewProject(
       next_milestone: local.project.nextMilestone ?? null,
       next_milestone_on: isoToDateOnly(local.project.nextMilestoneAt),
       created_by: userId,
-    })
-    .select("id")
-    .single();
-
-  const projectId = requireData(
-    projectRow as { id: string } | null,
-    projectError,
-    "create project",
-  ).id;
-
-  const stakeholderRows = local.project.stakeholders.map((s) => ({
-    workspace_id: workspaceId,
-    project_id: projectId,
-    name: s.name,
-    role: s.role || "Stakeholder",
-    preferences: s.preferences ?? [],
-    concerns: s.concerns ?? [],
-  }));
-
-  let stakeholders = local.project.stakeholders;
-  if (stakeholderRows.length) {
-    const { data, error } = await client
-      .from("stakeholders")
-      .insert(stakeholderRows)
-      .select("id, name, role, preferences, concerns");
-    if (error) throw new Error(`[supabase] create stakeholders: ${error.message}`);
-    stakeholders = (data ?? []).map((row) => ({
-      id: row.id,
-      name: row.name,
-      role: row.role,
-      preferences: Array.isArray(row.preferences) ? row.preferences : [],
-      concerns: Array.isArray(row.concerns) ? row.concerns : [],
-    }));
-  }
-
-  const todoInserts = local.todos.map((t) => ({
-    workspace_id: workspaceId,
-    project_id: projectId,
-    title: t.title,
-    detail: t.detail ?? null,
-    done: t.done,
-    due_on: isoToDateOnly(t.dueAt),
-    kind: t.kind ?? "ACTION",
-    waiting_on: t.waitingOn ?? null,
-    created_by: userId,
-  }));
-
-  let todos: TodoItem[] = [];
-  if (todoInserts.length) {
-    const { data, error } = await client
-      .from("todos")
-      .insert(todoInserts)
-      .select("*");
-    if (error) throw new Error(`[supabase] create todos: ${error.message}`);
-    todos = (data ?? []).map((row) => ({
-      id: row.id,
-      projectId: row.project_id,
-      title: row.title,
-      detail: row.detail ?? undefined,
-      done: Boolean(row.done),
-      createdAt: row.created_at,
-      dueAt: row.due_on ? `${row.due_on}T12:00:00.000Z` : undefined,
-      kind: row.kind,
-      waitingOn: row.waiting_on ?? undefined,
-    }));
-  }
-
-  const riskTitles = local.knowledge.sections.risks ?? [];
-  if (riskTitles.length) {
-    const { error } = await client.from("risks").insert(
-      riskTitles.map((title) => ({
-        workspace_id: workspaceId,
-        project_id: projectId,
-        title,
-        status: "open",
-        source: "setup",
-        created_by: userId,
-      })),
-    );
-    if (error) throw new Error(`[supabase] create risks: ${error.message}`);
-  }
-
-  const knowledgeInserts: Array<{
-    workspace_id: string;
-    project_id: string;
-    section: string;
-    body: string;
-    position: number;
-    created_by: string | null;
-  }> = [];
-  let position = 0;
-  for (const [section, bullets] of Object.entries(local.knowledge.sections)) {
-    for (const body of bullets) {
-      knowledgeInserts.push({
-        workspace_id: workspaceId,
-        project_id: projectId,
-        section,
-        body,
-        position: position++,
-        created_by: userId,
-      });
-    }
-  }
-  if (knowledgeInserts.length) {
-    const { error } = await client.from("knowledge_items").insert(knowledgeInserts);
-    if (error) throw new Error(`[supabase] create knowledge: ${error.message}`);
-  }
-
-  let timeline: TimelineItem[] = [];
-  if (local.timeline.length) {
-    const { data, error } = await client
-      .from("milestones")
-      .insert(
-        local.timeline.map((t) => ({
-          workspace_id: workspaceId,
-          project_id: projectId,
-          label: t.label,
-          type: t.type,
-          start_on: isoToDateOnly(t.startAt),
-          end_on: isoToDateOnly(t.endAt),
-          notes: t.notes ?? null,
-          source: t.source ?? "manual",
-        })),
-      )
-      .select("*");
-    if (error) throw new Error(`[supabase] create milestones: ${error.message}`);
-    timeline = (data ?? []).map((row) => ({
-      id: row.id,
-      projectId: row.project_id,
-      label: row.label,
-      type: row.type,
-      startAt: row.start_on
-        ? `${row.start_on}T12:00:00.000Z`
-        : row.created_at,
-      endAt: row.end_on ? `${row.end_on}T12:00:00.000Z` : undefined,
-      notes: row.notes ?? undefined,
-      source: row.source || "manual",
-    }));
-  }
-
-  let recommendations: Recommendation[] = [];
-  if (local.recommendations.length) {
-    const { data, error } = await client
-      .from("recommendations")
-      .insert(
-        local.recommendations.map((r) => ({
-          workspace_id: workspaceId,
-          project_id: projectId,
-          kind: r.kind,
-          urgency: r.urgency,
-          title: r.title,
-          action: r.action,
-          why: r.why,
-          leadership_impact: r.leadershipImpact,
-          suggested_script: r.suggestedScript ?? null,
-          status: r.status,
-          created_by: userId,
-        })),
-      )
-      .select("*");
-    if (error) {
-      throw new Error(`[supabase] create recommendations: ${error.message}`);
-    }
-    recommendations = (data ?? []).map((row) => ({
-      id: row.id,
-      kind: row.kind,
-      urgency: row.urgency,
-      title: row.title,
-      action: row.action ?? row.title,
-      why: row.why ?? "",
-      leadershipImpact: row.leadership_impact ?? "",
-      projectId: row.project_id ?? undefined,
-      createdAt: row.created_at,
-      status: row.status,
-    }));
-  }
-
-  let setupMemory: MemoryEntry | null = null;
-  if (input.sourceNarrative?.trim()) {
-    const { data, error } = await client
-      .from("memories")
-      .insert({
-        workspace_id: workspaceId,
-        project_id: projectId,
-        type: "conversation",
-        title: `Project setup — ${local.project.code}`,
-        content: input.sourceNarrative.trim(),
-        tags: ["project-setup", input.sourceMode ?? "setup"],
-        people: stakeholders.map((s) => s.name),
-        source: "capture",
-        created_by: userId,
-      })
-      .select("*")
-      .single();
-    if (error) throw new Error(`[supabase] create memory: ${error.message}`);
-    setupMemory = {
-      id: data.id,
-      type: "conversation",
-      projectId: projectId,
-      title: data.title,
-      content: data.content ?? "",
-      tags: Array.isArray(data.tags) ? data.tags : [],
-      people: Array.isArray(data.people) ? data.people : undefined,
-      occurredAt: data.occurred_at ?? data.created_at,
-      createdAt: data.created_at,
-      source: "capture",
     };
+    if (requestedId) projectInsert.id = requestedId;
+
+    const { data: projectRow, error: projectError } = await client
+      .from("projects")
+      .insert(projectInsert)
+      .select("id")
+      .single();
+
+    if (projectError && requestedId && isUniqueViolation(projectError)) {
+      const existing = await loadExistingProjectBundle(
+        client,
+        workspaceId,
+        requestedId,
+      );
+      if (existing) return existing;
+      throw new Error(
+        `[supabase] create project: duplicate id ${requestedId} is not in this workspace`,
+      );
+    }
+
+    projectId = requireData(
+      projectRow as { id: string } | null,
+      projectError,
+      "create project",
+    ).id;
+    createdThisCall = true;
+
+    const stakeholderRows = local.project.stakeholders.map((s) => ({
+      workspace_id: workspaceId,
+      project_id: projectId,
+      name: s.name,
+      role: s.role || "Stakeholder",
+      preferences: s.preferences ?? [],
+      concerns: s.concerns ?? [],
+    }));
+
+    let stakeholders = local.project.stakeholders;
+    if (stakeholderRows.length) {
+      const { data, error } = await client
+        .from("stakeholders")
+        .insert(stakeholderRows)
+        .select("id, name, role, preferences, concerns");
+      if (error) {
+        throw new Error(`[supabase] create stakeholders: ${error.message}`);
+      }
+      stakeholders = (data ?? []).map((row) => ({
+        id: row.id,
+        name: row.name,
+        role: row.role,
+        preferences: Array.isArray(row.preferences) ? row.preferences : [],
+        concerns: Array.isArray(row.concerns) ? row.concerns : [],
+      }));
+    }
+
+    const todoInserts = local.todos.map((t) => ({
+      workspace_id: workspaceId,
+      project_id: projectId,
+      title: t.title,
+      detail: t.detail ?? null,
+      done: t.done,
+      due_on: isoToDateOnly(t.dueAt),
+      kind: t.kind ?? "ACTION",
+      waiting_on: t.waitingOn ?? null,
+      created_by: userId,
+    }));
+
+    let todos: TodoItem[] = [];
+    if (todoInserts.length) {
+      const { data, error } = await client.from("todos").insert(todoInserts).select("*");
+      if (error) throw new Error(`[supabase] create todos: ${error.message}`);
+      todos = mapTodoRows(data ?? []);
+    }
+
+    const riskTitles = local.knowledge.sections.risks ?? [];
+    let risks: ProjectRisk[] = [];
+    if (riskTitles.length) {
+      const riskSource = requireLegalRiskSource(NEW_PROJECT_RISK_SOURCE);
+      const { data, error } = await client
+        .from("risks")
+        .insert(
+          riskTitles.map((title) => ({
+            workspace_id: workspaceId,
+            project_id: projectId,
+            title,
+            status: "open",
+            source: riskSource,
+            created_by: userId,
+          })),
+        )
+        .select("*");
+      if (error) throw new Error(`[supabase] create risks: ${error.message}`);
+      risks = mapRiskRows(data ?? []);
+    }
+
+    const knowledgeInserts: Array<{
+      workspace_id: string;
+      project_id: string;
+      section: string;
+      body: string;
+      position: number;
+      created_by: string | null;
+    }> = [];
+    let position = 0;
+    for (const [section, bullets] of Object.entries(local.knowledge.sections)) {
+      for (const body of bullets) {
+        knowledgeInserts.push({
+          workspace_id: workspaceId,
+          project_id: projectId,
+          section,
+          body,
+          position: position++,
+          created_by: userId,
+        });
+      }
+    }
+    if (knowledgeInserts.length) {
+      const { error } = await client.from("knowledge_items").insert(knowledgeInserts);
+      if (error) throw new Error(`[supabase] create knowledge: ${error.message}`);
+    }
+
+    let timeline: TimelineItem[] = [];
+    if (local.timeline.length) {
+      const { data, error } = await client
+        .from("milestones")
+        .insert(
+          local.timeline.map((t) => ({
+            workspace_id: workspaceId,
+            project_id: projectId,
+            label: t.label,
+            type: t.type,
+            start_on: isoToDateOnly(t.startAt),
+            end_on: isoToDateOnly(t.endAt),
+            notes: t.notes ?? null,
+            source: t.source ?? "manual",
+          })),
+        )
+        .select("*");
+      if (error) throw new Error(`[supabase] create milestones: ${error.message}`);
+      timeline = mapMilestoneRows(data ?? []);
+    }
+
+    let recommendations: Recommendation[] = [];
+    if (local.recommendations.length) {
+      const { data, error } = await client
+        .from("recommendations")
+        .insert(
+          local.recommendations.map((r) => ({
+            workspace_id: workspaceId,
+            project_id: projectId,
+            kind: r.kind,
+            urgency: r.urgency,
+            title: r.title,
+            action: r.action,
+            why: r.why,
+            leadership_impact: r.leadershipImpact,
+            suggested_script: r.suggestedScript ?? null,
+            status: r.status,
+            created_by: userId,
+          })),
+        )
+        .select("*");
+      if (error) {
+        throw new Error(`[supabase] create recommendations: ${error.message}`);
+      }
+      recommendations = mapRecommendationRows(data ?? []);
+    }
+
+    let setupMemory: MemoryEntry | null = null;
+    if (input.sourceNarrative?.trim()) {
+      const { data, error } = await client
+        .from("memories")
+        .insert({
+          workspace_id: workspaceId,
+          project_id: projectId,
+          type: "conversation",
+          title: `Project setup — ${local.project.code}`,
+          content: input.sourceNarrative.trim(),
+          tags: ["project-setup", input.sourceMode ?? "setup"],
+          people: stakeholders.map((s) => s.name),
+          source: "capture",
+          created_by: userId,
+        })
+        .select("*")
+        .single();
+      if (error) throw new Error(`[supabase] create memory: ${error.message}`);
+      setupMemory = {
+        id: data.id,
+        type: "conversation",
+        projectId,
+        title: data.title,
+        content: data.content ?? "",
+        tags: Array.isArray(data.tags) ? data.tags : [],
+        people: Array.isArray(data.people) ? data.people : undefined,
+        occurredAt: data.occurred_at ?? data.created_at,
+        createdAt: data.created_at,
+        source: "capture",
+      };
+    }
+
+    // History is secondary evidence after authoritative success. Failure must
+    // not roll back the project bundle or be recorded for a cleaned-up create.
+    const { error: historyError } = await client.from("history_events").insert({
+      workspace_id: workspaceId,
+      project_id: projectId,
+      type: "project_created",
+      title: `Created ${local.project.name}`,
+      detail: local.project.code,
+      source: "user",
+      created_by: userId,
+    });
+    if (historyError) {
+      console.error(
+        "[persistNewProject] history evidence skipped",
+        historyError.message,
+      );
+    }
+
+    return {
+      workspaceId,
+      project: {
+        ...local.project,
+        id: projectId,
+        stakeholders,
+      },
+      knowledge: {
+        ...local.knowledge,
+        projectId,
+      },
+      recommendations,
+      todos,
+      timeline,
+      risks,
+      ...(setupMemory ? { setupMemory } : {}),
+    } as PersistedProjectBundle & { setupMemory?: MemoryEntry };
+  } catch (err) {
+    if (createdThisCall && projectId) {
+      try {
+        await cleanupFailedNewProjectBundle(client, projectId);
+      } catch (cleanupErr) {
+        const origin = err instanceof Error ? err.message : String(err);
+        const cleanup =
+          cleanupErr instanceof Error ? cleanupErr.message : String(cleanupErr);
+        throw new Error(
+          `${origin} (also failed to clean up partial project: ${cleanup})`,
+        );
+      }
+    }
+    throw err;
   }
-
-  await client.from("history_events").insert({
-    workspace_id: workspaceId,
-    project_id: projectId,
-    type: "project_created",
-    title: `Created ${local.project.name}`,
-    detail: local.project.code,
-    source: "user",
-    created_by: userId,
-  });
-
-  return {
-    workspaceId,
-    project: {
-      ...local.project,
-      id: projectId,
-      stakeholders,
-    },
-    knowledge: {
-      ...local.knowledge,
-      projectId,
-    },
-    recommendations,
-    todos,
-    timeline,
-    ...(setupMemory ? { setupMemory } : {}),
-  } as PersistedProjectBundle & { setupMemory?: MemoryEntry };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

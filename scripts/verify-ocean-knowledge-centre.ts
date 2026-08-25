@@ -277,6 +277,12 @@ function testDefaultModeKnowledge() {
   assert.match(workspace, /ocean-knowledge-centre/);
 }
 
+function testOceanSaveFailureVisible() {
+  const shell = readSrc("src/components/AppShell.tsx");
+  assert.match(shell, /data-testid="ocean-save-error"/);
+  assert.match(shell, /saveStatus === "error"/);
+}
+
 async function main() {
   testSidebarContract();
   console.log("✓ sidebar omits removed V1 items; keeps Projects/utility");
@@ -298,6 +304,8 @@ async function main() {
   console.log("✓ semantic dates + truthful strip counts");
   testDefaultModeKnowledge();
   console.log("✓ Knowledge Centre default selected mode");
+  testOceanSaveFailureVisible();
+  console.log("✓ Ocean chrome surfaces persistence failure");
   console.log("verify-ocean-knowledge-centre: OK");
 }
 
