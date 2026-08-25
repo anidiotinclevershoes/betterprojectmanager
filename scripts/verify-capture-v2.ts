@@ -5,6 +5,8 @@
  * Run: npx tsx scripts/verify-capture-v2.ts
  */
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { isCaptureV2Enabled } from "../src/lib/capture-v2/flag";
 import {
   accountObservations,
@@ -560,6 +562,14 @@ function main() {
       (run.result.proposedOperations ?? []).every((op) => op.operation === "NO_CHANGE"),
     );
     assert.equal(buildSuggestions(run.result).length, 0);
+  });
+
+  check("client barrel does not re-export OpenAI extract", () => {
+    const barrel = readFileSync(
+      join(process.cwd(), "src/lib/capture-v2/index.ts"),
+      "utf8",
+    );
+    assert.doesNotMatch(barrel, /extractObservationsWithOpenAI/);
   });
 
   check("observation projectId cannot retarget another project", () => {

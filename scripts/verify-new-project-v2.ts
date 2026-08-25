@@ -128,6 +128,24 @@ function main() {
     assert.doesNotMatch(src, /persistNewProject\(|createProject\(/);
   });
 
+  check("client New Project V2 UI does not import OpenAI extract", () => {
+    const cat = readFileSync(
+      join(process.cwd(), "src/components/onboarding/NewProjectCategorisation.tsx"),
+      "utf8",
+    );
+    const exp = readFileSync(
+      join(process.cwd(), "src/components/onboarding/NewProjectExperience.tsx"),
+      "utf8",
+    );
+    const barrel = readFileSync(
+      join(process.cwd(), "src/lib/new-project-v2/index.ts"),
+      "utf8",
+    );
+    assert.doesNotMatch(cat, /extractNewProjectV2WithOpenAI|@\/lib\/openai/);
+    assert.doesNotMatch(exp, /extractNewProjectV2WithOpenAI|@\/lib\/openai/);
+    assert.doesNotMatch(barrel, /extractNewProjectV2WithOpenAI/);
+  });
+
   check("approval cannot be skipped in the Talk V2 UI", () => {
     const ui = readFileSync(
       join(process.cwd(), "src/components/onboarding/NewProjectExperience.tsx"),

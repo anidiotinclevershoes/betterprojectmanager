@@ -33,12 +33,12 @@ import { isProductionRuntime } from "@/lib/runtime-config";
 import { serverLog } from "@/lib/server-log";
 import {
   contextRecordsFromWorld,
-  extractObservationsWithOpenAI,
   formatAuthoritativeStateForPrompt,
   isCaptureV2Enabled,
   runCaptureV2FromModelJson,
   worldFromCaptureState,
 } from "@/lib/capture-v2";
+import { extractObservationsWithOpenAI } from "@/lib/capture-v2/extract";
 
 export const runtime = "nodejs";
 

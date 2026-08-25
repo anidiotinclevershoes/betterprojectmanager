@@ -1,4 +1,4 @@
-import type { ObservationDomain } from "@/lib/capture-v2";
+import type { ObservationDomain } from "@/lib/capture-v2/types";
 
 export const PROVISIONAL_CATEGORIES = [
   "person",

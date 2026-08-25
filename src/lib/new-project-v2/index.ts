@@ -8,4 +8,3 @@ export {
 } from "./types";
 export { parseNewProjectV2Envelope, recategoriseItem } from "./parse";
 export { draftFromProvisional } from "./map";
-export { extractNewProjectV2WithOpenAI } from "./extract";

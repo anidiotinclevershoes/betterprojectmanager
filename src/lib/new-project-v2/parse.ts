@@ -1,8 +1,8 @@
 import {
   isObservationDomain,
-  parseObservationEnvelope,
   type ObservationDomain,
-} from "@/lib/capture-v2";
+} from "@/lib/capture-v2/types";
+import { parseObservationEnvelope } from "@/lib/capture-v2/validate";
 import {
   categoryFromDomain,
   isProvisionalCategory,

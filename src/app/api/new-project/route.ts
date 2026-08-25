@@ -12,10 +12,10 @@ import { requireAiCaller } from "@/lib/ai-gate";
 import { isProductionRuntime } from "@/lib/runtime-config";
 import {
   draftFromProvisional,
-  extractNewProjectV2WithOpenAI,
   isNewProjectV2Enabled,
   parseNewProjectV2Envelope,
 } from "@/lib/new-project-v2";
+import { extractNewProjectV2WithOpenAI } from "@/lib/new-project-v2/extract";
 
 export const runtime = "nodejs";
 

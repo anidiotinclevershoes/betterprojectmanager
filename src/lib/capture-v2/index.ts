@@ -30,4 +30,3 @@ export {
   worldFromCaptureState,
   emptyV2Result,
 } from "./run";
-export { extractObservationsWithOpenAI } from "./extract";
