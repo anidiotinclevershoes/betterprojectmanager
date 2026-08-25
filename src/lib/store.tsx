@@ -53,6 +53,7 @@ import type {
   CaptureInput,
   CaptureResult,
   KnowledgeSectionId,
+  MemoryEntry,
   MissionState,
   ProjectKnowledge,
   Recommendation,
@@ -287,6 +288,18 @@ type MissionContextValue = {
     personId?: string;
     roleHint?: string;
   }) => Promise<{ ok: boolean; created: boolean; personId?: string; error?: string }>;
+  /** Phase 3B: persist-first Knowledge bullet from Capture. */
+  addCaptureKnowledgeBullet: (input: {
+    projectId: string;
+    section: import("./types").KnowledgeSectionId;
+    text: string;
+  }) => Promise<{ ok: boolean; error?: string }>;
+  /** Phase 3B: persist-first memory from Capture. */
+  addCaptureMemory: (input: {
+    projectId: string;
+    title: string;
+    content?: string;
+  }) => Promise<{ ok: boolean; error?: string }>;
   refreshCoaching: () => void;
   /** Development: restore seeded demo baseline; preserve non-seeded data. */
   resetDemo: () => SeedResetResult;
@@ -2529,6 +2542,118 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const addCaptureKnowledgeBullet = useCallback(
+    async (input: {
+      projectId: string;
+      section: KnowledgeSectionId;
+      text: string;
+    }): Promise<{ ok: boolean; error?: string }> => {
+      const trimmed = input.text.trim();
+      if (!trimmed) {
+        return { ok: false, error: "This knowledge item has no text." };
+      }
+      const applyLocal = () => {
+        setState((prev) => {
+          const current =
+            (prev.knowledge ?? []).find((k) => k.projectId === input.projectId) ??
+            emptyKnowledge(input.projectId);
+          const merged = mergeKnowledge(current, input.projectId, {
+            [input.section]: [trimmed],
+          });
+          return {
+            ...prev,
+            knowledge: [
+              ...(prev.knowledge ?? []).filter((k) => k.projectId !== input.projectId),
+              merged,
+            ],
+          };
+        });
+      };
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistKnowledgeBullet(
+            client,
+            meta.workspaceId,
+            input.projectId,
+            input.section,
+            trimmed,
+            meta.userId,
+          );
+          applyLocal();
+          markPersistSaved();
+          return { ok: true };
+        } catch (err) {
+          console.error("[addCaptureKnowledgeBullet] persist failed", err);
+          reportPersistFailure(err, "Could not save knowledge");
+          return {
+            ok: false,
+            error: err instanceof Error ? err.message : "Could not save knowledge",
+          };
+        }
+      }
+      applyLocal();
+      return { ok: true };
+    },
+    [],
+  );
+
+  const addCaptureMemory = useCallback(
+    async (input: {
+      projectId: string;
+      title: string;
+      content?: string;
+    }): Promise<{ ok: boolean; error?: string }> => {
+      const title = input.title.trim();
+      if (!title) {
+        return { ok: false, error: "This memory has no text." };
+      }
+      const now = new Date().toISOString();
+      const memory: MemoryEntry = {
+        id: newClientId(),
+        type: "conversation",
+        projectId: input.projectId,
+        title,
+        content: (input.content ?? title).trim() || title,
+        tags: ["capture"],
+        occurredAt: now,
+        createdAt: now,
+        source: "capture",
+      };
+      const applyLocal = () => {
+        setState((prev) => ({
+          ...prev,
+          memories: [memory, ...(prev.memories ?? [])],
+        }));
+      };
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistMemory(client, meta.workspaceId, meta.userId, memory);
+          applyLocal();
+          markPersistSaved();
+          return { ok: true };
+        } catch (err) {
+          console.error("[addCaptureMemory] persist failed", err);
+          reportPersistFailure(err, "Could not save memory");
+          return {
+            ok: false,
+            error: err instanceof Error ? err.message : "Could not save memory",
+          };
+        }
+      }
+      applyLocal();
+      return { ok: true };
+    },
+    [],
+  );
+
   const ensureCapturePerson = useCallback(
     async (input: {
       projectId: string;
@@ -2685,6 +2810,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateTimelineItem,
       addAvailabilityItem,
       ensureCapturePerson,
+      addCaptureKnowledgeBullet,
+      addCaptureMemory,
       refreshCoaching,
       resetDemo,
       persistenceMode,
@@ -2730,6 +2857,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateTimelineItem,
       addAvailabilityItem,
       ensureCapturePerson,
+      addCaptureKnowledgeBullet,
+      addCaptureMemory,
       refreshCoaching,
       resetDemo,
     ],

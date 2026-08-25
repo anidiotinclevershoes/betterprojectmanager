@@ -1054,6 +1054,25 @@ await check("overlapping title tokens do not auto-update an unrelated Todo", () 
   );
 });
 
+await check("completion cue without exact title does not complete an unrelated To Do", () => {
+  const index = new Map<string, IndexedContextRecord>();
+  index.set("todo-pack", {
+    entityType: "todo",
+    id: "todo-pack",
+    title: "Prepare the jelly pack",
+    rawType: "todo",
+    status: "open",
+  });
+  const findings = extractLocalFindings("The carnival pack is done.", index);
+  assert.equal(
+    findings.some(
+      (f) =>
+        f.target?.entityId === "todo-pack" && f.findingType === "ENTITY_COMPLETED",
+    ),
+    false,
+  );
+});
+
 await check("Risk kind cannot be retargeted to Todo via legalDomain sticker", async () => {
   const { decision, writes } = await apply(
     suggestion({
@@ -1079,6 +1098,57 @@ await check("Risk kind cannot be retargeted to Todo via legalDomain sticker", as
     ),
     "unsupported",
   );
+});
+
+await check("Risk complete without durable id cannot title-fallback", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "risk-no-id",
+      kind: "risk",
+      op: "complete",
+      content: "Gumdrop Bridge icing",
+      projectId: "proj-candy",
+    }),
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("foreign targetEntityId cannot change Project A ownership", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "foreign-target",
+      kind: "stakeholder",
+      op: "update",
+      content: "Brick Oakley replaces Pippa as UAT lead",
+      projectId: "proj-candy",
+      legalDomain: "responsibility",
+      ownershipSemantics: "replace",
+      personName: "Brick Oakley",
+      targetEntityId: "person-brick",
+      responsibilityScope: "UAT lead",
+      replacePersonId: "person-gumdrop",
+    }),
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("unknown ownership semantics cannot silently write", async () => {
+  const item = suggestion({
+    id: "bad-sem",
+    kind: "stakeholder",
+    op: "update",
+    content: "Fizz Caramel takes UAT lead",
+    projectId: "proj-candy",
+    legalDomain: "responsibility",
+    personName: "Fizz Caramel",
+    responsibilityScope: "UAT lead",
+  });
+  (item as { ownershipSemantics: string }).ownershipSemantics = "explode";
+  const { decision, writes } = await apply(item);
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
 });
 
 console.log(`\nverify-phase3b-capture-boundary: ${passed} passed`);

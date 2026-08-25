@@ -164,17 +164,8 @@ function planRisk(
   const projectRisks = world.risks.filter((r) => r.projectId === projectId);
 
   const resolveExisting = () => {
-    if (id) {
-      return projectRisks.find((r) => r.id === id);
-    }
-    // Exact title only when no durable id was supplied, and only when unique.
-    const needle = text.trim().toLowerCase();
-    if (!needle) return undefined;
-    const titleMatches = projectRisks.filter(
-      (r) => r.title.trim().toLowerCase() === needle,
-    );
-    if (titleMatches.length === 1) return titleMatches[0];
-    return undefined;
+    if (!id) return undefined;
+    return projectRisks.find((r) => r.id === id);
   };
 
   if (item.op === "complete" || item.op === "update") {
@@ -426,8 +417,21 @@ function planResponsibility(
     asString(values.scope) ||
     "";
   const personName = item.personName?.trim() || asString(values.personName) || "";
-  const semantics = (item.ownershipSemantics ||
-    asString(values.ownershipSemantics)) as OwnershipSemantics | undefined;
+  const semanticsRaw =
+    item.ownershipSemantics || asString(values.ownershipSemantics);
+  const semantics: OwnershipSemantics | undefined =
+    semanticsRaw === "share" ||
+    semanticsRaw === "replace" ||
+    semanticsRaw === "continue" ||
+    semanticsRaw === "ambiguous"
+      ? semanticsRaw
+      : undefined;
+  if (semanticsRaw && !semantics) {
+    return needsYou(
+      "responsibility",
+      "This ownership change is not specific enough to apply automatically.",
+    );
+  }
 
   if (!scope || !personName) {
     return needsYou(
@@ -436,9 +440,10 @@ function planResponsibility(
     );
   }
 
+  const claimedId = item.personId?.trim() || targetId(item);
   const person = resolvePerson(projectId, world, item, personName);
   const personId = person.status === "known" ? person.person.id : undefined;
-  if (item.personId?.trim() && person.status !== "known") {
+  if (claimedId && person.status !== "known") {
     return needsYou(
       "responsibility",
       "This person is not on this project. Lume will not change ownership.",

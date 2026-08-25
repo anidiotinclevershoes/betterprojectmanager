@@ -205,15 +205,15 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
   const {
     state,
     analyzeCaptureWithAI,
-    applyCaptureResult,
     addTodo,
-    addKnowledgeBullet,
     addTimelineItem,
     addCaptureRisk,
     setCaptureRiskStatus,
     updateTimelineItem,
     addAvailabilityItem,
     ensureCapturePerson,
+    addCaptureKnowledgeBullet,
+    addCaptureMemory,
     confirmResponsibilityOwner,
     toggleTodo,
     removeTodo,
@@ -686,20 +686,25 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
             throw new Error(result.error || "Could not save availability");
           }
         },
-        writeKnowledge: (op) => {
-          addKnowledgeBullet(op.projectId, op.section, op.text);
-        },
-        writeMemory: (op) => {
-          if (!slice.result) {
-            throw new Error("Capture result missing for memory write");
-          }
-          applyCaptureResult({
-            ...slice.result,
-            recommendations: [],
-            knowledgePatch: undefined,
-            timelinePatch: undefined,
-            memory: { ...slice.result.memory, title: op.title },
+        writeKnowledge: async (op) => {
+          const result = await addCaptureKnowledgeBullet({
+            projectId: op.projectId,
+            section: op.section,
+            text: op.text,
           });
+          if (!result.ok) {
+            throw new Error(result.error || "Could not save knowledge");
+          }
+        },
+        writeMemory: async (op) => {
+          const result = await addCaptureMemory({
+            projectId: op.projectId,
+            title: op.title,
+            content: slice.result?.memory.content,
+          });
+          if (!result.ok) {
+            throw new Error(result.error || "Could not save memory");
+          }
         },
       });
 
@@ -724,12 +729,12 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     },
     [
       addAvailabilityItem,
+      addCaptureKnowledgeBullet,
+      addCaptureMemory,
       addCaptureRisk,
-      addKnowledgeBullet,
       addTimelineItem,
       addTodo,
       announce,
-      applyCaptureResult,
       confirmResponsibilityOwner,
       ensureCapturePerson,
       removeTodo,

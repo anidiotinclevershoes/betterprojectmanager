@@ -39,7 +39,11 @@ export function extractLocalFindings(
     if (record.entityType === "todo" && record.status !== "done") {
       const titleKey = record.title.toLowerCase();
       const genericComplete =
-        titleKey.length > 8 && titleNearCompletionCue(text, titleKey);
+        titleKey.length > 8 &&
+        text.includes(titleKey) &&
+        /\b(?:is\s+done|are\s+done|is\s+complete|completed|finished|received|resolved|closed\s+off|close\s+that|been\s+approved)\b/.test(
+          text,
+        );
       if (genericComplete) {
         findings.push({
           id: nextId(),
@@ -472,37 +476,6 @@ function isTransientEventKnowledge(title: string): boolean {
 const IRRELEVANT_LOCAL =
   /\b(milk|timesheet|onetrust|eggs|grocery)\b/i;
 
-const TITLE_STOPWORDS = new Set([
-  "with",
-  "from",
-  "into",
-  "that",
-  "this",
-  "have",
-  "been",
-  "will",
-  "should",
-  "confirm",
-  "release",
-  "before",
-  "after",
-  "about",
-  "plan",
-  "planned",
-  "complete",
-  "board",
-  "the",
-  "and",
-  "for",
-  "not",
-  "but",
-  "are",
-  "was",
-  "has",
-  "had",
-  "its",
-]);
-
 function escapeRegExpLocal(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -616,43 +589,6 @@ function extractRoleScope(text: string, personName: string): string | undefined 
     }
   }
   return undefined;
-}
-
-function titleTokens(title: string): string[] {
-  return title
-    .split(/\s+/)
-    .map((t) => t.replace(/[^a-z0-9]/g, ""))
-    .filter((t) => t.length >= 3 && !TITLE_STOPWORDS.has(t));
-}
-
-function tokenAppears(haystack: string, token: string): boolean {
-  if (haystack.includes(token)) return true;
-  if (token.length >= 5) {
-    const stem = token.slice(0, 5);
-    return new RegExp(`\\b${stem}\\w*\\b`).test(haystack);
-  }
-  return false;
-}
-
-/**
- * Completion cue near distinctive title tokens.
- * Avoid matching the word "complete" inside the title itself (e.g. "Submit complete CAB pack").
- */
-function titleNearCompletionCue(text: string, title: string): boolean {
-  const tokens = titleTokens(title);
-  if (tokens.length === 0) return false;
-  // Prefer clear completion predicates — not bare "complete" (often part of titles).
-  const cue =
-    /\b(?:is\s+done|are\s+done|is\s+complete|completed|finished|received|resolved|closed\s+off|close\s+that|approv(?:ed|al)\s+(?:was\s+)?received|been\s+approved)\b/g;
-  let m: RegExpExecArray | null;
-  while ((m = cue.exec(text))) {
-    const start = Math.max(0, m.index - 90);
-    const end = Math.min(text.length, m.index + m[0].length + 90);
-    const window = text.slice(start, end);
-    const hits = tokens.filter((t) => tokenAppears(window, t)).length;
-    if (hits >= Math.min(2, tokens.length)) return true;
-  }
-  return false;
 }
 
 /**
