@@ -39,8 +39,8 @@ export class FakeWorkspaceClient {
   readonly userId: string;
   readonly tables: Record<string, FakeRow[]>;
   insertCount = 0;
-  failAfterInserts?: number;
-  failOnTable?: string;
+  private readonly failAfterInserts?: number;
+  private readonly failOnTable?: string;
 
   constructor(options: FakeWorkspaceOptions = {}) {
     this.workspaceId = options.workspaceId ?? "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -81,6 +81,18 @@ export class FakeWorkspaceClient {
 
   from(table: string) {
     return new FakeQuery(this, table);
+  }
+
+  /** Used by the query builder — keep failure flags private to this class. */
+  nextInsertFailure(table: string): string | null {
+    if (this.failOnTable === table) return `injected failure on ${table}`;
+    if (
+      this.failAfterInserts !== undefined &&
+      this.insertCount >= this.failAfterInserts
+    ) {
+      return `injected failure after ${this.insertCount} inserts`;
+    }
+    return null;
   }
 
   async rpc(fn: string) {
@@ -191,19 +203,14 @@ class FakeQuery {
     const tableRows = this.db.tables[this.table] ?? (this.db.tables[this.table] = []);
 
     if (this.insertRows) {
-      if (
-        this.db.failAfterInserts !== undefined &&
-        this.db.insertCount >= this.db.failAfterInserts
-      ) {
+      const injected = this.db.nextInsertFailure(this.table);
+      if (injected) {
         return {
           data: null,
-          error: { message: `injected failure after ${this.db.insertCount} inserts`, code: "PGRST" },
-        };
-      }
-      if (this.db.failOnTable === this.table) {
-        return {
-          data: null,
-          error: { message: `injected failure on ${this.table}`, code: "PGRST" },
+          error: {
+            message: injected,
+            code: "PGRST",
+          },
         };
       }
 
