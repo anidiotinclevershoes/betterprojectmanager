@@ -720,6 +720,100 @@ await check("open project is not used when finding is unresolved", async () => {
   assert.equal(writes.length, 0);
 });
 
+await check("todo delete on another project is Needs you", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "del-b",
+      kind: "action",
+      op: "delete",
+      content: "Console cert slip follow-up",
+      projectId: "proj-candy",
+      targetTodoId: "todo-pack",
+    }),
+    {
+      world: world({
+        todos: [
+          {
+            id: "todo-pack",
+            projectId: "proj-game",
+            title: "Prepare the jelly pack",
+          },
+        ],
+      }),
+    },
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("unknown todo operation cannot become a create", async () => {
+  const item = suggestion({
+    id: "bad-op",
+    kind: "action",
+    op: "create",
+    content: "Invented chore",
+    projectId: "proj-candy",
+  });
+  (item as { op: string }).op = "explode";
+  const { decision, writes } = await apply(item);
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("foreign Person id cannot write availability on Project A", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "foreign-person",
+      kind: "availability",
+      op: "create",
+      content: "Brick Oakley is away 2026-10-03",
+      projectId: "proj-candy",
+      personId: "person-brick",
+      personName: "Brick Oakley",
+      proposedValues: {
+        awayFromIso: "2026-10-03T12:00:00.000Z",
+        awayToIso: "2026-10-03T12:00:00.000Z",
+      },
+    }),
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("replacePersonId that is not the current owner cannot silently replace", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "bad-replace",
+      kind: "stakeholder",
+      op: "update",
+      content: "Brick replaces a stranger as UAT lead",
+      projectId: "proj-candy",
+      legalDomain: "responsibility",
+      ownershipSemantics: "replace",
+      personName: "Brick Oakley",
+      responsibilityScope: "UAT lead",
+      replacePersonId: "person-nobody",
+    }),
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("unknown Risk id cannot create a duplicate Risk", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "typo-risk",
+      kind: "risk",
+      op: "create",
+      content: "Gumdrop Bridge icing",
+      projectId: "proj-candy",
+      targetEntityId: "risk-typo",
+    }),
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
 await check("ambiguous ownership maps to clarification, not a Todo", () => {
   const finding: CaptureFinding = {
     id: "f-own",

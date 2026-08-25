@@ -38,7 +38,6 @@ export function extractLocalFindings(
   for (const record of contextIndex.values()) {
     if (record.entityType === "todo" && record.status !== "done") {
       const titleKey = record.title.toLowerCase();
-      // Only treat as CAB approval completion when the To Do itself is about approval.
       const genericComplete =
         titleKey.length > 8 && titleNearCompletionCue(text, titleKey);
       if (genericComplete) {
@@ -66,8 +65,7 @@ export function extractLocalFindings(
       const titleKey = record.title.toLowerCase();
       const generic =
         titleKey.length > 6 &&
-        (text.includes(titleKey.slice(0, Math.min(20, titleKey.length))) ||
-          significantTitleOverlap(text, titleKey)) &&
+        (text.includes(titleKey) || significantTitleOverlap(text, titleKey)) &&
         /\b(resolv\w*|fix\w*|cleared|closed|mitigated)\b/.test(text);
       if (generic) {
         findings.push({
@@ -94,9 +92,7 @@ export function extractLocalFindings(
       const titleKey = record.title.toLowerCase();
       const mentioned =
         titleKey.length > 4 &&
-        (text.includes(titleKey.slice(0, Math.min(24, titleKey.length))) ||
-          significantTitleOverlap(text, titleKey) ||
-          /\b(date|deadline|milestone|go-?live|release)\b/.test(text));
+        (text.includes(titleKey) || significantTitleOverlap(text, titleKey));
       const moved = /\b(moved|move|now|changed|pushed|brought forward)\b/.test(text);
       if (mentioned && moved) {
         const proposed = extractIsoDateHint(captureText);
@@ -163,10 +159,9 @@ export function extractLocalFindings(
       const titleKey = record.title.toLowerCase();
       const titleHit =
         titleKey.length > 10 &&
-        (text.includes(titleKey.slice(0, Math.min(28, titleKey.length))) ||
-          significantTitleOverlap(text, titleKey));
+        (text.includes(titleKey) || significantTitleOverlap(text, titleKey));
       const updateCue =
-        /\b(move|moved|due|push|friday|tuesday|owner|owning|deadline|close of play)\b/.test(
+        /\b(move|moved|due date|push(?:ed)?(?:\s+that)?\s+due|deadline)\b/.test(
           text,
         );
       const already =
@@ -238,7 +233,7 @@ export function extractLocalFindings(
     );
 
     if (away.test(captureText)) {
-      const from = extractIsoDateHint(captureText);
+      const from = extractAvailabilityDate(captureText, person.title);
       findings.push({
         id: nextId(),
         fact: from
@@ -499,8 +494,17 @@ const TITLE_STOPWORDS = new Set([
   "plan",
   "planned",
   "complete",
-  "complete",
   "board",
+  "the",
+  "and",
+  "for",
+  "not",
+  "but",
+  "are",
+  "was",
+  "has",
+  "had",
+  "its",
 ]);
 
 function escapeRegExpLocal(value: string): string {
@@ -542,17 +546,55 @@ const MONTHS: Record<string, string> = {
 
 /** Generic date parse — ISO or "8 October 2026". No demo-world special cases. */
 function extractIsoDateHint(text: string): string | undefined {
-  const iso = text.match(/\b(20\d{2}-\d{2}-\d{2})\b/);
-  if (iso) return `${iso[1]}T12:00:00.000Z`;
-  const word = text.match(
-    /\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\.?(?:\s+(20\d{2}))?\b/i,
+  const all = extractAllIsoDateHints(text);
+  return all[0];
+}
+
+function extractAllIsoDateHints(text: string): string[] {
+  const found: string[] = [];
+  const seen = new Set<string>();
+  const push = (iso: string) => {
+    const day = iso.slice(0, 10);
+    if (seen.has(day)) return;
+    seen.add(day);
+    found.push(iso);
+  };
+  for (const m of text.matchAll(/\b(20\d{2}-\d{2}-\d{2})\b/g)) {
+    push(`${m[1]}T12:00:00.000Z`);
+  }
+  const wordRe =
+    /\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\.?(?:\s+(20\d{2}))?\b/gi;
+  let m: RegExpExecArray | null;
+  while ((m = wordRe.exec(text))) {
+    const day = m[1]!.padStart(2, "0");
+    const month = MONTHS[m[2]!.toLowerCase()];
+    if (!month) continue;
+    const year = m[3] ?? String(new Date().getFullYear());
+    push(`${year}-${month}-${day}T12:00:00.000Z`);
+  }
+  return found;
+}
+
+/**
+ * Availability dates must come from the person clause, not some other date
+ * mentioned in the same Capture. Multiple unrelated dates → Needs you.
+ */
+function extractAvailabilityDate(
+  captureText: string,
+  personName: string,
+): string | undefined {
+  const name = escapeRegExpLocal(personName);
+  const windowRe = new RegExp(
+    `.{0,80}\\b${name}\\b.{0,80}`,
+    "i",
   );
-  if (!word) return undefined;
-  const day = word[1]!.padStart(2, "0");
-  const month = MONTHS[word[2]!.toLowerCase()];
-  if (!month) return undefined;
-  const year = word[3] ?? String(new Date().getFullYear());
-  return `${year}-${month}-${day}T12:00:00.000Z`;
+  const window = captureText.match(windowRe)?.[0] ?? "";
+  const near = extractAllIsoDateHints(window);
+  if (near.length === 1) return near[0];
+  if (near.length > 1) return undefined;
+  const all = extractAllIsoDateHints(captureText);
+  if (all.length === 1) return all[0];
+  return undefined;
 }
 
 function extractRoleScope(text: string, personName: string): string | undefined {
@@ -581,13 +623,27 @@ function extractRoleScope(text: string, personName: string): string | undefined 
 }
 
 function significantTitleOverlap(haystack: string, title: string): boolean {
-  const tokens = title
+  const tokens = titleTokens(title);
+  if (tokens.length < 2) return false;
+  const hits = tokens.filter((t) => tokenAppears(haystack, t)).length;
+  const needed = Math.max(2, Math.ceil(tokens.length * 0.7));
+  return hits >= needed;
+}
+
+function titleTokens(title: string): string[] {
+  return title
     .split(/\s+/)
     .map((t) => t.replace(/[^a-z0-9]/g, ""))
-    .filter((t) => t.length > 3 && !TITLE_STOPWORDS.has(t));
-  if (tokens.length < 2) return false;
-  const hits = tokens.filter((t) => haystack.includes(t)).length;
-  return hits >= Math.min(2, tokens.length);
+    .filter((t) => t.length >= 3 && !TITLE_STOPWORDS.has(t));
+}
+
+function tokenAppears(haystack: string, token: string): boolean {
+  if (haystack.includes(token)) return true;
+  if (token.length >= 5) {
+    const stem = token.slice(0, 5);
+    return new RegExp(`\\b${stem}\\w*\\b`).test(haystack);
+  }
+  return false;
 }
 
 /**
@@ -595,20 +651,17 @@ function significantTitleOverlap(haystack: string, title: string): boolean {
  * Avoid matching the word "complete" inside the title itself (e.g. "Submit complete CAB pack").
  */
 function titleNearCompletionCue(text: string, title: string): boolean {
-  const tokens = title
-    .split(/\s+/)
-    .map((t) => t.replace(/[^a-z0-9]/g, ""))
-    .filter((t) => t.length > 3 && !TITLE_STOPWORDS.has(t));
+  const tokens = titleTokens(title);
   if (tokens.length === 0) return false;
   // Prefer clear completion predicates — not bare "complete" (often part of titles).
   const cue =
-    /\b(?:is\s+done|are\s+done|is\s+complete|completed|finished|received|resolved|closed\s+off|close\s+that|approv(?:ed|al)\s+(?:was\s+)?received)\b/g;
+    /\b(?:is\s+done|are\s+done|is\s+complete|completed|finished|received|resolved|closed\s+off|close\s+that|approv(?:ed|al)\s+(?:was\s+)?received|been\s+approved)\b/g;
   let m: RegExpExecArray | null;
   while ((m = cue.exec(text))) {
     const start = Math.max(0, m.index - 90);
     const end = Math.min(text.length, m.index + m[0].length + 90);
     const window = text.slice(start, end);
-    const hits = tokens.filter((t) => window.includes(t)).length;
+    const hits = tokens.filter((t) => tokenAppears(window, t)).length;
     if (hits >= Math.min(2, tokens.length)) return true;
   }
   return false;
@@ -650,6 +703,40 @@ export function stampFindingProjects(
         projectCode: segment.project.code,
         projectCandidates: undefined,
       };
+    }
+
+    // Same titled open work on more than one project cannot be auto-assigned,
+    // including by selected-project / soft hint.
+    const targetTitle = finding.target?.title?.trim().toLowerCase();
+    if (targetTitle) {
+      const colliding = [
+        ...new Set(
+          (args.allOpenTodos ?? [])
+            .filter(
+              (t) =>
+                t.projectId &&
+                t.title.trim().toLowerCase() === targetTitle,
+            )
+            .map((t) => t.projectId as string),
+        ),
+      ];
+      if (colliding.length > 1) {
+        return {
+          ...finding,
+          projectId: undefined,
+          projectName: undefined,
+          projectCode: undefined,
+          projectCandidates: colliding.map((id) => {
+            const p = projects.find((x) => x.id === id);
+            return { id, name: p?.name ?? id, code: p?.code };
+          }),
+          requiresClarification: true,
+          clarificationQuestion:
+            finding.clarificationQuestion || "Which project does this refer to?",
+          target: undefined,
+          findingType: "AMBIGUOUS",
+        };
+      }
     }
 
     const resolution = resolveProjectForFact({

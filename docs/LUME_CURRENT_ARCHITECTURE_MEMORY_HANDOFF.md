@@ -2,7 +2,7 @@
 
 **Status:** Documentation of CURRENT implementation (not an ideal architecture)  
 **Date:** 25 August 2026  
-**Code observed:** `main` plus Phase 3A.1 project deletion (`persistProjectDelete`, Ocean Delete Project, SET NULL cleanup)  
+**Code observed:** `main` plus Phase 3B Capture mutation boundary (`src/lib/capture/apply`, persist-first Capture Risk/milestone/Person/availability)  
 **Docs entry point:** `docs/README.md`  
 **Governing product authority:** `docs/v1-reference-pack/`  
 **Living defect backlog:** `docs/LUME_V1_KNOWN_DISCOVERIES.md`  
@@ -456,24 +456,24 @@ From `docs/LUME_V1_KNOWN_DISCOVERIES.md` as of this handoff. **Do not treat reso
 | --- | --- | --- | --- |
 | D-003 | Suggestion accept/dismiss often MissionState-only | Reload resurrects suggestions | V1 product hardening |
 | D-004 | Many History events never `persistHistoryEvent` | Evidence missing after reload (New Project create-path decided in 3A) | V1 product hardening |
-| D-005 | Soft save failures | Ocean banner + reconcile landed; many mutations still optimistic | V1 product hardening / Phase 3B Capture |
-| D-007 | Capture people prose not promoted to stakeholders | Split identity; Tell Me/KC may miss durable person | Capture hardening (UI polish done 2D) |
+| D-005 | Soft save failures | Ocean banner + reconcile landed; Capture Risk/milestone/Person/availability persist-first; other mutations may still be optimistic | V1 product hardening |
+| D-007 | Capture people prose not promoted to stakeholders | Duplicate Person on Capture apply is closed; leftover Knowledge prose may still lack a stakeholder | remainder after 3B |
 | D-008 / D-021 | Todo waiting vs Knowledge openLoops | Duplicate/contradictory loops in KC/Ask | Open-loop / To Do architecture slice |
 | D-010 | Legacy Ask injects History as competing truth | Residual until canonical default | Canonical production default decision |
-| D-011 | Demo-name regex extractors | Homemade NLP on write-adjacent paths | Capture hardening |
+| D-011 | Demo-name regex extractors | Capture active path cleaned; New Project extractors remain structural | New Project touchpoint |
 | D-012 | `database.ts` lags migrations | Typing/ops drift (billing, snapshots, evals) | post-V1 hygiene unless it blocks a gate |
-| D-013 | Capture/coach tables underused | Session history not account-durable | Capture hardening |
-| D-014 | No CI Capture apply → Supabase round-trip | Cannot prove durability in deterministic suite | Capture hardening / V1-ready Capture |
+| D-013 | Capture/coach tables underused; New Capture can retain transcript | Session honesty / authority | Phase 3D |
+| D-014 | No live CI Capture apply → Supabase round-trip | Deterministic fake persist-failure exists; hosted apply not in `npm test` | before Capture V1-ready |
 | D-015 | Historical `[Resolved]` titles as open risk rows | Possible leftover data | Data cleanup / V1 hardening |
-| D-020 | Dependencies/availability under-modelled | Ask/KC miss prose-only facts; no graph/calendar | Modelling + Capture ingestion (UI display partial 2D) |
+| D-020 | Dependencies/availability under-modelled | Capture writes structured availability; Ask still has no calendar/graph | Ask/modelling remainder |
 | D-024 | “Actions left” is local analysis meter | Not Stripe entitlement | Billing hardening |
-| D-025 | Capture Ocean §16 visual depth | Cosmetic vs baseline | Capture visual polish |
+| D-025 | Capture Ocean §16 visual depth | Cosmetic vs baseline | Phase 3D |
 | D-026 | No unique `(workspace_id, code)` | Two projects may share a code; 3A retry uses UUID not code | New Project product decision |
 | D-027 | No archive/undo after project delete | Permanent by design until a product Archive decision | post-V1 / accepted limitation |
 | D-028 | Project delete is sequential, not one DB transaction | Failure after SET NULL cleanup can leave a visible project with some children already gone; UI does not fake success | V1 product hardening (bundle RPC) |
-| D-017 | (if still open in file) Capture validation item | See Known Discoveries | Capture hardening |
+| D-029 | Milestone complete has no status column | Capture complete-date is Needs you | later date-lifecycle slice |
 
-**Resolved (do not reopen as missing architecture):** D-R01 durable Knowledge, D-R02 stable identity, D-R03 risk resurrection, D-R04/R05 Confirm Owner persist/UUIDs, D-R06 false unknown-owner, D-R07 multi-owner Ask, D-R08 Ocean Capture, D-R09 item detail, D-R10 share vs replace, D-R11 Phase 3A New Project integrity (includes D-006), D-R12 Phase 3A.1 Safe Project Deletion.
+**Resolved (do not reopen as missing architecture):** D-R01 durable Knowledge, D-R02 stable identity, D-R03 risk resurrection, D-R04/R05 Confirm Owner persist/UUIDs, D-R06 false unknown-owner, D-R07 multi-owner Ask, D-R08 Ocean Capture, D-R09 item detail, D-R10 share vs replace, D-R11 Phase 3A New Project integrity (includes D-006), D-R12 Phase 3A.1 Safe Project Deletion, D-R13 Phase 3B Capture mutation boundary (includes D-017).
 
 ---
 
@@ -489,13 +489,11 @@ Deterministic suite: `npm test` → `scripts/run-regression-suite.ts` (credentia
 | `people-context-ui` | People frame + share-vs-replace UI contract |
 | `ask-context-authority` / `canonical-truth` / `tell-me` / `context-integrity` | Ask assemblers; do not flip default in tests unless explicit |
 | `ocean-knowledge-centre` / `ocean-capture` / `ocean-item-detail` | Ocean shell, Capture mode, drawer |
-| `capture-trust-boundary` / `capture-review` / `capture-reliability` / `findings` | Review-before-write |
+| `capture-trust-boundary` / `phase3b-capture-boundary` / `capture-review` / `capture-reliability` / `findings` / `capture-workspace` / `golden-test` | Review-before-write; legal-domain apply dispatcher |
 | `hydrate-session` / `phase2-auth` / `rls-policies` / `production-config` | Auth/persist/prod invariants |
 | `new-project` / `seed-reset` | Onboarding / demo |
 
-**Rerun guidance:** touch Knowledge identity → reconcile + project-truth; Risks → risk-lifecycle; People → people-entities + people-context-ui; Ask → ask-context + tell-me + canonical; Ocean UI → matching ocean-* + capture-trust if Capture chrome; always `typecheck` + full `npm test` before merge of behavioural PRs.
-
-This documentation-only change adds **no** tests.
+**Rerun guidance:** touch Knowledge identity → reconcile + project-truth; Risks → risk-lifecycle; People → people-entities + people-context-ui; Ask → ask-context + tell-me + canonical; Ocean UI → matching ocean-* + capture-trust if Capture chrome; Capture apply → phase3b-capture-boundary; always `typecheck` + full `npm test` before merge of behavioural PRs.
 
 ---
 
@@ -516,7 +514,7 @@ Inspect/extend these **before** creating parallel implementations:
 | Item detail | `knowledge-item-detail.ts` + `KnowledgeItemDetailDrawer` | Inspection/correction UX |
 | Canonical Ask | `serializeCanonicalTruth` | Ask context — do not rebuild a third assembler |
 | Legacy Ask | `buildTellMeContext` / `buildCaptureContext` | Rollback path only |
-| Capture apply | `CaptureSessionContext.applyOne` | Capture writes |
+| Capture apply | `src/lib/capture/apply` (`planCaptureApply` / `executeCaptureApply`) via `CaptureSessionContext.applyOne` | Capture writes — exhaustive domain dispatcher; no generic Todo fallback |
 | Search | `src/lib/tell-me/knowledge-search.ts` | Deterministic search |
 | Ocean shell | `OceanProjectWorkspace` | Project UI modes |
 | Drawer pattern | item-detail / CoachDrawer | Side inspection, not new pages |
@@ -556,8 +554,10 @@ Verified against current product/code:
 User input (Capture Ocean mode)
   → ✦ Analyse (/api/capture) → findings in session (NOT project truth)
   → human review / applyOne
-      → store mutations (todos / risks / knowledge / timeline / suggestions / memory)
-          → persist-mutations / persistKnowledgeReconcile / persistRiskStatus / persistEnsureStakeholder
+      → planCaptureApply (legal domain + project scope) → executeCaptureApply
+          → persist-first Capture hooks (risk / milestone / person / availability)
+          → existing todo / knowledge / confirm-owner store mutations
+              → persist-mutations / persistKnowledgeReconcile / persistRiskStatus / persistEnsureStakeholder
               → Supabase (workspace RLS)
                   → loadMissionStateFromSupabase (reload)
                       → MissionState cache
@@ -701,7 +701,12 @@ Parallel writes:
 | User action | In-memory | Durable |
 | --- | --- | --- |
 | Manual Knowledge section edit / item-detail Correct | `updateKnowledgeSection` / `replaceKnowledge` | `persistKnowledgeReconcile` |
-| Capture applyOne Knowledge bullet | `addKnowledgeBullet` / merge | knowledge persist / reconcile; risks dual-write if new risk |
+| Capture applyOne Knowledge bullet | `addKnowledgeBullet` / merge | knowledge persist / reconcile |
+| Capture applyOne new Risk | `addCaptureRisk` persist-first | `persistKnowledgeBullet` dual-write `risks` |
+| Capture applyOne Risk status | `setCaptureRiskStatus` persist-first | `persistRiskStatus` + knowledge risks reconcile |
+| Capture applyOne date create/update | `addTimelineItem` / `updateTimelineItem` persist-first | `persistTimelineItem` / `persistTimelineUpdate` |
+| Capture applyOne Person | `ensureCapturePerson` persist-first | `persistEnsureStakeholder` |
+| Capture applyOne availability | `addAvailabilityItem` persist-first | `persistKnowledgeBullet` `kind=availability` |
 | Risk resolve (domain) | `setRiskStatus` | `persistRiskStatus` + knowledge risks section reconcile |
 | Knowledge-only risk resolve | `setKnowledgeOnlyRiskResolved` | knowledge reconcile only |
 | Confirm Owner share | `confirmResponsibilityOwner` without `replacePersonId` | `persistEnsureStakeholder` + knowledge insert/update |

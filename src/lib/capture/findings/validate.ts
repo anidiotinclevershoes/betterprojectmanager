@@ -163,17 +163,6 @@ function parseTarget(
 
   const existing = index.get(entityId);
   if (!existing) {
-    // Unknown id on NEW_INFORMATION with a type may still be CREATE intent.
-    if (opts?.allowCreateWithoutId && entityType) {
-      return {
-        target: {
-          entityType,
-          title: title || "New item",
-        },
-        createShaped: true,
-        warning: `Unknown target ID "${entityId}" treated as CREATE (${entityType})`,
-      };
-    }
     return {
       invalidTarget: true,
       warning: `Unknown target ID "${entityId}" — not in provided context`,

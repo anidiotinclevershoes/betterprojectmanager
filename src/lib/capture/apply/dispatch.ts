@@ -69,6 +69,18 @@ function targetId(item: PendingSuggestion): string | undefined {
   return undefined;
 }
 
+function requireTodoOnProject(
+  world: CaptureApplyWorld,
+  projectId: string,
+  todoId: string,
+) {
+  const todo = world.todos.find((t) => t.id === todoId);
+  if (!todo || (todo.projectId && todo.projectId !== projectId)) {
+    return null;
+  }
+  return todo;
+}
+
 function planTodo(
   item: PendingSuggestion,
   text: string,
@@ -80,8 +92,7 @@ function planTodo(
     if (!todoId) {
       return needsYou("todo", "This To Do cannot be completed — the target item is missing.");
     }
-    const todo = world.todos.find((t) => t.id === todoId);
-    if (!todo || (todo.projectId && todo.projectId !== projectId)) {
+    if (!requireTodoOnProject(world, projectId, todoId)) {
       return needsYou("todo", "This To Do cannot be completed — the target is not on this project.");
     }
     return write("todo", { type: "complete_todo", projectId, todoId });
@@ -90,11 +101,17 @@ function planTodo(
     if (!todoId) {
       return needsYou("todo", "This To Do cannot be removed — the target item is missing.");
     }
+    if (!requireTodoOnProject(world, projectId, todoId)) {
+      return needsYou("todo", "This To Do cannot be removed — the target is not on this project.");
+    }
     return write("todo", { type: "delete_todo", projectId, todoId });
   }
   if (item.op === "archive") {
     if (!todoId) {
       return needsYou("todo", "This To Do cannot be archived — the target item is missing.");
+    }
+    if (!requireTodoOnProject(world, projectId, todoId)) {
+      return needsYou("todo", "This To Do cannot be archived — the target is not on this project.");
     }
     return write("todo", { type: "complete_todo", projectId, todoId });
   }
@@ -102,8 +119,7 @@ function planTodo(
     if (!todoId) {
       return needsYou("todo", "This To Do cannot be updated — the target item is missing.");
     }
-    const todo = world.todos.find((t) => t.id === todoId);
-    if (!todo || (todo.projectId && todo.projectId !== projectId)) {
+    if (!requireTodoOnProject(world, projectId, todoId)) {
       return needsYou("todo", "This To Do cannot be updated — the target is not on this project.");
     }
     return write("todo", {
@@ -115,8 +131,17 @@ function planTodo(
       dueAt: item.date,
     });
   }
+  if (item.op !== "create") {
+    return needsYou("todo", "This To Do operation is not supported.");
+  }
   if (!text) {
     return needsYou("todo", "This To Do has no title.");
+  }
+  if (todoId && !requireTodoOnProject(world, projectId, todoId)) {
+    return needsYou(
+      "todo",
+      "This To Do target is not on this project. Lume will not create a replacement.",
+    );
   }
   return write("todo", {
     type: "create_todo",
@@ -186,6 +211,19 @@ function planRisk(
     );
   }
 
+  if (item.op !== "create") {
+    return needsYou("risk", "This Risk operation is not supported.");
+  }
+  if (id) {
+    const existing = projectRisks.find((r) => r.id === id);
+    if (existing) {
+      return noChange("risk", "This Risk is already on the project.");
+    }
+    return needsYou(
+      "risk",
+      "This Risk target is not on this project. Lume will not create another Risk.",
+    );
+  }
   if (!text) {
     return needsYou("risk", "This Risk has no title.");
   }
@@ -245,6 +283,15 @@ function planMilestone(
     });
   }
 
+  if (item.op !== "create") {
+    return needsYou("milestone", "This date operation is not supported.");
+  }
+  if (id && !byId) {
+    return needsYou(
+      "milestone",
+      "This date target is not on this project. Lume will not create another date.",
+    );
+  }
   if (!text) {
     return needsYou("milestone", "This date has no label.");
   }
@@ -274,6 +321,7 @@ function resolvePerson(
   if (personId) {
     const byId = project.stakeholders.find((s) => s.id === personId);
     if (byId) return { status: "known" as const, person: byId };
+    return { status: "unknown" as const };
   }
   if (named) {
     const byName = project.stakeholders.find((s) => namesMatchExact(s.name, named));
@@ -457,6 +505,21 @@ function planResponsibility(
         personId: personId ?? null,
         replacePersonId: owners[0].personId,
       });
+    }
+    const owners = currentOwners(world, projectId, scope);
+    if (!owners.some((o) => o.personId === replacePersonId)) {
+      return needsYou(
+        "responsibility",
+        "Replacement needs a confirmed current owner. Confirm before Lume changes ownership.",
+        {
+          confirmOwner: {
+            projectId,
+            scope,
+            personName,
+            personId: personId ?? null,
+          },
+        },
+      );
     }
     return write("responsibility", {
       type: "confirm_responsibility",
