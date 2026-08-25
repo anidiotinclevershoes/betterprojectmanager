@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
+import { CaptureAutoTextarea } from "@/components/capture/CaptureAutoTextarea";
 import { CaptureBestPractice } from "@/components/capture/CaptureBestPractice";
 import { CaptureContextInspector } from "@/components/capture/CaptureContextInspector";
+import { CaptureLayoutToggle } from "@/components/capture/CaptureLayoutToggle";
 import { CaptureReliabilityNotice } from "@/components/capture/CaptureReliabilityNotice";
 import { useCaptureSession } from "@/components/capture/CaptureSessionContext";
+import { CaptureSimplifiedWorkspace } from "@/components/capture/simplified/CaptureSimplifiedWorkspace";
+import { useCaptureLayoutExperiment } from "@/components/capture/useCaptureLayoutExperiment";
+import { useRecordingBridge } from "@/components/capture/useRecordingBridge";
+import type { CaptureLayoutExperiment } from "@/lib/capture/layout-experiment";
 import { useMission } from "@/lib/store";
 import { analysesRemaining } from "@/lib/workspace/history";
 import { shouldWarnBeforeAnalysis } from "@/lib/capture/reliability";
@@ -68,6 +74,38 @@ export function CaptureWorkspace({
   defaultProjectId?: string;
   /** Ocean project-mode embed — presentation only; lifecycle unchanged. */
   variant?: "legacy" | "ocean";
+}) {
+  const experiment = useCaptureLayoutExperiment();
+  if (experiment.layout === "simplified") {
+    return (
+      <CaptureSimplifiedWorkspace
+        defaultProjectId={defaultProjectId}
+        variant={variant}
+        layout={experiment.layout}
+        onLayoutChange={experiment.setLayout}
+      />
+    );
+  }
+  return (
+    <CaptureClassicWorkspace
+      defaultProjectId={defaultProjectId}
+      variant={variant}
+      layout={experiment.layout}
+      onLayoutChange={experiment.setLayout}
+    />
+  );
+}
+
+function CaptureClassicWorkspace({
+  defaultProjectId,
+  variant = "legacy",
+  layout,
+  onLayoutChange,
+}: {
+  defaultProjectId?: string;
+  variant?: "legacy" | "ocean";
+  layout: CaptureLayoutExperiment;
+  onLayoutChange: (next: CaptureLayoutExperiment) => void;
 }) {
   const { state, openaiConfigured } = useMission();
   const usage = analysesRemaining(state);
@@ -476,6 +514,7 @@ export function CaptureWorkspace({
       aria-labelledby={titleId}
       data-testid={isOcean ? "ocean-capture-workspace" : "capture-workspace"}
       data-capture-variant={variant}
+      data-capture-layout="classic"
       data-capture-stage={
         reviewOpen ? "review" : busy === "analysing" ? "analysing" : "input"
       }
@@ -494,6 +533,7 @@ export function CaptureWorkspace({
               "Capture anything"
             )}
           </h2>
+          <CaptureLayoutToggle layout={layout} onChange={onLayoutChange} />
           {!showSessionActions ? (
             <p className="capture-support">
               {isOcean
@@ -836,239 +876,4 @@ export function CaptureWorkspace({
       <div ref={liveRef} className="sr-only" aria-live="polite" />
     </section>
   );
-}
-
-function CaptureAutoTextarea({
-  id,
-  value,
-  onChange,
-  readOnly,
-  disabled,
-  placeholder,
-  testId,
-}: {
-  id?: string;
-  value: string;
-  onChange: (value: string) => void;
-  readOnly?: boolean;
-  disabled?: boolean;
-  placeholder?: string;
-  testId?: string;
-}) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.height = "0px";
-    el.style.height = `${Math.max(el.scrollHeight, 72)}px`;
-  }, [value]);
-
-  return (
-    <textarea
-      ref={ref}
-      id={id}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      rows={3}
-      readOnly={readOnly}
-      disabled={disabled}
-      placeholder={placeholder}
-      data-testid={testId}
-      data-ai="false"
-      className={`capture-textarea capture-textarea-idle capture-textarea-auto ${readOnly ? "is-readonly" : ""}`}
-      aria-readonly={readOnly || undefined}
-    />
-  );
-}
-
-function useRecordingBridge({
-  setRecordingText,
-  prepareRecordingBlock,
-  finalizeRecordingBlock,
-  setBusy,
-  setError,
-  announce,
-  locked,
-  onRecorded,
-}: {
-  setRecordingText: (text: string) => void;
-  prepareRecordingBlock: () => string;
-  finalizeRecordingBlock: () => void;
-  setBusy: (v: "idle" | "transcribing" | "analysing") => void;
-  setError: (v: string | null) => void;
-  announce: (v: string) => void;
-  locked: boolean;
-  onRecorded: () => void;
-}) {
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<number | null>(null);
-  const recognitionRef = useRef<{ stop: () => void } | null>(null);
-  const liveBaseRef = useRef("");
-  const recordingTextRef = useRef("");
-  const lockedRef = useRef(locked);
-  const [active, setActive] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const [hint, setHint] = useState<string | null>(null);
-
-  useEffect(() => {
-    lockedRef.current = locked;
-  }, [locked]);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) window.clearInterval(timerRef.current);
-      mediaRecorderRef.current?.stream.getTracks().forEach((t) => t.stop());
-      recognitionRef.current?.stop();
-    };
-  }, []);
-
-  async function start() {
-    if (lockedRef.current) return;
-    setError(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : "audio/mp4";
-      const recorder = new MediaRecorder(stream, { mimeType });
-      chunksRef.current = [];
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) chunksRef.current.push(event.data);
-      };
-      recorder.onstop = () => {
-        void finish(recorder.mimeType || mimeType);
-      };
-      mediaRecorderRef.current = recorder;
-      prepareRecordingBlock();
-      liveBaseRef.current = "";
-      recordingTextRef.current = "";
-      recorder.start();
-      setActive(true);
-      setSeconds(0);
-      timerRef.current = window.setInterval(() => setSeconds((s) => s + 1), 1000);
-      onRecorded();
-
-      const w = window as Window & {
-        SpeechRecognition?: new () => {
-          continuous: boolean;
-          interimResults: boolean;
-          onresult: ((e: unknown) => void) | null;
-          onerror: ((e: unknown) => void) | null;
-          start: () => void;
-          stop: () => void;
-        };
-        webkitSpeechRecognition?: new () => {
-          continuous: boolean;
-          interimResults: boolean;
-          onresult: ((e: unknown) => void) | null;
-          onerror: ((e: unknown) => void) | null;
-          start: () => void;
-          stop: () => void;
-        };
-      };
-      const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
-      if (!SR) {
-        setHint("Recording… live transcription unavailable in this browser");
-        return;
-      }
-      const recognition = new SR();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.onresult = (rawEvent: unknown) => {
-        if (lockedRef.current) return;
-        const event = rawEvent as {
-          resultIndex: number;
-          results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }>;
-        };
-        let interim = "";
-        let finalChunk = "";
-        for (let i = event.resultIndex; i < event.results.length; i += 1) {
-          const transcript = event.results[i][0]?.transcript ?? "";
-          if (event.results[i].isFinal) finalChunk += transcript;
-          else interim += transcript;
-        }
-        if (finalChunk) {
-          liveBaseRef.current = `${liveBaseRef.current} ${finalChunk}`.trim();
-        }
-        const next = `${liveBaseRef.current}${interim ? ` ${interim}` : ""}`.trim();
-        recordingTextRef.current = next;
-        setRecordingText(next);
-        setHint("Live transcription");
-      };
-      recognition.onerror = () => setHint("Recording…");
-      recognitionRef.current = recognition;
-      recognition.start();
-      setHint("Live transcription");
-    } catch {
-      setError(
-        "Microphone permission denied. Allow mic access or type your note instead.",
-      );
-      finalizeRecordingBlock();
-    }
-  }
-
-  function stop() {
-    const recorder = mediaRecorderRef.current;
-    if (!recorder) return;
-    recognitionRef.current?.stop();
-    recognitionRef.current = null;
-    recorder.stop();
-    recorder.stream.getTracks().forEach((track) => track.stop());
-    setActive(false);
-    setHint(null);
-    if (timerRef.current) {
-      window.clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }
-
-  async function finish(mimeType: string) {
-    if (lockedRef.current) {
-      setBusy("idle");
-      finalizeRecordingBlock();
-      return;
-    }
-    if (recordingTextRef.current.trim()) {
-      setBusy("idle");
-      finalizeRecordingBlock();
-      announce("Recording saved. Edit the transcript, then press Analyse.");
-      return;
-    }
-    setBusy("transcribing");
-    setError(null);
-    try {
-      const blob = new Blob(chunksRef.current, { type: mimeType });
-      const extension = mimeType.includes("mp4") ? "mp4" : "webm";
-      const form = new FormData();
-      form.append("audio", blob, `capture.${extension}`);
-      const response = await fetch("/api/transcribe", {
-        method: "POST",
-        body: form,
-      });
-      const data = (await response.json()) as { text?: string; error?: string };
-      if (!response.ok || !data.text) {
-        throw new Error(data.error || "Transcription failed");
-      }
-      if (!lockedRef.current) {
-        recordingTextRef.current = data.text;
-        setRecordingText(data.text);
-      }
-      announce("Transcript ready. Edit if needed, then press Analyse.");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Voice capture failed");
-    } finally {
-      finalizeRecordingBlock();
-      setBusy("idle");
-    }
-  }
-
-  return {
-    active,
-    seconds,
-    hint,
-    start,
-    stop,
-  };
 }

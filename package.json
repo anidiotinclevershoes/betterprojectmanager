@@ -46,6 +46,7 @@
     "verify:ocean-item-detail": "npx --yes tsx scripts/verify-ocean-item-detail.ts",
     "verify:people-context-ui": "npx --yes tsx scripts/verify-people-context-ui.ts",
     "verify:capture-trust-boundary": "npx --yes tsx scripts/verify-capture-trust-boundary.ts",
+    "verify:capture-v2-simplified": "npx --yes tsx scripts/verify-capture-v2-simplified.ts",
     "typecheck": "tsc --noEmit",
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",
     "evals:pre-baseline": "npx --yes tsx scripts/run-pre-intelligence-baseline.ts",

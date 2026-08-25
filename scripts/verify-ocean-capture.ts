@@ -107,13 +107,14 @@ function testCaptureModeInOceanWorkspace() {
 
 function testOceanCaptureAiAffordanceAndInputs() {
   const capture = readSrc("src/components/capture/CaptureWorkspace.tsx");
+  const textarea = readSrc("src/components/capture/CaptureAutoTextarea.tsx");
   assert.match(capture, /variant\?: "legacy" \| "ocean"/);
   assert.match(capture, /ocean-capture-analyse/);
   assert.match(capture, /✦/);
   assert.match(capture, /Analyse/);
   assert.match(capture, /data-ai="true"/);
   assert.match(capture, /ocean-capture-input/);
-  assert.match(capture, /data-ai="false"/);
+  assert.match(textarea, /data-ai="false"/);
   assert.match(capture, /ocean-capture-record/);
   assert.match(capture, /Record/);
   assert.match(capture, /ocean-capture-review-boundary/);

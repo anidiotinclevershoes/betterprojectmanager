@@ -255,7 +255,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 
 **Other Capture GAPs:** D-013 session tables vs client lists; D-014 no CI Capture→Supabase round-trip; D-011 demo-name regex extractors; D-005 save visibility; D-025 Ocean §16 visual depth (not semantics).
 
-**Key files:** `src/components/capture/CaptureWorkspace.tsx`, `CaptureSessionContext.tsx`, `src/lib/store.tsx` (`analyzeCaptureWithAI`, `applyCaptureResult`, `mergeCapture`), `src/lib/capture/*`, `persistCaptureSession`.
+**Key files:** `src/components/capture/CaptureWorkspace.tsx`, `CaptureSessionContext.tsx`, `src/components/capture/simplified/*` (opt-in V2 layout), `src/lib/store.tsx` (`analyzeCaptureWithAI`, `applyCaptureResult`, `mergeCapture`), `src/lib/capture/*`, `persistCaptureSession`.
 
 ---
 
@@ -444,6 +444,7 @@ Significance: ✦ marks model judgement. Confirmed Knowledge should look normal,
 | Domain risks vs knowledge risks | Lifecycle | domain wins | `MissionState.risks` | knowledge-only `[Resolved]` | Transitional compatibility |
 | Stakeholders vs people prose | Identity | stakeholders | Confirm Owner / bundle | unpromoted Capture bullets | Capture hardening |
 | Capture analyse+applyOne vs captureWithAI | Trust boundary | Ocean uses review | `applyOne` | immediate `mergeCapture` still in store | Do not call immediate path from Ocean |
+| `lume-capture-layout-experiment-v1` | Capture compose/review chrome | **classic** | `CaptureSimplifiedWorkspace` | `CaptureClassicWorkspace` | After dogfood; keep Classic rollback |
 | Client session lists vs `capture_sessions` | Session history | client-primary | table write on apply | localStorage lists | Capture hardening (D-013) |
 
 ---
@@ -488,7 +489,7 @@ Deterministic suite: `npm test` → `scripts/run-regression-suite.ts` (credentia
 | `people-entities` | Confirm Owner model, share/replace API, bundles |
 | `people-context-ui` | People frame + share-vs-replace UI contract |
 | `ask-context-authority` / `canonical-truth` / `tell-me` / `context-integrity` | Ask assemblers; do not flip default in tests unless explicit |
-| `ocean-knowledge-centre` / `ocean-capture` / `ocean-item-detail` | Ocean shell, Capture mode, drawer |
+| `ocean-knowledge-centre` / `ocean-capture` / `ocean-item-detail` / `capture-v2-simplified` | Ocean shell, Capture mode, drawer, Capture layout experiment |
 | `capture-trust-boundary` / `capture-review` / `capture-reliability` / `findings` | Review-before-write |
 | `hydrate-session` / `phase2-auth` / `rls-policies` / `production-config` | Auth/persist/prod invariants |
 | `new-project` / `seed-reset` | Onboarding / demo |
@@ -633,10 +634,11 @@ Parallel writes:
 
 ### Capture
 
-- Components: `CaptureWorkspace`, `CaptureSessionContext`
+- Components: `CaptureWorkspace`, `CaptureSessionContext`, optional `CaptureSimplifiedWorkspace`
 - API: `src/app/api/capture/route.ts`
-- Tests: capture-trust-boundary, capture-review, capture-reliability, ocean-capture
+- Tests: capture-trust-boundary, capture-review, capture-reliability, ocean-capture, capture-v2-simplified
 - Discoveries: D-007, D-011, D-013, D-014, D-025
+- Layout experiment: localStorage `lume-capture-layout-experiment-v1` (default Classic). See `docs/CAPTURE_V2_SIMPLIFIED_EXPERIMENT.md`.
 
 ### Ask / Tell Me
 

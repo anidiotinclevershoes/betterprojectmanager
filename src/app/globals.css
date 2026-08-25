@@ -8662,3 +8662,197 @@ body {
     width: 100vw;
   }
 }
+
+/* ── Capture V2 simplified layout experiment ─────────────────────── */
+.capture-layout-toggle {
+  display: inline-flex;
+  gap: 0.2rem;
+  margin: 0.45rem 0 0.15rem;
+  padding: 0.18rem;
+  border-radius: 9px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.capture-layout-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.capture-layout-toggle button.is-selected {
+  background: rgba(108, 140, 255, 0.16);
+  border-color: rgba(108, 140, 255, 0.32);
+  color: var(--text-primary);
+}
+
+.capture-layout-experiment-tag {
+  font-size: 0.62rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.capture-layout-toggle button.is-selected .capture-layout-experiment-tag {
+  color: color-mix(in srgb, var(--accent-primary) 80%, var(--text-secondary));
+}
+
+.capture-v2-workspace .capture-support {
+  max-width: 36rem;
+}
+
+.capture-v2-compose {
+  margin-top: 0.15rem;
+}
+
+.capture-v2-textarea {
+  min-height: 7.5rem;
+}
+
+.capture-v2-toolbar {
+  margin-top: 0.7rem;
+}
+
+.capture-v2-note {
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.35rem 0.7rem 0.7rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.capture-v2-note-summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--text-secondary);
+  padding: 0.35rem 0;
+}
+
+.capture-v2-edit-note {
+  margin-top: 0.45rem;
+}
+
+.capture-v2-review {
+  gap: 1rem;
+}
+
+.capture-v2-review-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.capture-v2-counts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+.capture-v2-counts strong,
+.capture-v2-apply-ready {
+  font-weight: 650;
+}
+
+.capture-v2-group {
+  min-width: 0;
+}
+
+.capture-v2-group + .capture-v2-group {
+  margin-top: 0.15rem;
+}
+
+.capture-v2-ready-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.capture-v2-ready-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.capture-v2-ready-row.is-highlighted {
+  border-color: rgba(108, 140, 255, 0.45);
+}
+
+.capture-v2-ready-ico {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.capture-v2-ready-copy {
+  min-width: 0;
+}
+
+.capture-v2-ready-kind {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.capture-v2-ready-title {
+  margin: 0.1rem 0 0;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.capture-v2-ready-actions {
+  display: inline-flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.capture-v2-reviewed {
+  margin-top: 0.25rem;
+}
+
+.capture-v2-reviewed-toggle {
+  font-size: 0.78rem;
+}
+
+.ocean-capture-workspace .capture-v2-ready-row {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+@media (max-width: 720px) {
+  .capture-v2-ready-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .capture-v2-ready-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+  .capture-header-actions {
+    flex-wrap: wrap;
+  }
+}
+
