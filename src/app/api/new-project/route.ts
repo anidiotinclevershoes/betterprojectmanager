@@ -10,6 +10,12 @@ import { getOpenAIKey, isOpenAIConfigured } from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { requireAiCaller } from "@/lib/ai-gate";
 import { isProductionRuntime } from "@/lib/runtime-config";
+import {
+  draftFromProvisional,
+  extractNewProjectV2WithOpenAI,
+  isNewProjectV2Enabled,
+  parseNewProjectV2Envelope,
+} from "@/lib/new-project-v2";
 
 export const runtime = "nodejs";
 
@@ -46,6 +52,44 @@ export async function POST(request: Request) {
           provider: "local" as const,
           openaiConfigured: false,
         });
+      }
+
+      if (isNewProjectV2Enabled()) {
+        try {
+          const extracted = await extractNewProjectV2WithOpenAI(body.content);
+          const parsed = parseNewProjectV2Envelope(extracted.rawModelJson);
+          const draft = draftFromProvisional({
+            sourceNarrative: body.content,
+            sourceMode,
+            project: parsed.project,
+            items: parsed.items,
+          });
+          return NextResponse.json({
+            draft,
+            provisionalItems: parsed.items,
+            projectSeed: parsed.project,
+            provider: "openai" as const,
+            openaiConfigured: true,
+            pipeline: "v2" as const,
+          });
+        } catch {
+          const parsed = parseNewProjectV2Envelope({ observations: [] });
+          const draft = draftFromProvisional({
+            sourceNarrative: body.content,
+            sourceMode,
+            project: { name: "New project", summary: "", currentFocus: "" },
+            items: parsed.items,
+          });
+          return NextResponse.json({
+            draft,
+            provisionalItems: parsed.items,
+            projectSeed: parsed.project,
+            provider: "openai" as const,
+            openaiConfigured: true,
+            pipeline: "v2" as const,
+            note: "Lume could not organise this into a map. Nothing was created — you can recategorise or go back.",
+          });
+        }
       }
 
       try {

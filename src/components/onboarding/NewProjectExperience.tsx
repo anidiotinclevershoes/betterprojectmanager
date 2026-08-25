@@ -11,6 +11,7 @@ import {
 } from "react";
 import { LumeLogo } from "@/components/brand/LumeLogo";
 import { ProjectSetupReview } from "@/components/onboarding/ProjectSetupReview";
+import { NewProjectCategorisation } from "@/components/onboarding/NewProjectCategorisation";
 import {
   assembleFromNarrative,
   suggestCode,
@@ -18,9 +19,10 @@ import {
   TALK_GUIDANCE_TOPICS,
   type CreateProjectInput,
 } from "@/lib/create-project";
+import type { ProvisionalItem } from "@/lib/new-project-v2";
 import { useMission } from "@/lib/store";
 
-type Path = "choose" | "talk" | "blank" | "review";
+type Path = "choose" | "talk" | "blank" | "categorise" | "review";
 
 export function NewProjectExperience({
   variant = "page",
@@ -32,6 +34,15 @@ export function NewProjectExperience({
   const { createProject, openaiConfigured } = useMission();
   const [path, setPath] = useState<Path>("choose");
   const [draft, setDraft] = useState<CreateProjectInput | null>(null);
+  const [provisionalItems, setProvisionalItems] = useState<ProvisionalItem[]>([]);
+  const [projectSeed, setProjectSeed] = useState({
+    name: "",
+    summary: "",
+    currentFocus: "",
+  });
+  const [sourceNarrative, setSourceNarrative] = useState("");
+  const [sourceMode, setSourceMode] = useState<"talk" | "paste">("talk");
+  const [categorisationApproved, setCategorisationApproved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -80,8 +91,10 @@ export function NewProjectExperience({
     const controller = new AbortController();
     buildAbortRef.current = controller;
     try {
-      const local = assembleFromNarrative(content, "delivery", sourceMode);
-      const res = await fetch("/api/new-project", {
+        const local = assembleFromNarrative(content, "delivery", sourceMode);
+        setSourceNarrative(content);
+        setSourceMode(sourceMode);
+        const res = await fetch("/api/new-project", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
@@ -101,13 +114,30 @@ export function NewProjectExperience({
         );
         return;
       }
-      const data = (await res.json()) as {
-        draft?: CreateProjectInput;
-        note?: string;
-        provider?: string;
-      };
-      setDraft(data.draft ?? local);
-      setPath("review");
+        const data = (await res.json()) as {
+          draft?: CreateProjectInput;
+          note?: string;
+          provider?: string;
+          pipeline?: "v2" | "legacy";
+          provisionalItems?: ProvisionalItem[];
+          projectSeed?: { name?: string; summary?: string; currentFocus?: string };
+        };
+        if (data.pipeline === "v2") {
+          setProvisionalItems(data.provisionalItems ?? []);
+          setProjectSeed({
+            name: data.projectSeed?.name || data.draft?.name || "",
+            summary: data.projectSeed?.summary || data.draft?.summary || "",
+            currentFocus:
+              data.projectSeed?.currentFocus || data.draft?.currentFocus || "",
+          });
+          setCategorisationApproved(false);
+          setDraft(data.draft ?? local);
+          setPath("categorise");
+        } else {
+          setDraft(data.draft ?? local);
+          setCategorisationApproved(true);
+          setPath("review");
+        }
       if (data.note) {
         setError(data.note);
       }
@@ -175,14 +205,38 @@ export function NewProjectExperience({
         />
       ) : null}
 
+      {path === "categorise" ? (
+        <NewProjectCategorisation
+          sourceNarrative={sourceNarrative}
+          sourceMode={sourceMode}
+          project={projectSeed}
+          items={provisionalItems}
+          onChangeProject={setProjectSeed}
+          onChangeItems={setProvisionalItems}
+          busy={busy}
+          error={error}
+          onBack={() => setPath("talk")}
+          onApprove={(next) => {
+            setDraft(next);
+            setCategorisationApproved(true);
+            setPath("review");
+          }}
+        />
+      ) : null}
+
       {path === "review" && draft ? (
         <ProjectSetupReview
           draft={draft}
           onChange={setDraft}
           busy={busy}
           error={error}
-          onBack={() => setPath("talk")}
+          onBack={() => setPath(provisionalItems.length ? "categorise" : "talk")}
           onConfirm={() => {
+            if (provisionalItems.length && !categorisationApproved) {
+              setError("Approve the categorisation map before creating the project.");
+              setPath("categorise");
+              return;
+            }
             void createFromDraft(draft);
           }}
         />

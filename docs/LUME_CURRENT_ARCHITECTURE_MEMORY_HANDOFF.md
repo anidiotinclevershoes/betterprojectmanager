@@ -67,7 +67,7 @@ Use this section as working context for future product/development decisions and
 
 **Stale comment (do not trust):** `src/lib/data/index.ts` still says “Default: local (MissionState / localStorage remains the live UI path).” **CURRENT production path is Supabase hydrate + per-mutation persist.**
 
-**UI chrome:** V1 is **dark Ocean only**. AppearanceToggle was removed in Slice 2B.
+**UI chrome:** V1 appearances are **Ocean** (default, `data-theme="dark"`) and **Desert** (`data-theme="desert"`). The user chooses in Account → Appearance. Preference persists in `mc-appearance-v1`. `AppearanceToggle` remains unmounted from the project header (Slice 2B). See `docs/EXPERIMENTAL_PROGRAMME.md`.
 
 **Home:** `/` with projects **redirects into the first project’s Ocean Knowledge Centre** (`src/app/page.tsx`). There is no portfolio Overview.
 
@@ -437,6 +437,9 @@ Significance: ✦ marks model judgement. Confirmed Knowledge should look normal,
 | Flag / dual path | Purpose | Default | New path | Old path remains | Removal condition |
 | --- | --- | --- | --- | --- | --- |
 | `LUME_CANONICAL_TRUTH` | Ask assembler | **unset = legacy (off)** | `serializeCanonicalTruth` | `buildCaptureContext` + snapshots | After eval + product review; keep `0` rollback |
+| `LUME_CAPTURE_V2` | Capture observation pipeline | **unset = legacy (off)** | `src/lib/capture-v2` + Phase 3B apply | OpenAI findings / local regex fallback | Adopt or remove — do not keep two OpenAI Capture engines |
+| `LUME_NEW_PROJECT_V2` | New Project categorisation map | **unset = legacy (off)** | observations → provisional map → review → `persistNewProject` | `assembleFromNarrative` Talk path | Adopt or remove |
+| Appearance Ocean/Desert | Token themes | **Ocean default** | `[data-theme="desert"]` + Account picker | Ocean `[data-theme="dark"]` remains | Keep both; user-selectable |
 | `LUME_PERSISTENCE` | Durable store | prod supabase | hydrate + persist-mutations | localStorage v5 in local/dev | Do not silent-fallback in prod |
 | `LUME_AUTH` | Auth | prod supabase | Supabase session | demo JWT / none | — |
 | `LUME_ALLOW_LOCAL_IN_PRODUCTION` | Escape hatch | unset/false | — | local in prod if both set | Keep locked |

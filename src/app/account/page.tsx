@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { LumeThemePicker } from "@/components/app-shell/LumeThemePicker";
 import { TrialExpiredPanel } from "@/components/billing/TrialExpiredPanel";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import type { WorkspaceEntitlement } from "@/lib/billing/types";
@@ -119,8 +120,8 @@ export default function AccountPage() {
 
   return (
     <AuthShell
-      title="Account"
-      lede="Your Lume identity and billing status."
+        title="Account"
+        lede="Your Lume identity, appearance, and billing status."
       footer={
         <p className="auth-links">
           <Link href="/" className="auth-text-link">
@@ -143,6 +144,10 @@ export default function AccountPage() {
         <button type="button" className="ghost-btn" onClick={() => void signOut()}>
           Sign out
         </button>
+      </div>
+
+      <div className="account-block">
+        <LumeThemePicker />
       </div>
 
       <div className="account-block">

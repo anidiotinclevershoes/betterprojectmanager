@@ -31,6 +31,14 @@ import type {
 import { requireAiCaller } from "@/lib/ai-gate";
 import { isProductionRuntime } from "@/lib/runtime-config";
 import { serverLog } from "@/lib/server-log";
+import {
+  contextRecordsFromWorld,
+  extractObservationsWithOpenAI,
+  formatAuthoritativeStateForPrompt,
+  isCaptureV2Enabled,
+  runCaptureV2FromModelJson,
+  worldFromCaptureState,
+} from "@/lib/capture-v2";
 
 export const runtime = "nodejs";
 
@@ -59,13 +67,14 @@ function requestId() {
 
 export async function GET() {
   const diagnostics = getOpenAIKeyDiagnostics();
-  return NextResponse.json({
-    openaiConfigured: diagnostics.openaiConfigured,
-    model: resolveOpenAIChatModel(),
-    keyPrefix: diagnostics.prefix,
-    keyLength: diagnostics.length,
-    reason: diagnostics.reason,
-  });
+    return NextResponse.json({
+      openaiConfigured: diagnostics.openaiConfigured,
+      model: resolveOpenAIChatModel(),
+      keyPrefix: diagnostics.prefix,
+      keyLength: diagnostics.length,
+      reason: diagnostics.reason,
+      captureV2Enabled: isCaptureV2Enabled(),
+    });
 }
 
 export async function POST(request: Request) {
@@ -229,6 +238,93 @@ export async function POST(request: Request) {
 
     const existingKnowledge: ProjectKnowledge | null =
       knowledge.find((k) => k.projectId === body.projectId) ?? null;
+
+    if (isCaptureV2Enabled() && isOpenAIConfigured()) {
+      const world = worldFromCaptureState({
+        projects,
+        risks,
+        todos,
+        timeline,
+        knowledge,
+      });
+      const project = projects.find((p) => p.id === body.projectId);
+      const records = contextRecordsFromWorld(world, body.projectId);
+      const projectBlock = project
+        ? formatAuthoritativeStateForPrompt(
+            records,
+            { id: project.id, name: project.name, code: project.code },
+          )
+        : "Current project: (unscoped)\nAuthoritative current records:\n(none)";
+      const extraction = await extractObservationsWithOpenAI({
+        transcript: content,
+        projectBlock,
+      });
+      const v2 = runCaptureV2FromModelJson({
+        transcript: content,
+        rawModelJson: extraction.rawModelJson,
+        world,
+        projectId: body.projectId,
+      });
+      const promptAssembly = buildCapturePromptAssembly({
+        rawText: content,
+        projectId: body.projectId,
+        sourceType: body.sourceType,
+        projects,
+        existingKnowledge,
+        existingTimeline: timeline.filter((t) => t.projectId === body.projectId),
+        openTodos: todos
+          .filter((t) => !t.done)
+          .slice(0, 40)
+          .map((t) => ({
+            id: t.id,
+            title: t.title,
+            projectId: t.projectId,
+            dueAt: t.dueAt,
+          })),
+        captureContext,
+      });
+      const enrichedManifest = {
+        ...contextManifest,
+        promptAssembly: {
+          sections: promptAssembly.sections.map((s) => ({
+            id: s.id,
+            label: s.label,
+            present: true,
+          })),
+          approximateCharacters: promptAssembly.diagnostics.approximateCharacters,
+          estimatedTokens: promptAssembly.diagnostics.estimatedTokens,
+          contextRecordCount: promptAssembly.diagnostics.contextRecordCount,
+          dictionaryEntryCount: promptAssembly.diagnostics.dictionaryEntryCount,
+        },
+      };
+      const reliability = assessCaptureReliability({
+        captureText: content,
+        result: v2.result,
+        contextManifest: enrichedManifest,
+      });
+      recordCaptureMetricsSafe({
+        startedAt,
+        requestId: analysisRequestId,
+        source: "capture",
+        promptAssembly,
+        captureContext,
+        result: v2.result,
+        providerUsage: extraction.providerUsage,
+        responseText: extraction.responseText,
+        model: extraction.model,
+        systemPrompt: "capture-v2-observations",
+        reliability: reliabilityForCockpit(reliability),
+      });
+      return NextResponse.json({
+        result: v2.result,
+        openaiConfigured: true,
+        requestId: analysisRequestId,
+        contextManifest: enrichedManifest,
+        captureContextDiagnostics: captureContext.diagnostics,
+        reliability,
+        capturePipeline: "v2",
+      });
+    }
 
     const { ai, promptAssembly, providerUsage, responseText, model } =
       await tidyAndCoachWithOpenAI({
