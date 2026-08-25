@@ -45,8 +45,12 @@ async function main() {
     assert.match(store, /attempt < 7/);
     // Server cookie path is the primary hydrate (avoids browser session race).
     assert.match(store, /\/api\/workspace\/state/);
-    // Server create path — must not rely only on browser RLS.
-    assert.match(store, /\/api\/workspace\/projects/);
+    // One deliberate create path — never fall through to a second browser persist.
+    assert.doesNotMatch(store, /trying browser persist/);
+    assert.match(store, /createProjectInFlightRef/);
+    // Durable paint cache only after hydrate or confirmed persist.
+    assert.match(store, /shouldWriteDurableMissionCache/);
+    assert.match(store, /saveStatus !== "saved"/);
     // Production must not silently create local-only projects.
     assert.match(store, /Project was not saved to your account/);
     // Must keep Loading (not fail-fast) while supabase session settles.

@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 21 August 2026 (Documentation Governance Cleanup — D-019 recorded as resolved by D-R10; D-007 remaining scope = Capture people promotion only)  
+**Last housekeeping:** 25 August 2026 (Phase 3A — Data Integrity & Reactive-State Foundation: D-006 fixed; Ocean save-failure visibility; paint-cache + create idempotency)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
@@ -100,7 +100,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Selected mutations emit durable history rows in plan/fake client |
 | **Target resolution / validation point** | V1 product hardening |
 | **Related docs** | Architecture audit; philosophy (History = evidence/chronology) |
-| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. |
+| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. **Phase 3A create-path decision:** New Project History is **secondary evidence after authoritative bundle success**. A failed/rolled-back create must not write `project_created`. Failure of the History insert must not roll back the project bundle. Broader `pushHistory` without `persistHistoryEvent` remains open. |
 
 ---
 
@@ -108,39 +108,39 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | partial |
 | **Severity** | high |
 | **Domain** | Infra / UX trust |
 | **Found in** | Test safety net trust-critical gaps; store `console.error` + `setSaveStatus("error")` patterns |
 | **Failure class** | Persist failures often only set soft save status / console error; user may believe Knowledge/Risk/Todo saved when DB write failed |
 | **Evidence / repro** | Force persist error (network/RLS); observe UI continues with optimistic MissionState; reload loses change |
-| **Likely files** | `src/lib/store.tsx` (all supabase `void (async…)` paths); save-status UI consumers |
+| **Likely files** | `src/lib/store.tsx` (all supabase `void (async…)` paths); `src/components/AppShell.tsx` (`ocean-save-error`); save-status UI consumers |
 | **Proposed fix direction** | Surface durable toast/banner on save error; consider optimistic rollback or “not saved” badge on affected frames |
 | **Explicit non-goals** | Full offline sync engine |
 | **Regression test to add** | Hard without UI; at least ensure error paths set `saveStatus` and do not claim success |
 | **Target resolution / validation point** | V1 product hardening; must be checked before V1 launch (incremental per write path is OK) |
 | **Related docs** | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` §C.4 |
-| **Notes** | Cross-cutting — fix incrementally when touching a write path; full UX polish belongs in V1 product hardening. Slice 2C **partially** surfaces `saveStatus`/`saveError` inside the Knowledge item detail drawer on correction paths so a failed durable save is not silent there. App-wide toast/banner and optimistic rollback remain open. |
+| **Notes** | **Phase 3A (partial):** Ocean chrome now shows `saveStatus=error` via `ocean-save-error` (does not require opening a drawer or devtools). Failed persist paths call `reportPersistFailure`, which reconciles MissionState from `/api/workspace/state` and does not write dirty state to the paint cache. Success of a later persist clears the banner (`markPersistSaved`). **Still open:** most mutations remain optimistic-then-persist rather than persist-first; concurrent in-flight mutations can be overwritten by a coarse rehydrate; Capture apply is still optimistic (Phase 3B). App-wide per-field “not saved” badges remain out of scope. |
 
 ---
 
-### D-006 — `persistNewProject` uses invalid risk `source: "setup"`
+### D-026 — Workspace + project-code uniqueness is not a durable product constraint
 
 | Field | Value |
 | --- | --- |
 | **Status** | open |
-| **Severity** | medium |
-| **Domain** | Risks / New Project |
-| **Found in** | Slice 1B inspection (Aug 2026) |
-| **Failure class** | New project risk inserts use `source: "setup"` but DB check allows only `manual \| capture \| seed` → insert may fail at runtime |
-| **Evidence / repro** | `src/lib/data/supabase/persist-mutations.ts` `persistNewProject` risk insert; compare `supabase/migrations/20260812002748_workspace_schema.sql` risks.source check |
-| **Likely files** | `persist-mutations.ts` (`persistNewProject`); `src/types/database.ts` |
-| **Proposed fix direction** | Change to `source: "manual"` (or extend enum via migration if product wants `setup` — prefer allowed value first) |
-| **Explicit non-goals** | Risk UI redesign |
-| **Regression test to add** | Static assert allowed source values; or new-project persist unit with mocked client |
-| **Target resolution / validation point** | Fix at the next New Project/persistence touchpoint; must be resolved before V1 launch |
-| **Related docs** | Slice 1B completion discoveries |
-| **Notes** | Small one-line fix; do not wait for a dedicated Risks slice — fix opportunistically at the next New Project/persistence touch |
+| **Severity** | low |
+| **Domain** | Projects / Infra |
+| **Found in** | Phase 3A preflight (Aug 2026) |
+| **Failure class** | There is no unique constraint on `(workspace_id, code)` or project name. Two deliberately different New Project actions can share a code. Retry safety uses a client request UUID, not code matching. |
+| **Evidence / repro** | `supabase/migrations/20260812002748_workspace_schema.sql` `projects` table — `code text not null` with no unique index |
+| **Likely files** | schema; `persistNewProject`; New Project review |
+| **Proposed fix direction** | Decide the product rule first (codes unique per workspace vs allowed duplicates). If unique, add a DB unique index and a meaningful Ocean error. Do not invent fuzzy name matching. |
+| **Explicit non-goals** | Treating name similarity as duplication |
+| **Regression test to add** | If the product rule becomes “codes unique per workspace”, assert unique-violation surfaces a code-already-used error |
+| **Target resolution / validation point** | New Project/product hardening — do not silently add the constraint in an integrity slice |
+| **Related docs** | Phase 3A PR; this file D-R11 |
+| **Notes** | Phase 3A implements retry idempotency via `clientProjectId` (same user action / same UUID). That is not a product rule that two projects cannot share a code. |
 
 ---
 
@@ -550,9 +550,31 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ---
 
+### D-006 — Invalid New Project risk source `setup`
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Phase 3A (D-R11) |
+| **Failure class** | New project risk inserts used `source: "setup"`; DB allows only `manual \| capture \| seed` |
+| **Fix summary** | Inserts use `NEW_PROJECT_RISK_SOURCE = "manual"`. The DB enum was not expanded. |
+
+---
+
+### D-R11 — Phase 3A New Project integrity & durable reactive state
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Phase 3A — Data Integrity & Reactive-State Foundation |
+| **Failure class** | New Project used illegal risk `source: "setup"` (D-006); sequential non-transactional inserts could leave a partial project; server-fail fell through to a second browser `persistNewProject` (duplicate/orphan); no create idempotency; MissionState was written to the Supabase paint cache on every change including unconfirmed optimistic state; Ocean had no global save-failure surface |
+| **Fix summary** | Risk source `manual`; compensating cleanup of the failed bundle (SET NULL children first, then project CASCADE); one server create path; `clientProjectId` retry identity; persist-first create then `applyDurableWorkspace`; paint cache only on hydrate/confirmed persist; Ocean `ocean-save-error`; persist failure reconciles from `/api/workspace/state`. History create event is secondary after authoritative success. |
+
+---
+
 ## Suggested fix order (non-binding)
 
-1. **D-006** — next New Project/persistence touchpoint (before V1 launch)  
+1. ~~**D-006**~~ — fixed in Phase 3A (D-R11)  
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
 3. ~~**D-019**~~ — fixed in Slice 2D (D-R10)  
 4. **D-007** remainder — Capture People promotion only (People UI polish landed in 2D)  
@@ -562,10 +584,11 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 8. **D-014** — Capture apply → Supabase round-trip before Capture V1-ready  
 9. **D-011** — demo-name extractors at Capture hardening (not UI)  
 10. **D-003** — suggestion persist (V1 product hardening)  
-11. **D-005** remainder — app-wide save-error UX (V1 product hardening; drawer/confirm paths partial)  
-12. **D-004** — history persist gaps (V1 product hardening; honesty notes only)  
+11. **D-005** remainder — persist-first / per-field unsaved treatment (Ocean banner + reconcile landed in 3A; Capture apply still optimistic — Phase 3B)  
+12. **D-004** remainder — history persist gaps outside New Project create (create-path coupling decided in 3A)  
 13. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
-14. **D-008 / D-021**, **D-012–D-015**, **D-020** remainder (Ask/ingestion), **D-024** — as scheduled  
+14. **D-026** — product decision on project-code uniqueness  
+15. **D-008 / D-021**, **D-012–D-015**, **D-020** remainder (Ask/ingestion), **D-024** — as scheduled  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 

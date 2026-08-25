@@ -36,13 +36,24 @@ export function NewProjectExperience({
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const buildAbortRef = useRef<AbortController | null>(null);
+  const createLockRef = useRef(false);
+  const clientProjectIdRef = useRef<string | null>(null);
 
   const createFromDraft = useCallback(
     async (input: CreateProjectInput) => {
+      if (createLockRef.current) return;
+      createLockRef.current = true;
       setBusy(true);
       setError(null);
+      if (!clientProjectIdRef.current) {
+        clientProjectIdRef.current = crypto.randomUUID();
+      }
       try {
-        const id = await createProject(input);
+        const id = await createProject({
+          ...input,
+          clientProjectId: clientProjectIdRef.current,
+        });
+        clientProjectIdRef.current = null;
         setSuccess(`${input.name.trim() || input.code} is ready.`);
         router.push(`/projects/${id}`);
       } catch (err) {
@@ -52,6 +63,7 @@ export function NewProjectExperience({
             : "Could not create the project. Please try again.",
         );
       } finally {
+        createLockRef.current = false;
         setBusy(false);
       }
     },
@@ -658,7 +670,7 @@ function BlankPath({
             className="primary-btn"
             disabled={busy || !name.trim()}
           >
-            Create Project
+            {busy ? "Creating…" : "Create Project"}
           </button>
         </div>
       </form>

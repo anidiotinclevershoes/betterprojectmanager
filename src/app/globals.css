@@ -1668,6 +1668,17 @@ body {
   margin: 0 auto;
 }
 
+.ocean-save-error {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border-subtle));
+  background: rgba(228, 91, 91, 0.12);
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .app-sidebar {
   position: sticky;
   top: 0;
