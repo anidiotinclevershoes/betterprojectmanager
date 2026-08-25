@@ -304,6 +304,18 @@ check("env example documents public vs server vars", () => {
   assert.doesNotMatch(env, /NEXT_PUBLIC_SUPABASE_SERVICE/);
 });
 
+check("next production build typechecks the app, not verify scripts", () => {
+  const nextConfig = fs.readFileSync(path.join(root, "next.config.ts"), "utf8");
+  assert.match(nextConfig, /tsconfigPath:\s*"tsconfig\.build\.json"/);
+  const buildTsconfig = JSON.parse(
+    fs.readFileSync(path.join(root, "tsconfig.build.json"), "utf8"),
+  ) as { exclude?: string[] };
+  assert.ok(
+    (buildTsconfig.exclude ?? []).includes("scripts"),
+    "tsconfig.build.json must exclude scripts so next build cannot fail on test helpers",
+  );
+});
+
 check("browser supabase helpers use static NEXT_PUBLIC process.env access", () => {
   const src = fs.readFileSync(
     path.join(root, "src/lib/supabase/env.ts"),
