@@ -22,6 +22,8 @@ import {
 } from "./coach";
 import { extractKnowledgePatchFromText, emptyKnowledge, mergeKnowledge } from "./knowledge";
 import { confirmResponsibilityOwner as applyConfirmResponsibilityOwner } from "@/lib/canonical-truth/confirm-responsibility";
+import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
+import { ensurePersonOnProject as applyEnsurePersonOnProject } from "@/lib/people/identity";
 import { buildNewProject, type CreateProjectInput } from "./create-project";
 import { pruneBrowserResidueForDeletedProject } from "@/lib/workspace/prune-deleted-project-residue";
 import {
@@ -78,6 +80,7 @@ import {
   persistMemory,
   persistRiskStatus,
   persistTimelineItem,
+  persistTimelineUpdate,
   persistTodoCreate,
   persistTodoDelete,
   persistTodoUpdate,
@@ -250,7 +253,40 @@ type MissionContextValue = {
   addTimelineItem: (
     projectId: string,
     item: TimelineItemInput & { source?: TimelineItem["source"] },
-  ) => void;
+  ) => Promise<{ ok: boolean; error?: string }>;
+  /** Phase 3B: persist-first Risk create (dual-writes risks + knowledge projection). */
+  addCaptureRisk: (
+    projectId: string,
+    title: string,
+  ) => Promise<{ ok: boolean; riskId?: string; error?: string }>;
+  /** Phase 3B: persist-first Risk lifecycle update. */
+  setCaptureRiskStatus: (
+    riskId: string,
+    status: RiskStatus,
+    projectId: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  /** Phase 3B: persist-first milestone/date update. */
+  updateTimelineItem: (
+    projectId: string,
+    milestoneId: string,
+    patch: { label?: string; startAt?: string; endAt?: string; notes?: string },
+  ) => Promise<{ ok: boolean; error?: string }>;
+  /** Phase 3B: persist-first structured availability. */
+  addAvailabilityItem: (input: {
+    projectId: string;
+    personId: string;
+    personName: string;
+    awayFromIso: string;
+    awayToIso: string;
+    label?: string;
+  }) => Promise<{ ok: boolean; error?: string }>;
+  /** Phase 3B: persist-first Person reuse / project membership. */
+  ensureCapturePerson: (input: {
+    projectId: string;
+    name: string;
+    personId?: string;
+    roleHint?: string;
+  }) => Promise<{ ok: boolean; created: boolean; personId?: string; error?: string }>;
   refreshCoaching: () => void;
   /** Development: restore seeded demo baseline; preserve non-seeded data. */
   resetDemo: () => SeedResetResult;
@@ -891,6 +927,15 @@ export function MissionProvider({ children }: { children: ReactNode }) {
             dueAt: t.dueAt,
             done: t.done,
             createdAt: t.createdAt,
+          })),
+          risks: (latest.risks ?? []).slice(0, 80).map((r) => ({
+            id: r.id,
+            projectId: r.projectId,
+            title: r.title,
+            status: r.status,
+            source: r.source,
+            createdAt: r.createdAt,
+            updatedAt: r.updatedAt,
           })),
           history: (latest.history ?? []).slice(0, 40).map((h) => ({
             id: h.id,
@@ -2134,39 +2179,43 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   );
 
   const addTimelineItem = useCallback(
-    (
+    async (
       projectId: string,
       item: TimelineItemInput & { source?: TimelineItem["source"] },
-    ) => {
+    ): Promise<{ ok: boolean; error?: string }> => {
       const meta = persistMetaRef.current;
       if (meta.mode === "supabase" && meta.workspaceId) {
-        void (async () => {
-          try {
-            const client = createBrowserSupabaseClient();
-            const created = await persistTimelineItem(
-              client,
-              meta.workspaceId!,
-              projectId,
-              {
-                label: item.label,
-                type: item.type,
-                startAt: item.startAt,
-                endAt: item.endAt,
-                notes: item.notes,
-                source: item.source ?? "manual",
-              },
-            );
-            setState((prev) => ({
-              ...prev,
-              timeline: [...(prev.timeline ?? []), created],
-            }));
-            markPersistSaved();
-          } catch (err) {
-            console.error("[addTimelineItem] persist failed", err);
-            reportPersistFailure(err, "Could not save date");
-          }
-        })();
-        return;
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          const created = await persistTimelineItem(
+            client,
+            meta.workspaceId,
+            projectId,
+            {
+              label: item.label,
+              type: item.type,
+              startAt: item.startAt,
+              endAt: item.endAt,
+              notes: item.notes,
+              source: item.source ?? "manual",
+            },
+          );
+          setState((prev) => ({
+            ...prev,
+            timeline: [...(prev.timeline ?? []), created],
+          }));
+          markPersistSaved();
+          return { ok: true };
+        } catch (err) {
+          console.error("[addTimelineItem] persist failed", err);
+          reportPersistFailure(err, "Could not save date");
+          return {
+            ok: false,
+            error: err instanceof Error ? err.message : "Could not save date",
+          };
+        }
       }
       setState((prev) => ({
         ...prev,
@@ -2177,6 +2226,378 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           item.source ?? "manual",
         ),
       }));
+      return { ok: true };
+    },
+    [],
+  );
+
+  const addCaptureRisk = useCallback(
+    async (
+      projectId: string,
+      title: string,
+    ): Promise<{ ok: boolean; riskId?: string; error?: string }> => {
+      const trimmed = title.trim();
+      if (!trimmed) {
+        return { ok: false, error: "This Risk has no title." };
+      }
+      const riskId = newClientId();
+      const applyLocal = () => {
+        setState((prev) => {
+          const current =
+            (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
+            emptyKnowledge(projectId);
+          const merged = mergeKnowledge(current, projectId, { risks: [trimmed] });
+          return {
+            ...prev,
+            knowledge: [
+              ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
+              merged,
+            ],
+            risks: [
+              ...(prev.risks ?? []),
+              {
+                id: riskId,
+                projectId,
+                title: trimmed,
+                status: "open" as const,
+                source: "capture" as const,
+                createdAt: new Date().toISOString(),
+              },
+            ],
+          };
+        });
+      };
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistKnowledgeBullet(
+            client,
+            meta.workspaceId,
+            projectId,
+            "risks",
+            trimmed,
+            meta.userId,
+            { riskId },
+          );
+          applyLocal();
+          markPersistSaved();
+          return { ok: true, riskId };
+        } catch (err) {
+          console.error("[addCaptureRisk] persist failed", err);
+          reportPersistFailure(err, "Could not save risk");
+          return {
+            ok: false,
+            error: err instanceof Error ? err.message : "Could not save risk",
+          };
+        }
+      }
+      applyLocal();
+      return { ok: true, riskId };
+    },
+    [],
+  );
+
+  const setCaptureRiskStatus = useCallback(
+    async (
+      riskId: string,
+      status: RiskStatus,
+      projectId: string,
+    ): Promise<{ ok: boolean; error?: string }> => {
+      const prev = stateRef.current;
+      const existing = findProjectRisk(prev.risks, riskId, projectId);
+      if (!existing) {
+        return { ok: false, error: "This Risk could not be found on the project." };
+      }
+      const updatedRisk = {
+        ...existing,
+        status,
+        updatedAt: new Date().toISOString(),
+      };
+      const current =
+        (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
+        emptyKnowledge(projectId);
+      const nextKnowledge = syncKnowledgeRiskProjection(current, updatedRisk);
+      const applyLocal = () => {
+        setState((latest) => ({
+          ...latest,
+          risks: (latest.risks ?? []).map((r) =>
+            r.id === riskId && r.projectId === projectId ? updatedRisk : r,
+          ),
+          knowledge: [
+            ...(latest.knowledge ?? []).filter((k) => k.projectId !== projectId),
+            nextKnowledge,
+          ],
+        }));
+      };
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistRiskStatus(
+            client,
+            meta.workspaceId,
+            projectId,
+            riskId,
+            status,
+          );
+          await persistKnowledgeReconcile(
+            client,
+            meta.workspaceId,
+            projectId,
+            nextKnowledge,
+            meta.userId,
+            ["risks"],
+          );
+          applyLocal();
+          markPersistSaved();
+          return { ok: true };
+        } catch (err) {
+          console.error("[setCaptureRiskStatus] persist failed", err);
+          reportPersistFailure(err, "Could not save risk status");
+          return {
+            ok: false,
+            error:
+              err instanceof Error ? err.message : "Could not save risk status",
+          };
+        }
+      }
+      applyLocal();
+      return { ok: true };
+    },
+    [],
+  );
+
+  const updateTimelineItem = useCallback(
+    async (
+      projectId: string,
+      milestoneId: string,
+      patch: { label?: string; startAt?: string; endAt?: string; notes?: string },
+    ): Promise<{ ok: boolean; error?: string }> => {
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          const updated = await persistTimelineUpdate(
+            client,
+            meta.workspaceId,
+            projectId,
+            milestoneId,
+            patch,
+          );
+          setState((prev) => ({
+            ...prev,
+            timeline: (prev.timeline ?? []).map((t) =>
+              t.id === milestoneId && t.projectId === projectId ? updated : t,
+            ),
+          }));
+          markPersistSaved();
+          return { ok: true };
+        } catch (err) {
+          console.error("[updateTimelineItem] persist failed", err);
+          reportPersistFailure(err, "Could not save date change");
+          return {
+            ok: false,
+            error: err instanceof Error ? err.message : "Could not save date change",
+          };
+        }
+      }
+      setState((prev) => ({
+        ...prev,
+        timeline: (prev.timeline ?? []).map((t) => {
+          if (t.id !== milestoneId || t.projectId !== projectId) return t;
+          return {
+            ...t,
+            label: patch.label ?? t.label,
+            startAt: patch.startAt ?? t.startAt,
+            endAt: patch.endAt ?? t.endAt,
+            notes: patch.notes ?? t.notes,
+          };
+        }),
+      }));
+      return { ok: true };
+    },
+    [],
+  );
+
+  const addAvailabilityItem = useCallback(
+    async (input: {
+      projectId: string;
+      personId: string;
+      personName: string;
+      awayFromIso: string;
+      awayToIso: string;
+      label?: string;
+    }): Promise<{ ok: boolean; error?: string }> => {
+      const id = newClientId();
+      const fromDay = input.awayFromIso.slice(0, 10);
+      const toDay = input.awayToIso.slice(0, 10);
+      const body =
+        fromDay === toDay
+          ? `${input.personName} — away ${fromDay}`
+          : `${input.personName} — away ${fromDay} to ${toDay}`;
+      const structured: CanonicalTruthItem = {
+        id,
+        projectId: input.projectId,
+        section: "people",
+        body,
+        kind: "availability",
+        epistemic: "confirmed",
+        lifecycle: "current",
+        meta: {
+          personId: input.personId,
+          availability: {
+            personId: input.personId,
+            personName: input.personName,
+            awayFromIso: input.awayFromIso,
+            awayToIso: input.awayToIso,
+            label: input.label ?? null,
+          },
+        },
+        provenance: [{ type: "capture", at: new Date().toISOString() }],
+      };
+
+      const applyLocal = () => {
+        setState((prev) => {
+          const current =
+            (prev.knowledge ?? []).find((k) => k.projectId === input.projectId) ??
+            emptyKnowledge(input.projectId);
+          const next = {
+            ...current,
+            updatedAt: new Date().toISOString(),
+            sections: {
+              ...current.sections,
+              people: [...(current.sections.people ?? []), body].slice(0, 24),
+            },
+            structured: [...(current.structured ?? []), structured],
+          };
+          return {
+            ...prev,
+            knowledge: [
+              ...(prev.knowledge ?? []).filter((k) => k.projectId !== input.projectId),
+              next,
+            ],
+          };
+        });
+      };
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistKnowledgeBullet(
+            client,
+            meta.workspaceId,
+            input.projectId,
+            "people",
+            body,
+            meta.userId,
+            {
+              id,
+              kind: "availability",
+              epistemic: "confirmed",
+              lifecycle: "current",
+              meta: structured.meta as Record<string, unknown>,
+              provenance: structured.provenance ?? [],
+            },
+          );
+          applyLocal();
+          markPersistSaved();
+          return { ok: true };
+        } catch (err) {
+          console.error("[addAvailabilityItem] persist failed", err);
+          reportPersistFailure(err, "Could not save availability");
+          return {
+            ok: false,
+            error: err instanceof Error ? err.message : "Could not save availability",
+          };
+        }
+      }
+      applyLocal();
+      return { ok: true };
+    },
+    [],
+  );
+
+  const ensureCapturePerson = useCallback(
+    async (input: {
+      projectId: string;
+      name: string;
+      personId?: string;
+      roleHint?: string;
+    }): Promise<{ ok: boolean; created: boolean; personId?: string; error?: string }> => {
+      const latest = stateRef.current;
+      let created = false;
+      let personId = input.personId;
+      const applyLocal = () => {
+        setState((prev) => {
+          const result = applyEnsurePersonOnProject(
+            prev.projects,
+            input.projectId,
+            input.name,
+            input.personId,
+            input.roleHint,
+          );
+          created = result.created;
+          personId = result.stakeholder.id;
+          return { ...prev, projects: result.projects };
+        });
+      };
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        const preview = applyEnsurePersonOnProject(
+          latest.projects,
+          input.projectId,
+          input.name,
+          input.personId,
+          input.roleHint,
+        );
+        created = preview.created;
+        personId = preview.stakeholder.id;
+        if (!preview.created) {
+          applyLocal();
+          return { ok: true, created: false, personId };
+        }
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistEnsureStakeholder(
+            client,
+            meta.workspaceId,
+            input.projectId,
+            {
+              id: preview.stakeholder.id,
+              name: preview.stakeholder.name,
+              role: preview.stakeholder.role,
+            },
+          );
+          applyLocal();
+          markPersistSaved();
+          return { ok: true, created: true, personId };
+        } catch (err) {
+          console.error("[ensureCapturePerson] persist failed", err);
+          reportPersistFailure(err, "Could not save person");
+          return {
+            ok: false,
+            created: false,
+            error: err instanceof Error ? err.message : "Could not save person",
+          };
+        }
+      }
+      applyLocal();
+      return { ok: true, created, personId };
     },
     [],
   );
@@ -2259,6 +2680,11 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,
+      addCaptureRisk,
+      setCaptureRiskStatus,
+      updateTimelineItem,
+      addAvailabilityItem,
+      ensureCapturePerson,
       refreshCoaching,
       resetDemo,
       persistenceMode,
@@ -2299,6 +2725,11 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,
+      addCaptureRisk,
+      setCaptureRiskStatus,
+      updateTimelineItem,
+      addAvailabilityItem,
+      ensureCapturePerson,
       refreshCoaching,
       resetDemo,
     ],

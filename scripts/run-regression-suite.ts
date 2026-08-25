@@ -22,6 +22,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "ocean-item-detail", script: "scripts/verify-ocean-item-detail.ts" },
   { name: "people-context-ui", script: "scripts/verify-people-context-ui.ts" },
   { name: "capture-trust-boundary", script: "scripts/verify-capture-trust-boundary.ts" },
+  { name: "phase3b-capture-boundary", script: "scripts/verify-phase3b-capture-boundary.ts" },
   { name: "canonical-truth", script: "scripts/verify-canonical-truth.ts" },
   { name: "tell-me", script: "scripts/verify-tell-me.ts" },
   { name: "capture-context", script: "scripts/verify-capture-context.ts" },

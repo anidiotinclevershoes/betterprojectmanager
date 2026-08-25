@@ -69,6 +69,7 @@ export function buildContextRecordIndex(
         status: r.status,
         summary: r.summary,
         rawType: r.type,
+        date: r.date ?? null,
       });
     }
   }

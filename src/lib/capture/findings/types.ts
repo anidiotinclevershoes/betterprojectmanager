@@ -80,6 +80,7 @@ export type IndexedContextRecord = {
   status?: string;
   summary?: string;
   rawType: string;
+  date?: string | null;
 };
 
 export type FindingsValidationReport = {

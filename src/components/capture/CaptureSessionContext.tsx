@@ -12,8 +12,11 @@ import {
 } from "react";
 import { useMission } from "@/lib/store";
 import {
-  findProjectRiskByExactTitle,
-} from "@/lib/risks/lifecycle";
+  executeCaptureApply,
+  planCaptureApply,
+  captureApplyWorldFromState,
+  type CaptureApplyDecision,
+} from "@/lib/capture/apply";
 import {
   buildSuggestions,
   CAPTURE_SESSION_KEY,
@@ -56,6 +59,11 @@ type CaptureSessionValue = {
         | "content"
         | "date"
         | "targetTodoId"
+        | "targetEntityId"
+        | "legalDomain"
+        | "personId"
+        | "personName"
+        | "ownershipSemantics"
         | "projectId"
         | "projectName"
         | "projectCode"
@@ -88,8 +96,12 @@ type CaptureSessionValue = {
     options?: { force?: boolean },
   ) => Promise<void>;
   cancelAnalyse: () => void;
-  applyOne: (item: PendingSuggestion, scopedProjectId?: string) => void;
+  applyOne: (
+    item: PendingSuggestion,
+    scopedProjectId?: string,
+  ) => Promise<CaptureApplyDecision>;
   dismissOne: (id: string) => void;
+  markOneApplied: (id: string) => void;
   clearSession: () => void;
   expandAnalysis: () => void;
   /** Clear analysis but keep transcript — used after limited reliability. */
@@ -195,14 +207,17 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     analyzeCaptureWithAI,
     applyCaptureResult,
     addTodo,
-    addSuggestion,
     addKnowledgeBullet,
     addTimelineItem,
+    addCaptureRisk,
+    setCaptureRiskStatus,
+    updateTimelineItem,
+    addAvailabilityItem,
+    ensureCapturePerson,
+    confirmResponsibilityOwner,
     toggleTodo,
     removeTodo,
     updateTodo,
-    setRiskStatus,
-    setKnowledgeOnlyRiskResolved,
   } = useMission();
 
   const [slice, setSlice] = useState<CapturePersistSlice>(emptySlice);
@@ -324,6 +339,11 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           | "content"
           | "date"
           | "targetTodoId"
+          | "targetEntityId"
+          | "legalDomain"
+          | "personId"
+          | "personName"
+          | "ownershipSemantics"
           | "projectId"
           | "projectName"
           | "projectCode"
@@ -535,13 +555,19 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applyOne = useCallback(
-    (item: PendingSuggestion, scopedProjectId?: string) => {
+    async (
+      item: PendingSuggestion,
+      scopedProjectId?: string,
+    ): Promise<CaptureApplyDecision> => {
       const text = (slice.editing[item.id] ?? item.content).trim();
-      if (!text) return;
-      const pid =
-        item.projectId ?? scopedProjectId ?? (slice.projectId || null);
+      const decision = planCaptureApply({
+        item,
+        text,
+        world: captureApplyWorldFromState(state),
+        captureEntryProjectId: scopedProjectId || slice.projectId || null,
+      });
 
-      const finish = () => {
+      const finishApplied = (message: string) => {
         setSlice((prev) => {
           const next = {
             ...prev,
@@ -550,127 +576,170 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           persistHistory(next);
           return next;
         });
-        announce(
-          item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
-        );
+        announce(message);
       };
 
-      if (item.op === "complete" && item.targetTodoId) {
-        const todo = state.todos.find((t) => t.id === item.targetTodoId);
-        if (todo && !todo.done) toggleTodo(item.targetTodoId);
-        finish();
-        return;
+      if (decision.kind === "needs_you") {
+        announce(decision.reason);
+        return decision;
       }
-      if (
-        (item.op === "delete" || item.op === "remove" || item.op === "archive") &&
-        item.targetTodoId
-      ) {
-        if (item.op === "archive") {
-          const todo = state.todos.find((t) => t.id === item.targetTodoId);
-          if (todo && !todo.done) toggleTodo(item.targetTodoId!);
-        } else {
-          removeTodo(item.targetTodoId);
-        }
-        finish();
-        return;
-      }
-      if (item.op === "update" && item.targetTodoId) {
-        updateTodo(item.targetTodoId, {
-          title: text,
-          detail: item.recommendation?.action,
-          dueAt: item.date ?? undefined,
-        });
-        finish();
-        return;
+      if (decision.kind === "no_change") {
+        finishApplied(decision.reason);
+        return decision;
       }
 
-      // create (default)
-      if (item.kind === "memory" && slice.result) {
-        applyCaptureResult({
-          ...slice.result,
-          recommendations: [],
-          knowledgePatch: undefined,
-          timelinePatch: undefined,
-          memory: { ...slice.result.memory, title: text },
-        });
-      } else if (item.kind === "action" || item.kind === "nudge") {
-        addTodo({
-          title: text,
-          detail: item.recommendation?.action,
-          projectId: pid,
-          dueAt: item.date,
-          kind: item.todoKind ?? (item.kind === "nudge" ? "CHASE" : "ACTION"),
-          waitingOn: item.waitingOn,
-        });
-      } else if (item.kind === "risk" && pid) {
-        if (item.op === "complete") {
-          // Prefer Risk-domain authority via exact title match (no fuzzy matching).
-          const domain = findProjectRiskByExactTitle(state.risks, pid, text);
-          if (domain) {
-            setRiskStatus(domain.id, "resolved", pid);
-          } else {
-            // Legacy Knowledge-only — do not fabricate a risks row.
-            setKnowledgeOnlyRiskResolved(pid, text, true);
+      const executed = await executeCaptureApply(decision, {
+        createTodo: (op) => {
+          addTodo({
+            title: op.title,
+            detail: op.detail,
+            projectId: op.projectId,
+            dueAt: op.dueAt,
+            kind: op.todoKind,
+            waitingOn: op.waitingOn,
+          });
+        },
+        updateTodo: (op) => {
+          updateTodo(op.todoId, {
+            title: op.title,
+            detail: op.detail,
+            dueAt: op.dueAt,
+          });
+        },
+        completeTodo: (op) => {
+          const todo = state.todos.find((t) => t.id === op.todoId);
+          if (todo && !todo.done) toggleTodo(op.todoId);
+        },
+        deleteTodo: (op) => {
+          removeTodo(op.todoId);
+        },
+        createRisk: async (op) => {
+          const result = await addCaptureRisk(op.projectId, op.title);
+          if (!result.ok) {
+            throw new Error(result.error || "Could not save risk");
           }
-        } else {
-          addKnowledgeBullet(pid, "risks", text);
-        }
-      } else if (item.timelineItem && pid) {
-        addTimelineItem(pid, {
-          ...item.timelineItem,
-          label: text,
-          source: "capture",
-        });
-      } else if (item.knowledgeSection && pid) {
-        addKnowledgeBullet(pid, item.knowledgeSection, text);
-      } else if (pid && item.recommendation) {
-        addSuggestion({
-          projectId: pid,
-          title: text,
-          action: item.recommendation.action,
-          why: item.recommendation.why,
-          kind: item.recommendation.kind,
-          urgency: item.recommendation.urgency,
-        });
-      } else if (
-        pid &&
-        (item.kind === "knowledge" ||
-          item.kind === "decision" ||
-          item.kind === "stakeholder")
-      ) {
-        const section =
-          item.kind === "decision"
-            ? "decisions"
-            : item.kind === "stakeholder"
-              ? "people"
-              : "now";
-        addKnowledgeBullet(pid, section, text);
-      } else if (item.kind === "risk" && !pid) {
-        // Risk CREATE/Resolve requires a known project destination.
-        announce("Choose a project before applying this Risk change.");
-        return;
-      } else {
-        addTodo({ title: text, projectId: pid });
+        },
+        updateRiskStatus: async (op) => {
+          const result = await setCaptureRiskStatus(
+            op.riskId,
+            op.status,
+            op.projectId,
+          );
+          if (!result.ok) {
+            throw new Error(result.error || "Could not save risk status");
+          }
+        },
+        createMilestone: async (op) => {
+          const result = await addTimelineItem(op.projectId, {
+            label: op.label,
+            type: "milestone",
+            startAt: op.startAt ?? new Date().toISOString(),
+            endAt: op.endAt,
+            notes: op.notes,
+            source: "capture",
+          });
+          if (!result.ok) {
+            throw new Error(result.error || "Could not save date");
+          }
+        },
+        updateMilestone: async (op) => {
+          const result = await updateTimelineItem(op.projectId, op.milestoneId, {
+            label: op.label,
+            startAt: op.startAt,
+            endAt: op.endAt,
+            notes: op.notes,
+          });
+          if (!result.ok) {
+            throw new Error(result.error || "Could not save date change");
+          }
+        },
+        ensurePerson: async (op) => {
+          const result = await ensureCapturePerson({
+            projectId: op.projectId,
+            name: op.name,
+            personId: op.personId,
+            roleHint: op.roleHint,
+          });
+          if (!result.ok) {
+            throw new Error(result.error || "Could not save person");
+          }
+        },
+        confirmResponsibility: (op) => {
+          confirmResponsibilityOwner({
+            projectId: op.projectId,
+            scope: op.scope,
+            personName: op.personName,
+            personId: op.personId,
+            replacePersonId: op.replacePersonId,
+          });
+        },
+        writeAvailability: async (op) => {
+          const result = await addAvailabilityItem({
+            projectId: op.projectId,
+            personId: op.personId,
+            personName: op.personName,
+            awayFromIso: op.awayFromIso,
+            awayToIso: op.awayToIso,
+            label: op.label,
+          });
+          if (!result.ok) {
+            throw new Error(result.error || "Could not save availability");
+          }
+        },
+        writeKnowledge: (op) => {
+          addKnowledgeBullet(op.projectId, op.section, op.text);
+        },
+        writeMemory: (op) => {
+          if (!slice.result) {
+            throw new Error("Capture result missing for memory write");
+          }
+          applyCaptureResult({
+            ...slice.result,
+            recommendations: [],
+            knowledgePatch: undefined,
+            timelinePatch: undefined,
+            memory: { ...slice.result.memory, title: op.title },
+          });
+        },
+      });
+
+      if (executed.kind === "failed") {
+        announce(executed.reason);
+        return {
+          kind: "needs_you",
+          domain: decision.domain,
+          reason: executed.reason,
+        };
       }
-      finish();
+      if (executed.kind === "wrote") {
+        finishApplied(
+          item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
+        );
+      } else if (executed.kind === "no_change") {
+        finishApplied(executed.reason);
+      } else {
+        announce(executed.reason);
+      }
+      return decision;
     },
     [
+      addAvailabilityItem,
+      addCaptureRisk,
       addKnowledgeBullet,
-      addSuggestion,
       addTimelineItem,
       addTodo,
       announce,
       applyCaptureResult,
+      confirmResponsibilityOwner,
+      ensureCapturePerson,
       removeTodo,
-      setKnowledgeOnlyRiskResolved,
-      setRiskStatus,
+      setCaptureRiskStatus,
       slice.editing,
       slice.projectId,
       slice.result,
-      state.knowledge,
-      state.risks,
-      state.todos,
+      state,
       toggleTodo,
+      updateTimelineItem,
       updateTodo,
     ],
   );
@@ -689,6 +758,17 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     },
     [announce],
   );
+
+  const markOneApplied = useCallback((id: string) => {
+    setSlice((prev) => {
+      const next = {
+        ...prev,
+        added: { ...prev.added, [id]: true },
+      };
+      persistHistory(next);
+      return next;
+    });
+  }, []);
 
   const pendingCount = slice.suggestions.filter(
     (s) => !slice.dismissed[s.id] && !slice.added[s.id],
@@ -736,6 +816,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       cancelAnalyse,
       applyOne,
       dismissOne,
+      markOneApplied,
       clearSession,
       expandAnalysis,
       editCapture,
@@ -760,6 +841,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       busy,
       clearSession,
       dismissOne,
+      markOneApplied,
       dismissPreReliabilityWarn,
       editCapture,
       expandAnalysis,

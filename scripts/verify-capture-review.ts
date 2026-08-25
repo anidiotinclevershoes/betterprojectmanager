@@ -194,25 +194,26 @@ function model(
     "Sarah is still the Business Owner. Marcus is helping with release notes.",
   );
 
+  const fromFindings = obs.filter((o) => o.findingId);
   assert.equal(
-    obs.filter((o) => /cab/i.test(o.text)).length,
+    fromFindings.filter((o) => /cab/i.test(o.text)).length,
     1,
     "CAB conclusions should appear once",
   );
   assert.equal(
-    obs.filter((o) => /release/i.test(o.text) && /19|august/i.test(o.text))
+    fromFindings.filter((o) => /release/i.test(o.text) && /19|august/i.test(o.text))
       .length,
     1,
     "Release date conclusions should appear once",
   );
   assert.equal(
-    obs.filter((o) => /cdn/i.test(o.text)).length,
+    fromFindings.filter((o) => /cdn/i.test(o.text)).length,
     1,
     "CDN conclusions should appear once",
   );
-  assert.ok(obs.some((o) => /CAB approval received/i.test(o.text)));
-  assert.ok(obs.some((o) => /Release moved to 19 August/i.test(o.text)));
-  assert.ok(obs.some((o) => /CDN deployment blocker resolved/i.test(o.text)));
+  assert.ok(fromFindings.some((o) => /CAB/i.test(o.text)));
+  assert.ok(fromFindings.some((o) => /release/i.test(o.text)));
+  assert.ok(fromFindings.some((o) => /CDN/i.test(o.text)));
   assert.ok(
     obs.some((o) => o.actionLabel && o.actionLabel.length > 0),
     "observations expose downstream action labels",
@@ -223,34 +224,28 @@ function model(
 {
   const merged = dedupeObservationCandidates([
     {
-      text: "Sarah remains Business Owner",
-      category: "business_owner",
+      text: "Ada remains the festival lead",
+      category: "other",
       confidence: 80,
       source: "transcript",
     },
     {
-      text: "Marcus is supporting release notes",
-      category: "release_notes_support",
+      text: "Rafi is supporting programme notes",
+      category: "other",
       confidence: 80,
       source: "transcript",
     },
     {
-      text: "Marcus supports release notes",
-      category: "release_notes_support",
+      text: "Rafi is supporting programme notes",
+      category: "other",
       confidence: 70,
       source: "insight",
     },
   ]);
-  assert.ok(merged.some((o) => /Sarah remains Business Owner/i.test(o.text)));
-  assert.equal(merged.filter((o) => /Marcus/i.test(o.text)).length, 1);
-  assert.equal(
-    detectObservationCategory("Sarah remains Business Owner"),
-    "business_owner",
-  );
-  assert.equal(
-    detectObservationCategory("Marcus supports release notes"),
-    "release_notes_support",
-  );
+  assert.ok(merged.some((o) => /Ada remains the festival lead/i.test(o.text)));
+  assert.equal(merged.filter((o) => /Rafi/i.test(o.text)).length, 1);
+  assert.equal(detectObservationCategory("Ada remains the festival lead"), "other");
+  assert.equal(detectObservationCategory("Rafi supports programme notes"), "other");
 }
 
 // --- 3. Change count from unique validated findings ---

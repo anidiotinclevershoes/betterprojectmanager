@@ -13,6 +13,7 @@ export type SuggestionKind =
   | "decision"
   | "risk"
   | "stakeholder"
+  | "availability"
   | "knowledge"
   | "nudge"
   | "meeting"
@@ -49,6 +50,16 @@ export type PendingSuggestion = {
   waitingOn?: string;
   /** Compact Knowledge remember proposal. */
   isKnowledgeRemember?: boolean;
+  /** Phase 3B — legal mutation domain. Unsupported findings must not write. */
+  legalDomain?: import("./apply/types").CaptureLegalDomain;
+  /** Durable identity for the authoritative object (Risk/Person/milestone/todo). */
+  targetEntityId?: string;
+  personId?: string;
+  personName?: string;
+  ownershipSemantics?: import("./apply/types").OwnershipSemantics;
+  responsibilityScope?: string;
+  replacePersonId?: string;
+  proposedValues?: Record<string, unknown>;
 };
 
 export const KIND_LABEL: Record<SuggestionKind, string> = {
@@ -57,6 +68,7 @@ export const KIND_LABEL: Record<SuggestionKind, string> = {
   decision: "Decision",
   risk: "Risk",
   stakeholder: "Stakeholder",
+  availability: "Availability",
   knowledge: "Knowledge",
   nudge: "To Do",
   meeting: "Meeting",
@@ -135,6 +147,8 @@ export function parseSuggestionKind(
       decision: "decision",
       risk: "risk",
       stakeholder: "stakeholder",
+      availability: "availability",
+      away: "availability",
       knowledge: "knowledge",
       nudge: "nudge",
       meeting: "meeting",
@@ -171,6 +185,8 @@ export function destinationFor(kind: SuggestionKind): string {
       return "Knowledge";
     case "stakeholder":
       return "Stakeholders";
+    case "availability":
+      return "People";
     default:
       return "Workspace";
   }
@@ -358,8 +374,20 @@ function buildSuggestionsFromProposedOps(
 
   for (const op of result.proposedOperations ?? []) {
     if (op.operation === "NO_CHANGE") continue;
-    const kind: SuggestionKind =
-      op.entityType === "todo"
+    const availabilityHint =
+      op.proposedValues?.kind === "availability" ||
+      typeof op.proposedValues?.awayFromIso === "string";
+    const knownEntity =
+      op.entityType === "todo" ||
+      op.entityType === "risk" ||
+      op.entityType === "knowledge" ||
+      op.entityType === "stakeholder" ||
+      op.entityType === "meeting" ||
+      op.entityType === "milestone" ||
+      op.entityType === "nudge";
+    const kind: SuggestionKind = availabilityHint
+      ? "availability"
+      : op.entityType === "todo"
         ? "action"
         : op.entityType === "risk"
           ? "risk"
@@ -372,7 +400,7 @@ function buildSuggestionsFromProposedOps(
                 : op.entityType === "milestone"
                   ? "milestone"
                   : op.entityType === "nudge"
-                    ? "action" // Nudge → To Do
+                    ? "action"
                     : "knowledge";
     const suggestionOp = op.operation.toLowerCase() as SuggestionOp;
     const matched =
@@ -422,6 +450,45 @@ function buildSuggestionsFromProposedOps(
       typeof op.proposedValues?.waitingOn === "string"
         ? String(op.proposedValues.waitingOn)
         : undefined;
+    const ownershipRaw = op.proposedValues?.ownershipSemantics;
+    const ownershipSemantics =
+      ownershipRaw === "share" ||
+      ownershipRaw === "replace" ||
+      ownershipRaw === "continue" ||
+      ownershipRaw === "ambiguous"
+        ? ownershipRaw
+        : undefined;
+    const personName =
+      typeof op.proposedValues?.personName === "string"
+        ? String(op.proposedValues.personName)
+        : undefined;
+    const personId =
+      typeof op.proposedValues?.personId === "string"
+        ? String(op.proposedValues.personId)
+        : op.entityType === "stakeholder"
+          ? op.targetId
+          : undefined;
+    const responsibilityScope =
+      typeof op.proposedValues?.scope === "string"
+        ? String(op.proposedValues.scope)
+        : undefined;
+    const replacePersonId =
+      typeof op.proposedValues?.replacePersonId === "string"
+        ? String(op.proposedValues.replacePersonId)
+        : undefined;
+    const legalDomain = !knownEntity
+      ? ("unsupported" as const)
+      : availabilityHint
+        ? ("availability" as const)
+        : ownershipSemantics || responsibilityScope
+          ? ("responsibility" as const)
+          : undefined;
+    const durableId = op.targetId;
+    const targetTodoId =
+      matched?.id ??
+      (op.entityType === "todo" || op.entityType === "nudge"
+        ? op.targetId
+        : undefined);
 
     items.push({
       id: `op-${op.id}`,
@@ -438,13 +505,12 @@ function buildSuggestionsFromProposedOps(
           ? String(op.proposedValues.dueDate)
           : typeof op.proposedValues?.date === "string"
             ? String(op.proposedValues.date)
-            : undefined,
+            : typeof op.proposedValues?.awayFromIso === "string"
+              ? String(op.proposedValues.awayFromIso)
+              : undefined,
       destination: destinationFor(kind),
-      targetTodoId:
-        matched?.id ??
-        (op.entityType === "todo" || op.entityType === "nudge"
-          ? op.targetId
-          : undefined),
+      targetTodoId,
+      targetEntityId: durableId,
       recommendation: rec,
       knowledgeSection: isRemember
         ? "now"
@@ -456,6 +522,13 @@ function buildSuggestionsFromProposedOps(
       isKnowledgeRemember: isRemember && suggestionOp === "create",
       todoKind,
       waitingOn,
+      legalDomain,
+      personId,
+      personName,
+      ownershipSemantics,
+      responsibilityScope,
+      replacePersonId,
+      proposedValues: op.proposedValues,
     });
   }
 

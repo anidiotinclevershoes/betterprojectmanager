@@ -39,20 +39,12 @@ export function extractLocalFindings(
     if (record.entityType === "todo" && record.status !== "done") {
       const titleKey = record.title.toLowerCase();
       // Only treat as CAB approval completion when the To Do itself is about approval.
-      const cabCue =
-        /\bcab\b/.test(titleKey) &&
-        /\bapprov/.test(titleKey) &&
-        /\bcab\b/.test(text) &&
-        /\b(approv\w*|received|granted)\b/.test(text);
-      // Title mention alone is not enough — completion cue must be near the title.
       const genericComplete =
         titleKey.length > 8 && titleNearCompletionCue(text, titleKey);
-      if (cabCue || genericComplete) {
+      if (genericComplete) {
         findings.push({
           id: nextId(),
-          fact: cabCue
-            ? "CAB approval was received"
-            : `${record.title} is complete`,
+          fact: `${record.title} is complete`,
           evidence: captureText.slice(0, 200),
           findingType: "ENTITY_COMPLETED",
           target: {
@@ -63,7 +55,7 @@ export function extractLocalFindings(
           changes: {
             status: { previous: record.status ?? "open", proposed: "COMPLETED" },
           },
-          confidence: cabCue ? 94 : 82,
+          confidence: 82,
           requiresClarification: false,
           reasoningSummary: `Existing To Do "${record.title}" matches Capture evidence of completion.`,
         });
@@ -72,21 +64,15 @@ export function extractLocalFindings(
 
     if (record.entityType === "risk") {
       const titleKey = record.title.toLowerCase();
-      const cdnCue =
-        /\bcdn\b/.test(titleKey) &&
-        /\bcdn\b/.test(text) &&
-        /\b(resolv\w*|fix\w*|cleared|done|complete\w*)\b/.test(text);
       const generic =
         titleKey.length > 6 &&
         (text.includes(titleKey.slice(0, Math.min(20, titleKey.length))) ||
           significantTitleOverlap(text, titleKey)) &&
         /\b(resolv\w*|fix\w*|cleared|closed|mitigated)\b/.test(text);
-      if (cdnCue || generic) {
+      if (generic) {
         findings.push({
           id: nextId(),
-          fact: cdnCue
-            ? "The CDN deployment blocker was resolved"
-            : `${record.title} is resolved`,
+          fact: `${record.title} is resolved`,
           evidence: captureText.slice(0, 200),
           findingType: "ENTITY_COMPLETED",
           target: {
@@ -97,83 +83,79 @@ export function extractLocalFindings(
           changes: {
             status: { previous: "OPEN", proposed: "COMPLETED" },
           },
-          confidence: cdnCue ? 91 : 80,
+          confidence: 80,
           requiresClarification: false,
           reasoningSummary: `Existing Risk "${record.title}" is resolved per Capture.`,
         });
       }
     }
 
-    // Digit date form ("19 August") → Knowledge (standard Golden baseline).
-    // Word date form ("nineteenth of August") → Milestone when present (hard scenario).
-    const digitNewDate = /\b19\s*aug/.test(text);
-    const wordNewDate =
-      /\b(19th|nineteenth)\b/.test(text) && /\baug/.test(text);
-    const oldDateInRecord = (blob: string) =>
-      /\b12\s*aug/.test(blob) ||
-      /\b(12th|twelfth)\b/.test(blob);
-
-    if (record.entityType === "knowledge" && digitNewDate) {
+    if (record.entityType === "milestone") {
       const titleKey = record.title.toLowerCase();
-      const releaseCue =
-        /\brelease\b/.test(titleKey) && oldDateInRecord(titleKey);
-      if (releaseCue) {
-        findings.push({
-          id: nextId(),
-          fact: "Release moved from 12 August to 19 August",
-          evidence: captureText.slice(0, 240),
-          findingType: "ENTITY_UPDATED",
-          target: {
-            entityType: "knowledge",
-            entityId: record.id,
-            title: record.title,
-          },
-          changes: {
-            text: {
-              previous: record.title,
-              proposed: "Release planned for 19 August",
+      const mentioned =
+        titleKey.length > 4 &&
+        (text.includes(titleKey.slice(0, Math.min(24, titleKey.length))) ||
+          significantTitleOverlap(text, titleKey) ||
+          /\b(date|deadline|milestone|go-?live|release)\b/.test(text));
+      const moved = /\b(moved|move|now|changed|pushed|brought forward)\b/.test(text);
+      if (mentioned && moved) {
+        const proposed = extractIsoDateHint(captureText);
+        const previous = record.date ?? undefined;
+        if (proposed && previous && isoDay(proposed) === isoDay(previous)) {
+          findings.push({
+            id: nextId(),
+            fact: `${record.title} remains ${proposed.slice(0, 10)}`,
+            evidence: captureText.slice(0, 240),
+            findingType: "NO_CHANGE",
+            target: {
+              entityType: "milestone",
+              entityId: record.id,
+              title: record.title,
             },
-          },
-          confidence: 93,
-          requiresClarification: false,
-          reasoningSummary: `Existing Knowledge "${record.title}" should update to the new date.`,
-        });
+            confidence: 84,
+            requiresClarification: false,
+            reasoningSummary: `Existing date "${record.title}" is unchanged.`,
+          });
+        } else if (proposed) {
+          findings.push({
+            id: nextId(),
+            fact: `${record.title} moved to ${proposed.slice(0, 10)}`,
+            evidence: captureText.slice(0, 240),
+            findingType: "ENTITY_UPDATED",
+            target: {
+              entityType: "milestone",
+              entityId: record.id,
+              title: record.title,
+            },
+            changes: {
+              startAt: { previous, proposed },
+              date: { previous, proposed },
+            },
+            confidence: 84,
+            requiresClarification: false,
+            reasoningSummary: `Existing Milestone "${record.title}" should move to the stated date.`,
+          });
+        } else if (moved && significantTitleOverlap(text, titleKey)) {
+          findings.push({
+            id: nextId(),
+            fact: `${record.title} date change is unclear`,
+            evidence: captureText.slice(0, 240),
+            findingType: "AMBIGUOUS",
+            target: {
+              entityType: "milestone",
+              entityId: record.id,
+              title: record.title,
+            },
+            confidence: 60,
+            requiresClarification: true,
+            clarificationQuestion: "Which date should this milestone move to?",
+            reasoningSummary: "A date change was mentioned but the new date is not clear.",
+          });
+        }
       }
     }
 
-    if (record.entityType === "milestone" && wordNewDate && !digitNewDate) {
-      const blob = `${record.title} ${record.summary ?? ""}`.toLowerCase();
-      const releaseCue =
-        /\brelease\b/.test(blob) && oldDateInRecord(blob);
-      if (releaseCue) {
-        findings.push({
-          id: nextId(),
-          fact: "Release moved from 12 August to 19 August",
-          evidence: captureText.slice(0, 240),
-          findingType: "ENTITY_UPDATED",
-          target: {
-            entityType: "milestone",
-            entityId: record.id,
-            title: record.title,
-          },
-          changes: {
-            startAt: {
-              previous: "2026-08-12",
-              proposed: "2026-08-19",
-            },
-            date: {
-              previous: "12 August",
-              proposed: "19 August",
-            },
-          },
-          confidence: 92,
-          requiresClarification: false,
-          reasoningSummary: `Existing Milestone "${record.title}" should move to 19 August.`,
-        });
-      }
-    }
-
-    // General UPDATE: open todo/risk title mentioned with due-date / ownership language.
+    // General UPDATE: open todo/risk title mentioned with due-date language.
     if (
       (record.entityType === "todo" || record.entityType === "risk") &&
       record.status !== "done"
@@ -184,7 +166,7 @@ export function extractLocalFindings(
         (text.includes(titleKey.slice(0, Math.min(28, titleKey.length))) ||
           significantTitleOverlap(text, titleKey));
       const updateCue =
-        /\b(move|moved|due|push|friday|tuesday|owner|owning|nina|deadline|close of play)\b/.test(
+        /\b(move|moved|due|push|friday|tuesday|owner|owning|deadline|close of play)\b/.test(
           text,
         );
       const already =
@@ -197,16 +179,13 @@ export function extractLocalFindings(
       if (titleHit && updateCue && !already) {
         const friday = /\bfriday\b/.test(text);
         const tuesday = /\btuesday\b/.test(text);
-        const ownerNina = /\bnina\b/.test(text) && /\bown/.test(text);
         findings.push({
           id: nextId(),
-          fact: ownerNina
-            ? `${record.title} — ownership confirmed with Nina`
-            : friday
-              ? `${record.title} due date moved to Friday`
-              : tuesday
-                ? `${record.title} due date moved to Tuesday`
-                : `${record.title} schedule updated`,
+          fact: friday
+            ? `${record.title} due date moved to Friday`
+            : tuesday
+              ? `${record.title} due date moved to Tuesday`
+              : `${record.title} schedule updated`,
           evidence: captureText.slice(0, 240),
           findingType: "ENTITY_UPDATED",
           target: {
@@ -215,9 +194,6 @@ export function extractLocalFindings(
             title: record.title,
           },
           changes: {
-            ...(ownerNina
-              ? { owner: { previous: "Unassigned", proposed: "Nina" } }
-              : {}),
             date: {
               previous: "current",
               proposed: friday ? "Friday" : tuesday ? "Tuesday" : "updated",
@@ -228,6 +204,151 @@ export function extractLocalFindings(
           reasoningSummary: `Existing ${record.entityType} "${record.title}" should be updated per Capture.`,
         });
       }
+    }
+  }
+
+  const stakeholders = [...contextIndex.values()].filter(
+    (r) => r.entityType === "stakeholder",
+  );
+  const mentionedPeople = stakeholders.filter((s) => {
+    const re = new RegExp(`\\b${escapeRegExpLocal(s.title)}\\b`, "i");
+    return re.test(captureText);
+  });
+
+  for (const person of mentionedPeople) {
+    const already = findings.some(
+      (f) => f.target?.entityId === person.id && f.target.entityType === "stakeholder",
+    );
+    if (already) continue;
+
+    const nameRe = escapeRegExpLocal(person.title);
+    const remains = new RegExp(
+      `\\b${nameRe}\\b[^.\\n]{0,80}\\b(remains?|still|continues)\\b|\\b(remains?|still|continues)\\b[^.\\n]{0,80}\\b${nameRe}\\b`,
+      "i",
+    );
+    const away = new RegExp(
+      `\\b${nameRe}\\b[^.\\n]{0,80}\\b(away|unavailable|on leave|out of office|ooo|holiday|vacation)\\b|\\b(away|unavailable|on leave)\\b[^.\\n]{0,80}\\b${nameRe}\\b`,
+      "i",
+    );
+    const share = /\b(share|alongside|also|help(?:ing)? with|day-to-day)\b/i.test(
+      captureText,
+    );
+    const replace = /\b(replace[sd]?|takes over|instead of|from now on)\b/i.test(
+      captureText,
+    );
+
+    if (away.test(captureText)) {
+      const from = extractIsoDateHint(captureText);
+      findings.push({
+        id: nextId(),
+        fact: from
+          ? `${person.title} is away from ${from.slice(0, 10)}`
+          : `${person.title} availability mentioned`,
+        evidence: captureText.slice(0, 240),
+        findingType: from ? "NEW_INFORMATION" : "AMBIGUOUS",
+        target: {
+          entityType: "knowledge",
+          title: `${person.title} availability`,
+        },
+        changes: {
+          entityType: { proposed: "knowledge" },
+          kind: { proposed: "availability" },
+          personId: { proposed: person.id },
+          personName: { proposed: person.title },
+          ...(from
+            ? { awayFromIso: { proposed: from }, awayToIso: { proposed: from } }
+            : {}),
+        },
+        confidence: from ? 86 : 60,
+        requiresClarification: !from,
+        clarificationQuestion: from
+          ? undefined
+          : "Which dates is this person away?",
+        reasoningSummary: from
+          ? `Structured availability for existing person "${person.title}".`
+          : `Availability mentioned for "${person.title}" but dates are unclear.`,
+      });
+      continue;
+    }
+
+    if (share && replace && mentionedPeople.length >= 1) {
+      const scope = extractRoleScope(captureText, person.title);
+      findings.push({
+        id: nextId(),
+        fact: `${person.title} ownership change needs confirmation`,
+        evidence: captureText.slice(0, 240),
+        findingType: "AMBIGUOUS",
+        target: {
+          entityType: "stakeholder",
+          entityId: person.id,
+          title: person.title,
+        },
+        changes: {
+          ownershipSemantics: { proposed: "ambiguous" },
+          personId: { proposed: person.id },
+          personName: { proposed: person.title },
+          ...(scope ? { scope: { proposed: scope } } : {}),
+        },
+        confidence: 62,
+        requiresClarification: true,
+        clarificationQuestion: "Should this share or replace the current owner?",
+        reasoningSummary:
+          "Ownership language is ambiguous between sharing and replacing.",
+      });
+      continue;
+    }
+
+    if (replace && !share) {
+      const scope = extractRoleScope(captureText, person.title);
+      if (scope) {
+        findings.push({
+          id: nextId(),
+          fact: `${person.title} takes ${scope}`,
+          evidence: captureText.slice(0, 240),
+          findingType: "ENTITY_UPDATED",
+          target: {
+            entityType: "stakeholder",
+            entityId: person.id,
+            title: person.title,
+          },
+          changes: {
+            ownershipSemantics: { proposed: "replace" },
+            personId: { proposed: person.id },
+            personName: { proposed: person.title },
+            scope: { proposed: scope },
+          },
+          confidence: 80,
+          requiresClarification: false,
+          reasoningSummary: `Explicit replacement of ${scope} ownership.`,
+        });
+        continue;
+      }
+    }
+
+    if (remains.test(captureText)) {
+      const scope = extractRoleScope(captureText, person.title);
+      findings.push({
+        id: nextId(),
+        fact: scope
+          ? `${person.title} remains ${scope}`
+          : `${person.title} remains in role`,
+        evidence: captureText.slice(0, 240),
+        findingType: "NO_CHANGE",
+        target: {
+          entityType: "stakeholder",
+          entityId: person.id,
+          title: person.title,
+        },
+        changes: {
+          ownershipSemantics: { proposed: "continue" },
+          personId: { proposed: person.id },
+          personName: { proposed: person.title },
+          ...(scope ? { scope: { proposed: scope } } : {}),
+        },
+        confidence: 88,
+        requiresClarification: false,
+        reasoningSummary: `Existing person "${person.title}" is already on the project.`,
+      });
     }
   }
 
@@ -382,6 +503,83 @@ const TITLE_STOPWORDS = new Set([
   "board",
 ]);
 
+function escapeRegExpLocal(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function isoDay(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const m = value.match(/^(\d{4}-\d{2}-\d{2})/);
+  return m?.[1];
+}
+
+const MONTHS: Record<string, string> = {
+  january: "01",
+  jan: "01",
+  february: "02",
+  feb: "02",
+  march: "03",
+  mar: "03",
+  april: "04",
+  apr: "04",
+  may: "05",
+  june: "06",
+  jun: "06",
+  july: "07",
+  jul: "07",
+  august: "08",
+  aug: "08",
+  september: "09",
+  sep: "09",
+  sept: "09",
+  october: "10",
+  oct: "10",
+  november: "11",
+  nov: "11",
+  december: "12",
+  dec: "12",
+};
+
+/** Generic date parse — ISO or "8 October 2026". No demo-world special cases. */
+function extractIsoDateHint(text: string): string | undefined {
+  const iso = text.match(/\b(20\d{2}-\d{2}-\d{2})\b/);
+  if (iso) return `${iso[1]}T12:00:00.000Z`;
+  const word = text.match(
+    /\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\.?(?:\s+(20\d{2}))?\b/i,
+  );
+  if (!word) return undefined;
+  const day = word[1]!.padStart(2, "0");
+  const month = MONTHS[word[2]!.toLowerCase()];
+  if (!month) return undefined;
+  const year = word[3] ?? String(new Date().getFullYear());
+  return `${year}-${month}-${day}T12:00:00.000Z`;
+}
+
+function extractRoleScope(text: string, personName: string): string | undefined {
+  const name = escapeRegExpLocal(personName);
+  const patterns = [
+    new RegExp(
+      `\\b${name}\\b[^.\\n]{0,60}\\b(?:remains?|still|continues as|as)\\s+(?:the\\s+)?([^.,\\n]{3,60})`,
+      "i",
+    ),
+    new RegExp(
+      `\\b(?:as|the)\\s+([^.,\\n]{3,40}?)\\b[^.\\n]{0,40}\\b${name}\\b`,
+      "i",
+    ),
+  ];
+  for (const re of patterns) {
+    const m = text.match(re);
+    const scope = m?.[1]?.replace(/\s+/g, " ").trim();
+    if (
+      scope &&
+      !/^(owner|person|they|this|that|and|but)$/i.test(scope)
+    ) {
+      return scope.replace(/\b(remains?|still|continues)\b/i, "").trim();
+    }
+  }
+  return undefined;
+}
+
 function significantTitleOverlap(haystack: string, title: string): boolean {
   const tokens = title
     .split(/\s+/)
@@ -488,51 +686,6 @@ export function stampFindingProjects(
       `${finding.fact} ${finding.evidence}`,
       projects,
     );
-
-    // Bare CAB approval: only PROJECT_UNCERTAIN when multiple projects own CAB todos.
-    if (
-      /\bcab\b/i.test(finding.fact) &&
-      /\bapprov/i.test(finding.fact) &&
-      !mentioned.length
-    ) {
-      const cabTodos = (args.allOpenTodos ?? []).filter(
-        (t) =>
-          /\bcab\b/i.test(t.title) &&
-          /\bapprov/i.test(t.title) &&
-          t.projectId,
-      );
-      const cabProjectIds = [
-        ...new Set(cabTodos.map((t) => t.projectId).filter(Boolean) as string[]),
-      ];
-      if (cabProjectIds.length > 1) {
-        return {
-          ...finding,
-          projectCandidates: cabProjectIds.map((id) => {
-            const p = projects.find((x) => x.id === id);
-            return {
-              id,
-              name: p?.name ?? id,
-              code: p?.code,
-            };
-          }),
-          requiresClarification: true,
-          clarificationQuestion: "Which project does this refer to?",
-          target: undefined,
-          findingType: "AMBIGUOUS" as const,
-        };
-      }
-      if (cabProjectIds.length === 1) {
-        const p = projects.find((x) => x.id === cabProjectIds[0]);
-        if (p) {
-          return {
-            ...finding,
-            projectId: p.id,
-            projectName: p.name,
-            projectCode: p.code,
-          };
-        }
-      }
-    }
 
     // Soft hint may assign CREATE destinations when no other project evidence
     // exists. It must not resolve genuine multi-project ambiguity alone.

@@ -26,7 +26,47 @@ export function mapFindingToOperation(
   finding: CaptureFinding,
   targetRecord?: IndexedContextRecord | null,
 ): ProposedOperation | null {
+  const projectFields = {
+    projectId: finding.projectId,
+    projectName: finding.projectName,
+    projectCode: finding.projectCode,
+  };
+
   if (finding.requiresClarification || finding.findingType === "AMBIGUOUS") {
+    const ownership =
+      typeof finding.changes?.ownershipSemantics?.proposed === "string"
+        ? String(finding.changes.ownershipSemantics.proposed)
+        : undefined;
+    const availability =
+      finding.changes?.kind?.proposed === "availability" ||
+      typeof finding.changes?.awayFromIso?.proposed === "string";
+    if (ownership || availability) {
+      const proposedValues: Record<string, unknown> = {};
+      if (finding.changes) {
+        for (const [key, change] of Object.entries(finding.changes)) {
+          proposedValues[key] = change.proposed;
+        }
+      }
+      const entityType =
+        availability
+          ? "knowledge"
+          : (finding.target?.entityType ?? "stakeholder");
+      return {
+        id: id("op"),
+        sourceFindingId: finding.id,
+        operation: finding.target?.entityId ? "UPDATE" : "CREATE",
+        entityType: entityType === "nudge" ? "todo" : entityType,
+        targetId: finding.target?.entityId,
+        targetTitle: finding.target?.title ?? finding.fact.slice(0, 120),
+        ...projectFields,
+        proposedValues,
+        reason: finding.reasoningSummary,
+        evidence: finding.evidence,
+        confidence: finding.confidence,
+        destructive: false,
+        requiresClarification: true,
+      };
+    }
     // Project-only uncertainty: still emit CREATE so review can show project chips.
     const projectUncertainCreate =
       Boolean(finding.projectCandidates?.length) &&
@@ -52,11 +92,6 @@ export function mapFindingToOperation(
   const targetId = finding.target?.entityId ?? targetRecord?.id;
   const targetTitle =
     finding.target?.title ?? targetRecord?.title ?? undefined;
-  const projectFields = {
-    projectId: finding.projectId,
-    projectName: finding.projectName,
-    projectCode: finding.projectCode,
-  };
 
   if (finding.findingType === "ENTITY_COMPLETED" && entityType && targetId) {
     // Risks: COMPLETE is the canonical resolved lifecycle action.
@@ -89,6 +124,7 @@ export function mapFindingToOperation(
         entityType,
         targetId,
         targetTitle,
+        ...projectFields,
         reason: finding.reasoningSummary,
         evidence: finding.evidence,
         confidence: finding.confidence,
@@ -113,6 +149,7 @@ export function mapFindingToOperation(
       entityType,
       targetId,
       targetTitle,
+      ...projectFields,
       proposedValues: Object.keys(proposedValues).length
         ? proposedValues
         : undefined,
@@ -239,7 +276,7 @@ function looksTransientStatusUpdate(finding: CaptureFinding): boolean {
   return (
     /\b(completed|received|resolved|approved|done|finished|closed)\b/.test(
       blob,
-    ) && /\b(todo|task|risk|approval|cab|cdn)\b/.test(blob)
+    ) && /\b(todo|task|risk|approval)\b/.test(blob)
   );
 }
 

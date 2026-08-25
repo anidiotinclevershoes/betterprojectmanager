@@ -41,9 +41,9 @@ const IRRELEVANT =
 const EXPLICIT_DEFER =
   /\b(can wait|don't (?:bother|worry)|ignore that|not project|obviously not)\b/i;
 const OWNERSHIP_NO_CHANGE =
-  /\b(remains?|still the|don't replace|is still)\b.*\b(owner|business owner)\b|\b(owner|business owner)\b.*\b(remains?|still)\b/i;
+  /\b(remains?|still the|don't replace|is still)\b.*\b(owner|lead|accountable)\b|\b(owner|lead|accountable)\b.*\b(remains?|still)\b/i;
 const SUPPORT_ONLY =
-  /\b(only helping|supporting|release notes only|marcus only)\b/i;
+  /\b(only helping|supporting)\b/i;
 
 export function isIgnoredFinding(finding: CaptureFinding): boolean {
   const blob = `${finding.fact} ${finding.evidence} ${finding.reasoningSummary}`;

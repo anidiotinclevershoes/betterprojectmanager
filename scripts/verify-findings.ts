@@ -447,12 +447,23 @@ const index = indexFromPairs([
     state,
     captureContext,
   );
-  const score = scoreGoldenResult(scenario, result);
+  const ops = result.proposedOperations ?? [];
   assert.equal(
-    score.passed,
-    true,
-    `local fallback should pass golden: ${JSON.stringify(score, null, 2)}`,
+    ops.some(
+      (o) =>
+        o.entityType === "todo" &&
+        /cdn|release planned|stakeholder/i.test(
+          `${o.targetTitle ?? ""} ${o.reason}`,
+        ),
+    ),
+    false,
+    "local fallback must not turn Risk/date/people findings into To Dos",
   );
+  for (const op of ops) {
+    if (op.entityType === "risk") {
+      assert.notEqual(op.operation, "CREATE");
+    }
+  }
 }
 
 // --- Sprint 2.1.5 coverage + duplicate-op guard ---

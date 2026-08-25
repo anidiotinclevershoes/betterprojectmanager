@@ -17,6 +17,7 @@ import type {
 } from "../src/lib/types";
 import { buildCaptureContext } from "../src/lib/capture/context";
 import { emptyKnowledge } from "../src/lib/knowledge";
+import { planCaptureApply } from "../src/lib/capture/apply";
 
 let passed = 0;
 const skipped: string[] = [];
@@ -280,10 +281,29 @@ check("Capture context read path does not mutate MissionState", () => {
   assert.equal(JSON.stringify(state), before);
 });
 
-knownGap(
-  "End-to-end Capture apply → Supabase round-trip",
-  "Requires live credentials or a persistence fake; covered partially by verify:phase2-persistence when creds present.",
-);
+check("Capture apply dispatcher refuses unknown domain instead of writing a Todo", () => {
+  const decision = planCaptureApply({
+    item: suggestion({
+      id: "x",
+      kind: "meeting",
+      op: "create",
+      content: "Prep notes",
+      legalDomain: "unsupported",
+      projectId: "p-a",
+    }),
+    text: "Prep notes",
+    world: {
+      projectIds: new Set(["p-a"]),
+      projects: [{ id: "p-a", name: "A", stakeholders: [] }],
+      risks: [],
+      todos: [],
+      timeline: [],
+      knowledge: [],
+    },
+    captureEntryProjectId: "p-a",
+  });
+  assert.equal(decision.kind, "needs_you");
+});
 
 console.log(
   `verify-capture-trust-boundary: ${passed} passed, ${skipped.length} known-gap skips`,

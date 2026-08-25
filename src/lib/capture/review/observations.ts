@@ -14,16 +14,7 @@ const IRRELEVANT =
 const META =
   /programme manager checks|continuous analysis|risk language detected|captured as |tidied from raw/i;
 
-type ObservationCategory =
-  | "cab_approval"
-  | "release_date"
-  | "cdn_blocker"
-  | "hypercare_risk"
-  | "cab_pack_due"
-  | "business_owner"
-  | "release_notes_support"
-  | "implementation_guidance"
-  | "other";
+type ObservationCategory = "other";
 
 export type ObservationActionStatus =
   | "create"
@@ -96,66 +87,12 @@ function isNoise(text: string): boolean {
   return false;
 }
 
-export function detectObservationCategory(text: string): ObservationCategory {
-  const t = text.toLowerCase();
-  if (/\bcab\b/.test(t) && /\bapprov/.test(t)) return "cab_approval";
-  if (
-    /\b(hypercare|staffing gap)\b/.test(t) &&
-    /\b(resolv|confirm|roster|full)\b/.test(t)
-  ) {
-    return "hypercare_risk";
-  }
-  if (
-    /\b(cab pack|submission)\b/.test(t) &&
-    /\b(due|friday|moved|move|submit)\b/.test(t)
-  ) {
-    return "cab_pack_due";
-  }
-  if (
-    /\brelease\b/.test(t) &&
-    (/\b(date|moved|changed|nineteenth|august|go-?live)\b/.test(t) ||
-      /\b19\b/.test(t))
-  ) {
-    return "release_date";
-  }
-  if (/\bcdn\b/.test(t) && /\b(resolv|blocker|issue|deploy)/.test(t)) {
-    return "cdn_blocker";
-  }
-  if (
-    /\bsarah\b/.test(t) &&
-    (/\bowner\b/.test(t) || /\bremains\b/.test(t) || /\bstill\b/.test(t))
-  ) {
-    return "business_owner";
-  }
-  if (/\bmarcus\b/.test(t) && /\brelease notes\b/.test(t)) {
-    return "release_notes_support";
-  }
-  if (/\bimplementation guidance\b/.test(t)) return "implementation_guidance";
+export function detectObservationCategory(_text: string): ObservationCategory {
   return "other";
 }
 
-function preferredPhrase(category: ObservationCategory, raw: string): string {
-  switch (category) {
-    case "cab_approval":
-      return "CAB approval received";
-    case "release_date":
-      if (/\b19\b|nineteenth/i.test(raw)) return "Release moved to 19 August";
-      return ensurePhrase(raw.replace(/\b(changed|moved)\b/i, "moved"));
-    case "cdn_blocker":
-      return "CDN deployment blocker resolved";
-    case "hypercare_risk":
-      return "Hypercare staffing gap risk is resolved";
-    case "cab_pack_due":
-      return "CAB pack submission due date moved to Friday";
-    case "business_owner":
-      return "Sarah remains Business Owner";
-    case "release_notes_support":
-      return "Marcus is supporting release notes";
-    case "implementation_guidance":
-      return "Implementation guidance";
-    default:
-      return ensurePhrase(raw);
-  }
+function preferredPhrase(_category: ObservationCategory, raw: string): string {
+  return ensurePhrase(raw);
 }
 
 function candidateFromFinding(finding: CaptureFinding): ObservationCandidate | null {
@@ -371,7 +308,6 @@ export function buildCaptureObservations(
   reviewCardIdsByFinding: Record<string, string> = {},
 ): CaptureObservation[] {
   const candidates: ObservationCandidate[] = [];
-  const text = captureText.toLowerCase();
   const opsByFinding = new Map<string, ProposedOperation>();
   for (const op of result.proposedOperations ?? []) {
     opsByFinding.set(op.sourceFindingId, op);
@@ -388,50 +324,12 @@ export function buildCaptureObservations(
 
   for (const insight of result.insights ?? []) {
     if (isNoise(insight) || insight.length > 120) continue;
-    if (
-      !/\b(cab|release|cdn|sarah|marcus|approved|resolved|moved|owner|complete|risk|guidance)\b/i.test(
-        insight,
-      )
-    ) {
-      continue;
-    }
     const category = detectObservationCategory(insight);
     candidates.push({
       text: preferredPhrase(category, insight),
       category,
       confidence: 40,
       source: "insight",
-    });
-  }
-
-  if (
-    /\bsarah\b/.test(text) &&
-    (/\bstill the owner\b/.test(text) ||
-      /\bdon'?t replace sarah\b/.test(text) ||
-      /\bsarah remains\b/.test(text) ||
-      /\bsarah is still\b/.test(text) ||
-      /\bbusiness owner\b/.test(text))
-  ) {
-    candidates.push({
-      text: "Sarah remains Business Owner",
-      category: "business_owner",
-      confidence: 70,
-      source: "transcript",
-    });
-  }
-
-  if (
-    /\bmarcus\b/.test(text) &&
-    (/\brelease notes\b/.test(text) ||
-      /\bhelping with\b/.test(text) ||
-      /\bmarcus only\b/.test(text) ||
-      /\bsupporting\b/.test(text))
-  ) {
-    candidates.push({
-      text: "Marcus is supporting release notes",
-      category: "release_notes_support",
-      confidence: 70,
-      source: "transcript",
     });
   }
 
@@ -450,21 +348,13 @@ export function buildCaptureObservations(
       (c.findingId && reviewCardIdsByFinding[c.findingId]) ||
       action.reviewCardId;
 
-    // No-change insights (Sarah/Marcus ownership) without findings.
-    let status = action.status;
-    let label = action.label;
-    if (!finding && (c.category === "business_owner" || c.category === "release_notes_support")) {
-      status = "no_change";
-      label = "No Change";
-    }
-
     return {
       id: `obs-${index}-${normalizeText(c.text).slice(0, 24)}`,
       text: c.text,
-      actionStatus: status,
-      actionLabel: label,
+      actionStatus: action.status,
+      actionLabel: action.label,
       reviewCardId:
-        status === "no_change" || status === "ignored"
+        action.status === "no_change" || action.status === "ignored"
           ? undefined
           : reviewCardId,
       findingId: c.findingId,
