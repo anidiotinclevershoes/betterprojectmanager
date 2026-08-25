@@ -14,6 +14,7 @@ import {
   runCaptureV2FromModelJson,
   validateObservations,
 } from "../src/lib/capture-v2";
+import { buildSuggestions } from "../src/lib/capture/suggestions";
 import {
   CANDYLAND_ID,
   GAMING_ID,
@@ -534,6 +535,51 @@ function main() {
     assert.equal(run.result.capturePipeline, "v2");
     assert.equal(run.result.observationAccount?.proposedChanges, 1);
     assert.ok((run.result.proposedOperations ?? []).length >= 1);
+  });
+
+  check("Needs you Person is not serialized as a CREATE write", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript: "Pippa remains UAT lead.",
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-short",
+            statement: "Pippa remains UAT lead",
+            evidence: "Pippa remains UAT lead.",
+            domain: "person",
+            disposition: "create_new",
+            proposedValues: { name: "Pippa" },
+          },
+        ],
+      },
+      world,
+      projectId: CANDYLAND_ID,
+    });
+    assert.equal(run.resolved[0]?.decision.kind, "needs_you");
+    assert.ok(
+      (run.result.proposedOperations ?? []).every((op) => op.operation === "NO_CHANGE"),
+    );
+    assert.equal(buildSuggestions(run.result).length, 0);
+  });
+
+  check("observation projectId cannot retarget another project", () => {
+    const validated = validateObservations(
+      [
+        {
+          id: "obs-retarget",
+          statement: "Order extra sprinkles",
+          evidence: "Order extra sprinkles",
+          domain: "todo",
+          disposition: "create_new",
+          projectId: GAMING_ID,
+          proposedValues: { title: "Order extra sprinkles" },
+        },
+      ],
+      candyRecords,
+      CANDYLAND_ID,
+    );
+    assert.equal(validated.observations.length, 0);
+    assert.ok(validated.issues.some((i) => i.code === "cross_project_id"));
   });
 
   console.log("verify-capture-v2: OK");

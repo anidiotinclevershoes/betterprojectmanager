@@ -121,7 +121,7 @@ export function captureResultFromResolved(args: {
       projectName: args.projectName ?? undefined,
     });
 
-    const op = operationCode(observation, decision?.kind);
+    const op = operationCode(observation, decision?.kind, row.rejected);
     operations.push({
       id: `v2op-${observation.id}`,
       sourceFindingId: findingId,
@@ -224,13 +224,17 @@ function findingTypeFor(
 function operationCode(
   observation: CaptureObservationV2,
   decisionKind?: string,
+  rejected?: boolean,
 ): AIOperation {
   if (
+    rejected ||
+    decisionKind === "needs_you" ||
     decisionKind === "no_change" ||
     observation.disposition === "no_change" ||
     observation.disposition === "commentary" ||
     observation.disposition === "ignore" ||
     observation.disposition === "merge" ||
+    observation.disposition === "ambiguous" ||
     observation.domain === "commentary"
   ) {
     return "NO_CHANGE";

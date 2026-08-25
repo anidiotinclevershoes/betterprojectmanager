@@ -63,8 +63,7 @@ function resolveOne(
     captureEntryProjectId?: string | null;
   },
 ): ResolvedObservation {
-  const projectId =
-    observation.projectId || args.captureEntryProjectId || null;
+  const projectId = args.captureEntryProjectId || null;
 
   if (
     observation.disposition === "commentary" ||

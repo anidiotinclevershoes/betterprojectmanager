@@ -43,6 +43,7 @@ export function NewProjectExperience({
   const [sourceNarrative, setSourceNarrative] = useState("");
   const [sourceMode, setSourceMode] = useState<"talk" | "paste">("talk");
   const [categorisationApproved, setCategorisationApproved] = useState(false);
+  const [createUnlocked, setCreateUnlocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -87,6 +88,9 @@ export function NewProjectExperience({
   ) {
     setBusy(true);
     setError(null);
+    setCategorisationApproved(false);
+    setCreateUnlocked(false);
+    setProvisionalItems([]);
     buildAbortRef.current?.abort();
     const controller = new AbortController();
     buildAbortRef.current = controller;
@@ -107,6 +111,7 @@ export function NewProjectExperience({
           code?: string;
         } | null;
         setDraft(local);
+        setCreateUnlocked(true);
         setPath("review");
         setError(
           fail?.error ||
@@ -131,11 +136,13 @@ export function NewProjectExperience({
               data.projectSeed?.currentFocus || data.draft?.currentFocus || "",
           });
           setCategorisationApproved(false);
+          setCreateUnlocked(false);
           setDraft(data.draft ?? local);
           setPath("categorise");
         } else {
           setDraft(data.draft ?? local);
           setCategorisationApproved(true);
+          setCreateUnlocked(true);
           setPath("review");
         }
       if (data.note) {
@@ -147,6 +154,7 @@ export function NewProjectExperience({
         return;
       }
       setDraft(assembleFromNarrative(content, "delivery", sourceMode));
+      setCreateUnlocked(true);
       setPath("review");
       setError(
         "Build request failed. Showing a local draft instead — review carefully before creating.",
@@ -219,6 +227,7 @@ export function NewProjectExperience({
           onApprove={(next) => {
             setDraft(next);
             setCategorisationApproved(true);
+            setCreateUnlocked(true);
             setPath("review");
           }}
         />
@@ -232,9 +241,9 @@ export function NewProjectExperience({
           error={error}
           onBack={() => setPath(provisionalItems.length ? "categorise" : "talk")}
           onConfirm={() => {
-            if (provisionalItems.length && !categorisationApproved) {
+            if (!createUnlocked) {
               setError("Approve the categorisation map before creating the project.");
-              setPath("categorise");
+              setPath(provisionalItems.length ? "categorise" : "talk");
               return;
             }
             void createFromDraft(draft);

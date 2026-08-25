@@ -112,6 +112,32 @@ export function validateObservations(
     const projectId = asString(obj.projectId);
     const candidateTargetId = asString(obj.candidateTargetId);
 
+    if (
+      scopedProjectId &&
+      projectId &&
+      projectId !== scopedProjectId
+    ) {
+      issues.push({
+        observationId: id,
+        code: "cross_project_id",
+        message: `Observation project ${projectId} does not match Capture project ${scopedProjectId}.`,
+      });
+      rejected.push(
+        buildObservation({
+          id,
+          statement,
+          evidence,
+          domain: domainRaw,
+          disposition: "ambiguous",
+          projectId: scopedProjectId,
+          candidateTargetId: null,
+          candidateTargetTitle: asString(obj.candidateTargetTitle),
+          obj,
+        }),
+      );
+      return;
+    }
+
     if (candidateTargetId) {
       const hit = byId.get(candidateTargetId);
       if (!hit) {

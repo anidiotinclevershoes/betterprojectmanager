@@ -134,6 +134,9 @@ function main() {
       "utf8",
     );
     assert.match(ui, /categorisationApproved/);
+    assert.match(ui, /createUnlocked/);
+    assert.match(ui, /setCreateUnlocked\(false\)/);
+    assert.match(ui, /if \(!createUnlocked\)/);
     assert.match(ui, /Approve the categorisation map before creating/);
     const cat = readFileSync(
       join(
