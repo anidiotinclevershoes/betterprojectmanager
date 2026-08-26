@@ -1,0 +1,65 @@
+name: Stacked Capture Regression
+
+on:
+  workflow_dispatch:
+    inputs:
+      story:
+        description: "Story pack to run"
+        type: choice
+        options:
+          - all
+          - candyland
+          - toyworld
+          - gamingstudio5000
+        default: all
+      live:
+        description: "Attempt live stacked hook (still skips sequential live apply in this slice)"
+        type: boolean
+        default: false
+
+jobs:
+  stacked:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Deterministic stacked mutation path
+        run: npm run verify:stacked-capture
+        env:
+          STACKED_STORY: ${{ github.event.inputs.story }}
+          OPENAI_API_KEY: ""
+          ANTHROPIC_API_KEY: ""
+          GEMINI_API_KEY: ""
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Stacked Playwright journeys
+        run: npm run test:stacked-capture
+        env:
+          STACKED_STORY: ${{ github.event.inputs.story }}
+          OPENAI_API_KEY: ""
+          ANTHROPIC_API_KEY: ""
+          GEMINI_API_KEY: ""
+          CI: "true"
+      - name: Optional live stacked hook
+        if: ${{ github.event.inputs.live == 'true' }}
+        run: npm run eval:stacked-capture
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        continue-on-error: true
+      - name: Upload stacked evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stacked-capture-evidence
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore

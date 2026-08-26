@@ -8,6 +8,7 @@ import { experimentalMissionState } from "../src/lib/eval-capture-v2/mission-sta
 import { CAPTURE_V2_EVAL_CORPUS } from "../src/lib/eval-capture-v2/corpus";
 import { evaluateFrozenCase } from "../src/lib/eval-capture-v2/pipeline";
 import { FROZEN_MODEL_OUTPUTS } from "../src/lib/eval-capture-v2/frozen-model-outputs";
+import { STACKED_STORIES } from "../src/lib/eval-capture-v2/stacked-stories";
 
 const ROOT = join(process.cwd(), "e2e/fixtures");
 
@@ -34,6 +35,10 @@ function main() {
       ),
     );
   }
+  writeFileSync(
+    join(ROOT, "stacked-stories.json"),
+    JSON.stringify(STACKED_STORIES, null, 2),
+  );
   console.log("Wrote e2e/fixtures from frozen V2 pipeline.");
 }
 

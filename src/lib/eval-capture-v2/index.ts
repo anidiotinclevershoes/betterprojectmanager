@@ -7,3 +7,5 @@ export { runV2Pipeline, evaluateAgainstCase, evaluateFrozenCase } from "./pipeli
 export { frozenEnvelopeFor, FROZEN_MODEL_OUTPUTS } from "./frozen-model-outputs";
 export { approximateCostUsd, BENCHMARK_PRICE_TABLE_VERSION } from "./pricing";
 export { runCaptureV2Eval, summariseHarness } from "./harness";
+export { STACKED_STORIES, stackedStoryById } from "./stacked-stories";
+export { runStackedStory, snapshotProject } from "./stacked-runtime";

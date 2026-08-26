@@ -1,0 +1,427 @@
+[
+  {
+    "id": "candyland",
+    "title": "Candyland long-run sequential Capture",
+    "world": "candyland",
+    "projectId": "proj-candy",
+    "steps": [
+      {
+        "id": "existing-person",
+        "title": "Existing Person remains responsible",
+        "transcript": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-pippa",
+              "statement": "Pippa Gumdrop remains UAT lead for the licorice stands",
+              "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+              "domain": "person",
+              "disposition": "no_change",
+              "projectId": "proj-candy",
+              "candidateTargetId": "person-gumdrop",
+              "candidateTargetTitle": "Pippa Gumdrop"
+            }
+          ]
+        },
+        "expectedReview": "no_change",
+        "corpusCaseId": "existing-person"
+      },
+      {
+        "id": "risk-resolution",
+        "title": "Existing Risk resolves",
+        "transcript": "The icing on Gumdrop Bridge has melted; that risk is closed.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-bridge-closed",
+              "statement": "Gumdrop Bridge icing is resolved",
+              "evidence": "The icing on Gumdrop Bridge has melted; that risk is closed.",
+              "domain": "risk",
+              "disposition": "update_existing",
+              "candidateTargetId": "risk-bridge",
+              "candidateTargetTitle": "Gumdrop Bridge icing",
+              "proposedValues": {
+                "status": "resolved"
+              }
+            }
+          ]
+        },
+        "expectedReview": "apply",
+        "corpusCaseId": "risk-resolution"
+      },
+      {
+        "id": "milestone-move",
+        "title": "Milestone date moves",
+        "transcript": "Parade day is now 29 October 2026.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-parade",
+              "statement": "Parade day moved to 29 October 2026",
+              "evidence": "Parade day is now 29 October 2026.",
+              "domain": "milestone",
+              "disposition": "update_existing",
+              "candidateTargetId": "ms-parade",
+              "candidateTargetTitle": "Parade day",
+              "proposedValues": {
+                "date": "2026-10-29"
+              }
+            }
+          ]
+        },
+        "expectedReview": "apply",
+        "corpusCaseId": "milestone-move"
+      },
+      {
+        "id": "availability",
+        "title": "Person availability changes",
+        "transcript": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-fizz-away",
+              "statement": "Fizz Caramel is away 5–12 October 2026",
+              "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+              "domain": "availability",
+              "disposition": "update_existing",
+              "candidateTargetId": "person-fizz",
+              "candidateTargetTitle": "Fizz Caramel",
+              "proposedValues": {
+                "awayFromIso": "2026-10-05",
+                "awayToIso": "2026-10-12"
+              }
+            }
+          ]
+        },
+        "expectedReview": "apply",
+        "corpusCaseId": "availability"
+      },
+      {
+        "id": "share-vs-replace-ambiguous",
+        "title": "Ambiguous share-vs-replace",
+        "transcript": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-share-replace",
+              "statement": "UAT may be shared or replaced between Fizz and Pippa",
+              "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+              "domain": "responsibility",
+              "disposition": "ambiguous",
+              "proposedValues": {
+                "ownershipSemantics": "ambiguous",
+                "scope": "UAT lead"
+              },
+              "commentary": "Share versus replace is not decided."
+            }
+          ]
+        },
+        "expectedReview": "needs_you",
+        "corpusCaseId": "share-vs-replace-ambiguous"
+      },
+      {
+        "id": "todo-create",
+        "title": "Genuine new Todo",
+        "transcript": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-banners",
+              "statement": "Polish the candy-cane banners",
+              "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+              "domain": "todo",
+              "disposition": "create_new",
+              "proposedValues": {
+                "title": "Polish the candy-cane banners"
+              }
+            }
+          ]
+        },
+        "expectedReview": "apply",
+        "corpusCaseId": "todo-create"
+      },
+      {
+        "id": "existing-person-repeat",
+        "title": "Repeated / no-change Person",
+        "transcript": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-pippa",
+              "statement": "Pippa Gumdrop remains UAT lead for the licorice stands",
+              "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+              "domain": "person",
+              "disposition": "no_change",
+              "projectId": "proj-candy",
+              "candidateTargetId": "person-gumdrop",
+              "candidateTargetTitle": "Pippa Gumdrop"
+            }
+          ]
+        },
+        "expectedReview": "no_change",
+        "corpusCaseId": "existing-person"
+      },
+      {
+        "id": "todo-complete-from-earlier",
+        "title": "Complete Todo created earlier in the journey",
+        "transcript": "The candy-cane banners to-do is finished.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-banners-done",
+              "statement": "Candy-cane banners to-do is finished",
+              "evidence": "The candy-cane banners to-do is finished.",
+              "domain": "todo",
+              "disposition": "update_existing",
+              "projectId": "proj-candy",
+              "candidateTargetTitle": "Polish the candy-cane banners",
+              "proposedValues": {
+                "status": "complete",
+                "done": true
+              }
+            }
+          ]
+        },
+        "expectedReview": "apply",
+        "bindTarget": {
+          "domain": "todo",
+          "titleIncludes": "candy-cane banners"
+        }
+      }
+    ]
+  },
+  {
+    "id": "toyworld",
+    "title": "Toyworld identity / isolation",
+    "world": "toyworld",
+    "projectId": "proj-toy",
+    "steps": [
+      {
+        "id": "new-person",
+        "title": "Genuinely new Person",
+        "transcript": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-velvet",
+              "statement": "Velvet Sprocket is joining as paint lead",
+              "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+              "domain": "person",
+              "disposition": "create_new",
+              "projectId": "proj-toy",
+              "candidateTargetTitle": "Velvet Sprocket",
+              "proposedValues": {
+                "name": "Velvet Sprocket",
+                "role": "paint lead"
+              }
+            }
+          ]
+        },
+        "expectedReview": "apply",
+        "corpusCaseId": "new-person"
+      },
+      {
+        "id": "velvet-later-reference",
+        "title": "Later reference must not create a duplicate Person",
+        "transcript": "Velvet Sprocket is still the paint lead on the wooden-track refresh.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-velvet-again",
+              "statement": "Velvet Sprocket is joining as paint lead",
+              "evidence": "Velvet Sprocket is still the paint lead on the wooden-track refresh.",
+              "domain": "person",
+              "disposition": "create_new",
+              "projectId": "proj-toy",
+              "candidateTargetTitle": "Velvet Sprocket",
+              "proposedValues": {
+                "name": "Velvet Sprocket",
+                "role": "paint lead"
+              }
+            }
+          ]
+        },
+        "expectedReview": "no_change"
+      },
+      {
+        "id": "existing-risk-update",
+        "title": "Existing Risk update",
+        "transcript": "Packaging delay is getting worse after the cardboard mill flooded.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-packaging-worse",
+              "statement": "Packaging delay is getting worse",
+              "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+              "domain": "risk",
+              "disposition": "update_existing",
+              "projectId": "proj-toy",
+              "candidateTargetId": "risk-packaging",
+              "candidateTargetTitle": "Packaging delay",
+              "proposedValues": {
+                "status": "open"
+              }
+            }
+          ]
+        },
+        "expectedReview": "apply_or_no_change",
+        "corpusCaseId": "existing-risk-update"
+      },
+      {
+        "id": "explicit-no-change",
+        "title": "Explicit no-change",
+        "transcript": "Nothing has changed on Toyworld this week. Leave the records as they are.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-no-change",
+              "statement": "Nothing has changed on Toyworld this week",
+              "evidence": "Nothing has changed on Toyworld this week. Leave the records as they are.",
+              "domain": "commentary",
+              "disposition": "commentary",
+              "projectId": "proj-toy"
+            }
+          ]
+        },
+        "expectedReview": "no_change",
+        "corpusCaseId": "explicit-no-change"
+      }
+    ]
+  },
+  {
+    "id": "gamingstudio5000",
+    "title": "GamingStudio5000 correction / ambiguity",
+    "world": "gamingstudio5000",
+    "projectId": "proj-game",
+    "steps": [
+      {
+        "id": "responsibility-continues",
+        "title": "Responsibility continuation",
+        "transcript": "Pixel Ramos continues as Producer on the console sprint. No change there.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-pixel-continues",
+              "statement": "Pixel Ramos remains Producer",
+              "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there.",
+              "domain": "person",
+              "disposition": "no_change",
+              "projectId": "proj-game",
+              "candidateTargetId": "person-pixel",
+              "candidateTargetTitle": "Pixel Ramos"
+            }
+          ]
+        },
+        "expectedReview": "no_change",
+        "corpusCaseId": "responsibility-continues"
+      },
+      {
+        "id": "responsibility-replacement",
+        "title": "Replacement stays Needs you",
+        "transcript": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-producer-replace",
+              "statement": "Nova Quill may replace Pixel Ramos as Producer",
+              "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+              "domain": "responsibility",
+              "disposition": "ambiguous",
+              "projectId": "proj-game",
+              "proposedValues": {
+                "ownershipSemantics": "replace",
+                "scope": "Producer"
+              },
+              "commentary": "Replacement is stated; Confirm Owner is still required."
+            }
+          ]
+        },
+        "expectedReview": "needs_you",
+        "corpusCaseId": "responsibility-replacement"
+      },
+      {
+        "id": "correction-of-wording",
+        "title": "Spoken correction → audio bus risk",
+        "transcript": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-audio-bus",
+              "statement": "New risk: audio bus mixer stalling the cert build",
+              "evidence": "Wait — I meant the audio bus mixer, not the shader.",
+              "domain": "risk",
+              "disposition": "create_new",
+              "projectId": "proj-game",
+              "proposedValues": {
+                "title": "Audio bus mixer stall"
+              }
+            }
+          ]
+        },
+        "expectedReview": "apply",
+        "corpusCaseId": "correction-of-wording"
+      },
+      {
+        "id": "pronoun-ambiguity",
+        "title": "Pronoun ambiguity",
+        "transcript": "She said she will own the boss balancing pass from now on.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-who-she",
+              "statement": "Unnamed person may own the boss balancing pass",
+              "evidence": "She said she will own the boss balancing pass from now on.",
+              "domain": "responsibility",
+              "disposition": "ambiguous",
+              "projectId": "proj-game",
+              "commentary": "The speaker did not name who she is."
+            }
+          ]
+        },
+        "expectedReview": "needs_you",
+        "corpusCaseId": "pronoun-ambiguity"
+      },
+      {
+        "id": "new-risk",
+        "title": "New shader compile Risk",
+        "transcript": "The shader compile is stalling the cert build and could miss the nightlies.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-shader",
+              "statement": "Shader compile is stalling the cert build",
+              "evidence": "The shader compile is stalling the cert build and could miss the nightlies.",
+              "domain": "risk",
+              "disposition": "create_new",
+              "projectId": "proj-game",
+              "proposedValues": {
+                "title": "Shader compile stall"
+              }
+            }
+          ]
+        },
+        "expectedReview": "apply",
+        "corpusCaseId": "new-risk"
+      },
+      {
+        "id": "irrelevant-commentary",
+        "title": "Irrelevant commentary",
+        "transcript": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+        "rawModelJson": {
+          "observations": [
+            {
+              "id": "obs-chiptune",
+              "statement": "Lobby cabinets were blasting chiptunes",
+              "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+              "domain": "commentary",
+              "disposition": "commentary",
+              "projectId": "proj-game"
+            }
+          ]
+        },
+        "expectedReview": "no_change",
+        "corpusCaseId": "irrelevant-commentary"
+      }
+    ]
+  }
+]

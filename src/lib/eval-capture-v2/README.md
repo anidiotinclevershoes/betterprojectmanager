@@ -8,7 +8,10 @@ Opt-in measuring instrument for Capture V2. **Do not train against these tests.*
 npm test                          # existing regression + new deterministic foundation
 npm run eval:capture-v2           # live providers (needs keys; never fakes success)
 npm run eval:capture-v2 -- --provider all --runs 3
-npm run test:e2e                  # Playwright frozen journeys (no API keys)
+npm run test:e2e                  # isolated frozen journeys + stacked Playwright
+npm run test:stacked-capture      # stacked Playwright only
+npm run verify:stacked-capture    # sequential 3B path, no browser
+npm run eval:stacked-capture      # live hook (skips; sequential live apply not in this slice)
 ```
 
 Live harness env (server-only, never `NEXT_PUBLIC_`):

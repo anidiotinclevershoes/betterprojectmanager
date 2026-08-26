@@ -39,10 +39,19 @@ jobs:
         run: npm ci
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
-      - name: Frozen Capture V2 journeys
+      - name: Playwright frozen journeys + stacked Capture
         run: npm run test:e2e
         env:
           OPENAI_API_KEY: ""
           ANTHROPIC_API_KEY: ""
           GEMINI_API_KEY: ""
           CI: "true"
+      - name: Upload Playwright evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-evidence
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
