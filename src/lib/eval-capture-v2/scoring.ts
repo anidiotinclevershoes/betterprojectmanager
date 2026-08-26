@@ -25,7 +25,11 @@ function blob(observation: CaptureObservationV2): string {
   );
 }
 
-function covers(observation: CaptureObservationV2, fact: MaterialExpectation): boolean {
+/** True when this observation covers one material fact. Observation-local. */
+export function observationCoversMaterial(
+  observation: CaptureObservationV2,
+  fact: MaterialExpectation,
+): boolean {
   const text = blob(observation);
   const hits = fact.meaningTokens.filter((token) => text.includes(norm(token)));
   if (hits.length < Math.ceil(fact.meaningTokens.length * 0.5)) return false;
@@ -55,7 +59,7 @@ export function scoreModelObservations(
   const used = new Set<string>();
 
   for (const fact of testCase.material) {
-    const hits = observations.filter((obs) => covers(obs, fact));
+    const hits = observations.filter((obs) => observationCoversMaterial(obs, fact));
     matchedFacts.set(
       fact.id,
       hits.map((h) => h.id),

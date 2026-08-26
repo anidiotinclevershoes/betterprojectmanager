@@ -70,16 +70,22 @@ export function modelLabel(row: Pick<ModelRow, "provider" | "model">): string {
   return `${row.provider} / ${row.model}`;
 }
 
+function scorerLabel(row: Pick<ModelRow, "scorerVersion">): string {
+  return row.scorerVersion?.trim() || "capture-v2-eval-scorer-v1";
+}
+
 export function latestModels(models: ModelRow[]): ModelRow[] {
   const latest = new Map<string, ModelRow>();
   for (const row of models) {
-    const key = `${row.provider}\0${row.model}`;
+    const key = `${row.provider}\0${row.model}\0${scorerLabel(row)}`;
     const existing = latest.get(key);
     if (!existing || row.timestamp > existing.timestamp) latest.set(key, row);
   }
-  return [...latest.values()].sort((a, b) =>
-    modelLabel(a).localeCompare(modelLabel(b)),
-  );
+  return [...latest.values()].sort((a, b) => {
+    const byModel = modelLabel(a).localeCompare(modelLabel(b));
+    if (byModel !== 0) return byModel;
+    return scorerLabel(a).localeCompare(scorerLabel(b));
+  });
 }
 
 function worldName(world: WorldId): string {
@@ -123,6 +129,7 @@ function metricLines(row: ModelRow): string[] {
     `- **Provider:** ${escapeMdCell(row.provider)}`,
     `- **Model:** ${escapeMdCell(row.model)}`,
     `- **Corpus:** ${escapeMdCell(row.corpusVersion)}`,
+    `- **Scorer:** ${escapeMdCell(scorerLabel(row))}`,
     `- **Cases:** ${num(row.caseCount)}`,
     `- **Recall:** ${pct(row.recall)}`,
     `- **False positives / false observations:** ${num(row.falsePositives)}`,
@@ -284,12 +291,12 @@ export function renderIssueBody(state: DashboardState, updatedAt: string): strin
     );
     lines.push("");
     lines.push(
-      `| Model | Recall | False Positives | Lume Catches | Lume Failures | Tokens | Cost | Latency | Result |`,
+      `| Model | Scorer | Recall | False Positives | Lume Catches | Lume Failures | Tokens | Cost | Latency | Result |`,
     );
-    lines.push(`|---|---:|---:|---:|---:|---:|---:|---:|---|`);
+    lines.push(`|---|---|---:|---:|---:|---:|---:|---:|---:|---|`);
     for (const row of latest) {
       lines.push(
-        `| ${escapeMdCell(modelLabel(row))} | ${pct(row.recall)} | ${num(row.falsePositives)} | ${num(row.lumeCatches)} | ${num(row.lumeFailures)} | ${num(row.tokens.total)} | ${usd(row.costUsd)} | ${ms(row.latencyMs)} | ${resultCell(row.result)} |`,
+        `| ${escapeMdCell(modelLabel(row))} | ${escapeMdCell(scorerLabel(row))} | ${pct(row.recall)} | ${num(row.falsePositives)} | ${num(row.lumeCatches)} | ${num(row.lumeFailures)} | ${num(row.tokens.total)} | ${usd(row.costUsd)} | ${ms(row.latencyMs)} | ${resultCell(row.result)} |`,
       );
     }
   }
@@ -303,11 +310,11 @@ export function renderIssueBody(state: DashboardState, updatedAt: string): strin
   if (state.modelRows.length === 0) {
     lines.push(`No live Capture V2 benchmark has been recorded yet.`);
   } else {
-    lines.push(`| PR | SHA | Model | Recall | Lume Failures | Cost | Result |`);
-    lines.push(`|---|---|---|---:|---:|---:|---|`);
+    lines.push(`| PR | SHA | Model | Scorer | Recall | Lume Failures | Cost | Result |`);
+    lines.push(`|---|---|---|---|---:|---:|---:|---|`);
     for (const row of state.modelRows) {
       lines.push(
-        `| ${prCell(row.prNumber)} | ${shaCell(row.sha)} | ${escapeMdCell(modelLabel(row))} | ${pct(row.recall)} | ${num(row.lumeFailures)} | ${usd(row.costUsd)} | ${resultCell(row.result)} |`,
+        `| ${prCell(row.prNumber)} | ${shaCell(row.sha)} | ${escapeMdCell(modelLabel(row))} | ${escapeMdCell(scorerLabel(row))} | ${pct(row.recall)} | ${num(row.lumeFailures)} | ${usd(row.costUsd)} | ${resultCell(row.result)} |`,
       );
     }
   }
@@ -380,14 +387,14 @@ function renderWorldSection(
   }
 
   lines.push(
-    `| Model | World | Cases | Recall | MODEL FAILURE | LUME CATCH | LUME FAILURE |`,
+    `| Model | Scorer | World | Cases | Recall | MODEL FAILURE | LUME CATCH | LUME FAILURE |`,
   );
-  lines.push(`|---|---|---:|---:|---:|---:|---:|`);
+  lines.push(`|---|---|---|---:|---:|---:|---:|---:|`);
   for (const row of latest) {
     const present = WORLD_IDS.filter((world) => row.worlds[world]);
     if (present.length === 0) {
       lines.push(
-        `| ${escapeMdCell(modelLabel(row))} | — | ${num(row.caseCount)} | ${pct(row.recall)} | ${num(row.modelFailures)} | ${num(row.lumeCatches)} | ${num(row.lumeFailures)} |`,
+        `| ${escapeMdCell(modelLabel(row))} | ${escapeMdCell(scorerLabel(row))} | — | ${num(row.caseCount)} | ${pct(row.recall)} | ${num(row.modelFailures)} | ${num(row.lumeCatches)} | ${num(row.lumeFailures)} |`,
       );
       continue;
     }
@@ -395,7 +402,7 @@ function renderWorldSection(
       const slice = row.worlds[world];
       if (!slice) continue;
       lines.push(
-        `| ${escapeMdCell(modelLabel(row))} | ${worldName(world)} | ${num(slice.caseCount)} | ${pct(slice.recall)} | ${num(slice.modelFailures)} | ${num(slice.lumeCatches)} | ${num(slice.lumeFailures)} |`,
+        `| ${escapeMdCell(modelLabel(row))} | ${escapeMdCell(scorerLabel(row))} | ${worldName(world)} | ${num(slice.caseCount)} | ${pct(slice.recall)} | ${num(slice.modelFailures)} | ${num(slice.lumeCatches)} | ${num(slice.lumeFailures)} |`,
       );
     }
   }

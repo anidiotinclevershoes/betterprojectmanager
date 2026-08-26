@@ -9,11 +9,13 @@ import {
 } from "@/lib/capture-v2";
 import { experimentalApplyWorld } from "@/lib/experiments/worlds";
 import {
+  FROZEN_CORPUS_COMPOSITION,
   FROZEN_SYSTEM_MESSAGE,
   FROZEN_TEMPERATURE,
   FROZEN_V2_BASELINE,
   livePromptSnapshot,
 } from "./baseline";
+import { CAPTURE_V2_EVAL_SCORER_VERSION } from "./lume-safety";
 import { LIVE_EVAL_CASES, CAPTURE_V2_EVAL_CORPUS } from "./corpus";
 import { adapterHasKey, getEvalAdapter } from "./adapters";
 import { approximateCostUsd } from "./pricing";
@@ -35,6 +37,8 @@ export type HarnessOptions = {
 
 export type HarnessReport = {
   baselineVersion: string;
+  corpusVersion: string;
+  scorerVersion: string;
   startedAt: string;
   finishedAt: string;
   skipped: Array<{ provider: EvalProviderId; reason: string }>;
@@ -241,6 +245,8 @@ export async function runCaptureV2Eval(
 
   return {
     baselineVersion: FROZEN_V2_BASELINE.version,
+    corpusVersion: FROZEN_CORPUS_COMPOSITION.version,
+    scorerVersion: CAPTURE_V2_EVAL_SCORER_VERSION,
     startedAt,
     finishedAt: new Date().toISOString(),
     skipped,
@@ -252,7 +258,7 @@ export async function runCaptureV2Eval(
 
 export function summariseHarness(report: HarnessReport): string {
   const lines: string[] = [
-    `Capture V2 eval  baseline=${report.baselineVersion}`,
+    `Capture V2 eval  baseline=${report.baselineVersion} corpus=${report.corpusVersion} scorer=${report.scorerVersion}`,
     `live calls ${report.liveCallsSucceeded}/${report.liveCallsAttempted} succeeded`,
   ];
   for (const skip of report.skipped) {

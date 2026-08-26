@@ -10,6 +10,10 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { collectEvidence } from "./test-dashboard/collect";
+import {
+  corpusVersionFromReport,
+  scorerVersionFromReport,
+} from "./test-dashboard/aggregate";
 import { readGithubContext, type GithubRunContext } from "./test-dashboard/context";
 import type { GithubClient, GithubIssue } from "./test-dashboard/github";
 import {
@@ -19,7 +23,7 @@ import {
   upsertModelRow,
 } from "./test-dashboard/history";
 import { publishEvidence } from "./test-dashboard/publish";
-import { composeIssueBody, renderJobSummary, renderIssueBody } from "./test-dashboard/render";
+import { composeIssueBody, latestModels, renderJobSummary, renderIssueBody } from "./test-dashboard/render";
 import {
   DASHBOARD_ISSUE_TITLE,
   emptyDashboardState,
@@ -102,6 +106,7 @@ function sampleModel(partial: Partial<ModelRow> = {}): ModelRow {
     provider: "fixture-alpha",
     model: "alpha-1",
     corpusVersion: "capture-v2-eval-corpus-v1-hulk",
+    scorerVersion: null,
     caseCount: 1,
     recall: 0.9,
     falsePositives: 0,
@@ -154,6 +159,7 @@ async function main() {
     assert.equal(row.provider, "fixture-provider-a");
     assert.equal(row.model, "fixture-model-a");
     assert.equal(row.corpusVersion, "capture-v2-eval-corpus-v1-hulk");
+    assert.equal(row.scorerVersion, "capture-v2-eval-scorer-v1");
     assert.equal(row.caseCount, 1);
     assert.equal(row.recall, 1);
     assert.equal(row.falsePositives, 0);
@@ -412,6 +418,48 @@ async function main() {
         else process.env[key] = value;
       }
     }
+  });
+
+  await check("scorer version is independent of corpus/baseline; v1 and v2 rows coexist", () => {
+    assert.equal(
+      corpusVersionFromReport({ baselineVersion: "capture-v2-eval-baseline-v1" }),
+      "capture-v2-eval-corpus-v1-hulk",
+    );
+    assert.equal(
+      corpusVersionFromReport({
+        baselineVersion: "capture-v2-eval-baseline-v1",
+        corpusVersion: "capture-v2-eval-corpus-v1-hulk",
+      }),
+      "capture-v2-eval-corpus-v1-hulk",
+    );
+    assert.equal(scorerVersionFromReport({}), "capture-v2-eval-scorer-v1");
+    assert.equal(
+      scorerVersionFromReport({ scorerVersion: "capture-v2-eval-scorer-v2" }),
+      "capture-v2-eval-scorer-v2",
+    );
+
+    const v1 = sampleModel({
+      runId: "run-hist-v1",
+      timestamp: "2026-08-26T11:00:00.000Z",
+      scorerVersion: "capture-v2-eval-scorer-v1",
+      lumeFailures: 5,
+    });
+    const v2 = sampleModel({
+      runId: "run-rescore-v2",
+      timestamp: "2026-08-26T16:00:00.000Z",
+      scorerVersion: "capture-v2-eval-scorer-v2",
+      lumeFailures: 1,
+    });
+    let state = emptyDashboardState();
+    state = upsertModelRow(state, v1);
+    state = upsertModelRow(state, v2);
+    assert.equal(state.modelRows.length, 2);
+    const latest = latestModels(state.modelRows);
+    assert.equal(latest.length, 2);
+    const body = composeIssueBody(state);
+    assert.match(body, /capture-v2-eval-scorer-v1/);
+    assert.match(body, /capture-v2-eval-scorer-v2/);
+    assert.match(body, /\|\s*Scorer\s*\|/);
   });
 
   console.log("\nLume Test Dashboard reporter tests passed.");

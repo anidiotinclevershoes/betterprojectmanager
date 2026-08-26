@@ -5,6 +5,7 @@
 
 import { FROZEN_CORPUS_COMPOSITION } from "../../src/lib/eval-capture-v2/baseline";
 import { CAPTURE_V2_EVAL_CORPUS } from "../../src/lib/eval-capture-v2/corpus";
+import { CAPTURE_V2_EVAL_SCORER_V1 } from "../../src/lib/eval-capture-v2/lume-safety";
 import type { FailureClass, WorldId, WorldSuite } from "./schema";
 import { WORLD_IDS } from "./schema";
 import { redactSecrets } from "./secrets";
@@ -56,6 +57,8 @@ export type LooseCaseResult = {
 
 export type LooseHarnessReport = {
   baselineVersion?: string;
+  corpusVersion?: string;
+  scorerVersion?: string;
   startedAt?: string;
   finishedAt?: string;
   results?: LooseCaseResult[];
@@ -232,11 +235,24 @@ export function extractFailures(
   return out;
 }
 
+/**
+ * Corpus version is independent of prompt baseline and scorer versions.
+ * Historical v1 harness files stuffed the corpus id into `baselineVersion`;
+ * do not keep treating baseline as corpus. Missing corpusVersion → frozen corpus.
+ */
 export function corpusVersionFromReport(report: LooseHarnessReport): string {
-  return (
-    (typeof report.baselineVersion === "string" && report.baselineVersion) ||
-    FROZEN_CORPUS_COMPOSITION.version
-  );
+  if (typeof report.corpusVersion === "string" && report.corpusVersion.trim()) {
+    return report.corpusVersion;
+  }
+  return FROZEN_CORPUS_COMPOSITION.version;
+}
+
+/** Historical live reports without scorerVersion used the pre-v2 classifier. */
+export function scorerVersionFromReport(report: LooseHarnessReport): string {
+  if (typeof report.scorerVersion === "string" && report.scorerVersion.trim()) {
+    return report.scorerVersion;
+  }
+  return CAPTURE_V2_EVAL_SCORER_V1;
 }
 
 export { worldForCase };
