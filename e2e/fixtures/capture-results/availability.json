@@ -1,0 +1,111 @@
+{
+  "caseId": "availability",
+  "transcript": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+  "result": {
+    "memory": {
+      "id": "mem-mt9ud2af-889s8p",
+      "type": "conversation",
+      "projectId": "proj-candy",
+      "title": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+      "content": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T08:38:11.415Z",
+      "createdAt": "2026-08-26T08:38:11.415Z",
+      "source": "capture"
+    },
+    "insights": [
+      "Fizz Caramel is away 5–12 October 2026"
+    ],
+    "assumptions": [],
+    "recommendations": [
+      {
+        "id": "rec-kfpj0nk7",
+        "kind": "stakeholder_update",
+        "urgency": "this_week",
+        "title": "Fizz Caramel",
+        "action": "Fizz Caramel is away 5–12 October 2026",
+        "why": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+        "leadershipImpact": "Act on validated Capture findings without inventing duplicate work.",
+        "projectId": "proj-candy",
+        "relatedMemoryIds": [
+          "mem-mt9ud2af-889s8p"
+        ],
+        "createdAt": "2026-08-26T08:38:11.415Z",
+        "status": "active",
+        "operation": "update",
+        "itemType": "stakeholder",
+        "targetTitle": "Fizz Caramel",
+        "sourceFindingId": "find-obs-fizz-away",
+        "proposedOperationId": "v2op-obs-fizz-away",
+        "confidence": 0
+      }
+    ],
+    "rawContent": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-candy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 1,
+      "proposedChanges": 1,
+      "alreadyKnown": 0,
+      "merged": 0,
+      "needsYou": 0,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-fizz-away",
+        "fact": "Fizz Caramel is away 5–12 October 2026",
+        "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+        "findingType": "ENTITY_UPDATED",
+        "target": {
+          "entityType": "stakeholder",
+          "entityId": "person-fizz",
+          "title": "Fizz Caramel"
+        },
+        "changes": {
+          "value": {
+            "proposed": "Fizz Caramel is away 5–12 October 2026"
+          }
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Fizz Caramel is away 5–12 October 2026",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-fizz-away",
+        "sourceFindingId": "find-obs-fizz-away",
+        "operation": "UPDATE",
+        "entityType": "stakeholder",
+        "targetId": "person-fizz",
+        "targetTitle": "Fizz Caramel",
+        "proposedValues": {
+          "awayFromIso": "2026-10-05",
+          "awayToIso": "2026-10-12",
+          "kind": "availability"
+        },
+        "reason": "Fizz Caramel is away 5–12 October 2026",
+        "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ]
+  }
+}

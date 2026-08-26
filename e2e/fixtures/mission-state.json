@@ -1,0 +1,216 @@
+{
+  "projects": [
+    {
+      "id": "proj-candy",
+      "name": "Candyland",
+      "code": "CANDY",
+      "summary": "Rebuild of the Candyland parade float and licorice stands.",
+      "status": "watch",
+      "kind": "delivery",
+      "currentFocus": "Parade day readiness",
+      "nextMilestone": "Parade day",
+      "nextMilestoneAt": "2026-10-15T12:00:00.000Z",
+      "stakeholders": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ]
+    },
+    {
+      "id": "proj-toy",
+      "name": "Toyworld",
+      "code": "TOY",
+      "summary": "Toyworld wooden-track refresh for the autumn show.",
+      "status": "watch",
+      "kind": "delivery",
+      "currentFocus": "Track freeze",
+      "nextMilestone": "Track freeze",
+      "nextMilestoneAt": "2026-09-01T12:00:00.000Z",
+      "stakeholders": [
+        {
+          "id": "person-brick",
+          "name": "Brick Oakley",
+          "role": "Sponsor"
+        },
+        {
+          "id": "person-buttons",
+          "name": "Captain Buttons",
+          "role": "Assembly lead"
+        }
+      ]
+    },
+    {
+      "id": "proj-game",
+      "name": "GamingStudio5000",
+      "code": "GS5K",
+      "summary": "GamingStudio5000 console certification sprint.",
+      "status": "watch",
+      "kind": "delivery",
+      "currentFocus": "Console certification",
+      "nextMilestone": "Console certification",
+      "nextMilestoneAt": "2026-11-20T12:00:00.000Z",
+      "stakeholders": [
+        {
+          "id": "person-pixel",
+          "name": "Pixel Ramos",
+          "role": "Producer"
+        }
+      ]
+    }
+  ],
+  "memories": [],
+  "recommendations": [],
+  "meetings": [],
+  "releases": [],
+  "todos": [
+    {
+      "id": "todo-pack",
+      "projectId": "proj-candy",
+      "title": "Prepare the jelly pack",
+      "done": false,
+      "createdAt": "2026-08-26T12:00:00.000Z"
+    },
+    {
+      "id": "todo-track",
+      "projectId": "proj-toy",
+      "title": "Print the track map",
+      "done": false,
+      "createdAt": "2026-08-26T12:00:00.000Z"
+    },
+    {
+      "id": "todo-balance",
+      "projectId": "proj-game",
+      "title": "Boss balancing pass",
+      "done": false,
+      "createdAt": "2026-08-26T12:00:00.000Z"
+    }
+  ],
+  "knowledge": [
+    {
+      "projectId": "proj-candy",
+      "updatedAt": "2026-08-26T12:00:00.000Z",
+      "sections": {
+        "now": [],
+        "decisions": [],
+        "risks": [],
+        "people": [
+          "Pippa Gumdrop — UAT lead"
+        ],
+        "openLoops": []
+      },
+      "structured": [
+        {
+          "id": "resp-uat",
+          "projectId": "proj-candy",
+          "body": "Pippa Gumdrop — UAT lead",
+          "kind": "responsibility",
+          "epistemic": "confirmed",
+          "lifecycle": "current",
+          "meta": {
+            "responsibility": {
+              "personId": "person-gumdrop",
+              "personName": "Pippa Gumdrop",
+              "scope": "UAT lead",
+              "ownerConfirmed": true
+            },
+            "availability": null
+          }
+        }
+      ]
+    },
+    {
+      "projectId": "proj-toy",
+      "updatedAt": "2026-08-26T12:00:00.000Z",
+      "sections": {
+        "now": [],
+        "decisions": [],
+        "risks": [],
+        "people": [
+          "Brick Oakley — Sponsor",
+          "Captain Buttons — Assembly lead"
+        ],
+        "openLoops": []
+      },
+      "structured": []
+    },
+    {
+      "projectId": "proj-game",
+      "updatedAt": "2026-08-26T12:00:00.000Z",
+      "sections": {
+        "now": [],
+        "decisions": [],
+        "risks": [],
+        "people": [
+          "Pixel Ramos — Producer"
+        ],
+        "openLoops": []
+      },
+      "structured": []
+    }
+  ],
+  "risks": [
+    {
+      "id": "risk-bridge",
+      "projectId": "proj-candy",
+      "title": "Gumdrop Bridge icing",
+      "status": "open",
+      "source": "seed",
+      "createdAt": "2026-08-26T12:00:00.000Z",
+      "updatedAt": "2026-08-26T12:00:00.000Z"
+    },
+    {
+      "id": "risk-packaging",
+      "projectId": "proj-toy",
+      "title": "Packaging delay",
+      "status": "open",
+      "source": "seed",
+      "createdAt": "2026-08-26T12:00:00.000Z",
+      "updatedAt": "2026-08-26T12:00:00.000Z"
+    },
+    {
+      "id": "risk-console",
+      "projectId": "proj-game",
+      "title": "Console certification slip",
+      "status": "open",
+      "source": "seed",
+      "createdAt": "2026-08-26T12:00:00.000Z",
+      "updatedAt": "2026-08-26T12:00:00.000Z"
+    }
+  ],
+  "timeline": [
+    {
+      "id": "ms-parade",
+      "projectId": "proj-candy",
+      "label": "Parade day",
+      "type": "milestone",
+      "startAt": "2026-10-15T12:00:00.000Z",
+      "source": "seed"
+    },
+    {
+      "id": "ms-freeze",
+      "projectId": "proj-toy",
+      "label": "Track freeze",
+      "type": "milestone",
+      "startAt": "2026-09-01T12:00:00.000Z",
+      "source": "seed"
+    },
+    {
+      "id": "ms-cert",
+      "projectId": "proj-game",
+      "label": "Console certification",
+      "type": "milestone",
+      "startAt": "2026-11-20T12:00:00.000Z",
+      "source": "seed"
+    }
+  ],
+  "history": [],
+  "analysesThisMonth": 0,
+  "analysesMonthKey": "2026-08"
+}

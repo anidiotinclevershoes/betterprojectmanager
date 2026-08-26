@@ -1,0 +1,106 @@
+{
+  "caseId": "foreign-ids-malformed-envelope",
+  "transcript": "Please attach this update to the console certification risk.",
+  "result": {
+    "memory": {
+      "id": "mem-mt9ud2ag-yrn53s",
+      "type": "conversation",
+      "projectId": "proj-candy",
+      "title": "Please attach this update to the console certification risk.",
+      "content": "Please attach this update to the console certification risk.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T08:38:11.416Z",
+      "createdAt": "2026-08-26T08:38:11.416Z",
+      "source": "capture"
+    },
+    "insights": [],
+    "assumptions": [],
+    "recommendations": [],
+    "rawContent": "Please attach this update to the console certification risk.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-candy",
+    "findingsValidation": {
+      "ok": false,
+      "errors": [],
+      "warnings": [
+        "Resolve console certification slip",
+        "Update imaginary risk"
+      ],
+      "invalidTargetCount": 2
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 2,
+      "proposedChanges": 0,
+      "alreadyKnown": 0,
+      "merged": 0,
+      "needsYou": 0,
+      "commentary": 0,
+      "rejected": 2
+    },
+    "findings": [
+      {
+        "id": "find-obs-foreign",
+        "fact": "Resolve console certification slip",
+        "evidence": "Please attach this update to the console certification risk.",
+        "findingType": "AMBIGUOUS",
+        "confidence": 0,
+        "requiresClarification": true,
+        "clarificationQuestion": "Lume needs you to confirm this.",
+        "reasoningSummary": "Resolve console certification slip",
+        "invalidTarget": true,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      },
+      {
+        "id": "find-obs-invented",
+        "fact": "Update imaginary risk",
+        "evidence": "Please attach this update to the console certification risk.",
+        "findingType": "AMBIGUOUS",
+        "confidence": 0,
+        "requiresClarification": true,
+        "clarificationQuestion": "Lume needs you to confirm this.",
+        "reasoningSummary": "Update imaginary risk",
+        "invalidTarget": true,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-foreign",
+        "sourceFindingId": "find-obs-foreign",
+        "operation": "NO_CHANGE",
+        "entityType": "risk",
+        "targetTitle": "Console certification slip",
+        "proposedValues": {
+          "status": "resolved"
+        },
+        "reason": "Resolve console certification slip",
+        "evidence": "Please attach this update to the console certification risk.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": true,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      },
+      {
+        "id": "v2op-obs-invented",
+        "sourceFindingId": "find-obs-invented",
+        "operation": "NO_CHANGE",
+        "entityType": "risk",
+        "targetTitle": "Update imaginary risk",
+        "proposedValues": {},
+        "reason": "Update imaginary risk",
+        "evidence": "Please attach this update to the console certification risk.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": true,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ]
+  }
+}

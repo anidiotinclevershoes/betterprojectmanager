@@ -1,0 +1,83 @@
+{
+  "caseId": "existing-person",
+  "transcript": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+  "result": {
+    "memory": {
+      "id": "mem-mt9ud2ab-kw4bin",
+      "type": "conversation",
+      "projectId": "proj-candy",
+      "title": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+      "content": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T08:38:11.411Z",
+      "createdAt": "2026-08-26T08:38:11.411Z",
+      "source": "capture"
+    },
+    "insights": [
+      "Pippa Gumdrop remains UAT lead for the licorice stands"
+    ],
+    "assumptions": [],
+    "recommendations": [],
+    "rawContent": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-candy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 1,
+      "proposedChanges": 0,
+      "alreadyKnown": 1,
+      "merged": 0,
+      "needsYou": 0,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-pippa",
+        "fact": "Pippa Gumdrop remains UAT lead for the licorice stands",
+        "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+        "findingType": "NO_CHANGE",
+        "target": {
+          "entityType": "stakeholder",
+          "entityId": "person-gumdrop",
+          "title": "Pippa Gumdrop"
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Pippa Gumdrop remains UAT lead for the licorice stands",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-pippa",
+        "sourceFindingId": "find-obs-pippa",
+        "operation": "NO_CHANGE",
+        "entityType": "stakeholder",
+        "targetId": "person-gumdrop",
+        "targetTitle": "Pippa Gumdrop",
+        "proposedValues": {
+          "personName": "Pippa Gumdrop",
+          "name": "Pippa Gumdrop"
+        },
+        "reason": "Already known — no mutation.",
+        "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ]
+  }
+}

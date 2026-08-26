@@ -1,0 +1,143 @@
+{
+  "caseId": "duplicate-observation",
+  "transcript": "Packaging delay is resolved. Also, the packaging delay issue is resolved.",
+  "result": {
+    "memory": {
+      "id": "mem-mt9wxxfb-pwwkmm",
+      "type": "conversation",
+      "projectId": "proj-toy",
+      "title": "Packaging delay is resolved. Also, the packaging delay issue is resolved",
+      "content": "Packaging delay is resolved. Also, the packaging delay issue is resolved.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T09:50:24.119Z",
+      "createdAt": "2026-08-26T09:50:24.119Z",
+      "source": "capture"
+    },
+    "insights": [
+      "Packaging delay is resolved",
+      "Packaging delay issue is resolved"
+    ],
+    "assumptions": [],
+    "recommendations": [
+      {
+        "id": "rec-lr8tgvkp",
+        "kind": "risk",
+        "urgency": "this_week",
+        "title": "Packaging delay is resolved",
+        "action": "Packaging delay is resolved",
+        "why": "Packaging delay is resolved.",
+        "leadershipImpact": "Act on validated Capture findings without inventing duplicate work.",
+        "projectId": "proj-toy",
+        "relatedMemoryIds": [
+          "mem-mt9wxxfb-pwwkmm"
+        ],
+        "createdAt": "2026-08-26T09:50:24.119Z",
+        "status": "active",
+        "operation": "complete",
+        "itemType": "risk",
+        "targetTitle": "Packaging delay is resolved",
+        "sourceFindingId": "find-obs-a",
+        "proposedOperationId": "v2op-obs-a",
+        "confidence": 0
+      }
+    ],
+    "rawContent": "Packaging delay is resolved. Also, the packaging delay issue is resolved.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-toy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 2,
+      "proposedChanges": 1,
+      "alreadyKnown": 0,
+      "merged": 1,
+      "needsYou": 0,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-a",
+        "fact": "Packaging delay is resolved",
+        "evidence": "Packaging delay is resolved.",
+        "findingType": "ENTITY_COMPLETED",
+        "target": {
+          "entityType": "risk",
+          "entityId": "risk-packaging",
+          "title": "Packaging delay is resolved"
+        },
+        "changes": {
+          "value": {
+            "proposed": "Packaging delay is resolved"
+          }
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Packaging delay is resolved",
+        "invalidTarget": false,
+        "projectId": "proj-toy",
+        "projectName": "Toyworld"
+      },
+      {
+        "id": "find-obs-b",
+        "fact": "Packaging delay issue is resolved",
+        "evidence": "the packaging delay issue is resolved.",
+        "findingType": "NO_CHANGE",
+        "target": {
+          "entityType": "risk",
+          "entityId": "risk-packaging",
+          "title": "Packaging delay issue is resolved"
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Packaging delay issue is resolved",
+        "invalidTarget": false,
+        "projectId": "proj-toy",
+        "projectName": "Toyworld"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-a",
+        "sourceFindingId": "find-obs-a",
+        "operation": "COMPLETE",
+        "entityType": "risk",
+        "targetId": "risk-packaging",
+        "targetTitle": "Packaging delay is resolved",
+        "proposedValues": {
+          "status": "resolved"
+        },
+        "reason": "Packaging delay is resolved",
+        "evidence": "Packaging delay is resolved.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-toy",
+        "projectName": "Toyworld"
+      },
+      {
+        "id": "v2op-obs-b",
+        "sourceFindingId": "find-obs-b",
+        "operation": "NO_CHANGE",
+        "entityType": "risk",
+        "targetId": "risk-packaging",
+        "targetTitle": "Packaging delay issue is resolved",
+        "proposedValues": {},
+        "reason": "Merged with obs-a.",
+        "evidence": "the packaging delay issue is resolved.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-toy",
+        "projectName": "Toyworld"
+      }
+    ]
+  }
+}

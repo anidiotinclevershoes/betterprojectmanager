@@ -1,0 +1,78 @@
+{
+  "caseId": "share-vs-replace-ambiguous",
+  "transcript": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+  "result": {
+    "memory": {
+      "id": "mem-mt9ud2af-tj2qmg",
+      "type": "conversation",
+      "projectId": "proj-candy",
+      "title": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it —",
+      "content": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T08:38:11.415Z",
+      "createdAt": "2026-08-26T08:38:11.415Z",
+      "source": "capture"
+    },
+    "insights": [
+      "UAT may be shared or replaced between Fizz and Pippa"
+    ],
+    "assumptions": [],
+    "recommendations": [],
+    "rawContent": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-candy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 1,
+      "proposedChanges": 0,
+      "alreadyKnown": 0,
+      "merged": 0,
+      "needsYou": 1,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-share-replace",
+        "fact": "UAT may be shared or replaced between Fizz and Pippa",
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+        "findingType": "AMBIGUOUS",
+        "confidence": 0,
+        "requiresClarification": true,
+        "clarificationQuestion": "Share versus replace is not decided.",
+        "reasoningSummary": "UAT may be shared or replaced between Fizz and Pippa",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-share-replace",
+        "sourceFindingId": "find-obs-share-replace",
+        "operation": "NO_CHANGE",
+        "entityType": "stakeholder",
+        "targetTitle": "UAT may be shared or replaced between Fizz and Pippa",
+        "proposedValues": {
+          "ownershipSemantics": "ambiguous",
+          "scope": "UAT lead"
+        },
+        "reason": "Share versus replace is not decided.",
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": true,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ]
+  }
+}

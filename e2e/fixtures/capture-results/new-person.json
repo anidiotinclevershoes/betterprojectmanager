@@ -1,0 +1,109 @@
+{
+  "caseId": "new-person",
+  "transcript": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+  "result": {
+    "memory": {
+      "id": "mem-mt9wxxf8-e9gnyb",
+      "type": "conversation",
+      "projectId": "proj-toy",
+      "title": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+      "content": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T09:50:24.116Z",
+      "createdAt": "2026-08-26T09:50:24.116Z",
+      "source": "capture"
+    },
+    "insights": [
+      "Velvet Sprocket is joining as paint lead"
+    ],
+    "assumptions": [],
+    "recommendations": [
+      {
+        "id": "rec-t3pszg2a",
+        "kind": "stakeholder_update",
+        "urgency": "this_week",
+        "title": "Velvet Sprocket",
+        "action": "Velvet Sprocket is joining as paint lead",
+        "why": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "leadershipImpact": "Act on validated Capture findings without inventing duplicate work.",
+        "projectId": "proj-toy",
+        "relatedMemoryIds": [
+          "mem-mt9wxxf8-e9gnyb"
+        ],
+        "createdAt": "2026-08-26T09:50:24.116Z",
+        "status": "active",
+        "operation": "create",
+        "itemType": "stakeholder",
+        "targetTitle": "Velvet Sprocket",
+        "sourceFindingId": "find-obs-velvet",
+        "proposedOperationId": "v2op-obs-velvet",
+        "confidence": 0
+      }
+    ],
+    "rawContent": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-toy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 1,
+      "proposedChanges": 1,
+      "alreadyKnown": 0,
+      "merged": 0,
+      "needsYou": 0,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-velvet",
+        "fact": "Velvet Sprocket is joining as paint lead",
+        "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "findingType": "NEW_INFORMATION",
+        "target": {
+          "entityType": "stakeholder",
+          "title": "Velvet Sprocket"
+        },
+        "changes": {
+          "value": {
+            "proposed": "Velvet Sprocket is joining as paint lead"
+          }
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Velvet Sprocket is joining as paint lead",
+        "invalidTarget": false,
+        "projectId": "proj-toy",
+        "projectName": "Toyworld"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-velvet",
+        "sourceFindingId": "find-obs-velvet",
+        "operation": "CREATE",
+        "entityType": "stakeholder",
+        "targetTitle": "Velvet Sprocket",
+        "proposedValues": {
+          "name": "Velvet Sprocket",
+          "role": "paint lead",
+          "personName": "Velvet Sprocket"
+        },
+        "reason": "Velvet Sprocket is joining as paint lead",
+        "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-toy",
+        "projectName": "Toyworld"
+      }
+    ]
+  }
+}

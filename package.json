@@ -47,6 +47,11 @@
     "verify:people-context-ui": "npx --yes tsx scripts/verify-people-context-ui.ts",
     "verify:phase3b-capture-boundary": "npx --yes tsx scripts/verify-phase3b-capture-boundary.ts",
     "verify:capture-v2": "npx --yes tsx scripts/verify-capture-v2.ts",
+    "verify:eval-capture-v2": "npx --yes tsx scripts/verify-eval-capture-v2.ts",
+    "verify:capture-v2-invariants": "npx --yes tsx scripts/verify-capture-v2-invariants.ts",
+    "eval:capture-v2": "npx --yes tsx scripts/eval-capture-v2.ts",
+    "test:e2e": "playwright test",
+    "fixtures:e2e": "npx --yes tsx scripts/write-e2e-fixtures.ts",
     "verify:new-project-v2": "npx --yes tsx scripts/verify-new-project-v2.ts",
     "verify:desert-theme": "npx --yes tsx scripts/verify-desert-theme.ts",
     "typecheck": "tsc --noEmit",
@@ -70,7 +75,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
+    "@playwright/test": "^1.55.0",
     "eslint-config-next": "16.2.11",
+    "fast-check": "^4.3.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -1,0 +1,107 @@
+{
+  "caseId": "todo-create",
+  "transcript": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+  "result": {
+    "memory": {
+      "id": "mem-mt9ud2af-9ap68o",
+      "type": "conversation",
+      "projectId": "proj-candy",
+      "title": "Please add a to-do to polish the candy-cane banners before the float lea",
+      "content": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T08:38:11.415Z",
+      "createdAt": "2026-08-26T08:38:11.415Z",
+      "source": "capture"
+    },
+    "insights": [
+      "Polish the candy-cane banners"
+    ],
+    "assumptions": [],
+    "recommendations": [
+      {
+        "id": "rec-nb0zz337",
+        "kind": "leadership",
+        "urgency": "this_week",
+        "title": "Polish the candy-cane banners",
+        "action": "Polish the candy-cane banners",
+        "why": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+        "leadershipImpact": "Act on validated Capture findings without inventing duplicate work.",
+        "projectId": "proj-candy",
+        "relatedMemoryIds": [
+          "mem-mt9ud2af-9ap68o"
+        ],
+        "createdAt": "2026-08-26T08:38:11.415Z",
+        "status": "active",
+        "operation": "create",
+        "itemType": "action",
+        "targetTitle": "Polish the candy-cane banners",
+        "sourceFindingId": "find-obs-banners",
+        "proposedOperationId": "v2op-obs-banners",
+        "confidence": 0
+      }
+    ],
+    "rawContent": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-candy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 1,
+      "proposedChanges": 1,
+      "alreadyKnown": 0,
+      "merged": 0,
+      "needsYou": 0,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-banners",
+        "fact": "Polish the candy-cane banners",
+        "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+        "findingType": "NEW_INFORMATION",
+        "target": {
+          "entityType": "todo",
+          "title": "Polish the candy-cane banners"
+        },
+        "changes": {
+          "value": {
+            "proposed": "Polish the candy-cane banners"
+          }
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Polish the candy-cane banners",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-banners",
+        "sourceFindingId": "find-obs-banners",
+        "operation": "CREATE",
+        "entityType": "todo",
+        "targetTitle": "Polish the candy-cane banners",
+        "proposedValues": {
+          "title": "Polish the candy-cane banners"
+        },
+        "reason": "Polish the candy-cane banners",
+        "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ]
+  }
+}
