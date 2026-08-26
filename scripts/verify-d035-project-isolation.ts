@@ -387,11 +387,13 @@ async function main() {
       });
       await assert.rejects(
         () =>
-          hooks.completeTodo({
-            type: "complete_todo",
-            projectId: PROJECT_A,
-            todoId: TODO_B,
-          }),
+          Promise.resolve(
+            hooks.completeTodo({
+              type: "complete_todo",
+              projectId: PROJECT_A,
+              todoId: TODO_B,
+            }),
+          ),
         /not found in this project/,
       );
       assert.equal(todoB(fake)?.done, false);
