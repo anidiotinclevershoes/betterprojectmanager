@@ -14,12 +14,12 @@ This is **what the product does now**, not a Magic Patterns inventory.
 | Mode selector | `ProjectModeSelector` | Capture (✦) / Knowledge Centre / Advise Coming soon (disabled) |
 | Intelligence strip | `ProjectIntelligenceStrip` | Counts + Refresh + actions-left pill |
 | Standalone Capture URL | `src/app/capture/page.tsx` | Redirects to `/` |
-| Captures list | `src/app/captures/page.tsx` | Session history |
-| Coaching page | `src/app/coaching/page.tsx` | **Leftover** full page; constitution says Advise/Coaching are not sidebar destinations. Coach also exists as a drawer (`CoachDrawer`) — D-031 auto-open |
-| Meetings | `/meetings`, `/meetings/[id]` | Also embedded as KC “Meeting Prep” frame |
-| Memory | `/memory` | Org memories, not KC primary |
-| Releases | `/releases` | Not Ocean-primary |
-| Account | `/account` | Profile, billing, **Appearance** (`LumeThemePicker`) |
+| Captures list | `src/app/captures/page.tsx` | Session history; empty “No Capture sessions yet.” |
+| Coaching page | `src/app/coaching/page.tsx` | **Leftover** full page; not in sidebar. Coach also exists as `CoachDrawer` (D-031 auto-open). `HeaderCoachButton` exists but is **not mounted**. |
+| Meetings | `/meetings`, `/meetings/[id]` | Legacy `DashboardChrome`. Also embedded as KC “Meeting Prep” frame |
+| Memory | `/memory` | Legacy Knowledge Q&A; not KC primary; **not in sidebar** |
+| Releases | `/releases` | Legacy playbook; not Ocean-primary |
+| Account | `/account` | Profile, billing, **Appearance** (`LumeThemePicker`); trial-expired uses `TrialExpiredPanel` (no sidebar) |
 
 ## Knowledge Centre
 
@@ -38,7 +38,7 @@ This is **what the product does now**, not a Magic Patterns inventory.
 | Meeting Prep | Embedded `MeetingPrepFrame` | Legacy embed |
 | Timeline | Embedded `TimelineFrame` | **Duplicates** Important dates — candidate to delete later |
 
-Search Knowledge (deterministic) vs ✦ Ask Lume (`KnowledgeSearchAskBar` → Tell Me). Suggested questions present.
+Search Knowledge (deterministic) vs ✦ Ask Lume (`KnowledgeSearchAskBar`). Suggested questions present. `TellMePanel` still exists but is **unwired** from the Ocean shell — “✦ Lume noticed” on the live path comes from the Ask answer block.
 
 Item detail: body, previous value, provenance (“Why Lume believes this”), Needs you reason, Confirm Owner, inline edit, related people via `PersonEntity` (`@name · scope`).
 
@@ -56,10 +56,13 @@ Item detail: body, previous value, provenance (“Why Lume believes this”), Ne
 | Observation accounting (V2 only) | `capture-v2-account`: total / proposed / already known / Needs you / commentary |
 | Apply Ready | Ready cards + Approve Ready |
 | Needs you | `readiness=needs_review` or `unmatched` → `CorrectionActions` (Use this / pick target / Confirm Owner) |
-| No-change / already known | Counted in V2 account; may still be a card depending on pipeline |
+| No-change / already known | V2 account count; legacy `NO_CHANGE` findings are filtered out of the observation list — not a dedicated Review section |
+| Remember | `KnowledgeRememberList` — Remember / Remember All (not maintained truth until approved) |
 | Save/error | Ocean `saveStatus=error` / `ocean-save-error` (Phase 3A); Capture persist-first on 3B domains |
 
 Review cards: `CompactChangeCard` with Current vs Suggested, create/remove layouts, Why panel (progressive disclosure). Entity kinds include action, milestone, decision, risk, stakeholder, availability, knowledge, nudge, meeting, memory.
+
+**Orphan Capture UX:** `CaptureBar` still calls immediate-merge `captureWithAI` but is **unmounted**. Ocean path is analyse → review → `applyOne`. Do not revive `CaptureBar`.
 
 Flag: `LUME_CAPTURE_V2` (unset = legacy findings path). **Same Review chrome** for both; V2 adds the compact account line.
 
@@ -71,7 +74,7 @@ Flag: `LUME_CAPTURE_V2` (unset = legacy findings path). **Same Review chrome** f
 | --- | --- |
 | Talk It Through | Messy natural input; optional STT; Build My Project |
 | Start Blank | Name + code; skips review; **not** V2 map |
-| Paste | **Not on the choose screen.** Historical screenshots still show it. Constitution: paste out of V1 scope. API still accepts `sourceMode: "paste"`. |
+| Paste | **Not on the choose screen.** Historical screenshots still show it. Constitution: paste out of V1 scope. API still accepts `sourceMode: "paste"`, but the Talk textarea always posts `"talk"` even if the user pastes. |
 | V2 categorisation | Only when `pipeline === "v2"`; buckets People / Risks / Dates / To Dos / Knowledge / commentary / ignore; “not maintained truth yet”; then existing `ProjectSetupReview` |
 | Setup review | Existing review; create is persist-first |
 | First-run | Same component, `variant="first-run"` on zero-project home — **not a separate onboarding product** |
@@ -84,10 +87,22 @@ Flag: `LUME_NEW_PROJECT_V2`.
 | --- | --- |
 | Advise | Disabled “Coming soon” in mode selector. No V1 Advise screen. |
 | Coach | Drawer + leftover `/coaching` page. D-031: can auto-open over Capture/KC. |
-| Tell Me / Ask | `TellMePanel` / `TellMeSessionContext`; Search vs Ask distinction in KC |
-| Meeting Prep | KC embed + `/meetings` |
+| Tell Me / Ask | Live: `KnowledgeSearchAskBar`. `TellMePanel` unwired. |
+| Meeting Prep | KC embed + leftover `/meetings` |
 | History | `/history` — chronology / evidence, **not** current truth (D-004 persist gaps) |
 | Reminders | Todo `kind=REMINDER` in data/setup review. **No dedicated Reminders frame.** |
+
+## Unwired / leftover UI (deletion candidates)
+
+| Component / route | Status |
+| --- | --- |
+| `CaptureBar` | Unmounted; immediate-merge path — do not revive |
+| `TellMePanel` | Unwired; Ask lives in `KnowledgeSearchAskBar` |
+| `HeaderCoachButton` | Not mounted |
+| `ProjectWidgetGrid`, `ProjectKnowledgeBrief`, `WorkspaceGrid` | Old dashboard; unwired |
+| `AppearanceToggle` | Unmounted light↔dark toggle |
+| `/memory`, `/meetings`, `/releases`, `/coaching` | Exist; not Ocean sidebar destinations |
+| `DetailModal` | Still used by legacy frames (`TodoFrame`, `RiskFrame`) and delete confirm; Ocean KC uses the drawer instead |
 
 ## Account / themes
 

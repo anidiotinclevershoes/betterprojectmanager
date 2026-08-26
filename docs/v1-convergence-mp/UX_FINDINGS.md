@@ -136,7 +136,7 @@ Not a generic WCAG pamphlet.
 | Semantic controls | Theme picker | `radiogroup` / `role="radio"`. Some icon-only sidebar links rely on `title` when collapsed. |
 | Contrast | Desert muted text; Ocean `--text-muted` | Needs a later pass on empty frames and commentary. |
 | SR labels | Capture textarea | `sr-only` label. Analyse live region `aria-live="polite"`. Capture error `role="alert"`. Theme picker labelled. Item detail `aria-label`. |
-| Modal behaviour | Item drawer, Confirm Owner, Coach | Drawer is `aria-modal`. Coach auto-open (D-031) **steals** the Capture path — a11y and UX failure. |
+| Modal behaviour | Item drawer, Confirm Owner, Coach, `DetailModal` | Drawer is `aria-modal` with focus return. Coach auto-open (D-031) **steals** the Capture path. Legacy `DetailModal` has **no focus trap / initial focus**. |
 | Error announcements | Persist / Capture / New Project | Mix of `role="alert"` and inline `error` strings. Save-error banner is the Ocean pattern to reuse. |
 | Loading | Home / Analyse / NP build | Textual; no shared skeleton primitive. |
 
@@ -157,13 +157,15 @@ PNG itself is not a responsive spec. Do not implement a separate mobile IA unles
 **Likely to disappear (or stop being product chrome):**
 
 - `AppearanceToggle` (unmounted light/dark)
-- `/coaching` page as a destination; Coach auto-open
+- `/coaching` page as a destination; Coach auto-open; unmounted `HeaderCoachButton`
 - Duplicate **Timeline** embed beside Important dates
-- `WorkspaceGrid` / old dashboard chrome if still reachable
+- `WorkspaceGrid` / `ProjectWidgetGrid` / `ProjectKnowledgeBrief` (unwired dashboard)
+- `CaptureBar` immediate-merge; `TellMePanel` (Ask already in KC bar)
 - Overview (already gone)
-- Paste card (already gone from choose)
+- Paste card (already gone from choose; API paste mode unused by UI)
 - Legacy Capture findings UI **after** D-032 chooses V2
 - Light theme token block if PO confirms Ocean+Desert only
+- `/memory`, `/meetings`, `/releases` as product destinations if Meeting Prep stays a KC embed
 
 **MP patterns that would justify shared primitives later** (only after live MP is in git):
 

@@ -38,6 +38,8 @@ No Magic Patterns source files (`App.tsx` prototype export, `canvas.manifest.js`
 | Repo / PR / issue search for `magicpatterns.com` | **Zero hits** across listed PRs. |
 | GitHub code search in this owner | No `magicpatterns` matches. |
 | Prior cloud-agent list | No agent named as an MP design session with a stored editor URL in this environment’s agent index. |
+| Prior “Lume V1 architectural convergence” transcript | No MP URLs. Programme text treats live MP as an **external, unmanaged** dependency. |
+| Sibling “Find MP artefacts” search | Same conclusion: zero hosted MP ids; in-repo authority is the Ocean PNG + live Ocean implementation. |
 
 ## Access that is missing
 
