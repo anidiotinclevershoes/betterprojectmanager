@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireAiCaller } from "@/lib/ai-gate";
 import { refreshSnapshotWithAi } from "@/lib/tell-me/snapshot";
+import { saveSnapshotToSupabase } from "@/lib/tell-me/snapshot-store";
 import {
-  resolveWorkspaceIdForProject,
-  saveSnapshotToSupabase,
-} from "@/lib/tell-me/snapshot-store";
+  TellMeServerTruthError,
+  loadServerCurrentTruthForTellMe,
+} from "@/lib/tell-me/server-truth";
 import { isOpenAIConfigured } from "@/lib/openai";
 import { isProductionRuntime } from "@/lib/runtime-config";
 import { serverLog } from "@/lib/server-log";
@@ -15,8 +16,9 @@ export const runtime = "nodejs";
 
 type Body = {
   projectId?: string;
-  state?: MissionState;
   userDisplayName?: string | null;
+  /** Leftover — ignored. Refresh uses server-loaded durable state. */
+  state?: MissionState;
 };
 
 export async function POST(request: Request) {
@@ -33,33 +35,38 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as Body;
-    if (!body.projectId || !body.state) {
+    const projectId = body.projectId?.trim();
+    if (!projectId) {
       return NextResponse.json(
-        { error: "projectId and state are required." },
+        { error: "projectId is required." },
         { status: 400 },
       );
     }
 
-    const project = body.state.projects.find((p) => p.id === body.projectId);
+    const loaded = await loadServerCurrentTruthForTellMe({
+      projectId,
+      question: "Refresh project intelligence snapshot",
+    });
+    const project = loaded.state.projects.find((p) => p.id === projectId);
     if (!project) {
       return NextResponse.json(
-        { error: "Project not found in your workspace." },
+        { error: "Project not found or you do not have access to it." },
         { status: 404 },
       );
     }
 
-    const workspaceId = await resolveWorkspaceIdForProject(body.projectId);
     const refreshed = await refreshSnapshotWithAi({
-      state: body.state,
-      projectId: body.projectId,
+      state: loaded.state,
+      projectId,
       userDisplayName: body.userDisplayName ?? null,
-      workspaceId,
+      workspaceId: loaded.workspaceId,
     });
 
     let snapshot = refreshed.snapshot;
-    if (workspaceId) {
+    if (loaded.workspaceId) {
       snapshot =
-        (await saveSnapshotToSupabase(snapshot, workspaceId)) ?? snapshot;
+        (await saveSnapshotToSupabase(snapshot, loaded.workspaceId)) ??
+        snapshot;
     }
 
     recordTellMeMetricsSafe({
@@ -86,7 +93,7 @@ export async function POST(request: Request) {
         sources: [],
         scope: {
           mode: "project",
-          projectId: body.projectId,
+          projectId,
           projectCode: project.code,
           projectName: project.name,
         },
@@ -96,8 +103,9 @@ export async function POST(request: Request) {
 
     serverLog.info("tell_me.snapshot_refreshed", {
       userId: gate.userId,
-      projectId: body.projectId,
+      projectId,
       provider: refreshed.provider,
+      canonicalTruthChars: loaded.canonical.approxChars,
     });
 
     return NextResponse.json({
@@ -106,6 +114,17 @@ export async function POST(request: Request) {
       provider: refreshed.provider,
     });
   } catch (error) {
+    if (error instanceof TellMeServerTruthError) {
+      serverLog.error("tell_me.refresh_failed", {
+        error: error.message,
+        code: error.code,
+        status: error.status,
+      });
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.status },
+      );
+    }
     const message =
       error instanceof Error ? error.message : "Snapshot refresh failed";
     serverLog.error("tell_me.refresh_failed", { error: message });

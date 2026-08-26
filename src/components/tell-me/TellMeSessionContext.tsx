@@ -228,7 +228,7 @@ export function TellMeSessionProvider({
       setError(null);
       setQuestion(q);
       try {
-        // Ensure a deterministic snapshot exists for freshness messaging (no AI).
+        // Local snapshot is UX freshness only — never sent as AI current truth.
         let activeSnapshot = projectId ? snapshots[projectId] ?? null : null;
         if (projectId && !activeSnapshot) {
           activeSnapshot = buildDeterministicSnapshot({
@@ -248,8 +248,6 @@ export function TellMeSessionProvider({
             question: q,
             projectId,
             conversation,
-            snapshot: activeSnapshot,
-            state,
             userDisplayName,
           }),
         });
@@ -298,7 +296,6 @@ export function TellMeSessionProvider({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           projectId,
-          state,
           userDisplayName,
         }),
       });
@@ -333,7 +330,7 @@ export function TellMeSessionProvider({
     } finally {
       setRefreshing(false);
     }
-  }, [projectId, refreshing, state, userDisplayName, snapshots, answer]);
+  }, [projectId, refreshing, userDisplayName, snapshots, answer]);
 
   const value = useMemo<TellMeSessionValue>(
     () => ({

@@ -128,7 +128,7 @@ Use this section as working context for future product/development decisions and
 | **Releases** | `releases` | `releases` | UUID | release ops | Not Ocean-primary | — | RELOPS-oriented |
 | **History** | `MissionState.history` | `history_events` | UUID | chronology / evidence | Honesty notes; History page | `pushHistory`, `persistHistoryEvent` | **Not current truth.** Many events never persist (**GAP D-004**) |
 | **Capture sessions** | sessionStorage + client list | `capture_sessions` | mixed | review draft vs applied | Capture mode | `CaptureSessionContext`, `persistCaptureSession` | Table underused vs client lists (**GAP D-013**) |
-| **Ask context / snapshots** | Tell Me session + optional snapshot | `project_intelligence_snapshots` | 1 per project derived | **Derived**, must not mutate projects | Search/Ask bar | `buildTellMeContext` / `serializeCanonicalTruth` | Canonical path **ignores snapshot**. Flag default **legacy** |
+| **Ask context / snapshots** | Tell Me session (intent only on HTTP) | Durable tables via `loadMissionStateFromSupabase`; snapshots derived | 1 per project derived | **Server-loaded canonical truth** for Ask; snapshot is UX compression only | Search/Ask bar | `loadServerCurrentTruthForTellMe` → `serializeCanonicalTruth` | HTTP ignores client MissionState. Library flag still gates evals/legacy assembler. |
 
 ---
 
@@ -326,35 +326,30 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 
 ## 12. Ask / Tell Me architecture
 
-**Two assemblers. CURRENT production default is still LEGACY (flag unset = off). DECIDED V1 TARGET assembler is canonical (`serializeCanonicalTruth`) — Part C. The dual path is TRANSITIONAL / FLAGGED until default-on; the legacy Ask branch is then DEPRECATED / SCHEDULED FOR DELETION.**
+**HTTP production path (Slice 1B — CURRENT):** browser sends `projectId` + `question` + conversation/display name. Server authenticates (`requireAiCaller`), loads durable workspace state (`loadMissionStateFromSupabase` via cookie RLS client), verifies the exact project belongs to that workspace, filters to that project, then `serializeCanonicalTruth`. Client `MissionState` / snapshot are **not** current-truth inputs. Load or assembly failure returns a visible error — never falls back to browser state.
+
+**Library / eval path (TRANSITIONAL):** `answerTellMeQuestion` / `buildTellMeContext` may still accept a MissionState argument for tests and evals. `LUME_CANONICAL_TRUTH` still gates the **library assembler** (unset = off except eval/explicit; `0` = legacy `buildCaptureContext`). The HTTP route always passes `useCanonicalTruth: true` and never attaches a snapshot.
 
 ### Flag `LUME_CANONICAL_TRUTH` (`src/lib/canonical-truth/flag.ts`)
 
 | Value | Behaviour |
 | --- | --- |
-| unset | **off** for live product; **on** when `forEval` or `explicit: true` |
-| `1` / `true` / `on` | Force canonical |
-| `0` / `false` / `off` | Force legacy rollback |
+| unset | **off** for library callers; **on** when `forEval` or `explicit: true`. HTTP Tell Me always passes explicit true. |
+| `1` / `true` / `on` | Force canonical assembler |
+| `0` / `false` / `off` | Force legacy assembler **in the library** (emergency rollback of serialiser, not of server load) |
 
-**Why production has not flipped:** INTENT requires Ask UI smoke + eval evidence + residual D-010 plan. Slice 2A wired Ask into Ocean **without** flipping the default.
+**Remaining deletion gate:** legacy `buildCaptureContext` branch inside `buildTellMeContext`; flag default-off for evals; Capture/Coach still accept client MissionState (D-033 remainder). Do not delete the library branch until Capture migrates and eval evidence supports flipping the default.
 
-### Legacy Ask (CURRENT production)
-
-- `buildTellMeContext` → `buildCaptureContext` + optional `project_intelligence_snapshots`
-- Mixes Knowledge sections, history, snapshot fields
-- **GAP D-010:** History can still compete as current truth on this path
-- Ownership / current-state heuristics reduce history volume but do not apply the canonical MODE:current rule
-
-### Canonical Ask (flag / evals)
+### Canonical Ask (HTTP + explicit / evals)
 
 - `serializeCanonicalTruth` — **assembler only**, not a new store
-- Includes: project metadata, Knowledge (current structured + legacy section projection), **Risks from `risks.status`**, stakeholders, **all current responsibilities (multi-owner)**, todos + WAITING/CHASE, milestones, structured dependency/availability **if present**, stored unconfirmed-owner ambiguities only (does **not** invent “owner not recorded” from absence — D-R06)
+- Includes: project metadata, Knowledge (current structured + legacy section projection), **all domain Risks with `risks.status`**, stakeholders, **all current responsibilities (multi-owner)**, open todos + WAITING/CHASE, milestones, structured dependency/availability **if present**, stored unconfirmed-owner ambiguities only (does **not** invent “owner not recorded” from absence — D-R06)
 - History evidence **only** when `questionLooksHistorical`
-- Current-state MODE excludes superseded
-- Snapshot **null** on this path
+- Current-state MODE excludes superseded Knowledge; domain Risks still listed with durable status (including resolved)
+- Snapshot **null** on the HTTP path
 - Tell Me remains **read-only**; Confirm Owner is a separate mutation
 
-**Key files:** `src/lib/tell-me/{answer,context,question-shape,scope,types}.ts`, `src/lib/canonical-truth/serialize.ts`, `src/app/api/tell-me/route.ts`.
+**Key files:** `src/lib/tell-me/{answer,context,server-truth,question-shape,scope,types}.ts`, `src/lib/canonical-truth/serialize.ts`, `src/app/api/tell-me/route.ts`.
 
 ---
 
@@ -495,7 +490,7 @@ From `docs/LUME_V1_KNOWN_DISCOVERIES.md` as of this handoff. **Do not treat reso
 | D-030 | Leftover Knowledge prose vs domain after Capture apply | KC may still show old risk/date sentences | KC projection / reconcile |
 | D-031 | Coach drawer auto-opens over Capture/KC | Overlay can hide Analyse | Ocean/QOL — **convergence: hide/retire Coach as V1 surface** |
 | D-032 | Dual Capture / New Project OpenAI pipelines | Permanent dual engines reintroduce drift | After V2 gates; delete legacy understanding path |
-| D-033 | AI decision routes accept browser-supplied MissionState | Stale/forged own-session context; unbounded payloads | Server-load Tell Me first, then Capture |
+| D-033 | AI decision routes accept browser-supplied MissionState | Stale/forged own-session context; unbounded payloads | **Tell Me HTTP fixed (Slice 1B).** Capture then Coach remain. |
 | D-034 | Capture apply world is client MissionState; no row versioning | Planner cannot see concurrent durable writes | DB `version` + fresh load before write; not a new framework |
 | D-035 | Project-domain mutations must verify intended project membership | `persistTodoUpdate` is one known instance (id-only WHERE); class is broader | Later audit of all project-domain persist paths — not this docs PR |
 
@@ -674,10 +669,11 @@ Parallel writes:
 
 ### Ask / Tell Me
 
-- `answerTellMeQuestion`, `buildTellMeContext`, `serializeCanonicalTruth`
-- Flag: `isCanonicalTruthEnabled`
-- Tests: ask-context-authority, canonical-truth, tell-me, context-integrity
-- Discoveries: D-010 residual legacy
+- `loadServerCurrentTruthForTellMe` → `serializeCanonicalTruth` → `answerTellMeQuestion`
+- HTTP does not trust client MissionState
+- Library flag: `isCanonicalTruthEnabled` (evals / legacy assembler rollback)
+- Tests: ask-context-authority, canonical-truth, tell-me, tell-me-server-truth, context-integrity
+- Discoveries: D-033 partial (Tell Me); D-010 residual on library legacy branch
 
 ### History / provenance
 
@@ -998,8 +994,8 @@ This is **not** primarily an IDOR/tenant-isolation repair. Workspace RLS (`is_wo
 
 | Route | Client sends | Server loads project truth? | Call sites |
 | --- | --- | --- | --- |
-| `POST /api/tell-me` | **Full `MissionState` required** + optional snapshot | Snapshot only, if client omits it | `TellMeSessionContext.tsx` |
-| `POST /api/tell-me/refresh` | **Full `MissionState` required** | Saves snapshot; project existence checked on **client graph** | `TellMeSessionContext.tsx` |
+| `POST /api/tell-me` | `projectId` + `question` + conversation (intent). Leftover `state`/`snapshot` **ignored** | **Yes** — `loadMissionStateFromSupabase` then `serializeCanonicalTruth` | `TellMeSessionContext.tsx` |
+| `POST /api/tell-me/refresh` | `projectId` (+ display name). Leftover `state` **ignored** | **Yes** — same server load; snapshot is derived UX, not AI truth | `TellMeSessionContext.tsx` |
 | `POST /api/capture` | **Partial MissionState** (sliced in `store.tsx`) | **No** | `requestCaptureAnalysis` in `store.tsx` |
 | `POST /api/coach` | Large MissionState slice | **No** | `CoachSessionContext.tsx`, `CoachButton.tsx` |
 | `POST /api/new-project` | Narrative / answers only | No (draft); persist is separate | `NewProjectExperience.tsx` |
@@ -1021,7 +1017,7 @@ projectId + user intent
 
 **Surface-by-surface order (lowest risk first):**
 
-1. **`/api/tell-me` and `/api/tell-me/refresh`** — read-only; assembler already exists; stop requiring `state`.
+1. **`/api/tell-me` and `/api/tell-me/refresh`** — **done (Slice 1B).** Read-only; `serializeCanonicalTruth`; no client-state fallback.
 2. **`/api/capture`** — replace `body.state` with server load for `projectId`; keep Phase 3B; V2 world from that load.
 3. **Capture apply execution** — planner world from the same fresh load (D-034), still `planCaptureApply`.
 4. **`/api/coach`** — only if Coach remains at all; prefer hide/retire over migration investment.
@@ -1207,7 +1203,7 @@ Recommended order after this authority is reviewed:
 
 1. ~~**Dead-path deletion:** `CaptureBar` / immediate merge APIs~~ — **done Slice 1A**.
 2. **Tests (sibling workstream):** lock `serializeCanonicalTruth`, Phase 3B apply, waiting concatenation, V2 gates **before** structural deletion of live dual engines.
-3. **Tell Me server-load** + keep canonical assembler; then default-on when eval evidence exists.
+3. **Tell Me server-load** + keep canonical assembler — **done (Slice 1B).** Capture V2 must not start automatically from this slice.
 4. **Capture server-load** of the same world; V2 default-on; **then** delete legacy OpenAI findings path.
 5. **Integrity RPCs** (create/delete bundle) as their own slice.
 6. **Person table** only after the above; **not** mixed with Capture deletion.

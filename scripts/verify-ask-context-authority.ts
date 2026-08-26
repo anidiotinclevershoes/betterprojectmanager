@@ -203,8 +203,10 @@ function testResolvedRiskExcludedFromCurrent() {
     question: "What are the open risks?",
   });
   assert.match(bundle.promptBlock, /Auth0 delay/);
-  assert.match(bundle.promptBlock, /\(risk, open\)/);
-  assert.doesNotMatch(bundle.promptBlock, /\(risk, resolved\) Old cab risk/);
+  assert.match(bundle.promptBlock, /\(risk, open\) Auth0 delay/);
+  // Durable resolved status is current truth, not omitted and not presented as open.
+  assert.match(bundle.promptBlock, /\(risk, resolved\) Old cab risk/);
+  assert.doesNotMatch(bundle.promptBlock, /\(risk, open\) Old cab risk/);
   assert.doesNotMatch(bundle.promptBlock, /\[Resolved\] Old cab risk/);
 }
 

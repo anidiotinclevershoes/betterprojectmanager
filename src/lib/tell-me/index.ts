@@ -11,6 +11,11 @@ export type {
 export { answerTellMeQuestion, pickSources, filterRelevantSources } from "@/lib/tell-me/answer";
 export { buildTellMeContext } from "@/lib/tell-me/context";
 export {
+  TellMeServerTruthError,
+  filterMissionStateToProject,
+  loadServerCurrentTruthForTellMe,
+} from "@/lib/tell-me/server-truth";
+export {
   assessFreshness,
   questionImpliesLatest,
 } from "@/lib/tell-me/freshness";
