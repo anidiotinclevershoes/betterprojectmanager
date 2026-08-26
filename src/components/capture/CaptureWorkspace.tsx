@@ -24,6 +24,7 @@ import {
 import type { TargetOption } from "@/components/capture/review/TargetPicker";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
 import { KIND_LABEL } from "@/lib/capture/suggestions";
+import { ConfirmOwnerDialog } from "@/components/intelligence/ConfirmOwnerDialog";
 
 type CaptureBlock = {
   id: string;
@@ -93,6 +94,7 @@ export function CaptureWorkspace({
     cancelAnalyse,
     applyOne,
     dismissOne,
+    markOneApplied,
     clearSession,
     expandAnalysis,
     editCapture,
@@ -118,6 +120,13 @@ export function CaptureWorkspace({
   const [blocks, setBlocks] = useState<CaptureBlock[]>(() => [
     makeBlock("typed", content),
   ]);
+  const [confirmOwner, setConfirmOwner] = useState<{
+    suggestionId: string;
+    projectId: string;
+    scope: string;
+    personName: string;
+    personId?: string | null;
+  } | null>(null);
   const recordingIdRef = useRef<string | null>(null);
   const pushingContentRef = useRef(false);
 
@@ -306,6 +315,33 @@ export function CaptureWorkspace({
         status: "Open",
       });
     }
+    for (const risk of state.risks ?? []) {
+      if (risk.projectId !== pid) continue;
+      options.push({
+        id: risk.id,
+        title: risk.title,
+        entityLabel: KIND_LABEL.risk,
+        status: risk.status,
+      });
+    }
+    const project = state.projects.find((p) => p.id === pid);
+    for (const person of project?.stakeholders ?? []) {
+      options.push({
+        id: person.id,
+        title: person.name,
+        entityLabel: KIND_LABEL.stakeholder,
+        status: person.role,
+      });
+    }
+    for (const mile of state.timeline ?? []) {
+      if (mile.projectId !== pid) continue;
+      options.push({
+        id: mile.id,
+        title: mile.label,
+        entityLabel: KIND_LABEL.milestone,
+        status: mile.startAt?.slice(0, 10),
+      });
+    }
     for (const m of state.meetings ?? []) {
       if (m.projectId !== pid) continue;
       options.push({
@@ -314,32 +350,15 @@ export function CaptureWorkspace({
         entityLabel: KIND_LABEL.meeting,
       });
     }
-    const knowledge = state.knowledge?.find((k) => k.projectId === pid);
-    for (const [index, risk] of (knowledge?.sections.risks ?? []).entries()) {
-      options.push({
-        id: `know-risk-${pid}-${index}`,
-        title: risk,
-        entityLabel: KIND_LABEL.risk,
-      });
-    }
-    for (const release of state.releases ?? []) {
-      if (release.projectId !== pid) continue;
-      for (const [index, risk] of release.risks.entries()) {
-        options.push({
-          id: `${release.id}-risk-${index}`,
-          title: risk,
-          entityLabel: KIND_LABEL.risk,
-        });
-      }
-    }
     return options;
   }, [
     defaultProjectId,
     effectiveProjectId,
     state.todos,
     state.meetings,
-    state.knowledge,
-    state.releases,
+    state.risks,
+    state.projects,
+    state.timeline,
   ]);
 
   function approveById(id: string) {
@@ -349,12 +368,19 @@ export function CaptureWorkspace({
       dismissOne(id);
       return;
     }
-    applyOne(model.suggestion, defaultProjectId);
+    void applyOne(model.suggestion, defaultProjectId).then((decision) => {
+      if (decision.kind === "needs_you" && decision.confirmOwner) {
+        setConfirmOwner({
+          suggestionId: id,
+          ...decision.confirmOwner,
+        });
+      }
+    });
   }
 
   function approveReady() {
     for (const model of pendingReadyModels(reviewModels, added, dismissed)) {
-      applyOne(model.suggestion, defaultProjectId);
+      void applyOne(model.suggestion, defaultProjectId);
     }
   }
 
@@ -374,10 +400,18 @@ export function CaptureWorkspace({
           ? "nudge"
           : option.entityLabel === KIND_LABEL.meeting
             ? "meeting"
-            : "action";
+            : option.entityLabel === KIND_LABEL.stakeholder
+              ? "stakeholder"
+              : option.entityLabel === KIND_LABEL.milestone
+                ? "milestone"
+                : option.entityLabel === KIND_LABEL.availability
+                  ? "availability"
+                  : "action";
+    const isTodo = kind === "action" || kind === "nudge";
     updateSuggestion(id, {
       content: option.title,
-      targetTodoId: option.id,
+      targetTodoId: isTodo ? option.id : undefined,
+      targetEntityId: option.id,
       kind,
       op: "update",
     });
@@ -386,7 +420,7 @@ export function CaptureWorkspace({
       readiness: "ready",
       reviewReason: null,
       content: option.title,
-      targetTodoId: option.id,
+      targetTodoId: isTodo ? option.id : undefined,
       kind,
       op: "update",
       recordName: option.title,
@@ -396,7 +430,11 @@ export function CaptureWorkspace({
   function onCreateNew(id: string) {
     const model = reviewModels.find((m) => m.id === id);
     if (!model) return;
-    updateSuggestion(id, { op: "create", targetTodoId: undefined });
+    updateSuggestion(id, {
+      op: "create",
+      targetTodoId: undefined,
+      targetEntityId: undefined,
+    });
     setReviewOverride(id, {
       accepted: true,
       readiness: "ready",
@@ -417,7 +455,7 @@ export function CaptureWorkspace({
       reviewReason: null,
       op: "complete",
     });
-    applyOne({ ...model.suggestion, op: "complete" }, defaultProjectId);
+    void applyOne({ ...model.suggestion, op: "complete" }, defaultProjectId);
   }
 
   function onChooseProject(
@@ -760,6 +798,20 @@ export function CaptureWorkspace({
             });
           }}
           showDevDetails={isDev}
+        />
+      ) : null}
+
+      {confirmOwner ? (
+        <ConfirmOwnerDialog
+          projectId={confirmOwner.projectId}
+          scope={confirmOwner.scope}
+          defaultPersonName={confirmOwner.personName}
+          onDone={() => {
+            const id = confirmOwner.suggestionId;
+            setConfirmOwner(null);
+            markOneApplied(id);
+          }}
+          onCancel={() => setConfirmOwner(null)}
         />
       ) : null}
 

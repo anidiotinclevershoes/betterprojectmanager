@@ -36,34 +36,7 @@ function normalizeKey(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
-function factCategory(fact: string): string | null {
-  const t = fact.toLowerCase();
-  if (/\bcab\b/.test(t) && /\bapprov/.test(t)) return "cab_approval";
-  if (
-    /\b(hypercare|staffing gap)\b/.test(t) &&
-    /\b(resolv|confirm|roster)\b/.test(t)
-  ) {
-    return "hypercare_risk";
-  }
-  if (
-    /\b(cab pack|submission)\b/.test(t) &&
-    /\b(due|friday|moved|move)\b/.test(t)
-  ) {
-    return "cab_pack_due";
-  }
-  if (
-    /\brelease\b/.test(t) &&
-    (/\b(date|moved|changed|nineteenth|august)\b/.test(t) || /\b19\b/.test(t))
-  ) {
-    return "release_date";
-  }
-  if (/\bcdn\b/.test(t) && /\b(resolv|blocker|issue|deploy)/.test(t)) {
-    return "cdn_blocker";
-  }
-  if (/\bsarah\b/.test(t) && /\bowner\b/.test(t)) return "business_owner";
-  if (/\bmarcus\b/.test(t) && /\brelease notes\b/.test(t)) {
-    return "release_notes_support";
-  }
+function factCategory(_fact: string): string | null {
   return null;
 }
 

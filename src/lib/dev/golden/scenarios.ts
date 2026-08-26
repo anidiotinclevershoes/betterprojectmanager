@@ -512,6 +512,7 @@ export function fixtureToMissionState(
   | "recommendations"
   | "history"
   | "memories"
+  | "risks"
 > {
   const now = new Date().toISOString();
   const project: Project = {
@@ -544,7 +545,7 @@ export function fixtureToMissionState(
     sections: {
       now: [...scenario.knowledge],
       decisions: [],
-      risks: [], // Risks live as recommendation records so IDs stay stable
+      risks: [...scenario.risks],
       people: scenario.stakeholders.map((s) => `${s.name} (${s.role})`),
       openLoops: scenario.todos
         .filter((t) => !t.done)
@@ -553,7 +554,7 @@ export function fixtureToMissionState(
   };
 
   const recommendations = scenario.risks.map((risk, i) => ({
-    id: `golden-risk-${i}`,
+    id: `golden-rec-risk-${i}`,
     kind: "risk" as const,
     urgency: "today" as const,
     title: risk,
@@ -585,6 +586,14 @@ export function fixtureToMissionState(
       },
     ],
     recommendations,
+    risks: scenario.risks.map((title, i) => ({
+      id: `golden-risk-${i}`,
+      projectId: project.id,
+      title,
+      status: "open" as const,
+      source: "seed" as const,
+      createdAt: now,
+    })),
     history: [],
     memories: [],
   };

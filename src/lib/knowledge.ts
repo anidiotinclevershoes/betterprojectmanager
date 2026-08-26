@@ -155,7 +155,7 @@ export function extractKnowledgePatchFromText(content: string): Partial<
     ) {
       patch.openLoops.push(line);
     } else if (
-      /priya|marcus|elena|jordan|sponsor|stakeholder|finance|prefers|concerned/.test(
+      /\bsponsor\b|\bstakeholder\b|\bfinance\b|\bprefers\b|\bconcerned\b/.test(
         lower,
       )
     ) {

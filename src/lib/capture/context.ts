@@ -144,6 +144,7 @@ export type CaptureContextState = Pick<
   | "timeline"
   | "recommendations"
   | "history"
+  | "risks"
 >;
 
 function tokensFrom(text: string): Set<string> {
@@ -203,6 +204,31 @@ function takeRankedWithExclusions<T>(
       excluded: dropped.map((x) => toRecord(x.item)),
     },
   };
+}
+
+function structuredAuthorityRecords(
+  knowledge: ProjectKnowledge | undefined,
+): CaptureContextRecord[] {
+  if (!knowledge?.structured?.length) return [];
+  const rows: CaptureContextRecord[] = [];
+  for (const item of knowledge.structured) {
+    if (item.lifecycle !== "current") continue;
+    if (item.kind !== "responsibility" && item.kind !== "availability") continue;
+    rows.push(
+      rec({
+        id: item.id,
+        type: `knowledge:${item.kind}`,
+        title: item.body.slice(0, 120),
+        summary: item.body,
+        date:
+          item.kind === "availability"
+            ? item.meta?.availability?.awayFromIso ?? null
+            : null,
+        updatedAt: knowledge.updatedAt,
+      }),
+    );
+  }
+  return rows;
 }
 
 function knowledgeCandidates(
@@ -436,7 +462,10 @@ export function buildCaptureContext(args: {
 
   const knowledge = knowledgeList.find((k) => k.projectId === projectId);
   const knowledgePick = takeRankedWithExclusions(
-    knowledgeCandidates(knowledge),
+    [
+      ...knowledgeCandidates(knowledge),
+      ...structuredAuthorityRecords(knowledge),
+    ],
     limits.knowledgeItems,
     (r) => scoreText(`${r.title} ${r.summary ?? ""}`, keywords),
     (r) => r,
@@ -444,35 +473,19 @@ export function buildCaptureContext(args: {
   );
   if (knowledgePick.hit) limitsReached.push(knowledgePick.hit);
 
-  const risksFromKnowledge = (knowledge?.sections.risks ?? []).map(
-    (bullet, i) =>
-      rec({
-        id: `risk-${projectId}-${i}`,
-        type: "risk",
-        title: bullet.slice(0, 120),
-        summary: bullet,
-        updatedAt: knowledge?.updatedAt,
-      }),
-  );
-  const riskRecs = (args.state.recommendations ?? [])
-    .filter(
-      (r) =>
-        r.projectId === projectId &&
-        r.status === "active" &&
-        r.kind === "risk",
-    )
+  const domainRisks = (args.state.risks ?? [])
+    .filter((r) => r.projectId === projectId)
     .map((r) =>
       rec({
         id: r.id,
         type: "risk",
         title: r.title,
-        status: r.urgency,
-        summary: r.action,
-        updatedAt: r.createdAt,
+        status: r.status,
+        updatedAt: r.updatedAt ?? r.createdAt,
       }),
     );
   const riskPick = takeRankedWithExclusions(
-    [...risksFromKnowledge, ...riskRecs],
+    domainRisks,
     limits.risks,
     (r) => scoreText(`${r.title} ${r.summary ?? ""}`, keywords),
     (r) => r,
@@ -569,17 +582,15 @@ export function buildCaptureContext(args: {
       .slice(0, 8)
       .map((t) => todoRecord(t, "todo"));
     ctx.todos = [...ctx.todos, ...extraTodos];
-    const extraKnowledge = (args.state.knowledge ?? []).find(
-      (k) => k.projectId === extraId,
-    );
-    const extraRisks = (extraKnowledge?.sections.risks ?? [])
+    const extraRisks = (args.state.risks ?? [])
+      .filter((r) => r.projectId === extraId)
       .slice(0, 6)
-      .map((title, i) =>
+      .map((r) =>
         rec({
-          id: `risk-${extraId}-${i}`,
+          id: r.id,
           type: "risk",
-          title: title.replace(/^\s*\[resolved\]\s*/i, ""),
-          status: /^\s*\[resolved\]/i.test(title) ? "resolved" : "open",
+          title: r.title,
+          status: r.status,
         }),
       );
     ctx.risks = [...ctx.risks, ...extraRisks];

@@ -49,6 +49,7 @@ type Body = {
     | "timeline"
     | "todos"
     | "history"
+    | "risks"
   >;
 };
 
@@ -101,6 +102,7 @@ export async function POST(request: Request) {
     const history = (body.state?.history ?? []) as HistoryEvent[];
     const meetings = body.state?.meetings ?? [];
     const releases = body.state?.releases ?? [];
+    const risks = body.state?.risks ?? [];
     const analysisRequestId = requestId();
 
     const input: CaptureInput = {
@@ -122,6 +124,7 @@ export async function POST(request: Request) {
         timeline,
         recommendations,
         history,
+        risks,
       },
     });
     const contextManifest = buildCaptureContextManifest(

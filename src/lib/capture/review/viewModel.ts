@@ -386,6 +386,18 @@ function assessReadiness(
       reason: "Which project does this refer to?",
     };
   }
+  if (item.legalDomain === "unsupported") {
+    return {
+      readiness: "needs_review",
+      reason: "Lume cannot safely apply this finding to a maintained record.",
+    };
+  }
+  if (item.ownershipSemantics === "ambiguous") {
+    return {
+      readiness: "needs_review",
+      reason: "Should this share or replace the current owner?",
+    };
+  }
   // CREATE without a known project destination cannot be Apply Ready.
   if (
     (item.op === "create" || op?.operation === "CREATE") &&

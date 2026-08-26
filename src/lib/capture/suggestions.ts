@@ -6,6 +6,10 @@ import type {
 } from "@/lib/types";
 import type { CaptureContextManifest } from "@/lib/capture/context";
 import type { CaptureReliabilityAssessment } from "@/lib/capture/reliability";
+import {
+  hasInvalidOwnershipSemantics,
+  isOwnershipSemantics,
+} from "@/lib/capture/apply/types";
 
 export type SuggestionKind =
   | "action"
@@ -13,6 +17,7 @@ export type SuggestionKind =
   | "decision"
   | "risk"
   | "stakeholder"
+  | "availability"
   | "knowledge"
   | "nudge"
   | "meeting"
@@ -49,6 +54,16 @@ export type PendingSuggestion = {
   waitingOn?: string;
   /** Compact Knowledge remember proposal. */
   isKnowledgeRemember?: boolean;
+  /** Phase 3B — legal mutation domain. Unsupported findings must not write. */
+  legalDomain?: import("./apply/types").CaptureLegalDomain;
+  /** Durable identity for the authoritative object (Risk/Person/milestone/todo). */
+  targetEntityId?: string;
+  personId?: string;
+  personName?: string;
+  ownershipSemantics?: import("./apply/types").OwnershipSemantics;
+  responsibilityScope?: string;
+  replacePersonId?: string;
+  proposedValues?: Record<string, unknown>;
 };
 
 export const KIND_LABEL: Record<SuggestionKind, string> = {
@@ -57,6 +72,7 @@ export const KIND_LABEL: Record<SuggestionKind, string> = {
   decision: "Decision",
   risk: "Risk",
   stakeholder: "Stakeholder",
+  availability: "Availability",
   knowledge: "Knowledge",
   nudge: "To Do",
   meeting: "Meeting",
@@ -85,11 +101,11 @@ export function isDestructiveOp(op: SuggestionOp) {
   return DESTRUCTIVE_OPS.has(op);
 }
 
-/** Parse AI operation; unknown values fall back safely and log in development. */
+/** Parse AI operation. Unknown values do not become create. */
 export function parseSuggestionOp(
   raw: unknown,
   context = "suggestion",
-): SuggestionOp {
+): SuggestionOp | null {
   if (typeof raw === "string") {
     const normalized = raw.trim().toLowerCase().replace(/[\s-]+/g, "_");
     const aliases: Record<string, SuggestionOp> = {
@@ -110,21 +126,21 @@ export function parseSuggestionOp(
     if (mapped && OPS.has(mapped)) return mapped;
     if (OPS.has(normalized)) return normalized as SuggestionOp;
   }
-  if (process.env.NODE_ENV === "development") {
+  if (raw != null && process.env.NODE_ENV === "development") {
     console.warn(
       `[capture] schema mismatch: unknown operation for ${context}:`,
       raw,
-      "— falling back to create",
+      "— not falling back to create",
     );
   }
-  return "create";
+  return null;
 }
 
 export function parseSuggestionKind(
   raw: unknown,
-  fallback: SuggestionKind,
+  fallback: SuggestionKind | null,
   context = "suggestion",
-): SuggestionKind {
+): SuggestionKind | null {
   if (typeof raw === "string") {
     const normalized = raw.trim().toLowerCase().replace(/[\s-]+/g, "_");
     const aliases: Record<string, SuggestionKind> = {
@@ -135,6 +151,8 @@ export function parseSuggestionKind(
       decision: "decision",
       risk: "risk",
       stakeholder: "stakeholder",
+      availability: "availability",
+      away: "availability",
       knowledge: "knowledge",
       nudge: "nudge",
       meeting: "meeting",
@@ -144,11 +162,11 @@ export function parseSuggestionKind(
     if (mapped && KINDS.has(mapped)) return mapped;
     if (KINDS.has(normalized)) return normalized as SuggestionKind;
   }
-  if (process.env.NODE_ENV === "development") {
+  if (raw != null && process.env.NODE_ENV === "development") {
     console.warn(
       `[capture] schema mismatch: unknown itemType for ${context}:`,
       raw,
-      `— falling back to ${fallback}`,
+      fallback ? `— falling back to ${fallback}` : "— not falling back to To Do",
     );
   }
   return fallback;
@@ -171,6 +189,8 @@ export function destinationFor(kind: SuggestionKind): string {
       return "Knowledge";
     case "stakeholder":
       return "Stakeholders";
+    case "availability":
+      return "People";
     default:
       return "Workspace";
   }
@@ -178,7 +198,9 @@ export function destinationFor(kind: SuggestionKind): string {
 
 function kindFromRecommendation(rec: Recommendation): SuggestionKind {
   if (rec.itemType) {
-    return parseSuggestionKind(rec.itemType, "action", rec.title);
+    const parsed = parseSuggestionKind(rec.itemType, null, rec.title);
+    if (parsed) return parsed;
+    return "meeting";
   }
   if (rec.kind === "risk") return "risk";
   if (rec.kind === "decision") return "decision";
@@ -214,24 +236,11 @@ function inferOpFromText(title: string, action: string): SuggestionOp | null {
 function matchTodo(
   openTodos: { id: string; title: string }[],
   targetTitle?: string,
-  content?: string,
 ) {
-  if (targetTitle) {
-    const needle = targetTitle.toLowerCase();
-    const exact = openTodos.find((t) => t.title.toLowerCase() === needle);
-    if (exact) return exact;
-    const partial = openTodos.find(
-      (t) =>
-        t.title.toLowerCase().includes(needle.slice(0, 24)) ||
-        needle.includes(t.title.toLowerCase().slice(0, 24)),
-    );
-    if (partial) return partial;
-  }
-  if (content) {
-    const blob = content.toLowerCase();
-    return openTodos.find((t) => blob.includes(t.title.toLowerCase().slice(0, 24)));
-  }
-  return undefined;
+  if (!targetTitle?.trim()) return undefined;
+  const needle = targetTitle.trim().toLowerCase();
+  const exact = openTodos.filter((t) => t.title.toLowerCase() === needle);
+  return exact.length === 1 ? exact[0] : undefined;
 }
 
 export function buildSuggestions(
@@ -263,16 +272,25 @@ export function buildSuggestions(
 
   for (const rec of result.recommendations) {
     const kind = kindFromRecommendation(rec);
-    const matched = matchTodo(
-      openTodos,
-      rec.targetTitle,
-      `${rec.title} ${rec.action}`,
-    );
+    const matched = matchTodo(openTodos, rec.targetTitle);
     const fromSchema = rec.operation
       ? parseSuggestionOp(rec.operation, rec.title)
       : null;
+    if (rec.operation && fromSchema === null) {
+      items.push({
+        id: `rec-${rec.id}`,
+        kind: "meeting",
+        op: "create",
+        content: rec.title,
+        projectId: rec.projectId ?? projectId,
+        destination: destinationFor("meeting"),
+        legalDomain: "unsupported",
+        recommendation: rec,
+      });
+      continue;
+    }
     const inferred = inferOpFromText(rec.title, rec.action);
-    let op: SuggestionOp = fromSchema ?? inferred ?? "create";
+    const op: SuggestionOp = fromSchema ?? inferred ?? "create";
 
     if (
       (op === "complete" ||
@@ -280,10 +298,32 @@ export function buildSuggestions(
         op === "delete" ||
         op === "remove" ||
         op === "archive") &&
-      !matched &&
-      !fromSchema
+      !matched
     ) {
-      if (!fromSchema) op = "create";
+      items.push({
+        id: `rec-${rec.id}`,
+        kind,
+        op,
+        content: rec.title,
+        projectId: rec.projectId ?? projectId,
+        destination: destinationFor(kind),
+        legalDomain: "unsupported",
+        recommendation: rec,
+      });
+      continue;
+    }
+    if (kind === "meeting") {
+      items.push({
+        id: `rec-${rec.id}`,
+        kind,
+        op: "create",
+        content: rec.title,
+        projectId: rec.projectId ?? projectId,
+        destination: destinationFor("meeting"),
+        legalDomain: "unsupported",
+        recommendation: rec,
+      });
+      continue;
     }
 
     items.push({
@@ -358,27 +398,47 @@ function buildSuggestionsFromProposedOps(
 
   for (const op of result.proposedOperations ?? []) {
     if (op.operation === "NO_CHANGE") continue;
+    const availabilityHint =
+      op.proposedValues?.kind === "availability" ||
+      typeof op.proposedValues?.awayFromIso === "string";
+    const knownEntity =
+      op.entityType === "todo" ||
+      op.entityType === "risk" ||
+      op.entityType === "knowledge" ||
+      op.entityType === "stakeholder" ||
+      op.entityType === "meeting" ||
+      op.entityType === "milestone" ||
+      op.entityType === "nudge";
+    const availabilityCompatible =
+      op.entityType === "stakeholder" || op.entityType === "knowledge";
+    const conflictingAvailability = availabilityHint && !availabilityCompatible;
+    // Availability may refine Person/Knowledge. It must not retarget Risk,
+    // To Do, milestone, or an unknown entity into an Away write.
     const kind: SuggestionKind =
-      op.entityType === "todo"
-        ? "action"
-        : op.entityType === "risk"
-          ? "risk"
-          : op.entityType === "knowledge"
-            ? "knowledge"
-            : op.entityType === "stakeholder"
-              ? "stakeholder"
-              : op.entityType === "meeting"
-                ? "meeting"
-                : op.entityType === "milestone"
-                  ? "milestone"
-                  : op.entityType === "nudge"
-                    ? "action" // Nudge → To Do
-                    : "knowledge";
-    const suggestionOp = op.operation.toLowerCase() as SuggestionOp;
+      availabilityHint && availabilityCompatible
+        ? "availability"
+        : op.entityType === "todo"
+          ? "action"
+          : op.entityType === "risk"
+            ? "risk"
+            : op.entityType === "knowledge"
+              ? "knowledge"
+              : op.entityType === "stakeholder"
+                ? "stakeholder"
+                : op.entityType === "meeting"
+                  ? "meeting"
+                  : op.entityType === "milestone"
+                    ? "milestone"
+                    : op.entityType === "nudge"
+                      ? "action"
+                      : "meeting";
+    const parsedOp = parseSuggestionOp(op.operation, op.id);
+    const suggestionOp: SuggestionOp = parsedOp ?? "create";
     const matched =
       op.entityType === "todo" || op.entityType === "nudge"
-        ? openTodos.find((t) => t.id === op.targetId) ??
-          matchTodo(openTodos, op.targetTitle)
+        ? op.targetId
+          ? openTodos.find((t) => t.id === op.targetId)
+          : matchTodo(openTodos, op.targetTitle)
         : undefined;
     const rec = result.recommendations.find(
       (r) =>
@@ -422,6 +482,46 @@ function buildSuggestionsFromProposedOps(
       typeof op.proposedValues?.waitingOn === "string"
         ? String(op.proposedValues.waitingOn)
         : undefined;
+    const ownershipRaw = op.proposedValues?.ownershipSemantics;
+    const unknownOwnership = hasInvalidOwnershipSemantics(ownershipRaw);
+    const ownershipSemantics = isOwnershipSemantics(ownershipRaw)
+      ? ownershipRaw
+      : undefined;
+    const personName =
+      typeof op.proposedValues?.personName === "string"
+        ? String(op.proposedValues.personName)
+        : undefined;
+    const personId =
+      typeof op.proposedValues?.personId === "string"
+        ? String(op.proposedValues.personId)
+        : op.entityType === "stakeholder"
+          ? op.targetId
+          : undefined;
+    const responsibilityScope =
+      typeof op.proposedValues?.scope === "string"
+        ? String(op.proposedValues.scope)
+        : undefined;
+    const replacePersonId =
+      typeof op.proposedValues?.replacePersonId === "string"
+        ? String(op.proposedValues.replacePersonId)
+        : undefined;
+    const legalDomain =
+      !knownEntity ||
+      parsedOp === null ||
+      unknownOwnership ||
+      conflictingAvailability
+        ? ("unsupported" as const)
+        : availabilityHint
+          ? ("availability" as const)
+          : ownershipSemantics || responsibilityScope
+            ? ("responsibility" as const)
+            : undefined;
+    const durableId = op.targetId;
+    const targetTodoId =
+      matched?.id ??
+      (op.entityType === "todo" || op.entityType === "nudge"
+        ? op.targetId
+        : undefined);
 
     items.push({
       id: `op-${op.id}`,
@@ -438,13 +538,12 @@ function buildSuggestionsFromProposedOps(
           ? String(op.proposedValues.dueDate)
           : typeof op.proposedValues?.date === "string"
             ? String(op.proposedValues.date)
-            : undefined,
+            : typeof op.proposedValues?.awayFromIso === "string"
+              ? String(op.proposedValues.awayFromIso)
+              : undefined,
       destination: destinationFor(kind),
-      targetTodoId:
-        matched?.id ??
-        (op.entityType === "todo" || op.entityType === "nudge"
-          ? op.targetId
-          : undefined),
+      targetTodoId,
+      targetEntityId: durableId,
       recommendation: rec,
       knowledgeSection: isRemember
         ? "now"
@@ -456,6 +555,13 @@ function buildSuggestionsFromProposedOps(
       isKnowledgeRemember: isRemember && suggestionOp === "create",
       todoKind,
       waitingOn,
+      legalDomain,
+      personId,
+      personName,
+      ownershipSemantics,
+      responsibilityScope,
+      replacePersonId,
+      proposedValues: op.proposedValues,
     });
   }
 

@@ -908,6 +908,54 @@ export async function persistTimelineItem(
   };
 }
 
+/**
+ * Phase 3B: update an existing milestone/date in place.
+ * Completing a milestone is not a column on this table — callers must fail closed.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistTimelineUpdate(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  milestoneId: string,
+  patch: {
+    label?: string;
+    startAt?: string;
+    endAt?: string;
+    notes?: string;
+  },
+): Promise<TimelineItem> {
+  const scopedProjectId = requireUuid(projectId, "projectId");
+  const scopedMilestoneId = requireUuid(milestoneId, "milestoneId");
+  const update: Record<string, unknown> = {};
+  if (patch.label != null) update.label = patch.label;
+  if (patch.startAt !== undefined) update.start_on = isoToDateOnly(patch.startAt);
+  if (patch.endAt !== undefined) update.end_on = isoToDateOnly(patch.endAt);
+  if (patch.notes !== undefined) update.notes = patch.notes ?? null;
+  if (!Object.keys(update).length) {
+    throw new Error("[supabase] update milestone: empty patch");
+  }
+  const { data, error } = await client
+    .from("milestones")
+    .update(update)
+    .eq("id", scopedMilestoneId)
+    .eq("project_id", scopedProjectId)
+    .eq("workspace_id", workspaceId)
+    .select("*")
+    .single();
+  const row = requireData(data, error, "update milestone");
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    label: row.label,
+    type: row.type,
+    startAt: row.start_on ? `${row.start_on}T12:00:00.000Z` : row.created_at,
+    endAt: row.end_on ? `${row.end_on}T12:00:00.000Z` : undefined,
+    notes: row.notes ?? undefined,
+    source: row.source || "manual",
+  };
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function persistHistoryEvent(
   client: SupabaseClient<any>,

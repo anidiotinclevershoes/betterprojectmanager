@@ -69,6 +69,7 @@ export function buildContextRecordIndex(
         status: r.status,
         summary: r.summary,
         rawType: r.type,
+        date: r.date ?? null,
       });
     }
   }
@@ -162,17 +163,6 @@ function parseTarget(
 
   const existing = index.get(entityId);
   if (!existing) {
-    // Unknown id on NEW_INFORMATION with a type may still be CREATE intent.
-    if (opts?.allowCreateWithoutId && entityType) {
-      return {
-        target: {
-          entityType,
-          title: title || "New item",
-        },
-        createShaped: true,
-        warning: `Unknown target ID "${entityId}" treated as CREATE (${entityType})`,
-      };
-    }
     return {
       invalidTarget: true,
       warning: `Unknown target ID "${entityId}" — not in provided context`,
@@ -311,7 +301,9 @@ export function validateCaptureFindings(
     // CREATE-shaped findings are not "unmatched existing targets".
     const isCreateShaped =
       Boolean(targetParse.createShaped) ||
-      (findingTypeRaw === "NEW_INFORMATION" && Boolean(createTypeHint));
+      (findingTypeRaw === "NEW_INFORMATION" &&
+        Boolean(createTypeHint) &&
+        !targetParse.invalidTarget);
     const invalidExistingTarget =
       Boolean(targetParse.invalidTarget) && !isCreateShaped;
     if (invalidExistingTarget) invalidTargetCount += 1;
@@ -322,7 +314,7 @@ export function validateCaptureFindings(
 
     const resolvedTarget =
       targetParse.target ??
-      (createTypeHint
+      (createTypeHint && !targetParse.invalidTarget
         ? {
             entityType: createTypeHint,
             title: fact.slice(0, 120),

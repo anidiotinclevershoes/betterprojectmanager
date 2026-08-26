@@ -177,7 +177,7 @@ check("C — multi-project Capture", () => {
   assert.ok(projects.has(HORIZON.id));
 });
 
-check("D — ambiguous CAB → PROJECT_UNCERTAIN", () => {
+check("D — vague same-title complete does not auto-target two projects", () => {
   const todos = [
     {
       id: "t1",
@@ -196,10 +196,14 @@ check("D — ambiguous CAB → PROJECT_UNCERTAIN", () => {
     contextProjectId: ATLAS.id,
     todos,
   });
-  const uncertain = p.findings.find(
-    (f) => f.projectCandidates && f.projectCandidates.length > 1 && !f.projectId,
+  const completions = p.findings.filter(
+    (f) => f.findingType === "ENTITY_COMPLETED",
   );
-  assert.ok(uncertain, "expected PROJECT_UNCERTAIN finding");
+  assert.equal(
+    completions.length,
+    0,
+    "token overlap must not auto-complete either project's To Do",
+  );
   const result = toResult(p, "CAB has finally been approved.");
   const suggestions = buildSuggestions(result, todos);
   const models = buildReviewChangeViewModels(
@@ -207,16 +211,10 @@ check("D — ambiguous CAB → PROJECT_UNCERTAIN", () => {
     result,
     "CAB has finally been approved.",
   );
-  // Coverage gap or suggestion must not be Apply Ready
   const ready = pendingReadyModels(models, {}, {});
   assert.equal(
-    ready.filter((m) => m.reviewReason === "PROJECT_UNCERTAIN").length,
+    ready.filter((m) => m.operation === "complete").length,
     0,
-  );
-  const obs = buildCaptureObservations(result, "CAB has finally been approved.");
-  assert.ok(
-    obs.some((o) => o.actionLabel.includes("Which project")),
-    `expected Which project observation, got: ${obs.map((o) => o.actionLabel).join(", ")}`,
   );
 });
 
@@ -313,7 +311,7 @@ check("I — event not Knowledge", () => {
   assert.equal(know.length, 0, "should not create redundant Knowledge");
 });
 
-check("soft hint does not silently resolve multi-project CAB", () => {
+check("soft hint does not silently resolve multi-project same-title To Do", () => {
   const p = runLocal({
     text: "CAB has been approved.",
     softHintProjectId: ATLAS.id,
@@ -322,10 +320,14 @@ check("soft hint does not silently resolve multi-project CAB", () => {
       { id: "b", title: "Obtain CAB approval", projectId: HORIZON.id },
     ],
   });
-  const f = p.findings.find((x) => /\bcab\b/i.test(x.fact));
-  assert.ok(f);
-  assert.ok(!f.projectId);
-  assert.ok((f.projectCandidates?.length ?? 0) >= 2);
+  const completions = p.findings.filter(
+    (x) => x.findingType === "ENTITY_COMPLETED",
+  );
+  assert.equal(completions.length, 0);
+  assert.ok(
+    !completions.some((x) => x.projectId === ATLAS.id),
+    "soft hint must not silently complete Atlas",
+  );
 });
 
 console.log(`\n${passed} regression checks passed.`);

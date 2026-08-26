@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 25 August 2026 (Phase 3A.1 — Safe Project Deletion: D-R12; D-027 archive/undo deferred; D-028 non-transactional delete residual)  
+**Last housekeeping:** 25 August 2026 (Phase 3B fail-closed: same-clause completion cues, unknown ownership, CREATE identity)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
@@ -120,7 +120,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Hard without UI; at least ensure error paths set `saveStatus` and do not claim success |
 | **Target resolution / validation point** | V1 product hardening; must be checked before V1 launch (incremental per write path is OK) |
 | **Related docs** | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` §C.4 |
-| **Notes** | **Phase 3A (partial):** Ocean chrome now shows `saveStatus=error` via `ocean-save-error` (does not require opening a drawer or devtools). Failed persist paths call `reportPersistFailure`, which reconciles MissionState from `/api/workspace/state` and does not write dirty state to the paint cache. Success of a later persist clears the banner (`markPersistSaved`). **Phase 3A.1:** project deletion is persist-first (same failure banner; MissionState is not stripped until the server confirms). **Still open:** most other mutations remain optimistic-then-persist rather than persist-first; concurrent in-flight mutations can be overwritten by a coarse rehydrate; Capture apply is still optimistic (Phase 3B). App-wide per-field “not saved” badges remain out of scope. |
+| **Notes** | **Phase 3A (partial):** Ocean chrome now shows `saveStatus=error` via `ocean-save-error` (does not require opening a drawer or devtools). Failed persist paths call `reportPersistFailure`, which reconciles MissionState from `/api/workspace/state` and does not write dirty state to the paint cache. Success of a later persist clears the banner (`markPersistSaved`). **Phase 3A.1:** project deletion is persist-first (same failure banner; MissionState is not stripped until the server confirms). **Phase 3B:** Capture apply for Risk create/status, milestone create/update, Person ensure, and structured availability is persist-first (failed persist is Needs you / visible failure, not a false Apply). Todo create/update/complete and Confirm Owner remain optimistic-then-persist with the Phase 3A save-error + reconcile path. **Still open:** most other mutations remain optimistic-then-persist; concurrent in-flight mutations can be overwritten by a coarse rehydrate. App-wide per-field “not saved” badges remain out of scope. |
 
 ---
 
@@ -188,7 +188,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open (Capture people promotion only) |
+| **Status** | open (remainder: Knowledge people prose without a stakeholder link) |
 | **Severity** | medium (down from high after 1C foundation) |
 | **Domain** | People |
 | **Found in** | Architecture audit §3.2.2 |
@@ -200,7 +200,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Capture→promote path once specified |
 | **Target resolution / validation point** | Capture hardening (people promotion into durable stakeholder/person identity) |
 | **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md`; `docs/SLICE2C_KNOWLEDGE_ITEM_DETAIL_HANDOVER.md`; `docs/SLICE2D_PEOPLE_CONTEXT_UI_HANDOVER.md` |
-| **Notes** | **Already delivered (do not re-open as missing UI):** Slice 1C durable stakeholder identity + `personId` on responsibilities; Slice 2C reusable person detail (`getPersonBundle` / Ocean drawer); Slice 2D People frame polish + Confirm Owner share-vs-replace (D-019 → D-R10). **Remaining open scope:** Capture still does not consistently promote discovered People prose into durable stakeholders. That is Capture hardening, not a People UI gap. |
+| **Notes** | **Already delivered (do not re-open as missing UI):** Slice 1C durable stakeholder identity + `personId` on responsibilities; Slice 2C reusable person detail (`getPersonBundle` / Ocean drawer); Slice 2D People frame polish + Confirm Owner share-vs-replace (D-019 → D-R10). **Phase 3B (D-R13):** Capture apply reuses `ensurePersonOnProject` / existing Person UUIDs. An existing Person is not duplicated; continuing-responsibility statements no-op; ambiguous identity is Needs you. **Remaining open scope:** leftover Knowledge people *prose* that was never a Capture finding still may lack a stakeholder link. That is not permission to silently mint identities. |
 
 ---
 
@@ -248,7 +248,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | open (New Project extractors only — Capture active path fixed in 3B / D-R13) |
 | **Severity** | medium |
 | **Domain** | Capture / New Project |
 | **Found in** | Architecture audit §3.4.4 |
@@ -260,7 +260,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Extractor does not invent stakeholders from demo name list on unrelated text |
 | **Target resolution / validation point** | Capture hardening; also check at next New Project/persistence touchpoint if create-project extractors are touched |
 | **Related docs** | Philosophy §20 |
-| **Notes** | Adjacent to Capture interpretation — only touch when Capture slice allows |
+| **Notes** | **Phase 3B:** Active Capture interpretation/apply path no longer hardcodes Sarah/Marcus/Priya/demo dates. Token-overlap / stem matching is not used to auto-ready existing Risk/milestone/Todo updates — the existing title must appear in the **same sentence/clause** as the update or completion/resolution cue. `verify-phase3b-capture-boundary` asserts demo-name strings are absent from the listed Capture files. Residual: New Project `extractStakeholders` still uses structural proper-noun regex (not demo-name lists) — leave for a New Project touchpoint. Do not replace with a larger regex NLP stack. |
 
 ---
 
@@ -298,9 +298,9 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Proposed fix direction** | Decide authority; migrate durable session metadata to Supabase when logged in |
 | **Explicit non-goals** | Capture interpretation redesign |
 | **Regression test to add** | Later |
-| **Target resolution / validation point** | Capture hardening |
+| **Target resolution / validation point** | Phase 3D Capture session redesign |
 | **Related docs** | Architecture audit |
-| **Notes** | Not blocking domain-authority slices. **Phase 3A.1:** durable `capture_sessions` / `coach_sessions` rows for a deleted project are removed with the SET NULL bundle, and matching browser Capture/Coach lists plus the active Capture draft are pruned so they cannot attach to the next project. Session *authority* (client lists vs Supabase tables) remains a Phase 3D / Capture hardening concern. |
+| **Notes** | Not blocking domain-authority slices. **Phase 3A.1:** durable `capture_sessions` / `coach_sessions` rows for a deleted project are removed with the SET NULL bundle, and matching browser Capture/Coach lists plus the active Capture draft are pruned so they cannot attach to the next project. **Phase 3B validated:** starting New Capture can still retain previous transcript text. That is session honesty, not an apply-domain fallthrough. 3B did not redesign session start. Leave the behavioural fix for Phase 3D unless stale session state is later proven to cause an unsafe write. |
 
 ---
 
@@ -308,19 +308,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open (test gap) |
+| **Status** | partial |
 | **Severity** | medium |
 | **Domain** | Capture / Infra |
 | **Found in** | Test safety net; `verify-capture-trust-boundary.ts` knownGap |
-| **Failure class** | Deterministic suite cannot prove Capture apply durability without credentials or a persistence fake |
-| **Evidence / repro** | `knownGap("End-to-end Capture apply → Supabase round-trip")` |
-| **Likely files** | `scripts/verify-capture-trust-boundary.ts`; `scripts/verify-phase2-persistence.ts` |
-| **Proposed fix direction** | Persistence fake or CI secrets for live job; keep deterministic suite credential-free |
+| **Failure class** | Deterministic suite cannot prove a live Capture apply → hosted Supabase round-trip without credentials |
+| **Evidence / repro** | No live-Supabase Capture apply job in `npm test` |
+| **Likely files** | `scripts/verify-phase3b-capture-boundary.ts`; `scripts/verify-capture-trust-boundary.ts`; `scripts/verify-phase2-persistence.ts` |
+| **Proposed fix direction** | Keep deterministic suite credential-free. Phase 3B added fake-hook persist success/failure. A live workspace round-trip remains a separate job. |
 | **Explicit non-goals** | Weakening review-before-write |
-| **Regression test to add** | Fake client apply round-trip OR separate live workflow |
-| **Target resolution / validation point** | Capture hardening; must be checked before Capture is declared V1-ready |
+| **Regression test to add** | Live Capture apply job with secrets — not in `npm test` |
+| **Target resolution / validation point** | before Capture is declared V1-ready (live job); deterministic apply-failure path validated in 3B |
 | **Related docs** | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` |
-| **Notes** | Testing debt, not product ambiguity |
+| **Notes** | **Phase 3B:** the previous `knownGap("End-to-end Capture apply → Supabase round-trip")` skip is retired. Dispatcher tests prove persist-failure does not announce success and does not fall through to another domain. Hosted Supabase apply is still not in CI. |
 
 ---
 
@@ -364,31 +364,13 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
-### D-017 — Capture risk-complete path: exact-title domain match (Slice 1B transitional)
-
-| Field | Value |
-| --- | --- |
-| **Status** | open (validation required — not a silent product expansion) |
-| **Severity** | medium (trust / architecture guardrail) |
-| **Domain** | Capture / Risks |
-| **Found in** | Slice 1B — `CaptureSessionContext.tsx` risk `op === "complete"` path |
-| **Failure class** | Capture complete now routes genuine Risks via `findProjectRiskByExactTitle` → `setRiskStatus`, else Knowledge-only resolve. This must remain **identity carriage** (exact title ↔ domain row), not a growing semantic/fuzzy Risk interpreter |
-| **Evidence / repro** | `src/components/capture/CaptureSessionContext.tsx` (risk complete branch); `src/lib/risks/lifecycle.ts` `findProjectRiskByExactTitle` (exact match only; no substring/fuzzy). Slice 1B intentionally removed prior fuzzy `includes(…slice(0, 24))` matching |
-| **Likely files** | `src/components/capture/CaptureSessionContext.tsx`; `src/lib/risks/lifecycle.ts`; Capture review apply path |
-| **Proposed fix direction** | During Capture hardening: prefer carrying stable `risks.id` through Capture review items when available; keep exact-title only as transitional fallback; **never** reintroduce fuzzy/NLP matching; assert recommendations are not auto-resolved as domain Risks |
-| **Explicit non-goals** | Capture interpretation redesign; AI risk linking; expanding title heuristics |
-| **Regression test to add** | Capture complete: (1) domain risk with exact title → status resolved by id; (2) near-miss title does **not** resolve domain risk; (3) no `risks` row → Knowledge-only path; (4) recommendation kind risk unchanged unless explicit convert |
-| **Target resolution / validation point** | Validate during Capture hardening; must be checked before Capture is declared V1-ready |
-| **Related docs** | `docs/SLICE1B_RISK_LIFECYCLE_AUTHORITY_HANDOVER.md`; `docs/LUME_V1_KNOWN_DISCOVERIES.md` D-003 (suggestions remain suggestions) |
-| **Notes** | This entry is a **guardrail**, not permission to grow Capture NLP. Exact-title matching is transitional identity evidence until Capture review carries `riskId` end-to-end. |
-
 ---
 
 ### D-020 — Dependencies / availability lack dedicated Ask domains
 
 | Field | Value |
 | --- | --- |
-| **Status** | open (partial UI display in Slice 2D) |
+| **Status** | open (Ask/modelling remainder — Capture ingestion fixed in 3B / D-R13) |
 | **Severity** | low |
 | **Domain** | Ask/Tell Me · People · Knowledge |
 | **Found in** | Slice 1D Ask context authority |
@@ -398,9 +380,9 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Proposed fix direction** | Keep exposing structured kinds; do not invent brittle prose heuristics. Add dedicated modelling only when product requires it |
 | **Explicit non-goals** | Building a universal graph or calendar in Ask convergence |
 | **Regression test to add** | Already covered lightly in `verify:ask-context-authority` when structured availability present; People UI shows structured availability only |
-| **Target resolution / validation point** | Dependencies / availability modelling + Capture availability ingestion — Ask domain still open; People UI display partial in 2D |
+| **Target resolution / validation point** | Ask/modelling for dedicated availability/dependency domains — Capture write path landed in 3B |
 | **Related docs** | `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md`; `docs/SLICE2D_PEOPLE_CONTEXT_UI_HANDOVER.md` |
-| **Notes** | Slice 2A Dependencies frame shows structured `kind=dependency` only. Slice 2D People frame/detail renders structured availability when present and refuses to invent Away labels. Capture→availability creation path still incomplete. |
+| **Notes** | Slice 2A Dependencies frame shows structured `kind=dependency` only. Slice 2D People frame/detail renders structured availability when present and refuses to invent Away labels. **Phase 3B:** Capture availability writes `knowledge_items` `kind=availability` linked to a known Person, or Needs you. Unresolved availability cannot become Stakeholder or Todo. Ask still has no dedicated calendar/graph domain. |
 
 ---
 
@@ -458,9 +440,69 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Proposed fix direction** | Optional Capture visual polish pass once item-detail/People UI land; do not change lifecycle |
 | **Explicit non-goals** | Changing Capture extraction/review-before-write |
 | **Regression test to add** | Visual/state markers per §16 stage if redesigned |
-| **Target resolution / validation point** | Capture visual polish follow-up — not blocking Capture↔KC coherence |
+| **Target resolution / validation point** | Phase 3D Capture visual/session polish |
 | **Related docs** | Ocean baseline §16; `docs/SLICE2B_CAPTURE_OCEAN_HANDOVER.md` |
-| **Notes** | Slice 2B closed D-022 integration; this tracks remaining visual depth only |
+| **Notes** | Slice 2B closed D-022 integration; this tracks remaining visual depth only. **Phase 3B** did not redesign Review chrome. Review denominator/count, restore-dismissed, New Capture honesty remain 3D. |
+
+---
+
+### D-029 — Milestone complete has no durable status
+
+| Field | Value |
+| --- | --- |
+| **Status** | deferred |
+| **Severity** | low |
+| **Domain** | Capture / Dates |
+| **Found in** | Phase 3B Capture mutation boundary |
+| **Failure class** | Completing/resolving a milestone cannot persist a completed status — `milestones` rows have no such column. Capture therefore fails closed (Needs you) instead of faking a Todo or deleting the date. |
+| **Evidence / repro** | `planMilestone` `op === "complete"` → Needs you; `persistTimelineUpdate` updates label/dates only |
+| **Likely files** | `src/lib/capture/apply/dispatch.ts`; `src/lib/data/supabase/persist-mutations.ts` |
+| **Proposed fix direction** | Add a real milestone lifecycle only if product wants completed dates as first-class state. Until then, Needs you is the legal outcome. |
+| **Explicit non-goals** | Routing milestone completion to Todo; inventing a status in Knowledge prose |
+| **Regression test to add** | Already covered: Phase 3B test 12 |
+| **Target resolution / validation point** | later date-lifecycle slice — not Phase 3D session UX |
+| **Related docs** | D-R13 |
+| **Notes** | Date *moves* persist via `updateTimelineItem` / `persistTimelineUpdate`. Unchanged dates are No Change. |
+
+---
+
+### D-030 — Leftover Knowledge prose can disagree with domain after Capture apply
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium (trust/readability, not a wrong-domain write) |
+| **Domain** | Knowledge Centre / Capture |
+| **Found in** | Phase 3B visual/browser pass (25 Aug 2026) |
+| **Failure class** | After a legal Capture apply, domain truth updates (Risk resolved, date moved) but leftover Knowledge section bullets with *different wording* still show in KC. Intelligence may say 0 risks while Risks & blockers still shows an old “remains open” sentence. Current position may still name the old date while Important dates is correct. |
+| **Evidence / repro** | Candyland: resolve “Gumdrop Bridge icing” → `risks.status=resolved` and intelligence “I see 0 risks”, but `knowledge.sections.risks` still contains “Gumdrop Bridge icing remains open.” Ocean frames only skip knowledge bullets whose stripped title *equals* the domain title. |
+| **Likely files** | `src/lib/knowledge-centre/ocean-frames.ts`; Capture apply knowledge projection (not the 3B dispatcher) |
+| **Proposed fix direction** | When Capture legally resolves/updates a domain record, retire or rewrite the matching Knowledge projection using carried IDs — not fuzzy title match. Until then, testers should trust the domain frame + intelligence strip over leftover sentences. |
+| **Explicit non-goals** | Fuzzy matching leftover bullets to domain titles; treating Knowledge prose as Risk authority |
+| **Regression test to add** | After Capture Risk resolve, KC open-risk rows exclude leftover prose for that durable Risk ID |
+| **Target resolution / validation point** | KC projection / knowledge reconcile — not Phase 3D session UX |
+| **Related docs** | D-R13; D-015 |
+| **Notes** | Does not mean the 3B dispatcher wrote the wrong object. It makes manual regression easy to misread if the reviewer only looks at leftover bullets. |
+
+---
+
+### D-031 — Coach drawer auto-opens over Capture / Knowledge Centre
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | Ocean / Coach |
+| **Found in** | Phase 3B visual pass (25 Aug 2026) |
+| **Failure class** | On project load the Coach dialog overlays Capture and KC, including the Capture Analyse control. Close is outside the default viewport in some layouts. |
+| **Evidence / repro** | Open `/projects/:id` in local mode; Coach “Ready when you are” dialog is present before any Capture action |
+| **Likely files** | Coach drawer / Ocean shell |
+| **Proposed fix direction** | Do not auto-open Coach on Capture/KC entry; keep it opt-in. Do not redesign Ocean in 3B. |
+| **Explicit non-goals** | Coach product revival; Ocean redesign |
+| **Regression test to add** | Capture mode is usable without dismissing Coach |
+| **Target resolution / validation point** | Ocean/QOL — not Phase 3B or 3D Capture session |
+| **Related docs** | D-025 |
+| **Notes** | 3B testing dismissed the overlay; it did not cause a wrong-domain write. |
 
 ---
 
@@ -623,25 +665,36 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ---
 
+### D-R13 — Phase 3B Conservative Capture mutation boundary
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Phase 3B — Conservative Capture Mutation Boundary |
+| **Failure class** | Capture apply could fall through into the wrong authority (generic Todo, duplicate Person, Risk/date as Todo). Project scope could silently use whichever project was open. Demo-name heuristics steered interpretation. Availability could become Stakeholder. Ambiguous share-vs-replace could write. |
+| **Fix summary** | Exhaustive typed apply dispatcher (`src/lib/capture/apply`) with runtime validation. Each finding mutates only its legal domain or Needs you / no write. No generic Todo fallback. Project scope uses Capture entry context only when the finding is not uncertain. Durable IDs carried for Risk/Person/milestone; a supplied Risk ID that is not on the project does **not** title-fallback onto another Risk. Unassigned (`projectId: null`) Todos cannot be mutated from a project Capture. `kind` cannot be retargeted by a conflicting `legalDomain` sticker. Availability fields cannot retarget a typed Risk/Todo/milestone. Mapping `legalDomain: unsupported` (unknown op/entity) is honored before availability/responsibility refinements. People reuse `ensurePersonOnProject`. Responsibilities reuse Confirm Owner; a Person ID not on the project is Needs you. Unknown ownership semantics cannot be discarded into a Person write. Availability writes structured `kind=availability`. Milestone date moves persist; milestone *complete* is Needs you (D-029). CREATE against an existing on-project Todo/milestone ID, or an exact unique Risk title, is no-change rather than a duplicate. Local extract auto-ready updates/completions require the existing title and cue in the same sentence (no token-overlap auto-accept). Persist-first Capture paths for Risk create/status, milestone create/update, Person, availability. Tests in `scripts/verify-phase3b-capture-boundary.ts`. Resolves D-017; Capture portions of D-011 and D-020; duplicate-Person class of D-007. |
+
+---
+
 ## Suggested fix order (non-binding)
 
 1. ~~**D-006**~~ — fixed in Phase 3A (D-R11)  
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
 3. ~~**D-019**~~ — fixed in Slice 2D (D-R10)  
-4. **D-007** remainder — Capture People promotion only (People UI polish landed in 2D)  
+4. **D-007** remainder — leftover Knowledge people prose without a stakeholder link  
 5. ~~**D-023**~~ — fixed in Slice 2C (D-R09)  
-6. ~~**D-022**~~ — fixed in Slice 2B; residual **D-025** Capture §16 visual depth  
-7. **D-017** — validate during Capture hardening (before Capture V1-ready)  
-8. **D-014** — Capture apply → Supabase round-trip before Capture V1-ready  
-9. **D-011** — demo-name extractors at Capture hardening (not UI)  
+6. ~~**D-022**~~ — fixed in Slice 2B; residual **D-025** / **D-013** → Phase 3D  
+7. ~~**D-017**~~ — fixed in Phase 3B (D-R13)  
+8. **D-014** remainder — live Supabase Capture apply job (deterministic fake path landed in 3B)  
+9. **D-011** remainder — New Project extractors only  
 10. **D-003** — suggestion persist (V1 product hardening)  
-11. **D-005** remainder — persist-first / per-field unsaved treatment (Ocean banner + reconcile landed in 3A; Capture apply still optimistic — Phase 3B)  
+11. **D-005** remainder — persist-first for remaining optimistic store paths (Capture Risk/milestone/Person/availability landed in 3B)  
 12. **D-004** remainder — history persist gaps outside New Project create (create-path coupling decided in 3A)  
 13. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
 14. **D-026** — product decision on project-code uniqueness  
 15. **D-028** — optional later bundle RPC for delete (same class as create)  
 16. **D-027** — Archive/undo only if product asks; not required for V1 hygiene  
-17. **D-008 / D-021**, **D-012–D-015**, **D-020** remainder (Ask/ingestion), **D-024** — as scheduled  
+17. **D-008 / D-021**, **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031** — as scheduled  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 

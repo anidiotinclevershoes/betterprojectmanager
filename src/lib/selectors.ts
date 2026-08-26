@@ -294,12 +294,5 @@ function extractPeople(rec: Recommendation): string[] {
   const fromAction = (rec.action.match(
     /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\b/g,
   ) ?? []) as string[];
-  const known = ["Priya Shah", "Marcus Webb", "Elena Rostova", "Jordan Lee"];
-  const hits = known.filter(
-    (name) =>
-      rec.title.includes(name.split(" ")[0]!) ||
-      rec.action.includes(name) ||
-      rec.why.includes(name),
-  );
-  return hits.length ? hits : fromAction.slice(0, 2);
+  return fromAction.slice(0, 2);
 }

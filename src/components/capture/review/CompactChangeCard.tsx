@@ -11,6 +11,7 @@ const KIND_ICON: Record<SuggestionKind, string> = {
   decision: "◇",
   risk: "⚠",
   stakeholder: "◎",
+  availability: "◎",
   knowledge: "☰",
   nudge: "→",
   meeting: "○",
