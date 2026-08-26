@@ -1,0 +1,102 @@
+name: Capture V2 live eval
+
+# Opt-in paid benchmark. Does not run on pull requests.
+# Dashboard publishing cannot turn a valid eval into a product failure
+# of the deterministic regression suite — this workflow is separate.
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "Provider to evaluate"
+        type: choice
+        options:
+          - openai
+          - anthropic
+          - gemini
+          - all
+        default: openai
+      runs:
+        description: "Repeats per case"
+        type: string
+        default: "3"
+      model:
+        description: "Optional model id override (applied to the selected provider(s))"
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Live Capture V2 eval
+        id: eval
+        run: |
+          mkdir -p test-results
+          extra=()
+          if [ -n "${{ github.event.inputs.model }}" ]; then
+            extra+=(--model "${{ github.event.inputs.model }}")
+          fi
+          npx --yes tsx scripts/eval-capture-v2.ts \
+            --provider "${{ github.event.inputs.provider }}" \
+            --runs "${{ github.event.inputs.runs }}" \
+            --out test-results/capture-v2-eval.json \
+            "${extra[@]}"
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - name: Job summary
+        if: always()
+        continue-on-error: true
+        run: npx --yes tsx scripts/test-dashboard/publish.ts --mode summary --results-dir test-results
+      - name: Upload eval evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capture-v2-eval-evidence
+          path: test-results
+          if-no-files-found: ignore
+
+  dashboard:
+    name: Lume Test Dashboard
+    needs: [eval]
+    if: always()
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Download eval evidence
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: capture-v2-eval-evidence
+          path: test-results
+      - name: Publish dashboard
+        if: always()
+        run: npx --yes tsx scripts/test-dashboard/publish.ts --mode both --results-dir test-results
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

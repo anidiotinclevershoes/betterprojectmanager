@@ -1,0 +1,65 @@
+{
+  "baselineVersion": "capture-v2-eval-corpus-v1-hulk",
+  "startedAt": "2026-08-26T13:00:00.000Z",
+  "finishedAt": "2026-08-26T13:00:20.000Z",
+  "skipped": [],
+  "liveCallsAttempted": 1,
+  "liveCallsSucceeded": 1,
+  "results": [
+    {
+      "caseId": "existing-person",
+      "runIndex": 0,
+      "provider": "fixture-safety",
+      "model": "safety-1",
+      "modelMetrics": {
+        "materialRecall": 0.5,
+        "unsupportedCount": 1,
+        "domainCorrectness": 1,
+        "existingVsNewCorrectness": 0,
+        "stableTargetCorrectness": 0,
+        "ambiguityPreserved": null,
+        "noChangeHandled": false,
+        "commentaryHandled": null
+      },
+      "lumeSafety": {
+        "rows": [
+          {
+            "observationId": "obs-model",
+            "statement": "invented a second Pippa",
+            "classification": "model_failure",
+            "decisionKind": "rejected",
+            "reason": "unsupported person create"
+          },
+          {
+            "observationId": "obs-catch",
+            "statement": "wrong target blocked",
+            "classification": "lume_catch",
+            "decisionKind": "needs_you",
+            "reason": "ambiguous identity"
+          },
+          {
+            "observationId": "obs-fail",
+            "statement": "legal write of a wrong fact",
+            "classification": "lume_failure",
+            "decisionKind": "write",
+            "reason": "incorrect legal write"
+          }
+        ],
+        "totals": {
+          "modelFailures": 1,
+          "lumeCatches": 1,
+          "lumeFailures": 1
+        }
+      },
+      "call": {
+        "provider": "fixture-safety",
+        "requestedModel": "safety-1",
+        "usage": { "inputTokens": 10, "outputTokens": 5, "totalTokens": 15 },
+        "latencyMs": 50,
+        "approximateCostUsd": 0.0001,
+        "error": null
+      },
+      "usedFrozenFixture": true
+    }
+  ]
+}

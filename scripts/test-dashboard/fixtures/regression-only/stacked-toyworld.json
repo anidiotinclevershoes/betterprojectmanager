@@ -1,0 +1,6 @@
+{
+  "storyId": "toyworld",
+  "steps": [
+    { "id": "t1", "review": "write", "writeCount": 1, "needsYouCount": 0, "lumeFailures": 0 }
+  ]
+}

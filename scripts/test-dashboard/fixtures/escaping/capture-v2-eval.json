@@ -1,0 +1,46 @@
+{
+  "baselineVersion": "capture-v2-eval-corpus-v1-hulk",
+  "startedAt": "2026-08-26T14:00:00.000Z",
+  "finishedAt": "2026-08-26T14:00:05.000Z",
+  "skipped": [],
+  "liveCallsAttempted": 1,
+  "liveCallsSucceeded": 1,
+  "results": [
+    {
+      "caseId": "existing-person",
+      "runIndex": 0,
+      "provider": "fixture-escape",
+      "model": "escape|model",
+      "modelMetrics": {
+        "materialRecall": 1,
+        "unsupportedCount": 0,
+        "domainCorrectness": 1,
+        "existingVsNewCorrectness": 1,
+        "stableTargetCorrectness": 1,
+        "ambiguityPreserved": null,
+        "noChangeHandled": true,
+        "commentaryHandled": null
+      },
+      "lumeSafety": {
+        "rows": [
+          {
+            "observationId": "obs-secret",
+            "classification": "lume_catch",
+            "decisionKind": "rejected",
+            "reason": "blocked token sk-testfixturevalue999 and comment --> leak"
+          }
+        ],
+        "totals": { "modelFailures": 0, "lumeCatches": 1, "lumeFailures": 0 }
+      },
+      "call": {
+        "provider": "fixture-escape",
+        "requestedModel": "escape|model",
+        "usage": { "inputTokens": 1, "outputTokens": 1, "totalTokens": 2 },
+        "latencyMs": 10,
+        "approximateCostUsd": 0,
+        "error": null
+      },
+      "usedFrozenFixture": true
+    }
+  ]
+}

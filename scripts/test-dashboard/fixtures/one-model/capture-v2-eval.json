@@ -1,0 +1,48 @@
+{
+  "baselineVersion": "capture-v2-eval-corpus-v1-hulk",
+  "startedAt": "2026-08-26T10:00:00.000Z",
+  "finishedAt": "2026-08-26T10:01:00.000Z",
+  "skipped": [],
+  "liveCallsAttempted": 1,
+  "liveCallsSucceeded": 1,
+  "results": [
+    {
+      "caseId": "existing-person",
+      "runIndex": 0,
+      "provider": "fixture-provider-a",
+      "model": "fixture-model-a",
+      "modelMetrics": {
+        "materialRecall": 1,
+        "unsupportedCount": 0,
+        "domainCorrectness": 1,
+        "existingVsNewCorrectness": 1,
+        "stableTargetCorrectness": 1,
+        "ambiguityPreserved": null,
+        "noChangeHandled": true,
+        "commentaryHandled": null
+      },
+      "lumeSafety": {
+        "rows": [],
+        "totals": {
+          "modelFailures": 0,
+          "lumeCatches": 0,
+          "lumeFailures": 0
+        }
+      },
+      "call": {
+        "provider": "fixture-provider-a",
+        "requestedModel": "fixture-model-a",
+        "responseModel": "fixture-model-a",
+        "usage": {
+          "inputTokens": 100,
+          "outputTokens": 40,
+          "totalTokens": 140
+        },
+        "latencyMs": 800,
+        "approximateCostUsd": 0.0025,
+        "error": null
+      },
+      "usedFrozenFixture": false
+    }
+  ]
+}

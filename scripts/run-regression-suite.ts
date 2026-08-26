@@ -28,6 +28,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "eval-capture-v2-foundation", script: "scripts/verify-eval-capture-v2.ts" },
   { name: "capture-v2-invariants", script: "scripts/verify-capture-v2-invariants.ts" },
   { name: "stacked-capture", script: "scripts/verify-stacked-capture.ts" },
+  { name: "test-dashboard", script: "scripts/verify-test-dashboard.ts" },
   { name: "new-project-v2", script: "scripts/verify-new-project-v2.ts" },
   { name: "desert-theme", script: "scripts/verify-desert-theme.ts" },
   { name: "phase6-worlds", script: "scripts/verify-phase6-worlds.ts" },
