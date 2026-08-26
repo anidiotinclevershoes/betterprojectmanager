@@ -75,8 +75,12 @@ function main() {
   if (from) {
     const originals = loadOriginalReports(from);
     archive = buildFirstLiveEnvelopeArchive(originals.map((row) => row.report));
-    writeFileSync(ENVELOPES_PATH, `${JSON.stringify(archive)}\n`);
-    console.log(`Wrote envelope archive ${ENVELOPES_PATH}`);
+    if (existsSync(ENVELOPES_PATH)) {
+      console.log(`Preserving immutable envelope archive ${ENVELOPES_PATH}`);
+    } else {
+      writeFileSync(ENVELOPES_PATH, `${JSON.stringify(archive)}\n`);
+      console.log(`Wrote envelope archive ${ENVELOPES_PATH}`);
+    }
     for (const original of originals) {
       const after = sha256File(original.path);
       if (after !== original.sha256) {
@@ -106,7 +110,14 @@ function main() {
       v2: row.v2,
     })),
   };
-  writeFileSync(RESCORE_PATH, `${JSON.stringify(slim)}\n`);
+  if (existsSync(RESCORE_PATH)) {
+    console.log(
+      `Preserving immutable historical scorer-v2 rescore ${RESCORE_PATH}`,
+    );
+  } else {
+    writeFileSync(RESCORE_PATH, `${JSON.stringify(slim)}\n`);
+    console.log(`\nWrote ${RESCORE_PATH}`);
+  }
 
   const out = arg("out");
   if (out) {
@@ -117,7 +128,6 @@ function main() {
   }
 
   console.log(summarise(report));
-  console.log(`\nWrote ${RESCORE_PATH}`);
   console.log(`corpus ${FROZEN_CORPUS_COMPOSITION.version}`);
   console.log(`scorer ${CAPTURE_V2_EVAL_SCORER_VERSION}`);
 }

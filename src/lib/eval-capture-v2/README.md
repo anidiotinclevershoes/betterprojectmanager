@@ -7,6 +7,8 @@ Opt-in measuring instrument for Capture V2. **Do not train against these tests.*
 ```bash
 npm test                          # existing regression + new deterministic foundation
 npm run eval:capture-v2           # live providers (needs keys; never fakes success)
+npm run eval:capture-v2-rescore              # historical scorer-v2 comparison (does not overwrite committed artifact)
+npm run eval:capture-v2-post-identity-replay # current-production replay of archived envelopes
 npm run eval:capture-v2 -- --provider all --runs 3
 npm run test:e2e                  # isolated frozen journeys + stacked Playwright
 npm run test:stacked-capture      # stacked Playwright only
