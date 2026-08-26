@@ -23,6 +23,7 @@
     "verify:new-project": "npx --yes tsx scripts/verify-new-project-onboarding.ts",
     "verify:phase3a-integrity": "npx --yes tsx scripts/verify-phase3a-integrity.ts",
     "verify:project-delete": "npx --yes tsx scripts/verify-project-delete.ts",
+    "verify:d035-project-isolation": "npx --yes tsx scripts/verify-d035-project-isolation.ts",
     "verify:rls-policies": "npx --yes tsx scripts/verify-rls-policies.ts",
     "verify:tenant-isolation": "npx --yes tsx scripts/verify-tenant-isolation.ts",
     "verify:phase2-auth": "npx --yes tsx scripts/verify-phase2-auth.ts",
