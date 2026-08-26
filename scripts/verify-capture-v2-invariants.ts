@@ -313,12 +313,11 @@ function main() {
     fc.assert(
       fc.property(
         fc.constantFrom("Jordan", "Riley", "Casey", "Avery", "Quinn"),
-        fc.constantFrom("Hale", "Patel", "Ng", "Brooks", "Frost"),
-        fc.constantFrom("Ash", "Okada", "Singh", "Vale", "Cole"),
+        fc.constantFrom("Hale", "Patel", "Ng", "Brooks", "Frost", "Ash"),
+        fc.constantFrom("Okada", "Singh", "Vale", "Cole", "Quinn", "Morse"),
         fc.constantFrom("person", "availability", "responsibility"),
         fc.integer({ min: 0, max: 2 }),
         (first, lastA, lastB, domain, extra) => {
-          fc.pre(lastA !== lastB);
           const people = [
             { id: "p-a", name: `${first} ${lastA}`, role: "A" },
             { id: "p-b", name: `${first} ${lastB}`, role: "B" },
