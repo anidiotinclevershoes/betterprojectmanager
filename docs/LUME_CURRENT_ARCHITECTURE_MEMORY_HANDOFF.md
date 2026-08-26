@@ -189,7 +189,7 @@ Use this section as working context for future product/development decisions and
 - Mutation: `confirmResponsibilityOwner` in `src/lib/people/identity.ts` + store persist (`persistEnsureStakeholder`, knowledge persist, `persistKnowledgeLifecycle` for superseded ids)
 - If other current owners exist for the scope → **Needs you**: user must choose **Add as another owner (share)** or **Replace a named current owner**.
 - Adding a second owner **does not** replace the first unless replace is chosen.
-- New person: create durable stakeholder first, then attach responsibility. Existing person: reuse **stable `personId`**. Exact-name match within the project is **CURRENT** conservative resolution only — **a name is not identity**. Two legitimate people may share a name. If name-only resolution is ambiguous (zero or more than one match), fail closed / Needs you. Do **not** add a database uniqueness constraint on stakeholder or person name.
+- New person: create durable stakeholder first, then attach responsibility. Existing person: reuse **stable `personId`** only when Capture text establishes that Person (recorded full name). A model-supplied UUID is not identity proof. Exact-name match within the project is **CURRENT** conservative resolution only — **a name is not identity**. Two legitimate people may share a name. If name-only resolution is ambiguous (zero or more than one match), fail closed / Needs you. Do **not** add a database uniqueness constraint on stakeholder or person name.
 
 **Person retrieval:** `getPersonBundle(state, projectId, personId)` — current/historical responsibilities, `sharedScopes`, availability, legacy bullets. Does not scan unrelated prose.
 
@@ -265,7 +265,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 
 **Ocean UI uses analyse + `applyOne` only.** Immediate-merge `capture()` / `captureWithAI` / `applyCaptureResult` / unmounted `CaptureBar` were **DELETED** in Slice 1A.
 
-**People:** Capture apply reuses existing Person UUIDs. Duplicate-stakeholder on mention is closed. Leftover Knowledge people *prose* (never a finding) may still lack a stakeholder. **GAP D-007 remainder.**
+**People:** Capture apply reuses existing Person UUIDs **only after the Capture text establishes that Person**. A model-supplied UUID is not identity proof. Incomplete first-name fragments, competing same-name records, and wrong UUIDs are Needs you (`personLinkedIdentityGate` + Phase 3B `resolvePerson`). Duplicate-stakeholder on mention is closed. Leftover Knowledge people *prose* (never a finding) may still lack a stakeholder. **GAP D-007 remainder.**
 
 **Other Capture GAPs:** D-013 session tables vs client lists / New Capture transcript (Phase 3D); D-014 hosted Capture apply → Supabase not in CI; D-011 New Project extractors only; D-005 remaining optimistic paths (Todo / Confirm Owner); D-025 Ocean §16 visual depth (not semantics).
 
@@ -859,7 +859,7 @@ Use the legend in the file header. This table is the ambiguity-remover for the d
 | Legacy Capture understanding (OpenAI findings / local regex extract) | **Default** `/api/capture` path when flag unset | Not the V1 engine | Coexists until V2 default-on | **After required V2 gates** (git rollback) | — |
 | Immediate-merge `capture()` / `captureWithAI` / `CaptureBar` | **DELETED** (Slice 1A) | Ocean analyse + `applyOne` | — | Removed | — |
 | Canonical truth (`serializeCanonicalTruth`) | Assembler exists; production flag **off** | **The** current-truth recall projection | `LUME_CANONICAL_TRUTH` dual Ask | Legacy Ask branch after default-on + one-release rollback | Production default-on **timing** waits on eval/Test workstream |
-| Person identity | Project-scoped `stakeholders` UUID | Workspace `people` + project participation. **Stable IDs own identity. A name is not identity.** Same-name people must remain representable. Name-only resolution if ambiguous → Needs you. No unique-name DB constraint. No fuzzy/global merge of existing rows | Exact-name match as conservative temporary resolver | — | When to ship the `people` table (not first slice) |
+| Person identity | Project-scoped `stakeholders` UUID. **UUID is not Capture identity proof** (Slice 1D: recorded full name in text) | Workspace `people` + project participation. **Stable IDs own identity. A name is not identity.** Same-name people must remain representable. Name-only resolution if ambiguous → Needs you. No unique-name DB constraint. No fuzzy/global merge of existing rows | Exact-name match as conservative temporary resolver | — | When to ship the `people` table (not first slice) |
 | Playwright / property testing | `verify-*` + frozen Playwright Capture V2 journeys + narrow fast-check invariants | Tests must protect behaviour **before** risky structural deletion | — | — | — |
 | Ocean | Default appearance | **Keep** | — | **Never** | — |
 | Desert | Supported appearance (`data-theme="desert"`) | **Keep both** (user-selectable) | — | — | MP token/UX polish (sibling stream) |
@@ -1095,6 +1095,7 @@ Multi-step dual-write (`persistKnowledgeBullet` knowledge then risks) should rid
 
 - **Stable IDs own identity.**
 - A **name is not identity.** Two legitimate different people may share the same name.
+- A **model-supplied Person UUID is not identity proof.** Capture V2 / Phase 3B must independently establish the Person from Capture text (recorded full name) before a person-linked write is Apply Ready. UUID cannot convert incomplete or competing evidence into a legal write.
 - Same-name people **must remain representable** (no unique-name constraint on `stakeholders` or `people`).
 - Exact-name matching may remain a **conservative temporary resolution** behaviour.
 - If name-only resolution is ambiguous (zero or more than one match), **fail closed / Needs you**.

@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 26 August 2026 (Thor amendment on architecture PR #69: name ≠ identity; D-035 project-scoped mutation invariant; status categories)  
+**Last housekeeping:** 26 August 2026 (Thor Slice 1D: model-supplied Person UUID is not identity proof)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
@@ -752,7 +752,18 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 | **Status** | fixed |
 | **Fixed in** | Phase 3B — Conservative Capture Mutation Boundary |
 | **Failure class** | Capture apply could fall through into the wrong authority (generic Todo, duplicate Person, Risk/date as Todo). Project scope could silently use whichever project was open. Demo-name heuristics steered interpretation. Availability could become Stakeholder. Ambiguous share-vs-replace could write. |
-| **Fix summary** | Exhaustive typed apply dispatcher (`src/lib/capture/apply`) with runtime validation. Each finding mutates only its legal domain or Needs you / no write. No generic Todo fallback. Project scope uses Capture entry context only when the finding is not uncertain. Durable IDs carried for Risk/Person/milestone; a supplied Risk ID that is not on the project does **not** title-fallback onto another Risk. Unassigned (`projectId: null`) Todos cannot be mutated from a project Capture. `kind` cannot be retargeted by a conflicting `legalDomain` sticker. Availability fields cannot retarget a typed Risk/Todo/milestone. Mapping `legalDomain: unsupported` (unknown op/entity) is honored before availability/responsibility refinements. People reuse `ensurePersonOnProject`. Responsibilities reuse Confirm Owner; a Person ID not on the project is Needs you. Unknown ownership semantics cannot be discarded into a Person write. Availability writes structured `kind=availability`. Milestone date moves persist; milestone *complete* is Needs you (D-029). CREATE against an existing on-project Todo/milestone ID, or an exact unique Risk title, is no-change rather than a duplicate. Local extract auto-ready updates/completions require the existing title and cue in the same sentence (no token-overlap auto-accept). Persist-first Capture paths for Risk create/status, milestone create/update, Person, availability. Tests in `scripts/verify-phase3b-capture-boundary.ts`. Resolves D-017; Capture portions of D-011 and D-020; duplicate-Person class of D-007. |
+| **Fix summary** | Exhaustive typed apply dispatcher (`src/lib/capture/apply`) with runtime validation. Each finding mutates only its legal domain or Needs you / no write. No generic Todo fallback. Project scope uses Capture entry context only when the finding is not uncertain. Durable IDs carried for Risk/Person/milestone; a supplied Risk ID that is not on the project does **not** title-fallback onto another Risk. Unassigned (`projectId: null`) Todos cannot be mutated from a project Capture. `kind` cannot be retargeted by a conflicting `legalDomain` sticker. Availability fields cannot retarget a typed Risk/Todo/milestone. Mapping `legalDomain: unsupported` (unknown op/entity) is honored before availability/responsibility refinements. People reuse `ensurePersonOnProject`. Responsibilities reuse Confirm Owner; a Person ID not on the project is Needs you. Unknown ownership semantics cannot be discarded into a Person write. Availability writes structured `kind=availability`. Milestone date moves persist; milestone *complete* is Needs you (D-029). CREATE against an existing on-project Todo/milestone ID, or an exact unique Risk title, is no-change rather than a duplicate. Local extract auto-ready updates/completions require the existing title and cue in the same sentence (no token-overlap auto-accept). Persist-first Capture paths for Risk create/status, milestone create/update, Person, availability. Tests in `scripts/verify-phase3b-capture-boundary.ts`. Resolves D-017; Capture portions of D-011 and D-020; duplicate-Person class of D-007. **Slice 1D:** a valid Person UUID is no longer sufficient identity (see D-R14). |
+
+---
+
+### D-R14 — Model-supplied Person UUID does not prove identity
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Slice 1D — Person identity certainty safety invariant |
+| **Failure class** | Capture V2 resolver trusted `candidateTargetId` as Person identity. Incomplete evidence such as a first-name fragment plus a valid existing UUID became Apply Ready (person / availability / responsibility). Phase 3B `resolvePerson` short-circuited on that UUID. |
+| **Fix summary** | **Invariant:** a model-supplied Person UUID is evidence of model intent, not proof of identity. Primary gate: V2 `personLinkedIdentityGate` (expanded from `personCreateIdentityGate`). Person-linked writes require the Capture text to contain the recorded full name (`recordedPersonNameAppearsInText`). UUID cannot raise incomplete/competing evidence to Apply Ready. Same-name duplicates stay Needs you. Explicit new full names remain creatable. Secondary: Phase 3B `resolvePerson` refuses UUID-only binds. Not a first-name heuristic, not an Identity Engine, not benchmark-specific. Tests: `scripts/verify-person-identity-safety.ts` plus invariant properties. |
 
 ---
 

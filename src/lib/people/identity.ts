@@ -41,6 +41,34 @@ export function namesMatchExact(a: string, b: string): boolean {
   return normalisePersonName(a) === normalisePersonName(b);
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * True when `text` contains the Person's recorded full name as a whole phrase.
+ * A first-name fragment is not enough. Not fuzzy. Not UUID-aware.
+ */
+export function recordedPersonNameAppearsInText(
+  text: string,
+  recordedName: string,
+): boolean {
+  const name = recordedName.trim().replace(/\s+/g, " ");
+  if (!name || !text.trim()) return false;
+  const re = new RegExp(`\\b${escapeRegExp(name)}\\b`, "i");
+  return re.test(text);
+}
+
+/** People whose recorded full name appears in `text`. UUID is irrelevant. */
+export function peopleEvidencedByRecordedNameInText<T extends { name: string }>(
+  people: readonly T[],
+  text: string,
+): T[] {
+  return people.filter((person) =>
+    recordedPersonNameAppearsInText(text, person.name),
+  );
+}
+
 export function scopesMatchExact(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
 }
