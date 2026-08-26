@@ -61,6 +61,12 @@ All existing `scripts/verify-*.ts` and `npm test` aggregation. Live Tell Me eval
 
 Implemented: 7 frozen journeys in `e2e/capture-v2-journeys.spec.ts`. No visual screenshot regression. Optional live smoke is skipped unless `EVAL_CAPTURE_V2_LIVE_SMOKE=1` and `OPENAI_API_KEY` are set.
 
+Instrumentation notes (tests, not product):
+
+- Coach overlay “Ready when you are” intercepts clicks; tests dismiss it.
+- Frozen envelopes without `modelConfidence` fall through the review UI’s `< 70` Needs Review path. Apply for those rows is **Resolve Risk / Approve**, not “Apply Ready”.
+- `addInitScript` that always writes `localStorage` would re-seed after reload and fake “risk still on board”. Seed is now once-per-test via `sessionStorage`.
+
 ## 8. Property-testing status
 
 Adopted **narrowly** in `scripts/verify-capture-v2-invariants.ts` only. Justification: fail-closed identity properties are cheaper as properties than as more one-off examples. Not applied to UI or legacy scripts.
@@ -84,10 +90,16 @@ On **frozen/adversarial fixtures** (not live models):
 - Foreign / invented IDs → rejected (Lume catch)
 - Duplicate `create_new` of Pippa Gumdrop → no-change / Needs you (identity gate)
 - Share vs replace ambiguous envelope → Needs you, never Apply Ready
+- Playwright: share-vs-replace shows Needs Review, no Apply Ready button
 
 ## 13. Lume failures observed
 
-None on the frozen fixtures. Live path not executed.
+None on frozen fixtures that would become an unreviewed legal write.
+
+**Recorded production behaviour (not fixed in this branch):**
+
+- V2 says model confidence is informational and never makes Apply Ready by itself. The existing Capture review UI still treats `confidence < 70` as Needs Review. Frozen envelopes without `modelConfidence` therefore land as Needs Review; Risk resolve is approved via **Resolve Risk**, not Apply Ready.
+- On the Risk-resolve review screen, “What Lume Understood” labelled the row **No Change** while the observation account correctly said 1 proposed change. Presentation inconsistency only; 3B still planned a risk status write after Resolve Risk.
 
 ## 14. Token / cost / latency instrumentation
 
@@ -116,11 +128,27 @@ See `docs/v1-convergence/TEST_DEBT.md`. 44 `verify-*.ts` scripts remain. Largest
 
 ## 19. Exact files changed
 
-See the pull request diff. Principal additions: `src/lib/eval-capture-v2/**`, `scripts/eval-capture-v2.ts`, `scripts/verify-eval-capture-v2.ts`, `scripts/verify-capture-v2-invariants.ts`, `e2e/**`, `playwright.config.ts`, `docs/v1-convergence/**`.
+See the pull request diff. Principal additions:
+
+- `src/lib/eval-capture-v2/**` (library + adapters + README)
+- `scripts/eval-capture-v2.ts`, `scripts/verify-eval-capture-v2.ts`, `scripts/verify-capture-v2-invariants.ts`, `scripts/write-e2e-fixtures.ts`
+- `e2e/**` including helpers, frozen journeys, and JSON fixtures
+- `playwright.config.ts`
+- `docs/v1-convergence/**`
+- `.github/workflows/regression.yml` (credential-free Playwright job)
+- `.gitignore` (Playwright reports)
+- `src/lib/experiments/worlds.ts` (JSDoc only)
 
 ## 20. Test results
 
-Filled after CI-equivalent local runs (typecheck, `npm test`, Playwright). Live eval: skipped, not faked.
+| Check | Result |
+| --- | --- |
+| `npx tsc --noEmit` | pass |
+| `npm test` | **37/37** suites passed (includes eval-foundation + invariants) |
+| `npm run eval:capture-v2 -- --provider all` | **skipped truthfully**, exit 2, no invented success |
+| Playwright frozen journeys | **7 passed**, 1 optional live smoke skipped |
+
+Playwright journeys: existing Person, Risk resolve, date move, availability, To Do, Needs you, Toyworld isolation + reload.
 
 ## 21. Recommendation
 

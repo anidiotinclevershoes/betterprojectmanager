@@ -8,11 +8,12 @@ import {
   seedExperimentalWorlds,
   CANDYLAND_ID,
   TOYWORLD_ID,
+  walkthroughPath,
 } from "./helpers";
 
 test.describe("Capture V2 frozen journeys", () => {
-  test.beforeEach(async ({ page }) => {
-    await seedExperimentalWorlds(page);
+  test.beforeEach(async ({ page }, testInfo) => {
+    await seedExperimentalWorlds(page, testInfo.testId);
   });
 
   test("existing Person — no duplicate stakeholder after review", async ({
@@ -22,7 +23,9 @@ test.describe("Capture V2 frozen journeys", () => {
     await openCapture(page);
     await expect(page.getByRole("heading", { name: "Candyland" })).toBeVisible();
     await analyseFrozenTranscript(page, frozen.transcript);
-    await expect(page.getByText(/already known|No operational changes/i)).toBeVisible();
+    await expect(
+      page.getByText("No operational changes to review."),
+    ).toBeVisible();
     await openKnowledgeCentre(page);
     const people = page.getByTestId("ocean-frame-people");
     await expect(people.getByText("Pippa Gumdrop")).toBeVisible();
@@ -39,7 +42,9 @@ test.describe("Capture V2 frozen journeys", () => {
     const frozen = await mockLocalAuthAndFrozenCapture(page, "risk-resolution");
     await openCapture(page);
     await analyseFrozenTranscript(page, frozen.transcript);
-    await expect(page.getByText(/Risk/i).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /Resolve Risk/i })).toBeVisible();
+    const riskShot = walkthroughPath("capture_v2_risk_review.png");
+    if (riskShot) await page.screenshot({ path: riskShot, fullPage: true });
     await applyReadyIfPresent(page);
     await openKnowledgeCentre(page);
     const risks = page.getByTestId("ocean-frame-risks");
@@ -62,7 +67,7 @@ test.describe("Capture V2 frozen journeys", () => {
     await openKnowledgeCentre(page);
     const dates = page.getByTestId("ocean-frame-dates");
     await expect(dates.getByText("Parade day")).toBeVisible();
-    await expect(dates.getByText(/29/)).toBeVisible();
+    await expect(dates.getByText(/29 Oct/)).toBeVisible();
     await expect(
       page.getByTestId("ocean-frame-todo").getByText(/Parade day/),
     ).toHaveCount(0);
@@ -78,7 +83,7 @@ test.describe("Capture V2 frozen journeys", () => {
     await openKnowledgeCentre(page);
     const people = page.getByTestId("ocean-frame-people");
     await expect(people.getByText("Fizz Caramel")).toBeVisible();
-    await expect(people.getByText(/5|Oct/i).first()).toBeVisible();
+    await expect(people.getByText(/Away 5–12 Oct/)).toBeVisible();
   });
 
   test("To Do create — appears on Candyland board", async ({ page }) => {
@@ -93,6 +98,8 @@ test.describe("Capture V2 frozen journeys", () => {
     await expect(
       page.getByTestId("ocean-frame-todo").getByText("Prepare the jelly pack"),
     ).toBeVisible();
+    const todoShot = walkthroughPath("capture_v2_todo_on_board.png");
+    if (todoShot) await page.screenshot({ path: todoShot, fullPage: true });
   });
 
   test("Needs you — share vs replace is not Apply Ready", async ({ page }) => {
@@ -143,6 +150,8 @@ test.describe("Capture V2 frozen journeys", () => {
       page.getByTestId("ocean-frame-todo").getByText("Print the track map"),
     ).toBeVisible();
     await expect(page.getByText(/candy-cane banners/i)).toHaveCount(0);
+    const isoShot = walkthroughPath("capture_v2_toyworld_isolation.png");
+    if (isoShot) await page.screenshot({ path: isoShot, fullPage: true });
   });
 });
 
