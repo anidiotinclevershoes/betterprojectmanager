@@ -1,6 +1,7 @@
 /**
- * Offline rescore of archived first-live Capture V2 envelopes through scorer v2.
- * No provider calls. Does not mutate original harness artifacts.
+ * Offline rescore of archived first-live Capture V2 envelopes through the
+ * current scorer. No provider calls. Does not mutate original harness artifacts
+ * or the historical scorer-v2 JSON.
  */
 
 import { FROZEN_CORPUS_COMPOSITION, FROZEN_V2_BASELINE } from "./baseline";
@@ -314,7 +315,7 @@ export function rescoreArchivedEnvelopes(
     originalScorerVersion: archive.originalScorerVersion,
     originalWorkflowRunId: archive.originalWorkflowRunId,
     originalArtifactName: archive.originalArtifactName,
-    note: "Scorer v2 rescore of archived first-live envelopes. Original artifact was not mutated. No provider calls.",
+    note: "Current-scorer rescore of archived first-live envelopes. Original artifact was not mutated. No provider calls.",
     models,
     cases,
   };
@@ -395,5 +396,168 @@ export function rescoreReportToHarnessShape(report: RescoreReport): {
         : null,
       usedFrozenFixture: false,
     })),
+  };
+}
+
+/** Current-production replay of archived envelopes through the current scorer. */
+export const SCORER_V3_REPLAY_ID = "capture-v2-eval-scorer-v3-replay";
+
+export type ReplayOutcomeKind =
+  | "technical_failure"
+  | "still_genuine_lume_failure"
+  | "scorer_defect"
+  | "safe_now"
+  | "lume_catch"
+  | "model_failure"
+  | "current_ok";
+
+export type CurrentProductionReplayCase = RescoredCase & {
+  applyReady: number;
+  needsYou: number;
+  rejected: number;
+  noChange: number;
+  writeOperations: string[];
+  decisionKinds: string[];
+  failureStatements: string[];
+  outcome: ReplayOutcomeKind;
+};
+
+export type CurrentProductionReplayReport = {
+  replayId: typeof SCORER_V3_REPLAY_ID;
+  kind: "archived-output-current-production-replay";
+  baselineVersion: string;
+  corpusVersion: string;
+  scorerVersion: string;
+  productionSha: string;
+  originalWorkflowRunId: string;
+  originalArtifactName: string;
+  envelopeArchiveId: string;
+  note: string;
+  models: Array<{
+    provider: string;
+    model: string;
+    successfulEnvelopes: number;
+    callErrors: number;
+    lumeFailures: number;
+    lumeCatches: number;
+    modelFailures: number;
+    applyReady: number;
+  }>;
+  cases: CurrentProductionReplayCase[];
+};
+
+function replayOutcome(row: {
+  error: string | null;
+  applyReady: number;
+  lumeFailures: number;
+  lumeCatches: number;
+  modelFailures: number;
+  originalLumeFailures: number;
+}): ReplayOutcomeKind {
+  if (row.error) return "technical_failure";
+  if (row.lumeFailures > 0 && row.applyReady > 0) return "still_genuine_lume_failure";
+  if (row.lumeFailures > 0 && row.applyReady === 0) return "scorer_defect";
+  if (row.originalLumeFailures > 0 && row.lumeFailures === 0) {
+    if (row.lumeCatches > 0) return "lume_catch";
+    return "safe_now";
+  }
+  if (row.lumeCatches > 0) return "lume_catch";
+  if (row.modelFailures > 0) return "model_failure";
+  return "current_ok";
+}
+
+export function replayArchivedThroughCurrentProduction(args: {
+  archive: FirstLiveEnvelopeArchive;
+  productionSha: string;
+}): CurrentProductionReplayReport {
+  const historical = rescoreArchivedEnvelopes(args.archive);
+  const cases: CurrentProductionReplayCase[] = [];
+
+  for (let i = 0; i < args.archive.envelopes.length; i += 1) {
+    const envelope = args.archive.envelopes[i]!;
+    const scored = historical.cases[i]!;
+    if (envelope.error) {
+      cases.push({
+        ...scored,
+        applyReady: 0,
+        needsYou: 0,
+        rejected: 0,
+        noChange: 0,
+        writeOperations: [],
+        decisionKinds: [],
+        failureStatements: [],
+        outcome: "technical_failure",
+      });
+      continue;
+    }
+    const testCase = CAPTURE_V2_EVAL_CORPUS.find((c) => c.id === envelope.caseId);
+    if (!testCase) {
+      throw new Error(`Archived envelope refers to unknown case ${envelope.caseId}`);
+    }
+    const evaluated = evaluateAgainstCase({
+      testCase,
+      rawModelJson: envelope.rawJson,
+    });
+    const applyReady = evaluated.lumeSafety.totals.applyReady;
+    const failureRows = evaluated.lumeSafety.rows.filter(
+      (row) => row.classification === "lume_failure",
+    );
+    cases.push({
+      ...scored,
+      applyReady,
+      needsYou: evaluated.lumeSafety.totals.needsYou,
+      rejected: evaluated.lumeSafety.totals.rejected,
+      noChange: evaluated.lumeSafety.totals.noChange,
+      writeOperations: evaluated.pipeline.resolved
+        .filter((row) => row.decision.kind === "write")
+        .map((row) =>
+          row.decision.kind === "write" ? row.decision.operation.type : "",
+        ),
+      decisionKinds: [
+        ...evaluated.pipeline.validation.rejected.map(() => "rejected"),
+        ...evaluated.pipeline.resolved.map((row) => row.decision.kind),
+      ],
+      failureStatements: failureRows.map((row) => row.statement),
+      outcome: replayOutcome({
+        error: null,
+        applyReady,
+        lumeFailures: scored.v2.lumeFailures,
+        lumeCatches: scored.v2.lumeCatches,
+        modelFailures: scored.v2.modelFailures,
+        originalLumeFailures: scored.original.lumeFailures,
+      }),
+    });
+  }
+
+  const keys = [...new Set(cases.map((c) => `${c.provider}::${c.model}`))];
+  const models = keys.map((key) => {
+    const subset = cases.filter((c) => `${c.provider}::${c.model}` === key);
+    const first = subset[0]!;
+    const ok = subset.filter((c) => !c.original.error);
+    return {
+      provider: first.provider,
+      model: first.model,
+      successfulEnvelopes: ok.length,
+      callErrors: subset.length - ok.length,
+      lumeFailures: ok.reduce((n, r) => n + r.v2.lumeFailures, 0),
+      lumeCatches: ok.reduce((n, r) => n + r.v2.lumeCatches, 0),
+      modelFailures: ok.reduce((n, r) => n + r.v2.modelFailures, 0),
+      applyReady: ok.reduce((n, r) => n + r.applyReady, 0),
+    };
+  });
+
+  return {
+    replayId: SCORER_V3_REPLAY_ID,
+    kind: "archived-output-current-production-replay",
+    baselineVersion: FROZEN_V2_BASELINE.version,
+    corpusVersion: FROZEN_CORPUS_COMPOSITION.version,
+    scorerVersion: CAPTURE_V2_EVAL_SCORER_VERSION,
+    productionSha: args.productionSha,
+    originalWorkflowRunId: args.archive.originalWorkflowRunId,
+    originalArtifactName: args.archive.originalArtifactName,
+    envelopeArchiveId: args.archive.archiveId,
+    note: "Replay of archived first-live raw envelopes through current production Capture V2 + scorer v3. Not a live benchmark. Historical v1/v2 artifacts were not mutated. No provider calls.",
+    models,
+    cases,
   };
 }

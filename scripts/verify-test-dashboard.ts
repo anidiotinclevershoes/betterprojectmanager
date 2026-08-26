@@ -420,7 +420,7 @@ async function main() {
     }
   });
 
-  await check("scorer version is independent of corpus/baseline; v1 and v2 rows coexist", () => {
+  await check("scorer version is independent of corpus/baseline; v1, v2, and v3 rows coexist", () => {
     assert.equal(
       corpusVersionFromReport({ baselineVersion: "capture-v2-eval-baseline-v1" }),
       "capture-v2-eval-corpus-v1-hulk",
@@ -450,15 +450,23 @@ async function main() {
       scorerVersion: "capture-v2-eval-scorer-v2",
       lumeFailures: 1,
     });
+    const v3 = sampleModel({
+      runId: "run-rescore-v3",
+      timestamp: "2026-08-26T22:00:00.000Z",
+      scorerVersion: "capture-v2-eval-scorer-v3",
+      lumeFailures: 2,
+    });
     let state = emptyDashboardState();
     state = upsertModelRow(state, v1);
     state = upsertModelRow(state, v2);
-    assert.equal(state.modelRows.length, 2);
+    state = upsertModelRow(state, v3);
+    assert.equal(state.modelRows.length, 3);
     const latest = latestModels(state.modelRows);
-    assert.equal(latest.length, 2);
+    assert.equal(latest.length, 3);
     const body = composeIssueBody(state);
     assert.match(body, /capture-v2-eval-scorer-v1/);
     assert.match(body, /capture-v2-eval-scorer-v2/);
+    assert.match(body, /capture-v2-eval-scorer-v3/);
     assert.match(body, /\|\s*Scorer\s*\|/);
   });
 
