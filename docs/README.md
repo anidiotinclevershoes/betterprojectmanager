@@ -65,7 +65,7 @@ They do not override (1)–(3) unless they are the specific contract for that se
 
 Plans describe **intended future work**. They do not override current architecture or code.
 
-`docs/v1-convergence-mp/` is the Magic Patterns / V1 UX convergence **reference** (Workstream C). It does not replace the visual constitution in `docs/v1-reference-pack/` and it is not a licence to implement a UX overhaul.
+`docs/v1-convergence-mp/` is the Magic Patterns / V1 UX convergence **reference** (Workstream C). Live MP v8 (Knowledge Centre + inspector) is dumped unaltered under `docs/v1-convergence-mp/mp-source/`. It does not replace the visual constitution in `docs/v1-reference-pack/` and it is not a licence to implement a UX overhaul.
 
 ### 6. Historical handovers / audits / screenshots
 
