@@ -19,9 +19,11 @@ export const metadata: Metadata = {
 const themeBootScript = `
 (function(){
   try {
-    localStorage.setItem('mc-appearance-v1', 'dark');
-  } catch (e) {}
-  document.documentElement.dataset.theme = 'dark';
+    var v = localStorage.getItem('mc-appearance-v1');
+    document.documentElement.dataset.theme = v === 'desert' ? 'desert' : 'dark';
+  } catch (e) {
+    document.documentElement.dataset.theme = 'dark';
+  }
 })();
 `;
 

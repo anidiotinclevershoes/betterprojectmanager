@@ -92,6 +92,7 @@ For ordinary development:
 4. `docs/LUME_V1_KNOWN_DISCOVERIES.md`
 5. only the relevant historical `SLICE*` handover when extending that particular seam
 6. Intelligence Contract (`docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`) when doing Ask / eval / intelligence-scoring work
+7. `docs/EXPERIMENTAL_PROGRAMME.md` when working Capture V2, New Project V2, or Desert (experimental vs current)
 
 Then open operational docs only if the task is about tests, deploy, or persistence setup.
 

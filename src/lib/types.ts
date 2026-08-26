@@ -280,6 +280,17 @@ export interface CaptureResult {
   };
   /** Sprint 2.1.5: actionable finding dispositions after mapping. */
   findingCoverage?: import("./capture/findings").FindingCoverageReport;
+  /** Experimental Capture V2 — informational accounting only. */
+  capturePipeline?: "legacy" | "v2";
+  observationAccount?: {
+    total: number;
+    proposedChanges: number;
+    alreadyKnown: number;
+    merged: number;
+    needsYou: number;
+    commentary: number;
+    rejected: number;
+  };
 }
 
 /** Lightweight timeline entry the UI renders; AI only adds/updates these. */

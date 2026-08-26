@@ -831,6 +831,33 @@ export function CaptureWorkspace({
             needsAttentionCount={counts.needsAttention}
             onSelectObservation={onSelectObservation}
           />
+          {result?.capturePipeline === "v2" && result.observationAccount ? (
+            <p
+              className="capture-summary-line capture-v2-account"
+              data-testid="capture-v2-account"
+              role="status"
+            >
+              <span>
+                {result.observationAccount.total} observations
+              </span>
+              <span aria-hidden>·</span>
+              <span>
+                {result.observationAccount.proposedChanges} proposed
+              </span>
+              <span aria-hidden>·</span>
+              <span>
+                {result.observationAccount.alreadyKnown} already known
+              </span>
+              <span aria-hidden>·</span>
+              <span>
+                {result.observationAccount.needsYou} Needs you
+              </span>
+              <span aria-hidden>·</span>
+              <span>
+                {result.observationAccount.commentary} commentary
+              </span>
+            </p>
+          ) : null}
           <SuggestedChangesList
             models={reviewModels}
             added={added}

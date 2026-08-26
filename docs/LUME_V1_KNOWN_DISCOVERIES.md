@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 25 August 2026 (Phase 3B fail-closed: same-clause completion cues, unknown ownership, CREATE identity)  
+**Last housekeeping:** 25 August 2026 (Experimental Programme: Capture V2 / New Project V2 flags; Desert appearance; D-032)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
@@ -503,6 +503,26 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Target resolution / validation point** | Ocean/QOL — not Phase 3B or 3D Capture session |
 | **Related docs** | D-025 |
 | **Notes** | 3B testing dismissed the overlay; it did not cause a wrong-domain write. |
+
+---
+
+### D-032 — Dual Capture / New Project pipelines while experimental flags are on
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Capture / New Project |
+| **Found in** | Experimental Programme (25 Aug 2026) |
+| **Failure class** | `LUME_CAPTURE_V2` and `LUME_NEW_PROJECT_V2` keep legacy OpenAI/local paths alongside observation pipelines. Permanent dual engines would reintroduce matching/heuristic drift. |
+| **Evidence / repro** | Unset flags → `/api/capture` uses findings + `tidyAndCoachWithOpenAI` / local regex; flags `=1` + OpenAI → `src/lib/capture-v2` / `src/lib/new-project-v2`. Phase 3B apply is shared. |
+| **Likely files** | `src/app/api/capture/route.ts`; `src/app/api/new-project/route.ts`; `src/lib/capture-v2`; `src/lib/new-project-v2`; `docs/EXPERIMENTAL_PROGRAMME.md` |
+| **Proposed fix direction** | After independent review: either default V2 and delete the OpenAI findings path, or disable V2. Keep Phase 3B. Local/no-OpenAI Capture remains legacy (V2 does not add regex). |
+| **Explicit non-goals** | A second NLP/matching engine; weakening 3A/3B |
+| **Regression test to add** | `verify-capture-v2`; `verify-new-project-v2`; phase 3B suite still green |
+| **Target resolution / validation point** | Experimental Programme merge decision |
+| **Related docs** | `docs/EXPERIMENTAL_PROGRAMME.md`; D-011; D-R13 |
+| **Notes** | Desert is not flagged. Ocean remains the default appearance. |
 
 ---
 

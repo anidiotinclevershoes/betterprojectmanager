@@ -153,15 +153,22 @@ function testAnalyseDoesNotWriteMaintainedTruth() {
   assert.equal(result.memory.source, "capture");
 }
 
-function testDarkOnlyV1() {
+function testAppearanceThemes() {
   const header = readSrc("src/components/app-shell/TopHeader.tsx");
   const appearance = readSrc("src/lib/appearance.tsx");
   const layout = readSrc("src/app/layout.tsx");
+  const globals = readSrc("src/app/globals.css");
+  const account = readSrc("src/app/account/page.tsx");
   assert.doesNotMatch(header, /AppearanceToggle/);
-  assert.match(appearance, /V1 is dark-only|dark-only/);
-  assert.match(appearance, /forceDarkDocument|dataset\.theme = "dark"/);
+  assert.match(appearance, /LumeTheme/);
+  assert.match(appearance, /desert/);
+  assert.match(appearance, /ocean/);
   assert.match(layout, /dataset\.theme = 'dark'/);
+  assert.match(layout, /desert/);
   assert.doesNotMatch(layout, /prefers-color-scheme: light/);
+  assert.match(globals, /\[data-theme="desert"\]/);
+  assert.match(globals, /\[data-theme="dark"\]/);
+  assert.match(account, /LumeThemePicker/);
 }
 
 function testOceanSidebarContractPreserved() {
@@ -191,8 +198,8 @@ async function main() {
   console.log("✓ ✦ Analyse, typed input, Record, review boundary");
   testAnalyseDoesNotWriteMaintainedTruth();
   console.log("✓ Analyse path yields proposals only (review-before-write)");
-  testDarkOnlyV1();
-  console.log("✓ dark-only V1 — no light toggle in project chrome");
+  testAppearanceThemes();
+  console.log("✓ Ocean remains; Desert is selectable; no light toggle in project chrome");
   testOceanSidebarContractPreserved();
   console.log("✓ Slice 2A sidebar contract preserved");
   testNoSecondNavModel();
