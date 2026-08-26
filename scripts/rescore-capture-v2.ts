@@ -106,7 +106,7 @@ function main() {
       v2: row.v2,
     })),
   };
-  writeFileSync(RESCORE_PATH, `${JSON.stringify(slim, null, 2)}\n`);
+  writeFileSync(RESCORE_PATH, `${JSON.stringify(slim)}\n`);
 
   const out = arg("out");
   if (out) {
