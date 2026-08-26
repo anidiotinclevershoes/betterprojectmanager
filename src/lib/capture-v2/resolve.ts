@@ -6,8 +6,18 @@ import {
 } from "@/lib/capture/apply";
 import { fingerprintExpectedTarget } from "@/lib/capture/apply/expected-target";
 import type { PendingSuggestion, SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
-import { namesMatchExact } from "@/lib/people/identity";
+import {
+  namesMatchExact,
+  peopleEvidencedByRecordedNameInText,
+  recordedPersonNameAppearsInText,
+} from "@/lib/people/identity";
 import type { CaptureObservationV2, ObservationDomain } from "./types";
+
+const PERSON_LINKED_DOMAINS = new Set<ObservationDomain>([
+  "person",
+  "availability",
+  "responsibility",
+]);
 
 export type ResolvedObservation = {
   observation: CaptureObservationV2;
@@ -147,7 +157,12 @@ function resolveOne(
     };
   }
 
-  const identityGate = personCreateIdentityGate(observation, args.world, projectId);
+  const identityGate = personLinkedIdentityGate(
+    observation,
+    args.world,
+    projectId,
+    args.transcript,
+  );
   if (identityGate) {
     return { observation, suggestion: null, decision: identityGate };
   }
@@ -255,48 +270,116 @@ function asString(value: unknown): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+function identityEvidenceText(
+  observation: CaptureObservationV2,
+  transcript: string,
+): string {
+  // Capture text the user supplied, plus the observation's verbatim evidence
+  // quote. The model statement is not identity proof — it can echo a UUID's
+  // recorded name that the transcript never established.
+  return [transcript, observation.evidence]
+    .filter((part) => typeof part === "string" && part.trim())
+    .join("\n");
+}
+
+function uncertainPersonIdentity(
+  domain: CaptureLegalDomain,
+  reason: string,
+): CaptureApplyDecision {
+  return { kind: "needs_you", domain, reason };
+}
+
 /**
- * Uses Lume's existing exact-name identity authority (`namesMatchExact`).
- * Incomplete single-token names in a populated project fail closed to Needs you.
+ * Person-linked identity certainty.
+ *
+ * A model-supplied Person UUID is evidence of model intent, not proof of
+ * identity. Binding requires the Capture text to contain the recorded full
+ * name (existing exact-name authority). Incomplete / competing references
+ * are Needs you. Not a first-name heuristic. Not a second identity engine.
  */
-function personCreateIdentityGate(
+function personLinkedIdentityGate(
   observation: CaptureObservationV2,
   world: CaptureApplyWorld,
   projectId: string | null,
+  transcript: string,
 ): CaptureApplyDecision | null {
-  if (observation.domain !== "person" || observation.disposition !== "create_new") {
+  if (!PERSON_LINKED_DOMAINS.has(observation.domain)) {
     return null;
   }
-  const name =
-    asString(observation.proposedValues?.name) ||
-    observation.candidateTargetTitle?.trim() ||
-    "";
-  if (!name) {
-    return {
-      kind: "needs_you",
-      domain: "person",
-      reason: "A new person needs a name before Lume will write a stakeholder.",
-    };
-  }
+
+  const legal = DOMAIN_TO_LEGAL[observation.domain];
   const project = projectId
     ? world.projects.find((p) => p.id === projectId)
     : undefined;
   const people = project?.stakeholders ?? [];
-  if (people.some((p) => namesMatchExact(p.name, name))) {
-    return {
-      kind: "no_change",
-      domain: "person",
-      reason: `${name} is already on this project.`,
-    };
-  }
-  const tokens = name.split(/\s+/).filter(Boolean);
-  if (tokens.length < 2 && people.length > 0) {
-    return {
-      kind: "needs_you",
-      domain: "person",
-      reason:
+  const text = identityEvidenceText(observation, transcript);
+  const uncertain = (reason: string) => uncertainPersonIdentity(legal, reason);
+
+  if (observation.domain === "person" && observation.disposition === "create_new") {
+    const name =
+      asString(observation.proposedValues?.name) ||
+      observation.candidateTargetTitle?.trim() ||
+      "";
+    if (!name) {
+      return uncertain(
+        "A new person needs a name before Lume will write a stakeholder.",
+      );
+    }
+    if (people.some((p) => namesMatchExact(p.name, name))) {
+      return {
+        kind: "no_change",
+        domain: "person",
+        reason: `${name} is already on this project.`,
+      };
+    }
+    const tokens = name.split(/\s+/).filter(Boolean);
+    if (tokens.length < 2 && people.length > 0) {
+      return uncertain(
         "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder.",
-    };
+      );
+    }
+    if (tokens.length >= 2 && !recordedPersonNameAppearsInText(text, name)) {
+      return uncertain(
+        "This Person identity is not established in the Capture, so Lume will not create a stakeholder.",
+      );
+    }
+    return null;
   }
-  return null;
+
+  const evidenced = peopleEvidencedByRecordedNameInText(people, text);
+  const candidateId = observation.candidateTargetId?.trim() || "";
+
+  if (candidateId) {
+    const byId = people.find((p) => p.id === candidateId);
+    if (!byId) {
+      return uncertain(
+        "This person is not on this project. Lume will not write.",
+      );
+    }
+    const sameName = people.filter((p) => namesMatchExact(p.name, byId.name));
+    if (sameName.length > 1) {
+      return uncertain(
+        "More than one existing person matches this Capture. Choose who it refers to.",
+      );
+    }
+    if (!recordedPersonNameAppearsInText(text, byId.name)) {
+      return uncertain(
+        "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      );
+    }
+    return null;
+  }
+
+  if (evidenced.length > 1) {
+    return uncertain(
+      "More than one existing person matches this Capture. Choose who it refers to.",
+    );
+  }
+  if (evidenced.length === 1) {
+    return null;
+  }
+
+  return uncertain(
+    "This Person identity is not established in the Capture. A supplied record id is not enough.",
+  );
 }

@@ -19,6 +19,7 @@ import {
   experimentalApplyWorld,
 } from "../src/lib/experiments/worlds";
 import type { CaptureObservationV2 } from "../src/lib/capture-v2/types";
+import type { CaptureApplyWorld } from "../src/lib/capture/apply";
 
 const PARAMS = { numRuns: 40 };
 
@@ -306,6 +307,85 @@ function main() {
     const writes = resolved.filter((row) => row.decision.kind === "write");
     assert.equal(writes.length, 1);
     assert.equal(resolved[1]?.decision.kind, "no_change");
+  });
+
+  check("a valid Person UUID never raises incomplete textual identity to Apply Ready", () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom("Jordan", "Riley", "Casey", "Avery", "Quinn"),
+        fc.constantFrom("Hale", "Patel", "Ng", "Brooks", "Frost", "Ash"),
+        fc.constantFrom("Okada", "Singh", "Vale", "Cole", "Quinn", "Morse"),
+        fc.constantFrom("person", "availability", "responsibility"),
+        fc.integer({ min: 0, max: 2 }),
+        (first, lastA, lastB, domain, extra) => {
+          const people = [
+            { id: "p-a", name: `${first} ${lastA}`, role: "A" },
+            { id: "p-b", name: `${first} ${lastB}`, role: "B" },
+          ];
+          for (let i = 0; i < extra; i += 1) {
+            people.push({
+              id: `p-x${i}`,
+              name: `Morgan Extra${i}`,
+              role: "X",
+            });
+          }
+          const baseWorld = experimentalApplyWorld();
+          const world: CaptureApplyWorld = {
+            ...baseWorld,
+            projects: baseWorld.projects.map((p) =>
+              p.id === CANDYLAND_ID ? { ...p, stakeholders: people } : p,
+            ),
+          };
+          const transcript = `${first} from dispatch called.`;
+          const proposed =
+            domain === "availability"
+              ? { awayFromIso: "2026-10-06" }
+              : domain === "responsibility"
+                ? {
+                    personName: people[0]!.name,
+                    scope: "dispatch",
+                    ownershipSemantics: "share",
+                  }
+                : { name: people[0]!.name };
+          const base = {
+            id: "obs-id-cert",
+            statement: transcript,
+            evidence: transcript,
+            domain,
+            disposition: "update_existing" as const,
+            projectId: CANDYLAND_ID,
+            candidateTargetTitle: people[0]!.name,
+            proposedValues: proposed,
+            commentary: null,
+            modelConfidence: null,
+          };
+          const without = resolveObservations({
+            observations: [{ ...base, candidateTargetId: null }],
+            world,
+            transcript,
+            captureEntryProjectId: CANDYLAND_ID,
+          });
+          const withA = resolveObservations({
+            observations: [{ ...base, candidateTargetId: "p-a" }],
+            world,
+            transcript,
+            captureEntryProjectId: CANDYLAND_ID,
+          });
+          const withB = resolveObservations({
+            observations: [{ ...base, candidateTargetId: "p-b" }],
+            world,
+            transcript,
+            captureEntryProjectId: CANDYLAND_ID,
+          });
+          assert.notEqual(without[0]?.decision.kind, "write");
+          assert.notEqual(withA[0]?.decision.kind, "write");
+          assert.notEqual(withB[0]?.decision.kind, "write");
+          assert.equal(withA[0]?.decision.kind, without[0]?.decision.kind);
+          assert.equal(withB[0]?.decision.kind, without[0]?.decision.kind);
+        },
+      ),
+      PARAMS,
+    );
   });
 
   check("malformed envelopes fail closed", () => {

@@ -1422,6 +1422,59 @@ await check("Person availability through the production pipeline still writes Aw
   assert.equal(writes[0]?.type, "write_availability");
 });
 
+await check("Person UUID alone does not establish identity on incomplete evidence", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "uuid-not-identity",
+      kind: "availability",
+      op: "create",
+      content: "Pippa from the gate crew is away next week",
+      projectId: "proj-candy",
+      personId: "person-gumdrop",
+      personName: "Pippa Gumdrop",
+      proposedValues: {
+        awayFromIso: "2026-10-03T12:00:00.000Z",
+        awayToIso: "2026-10-03T12:00:00.000Z",
+      },
+    }),
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("wrong Person UUID cannot write when another recorded name is evidenced", async () => {
+  const shared = world({
+    projects: [
+      {
+        id: "proj-candy",
+        name: "Candyland",
+        stakeholders: [
+          { id: "person-gumdrop", name: "Pippa Gumdrop", role: "UAT lead" },
+          { id: "person-fizz", name: "Fizz Caramel", role: "Designer" },
+        ],
+      },
+    ],
+  });
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "wrong-uuid",
+      kind: "availability",
+      op: "create",
+      content: "Pippa Gumdrop is away 2026-10-03",
+      projectId: "proj-candy",
+      personId: "person-fizz",
+      personName: "Fizz Caramel",
+      proposedValues: {
+        awayFromIso: "2026-10-03T12:00:00.000Z",
+        awayToIso: "2026-10-03T12:00:00.000Z",
+      },
+    }),
+    { world: shared },
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
 console.log(`\nverify-phase3b-capture-boundary: ${passed} passed`);
 }
 

@@ -5,7 +5,11 @@
  * combinations fail closed (Needs you). There is no Todo fallback.
  */
 
-import { namesMatchExact } from "@/lib/people/identity";
+import {
+  namesMatchExact,
+  peopleEvidencedByRecordedNameInText,
+  recordedPersonNameAppearsInText,
+} from "@/lib/people/identity";
 import type { PendingSuggestion } from "@/lib/capture/suggestions";
 import { classifyCaptureLegalDomain } from "./classify";
 import { resolveCaptureProjectScope } from "./project-scope";
@@ -329,32 +333,65 @@ function resolvePerson(
   if (!project) return { status: "missing_project" as const };
   const personId = item.personId?.trim() || targetId(item);
   const named = item.personName?.trim();
+  const evidenced = peopleEvidencedByRecordedNameInText(
+    project.stakeholders,
+    text,
+  );
+
   if (personId) {
     const byId = project.stakeholders.find((s) => s.id === personId);
-    if (byId) return { status: "known" as const, person: byId };
-    return { status: "unknown" as const };
-  }
-  if (named) {
-    const byName = project.stakeholders.find((s) => namesMatchExact(s.name, named));
-    if (byName) return { status: "known" as const, person: byName };
-    return { status: "new_named" as const, name: named, personId };
+    if (!byId) return { status: "unknown" as const };
+    if (named) {
+      const namedMatchesOther = project.stakeholders.some(
+        (s) => s.id !== byId.id && namesMatchExact(s.name, named),
+      );
+      const namedTokens = named.split(/\s+/).filter(Boolean);
+      if (
+        namedMatchesOther ||
+        (namedTokens.length >= 2 && !namesMatchExact(named, byId.name))
+      ) {
+        return { status: "unknown" as const };
+      }
+    }
+    const sameName = project.stakeholders.filter((s) =>
+      namesMatchExact(s.name, byId.name),
+    );
+    if (sameName.length > 1) return { status: "ambiguous" as const };
+    if (!recordedPersonNameAppearsInText(text, byId.name)) {
+      return { status: "unknown" as const };
+    }
+    return { status: "known" as const, person: byId };
   }
 
-  const mentioned = project.stakeholders.filter((s) => {
-    const re = new RegExp(`\\b${escapeRegExp(s.name)}\\b`, "i");
-    return re.test(text);
-  });
-  if (mentioned.length === 1) {
-    return { status: "known" as const, person: mentioned[0]! };
-  }
-  if (mentioned.length > 1) {
+  if (evidenced.length > 1) {
     return { status: "ambiguous" as const };
   }
-  return { status: "unknown" as const };
-}
+  if (evidenced.length === 1) {
+    return { status: "known" as const, person: evidenced[0]! };
+  }
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (named) {
+    const byName = project.stakeholders.filter((s) =>
+      namesMatchExact(s.name, named),
+    );
+    if (byName.length > 1) return { status: "ambiguous" as const };
+    if (byName.length === 1) {
+      if (!recordedPersonNameAppearsInText(text, byName[0]!.name)) {
+        return { status: "unknown" as const };
+      }
+      return { status: "known" as const, person: byName[0]! };
+    }
+    const tokens = named.split(/\s+/).filter(Boolean);
+    if (
+      tokens.length >= 2 &&
+      recordedPersonNameAppearsInText(text, named)
+    ) {
+      return { status: "new_named" as const, name: named, personId };
+    }
+    return { status: "unknown" as const };
+  }
+
+  return { status: "unknown" as const };
 }
 
 function planPerson(
@@ -471,7 +508,7 @@ function planResponsibility(
   }
 
   const claimedId = item.personId?.trim() || targetId(item);
-  const person = resolvePerson(projectId, world, item, personName);
+  const person = resolvePerson(projectId, world, item, text);
   const personId = person.status === "known" ? person.person.id : undefined;
   if (claimedId && person.status !== "known") {
     return needsYou(
