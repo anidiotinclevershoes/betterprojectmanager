@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Unaltered Magic Patterns dump — reference only, not app code.
+    "docs/v1-convergence-mp/mp-source/**",
   ]),
 ]);
 

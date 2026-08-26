@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "scripts"]
+  "exclude": ["node_modules", "scripts", "docs/v1-convergence-mp/mp-source"]
 }

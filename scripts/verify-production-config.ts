@@ -314,6 +314,10 @@ check("next production build typechecks the app, not verify scripts", () => {
     (buildTsconfig.exclude ?? []).includes("scripts"),
     "tsconfig.build.json must exclude scripts so next build cannot fail on test helpers",
   );
+  assert.ok(
+    (buildTsconfig.exclude ?? []).includes("docs/v1-convergence-mp/mp-source"),
+    "tsconfig.build.json must exclude the unaltered Magic Patterns dump so next build cannot typecheck reference prototypes",
+  );
 });
 
 check("browser supabase helpers use static NEXT_PUBLIC process.env access", () => {
