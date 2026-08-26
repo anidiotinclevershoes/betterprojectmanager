@@ -206,7 +206,11 @@ export async function publishFromCli(): Promise<void> {
     github,
     summaryPath: arg("summary-out") ?? context.stepSummaryPath,
     issueOutPath: arg("issue-out"),
-    evidenceOutPath: arg("evidence-out"),
+    evidenceOutPath:
+      arg("evidence-out") ??
+      (mode === "preview"
+        ? undefined
+        : join(resultsDir, "lume-dashboard-evidence.json")),
     stateInPath: arg("state-in"),
   });
 
