@@ -7,6 +7,8 @@
  * Run: npx tsx scripts/verify-person-identity-safety.ts
  */
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   resolveObservations,
   validateObservations,
@@ -441,6 +443,59 @@ function main() {
     assert.equal(evaluated.lumeSafety.totals.applyReady, 0);
     assert.equal(evaluated.pipeline.resolved[0]?.decision.kind, "needs_you");
     assert.equal(evaluated.pipeline.resolved[0]?.suggestion, null);
+  });
+
+  check("model-stuffed full name in statement cannot bind incomplete transcript", () => {
+    const transcript = "Jordan from the loading bay called.";
+    const { row } = resolveObs(haleWorld(), transcript, {
+      domain: "person",
+      disposition: "update_existing",
+      statement: "Jordan Hale from the loading bay called.",
+      evidence: transcript,
+      candidateTargetId: HALE,
+      candidateTargetTitle: "Jordan Hale",
+    });
+    assertNeedsYou(row, "stuffed statement is not identity proof");
+  });
+
+  check("every archived incomplete-Person live envelope is Needs you under current production", () => {
+    const archive = JSON.parse(
+      readFileSync(
+        join(
+          process.cwd(),
+          "src/lib/eval-capture-v2/archive/first-live-benchmark-envelopes-v1.json",
+        ),
+        "utf8",
+      ),
+    ) as {
+      envelopes: Array<{
+        caseId: string;
+        error: string | null;
+        rawJson: unknown;
+      }>;
+    };
+    const testCase = CAPTURE_V2_EVAL_CORPUS.find(
+      (c) => c.id === "ambiguous-same-first-name",
+    );
+    assert.ok(testCase);
+    const hits = archive.envelopes.filter(
+      (e) => e.caseId === "ambiguous-same-first-name" && !e.error,
+    );
+    assert.ok(hits.length > 0);
+    for (const env of hits) {
+      const evaluated = evaluateAgainstCase({
+        testCase,
+        world: experimentalApplyWorld(),
+        rawModelJson: env.rawJson,
+      });
+      assert.equal(evaluated.lumeSafety.totals.applyReady, 0);
+      assert.equal(evaluated.lumeSafety.totals.lumeFailures, 0);
+      assert.ok(
+        evaluated.pipeline.resolved.every(
+          (row) => row.decision.kind !== "write" && row.suggestion === null,
+        ),
+      );
+    }
   });
 
   check("UUID cannot raise certainty vs the same incomplete evidence without an id", () => {

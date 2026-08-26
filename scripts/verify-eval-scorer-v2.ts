@@ -182,11 +182,11 @@ async function main() {
     assert.equal(classOf(evaluated, "obs-away"), "correct_write");
   });
 
-  await check("B. actual unintended Person creation is a Lume failure", () => {
+  await check("B. invented Person name absent from Capture text is Needs you, not a write", () => {
     const testCase = baseCase({
       id: "generic-unintended-person-create",
       transcript: "Keep the current team. No new people.",
-      expectedNoChange: true,
+      expectedNeedsYou: true,
       material: [],
       allowedDomains: ["commentary", "person"],
       prohibitedWrites: [
@@ -204,9 +204,11 @@ async function main() {
         candidateTargetTitle: "Morgan Quinn",
       }),
     ]);
-    assert.ok(writeTypes(evaluated).includes("ensure_person"));
-    assert.ok(evaluated.lumeSafety.totals.lumeFailures >= 1);
-    assert.equal(classOf(evaluated, "obs-new-person"), "lume_failure");
+    assert.equal(evaluated.lumeSafety.totals.applyReady, 0);
+    assert.ok(!writeTypes(evaluated).includes("ensure_person"));
+    assert.equal(evaluated.lumeSafety.totals.lumeFailures, 0);
+    assert.equal(classOf(evaluated, "obs-new-person"), "correct_needs_you");
+    assert.equal(evaluated.pipeline.resolved[0]?.decision.kind, "needs_you");
   });
 
   await check("C. legitimate new Risk beside existing-target sibling is not unresolved-target failure", () => {

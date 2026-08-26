@@ -274,7 +274,10 @@ function identityEvidenceText(
   observation: CaptureObservationV2,
   transcript: string,
 ): string {
-  return [transcript, observation.statement, observation.evidence]
+  // Capture text the user supplied, plus the observation's verbatim evidence
+  // quote. The model statement is not identity proof — it can echo a UUID's
+  // recorded name that the transcript never established.
+  return [transcript, observation.evidence]
     .filter((part) => typeof part === "string" && part.trim())
     .join("\n");
 }
