@@ -2,9 +2,11 @@
 
 **Status:** Experimental (25 August 2026)  
 **Branch:** `cursor/capture-v2-desert-new-project-56c9`  
-**Does not replace:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` as the current-implementation map.
+**Does not replace:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` as the current-implementation map (Part C of that file is the 26 Aug V1 convergence *target* delta).
 
 This file records the three independent workstreams from the Experimental Programme. Treat items marked **experimental** as flagged or newly added; do not describe them as the only production path until a workstream is **accepted**.
+
+**V1 convergence binding (docs only, 26 Aug 2026):** Capture V2 is the target V1 Capture *understanding* engine; Phase 3B remains the mutation gate; delete the legacy OpenAI findings path after the required V2 gates (D-032). Do not merge this experimental PR (#66) from the architecture review.
 
 ## Capture V2 — experimental
 
