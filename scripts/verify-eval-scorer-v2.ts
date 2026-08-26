@@ -305,7 +305,7 @@ async function main() {
     assert.equal(classOf(evaluated, "obs-ms"), "correct_write");
   });
 
-  await check("E. unsafe foreign target is a Lume catch; wrong existing target is a Lume failure", () => {
+  await check("E. unsafe foreign or wrong existing Person target is a Lume catch", () => {
     const foreignCase = baseCase({
       id: "generic-foreign-target",
       transcript: "Jordan Hale is off next Thursday.",
@@ -366,11 +366,13 @@ async function main() {
         proposedValues: { awayFromIso: "2026-09-03", awayToIso: "2026-09-03" },
       }),
     ]);
-    assert.equal(classOf(wrong, "obs-wrong"), "lume_failure");
-    assert.ok(wrong.lumeSafety.totals.lumeFailures >= 1);
+    assert.equal(classOf(wrong, "obs-wrong"), "lume_catch");
+    assert.equal(wrong.lumeSafety.totals.applyReady, 0);
+    assert.equal(wrong.lumeSafety.totals.lumeFailures, 0);
+    assert.ok(wrong.lumeSafety.totals.lumeCatches >= 1);
   });
 
-  await check("F. ambiguous Person unsafe bind is a Lume failure", () => {
+  await check("F. ambiguous Person unsafe bind is Needs you, not a Lume failure", () => {
     const testCase = baseCase({
       id: "generic-incomplete-person-bind",
       transcript: "Jordan from the warehouse called; he wants to help with assembly.",
@@ -397,13 +399,11 @@ async function main() {
         candidateTargetTitle: "Jordan Hale",
       }),
     ]);
-    assert.ok(writeTypes(evaluated).includes("ensure_person"));
-    assert.equal(classOf(evaluated, "obs-bind"), "lume_failure");
-    assert.ok(
-      evaluated.lumeSafety.rows.some((row) =>
-        row.reason.includes("incomplete identity evidence"),
-      ),
-    );
+    assert.equal(evaluated.lumeSafety.totals.applyReady, 0);
+    assert.ok(!writeTypes(evaluated).includes("ensure_person"));
+    assert.equal(classOf(evaluated, "obs-bind"), "correct_needs_you");
+    assert.equal(evaluated.pipeline.resolved[0]?.decision.kind, "needs_you");
+    assert.equal(evaluated.lumeSafety.totals.lumeFailures, 0);
   });
 
   await check("G. model error blocked by Lume is a Lume catch", () => {
@@ -842,7 +842,8 @@ async function main() {
     const ambiguous = first.cases.filter(
       (row) => row.model === mini!.model && row.caseId === "ambiguous-same-first-name",
     );
-    assert.ok(ambiguous.some((row) => row.v2.lumeFailures > 0));
+    assert.ok(ambiguous.length > 0);
+    assert.ok(ambiguous.every((row) => row.v2.lumeFailures === 0));
 
     console.log(
       first.models
