@@ -156,11 +156,13 @@ Do **not** start a design-system rewrite. The CSS file is large; the cheap path 
 
 - Unmounted light/dark `AppearanceToggle`
 - `/coaching` as a place people go (and Coach auto-open)
+- Unmounted `CaptureBar` (immediate merge — do not revive) and unwired `TellMePanel`
 - Duplicate Timeline embed next to Important dates
 - Legacy Capture engine **after** you pick V2 (D-032)
-- Paste New Project card (already gone from the chooser)
+- Paste New Project card (already gone from the chooser; Talk still tags paste as `"talk"`)
 - Overview (already gone)
 - Light theme as a product offering
+- Leftover `/memory`, `/meetings`, `/releases` if they stay out of Ocean nav
 
 ## 15. Recommended implementation order
 
