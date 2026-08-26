@@ -5,7 +5,7 @@
  * Run: npm run verify:ocean-capture
  */
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { pendingReadyModels } from "../src/lib/capture/review/counts";
 import { buildReviewChangeViewModels } from "../src/lib/capture/review/viewModel";
@@ -191,6 +191,23 @@ function testNoSecondNavModel() {
   assert.match(workspace, /ProjectModeSelector/);
 }
 
+function testImmediateMergeCapturePathDeleted() {
+  const store = readSrc("src/lib/store.tsx");
+  assert.doesNotMatch(store, /function mergeCapture/);
+  assert.doesNotMatch(store, /captureWithAI/);
+  assert.doesNotMatch(store, /applyCaptureResult/);
+  assert.doesNotMatch(store, /const capture = useCallback/);
+  assert.match(store, /analyzeCaptureWithAI/);
+  const session = readSrc("src/components/capture/CaptureSessionContext.tsx");
+  assert.match(session, /applyOne/);
+  assert.match(session, /planCaptureApply/);
+  assert.equal(existsSync(join(ROOT, "src/components/CaptureBar.tsx")), false);
+  assert.equal(
+    existsSync(join(ROOT, "src/components/RecommendationItem.tsx")),
+    false,
+  );
+}
+
 async function main() {
   testCaptureModeInOceanWorkspace();
   console.log("✓ Capture selectable in Ocean mode selector + embedded");
@@ -204,6 +221,8 @@ async function main() {
   console.log("✓ Slice 2A sidebar contract preserved");
   testNoSecondNavModel();
   console.log("✓ Capture↔KC remains mode switch, not second nav");
+  testImmediateMergeCapturePathDeleted();
+  console.log("✓ Immediate-merge CaptureBar / captureWithAI / applyCaptureResult deleted");
   console.log("verify-ocean-capture: OK");
 }
 

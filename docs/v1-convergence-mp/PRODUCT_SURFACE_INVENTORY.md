@@ -64,7 +64,7 @@ Item detail: body, previous value, provenance (“Why Lume believes this”), Ne
 
 Review cards: `CompactChangeCard` with Current vs Suggested, create/remove layouts, Why panel (progressive disclosure). Entity kinds include action, milestone, decision, risk, stakeholder, availability, knowledge, nudge, meeting, memory.
 
-**Orphan Capture UX:** `CaptureBar` still calls immediate-merge `captureWithAI` but is **unmounted**. Ocean path is analyse → review → `applyOne`. Do not revive `CaptureBar`.
+**Orphan Capture UX:** Immediate-merge `CaptureBar` / `captureWithAI` were **deleted in Slice 1A**. Ocean path remains analyse → review → `applyOne`.
 
 Flag: `LUME_CAPTURE_V2` (unset = legacy findings path). **Same Review chrome** for both; V2 adds the compact account line.
 
@@ -98,7 +98,7 @@ Flag: `LUME_NEW_PROJECT_V2`.
 
 | Component / route | Status |
 | --- | --- |
-| `CaptureBar` | Unmounted; immediate-merge path — do not revive |
+| `CaptureBar` | **Deleted** Slice 1A (was unmounted immediate-merge) |
 | `TellMePanel` | Unwired; Ask lives in `KnowledgeSearchAskBar` |
 | `HeaderCoachButton` | Not mounted |
 | `ProjectWidgetGrid`, `ProjectKnowledgeBrief`, `WorkspaceGrid` | Old dashboard; unwired |

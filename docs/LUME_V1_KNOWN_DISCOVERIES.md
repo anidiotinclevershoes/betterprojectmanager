@@ -522,7 +522,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | `verify-capture-v2`; `verify-new-project-v2`; phase 3B suite still green |
 | **Target resolution / validation point** | Close to V2 default-on (not a terminal cleanup PR) |
 | **Related docs** | `docs/EXPERIMENTAL_PROGRAMME.md`; D-011; D-R13; handoff Part C §C8 |
-| **Notes** | Desert is not flagged. Ocean remains the default appearance. Immediate-merge `captureWithAI` / unmounted `CaptureBar` can be deleted earlier — they are already off the Ocean path. |
+| **Notes** | Desert is not flagged. Ocean remains the default appearance. Immediate-merge `captureWithAI` / unmounted `CaptureBar` were **deleted in Slice 1A**. D-032 remaining scope is the live legacy `/api/capture` findings path vs V2. |
 
 ---
 
@@ -761,7 +761,7 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 1. ~~**D-006**~~ — fixed in Phase 3A (D-R11)  
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
 3. ~~**D-019**~~ — fixed in Slice 2D (D-R10)  
-4. **Dead Capture merge path** — unmounted `CaptureBar` / `captureWithAI` / `applyCaptureResult` (shortens dual-path table immediately)  
+4. ~~**Dead Capture merge path**~~ — unmounted `CaptureBar` / `captureWithAI` / `applyCaptureResult` **deleted in Slice 1A**  
 5. **D-033** — Tell Me server-load of canonical truth (then Capture)  
 6. **D-010** — canonical production default after eval evidence  
 7. **D-032** — default Capture V2 / New Project V2 then delete legacy OpenAI understanding paths (after Test workstream gates)  

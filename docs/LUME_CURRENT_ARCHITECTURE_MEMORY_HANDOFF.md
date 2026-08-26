@@ -252,7 +252,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 
 **INTENT / locked rule:** nothing extracted from Capture becomes maintained project truth **before final human review/approval**.
 
-**DECIDED V1 TARGET engine:** Capture V2 (`src/lib/capture-v2`, flag `LUME_CAPTURE_V2`) is the V1 Capture understanding path. **CURRENT:** flag unset = legacy OpenAI findings path (**TRANSITIONAL / FLAGGED**). Phase 3B `planCaptureApply` / `executeCaptureApply` remains the **only** Capture mutation safety gate. The V2 “world” / ID catalogue is a *derived projection of the same durable authorities*, not a second current-truth snapshot. Do not keep two OpenAI Capture engines permanently (**D-032**). Legacy understanding path is **DEPRECATED / SCHEDULED FOR DELETION** after the required V2 gates. Immediate-merge `captureWithAI` is **DEPRECATED / SCHEDULED FOR DELETION** on the next implementation slice.
+**DECIDED V1 TARGET engine:** Capture V2 (`src/lib/capture-v2`, flag `LUME_CAPTURE_V2`) is the V1 Capture understanding path. **CURRENT:** flag unset = legacy OpenAI findings path (**TRANSITIONAL / FLAGGED**). Phase 3B `planCaptureApply` / `executeCaptureApply` remains the **only** Capture mutation safety gate. The V2 “world” / ID catalogue is a *derived projection of the same durable authorities*, not a second current-truth snapshot. Do not keep two OpenAI Capture engines permanently (**D-032**). Immediate-merge `capture()` / `captureWithAI` / `applyCaptureResult` / `CaptureBar` are **DELETED** (Slice 1A). The live legacy *understanding* path (`/api/capture` findings) remains until V2 gates.
 
 **CURRENT primary Ocean flow:**
 
@@ -263,7 +263,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 
 **`applyOne` legal domains (post-approval):** Todo authority; Risk authority; milestone/date authority (update yes, complete → Needs you / D-029); Person via `ensurePersonOnProject`; responsibility via Confirm Owner / share-vs-replace; structured availability; knowledge/memory. Unsupported/unknown → Needs you. **There is no generic Todo fallback.** Project scope uses Capture entry project only when the finding is not uncertain. A supplied durable ID that is not on the project does not fuzzy- or title-fallback onto another record.
 
-**LEGACY still in store (do not use as the Ocean path):** `capture()` local heuristic and `captureWithAI()` **merge immediately** without review. Ocean UI uses analyse + `applyOne`.
+**Ocean UI uses analyse + `applyOne` only.** Immediate-merge `capture()` / `captureWithAI` / `applyCaptureResult` / unmounted `CaptureBar` were **DELETED** in Slice 1A.
 
 **People:** Capture apply reuses existing Person UUIDs. Duplicate-stakeholder on mention is closed. Leftover Knowledge people *prose* (never a finding) may still lack a stakeholder. **GAP D-007 remainder.**
 
@@ -462,7 +462,7 @@ The **deletion-point** version of this table is Part C §H. This table remains t
 | Knowledge sections vs structured | **TRANSITIONAL** overlay | Overlay | both live | structured + sectionItemIds | string bullets | Do not wipe sections; structured + ids are authority |
 | Domain risks vs knowledge risks | **CURRENT** domain wins; leftover prose **TRANSITIONAL** | Lifecycle | domain wins | `MissionState.risks` | knowledge-only `[Resolved]` | Transitional compatibility + D-015/D-030 cleanup |
 | Stakeholders vs people prose | **CURRENT** stakeholders; workspace Person = **DECIDED V1 TARGET** | Identity | stakeholders | Confirm Owner / bundle | unpromoted Capture bullets | Capture hardening (D-007); later workspace Person slice. Name is not identity |
-| Capture analyse+applyOne vs captureWithAI | **CURRENT** Ocean = analyse+applyOne. Immediate merge **DEPRECATED / SCHEDULED FOR DELETION** | Trust boundary | Ocean uses review | `applyOne` | immediate `mergeCapture` still in store | **Earliest deletion:** unmounted `CaptureBar` + `capture()` / `captureWithAI` / `applyCaptureResult` |
+| Capture analyse+applyOne vs captureWithAI | **DELETED** (Slice 1A). **CURRENT** Ocean = analyse+applyOne | Trust boundary | Ocean uses review | `applyOne` | — | Immediate-merge path removed; do not revive |
 | Client session lists vs `capture_sessions` | **TRANSITIONAL** | Session history | client-primary | table write on apply | localStorage lists | Capture hardening (D-013) / Phase 3D |
 | Coach drawer vs parked Advise | **CURRENT** Coach in AppShell. **DECIDED V1 TARGET** hide/retire Coach; Advise stays parked | Advisory UI | Coach still in AppShell | Product: Advise parked; Coaching out of V1 | `/api/coach` + `buildCoachContext` | Hide/retire Coach as a V1 product surface; do not invest in a third truth assembler |
 
@@ -560,7 +560,7 @@ Verified against current product/code:
 4. History is **not** current truth and is **not** complete after reload.
 5. Missing retrieval does **not** prove a fact is unknown (do not invent Needs you from absence).
 6. Resolved Risks must **not** be resurrected from Knowledge prose or `[Resolved]` folding.
-7. Capture analysis does **not** write before review on the Ocean path (`analyzeCaptureWithAI`); do not revive immediate `captureWithAI` as the product path.
+7. Capture analysis does **not** write before review on the Ocean path (`analyzeCaptureWithAI`). Immediate-merge `captureWithAI` was deleted in Slice 1A.
 8. Stable item identity must **not** rely on list position.
 9. Knowledge Centre frames do **not** own the truth they display.
 10. People identity is **currently** project-scoped `stakeholders`, not global contacts; do not fuzzy-merge similar names. **DECIDED V1 TARGET** is workspace-scoped Person + project participation (Part C §C7) — that is not a licence to introduce an Entity-Everything table. **A name is not identity**; do not add a unique-name constraint.
@@ -858,7 +858,7 @@ Use the legend in the file header. This table is the ambiguity-remover for the d
 | --- | --- | --- | --- | --- | --- |
 | Capture V2 | Flag unset = **off**; library present | **The** V1 Capture understanding engine + Phase 3B apply | `LUME_CAPTURE_V2=1` coexistence | — | — |
 | Legacy Capture understanding (OpenAI findings / local regex extract) | **Default** `/api/capture` path when flag unset | Not the V1 engine | Coexists until V2 default-on | **After required V2 gates** (git rollback) | — |
-| Immediate-merge `capture()` / `captureWithAI` / `CaptureBar` | Code still in `store.tsx`; `CaptureBar` unmounted | Ocean analyse + `applyOne` | — | **Next implementation slice** | — |
+| Immediate-merge `capture()` / `captureWithAI` / `CaptureBar` | **DELETED** (Slice 1A) | Ocean analyse + `applyOne` | — | Removed | — |
 | Canonical truth (`serializeCanonicalTruth`) | Assembler exists; production flag **off** | **The** current-truth recall projection | `LUME_CANONICAL_TRUTH` dual Ask | Legacy Ask branch after default-on + one-release rollback | Production default-on **timing** waits on eval/Test workstream |
 | Person identity | Project-scoped `stakeholders` UUID | Workspace `people` + project participation. **Stable IDs own identity. A name is not identity.** Same-name people must remain representable. Name-only resolution if ambiguous → Needs you. No unique-name DB constraint. No fuzzy/global merge of existing rows | Exact-name match as conservative temporary resolver | — | When to ship the `people` table (not first slice) |
 | Playwright / property testing | `verify-*` + frozen Playwright Capture V2 journeys + narrow fast-check invariants | Tests must protect behaviour **before** risky structural deletion | — | — | — |
@@ -1135,7 +1135,6 @@ stakeholders  → participation row
 
 | Dual path | Survive | Evidence before deletion | Earliest safe deletion |
 | --- | --- | --- | --- |
-| Immediate `capture()` / `captureWithAI` / `applyCaptureResult` / unmounted `CaptureBar` | Ocean analyse + `applyOne` | Grep shows `CaptureBar` has **no importers**; trust-boundary suite green | **Next implementation slice** (dead path) |
 | `LUME_CAPTURE_V2` vs OpenAI findings | **V2 + Phase 3B** | Test workstream server-backed/manual/automated V2 gates; `verify-capture-v2` + `phase3b-capture-boundary`; D-014 remainder acknowledged | **Close to V2 default-on** — delete legacy understanding path; git is rollback. Local/no-OpenAI stays a fallback, not a second extractor |
 | `LUME_NEW_PROJECT_V2` vs Talk assemble | **V2 categorisation + existing persist** | Gate B / `verify-new-project-v2`; approval cannot be skipped | After V2 default-on |
 | `LUME_CANONICAL_TRUTH` vs `buildCaptureContext` Ask | **`serializeCanonicalTruth`** | Eval + Ask smoke; D-010 closed on default path; keep env `0` one release | After default-on + rollback tested, delete legacy Ask branch |
@@ -1156,7 +1155,7 @@ stakeholders  → participation row
 
 | Keep as client state/view | Move behind server over time | Delete when superseded |
 | --- | --- | --- |
-| `MissionProvider`, hydrate, paint cache, `saveStatus`, in-flight create/delete guards, OpenAI probe | Mutation orchestration that still `createBrowserSupabaseClient()` after optimistic `setState` — follow `createProject` / `deleteProject` | `capture`, `captureWithAI`, `applyCaptureResult`, `mergeCapture`, `CaptureBar` |
+| `MissionProvider`, hydrate, paint cache, `saveStatus`, in-flight create/delete guards, OpenAI probe | Mutation orchestration that still `createBrowserSupabaseClient()` after optimistic `setState` — follow `createProject` / `deleteProject` | Immediate-merge `capture` / `captureWithAI` / `applyCaptureResult` / `mergeCapture` / `CaptureBar` — **DELETED** Slice 1A |
 
 After those deletions, optional file split (`store-hydration`, persist-meta) is cosmetic. Prefer **deleting responsibilities** over introducing Redux/Zustand.
 
@@ -1206,7 +1205,7 @@ No Magic Patterns artefacts were found locally. The sibling MP agent owns UX. Do
 
 Recommended order after this authority is reviewed:
 
-1. **Dead-path deletion:** `CaptureBar` / immediate merge APIs (shortens §19 immediately).
+1. ~~**Dead-path deletion:** `CaptureBar` / immediate merge APIs~~ — **done Slice 1A**.
 2. **Tests (sibling workstream):** lock `serializeCanonicalTruth`, Phase 3B apply, waiting concatenation, V2 gates **before** structural deletion of live dual engines.
 3. **Tell Me server-load** + keep canonical assembler; then default-on when eval evidence exists.
 4. **Capture server-load** of the same world; V2 default-on; **then** delete legacy OpenAI findings path.
