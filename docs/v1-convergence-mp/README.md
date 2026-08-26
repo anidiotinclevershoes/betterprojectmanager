@@ -9,6 +9,7 @@
 - [Frozen base](./FROZEN_BASE.md)
 - [MP retrieval](./MP_RETRIEVAL.md)
 - [Unaltered v8 source](./mp-source/PROVENANCE.md)
+- [Spiderman amendment — V1 product decisions](./SPIDERMAN_AMENDMENT.md)
 - [Product surface inventory](./PRODUCT_SURFACE_INVENTORY.md)
 - [Design ↔ product mapping](./DESIGN_PRODUCT_MAPPING.md)
 - [UX findings](./UX_FINDINGS.md)
@@ -17,7 +18,7 @@
 
 # PLAIN-ENGLISH CHECKPOINT — FOR THE PRODUCT OWNER
 
-This branch does **not** restyle Lume. It records the live Magic Patterns file you pointed us at, what the shipping V2 product already does, and where those two disagree with the architecture you already chose.
+This branch does **not** restyle Lume. It records the live Magic Patterns file, what the shipping V2 product already does, and the **V1 product decisions** recorded in the [Spiderman amendment](./SPIDERMAN_AMENDMENT.md).
 
 Live design (read-only, unaltered dump in git):  
 https://www.magicpatterns.com/c/gekwmrddrt3hkx7f1c9gm8/screens  
@@ -29,16 +30,16 @@ This file is **Knowledge Centre + compact inspector only.** It does not draw Cap
 **Live Magic Patterns:** yes.
 
 - Editor `gekwmrddrt3hkx7f1c9gm8`, artifact `30fc8231-32b7-475b-bf5f-d8f6d44c8841`, generating false.
-- 21 prototype files exported unaltered to `docs/v1-convergence-mp/mp-source/`.
+- 21 prototype files exported unaltered to `docs/v1-convergence-mp/mp-source/`. **The dump was not modified by the Spiderman amendment.**
 - Nine canvas screens (resting KC, risk compact, risk more-details, person, connected area, connected decision, to-do, milestone, Needs you).
-- Hosted Screenshots were **not** captured (Magic Patterns login). Source + canvas manifest are the reviewable copy.
+- Hosted screenshots were **not** captured (Magic Patterns login). Source + canvas manifest are the reviewable copy.
 
 **Still in git as Ocean visual constitution (parent, not replaced):**
 
 - `docs/v1-reference-pack/LUME_V1_UI_BASELINE_OCEAN.png` (19 Aug 2026)
 - `LUME_V1_UI_BASELINE_OCEAN.md` + product philosophy
 
-v2 of the live file (“Evolve KC”) is **not** treated as approved.
+v2 of the live file (“Evolve KC”) is **not** treated as approved. Ocean-only wording in that baseline is **superseded for V1 themes** by the Spiderman Desert decision.
 
 ## 2. Which version/design was treated as latest
 
@@ -46,9 +47,9 @@ v2 of the live file (“Evolve KC”) is **not** treated as approved.
 
 Governing earlier prompt in the same file: **v6 Compact Object Inspector** (Ocean locked; inspector is an overlay ~26rem that does not reflow the KC).
 
-v8 is the latest **user surgical pass**: To Do + Risks & blockers as the top operational row; Current Position below; full-width mode bar; directional relationship language; no SOURCE on ordinary Known.
+**V1 target (Spiderman):** To Dos + Risks at the top; Current Position below. Full-width mode bar; directional relationship language; no SOURCE on ordinary Known.
 
-Desert, Capture V2 observation accounting, and New Project categorisation **are not in this MP file**. They exist in the frozen V2 product.
+Desert, Capture V2 observation accounting, and New Project categorisation **are not in this MP file**. They exist in the frozen V2 product. Desert is a decided additive theme; NP Talk is the decided first-run route.
 
 ## 3. What was inspected in the existing product
 
@@ -62,13 +63,13 @@ PR **#64 is in ancestry** but not merged to `main`. This PR does not merge #64 o
 
 These are already largely **in the product**. Do not casually replace them.
 
-- Selected-project shell: Capture / Knowledge Centre / Advise Coming soon as **modes**, not sidebar apps. v8 restores the **full-width** mode bar (inspector must not narrow it).
+- Selected-project shell: Capture / Knowledge Centre / Advise Coming soon as **modes**, not sidebar apps. v8 restores the **full-width** mode bar (inspector must not narrow it). Advise stays parked.
 - Sidebar: projects, + New Project, Master To Do, History, Captures, Account/Help — no Overview.
-- Knowledge Centre frames (same ten names): Current position, Risks, To Do, People, Dependencies, Decisions, Important dates, Waiting, Meeting Prep, Timeline.
+- Knowledge Centre frames (same ten names). **V1 scan order** is To Do + Risks first; Current position below. Shipping product still leads with Current position until a later implementation PR.
 - Search Knowledge vs ✦ Ask Lume.
 - Selectable cards + richer detail (product already has a drawer; MP specifies overlay behaviour).
 - `@person` / scoped responsibility language (Owns, Responsible for, Away, Chairs).
-- Ocean as a full theme.
+- Ocean as a full theme; Desert additive on the same screens.
 - Known looks ordinary; ✦ Lume noticed / Needs you only when relevant.
 - Needs you = statement + question; no AI solution menus.
 
@@ -80,12 +81,11 @@ These are already largely **in the product**. Do not casually replace them.
 
 - Capture Review as a screen (Apply Ready, Needs you, no-change, commentary, merged, observation accounting).
 - Persist/save error, loading, honest empty states (except Dependencies empty copy).
-- New Project provisional categorisation.
-- Desert.
-- First-run onboarding as its own problem.
-- A visual distinction that **stops leftover Capture sentences competing with current Risk/date truth** (D-030 is still a product data/UX problem).
+- New Project provisional categorisation (behaviour exists; no MP drawing).
+- Desert as a canvas (product has the theme; MP is Ocean-only — **not** a reason to fork screens).
+- A visual distinction that **stops leftover Capture sentences competing with current Risk/date truth** (D-030 is still Architecture’s data problem; UX rule is decided).
 
-The gap for Capture/NP/Desert is “MP never drew them”, not “the product forgot them”.
+First-run onboarding is **decided** (New Project Talk), not missing as a product choice.
 
 ## 6. New Project V2 mapping
 
@@ -93,63 +93,55 @@ When `LUME_NEW_PROJECT_V2=1`, the product already does:
 
 talk through the mess → provisional buckets (People / Risks / Dates / Todos / Knowledge / not-project) → you correct categories → approve map → existing setup review → real project.
 
-That is the right shape. Blank New Project stays a short form.
+That is the right shape. Blank New Project stays a short form. **V1 first-run = this Talk route.** Do not add a sample project. Do not turn categorisation into a long wizard.
 
-Live MP has **no** drawing of this step — only `+ New Project` in the sidebar. Do not invent a long onboarding form and call it the MP target.
+Live MP has **no** drawing of this step — only `+ New Project` in the sidebar.
 
 ## 7. Entity / object UX findings
 
-Keep cards in frames for the list. Open a **compact overlay inspector** when someone needs relationships, evidence, history, or correction. Do not leave KC. Do not build a generic Entity app.
+Keep cards in frames for the list. Open a **compact overlay inspector** when someone needs relationships, evidence, history, or correction. Do not leave KC. Do not build a generic Entity app. Do not expose the word Entity.
 
-The prototype uses one internal `Entity` grammar, including a future **`issue`** kind. Users see Person / Risk / To do / Issue via labels. **Do not implement Issue. Do not expose the word Entity.**
-
-A future Issue should reuse: stable id, `@person` links, inspector sections (RIGHT NOW, CONNECTED TO, Why, history). It should **not** flatten People into text labels.
+The prototype uses one internal `Entity` grammar, including a future **`issue`** kind. **Do not implement Issue.** Future rich Issue-like objects remain an extension point only (stable IDs, `@person` links, inspector sections).
 
 ## 8. People / relationship implications
 
-Today: a Person is a **project** stakeholder UUID.
+**Target direction (Spiderman; not current implementation):** workspace Person identity + project participation/responsibility + stable IDs.
 
-Your architecture direction: **workspace** Person identity + **project** participation/responsibility.
+**Today in code:** a Person is a **project** stakeholder UUID. Architecture owns the schema. This workstream does not implement it.
 
-MP people (Elena, Marcus, Priya, Sarah) are **project-story demo objects**. The UI language (`Owns`, `Responsible for`, Away, Chairs, Decided by) can survive. What must **not** happen is designing People as throwaway per-project labels or hydrating those demo names into production.
-
-This is an **architecture decision**, not a skin. Flagged, not chosen.
+MP people (Elena, Marcus, Priya, Sarah) are **project-story demo objects**. UX language (`Owns`, `Responsible for`, Away, Chairs) can survive. Do not hydrate those demo names into production.
 
 ## 9. Current truth vs history UX findings
 
-Users can already be misled **in the current product** (D-030): a Risk can be resolved in the real Risks list while an old sentence still sits in Knowledge.
+**V1 UX rule (Spiderman):**
 
-Live MP helps the **inspector**: ordinary Known does not show SOURCE up front; Why / history sit behind More details. It does **not** fix leftover bullets in the frames.
+- domain frames show maintained current truth;
+- Needs you is unresolved / provisional, not saved truth;
+- superseded Capture / prose belongs in History / evidence / detail;
+- old prose must not visually compete as equivalent current truth.
 
-Recommended convention (no new state model):
+Users can already be misled **in the current product** (D-030). Live MP helps the inspector (SOURCE off ordinary Known; Why/history behind More details). Architecture still owns leftover bullets as data.
 
-- Domain frames = current truth.
-- Old Capture wording = evidence in More details / History.
-- Needs you = unresolved, not saved truth.
-- “Accept as known” in the prototype is **not** a licence to write from the KC — Phase 3B / Capture Review remain the gate.
-
-Architecture sibling should retire leftover bullets; UX should stop giving them equal visual weight.
+**“Accept as known”:** prototype wording is not a KC write licence. If the control survives, it may only resolve an already structured / provisional / Needs-you item through the safe mutation / review path. Architecture owns that path. No second KC mutation architecture.
 
 ## 10. Ocean / Desert findings
 
-Ocean stays. This MP file is Ocean-only. Desert is a second coat of paint on the **same** screens (Account → Appearance). No Desert-only layouts found.
+**V1 decided:** Ocean remains supported. Desert is additive. Same screens, components, semantic states. No theme-specific forks.
 
-The 19 Aug constitution still says “V1 is dark/Ocean only”. The Experimental Programme **accepted Desert**. That is a documentation conflict for you, not a reason to fork the UI or to invent a Desert MP canvas.
+The 19 Aug constitution “V1 is dark/Ocean only” is **superseded**. The live MP file is Ocean-only; that does not forbid Desert in product.
 
 Watch later: muted Desert text contrast, leftover light-theme CSS, unused light/dark toggle code.
 
-## 11. Onboarding decisions still required
+## 11. Onboarding — decided for V1
 
-**Smallest decision:** keep first-run as New Project Talk (what ships today), **or** add one obviously-fake sample project that Capture is forbidden from treating as real people.
-
-Do not build a long setup ceremony. Do not treat New Project V2 categorisation as onboarding. Do not ship the MP Atlas demo as a tutorial project.
+**Retain New Project Talk as the first-run route.** Do not introduce a fake / sample / tutorial project in V1. Do not treat New Project V2 categorisation as a separate onboarding product. Do not ship the MP Atlas demo as a tutorial project.
 
 ## 12. Accessibility / responsive issues
 
 Real ones, on real screens:
 
-- Coach can auto-open over Capture (D-031) — keyboard and first-use failure.
-- Knowledge Centre is a wide design; it stacks on laptop/narrow. MP is desktop canvas.
+- Coach auto-open over Capture (D-031) — **V1: Coach leaves the active shell**; do not redesign it here.
+- Knowledge Centre is a wide design; it stacks on laptop/narrow. MP is desktop canvas. V1 top row is two frames (To Do + Risks).
 - Overlay inspector (~26rem) must keep the mode bar full width; on narrow, the existing drawer-full-width behaviour should remain.
 - Focus-visible, dialog Escape, Capture `aria-live` / `role="alert"`, theme radiogroup: already present in product.
 - Collapsed sidebar icon links are thin for screen readers.
@@ -162,17 +154,17 @@ Not a generic WCAG project.
 
 Keep: project workspace, mode selector, knowledge cards + **existing drawer as the parent** of the compact inspector, `@person`, Capture compact review cards, New Project categorisation, theme picker, CSS variables.
 
-Extract later, after architecture + your frame-order call: overlay inspector behaviour, `TrustMark`, deterministic date popover (UX only), one Frame shell.
+Extract later, after architecture reconciliation: overlay inspector behaviour, `TrustMark`, deterministic date popover (UX only), one Frame shell.
 
 Do **not** start a design-system rewrite. Do not port MP Tailwind/framer-motion literally. Do not revive `CaptureBar`.
 
 ## 14. Existing UI paths likely to be deleted
 
+- Coach in the active V1 shell (auto-open overlay, `/coaching`, unmounted `HeaderCoachButton`) — **decided removal / deprecation** unless later reactivated. Advise stays parked.
 - Unmounted light/dark `AppearanceToggle`
-- `/coaching` as a place people go (and Coach auto-open)
 - Unmounted `CaptureBar` (immediate merge — do not revive) and unwired `TellMePanel`
-- Duplicate Timeline embed next to Important dates (**still in live MP as well as the product**)
-- Legacy Capture engine **after** you pick V2 (D-032)
+- Timeline **as a date authority**. If retained, it is a projection over milestone/date data; otherwise a deletion candidate after MP implementation
+- Legacy Capture engine **after** D-032 chooses V2
 - Paste New Project card (already gone from the chooser; Talk still tags paste as `"talk"`)
 - Overview (already gone)
 - Light theme as a product offering
@@ -180,53 +172,55 @@ Do **not** start a design-system rewrite. Do not port MP Tailwind/framer-motion 
 
 ## 15. Recommended implementation order
 
-1. You confirm v8 as the KC + inspector target, **including** whether To Do + Risks stay the top row.
-2. Architecture reconciliation (truth + Person + leftover prose + Waiting + milestone complete). Paint follows.
+1. Architecture reconciliation (truth store, Person schema, leftover prose, Waiting authority, milestone complete, Accept-as-known mutation path). Paint follows.
+2. Apply **v8 frame order** (To Do + Risks top; Current Position below) on existing frames.
 3. One Capture / New Project engine (D-032).
 4. Shared tokens (Ocean + Desert), no screen forks.
 5. Evolve the existing drawer toward the compact overlay (do not reflow KC).
-6. Stop leftover sentences looking as true as Risks.
+6. Stop leftover sentences looking as true as Risks (depends on Architecture for data).
 7. Capture Review stays compact; show “the rest” only if asked. (No MP screen — follow product.)
-8. New Project map visual — behaviour is already there; still no MP drawing.
-9. Kill Coach overlay.
-10. Only then remaining deltas, screen by screen.
+8. New Project map visual — behaviour is already there; still no MP drawing. First-run remains Talk.
+9. Remove Coach from the active V1 shell (do not redesign).
+10. Timeline: keep only as a projection, or delete if it adds no V1 value.
+11. Only then remaining deltas, screen by screen.
 
 ## 16. Visual regression targets for later
 
-Do not screenshot-baseline this UI now. After architecture settles, about twelve states: KC Ocean resting (confirmed frame order), KC Desert (product-only), Risk compact, Risk more-details, Person, Needs you, To Do, Milestone, Capture Review Apply Ready, Capture Review Needs you, NP categorisation, narrow KC with inspector.
+Do not screenshot-baseline this UI now. After architecture settles, about twelve states: KC Ocean resting **in v8 order**, KC Desert (same screens), Risk compact, Risk more-details, Person, Needs you, To Do, Milestone, Capture Review Apply Ready, Capture Review Needs you, NP categorisation, narrow KC with inspector.
 
 ## 17. Cross-workstream dependencies
 
-Architecture: current truth, Person schema, leftover prose, Waiting authority, milestone complete, whether “Accept as known” is ever a write.  
+Architecture: current-truth store, Person schema, leftover prose as data, Waiting authority, milestone complete, exact “Accept as known” mutation path.  
 Test: Playwright functional net — **no** screenshot farm on this branch.  
-UX: will not invent Issue, Advise, Reminders, Area-of-work store, or workspace Person tables ahead of those decisions.
+UX: will not invent Issue, Advise, Reminders, Area-of-work store, or workspace Person tables on this branch.
 
 ## 18. Risks
 
-- Implementing v8 frame order without confirming it against the 19 Aug constitution and the shipping product.
-- Shipping “Accept as known” as a Knowledge Centre write that bypasses Phase 3B.
-- Painting a second “source of truth” instead of following canonical-truth.
-- Freezing People as per-project demo labels (Elena/Marcus).
-- Two Review UIs while both Capture engines live.
-- Desert vs “Ocean only” constitution left unresolved.
+- Shipping “Accept as known” as a Knowledge Centre write that bypasses Capture / Review / Phase 3B.
+- Painting leftover prose as peer current truth instead of following canonical-truth.
+- Freezing People as per-project demo labels (Elena/Marcus) instead of waiting for workspace Person.
+- Two Review UIs while both Capture engines live (D-032).
+- Letting Timeline become a second date store.
 - Treating MP `Entity` / `issue` / `waiting` / `area` as stores to build.
+- Redesigning Coach instead of removing it from the V1 shell.
 
 ## 19. Tech debt currently visible
 
-D-030 leftover prose, D-031 Coach overlay, D-032 dual engines, Waiting dual authority, Timeline vs dates (also in live MP), unused light toggle, leftover coaching page, History not fully persisted, Capture V2 off by default.
+D-030 leftover prose, D-031 Coach overlay (now a V1 removal candidate), D-032 dual engines, Waiting dual authority, Timeline vs dates (also in live MP), unused light toggle, leftover coaching page, History not fully persisted, Capture V2 off by default.
 
 ## 20. Tech debt this design would create, if any
 
-If we copied v8 literally into production: KC “Accept as known” writes, demo people as identity, Issue/Area/Waiting stores, priority dots competing with Risk status, Desert ignored or forked, date popover persisting unsafely, Timeline still duplicated. **That is why this branch does not implement the overhaul.**
+If we copied v8 literally into production **against** the Spiderman rules: KC “Accept as known” writes, demo people as identity, Issue/Area/Waiting stores, leftover prose competing with Risks, Desert ignored or forked, date popover persisting unsafely, Timeline as a second authority. **That is why this branch does not implement the overhaul.**
 
 ## 21. Exact files / artefacts changed
 
 | File | Role |
 | --- | --- |
 | `docs/v1-convergence-mp/README.md` | This checkpoint |
+| `docs/v1-convergence-mp/SPIDERMAN_AMENDMENT.md` | V1 product decisions (this amendment) |
 | `docs/v1-convergence-mp/FROZEN_BASE.md` | SHA / 3B ancestry |
 | `docs/v1-convergence-mp/MP_RETRIEVAL.md` | Live retrieval (v8) |
-| `docs/v1-convergence-mp/mp-source/` | Unaltered v8 export + provenance |
+| `docs/v1-convergence-mp/mp-source/` | Unaltered v8 export — **untouched by this amendment** |
 | `docs/v1-convergence-mp/PRODUCT_SURFACE_INVENTORY.md` | Shipping surfaces |
 | `docs/v1-convergence-mp/DESIGN_PRODUCT_MAPPING.md` | Nine screens + inventory vs V2 vs architecture |
 | `docs/v1-convergence-mp/UX_FINDINGS.md` | Entity, truth, review, NP, themes, a11y, components |
@@ -236,29 +230,19 @@ No production React/API/schema changes.
 
 ## 22. Recommendation
 
-**Merge this reference pack** so Architecture and Test have a shared UX map against the **live** MP file.  
+**This reference pack is ready for the lead merge workflow** (Architecture/Test share the live MP map plus decided V1 rules).  
 **Do not** start the visual overhaul from this PR.  
-**Do not** reject the pack: the design is now in git, conflicts are flagged, not hidden.
+**Do not merge from this workstream.**
 
-**You still need to:**
-
-1. Confirm v8 frame order (To Do + Risks on top) as the V1 default, or keep Current position first (constitution + shipping product).
-2. Choose first-run onboarding (keep New Project vs marked sample).
-3. Let Architecture settle Person scope, leftover prose vs current truth, Waiting authority, and that KC “Accept as known” is not a 3B bypass.
-4. Acknowledge Desert as additive despite the older “Ocean only” sentence and the Ocean-only MP file.
+Product-owner scan-order, onboarding, Desert, Accept-as-known UX rule, Timeline rule, Coach/Advise, current-truth chrome, and People/Entity direction are **recorded**. Remaining work is Architecture reconciliation and later implementation PRs — not more silent UX choices.
 
 ---
 
 # MP V1 CONVERGENCE VERDICT
 
-**READY WITH PRODUCT-OWNER DECISIONS**
+**READY TO IMPLEMENT AFTER ARCHITECTURE RECONCILIATION**
 
-Not “ready to implement the look”. Ready to reconcile, now that live MP is in hand, once you:
+Not “ready to paint from this PR”. Ready for a later implementation stream **after** Architecture settles the store, Person schema, leftover prose, Waiting, milestone complete, and the Accept-as-known mutation path.
 
-1. Confirm v8 (including operational frame order) as the Knowledge Centre + inspector target.
-2. Choose first-run onboarding (keep New Project vs marked sample).
-3. Let Architecture settle Person scope, current-truth vs leftover prose, Waiting, milestone complete, and the “Accept as known” write boundary — UX will follow, not invent a third model.
-4. Acknowledge Desert as additive despite the older “Ocean only” sentence, or tell us to challenge Desert.
-
-**Not chosen:** `READY TO IMPLEMENT AFTER ARCHITECTURE RECONCILIATION` — live MP is retrieved, but frame order, Accept-as-known, Person scope, and missing Capture/NP screens still need you (and Architecture), not a silent paint job.  
-**Not chosen:** `NOT READY — DESIGN/ARCHITECTURE CONFLICT FOUND` — conflicts are **flagged** (frame order, Person, leftover prose, Accept as known vs 3B, constitution vs Desert, Waiting, Timeline duplicate), not used as a reason to hide the map.
+**Not chosen:** `READY WITH PRODUCT-OWNER DECISIONS` — the Spiderman items that were blocking UX are now decided.  
+**Not chosen:** `NOT READY — DESIGN/ARCHITECTURE CONFLICT FOUND` — remaining gaps are Architecture-owned or deferred implementation judgment (Timeline keep-as-projection vs delete after MP implementation), not hidden design conflicts.

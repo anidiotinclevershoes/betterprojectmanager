@@ -14,7 +14,7 @@
 | Active artifact | `30fc8231-32b7-475b-bf5f-d8f6d44c8841` |
 | Version treated as latest | **v8 — Knowledge Centre Frame Reordering Cleanup** |
 | Generating at retrieval | false |
-| In-git dump | `docs/v1-convergence-mp/mp-source/` (unaltered artifact files + `PROVENANCE.md`) |
+| In-git dump | `docs/v1-convergence-mp/mp-source/` (unaltered artifact files + `PROVENANCE.md`). **Spiderman amendment did not touch this dump.** |
 
 Playwright could **not** screenshot the hosted Screens page (Magic Patterns login / empty chrome). The versioned source + canvas manifest are the reviewable artefacts. Do not invent screenshots.
 

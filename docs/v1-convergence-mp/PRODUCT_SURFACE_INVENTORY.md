@@ -3,13 +3,15 @@
 Inspected on frozen HEAD `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`.  
 This is **what the product does now**, not a Magic Patterns inventory.
 
+V1 **target** decisions (frame order, onboarding, Desert, Coach/Advise, Timeline, truth chrome, People direction) live in [SPIDERMAN_AMENDMENT.md](./SPIDERMAN_AMENDMENT.md). They do not rewrite this inventory.
+
 ## Shell / navigation
 
 | Surface | Path / component | Notes |
 | --- | --- | --- |
 | App shell | `src/components/AppShell.tsx` | Sidebar + main |
 | Sidebar | `src/components/app-shell/Sidebar.tsx` | Wordmark `lume` (embedded `me`); Projects list; green `+ New Project`; Master To Do; History; Captures; Account; Help. **No** Overview, Knowledge Centre, Capture, Advise, Coaching in normal nav. Evals + Golden Test + AI Cockpit are internal/dev. |
-| Home | `src/app/page.tsx` | With projects → redirect to first project KC. Zero projects → `NewProjectExperience variant="first-run"`. Hydrate failure → error card, not empty seed. |
+| Home | `src/app/page.tsx` | With projects → redirect to first project KC. Zero projects → `NewProjectExperience variant="first-run"`. **V1 first-run remains New Project Talk** (no sample project). Hydrate failure → error card, not empty seed. |
 | Selected project | `src/app/projects/[id]/page.tsx` + `OceanProjectWorkspace` | Modes live **in the project**, not the sidebar |
 | Mode selector | `ProjectModeSelector` | Capture (✦) / Knowledge Centre / Advise Coming soon (disabled) |
 | Intelligence strip | `ProjectIntelligenceStrip` | Counts + Refresh + actions-left pill |
@@ -23,7 +25,7 @@ This is **what the product does now**, not a Magic Patterns inventory.
 
 ## Knowledge Centre
 
-`OceanKnowledgeFrames` — three **primary** frames then **secondary** via scroll. Cards open `KnowledgeItemDetailDrawer` (role=dialog, Escape, return focus).
+`OceanKnowledgeFrames` — three **primary** frames then **secondary** via scroll (current product: Current position, Risks, To Do). **V1 target** (Spiderman): To Do + Risks on top; Current position below. Cards open `KnowledgeItemDetailDrawer` (role=dialog, Escape, return focus).
 
 | Frame | Source of rows | Empty copy |
 | --- | --- | --- |
@@ -36,7 +38,7 @@ This is **what the product does now**, not a Magic Patterns inventory.
 | Important dates | Timeline/milestones | No milestones recorded. |
 | Waiting & open loops | WAITING/CHASE/`waitingOn` todos **plus** `sections.openLoops` (dual authority D-008/D-021) | No open loops. |
 | Meeting Prep | Embedded `MeetingPrepFrame` | Legacy embed |
-| Timeline | Embedded `TimelineFrame` | **Duplicates** Important dates — candidate to delete later |
+| Timeline | Embedded `TimelineFrame` | **Duplicates** Important dates. **V1:** never a date authority — projection over milestone/date data, or deletion candidate |
 
 Search Knowledge (deterministic) vs ✦ Ask Lume (`KnowledgeSearchAskBar`). Suggested questions present. `TellMePanel` still exists but is **unwired** from the Ocean shell — “✦ Lume noticed” on the live path comes from the Ask answer block.
 
@@ -85,8 +87,8 @@ Flag: `LUME_NEW_PROJECT_V2`.
 
 | Surface | Status |
 | --- | --- |
-| Advise | Disabled “Coming soon” in mode selector. No V1 Advise screen. |
-| Coach | Drawer + leftover `/coaching` page. D-031: can auto-open over Capture/KC. |
+| Advise | Disabled “Coming soon” in mode selector. No V1 Advise screen. **V1: parked.** |
+| Coach | Drawer + leftover `/coaching` page. D-031: can auto-open over Capture/KC. **V1: leave the active shell** (removal/deprecation). Do not redesign here. |
 | Tell Me / Ask | Live: `KnowledgeSearchAskBar`. `TellMePanel` unwired. |
 | Meeting Prep | KC embed + leftover `/meetings` |
 | History | `/history` — chronology / evidence, **not** current truth (D-004 persist gaps) |
@@ -122,4 +124,4 @@ Flag: `LUME_NEW_PROJECT_V2`.
 
 ## People
 
-Current implementation: **project-scoped** `stakeholders` UUID (`ensurePersonOnProject`). Architecture direction (this programme): **workspace-scoped Person identity + project-scoped participation**. Flagged — not silently designed away. UI already uses `@name · scope` (`PersonEntity`) and Confirm Owner share-vs-replace (Slice 2D).
+Current implementation: **project-scoped** `stakeholders` UUID (`ensurePersonOnProject`). V1 **target direction** (Spiderman; Architecture owns schema): **workspace-scoped Person identity + project-scoped participation**. Not implemented on this branch. UI already uses `@name · scope` (`PersonEntity`) and Confirm Owner share-vs-replace (Slice 2D).

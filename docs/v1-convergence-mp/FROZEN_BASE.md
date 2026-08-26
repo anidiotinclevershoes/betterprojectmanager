@@ -52,3 +52,5 @@ Record: `docs/EXPERIMENTAL_PROGRAMME.md`, PR #66 body.
 - Did not rebase onto Architecture or Test workstreams.
 - Did not implement the Magic Patterns overhaul.
 - Did not change production React screens, API routes, Capture engine, resolver, schema, or the mutation boundary.
+- Did not modify the unaltered Magic Patterns dump in `docs/v1-convergence-mp/mp-source/`.
+- Spiderman amendment (26 Aug) is **docs/reference only** on this same branch.

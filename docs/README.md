@@ -65,7 +65,7 @@ They do not override (1)–(3) unless they are the specific contract for that se
 
 Plans describe **intended future work**. They do not override current architecture or code.
 
-`docs/v1-convergence-mp/` is the Magic Patterns / V1 UX convergence **reference** (Workstream C). Live MP v8 (Knowledge Centre + inspector) is dumped unaltered under `docs/v1-convergence-mp/mp-source/`. It does not replace the visual constitution in `docs/v1-reference-pack/` and it is not a licence to implement a UX overhaul.
+`docs/v1-convergence-mp/` is the Magic Patterns / V1 UX convergence **reference** (Workstream C). Live MP v8 is dumped unaltered under `docs/v1-convergence-mp/mp-source/`. V1 product decisions are in `docs/v1-convergence-mp/SPIDERMAN_AMENDMENT.md`. This pack does not replace the visual constitution in `docs/v1-reference-pack/` and it is not a licence to implement a UX overhaul. For V1 themes and KC scan order, the Spiderman amendment supersedes older Ocean-only / Current-position-first constitution wording.
 
 ### 6. Historical handovers / audits / screenshots
 
@@ -96,7 +96,7 @@ For ordinary development:
 5. only the relevant historical `SLICE*` handover when extending that particular seam
 6. Intelligence Contract (`docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`) when doing Ask / eval / intelligence-scoring work
 7. `docs/EXPERIMENTAL_PROGRAMME.md` when working Capture V2, New Project V2, or Desert (experimental vs current)
-8. `docs/v1-convergence-mp/README.md` when reconciling Magic Patterns / V1 UX with the frozen V2 product (reference only; not an implementation licence)
+8. `docs/v1-convergence-mp/README.md` (and `SPIDERMAN_AMENDMENT.md`) when reconciling Magic Patterns / V1 UX with the frozen V2 product (reference only; not an implementation licence)
 
 Then open operational docs only if the task is about tests, deploy, or persistence setup.
 
@@ -106,7 +106,7 @@ Then open operational docs only if the task is about tests, deploy, or persisten
 
 | Kind of question | Trust this | Do not silently prefer |
 | --- | --- | --- |
-| What should the product do? (trust, Capture, Ocean, V1 scope) | `docs/v1-reference-pack/` | Historical handovers, old UI snapshots, root README product copy |
+| What should the product do? (trust, Capture, Ocean, V1 scope) | `docs/v1-reference-pack/`, except V1 KC scan order / Desert / first-run / Coach / Timeline / Accept-as-known UX rule → `docs/v1-convergence-mp/SPIDERMAN_AMENDMENT.md` | Historical handovers, old UI snapshots, root README product copy |
 | What does the code do now? | Current Architecture Handoff, then the code | 19 Aug Project Truth Audit; `docs/current-state/`; SLICE/PHASE bodies |
 | What debt is open vs fixed? | Known Discoveries (open vs resolved sections) | Duplicate headings, historical “still missing” notes, plans |
 | How should Ask/evals score? | Intelligence Contract, reconciled with the pack | Benchmark-chasing notes in old phase handovers |
