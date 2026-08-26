@@ -1,7 +1,7 @@
 # Lume — Current Architecture Memory Handoff
 
 **Status:** Documentation of CURRENT implementation, plus the V1 Architectural Convergence delta (Part C)  
-**Date:** 26 August 2026  
+**Date:** 26 August 2026 (Thor amendment: name ≠ identity; project-scoped mutation invariant; status categories)  
 **Code observed:** `cursor/capture-v2-desert-new-project-56c9` @ `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`  
 **Ancestry verified:** Phase 3B / PR #64 HEAD `b52995c3b7eb80971d052e875c1d372ebb424ebe` is an ancestor. This SHA also contains Capture V2, New Project V2, and Desert. PR #66 is **not** merged and must not be merged from this review.  
 **Docs entry point:** `docs/README.md`  
@@ -12,18 +12,22 @@
 
 **How to read this file after 26 August 2026:** Part A/B remain the current-implementation map. **Part C is the binding V1 convergence delta** (one-authority decisions, deletion points, migration order). Part C does not re-audit the world. If Part A/B and Part C disagree on a *target*, Part C wins. If they disagree on *what the code does now*, the code wins and this file should be updated.
 
-This document has two parts:
+This document has three parts:
 
 - **Part A** — memory-ready checkpoint (paste into ChatGPT context)
 - **Part B** — detailed reference (paths, write/read traces, duplication map)
+- **Part C** — binding V1 convergence delta (targets, deletion points, migration order)
 
 Legend used throughout:
 
 | Tag | Meaning |
 | --- | --- |
-| **CURRENT** | Verified in code now |
-| **INTENT** | Product rule the code is trying to honour |
-| **LEGACY / TRANSITIONAL** | Still present; do not treat as the target model |
+| **CURRENT** | What the code does now (verified) |
+| **DECIDED V1 TARGET** | Accepted direction, not yet fully implemented |
+| **TRANSITIONAL / FLAGGED** | Temporary coexistence or migration state (often a feature flag) |
+| **DEPRECATED / SCHEDULED FOR DELETION** | Surviving only until the named deletion point |
+| **UNRESOLVED** | Genuinely undecided — do not treat a guess as a decision |
+| **INTENT** | Product rule the code is trying to honour (may already be CURRENT) |
 | **GAP** | Known incomplete / Known Discovery |
 
 ---
@@ -185,13 +189,13 @@ Use this section as working context for future product/development decisions and
 - Mutation: `confirmResponsibilityOwner` in `src/lib/people/identity.ts` + store persist (`persistEnsureStakeholder`, knowledge persist, `persistKnowledgeLifecycle` for superseded ids)
 - If other current owners exist for the scope → **Needs you**: user must choose **Add as another owner (share)** or **Replace a named current owner**.
 - Adding a second owner **does not** replace the first unless replace is chosen.
-- New person: create durable stakeholder first, then attach responsibility. Existing person: reuse `personId` / exact name within the project.
+- New person: create durable stakeholder first, then attach responsibility. Existing person: reuse **stable `personId`**. Exact-name match within the project is **CURRENT** conservative resolution only — **a name is not identity**. Two legitimate people may share a name. If name-only resolution is ambiguous (zero or more than one match), fail closed / Needs you. Do **not** add a database uniqueness constraint on stakeholder or person name.
 
 **Person retrieval:** `getPersonBundle(state, projectId, personId)` — current/historical responsibilities, `sharedScopes`, availability, legacy bullets. Does not scan unrelated prose.
 
-**People are not a workspace-global CRM today.** Same human on two projects is two stakeholder rows. Do not fuzzy-merge similar names. Do not assume `projectId` can never be selected dynamically later.
+**People are not a workspace-global CRM today.** **CURRENT:** same human on two projects is two stakeholder rows. Do not fuzzy-merge similar names. Do not assume `projectId` can never be selected dynamically later.
 
-**TARGET (Part C — do not implement in this review):** workspace-scoped Person identity + project-scoped participation/responsibility. That is a later dedicated slice, not a generic Entity table. Until then, stop adding new text-name couplings (`waitingOn`, memories `people` jsonb) without a durable `personId` when the Person is already known.
+**DECIDED V1 TARGET (Part C — do not implement in this review):** workspace-scoped Person identity + project-scoped participation/responsibility. Stable IDs own identity; same-name people must remain representable; no unique-name constraint; no fuzzy/global merging of existing stakeholder rows. That is a later dedicated slice, not a generic Entity table. Until then, stop adding new text-name couplings (`waitingOn`, memories `people` jsonb) without a durable `personId` when the Person is already known.
 
 **GAP D-007 remainder:** Capture still often writes people **prose** without promoting a stakeholder. UI will not invent identity from that. Target: Capture hardening.
 
@@ -228,7 +232,7 @@ Use this section as working context for future product/development decisions and
 
 **There is currently no single waiting/open-loop authority.** Duplicate or contradictory loops are possible. **GAP D-008 / D-021.**
 
-**TARGET (Part C):** do not invent a third store. **Todos** (`WAITING` / `CHASE` / `waitingOn`) are the authority for *actionable waits the PM owns*. **`openLoops` / structured `open_loop`** are narrative Knowledge until explicitly promoted to a todo (then superseded) or closed. The Ocean Waiting frame may still concatenate both as a *view*. Ask/canonical must not treat them as interchangeable. Do not fuzzy-dedupe.
+**DECIDED V1 TARGET (Part C):** do not invent a third store. **Todos** (`WAITING` / `CHASE` / `waitingOn`) are the authority for *actionable waits the PM owns*. **`openLoops` / structured `open_loop`** are narrative Knowledge until explicitly promoted to a todo (then superseded) or closed. The Ocean Waiting frame may still concatenate both as a *view*. Ask/canonical must not treat them as interchangeable. Do not fuzzy-dedupe.
 
 Do not create extra To Dos merely to populate People detail. Person detail waiting lines use **exact** `waitingOn === person.name` match only.
 
@@ -248,7 +252,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 
 **INTENT / locked rule:** nothing extracted from Capture becomes maintained project truth **before final human review/approval**.
 
-**TARGET engine (binding):** Capture V2 (`src/lib/capture-v2`, flag `LUME_CAPTURE_V2`) is the V1 Capture understanding path. Phase 3B `planCaptureApply` / `executeCaptureApply` remains the **only** Capture mutation safety gate. The V2 “world” / ID catalogue is a *derived projection of the same durable authorities*, not a second current-truth snapshot. Do not keep two OpenAI Capture engines permanently (**D-032**).
+**DECIDED V1 TARGET engine:** Capture V2 (`src/lib/capture-v2`, flag `LUME_CAPTURE_V2`) is the V1 Capture understanding path. **CURRENT:** flag unset = legacy OpenAI findings path (**TRANSITIONAL / FLAGGED**). Phase 3B `planCaptureApply` / `executeCaptureApply` remains the **only** Capture mutation safety gate. The V2 “world” / ID catalogue is a *derived projection of the same durable authorities*, not a second current-truth snapshot. Do not keep two OpenAI Capture engines permanently (**D-032**). Legacy understanding path is **DEPRECATED / SCHEDULED FOR DELETION** after the required V2 gates. Immediate-merge `captureWithAI` is **DEPRECATED / SCHEDULED FOR DELETION** on the next implementation slice.
 
 **CURRENT primary Ocean flow:**
 
@@ -322,7 +326,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 
 ## 12. Ask / Tell Me architecture
 
-**Two assemblers. Production default is still LEGACY. TARGET assembler is canonical (`serializeCanonicalTruth`) — Part C.**
+**Two assemblers. CURRENT production default is still LEGACY (flag unset = off). DECIDED V1 TARGET assembler is canonical (`serializeCanonicalTruth`) — Part C. The dual path is TRANSITIONAL / FLAGGED until default-on; the legacy Ask branch is then DEPRECATED / SCHEDULED FOR DELETION.**
 
 ### Flag `LUME_CANONICAL_TRUTH` (`src/lib/canonical-truth/flag.ts`)
 
@@ -444,23 +448,23 @@ Significance: ✦ marks model judgement. Confirmed Knowledge should look normal,
 
 ## 19. Current feature flags / transitional architecture
 
-The **deletion-point** version of this table is Part C §H. This table remains the current-runtime map. The programme rule: **this table must get shorter as convergence proceeds.** Deletion should happen close to the change that supersedes a path, not in a terminal “cleanup PR”.
+The **deletion-point** version of this table is Part C §H. This table remains the current-runtime map. The programme rule: **this table must get shorter as convergence proceeds.** Deletion should happen close to the change that supersedes a path, not in a terminal “cleanup PR”. Status tags: **CURRENT** / **DECIDED V1 TARGET** / **TRANSITIONAL / FLAGGED** / **DEPRECATED / SCHEDULED FOR DELETION** / **UNRESOLVED**.
 
-| Flag / dual path | Purpose | Default | New path | Old path remains | Removal condition |
-| --- | --- | --- | --- | --- | --- |
-| `LUME_CANONICAL_TRUTH` | Ask assembler | **unset = legacy (off)** | `serializeCanonicalTruth` | `buildCaptureContext` + snapshots | After eval + product review; keep `0` rollback through one release; then delete legacy Ask branch |
-| `LUME_CAPTURE_V2` | Capture observation pipeline | **unset = legacy (off)** | `src/lib/capture-v2` + Phase 3B apply | OpenAI findings / local regex fallback | **Target = V2.** Delete legacy OpenAI findings path after the required V2 gates; keep git as rollback. Local/no-OpenAI remains a fallback, not a second extraction engine |
-| `LUME_NEW_PROJECT_V2` | New Project categorisation map | **unset = legacy (off)** | observations → provisional map → review → `persistNewProject` | `assembleFromNarrative` Talk path | Adopt or remove after Gate B evidence; do not keep two OpenAI New Project extractors |
-| Appearance Ocean/Desert | Token themes | **Ocean default** | `[data-theme="desert"]` + Account picker | Ocean `[data-theme="dark"]` remains | **Keep both**; user-selectable. Magic Patterns V1 UX is product target, not a later reskin |
-| `LUME_PERSISTENCE` | Durable store | prod supabase | hydrate + persist-mutations | localStorage v5 in local/dev | Do not silent-fallback in prod |
-| `LUME_AUTH` | Auth | prod supabase | Supabase session | demo JWT / none | Keep demo/none for local DX |
-| `LUME_ALLOW_LOCAL_IN_PRODUCTION` | Escape hatch | unset/false | — | local in prod if both set | Keep locked |
-| Knowledge sections vs structured | Overlay | both live | structured + sectionItemIds | string bullets | Do not wipe sections; structured + ids are authority |
-| Domain risks vs knowledge risks | Lifecycle | domain wins | `MissionState.risks` | knowledge-only `[Resolved]` | Transitional compatibility + D-015/D-030 cleanup |
-| Stakeholders vs people prose | Identity | stakeholders | Confirm Owner / bundle | unpromoted Capture bullets | Capture hardening (D-007); later workspace Person slice |
-| Capture analyse+applyOne vs captureWithAI | Trust boundary | Ocean uses review | `applyOne` | immediate `mergeCapture` still in store | **Earliest deletion:** unmounted `CaptureBar` + `capture()` / `captureWithAI` / `applyCaptureResult` |
-| Client session lists vs `capture_sessions` | Session history | client-primary | table write on apply | localStorage lists | Capture hardening (D-013) / Phase 3D |
-| Coach drawer vs parked Advise | Advisory UI | Coach still in AppShell | Product: Advise parked; Coaching out of V1 | `/api/coach` + `buildCoachContext` | Hide/retire Coach as a V1 product surface; do not invest in a third truth assembler |
+| Flag / dual path | Status | Purpose | Default | New path | Old path remains | Removal condition |
+| --- | --- | --- | --- | --- | --- | --- |
+| `LUME_CANONICAL_TRUTH` | **TRANSITIONAL / FLAGGED.** **DECIDED V1 TARGET** = `serializeCanonicalTruth`. Legacy Ask **DEPRECATED / SCHEDULED FOR DELETION** after default-on | Ask assembler | **unset = legacy (off)** | `serializeCanonicalTruth` | `buildCaptureContext` + snapshots | After eval + product review; keep `0` rollback through one release; then delete legacy Ask branch |
+| `LUME_CAPTURE_V2` | **TRANSITIONAL / FLAGGED.** **DECIDED V1 TARGET** = V2 + Phase 3B. Legacy findings **DEPRECATED / SCHEDULED FOR DELETION** after V2 gates | Capture observation pipeline | **unset = legacy (off)** | `src/lib/capture-v2` + Phase 3B apply | OpenAI findings / local regex fallback | Delete legacy OpenAI findings path after the required V2 gates; keep git as rollback. Local/no-OpenAI remains a fallback, not a second extraction engine |
+| `LUME_NEW_PROJECT_V2` | **TRANSITIONAL / FLAGGED.** **DECIDED V1 TARGET** = V2 map + existing persist | New Project categorisation map | **unset = legacy (off)** | observations → provisional map → review → `persistNewProject` | `assembleFromNarrative` Talk path | Adopt or remove after Gate B evidence; do not keep two OpenAI New Project extractors |
+| Appearance Ocean/Desert | **CURRENT** both. **DECIDED V1 TARGET** = keep both | Token themes | **Ocean default** | `[data-theme="desert"]` + Account picker | Ocean `[data-theme="dark"]` remains | **Keep both**; user-selectable. Magic Patterns V1 UX is product target, not a later reskin |
+| `LUME_PERSISTENCE` | **CURRENT** prod supabase | Durable store | prod supabase | hydrate + persist-mutations | localStorage v5 in local/dev | Do not silent-fallback in prod |
+| `LUME_AUTH` | **CURRENT** prod supabase | Auth | prod supabase | Supabase session | demo JWT / none | Keep demo/none for local DX |
+| `LUME_ALLOW_LOCAL_IN_PRODUCTION` | **CURRENT** locked off | Escape hatch | unset/false | — | local in prod if both set | Keep locked |
+| Knowledge sections vs structured | **TRANSITIONAL** overlay | Overlay | both live | structured + sectionItemIds | string bullets | Do not wipe sections; structured + ids are authority |
+| Domain risks vs knowledge risks | **CURRENT** domain wins; leftover prose **TRANSITIONAL** | Lifecycle | domain wins | `MissionState.risks` | knowledge-only `[Resolved]` | Transitional compatibility + D-015/D-030 cleanup |
+| Stakeholders vs people prose | **CURRENT** stakeholders; workspace Person = **DECIDED V1 TARGET** | Identity | stakeholders | Confirm Owner / bundle | unpromoted Capture bullets | Capture hardening (D-007); later workspace Person slice. Name is not identity |
+| Capture analyse+applyOne vs captureWithAI | **CURRENT** Ocean = analyse+applyOne. Immediate merge **DEPRECATED / SCHEDULED FOR DELETION** | Trust boundary | Ocean uses review | `applyOne` | immediate `mergeCapture` still in store | **Earliest deletion:** unmounted `CaptureBar` + `capture()` / `captureWithAI` / `applyCaptureResult` |
+| Client session lists vs `capture_sessions` | **TRANSITIONAL** | Session history | client-primary | table write on apply | localStorage lists | Capture hardening (D-013) / Phase 3D |
+| Coach drawer vs parked Advise | **CURRENT** Coach in AppShell. **DECIDED V1 TARGET** hide/retire Coach; Advise stays parked | Advisory UI | Coach still in AppShell | Product: Advise parked; Coaching out of V1 | `/api/coach` + `buildCoachContext` | Hide/retire Coach as a V1 product surface; do not invest in a third truth assembler |
 
 ---
 
@@ -493,6 +497,7 @@ From `docs/LUME_V1_KNOWN_DISCOVERIES.md` as of this handoff. **Do not treat reso
 | D-032 | Dual Capture / New Project OpenAI pipelines | Permanent dual engines reintroduce drift | After V2 gates; delete legacy understanding path |
 | D-033 | AI decision routes accept browser-supplied MissionState | Stale/forged own-session context; unbounded payloads | Server-load Tell Me first, then Capture |
 | D-034 | Capture apply world is client MissionState; no row versioning | Planner cannot see concurrent durable writes | DB `version` + fresh load before write; not a new framework |
+| D-035 | Project-domain mutations must verify intended project membership | `persistTodoUpdate` is one known instance (id-only WHERE); class is broader | Later audit of all project-domain persist paths — not this docs PR |
 
 **Resolved (do not reopen as missing architecture):** D-R01 durable Knowledge, D-R02 stable identity, D-R03 risk resurrection, D-R04/R05 Confirm Owner persist/UUIDs, D-R06 false unknown-owner, D-R07 multi-owner Ask, D-R08 Ocean Capture, D-R09 item detail, D-R10 share vs replace, D-R11 Phase 3A New Project integrity (includes D-006), D-R12 Phase 3A.1 Safe Project Deletion, D-R13 Phase 3B Capture mutation boundary (includes D-017).
 
@@ -515,6 +520,8 @@ Deterministic suite: `npm test` → `scripts/run-regression-suite.ts` (credentia
 | `new-project` / `seed-reset` | Onboarding / demo |
 
 **Rerun guidance:** touch Knowledge identity → reconcile + project-truth; Risks → risk-lifecycle; People → people-entities + people-context-ui; Ask → ask-context + tell-me + canonical; Ocean UI → matching ocean-* + capture-trust if Capture chrome; Capture apply → phase3b-capture-boundary; always `typecheck` + full `npm test` before merge of behavioural PRs.
+
+**Playwright / property testing:** **UNRESOLVED** as a testing-*shape* decision. This architecture does not mandate Playwright E2E or property-based tests. **CURRENT** safety net is the credential-free `verify-*` regression suite. Whether to add Playwright or property tests belongs to the Test workstream, provided it protects behaviour **before** risky structural deletion (canonical default-on, Capture V2 default-on, legacy-path removal).
 
 ---
 
@@ -556,7 +563,7 @@ Verified against current product/code:
 7. Capture analysis does **not** write before review on the Ocean path (`analyzeCaptureWithAI`); do not revive immediate `captureWithAI` as the product path.
 8. Stable item identity must **not** rely on list position.
 9. Knowledge Centre frames do **not** own the truth they display.
-10. People identity is **currently** project-scoped `stakeholders`, not global contacts; do not fuzzy-merge similar names. **Target** is workspace-scoped Person + project participation (Part C §G) — that is not a licence to introduce an Entity-Everything table.
+10. People identity is **currently** project-scoped `stakeholders`, not global contacts; do not fuzzy-merge similar names. **DECIDED V1 TARGET** is workspace-scoped Person + project participation (Part C §C7) — that is not a licence to introduce an Entity-Everything table. **A name is not identity**; do not add a unique-name constraint.
 11. V1 being project-scoped does **not** justify dropping `projectId` or blocking later authorised multi-project reads.
 12. AI must **not** infer and persist durable relationships without human review.
 13. Production Ask is **not** canonical unless `LUME_CANONICAL_TRUTH=1`.
@@ -569,6 +576,7 @@ Verified against current product/code:
 20. Coach is **not** a V1 product surface to invest in (philosophy §26); do not build a third assembler for it.
 21. `updated_at` triggers are **not** optimistic concurrency (D-034).
 22. Workspace RLS is **not** per-project ACL — application code must keep `projectId` filters.
+23. **Every project-domain mutation must verify that the target durable object belongs to the intended project before mutation** (D-035). `persistTodoUpdate` is one known gap, not the whole class.
 
 ---
 
@@ -835,9 +843,32 @@ Do not create a fourth overlapping architecture audit. Amend this file.
 
 **Status:** Binding target decisions for V1 convergence. **Not implemented in this review.**  
 **Base SHA:** `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4` (`cursor/capture-v2-desert-new-project-56c9`)  
-**Is this a new architecture?** No. This part answers: *what changed since the 25 Aug handoff, what was already documented, and which one path should survive.*
+**Is this a new architecture?** No. This part answers: *what changed since the 25 Aug handoff, what was already documented, and which one path should survive.*  
+**Thor amendment (same day):** name is not identity (no unique-name constraint); project-scoped mutation is a broad invariant (D-035); status categories made explicit. Approved architectural substance is otherwise unchanged.
 
 For every claim below, **Already documented** means Part A/B or Known Discoveries already had it; **New since handoff** means this review found or decided it against current code.
+
+---
+
+## C0a. Status register (explicit)
+
+Use the legend in the file header. This table is the ambiguity-remover for the dual-path / target items. It does not replace Part A.
+
+| Topic | CURRENT | DECIDED V1 TARGET | TRANSITIONAL / FLAGGED | DEPRECATED / SCHEDULED FOR DELETION | UNRESOLVED |
+| --- | --- | --- | --- | --- | --- |
+| Capture V2 | Flag unset = **off**; library present | **The** V1 Capture understanding engine + Phase 3B apply | `LUME_CAPTURE_V2=1` coexistence | — | — |
+| Legacy Capture understanding (OpenAI findings / local regex extract) | **Default** `/api/capture` path when flag unset | Not the V1 engine | Coexists until V2 default-on | **After required V2 gates** (git rollback) | — |
+| Immediate-merge `capture()` / `captureWithAI` / `CaptureBar` | Code still in `store.tsx`; `CaptureBar` unmounted | Ocean analyse + `applyOne` | — | **Next implementation slice** | — |
+| Canonical truth (`serializeCanonicalTruth`) | Assembler exists; production flag **off** | **The** current-truth recall projection | `LUME_CANONICAL_TRUTH` dual Ask | Legacy Ask branch after default-on + one-release rollback | Production default-on **timing** waits on eval/Test workstream |
+| Person identity | Project-scoped `stakeholders` UUID | Workspace `people` + project participation. **Stable IDs own identity. A name is not identity.** Same-name people must remain representable. Name-only resolution if ambiguous → Needs you. No unique-name DB constraint. No fuzzy/global merge of existing rows | Exact-name match as conservative temporary resolver | — | When to ship the `people` table (not first slice) |
+| Playwright / property testing | Safety net = `verify-*` regression suite | Tests must protect behaviour **before** risky structural deletion | — | — | **Whether** to add Playwright E2E or property tests — Test workstream; this architecture does **not** mandate them |
+| Ocean | Default appearance | **Keep** | — | **Never** | — |
+| Desert | Supported appearance (`data-theme="desert"`) | **Keep both** (user-selectable) | — | — | MP token/UX polish (sibling stream) |
+| Coach | In AppShell / Intelligence strip / `/api/coach` | **Hide/retire** as V1 product surface | — | Coach product surface | Exact MP strip layout after hide |
+| Advise | Stub “Coming soon” | **Parked** (philosophy §26) | — | — | Whether Advise is required later |
+| Waiting vs openLoops | KC concatenates both; no single authority | Todos = waiting *work*; openLoops = narrative | Concatenated **view** until promotion/supersede lands | — | Visual distinction in the Waiting frame (MP) |
+| ✦ Lume noticed | `recommendations` table + often memory-only accept/dismiss (D-003) | Table is durable noticed lifecycle; generators are not truth | — | — | — |
+| Unique person/stakeholder **name** | App may reuse exact name (`ensurePersonOnProject`) | **Rejected as identity.** Do **not** add `UNIQUE` on name | Exact-name match as temporary resolver only | Unique-name-as-identity recommendation (removed in Thor amendment) | — |
 
 ---
 
@@ -951,9 +982,9 @@ Canonical Ask already omits history unless the question looks historical. Legacy
 
 ### 5. People / responsibilities / availability
 
-**Current:** project-scoped `stakeholders` UUID = identity **and** participation. Responsibilities/availability live on `knowledge_items` with `personId`. Exact normalised name match within a project. `waitingOn` and memories `people` are text.
+**CURRENT:** project-scoped `stakeholders` UUID = identity **and** participation. Responsibilities/availability live on `knowledge_items` with `personId`. Exact normalised name match within a project is a **temporary resolver**, not identity. `waitingOn` and memories `people` are text.
 
-**Target:** see §G. Do not fuzzy-merge. Do not mint identity from leftover prose (D-007 remainder).
+**DECIDED V1 TARGET:** see §C7. Stable IDs own identity. Same-name people remain representable. No unique-name constraint. Do not fuzzy-merge. Do not mint identity from leftover prose (D-007 remainder).
 
 ---
 
@@ -1029,7 +1060,7 @@ Privacy: server-load does **not** stop the model seeing project data. It stops t
 2. **Optimistic concurrency** — no `version` / `expectedVersion`. `updated_at` triggers exist and are **unused** for writes. This is a **database + command** concern: add integer `version` (or equivalent) on hot tables when this slice is done; check it in persist helpers. Not a TypeScript-only field.
 3. **Idempotency** — New Project has `clientProjectId`. Capture apply operations do not. Double-apply can duplicate knowledge bullets depending on domain.
 4. **Stable IDs / foreign-project** — enforced against **client** `world.projectIds`, not server project enumeration.
-5. **Schema** — no version column. Todo update/delete keyed by id only (workspace RLS still applies; **no `project_id` in the WHERE** of `persistTodoUpdate`).
+5. **Project-scoped mutation (broad invariant, D-035)** — **Every project-domain mutation must verify that the target durable object belongs to the intended project before mutation.** This is **not** a Todo-only defect. `persistTodoUpdate` / `persistTodoDelete` currently key by id only (workspace RLS still applies; no `project_id` in the WHERE). The later implementation/test pass must **audit equivalent paths** across all relevant project-domain mutations (todos, risks, knowledge_items, milestones, stakeholders, memories, recommendations, history, sessions, …). **Do not fix them in this docs branch.** Schema: no `version` column (D-034, separate).
 6. **Execute persist semantics** — Risk/milestone/Person/availability/knowledge/memory Capture hooks are persist-first; todo complete/update/delete and Confirm Owner remain optimistic-then-persist (D-005 remainder). Same dispatcher, split failure UX.
 
 Unsupported on purpose: meeting complete, milestone *complete* (D-029). Leave them Needs you.
@@ -1044,9 +1075,10 @@ Do not design a generic transaction framework.
 | --- | --- | --- |
 | New Project sequential inserts; crash skips `catch` cleanup | One `create_project_bundle` Postgres RPC (this bundle only). Keep `clientProjectId` PK idempotency | Dedicated integrity slice |
 | D-028 delete SET NULL then project row | `delete_project_bundle` RPC **or** change those six FKs to `ON DELETE CASCADE` | Same integrity slice |
-| Duplicate Person per project | `UNIQUE (project_id, lower(trim(name)))` on `stakeholders` — matches current exact-name rule | Cheap; do with Person or integrity slice |
+| Same-name people blocked by a unique-name index | **Do not add** `UNIQUE` on stakeholder or person name. Identity is the stable UUID. Same-name people must remain representable | N/A — rejected |
+| Project-domain writes that do not check `project_id` (D-035) | Invariant: verify the target row belongs to the intended project before mutate. Audit all persist helpers; `persistTodoUpdate` is one known instance | Later implementation/test pass — **not this branch** |
 | `todos.source_recommendation_id` has no FK | `REFERENCES recommendations(id) ON DELETE SET NULL` | With D-003 |
-| `waiting_on` text | Add `waiting_on_person_id` when Person slice lands; keep text as display cache | Person slice |
+| `waiting_on` text | Add `waiting_on_person_id` when Person slice lands; keep text as display cache. Resolve by ID; name-only only if unambiguous | Person slice |
 | No row versioning (D-034) | `version int not null default 1` on `projects`, `todos`, `risks`, `knowledge_items`, `milestones`, `stakeholders`; persist helpers `WHERE version = $expected` | With apply revalidation, not earlier |
 | D-026 project code uniqueness | **Product decision first** — do not add silently | No |
 | Workspace_id vs parent project workspace | Optional later composite/trigger; not V1-critical while app always writes both | No |
@@ -1057,7 +1089,16 @@ Multi-step dual-write (`persistKnowledgeBullet` knowledge then risks) should rid
 
 ## C7. Person / entity-compatible architecture
 
-**Target (binding):** workspace-scoped Person identity + project-scoped participation/responsibility.
+**DECIDED V1 TARGET (binding):** workspace-scoped Person identity + project-scoped participation/responsibility.
+
+**Identity principle (Thor amendment):**
+
+- **Stable IDs own identity.**
+- A **name is not identity.** Two legitimate different people may share the same name.
+- Same-name people **must remain representable** (no unique-name constraint on `stakeholders` or `people`).
+- Exact-name matching may remain a **conservative temporary resolution** behaviour.
+- If name-only resolution is ambiguous (zero or more than one match), **fail closed / Needs you**.
+- Do **not** fuzzy/global-merge existing stakeholder rows.
 
 **Do not build** a universal `entities` table, graph DB, or CRM.
 
@@ -1065,16 +1106,20 @@ Multi-step dual-write (`persistKnowledgeBullet` knowledge then risks) should rid
 
 ```text
 people (
-  id, workspace_id, display_name, name_normalized
-  UNIQUE (workspace_id, name_normalized)
+  id, workspace_id, display_name
+  -- NO unique constraint on name / name_normalized
 )
 stakeholders  → participation row
   + person_id REFERENCES people(id)
-  UNIQUE (project_id, person_id)
+  UNIQUE (project_id, person_id)   -- same Person cannot participate twice; names may collide
   name/role/preferences/concerns may remain on the participation row
 ```
 
-**Migration implications:** group existing stakeholders per workspace by exact normalised name → one `people` row; backfill `person_id`; remap `knowledge_items.meta.responsibility.personId` from **stakeholder id → people id** (breaking semantic — must be explicit). Add `todos.waiting_on_person_id`; keep `waiting_on` text during transition. Different spellings stay distinct (no fuzzy merge). Same exact name across projects **collapses** — that is the point of workspace identity; collisions that are not the same human remain a Needs you / product problem, not a regex problem.
+`UNIQUE (project_id, person_id)` is an **ID** constraint (one participation row per person per project). It is **not** a name uniqueness constraint.
+
+**Migration implications:** do **not** group existing stakeholders by exact normalised name into one `people` row. Preserve each existing stakeholder UUID (1:1 `people` row, or equivalent) unless a **human** later explicitly links two records as the same person. Remap `knowledge_items.meta.responsibility.personId` from stakeholder id → `people.id` only as an explicit, tested mapping. Add `todos.waiting_on_person_id`; keep `waiting_on` text as display cache. Different spellings stay distinct (no fuzzy merge). Same spelling stays distinct **until** IDs say otherwise.
+
+**CURRENT** `ensurePersonOnProject` reuses exact name within a project (prevents accidental duplicate-on-mention). That is **TRANSITIONAL** resolver behaviour, not a licence to make name unique in the database. Once two same-name people can exist, name-only ensure must Needs you.
 
 **Until that slice:** keep project-scoped stakeholders. Stop adding new exact-name-only relationships when a UUID is already known.
 
@@ -1137,7 +1182,7 @@ After those deletions, optional file split (`store-hydration`, persist-meta) is 
 | Vector DB / multi-pass agents | **Reject** (philosophy §26) |
 | Making `planCaptureApply` the app-wide mutation bus | **Reject** — Capture boundary stays Capture |
 
-**Still missing from a naive V1 plan (now recorded):** D-033/D-034; Coach vs constitution mismatch; `persistTodoUpdate` not project-scoped in SQL; snapshots-as-compression temptation; MP UX is in-scope but artefacts are not in this repo.
+**Still missing from a naive V1 plan (now recorded):** D-033/D-034/D-035; Coach vs constitution mismatch; project-scoped mutation invariant (class, not Todo-only); snapshots-as-compression temptation; MP UX is in-scope but artefacts are not in this repo.
 
 ---
 
@@ -1173,5 +1218,5 @@ Recommended order after this authority is reviewed:
 
 ## C13. Explicitly do not build
 
-Generic Truth Engine; Hygiene Engine; reconciliation daemon; event-sourced rewrite; second persistence layer; Entity-Everything table; giant AI orchestration; permanent dual Capture engines; permanent dual truth projections; app-wide command bus; Redux/Zustand; vector infrastructure; Advise; Issues; workspace Person table in the first slice; Redis “just in case”.
+Generic Truth Engine; Hygiene Engine; reconciliation daemon; event-sourced rewrite; second persistence layer; Entity-Everything table; unique-name-as-identity constraint; giant AI orchestration; permanent dual Capture engines; permanent dual truth projections; app-wide command bus; Redux/Zustand; vector infrastructure; Advise; Issues; workspace Person table in the first slice; Redis “just in case”.
 

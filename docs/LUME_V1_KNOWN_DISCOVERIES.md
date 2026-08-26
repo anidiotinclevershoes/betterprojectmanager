@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 26 August 2026 (V1 Architectural Convergence delta: D-033/D-034; waiting/Person/Capture-V2 target decisions in the architecture handoff Part C)  
+**Last housekeeping:** 26 August 2026 (Thor amendment on architecture PR #69: name ≠ identity; D-035 project-scoped mutation invariant; status categories)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
@@ -200,7 +200,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Capture→promote path once specified |
 | **Target resolution / validation point** | Capture hardening (people promotion into durable stakeholder/person identity) |
 | **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md`; `docs/SLICE2C_KNOWLEDGE_ITEM_DETAIL_HANDOVER.md`; `docs/SLICE2D_PEOPLE_CONTEXT_UI_HANDOVER.md` |
-| **Notes** | **Already delivered (do not re-open as missing UI):** Slice 1C durable stakeholder identity + `personId` on responsibilities; Slice 2C reusable person detail (`getPersonBundle` / Ocean drawer); Slice 2D People frame polish + Confirm Owner share-vs-replace (D-019 → D-R10). **Phase 3B (D-R13):** Capture apply reuses `ensurePersonOnProject` / existing Person UUIDs. An existing Person is not duplicated; continuing-responsibility statements no-op; ambiguous identity is Needs you. **Remaining open scope:** leftover Knowledge people *prose* that was never a Capture finding still may lack a stakeholder link. That is not permission to silently mint identities. |
+| **Notes** | **Already delivered (do not re-open as missing UI):** Slice 1C durable stakeholder identity + `personId` on responsibilities; Slice 2C reusable person detail (`getPersonBundle` / Ocean drawer); Slice 2D People frame polish + Confirm Owner share-vs-replace (D-019 → D-R10). **Phase 3B (D-R13):** Capture apply reuses `ensurePersonOnProject` / existing Person UUIDs. An existing Person is not duplicated **by ID**; continuing-responsibility statements no-op; ambiguous identity is Needs you. Exact-name reuse is **CURRENT** conservative resolution only — **a name is not identity** (handoff Part C §C7). Two legitimate people may share a name; do **not** add a unique-name DB constraint. **Remaining open scope:** leftover Knowledge people *prose* that was never a Capture finding still may lack a stakeholder link. That is not permission to silently mint identities. |
 
 ---
 
@@ -554,15 +554,35 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Severity** | medium |
 | **Domain** | Capture · Infra |
 | **Found in** | V1 Architectural Convergence (26 Aug 2026) |
-| **Failure class** | `planCaptureApply` is pure over `captureApplyWorldFromState(MissionState)`. There is no fresh DB load and no `expectedVersion`. `updated_at` triggers exist but persist helpers update by id only. Concurrent tabs / stale apply review can write against a world that is no longer durable truth. `persistTodoUpdate` does not include `project_id` in the WHERE clause (workspace RLS still applies). |
-| **Evidence / repro** | `src/lib/capture/apply/world.ts`; grep shows no `expectedVersion` / version columns in product tables; `persistTodoUpdate` `.eq("id", todoId)` |
-| **Likely files** | `src/lib/capture/apply/*`; `src/lib/data/supabase/persist-mutations.ts`; schema |
+| **Failure class** | `planCaptureApply` is pure over `captureApplyWorldFromState(MissionState)`. There is no fresh DB load and no `expectedVersion`. `updated_at` triggers exist but persist helpers update by id only. Concurrent tabs / stale apply review can write against a world that is no longer durable truth. |
+| **Evidence / repro** | `src/lib/capture/apply/world.ts`; grep shows no `expectedVersion` / version columns in product tables |
+| **Likely files** | `src/lib/capture/apply/*`; persist helpers; schema |
 | **Proposed fix direction** | On Capture apply (supabase mode): reload authoritative world, then `planCaptureApply`. Add integer `version` on hot tables and check it in persist helpers. Not a new mutation framework. Align remaining optimistic Capture hooks (todo complete/update, Confirm Owner) to persist-first. |
-| **Explicit non-goals** | App-wide command bus; making Phase 3B own Knowledge Centre / New Project / delete |
+| **Explicit non-goals** | App-wide command bus; making Phase 3B own Knowledge Centre / New Project / delete; treating this as the project-membership invariant (that is **D-035**) |
 | **Regression test to add** | Apply against a stale client world fails closed or revalidates; version mismatch does not silently clobber |
 | **Target resolution / validation point** | After Capture server-load; with integrity/concurrency slice — not mixed into dead-path deletion |
-| **Related docs** | Handoff Part C §C5–C6; D-005; D-R13 |
-| **Notes** | Phase 3B remains the Capture mutation boundary. This gap is revalidation + DB concurrency, not a missing framework. |
+| **Related docs** | Handoff Part C §C5–C6; D-005; D-R13; D-035 |
+| **Notes** | Phase 3B remains the Capture mutation boundary. This gap is revalidation + DB concurrency, not a missing framework. Project-membership checks on persist helpers are **D-035**, not this entry. |
+
+---
+
+### D-035 — Project-domain mutations must verify intended project membership
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | high |
+| **Domain** | Infra / all project-domain writes |
+| **Found in** | V1 Architectural Convergence; Thor amendment (26 Aug 2026) |
+| **Failure class** | **Invariant:** every project-domain mutation must verify that the target durable object belongs to the intended project before mutation. Workspace RLS is membership-wide, so an id-only UPDATE/DELETE can mutate another project’s row in the same workspace. `persistTodoUpdate` / `persistTodoDelete` (`.eq("id", todoId)` with no `project_id`) are **one known instance**, not the whole class. |
+| **Evidence / repro** | `persistTodoUpdate` in `src/lib/data/supabase/persist-mutations.ts` updates by todo id only. Equivalent helpers must be audited: risks, knowledge_items, milestones, stakeholders, memories, recommendations, history_events, capture_sessions, coach_sessions, and any other project-domain write. |
+| **Likely files** | `src/lib/data/supabase/persist-mutations.ts`; Capture apply hooks; store mutations; workspace project routes |
+| **Proposed fix direction** | Treat the quoted invariant as a persist-layer rule. Later implementation/test pass: inventory every project-domain mutation; require intended `project_id` (and workspace) on the target row before write. Do **not** fix in the architecture-docs branch. |
+| **Explicit non-goals** | A generic mutation framework; conflating this with D-034 versioning; calling this an RLS/IDOR tenant bug |
+| **Regression test to add** | Property/characterisation: a persist helper given a foreign `projectId` or a row whose `project_id` is not the intended project must not mutate that row. Cover every audited helper, not todos alone. |
+| **Target resolution / validation point** | Later implementation + Test workstream audit — after this authority is merged, not in PR #69 |
+| **Related docs** | Handoff Part C §C5 gap 5, §C6, assumption 23; D-034 (separate: apply world / version) |
+| **Notes** | Application-layer project scoping already exists on many paths (Capture apply world, some persist helpers). The defect class is **inconsistent enforcement**. Do not document or fix this as Todo-only. |
 
 ---
 
@@ -746,21 +766,20 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 6. **D-010** — canonical production default after eval evidence  
 7. **D-032** — default Capture V2 / New Project V2 then delete legacy OpenAI understanding paths (after Test workstream gates)  
 8. **D-034 / D-005 remainder** — fresh apply world + persist-first remaining Capture hooks; `version` columns with that slice  
-9. **D-028** + New Project crash residual — bundle RPCs (dedicated integrity slice)  
-10. **D-003** — suggestion persist  
-11. **D-008 / D-021** — implement the decided waiting/open-loop split  
-12. **D-007** remainder — leftover Knowledge people prose without a stakeholder link  
-13. **Person identity** — workspace `people` + participation (later; not first slice)  
-14. **D-014** remainder — live Supabase Capture apply job  
-15. **D-011** remainder — New Project extractors only  
-16. **D-004** remainder — history persist gaps outside New Project create  
-17. **D-026** — product decision on project-code uniqueness  
-18. **D-027** — Archive/undo only if product asks  
-19. **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031** — as scheduled (D-031: hide/retire Coach rather than rewrite)  
+9. **D-035** — audit **all** project-domain persist paths against the project-membership invariant (`persistTodoUpdate` is one instance)  
+10. **D-028** + New Project crash residual — bundle RPCs (dedicated integrity slice)  
+11. **D-003** — suggestion persist  
+12. **D-008 / D-021** — implement the decided waiting/open-loop split  
+13. **D-007** remainder — leftover Knowledge people prose without a stakeholder link  
+14. **Person identity** — workspace `people` + participation (later; not first slice). **No unique-name constraint.**  
+15. **D-014** remainder — live Supabase Capture apply job  
+16. **D-011** remainder — New Project extractors only  
+17. **D-004** remainder — history persist gaps outside New Project create  
+18. **D-026** — product decision on project-code uniqueness  
+19. **D-027** — Archive/undo only if product asks  
+20. **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031** — as scheduled (D-031: hide/retire Coach rather than rewrite)  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice. Do **not** begin implementation from the architecture review PR.
-
-Do **not** treat this order as a mandate to broaden an in-flight slice.
 
 ---
 

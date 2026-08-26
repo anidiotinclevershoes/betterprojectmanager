@@ -3,7 +3,7 @@
 **Workstream:** Architecture, authority & deletion review  
 **Branch:** `cursor/v1-convergence-architecture-9524`  
 **Base SHA:** `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4` (`cursor/capture-v2-desert-new-project-56c9`)  
-**Date:** 26 August 2026  
+**Date:** 26 August 2026 (includes Thor amendment: name ≠ identity; D-035; status categories)  
 **Production behaviour:** unchanged (docs only)
 
 ---
@@ -28,6 +28,16 @@ Lume already has the right bones. This review did **not** invent a new architect
 No production API, Capture, schema, or UI changes. No merge of the experimental programme PR (#66). No implementation of the architecture we recommend.
 
 **Verdict:** ready to start implementation **with specific conditions** — tests first, dead Capture code out, Tell Me loads truth from the server, then Capture V2 becomes the default and the old understanding path goes. Person table, bundle database functions, and Issue objects wait their turn.
+
+### Thor amendment (same day, docs only)
+
+Lead review accepted the report with three corrections, now applied:
+
+1. **Name is not identity.** Unique stakeholder/person **name** constraints are **rejected**. Same-name people must remain representable. Exact-name match may stay a conservative temporary resolver; if ambiguous, Needs you.
+2. **Project-scoped mutation is a broad invariant** (D-035), not a Todo-only `persistTodoUpdate` note. Later implementation/test pass audits all project-domain mutations. Not fixed here.
+3. **Status categories** are explicit: CURRENT / DECIDED V1 TARGET / TRANSITIONAL / FLAGGED / DEPRECATED / SCHEDULED FOR DELETION / UNRESOLVED (handoff legend + Part C §C0a).
+
+All other approved architectural substance is unchanged.
 
 ---
 
@@ -64,7 +74,7 @@ The 25 Aug handoff already knew Phase 3B, the V2 **flags**, Desert, and most dom
 - MissionState is cache; durable tables are authority.
 - History is evidence; canonical Ask already omits it on current-state questions.
 - Domain `risks` beat Knowledge risk prose.
-- Stakeholders + structured responsibilities beat people prose; exact name, no fuzzy merge.
+- Stakeholders + structured responsibilities beat people prose; stable IDs own identity; exact-name match is a temporary resolver only — **a name is not identity**; no unique-name constraint.
 - New Project / project delete server routes are the right persist-first pattern to copy.
 - Workspace RLS is membership, not per-project ACL — `projectId` filters stay in the app.
 - Prefer reuse/deletion over new engines. Rejected list in the programme remains rejected.
@@ -72,7 +82,7 @@ The 25 Aug handoff already knew Phase 3B, the V2 **flags**, Desert, and most dom
 
 ## 4. Which assumptions were challenged
 
-- “People are project-scoped entities” as a **standing** rule — still true **today**; **target** is workspace Person + participation.
+- “People are project-scoped entities” as a **standing** rule — still true **today**; **DECIDED V1 TARGET** is workspace Person + participation. **A name is not identity** (unique-name-as-constraint **rejected**).
 - Treating Coach as a third AI product surface to migrate carefully — constitution parks it; invest in hiding, not a Coach assembler.
 - `updated_at` as if it were concurrency — it is not used on writes.
 - Intelligence snapshots as a compression strategy for V1 — they compete with current truth on the legacy Ask path and should not be a second projection.
@@ -92,7 +102,7 @@ The 25 Aug handoff already knew Phase 3B, the V2 **flags**, Desert, and most dom
 | History | `history_events` + item provenance — evidence only |
 | Risks | `risks` table |
 | People (now) | Project `stakeholders` UUID |
-| People (target) | Workspace `people` + project participation — later slice |
+| People (target) | Workspace `people` + project participation. **Stable IDs own identity. Name is not identity. No unique-name constraint.** |
 | UI working copy | MissionState cache |
 
 Full inventory and dual-path table: handoff **Part C**.
@@ -112,7 +122,7 @@ Lowest-risk order, copying `/api/workspace/projects` and `/api/new-project`:
 
 ## 7. Person / entity recommendation
 
-Smallest future schema: `people(workspace_id, display_name, name_normalized UNIQUE)` + `stakeholders.person_id`. Remap `meta.responsibility.personId`. Add `todos.waiting_on_person_id`; keep text name as display cache. Exact normalised names only — no fuzzy merge.
+Smallest future schema: `people(workspace_id, display_name)` + `stakeholders.person_id`. **No unique constraint on name.** `UNIQUE (project_id, person_id)` is an ID participation constraint only. Remap `meta.responsibility.personId` as an explicit 1:1 mapping from existing stakeholder UUIDs — **do not collapse same-name rows**. Add `todos.waiting_on_person_id`; keep text name as display cache. Name-only resolution: if ambiguous, Needs you.
 
 **Issue stress-test:** a future first-class `issues` table can FK to people, risks, milestones, todos, knowledge/decisions, and evidence the same way `risks` already does. **No Entity-Everything table. Do not implement Issues. Do not do the Person table in the first implementation slice.**
 
@@ -123,7 +133,8 @@ Until then: stop adding new text-only relationships when a Person UUID is alread
 - New Project compensating cleanup does not run if the process dies mid-insert → one `create_project_bundle` RPC.
 - D-028 sequential delete → `delete_project_bundle` **or** CASCADE those SET NULL FKs.
 - Hot tables need integer `version` when apply revalidation lands; `updated_at` is insufficient.
-- Cheap: unique `(project_id, lower(trim(name)))` on stakeholders (matches today’s exact-name rule).
+- **Do not** add unique stakeholder/person **names**. Identity is the stable UUID. Same-name people must remain representable.
+- **Invariant (D-035):** every project-domain mutation must verify that the target durable object belongs to the intended project before mutation. `persistTodoUpdate` is one known instance. Later implementation/test pass audits the class. Not this branch.
 - Do **not** unique project `code` without the D-026 product decision.
 - Do **not** build a generic transaction framework.
 
@@ -144,16 +155,18 @@ The dual-path table is written so it can get **shorter** as those slices land, n
 ## 10. Anything the current V1 plan still misses
 
 - Client MissionState as AI context was under-specified (D-033).
-- Apply vs durable concurrency (D-034); `persistTodoUpdate` is not project-scoped in SQL.
+- Apply vs durable concurrency (D-034).
+- Project-domain mutations must verify intended project membership (D-035) — class, not Todo-only.
 - Coach vs parked-Coaching constitution.
 - Snapshot compression temptation (reject as a second truth projection).
 - Large-project control belongs in assembler caps, not a new snapshot store.
 - MP UX is in-scope but artefacts are absent locally.
+- Playwright / property tests are **UNRESOLVED** (Test workstream); existing `verify-*` suite is CURRENT.
 - Privacy: server-load does not stop the model seeing project data; it stops the browser choosing which rows are “current.”
 
 ## 11. What you explicitly recommend NOT building
 
-Generic Truth Engine; Hygiene Engine; reconciliation daemon; event-sourced rewrite; second persistence layer; Entity-Everything table; giant AI orchestration; permanent dual Capture engines; permanent dual truth projections; app-wide command bus wrapping Phase 3B; Redux/Zustand; vector DB; Advise; Issues; Person table in slice 1; Redis rate limiter “just in case.”
+Generic Truth Engine; Hygiene Engine; reconciliation daemon; event-sourced rewrite; second persistence layer; Entity-Everything table; unique-name-as-identity constraint; giant AI orchestration; permanent dual Capture engines; permanent dual truth projections; app-wide command bus wrapping Phase 3B; Redux/Zustand; vector DB; Advise; Issues; Person table in slice 1; Redis rate limiter “just in case.”
 
 ## 12. Cross-workstream dependencies
 
@@ -190,11 +203,11 @@ Generic Truth Engine; Hygiene Engine; reconciliation daemon; event-sourced rewri
 
 ## 16. Exact files changed
 
-- `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` (header, target notes, §19 deletion conditions, Part C)
-- `docs/LUME_V1_KNOWN_DISCOVERIES.md` (D-008/D-021/D-032 notes; D-033; D-034; fix order)
+- `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` (header, target notes, §19 deletion conditions, Part C; Thor amendment: status register C0a, name≠identity, D-035 invariant)
+- `docs/LUME_V1_KNOWN_DISCOVERIES.md` (D-008/D-021/D-032 notes; D-033; D-034; **D-035**; fix order)
 - `docs/README.md` (authority pointer)
 - `docs/EXPERIMENTAL_PROGRAMME.md` (convergence binding pointer)
-- `docs/V1_CONVERGENCE_ARCHITECTURE_COMPLETION.md` (this report)
+- `docs/V1_CONVERGENCE_ARCHITECTURE_COMPLETION.md` (this report, including Thor amendment)
 
 No production code, schema, UI, or Magic Patterns files.
 
@@ -204,9 +217,9 @@ None required for a docs-only delta. Ancestry and path inventory were verified b
 
 ## 18. Recommendation: merge docs / revise first / reject
 
-**Merge docs** after review (this PR only). Do not merge to `main` as an implementation. Do not merge #66 from here. Do not start implementation automatically.
+**Merge docs** after review (this PR only), **including the Thor amendment**. Do not merge to `main` as an implementation. Do not merge #66 from here. Do not start implementation automatically.
 
-If reviewers disagree on workspace-scoped Person timing or Coach retirement, revise those two Part C rows before the first implementation slice — everything else can proceed.
+If reviewers disagree on workspace-scoped Person **timing** or Coach retirement, revise those two Part C rows before the first implementation slice — everything else can proceed. Unique-name-as-identity is **not** open for revival.
 
 ---
 
