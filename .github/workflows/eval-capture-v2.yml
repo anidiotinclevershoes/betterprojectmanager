@@ -3,6 +3,10 @@ name: Capture V2 live eval
 # Opt-in paid benchmark. Does not run on pull requests.
 # Dashboard publishing cannot turn a valid eval into a product failure
 # of the deterministic regression suite — this workflow is separate.
+#
+# Push trigger is a one-shot Hulk first-live-benchmark plumbing path:
+# the cloud agent cannot create workflow_dispatch events (403).
+# Semantic corpus / prompt / resolver / scoring are not changed.
 
 on:
   workflow_dispatch:
@@ -25,6 +29,11 @@ on:
         type: string
         required: false
         default: ""
+  push:
+    branches:
+      - cursor/v1-hulk-first-live-eval-610b
+
+run-name: Capture V2 live eval (${{ github.event.inputs.provider || 'hulk-first-benchmark' }})
 
 permissions:
   contents: read
@@ -32,7 +41,7 @@ permissions:
 jobs:
   eval:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -41,23 +50,48 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Pre-run frozen eval verification
+        run: npm run verify:eval-capture-v2
       - name: Live Capture V2 eval
         id: eval
-        run: |
-          mkdir -p test-results
-          extra=()
-          if [ -n "${{ github.event.inputs.model }}" ]; then
-            extra+=(--model "${{ github.event.inputs.model }}")
-          fi
-          npx --yes tsx scripts/eval-capture-v2.ts \
-            --provider "${{ github.event.inputs.provider }}" \
-            --runs "${{ github.event.inputs.runs }}" \
-            --out test-results/capture-v2-eval.json \
-            "${extra[@]}"
         env:
+          EVAL_EVENT: ${{ github.event_name }}
+          EVAL_PROVIDER: ${{ github.event.inputs.provider }}
+          EVAL_RUNS: ${{ github.event.inputs.runs }}
+          EVAL_MODEL: ${{ github.event.inputs.model }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          mkdir -p test-results
+          run_eval() {
+            npx --yes tsx scripts/eval-capture-v2.ts "$@"
+          }
+          if [ "$EVAL_EVENT" = "push" ]; then
+            # Sequential: same frozen task for every approved candidate.
+            # Do not stop Model B because Model A recorded Lume failures.
+            set +e
+            run_eval --provider all --runs 3 --out test-results/capture-v2-eval.json
+            s1=$?
+            run_eval --provider openai --model gpt-4.1-mini --runs 3 --out test-results/eval-capture-v2.json
+            s2=$?
+            set -e
+            echo "eval_exit_all=$s1 eval_exit_openai_challenger=$s2"
+            if [ "$s1" -ne 0 ] || [ "$s2" -ne 0 ]; then
+              echo "One or more live evals exited non-zero. Evidence is still uploaded."
+              exit 1
+            fi
+          else
+            extra=()
+            if [ -n "$EVAL_MODEL" ]; then
+              extra+=(--model "$EVAL_MODEL")
+            fi
+            run_eval \
+              --provider "${EVAL_PROVIDER:-openai}" \
+              --runs "${EVAL_RUNS:-3}" \
+              --out test-results/capture-v2-eval.json \
+              "${extra[@]}"
+          fi
       - name: Job summary
         if: always()
         continue-on-error: true
