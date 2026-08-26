@@ -1,0 +1,143 @@
+{
+  "caseId": "duplicate-observation",
+  "transcript": "Gumdrop Bridge icing is resolved. Also, the Gumdrop Bridge icing issue is resolved.",
+  "result": {
+    "memory": {
+      "id": "mem-mt9ud2ag-209kv5",
+      "type": "conversation",
+      "projectId": "proj-candy",
+      "title": "Gumdrop Bridge icing is resolved. Also, the Gumdrop Bridge icing issue i",
+      "content": "Gumdrop Bridge icing is resolved. Also, the Gumdrop Bridge icing issue is resolved.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T08:38:11.416Z",
+      "createdAt": "2026-08-26T08:38:11.416Z",
+      "source": "capture"
+    },
+    "insights": [
+      "Gumdrop Bridge icing is resolved",
+      "Gumdrop Bridge icing issue is resolved"
+    ],
+    "assumptions": [],
+    "recommendations": [
+      {
+        "id": "rec-4h1vsm8x",
+        "kind": "risk",
+        "urgency": "this_week",
+        "title": "Gumdrop Bridge icing is resolved",
+        "action": "Gumdrop Bridge icing is resolved",
+        "why": "Gumdrop Bridge icing is resolved.",
+        "leadershipImpact": "Act on validated Capture findings without inventing duplicate work.",
+        "projectId": "proj-candy",
+        "relatedMemoryIds": [
+          "mem-mt9ud2ag-209kv5"
+        ],
+        "createdAt": "2026-08-26T08:38:11.416Z",
+        "status": "active",
+        "operation": "complete",
+        "itemType": "risk",
+        "targetTitle": "Gumdrop Bridge icing is resolved",
+        "sourceFindingId": "find-obs-a",
+        "proposedOperationId": "v2op-obs-a",
+        "confidence": 0
+      }
+    ],
+    "rawContent": "Gumdrop Bridge icing is resolved. Also, the Gumdrop Bridge icing issue is resolved.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-candy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 2,
+      "proposedChanges": 1,
+      "alreadyKnown": 0,
+      "merged": 1,
+      "needsYou": 0,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-a",
+        "fact": "Gumdrop Bridge icing is resolved",
+        "evidence": "Gumdrop Bridge icing is resolved.",
+        "findingType": "ENTITY_COMPLETED",
+        "target": {
+          "entityType": "risk",
+          "entityId": "risk-bridge",
+          "title": "Gumdrop Bridge icing is resolved"
+        },
+        "changes": {
+          "value": {
+            "proposed": "Gumdrop Bridge icing is resolved"
+          }
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Gumdrop Bridge icing is resolved",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      },
+      {
+        "id": "find-obs-b",
+        "fact": "Gumdrop Bridge icing issue is resolved",
+        "evidence": "the Gumdrop Bridge icing issue is resolved.",
+        "findingType": "NO_CHANGE",
+        "target": {
+          "entityType": "risk",
+          "entityId": "risk-bridge",
+          "title": "Gumdrop Bridge icing issue is resolved"
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Gumdrop Bridge icing issue is resolved",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-a",
+        "sourceFindingId": "find-obs-a",
+        "operation": "COMPLETE",
+        "entityType": "risk",
+        "targetId": "risk-bridge",
+        "targetTitle": "Gumdrop Bridge icing is resolved",
+        "proposedValues": {
+          "status": "resolved"
+        },
+        "reason": "Gumdrop Bridge icing is resolved",
+        "evidence": "Gumdrop Bridge icing is resolved.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      },
+      {
+        "id": "v2op-obs-b",
+        "sourceFindingId": "find-obs-b",
+        "operation": "NO_CHANGE",
+        "entityType": "risk",
+        "targetId": "risk-bridge",
+        "targetTitle": "Gumdrop Bridge icing issue is resolved",
+        "proposedValues": {},
+        "reason": "Merged with obs-a.",
+        "evidence": "the Gumdrop Bridge icing issue is resolved.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ]
+  }
+}

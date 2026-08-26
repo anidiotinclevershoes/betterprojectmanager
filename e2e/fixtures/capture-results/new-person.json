@@ -1,0 +1,109 @@
+{
+  "caseId": "new-person",
+  "transcript": "Marzipan Cole is joining as float marshal next Monday.",
+  "result": {
+    "memory": {
+      "id": "mem-mt9ud2ac-gfou0g",
+      "type": "conversation",
+      "projectId": "proj-candy",
+      "title": "Marzipan Cole is joining as float marshal next Monday.",
+      "content": "Marzipan Cole is joining as float marshal next Monday.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T08:38:11.412Z",
+      "createdAt": "2026-08-26T08:38:11.412Z",
+      "source": "capture"
+    },
+    "insights": [
+      "Marzipan Cole is joining as float marshal"
+    ],
+    "assumptions": [],
+    "recommendations": [
+      {
+        "id": "rec-2u89805v",
+        "kind": "stakeholder_update",
+        "urgency": "this_week",
+        "title": "Marzipan Cole",
+        "action": "Marzipan Cole is joining as float marshal",
+        "why": "Marzipan Cole is joining as float marshal next Monday.",
+        "leadershipImpact": "Act on validated Capture findings without inventing duplicate work.",
+        "projectId": "proj-candy",
+        "relatedMemoryIds": [
+          "mem-mt9ud2ac-gfou0g"
+        ],
+        "createdAt": "2026-08-26T08:38:11.412Z",
+        "status": "active",
+        "operation": "create",
+        "itemType": "stakeholder",
+        "targetTitle": "Marzipan Cole",
+        "sourceFindingId": "find-obs-marzipan",
+        "proposedOperationId": "v2op-obs-marzipan",
+        "confidence": 0
+      }
+    ],
+    "rawContent": "Marzipan Cole is joining as float marshal next Monday.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-candy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 1,
+      "proposedChanges": 1,
+      "alreadyKnown": 0,
+      "merged": 0,
+      "needsYou": 0,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-marzipan",
+        "fact": "Marzipan Cole is joining as float marshal",
+        "evidence": "Marzipan Cole is joining as float marshal next Monday.",
+        "findingType": "NEW_INFORMATION",
+        "target": {
+          "entityType": "stakeholder",
+          "title": "Marzipan Cole"
+        },
+        "changes": {
+          "value": {
+            "proposed": "Marzipan Cole is joining as float marshal"
+          }
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Marzipan Cole is joining as float marshal",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-marzipan",
+        "sourceFindingId": "find-obs-marzipan",
+        "operation": "CREATE",
+        "entityType": "stakeholder",
+        "targetTitle": "Marzipan Cole",
+        "proposedValues": {
+          "name": "Marzipan Cole",
+          "role": "float marshal",
+          "personName": "Marzipan Cole"
+        },
+        "reason": "Marzipan Cole is joining as float marshal",
+        "evidence": "Marzipan Cole is joining as float marshal next Monday.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ]
+  }
+}

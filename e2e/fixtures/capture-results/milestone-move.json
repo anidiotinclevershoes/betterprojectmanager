@@ -1,0 +1,109 @@
+{
+  "caseId": "milestone-move",
+  "transcript": "Parade day is now 29 October 2026.",
+  "result": {
+    "memory": {
+      "id": "mem-mt9ud2ad-3zu6ck",
+      "type": "conversation",
+      "projectId": "proj-candy",
+      "title": "Parade day is now 29 October 2026.",
+      "content": "Parade day is now 29 October 2026.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T08:38:11.413Z",
+      "createdAt": "2026-08-26T08:38:11.413Z",
+      "source": "capture"
+    },
+    "insights": [
+      "Parade day moved to 29 October 2026"
+    ],
+    "assumptions": [],
+    "recommendations": [
+      {
+        "id": "rec-dfw0p0af",
+        "kind": "leadership",
+        "urgency": "this_week",
+        "title": "Parade day",
+        "action": "Parade day moved to 29 October 2026",
+        "why": "Parade day is now 29 October 2026.",
+        "leadershipImpact": "Act on validated Capture findings without inventing duplicate work.",
+        "projectId": "proj-candy",
+        "relatedMemoryIds": [
+          "mem-mt9ud2ad-3zu6ck"
+        ],
+        "createdAt": "2026-08-26T08:38:11.413Z",
+        "status": "active",
+        "operation": "update",
+        "itemType": "milestone",
+        "targetTitle": "Parade day",
+        "sourceFindingId": "find-obs-parade",
+        "proposedOperationId": "v2op-obs-parade",
+        "confidence": 0
+      }
+    ],
+    "rawContent": "Parade day is now 29 October 2026.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-candy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 1,
+      "proposedChanges": 1,
+      "alreadyKnown": 0,
+      "merged": 0,
+      "needsYou": 0,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-parade",
+        "fact": "Parade day moved to 29 October 2026",
+        "evidence": "Parade day is now 29 October 2026.",
+        "findingType": "ENTITY_UPDATED",
+        "target": {
+          "entityType": "milestone",
+          "entityId": "ms-parade",
+          "title": "Parade day"
+        },
+        "changes": {
+          "value": {
+            "proposed": "Parade day moved to 29 October 2026"
+          }
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Parade day moved to 29 October 2026",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-parade",
+        "sourceFindingId": "find-obs-parade",
+        "operation": "UPDATE",
+        "entityType": "milestone",
+        "targetId": "ms-parade",
+        "targetTitle": "Parade day",
+        "proposedValues": {
+          "date": "2026-10-29"
+        },
+        "reason": "Parade day moved to 29 October 2026",
+        "evidence": "Parade day is now 29 October 2026.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ]
+  }
+}
