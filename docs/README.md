@@ -1,6 +1,6 @@
 # Lume documentation
 
-**Status:** Documentation authority map (21 August 2026)  
+**Status:** Documentation authority map (26 August 2026)  
 **Scope:** How to read Lume docs. This file does not replace product philosophy or current architecture.
 
 Use this page first. Then read only what the task needs.
@@ -39,7 +39,8 @@ Governs:
 - feature flags;
 - legacy/transitional systems;
 - reusable helpers;
-- current technical seams.
+- current technical seams;
+- **Part C** — binding V1 Architectural Convergence *target* decisions (26 Aug 2026). If Part A/B and Part C disagree on a target, Part C wins. If they disagree on what the code does now, the code wins.
 
 If this handoff and the code disagree, **the code wins** and the handoff should be updated.
 
@@ -88,7 +89,7 @@ For ordinary development:
 
 1. `docs/README.md` (this file)
 2. `docs/v1-reference-pack/README.md`
-3. `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`
+3. `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` (including **Part C** — V1 Architectural Convergence decisions, 26 Aug 2026)
 4. `docs/LUME_V1_KNOWN_DISCOVERIES.md`
 5. only the relevant historical `SLICE*` handover when extending that particular seam
 6. Intelligence Contract (`docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`) when doing Ask / eval / intelligence-scoring work
@@ -119,7 +120,7 @@ Left in place on purpose. They record *why* the architecture evolved.
 | --- | --- | --- |
 | Pre-slice architecture snapshot | `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` (19 Aug 2026) | Original failure analysis; **superseded as an implementation map** |
 | UI/application snapshot | `docs/current-state/` (11 Aug 2026) | Screenshots and pre-Ocean / pre-Supabase UI evidence |
-| Slice / phase handovers | `docs/SLICE*.md`, `docs/PHASE*.md`, completion reports | Seam history when extending that slice |
+| Slice / phase handovers | `docs/SLICE*.md`, `docs/PHASE*.md`, completion reports, `docs/V1_CONVERGENCE_ARCHITECTURE_COMPLETION.md` | Seam history when extending that slice; architecture review checkpoint |
 | Older product copy | repository root `README.md` | Setup remnants; not current product/architecture authority |
 
 Do not move or delete these in ordinary work. Do not rewrite them to pretend they always described today’s system.
@@ -132,7 +133,7 @@ Not every PR must touch every document.
 
 When a **substantive development slice** changes architecture:
 
-- update `LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` if the current architecture map materially changed;
+- update `LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` if the current architecture map materially changed (including Part C if a convergence decision is completed or reversed);
 - update `LUME_V1_KNOWN_DISCOVERIES.md` if open/resolved debt changed;
 - create/update that slice’s handover;
 - avoid copying mutable implementation status (feature flags, “not yet persisted”, Capture promotion state) into stable philosophy documents.

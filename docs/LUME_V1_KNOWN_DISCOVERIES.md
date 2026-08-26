@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 25 August 2026 (Experimental Programme: Capture V2 / New Project V2 flags; Desert appearance; D-032)  
+**Last housekeeping:** 26 August 2026 (V1 Architectural Convergence delta: D-033/D-034; waiting/Person/Capture-V2 target decisions in the architecture handoff Part C)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
@@ -215,12 +215,12 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Failure class** | Waiting work appears as `todos` (WAITING) and/or `knowledge.sections.openLoops` → duplicate or contradictory open loops in Ask/KC |
 | **Evidence / repro** | Add waiting todo vs open-loop knowledge bullet; inspect Tell Me / serialize coverage |
 | **Likely files** | todos persist; openLoops knowledge; `serialize.ts`; Capture context |
-| **Proposed fix direction** | Decide single authority for waiting (likely todos); Knowledge openLoops as projection/narrative only |
-| **Explicit non-goals** | Full GTD redesign |
-| **Regression test to add** | Authority rule characterisation once decided |
-| **Target resolution / validation point** | ambiguous — see Notes |
-| **Related docs** | Architecture audit |
-| **Notes** | Could land under open-loop/To Do architecture, Capture hardening (if Capture writes both), or Ask/canonical convergence (if only retrieval suffers). Do not fix opportunistically inside unrelated slices until authority is decided. |
+| **Proposed fix direction** | **Authority decided (26 Aug convergence, not implemented):** todos `WAITING`/`CHASE`/`waitingOn` = maintained waiting *work*; `openLoops` / structured `open_loop` = narrative Knowledge until promoted (then superseded) or closed. KC Waiting frame may still concatenate as a view. Do not fuzzy-dedupe. Canonical Ask must not treat them as interchangeable. |
+| **Explicit non-goals** | Full GTD redesign; a third waiting store |
+| **Regression test to add** | Authority rule characterisation: waiting todos vs openLoop narrative; promotion supersedes the openLoop |
+| **Target resolution / validation point** | Open-loop / To Do architecture slice — after tests lock current concatenation behaviour |
+| **Related docs** | Architecture audit; `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` Part C §C2 |
+| **Notes** | Authority is now decided in the handoff. Implementation is a later slice. Do not fix opportunistically inside unrelated slices. |
 
 ---
 
@@ -397,12 +397,12 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Failure class** | Canonical Ask now includes Todo-domain open items + WAITING/CHASE and may still include Knowledge `openLoops` / open_loop structured facts. Soft overlap can remain when the same loop exists in both stores |
 | **Evidence / repro** | Project with matching todo title and openLoops bullet; inspect AUTHORITATIVE PROJECT STATE sections |
 | **Likely files** | `src/lib/canonical-truth/serialize.ts`; Todo/open-loop authority slice |
-| **Proposed fix direction** | Dedicated open-loop/Todo authority decision (see D-008); optional deterministic dedupe only after authority is clear |
-| **Explicit non-goals** | Fully resolving D-008 inside Ask context convergence |
-| **Regression test to add** | After authority decision — not encoded as green “deduped” behaviour yet |
+| **Proposed fix direction** | Follow D-008 / handoff Part C: Ask waiting block from todos only as *work*; `open_loop` items remain Knowledge narrative. No fuzzy title dedupe. Promotion must supersede the openLoop. |
+| **Explicit non-goals** | Fully resolving D-008 inside an Ask-only PR; string-similarity merge |
+| **Regression test to add** | After authority implementation — not encoded as green “deduped” behaviour yet |
 | **Target resolution / validation point** | Open-loop / To Do architecture slice (same family as D-008) |
-| **Related docs** | D-008; `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
-| **Notes** | 1D intentionally did not force a full dedupe redesign. Slice 2A Waiting frame may surface both todo waiting/chase and Knowledge openLoops — UI does not invent dedupe. |
+| **Related docs** | D-008; `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md`; handoff Part C §C2 |
+| **Notes** | 1D intentionally did not force a full dedupe redesign. Authority is now decided; implementation is later. Slice 2A Waiting frame may still surface both as a view. |
 
 ---
 
@@ -517,12 +517,52 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Failure class** | `LUME_CAPTURE_V2` and `LUME_NEW_PROJECT_V2` keep legacy OpenAI/local paths alongside observation pipelines. Permanent dual engines would reintroduce matching/heuristic drift. |
 | **Evidence / repro** | Unset flags → `/api/capture` uses findings + `tidyAndCoachWithOpenAI` / local regex; flags `=1` + OpenAI → `src/lib/capture-v2` / `src/lib/new-project-v2`. Phase 3B apply is shared. |
 | **Likely files** | `src/app/api/capture/route.ts`; `src/app/api/new-project/route.ts`; `src/lib/capture-v2`; `src/lib/new-project-v2`; `docs/EXPERIMENTAL_PROGRAMME.md` |
-| **Proposed fix direction** | After independent review: either default V2 and delete the OpenAI findings path, or disable V2. Keep Phase 3B. Local/no-OpenAI Capture remains legacy (V2 does not add regex). |
-| **Explicit non-goals** | A second NLP/matching engine; weakening 3A/3B |
+| **Proposed fix direction** | **Convergence decision:** Capture V2 is the V1 Capture engine. After the required server-backed/manual/automated V2 gates, default V2 on and **delete** the legacy OpenAI findings path (git is rollback). Keep Phase 3B. Local/no-OpenAI Capture remains a fallback — V2 does not add regex. Same pattern for New Project V2 vs Talk assemble. |
+| **Explicit non-goals** | A second NLP/matching engine; weakening 3A/3B; permanent dual engines |
 | **Regression test to add** | `verify-capture-v2`; `verify-new-project-v2`; phase 3B suite still green |
-| **Target resolution / validation point** | Experimental Programme merge decision |
-| **Related docs** | `docs/EXPERIMENTAL_PROGRAMME.md`; D-011; D-R13 |
-| **Notes** | Desert is not flagged. Ocean remains the default appearance. |
+| **Target resolution / validation point** | Close to V2 default-on (not a terminal cleanup PR) |
+| **Related docs** | `docs/EXPERIMENTAL_PROGRAMME.md`; D-011; D-R13; handoff Part C §C8 |
+| **Notes** | Desert is not flagged. Ocean remains the default appearance. Immediate-merge `captureWithAI` / unmounted `CaptureBar` can be deleted earlier — they are already off the Ocean path. |
+
+---
+
+### D-033 — AI decision routes accept browser-supplied MissionState as current truth
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | high |
+| **Domain** | Ask/Tell Me · Capture · Infra |
+| **Found in** | V1 Architectural Convergence (26 Aug 2026) |
+| **Failure class** | `/api/tell-me`, `/api/tell-me/refresh`, `/api/capture`, and `/api/coach` treat client-posted `MissionState` (full or sliced) as the project truth the model sees. Workspace RLS already prevents cross-tenant reads; this is not primarily IDOR. Harm is stale/forged *own-session* context, unpredictable prompts, unbounded payloads, and a second “truth” besides durable tables. |
+| **Evidence / repro** | `POST /api/tell-me` returns 400 without `body.state`. `/api/capture` builds `buildCaptureContext` / V2 world exclusively from `body.state`. `/api/workspace/projects` already loads server-side after persist. |
+| **Likely files** | `src/app/api/tell-me/route.ts`; `src/app/api/tell-me/refresh/route.ts`; `src/app/api/capture/route.ts`; `src/app/api/coach/route.ts`; `src/lib/store.tsx` `requestCaptureAnalysis`; `TellMeSessionContext.tsx` |
+| **Proposed fix direction** | `projectId` + intent → `requireAiCaller` → `loadMissionStateFromSupabase` → existing `serializeCanonicalTruth` / `captureApplyWorldFromState`. Lowest-risk surface: Tell Me first. Add payload caps and production telemetry on the same slices. |
+| **Explicit non-goals** | Claiming this as an RLS/IDOR repair; a new snapshot architecture; sending client-constructed current-truth JSON |
+| **Regression test to add** | Tell Me / Capture analysis ignore a client-supplied contradictory MissionState when supabase-mode (server load wins) |
+| **Target resolution / validation point** | Server-truth migration slices (Tell Me, then Capture) |
+| **Related docs** | Handoff Part C §C3–C4; D-010; D-032 |
+| **Notes** | Project scoping remains application-layer because RLS is workspace membership. `/api/new-project` already sends intent only. |
+
+---
+
+### D-034 — Capture apply validates against client world; no durable row versioning
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Capture · Infra |
+| **Found in** | V1 Architectural Convergence (26 Aug 2026) |
+| **Failure class** | `planCaptureApply` is pure over `captureApplyWorldFromState(MissionState)`. There is no fresh DB load and no `expectedVersion`. `updated_at` triggers exist but persist helpers update by id only. Concurrent tabs / stale apply review can write against a world that is no longer durable truth. `persistTodoUpdate` does not include `project_id` in the WHERE clause (workspace RLS still applies). |
+| **Evidence / repro** | `src/lib/capture/apply/world.ts`; grep shows no `expectedVersion` / version columns in product tables; `persistTodoUpdate` `.eq("id", todoId)` |
+| **Likely files** | `src/lib/capture/apply/*`; `src/lib/data/supabase/persist-mutations.ts`; schema |
+| **Proposed fix direction** | On Capture apply (supabase mode): reload authoritative world, then `planCaptureApply`. Add integer `version` on hot tables and check it in persist helpers. Not a new mutation framework. Align remaining optimistic Capture hooks (todo complete/update, Confirm Owner) to persist-first. |
+| **Explicit non-goals** | App-wide command bus; making Phase 3B own Knowledge Centre / New Project / delete |
+| **Regression test to add** | Apply against a stale client world fails closed or revalidates; version mismatch does not silently clobber |
+| **Target resolution / validation point** | After Capture server-load; with integrity/concurrency slice — not mixed into dead-path deletion |
+| **Related docs** | Handoff Part C §C5–C6; D-005; D-R13 |
+| **Notes** | Phase 3B remains the Capture mutation boundary. This gap is revalidation + DB concurrency, not a missing framework. |
 
 ---
 
@@ -701,20 +741,24 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 1. ~~**D-006**~~ — fixed in Phase 3A (D-R11)  
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
 3. ~~**D-019**~~ — fixed in Slice 2D (D-R10)  
-4. **D-007** remainder — leftover Knowledge people prose without a stakeholder link  
-5. ~~**D-023**~~ — fixed in Slice 2C (D-R09)  
-6. ~~**D-022**~~ — fixed in Slice 2B; residual **D-025** / **D-013** → Phase 3D  
-7. ~~**D-017**~~ — fixed in Phase 3B (D-R13)  
-8. **D-014** remainder — live Supabase Capture apply job (deterministic fake path landed in 3B)  
-9. **D-011** remainder — New Project extractors only  
-10. **D-003** — suggestion persist (V1 product hardening)  
-11. **D-005** remainder — persist-first for remaining optimistic store paths (Capture Risk/milestone/Person/availability landed in 3B)  
-12. **D-004** remainder — history persist gaps outside New Project create (create-path coupling decided in 3A)  
-13. ~~**D-009 / D-018**~~ — fixed in Slice 1D; **D-010** residual until canonical production default  
-14. **D-026** — product decision on project-code uniqueness  
-15. **D-028** — optional later bundle RPC for delete (same class as create)  
-16. **D-027** — Archive/undo only if product asks; not required for V1 hygiene  
-17. **D-008 / D-021**, **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031** — as scheduled  
+4. **Dead Capture merge path** — unmounted `CaptureBar` / `captureWithAI` / `applyCaptureResult` (shortens dual-path table immediately)  
+5. **D-033** — Tell Me server-load of canonical truth (then Capture)  
+6. **D-010** — canonical production default after eval evidence  
+7. **D-032** — default Capture V2 / New Project V2 then delete legacy OpenAI understanding paths (after Test workstream gates)  
+8. **D-034 / D-005 remainder** — fresh apply world + persist-first remaining Capture hooks; `version` columns with that slice  
+9. **D-028** + New Project crash residual — bundle RPCs (dedicated integrity slice)  
+10. **D-003** — suggestion persist  
+11. **D-008 / D-021** — implement the decided waiting/open-loop split  
+12. **D-007** remainder — leftover Knowledge people prose without a stakeholder link  
+13. **Person identity** — workspace `people` + participation (later; not first slice)  
+14. **D-014** remainder — live Supabase Capture apply job  
+15. **D-011** remainder — New Project extractors only  
+16. **D-004** remainder — history persist gaps outside New Project create  
+17. **D-026** — product decision on project-code uniqueness  
+18. **D-027** — Archive/undo only if product asks  
+19. **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031** — as scheduled (D-031: hide/retire Coach rather than rewrite)  
+
+Do **not** treat this order as a mandate to broaden an in-flight slice. Do **not** begin implementation from the architecture review PR.
 
 Do **not** treat this order as a mandate to broaden an in-flight slice.
 
