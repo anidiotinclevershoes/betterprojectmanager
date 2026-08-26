@@ -9,7 +9,8 @@ export function walkthroughPath(name: string): string | null {
 
 export const CANDYLAND_ID = "proj-candy";
 export const TOYWORLD_ID = "proj-toy";
-const STORAGE_KEY = "mission-control-state-v5";
+export const GAMING_ID = "proj-game";
+export const STORAGE_KEY = "mission-control-state-v5";
 const CAPTURE_SESSION_KEY = "lume-capture-session-v1";
 const FIXTURES = join(process.cwd(), "e2e/fixtures");
 
@@ -138,4 +139,25 @@ export async function openKnowledgeCentre(page: Page) {
   await dismissCoachIfPresent(page);
   await page.getByTestId("ocean-mode-knowledge").click();
   await expect(page.getByTestId("ocean-knowledge-centre")).toBeVisible();
+}
+
+export async function startNewCapture(page: Page) {
+  await dismissCoachIfPresent(page);
+  await page.getByRole("button", { name: "New Capture" }).click();
+  await expect(page.getByTestId("ocean-capture-input")).toBeVisible();
+}
+
+export async function readMissionState(page: Page) {
+  return page.evaluate((key) => {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as unknown) : null;
+  }, STORAGE_KEY);
+}
+
+export async function writeStackedSnapshot(name: string, value: unknown) {
+  const { mkdirSync, writeFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const dir = join(process.cwd(), "test-results");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, name), JSON.stringify(value, null, 2));
 }
