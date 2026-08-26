@@ -16,6 +16,23 @@ import { PINNED_OPENAI_CHAT_MODEL } from "@/lib/openai-model";
 
 export const FROZEN_V2_BASELINE_VERSION = "capture-v2-eval-baseline-v1";
 
+/**
+ * Corpus composition freeze (Hulk amendment).
+ * Independent of the V2 prompt/schema/model freeze above.
+ * Finalised before any live provider result was seen.
+ */
+export const FROZEN_CORPUS_COMPOSITION = {
+  version: "capture-v2-eval-corpus-v1-hulk",
+  finalisedAt: "2026-08-26",
+  liveProviderResultsSeen: false,
+  note: "Corpus composition was finalised BEFORE any live provider result was seen. Do not alter cases in response to later model output.",
+  worlds: {
+    candyland: "largest share; Playwright journeys and cross-project bait remain here",
+    toyworld: "several genuine semantic cases (not bait-only)",
+    gamingstudio5000: "several genuine semantic cases (not bait-only)",
+  },
+} as const;
+
 export const FROZEN_PROGRAMME_BASE = {
   branch: "cursor/capture-v2-desert-new-project-56c9",
   headSha: "3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4",
@@ -95,6 +112,7 @@ export const FROZEN_V2_BASELINE = {
   projectContextShape: FROZEN_PROJECT_CONTEXT_SHAPE,
   reasoning: FROZEN_REASONING_SETTINGS,
   suggestedChallengers: SUGGESTED_EVAL_CHALLENGERS,
+  corpusComposition: FROZEN_CORPUS_COMPOSITION,
   note: "Benchmark is a measuring instrument. Do not train against the test.",
 } as const;
 

@@ -7,3 +7,5 @@ This folder is the Capture V2 **test / evaluation** workstream. It must not be m
 - Completion report: `TEST_FOUNDATION.md`
 - Test-debt inventory: `TEST_DEBT.md`
 - Vercel AI SDK spike: `VERCEL_AI_SDK_SPIKE.md`
+
+Corpus composition (`capture-v2-eval-corpus-v1-hulk`) was finalised **before any live provider result was seen**.

@@ -8,7 +8,7 @@ This branch **adds tests and measuring instruments**. It does **not** change how
 
 ## 1. What was built
 
-- A frozen Capture V2 **benchmark corpus** (22 fictional Candyland cases).
+- A frozen Capture V2 **benchmark corpus** (22 cases across Candyland, Toyworld, and GamingStudio5000).
 - A **live eval harness** (`npm run eval:capture-v2`) that can call OpenAI, Anthropic, and Gemini with the **same** V2 prompt/schema.
 - **Model metrics kept separate** (recall, false positives, domain, existing-vs-new, stable IDs, ambiguity, no-change, commentary, stability, cost). No single score.
 - **Lume safety metrics** after the real V2 validate → resolve → Phase 3B plan path: MODEL FAILURE / LUME CATCH / LUME FAILURE.
@@ -40,9 +40,19 @@ Record: `src/lib/eval-capture-v2/baseline.ts`. If production prompt/schema/model
 
 ## 4. Benchmark corpus summary
 
-22 cases on Candyland, with Toyworld / GamingStudio5000 used as contamination bait. Fresh wording (no Niamh/CAB).
+22 cases. **Corpus composition was finalised BEFORE any live provider result was seen.**
 
-Includes: existing Person, new Person, same-first-name ambiguity, responsibility continue/replace, share-vs-replace, existing/new/resolved Risk, date move, unchanged date, To Do, availability, duplicate restatement, spoken correction, mixed domains, pronoun ambiguity, commentary, explicit no-change, cross-project bait, Toyworld bait, foreign-ID envelope (fixture-only).
+Hulk amendment (this revision): the same semantic coverage was redistributed so Toyworld and GamingStudio5000 hold genuine cases, not only contamination bait. Case count stayed at 22. No cases were added for volume.
+
+| World | Genuine cases | Role |
+| --- | --- | --- |
+| Candyland | 10 (largest) | Existing Person, share-vs-replace, Risk resolve, date move, To Do, availability, mixed domains, isolation bait, foreign-ID fixture |
+| Toyworld | 6 | New Person, same-first-name ambiguity, existing Risk update, unchanged date, duplicate restatement, explicit no-change |
+| GamingStudio5000 | 6 | Responsibility continue/replace, new Risk, spoken correction, pronoun ambiguity, commentary |
+
+Dimensions retained across the three worlds: existing/new Person, ambiguity, responsibility, Risk, milestone/date, Todo, availability, correction, no-change, commentary, mixed domains, cross-project protection.
+
+Fresh wording (no Niamh/CAB). After the first live model run, freeze this semantic corpus and do not alter it in response to model results.
 
 ## 5. New test tooling added and why
 

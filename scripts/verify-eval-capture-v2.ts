@@ -10,10 +10,13 @@ import { join } from "node:path";
 import {
   CAPTURE_V2_EVAL_CORPUS,
   REQUIRED_CORPUS_CATEGORIES,
+  CORPUS_WORLD_PROJECT_ID,
+  corpusWorldCounts,
 } from "../src/lib/eval-capture-v2/corpus";
 import {
   FROZEN_SYSTEM_MESSAGE,
   FROZEN_V2_BASELINE,
+  FROZEN_CORPUS_COMPOSITION,
   baselineStillMatchesProduction,
 } from "../src/lib/eval-capture-v2/baseline";
 import { evaluateAgainstCase, evaluateFrozenCase } from "../src/lib/eval-capture-v2/pipeline";
@@ -22,7 +25,7 @@ import { scoreModelObservations } from "../src/lib/eval-capture-v2/scoring";
 import { runCaptureV2Eval } from "../src/lib/eval-capture-v2/harness";
 import { PINNED_OPENAI_CHAT_MODEL } from "../src/lib/openai-model";
 import { isCaptureV2Enabled } from "../src/lib/capture-v2/flag";
-import { CANDYLAND_ID } from "../src/lib/experiments/worlds";
+import { CANDYLAND_ID, GAMING_ID, TOYWORLD_ID } from "../src/lib/experiments/worlds";
 
 function check(name: string, fn: () => void | Promise<void>) {
   return Promise.resolve(fn()).then(() => console.log(`✓ ${name}`));
@@ -51,16 +54,45 @@ async function main() {
     assert.equal(isCaptureV2Enabled({ LUME_CAPTURE_V2: "true" }), true);
   });
 
-  await check("corpus is 15–25 high-value cases covering required categories", () => {
+  await check("corpus is 15–25 high-value cases covering required categories across three worlds", () => {
     assert.ok(CAPTURE_V2_EVAL_CORPUS.length >= 15);
     assert.ok(CAPTURE_V2_EVAL_CORPUS.length <= 25);
     const categories = new Set(CAPTURE_V2_EVAL_CORPUS.map((c) => c.category));
     for (const required of REQUIRED_CORPUS_CATEGORIES) {
       assert.ok(categories.has(required), `missing category ${required}`);
     }
-    assert.ok(CAPTURE_V2_EVAL_CORPUS.every((c) => c.projectId === CANDYLAND_ID));
+    for (const row of CAPTURE_V2_EVAL_CORPUS) {
+      assert.equal(row.projectId, CORPUS_WORLD_PROJECT_ID[row.world], row.id);
+    }
+    const counts = corpusWorldCounts();
+    assert.ok(counts.candyland > counts.toyworld, "Candyland must remain the largest world");
+    assert.ok(counts.candyland > counts.gamingstudio5000, "Candyland must remain the largest world");
+    assert.ok(counts.toyworld >= 5, "Toyworld must hold several genuine semantic cases");
+    assert.ok(counts.gamingstudio5000 >= 5, "GamingStudio5000 must hold several genuine semantic cases");
+    assert.equal(FROZEN_CORPUS_COMPOSITION.liveProviderResultsSeen, false);
+    assert.equal(
+      FROZEN_CORPUS_COMPOSITION.note.includes("BEFORE any live provider result"),
+      true,
+    );
     const joined = CAPTURE_V2_EVAL_CORPUS.map((c) => c.transcript).join(" ");
     assert.equal(/Niamh|CAB pack|Priya Shah|Atlas Platform/i.test(joined), false);
+    const candyVocab = /gumdrop|parade|licorice|candy-cane|fizz caramel|pippa/i;
+    const toyVocab = /velvet sprocket|wooden-track|warehouse|packaging delay|track freeze/i;
+    const gameVocab = /pixel ramos|nova quill|shader compile|chiptunes|boss balancing|audio bus/i;
+    const toyText = CAPTURE_V2_EVAL_CORPUS.filter((c) => c.world === "toyworld")
+      .map((c) => c.transcript)
+      .join(" ");
+    const gameText = CAPTURE_V2_EVAL_CORPUS.filter((c) => c.world === "gamingstudio5000")
+      .map((c) => c.transcript)
+      .join(" ");
+    const candyText = CAPTURE_V2_EVAL_CORPUS.filter((c) => c.world === "candyland")
+      .map((c) => c.transcript)
+      .join(" ");
+    assert.equal(candyVocab.test(candyText), true);
+    assert.equal(toyVocab.test(toyText), true);
+    assert.equal(gameVocab.test(gameText), true);
+    assert.equal(/pippa gumdrop|gumdrop bridge|parade day/i.test(toyText), false);
+    assert.equal(/pippa gumdrop|gumdrop bridge|brick oakley|track freeze/i.test(gameText), false);
   });
 
   await check("metrics stay separate — no opaque overall score helper", () => {
@@ -76,6 +108,50 @@ async function main() {
     assert.ok(lume.includes("lume_failure"));
     assert.ok(lume.includes("lume_catch"));
     assert.ok(lume.includes("model_failure"));
+  });
+
+  await check("frozen Toyworld risk update writes packaging, not Candyland bridge", () => {
+    const testCase = CAPTURE_V2_EVAL_CORPUS.find((c) => c.id === "existing-risk-update");
+    assert.ok(testCase);
+    assert.equal(testCase.projectId, TOYWORLD_ID);
+    const evaluated = evaluateFrozenCase(testCase);
+    const writes = evaluated.pipeline.resolved.filter((r) => r.decision.kind === "write");
+    for (const write of writes) {
+      if (write.decision.kind !== "write") continue;
+      assert.equal(write.decision.domain, "risk");
+      const op = write.decision.operation as { riskId?: string; projectId?: string };
+      assert.equal(op.riskId, "risk-packaging");
+      assert.equal(op.projectId, TOYWORLD_ID);
+    }
+    assert.equal(evaluated.lumeSafety.totals.projectIsolationViolation, 0);
+    assert.equal(evaluated.lumeSafety.totals.lumeFailures, 0);
+  });
+
+  await check("GamingStudio5000 continuity does not write Candyland people", () => {
+    const testCase = CAPTURE_V2_EVAL_CORPUS.find((c) => c.id === "responsibility-continues");
+    assert.ok(testCase);
+    assert.equal(testCase.projectId, GAMING_ID);
+    const evaluated = evaluateAgainstCase({
+      testCase,
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-pixel",
+            statement: "Pixel Ramos remains Producer",
+            evidence:
+              "Pixel Ramos continues as Producer on the console sprint. No change there.",
+            domain: "person",
+            disposition: "no_change",
+            projectId: GAMING_ID,
+            candidateTargetId: "person-pixel",
+            candidateTargetTitle: "Pixel Ramos",
+          },
+        ],
+      },
+    });
+    assert.equal(evaluated.lumeSafety.totals.applyReady, 0);
+    assert.equal(evaluated.lumeSafety.totals.lumeFailures, 0);
+    assert.ok(evaluated.pipeline.resolved.every((r) => r.decision.kind !== "write"));
   });
 
   await check("frozen existing-person does not create a duplicate write", () => {

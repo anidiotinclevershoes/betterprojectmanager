@@ -1,5 +1,5 @@
-export { FROZEN_V2_BASELINE, baselineStillMatchesProduction } from "./baseline";
-export { CAPTURE_V2_EVAL_CORPUS, LIVE_EVAL_CASES, REQUIRED_CORPUS_CATEGORIES } from "./corpus";
+export { FROZEN_V2_BASELINE, FROZEN_CORPUS_COMPOSITION, baselineStillMatchesProduction } from "./baseline";
+export { CAPTURE_V2_EVAL_CORPUS, LIVE_EVAL_CASES, REQUIRED_CORPUS_CATEGORIES, corpusWorldCounts } from "./corpus";
 export { experimentalMissionState, MISSION_STATE_STORAGE_KEY } from "./mission-state";
 export { scoreModelObservations } from "./scoring";
 export { classifyLumeSafety } from "./lume-safety";

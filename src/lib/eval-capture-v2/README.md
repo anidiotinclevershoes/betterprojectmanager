@@ -23,4 +23,6 @@ Missing keys: explicit skip, exit 2, no invented pass.
 
 ## Frozen baseline
 
-See `src/lib/eval-capture-v2/baseline.ts`. Frozen against SHA `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`.
+See `src/lib/eval-capture-v2/baseline.ts`. Prompt/schema/model frozen against SHA `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`.
+
+Corpus composition (`capture-v2-eval-corpus-v1-hulk`) was **finalised BEFORE any live provider result was seen**. 22 cases: Candyland remains the largest world; Toyworld and GamingStudio5000 each hold several genuine semantic cases (not bait-only). After the first live run, do not alter the semantic corpus in response to model output.

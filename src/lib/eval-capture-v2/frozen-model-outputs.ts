@@ -3,7 +3,7 @@
  * and Playwright journeys. These are fixtures, not live model output.
  */
 
-import { CANDYLAND_ID, GAMING_ID } from "@/lib/experiments/worlds";
+import { CANDYLAND_ID, GAMING_ID, TOYWORLD_ID } from "@/lib/experiments/worlds";
 
 export type FrozenEnvelope = {
   caseId: string;
@@ -33,14 +33,15 @@ export const FROZEN_MODEL_OUTPUTS: FrozenEnvelope[] = [
     rawModelJson: {
       observations: [
         {
-          id: "obs-marzipan",
-          statement: "Marzipan Cole is joining as float marshal",
-          evidence: "Marzipan Cole is joining as float marshal next Monday.",
+          id: "obs-velvet",
+          statement: "Velvet Sprocket is joining as paint lead",
+          evidence:
+            "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
           domain: "person",
           disposition: "create_new",
-          projectId: CANDYLAND_ID,
-          candidateTargetTitle: "Marzipan Cole",
-          proposedValues: { name: "Marzipan Cole", role: "float marshal" },
+          projectId: TOYWORLD_ID,
+          candidateTargetTitle: "Velvet Sprocket",
+          proposedValues: { name: "Velvet Sprocket", role: "paint lead" },
         },
       ],
     },
@@ -50,13 +51,14 @@ export const FROZEN_MODEL_OUTPUTS: FrozenEnvelope[] = [
     rawModelJson: {
       observations: [
         {
-          id: "obs-bridge-worse",
-          statement: "Gumdrop Bridge icing is getting worse",
-          evidence: "Gumdrop Bridge icing is getting worse after last night's frost.",
+          id: "obs-packaging-worse",
+          statement: "Packaging delay is getting worse",
+          evidence: "Packaging delay is getting worse after the cardboard mill flooded.",
           domain: "risk",
           disposition: "update_existing",
-          candidateTargetId: "risk-bridge",
-          candidateTargetTitle: "Gumdrop Bridge icing",
+          projectId: TOYWORLD_ID,
+          candidateTargetId: "risk-packaging",
+          candidateTargetTitle: "Packaging delay",
           proposedValues: { status: "open" },
         },
       ],
@@ -182,21 +184,23 @@ export const FROZEN_MODEL_OUTPUTS: FrozenEnvelope[] = [
       observations: [
         {
           id: "obs-a",
-          statement: "Gumdrop Bridge icing is resolved",
-          evidence: "Gumdrop Bridge icing is resolved.",
+          statement: "Packaging delay is resolved",
+          evidence: "Packaging delay is resolved.",
           domain: "risk",
           disposition: "update_existing",
-          candidateTargetId: "risk-bridge",
+          projectId: TOYWORLD_ID,
+          candidateTargetId: "risk-packaging",
           proposedValues: { status: "resolved" },
         },
         {
           id: "obs-b",
-          statement: "Gumdrop Bridge icing issue is resolved",
-          evidence: "the Gumdrop Bridge icing issue is resolved.",
+          statement: "Packaging delay issue is resolved",
+          evidence: "the packaging delay issue is resolved.",
           domain: "risk",
           disposition: "merge",
           mergeWithObservationId: "obs-a",
-          candidateTargetId: "risk-bridge",
+          projectId: TOYWORLD_ID,
+          candidateTargetId: "risk-packaging",
         },
       ],
     },

@@ -3,6 +3,11 @@
  * Fictional worlds only. Fresh wording — no Niamh / CAB / ATLAS phrases.
  *
  * Meaning-based expectations. Do not treat this as training data.
+ *
+ * Hulk amendment: composition was redistributed across Candyland,
+ * Toyworld, and GamingStudio5000 BEFORE any live provider result was seen.
+ * After the first live run, do not alter this semantic corpus in response
+ * to model output.
  */
 
 import {
@@ -10,7 +15,13 @@ import {
   GAMING_ID,
   TOYWORLD_ID,
 } from "@/lib/experiments/worlds";
-import type { BenchmarkCase } from "./types";
+import type { BenchmarkCase, EvalWorldId } from "./types";
+
+export const CORPUS_WORLD_PROJECT_ID: Record<EvalWorldId, string> = {
+  candyland: CANDYLAND_ID,
+  toyworld: TOYWORLD_ID,
+  gamingstudio5000: GAMING_ID,
+};
 
 export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
   {
@@ -48,16 +59,16 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     id: "new-person",
     title: "Genuinely new Person",
     category: "person-new",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "toyworld",
+    projectId: TOYWORLD_ID,
     evaluationMode: "live",
     transcript:
-      "Marzipan Cole is joining as float marshal next Monday.",
+      "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
     material: [
       {
-        id: "marzipan-new",
-        meaning: "Marzipan Cole is a new person on Candyland.",
-        meaningTokens: ["marzipan", "cole"],
+        id: "velvet-new",
+        meaning: "Velvet Sprocket is a new person on Toyworld.",
+        meaningTokens: ["velvet", "sprocket"],
         allowedDomains: ["person"],
         existingVsNew: "new",
         expectedDisposition: "create_new",
@@ -65,27 +76,27 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     ],
     allowedDomains: ["person"],
     prohibitedInterpretations: [
-      "Treat Marzipan Cole as Pippa Gumdrop or Fizz Caramel",
+      "Treat Velvet Sprocket as Brick Oakley or Captain Buttons",
     ],
     prohibitedWrites: [
-      { reason: "Must not retarget an existing person", targetId: "person-gumdrop" },
-      { reason: "Must not retarget Fizz", targetId: "person-fizz" },
+      { reason: "Must not retarget Brick Oakley", targetId: "person-brick" },
+      { reason: "Must not retarget Captain Buttons", targetId: "person-buttons" },
     ],
   },
   {
     id: "ambiguous-same-first-name",
     title: "Same first name / ambiguous Person",
     category: "person-ambiguous",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "toyworld",
+    projectId: TOYWORLD_ID,
     evaluationMode: "live",
     transcript:
-      "Pippa from the marshmallow stall called; she wants to help with UAT.",
+      "Brick from the warehouse called; he wants to help with assembly.",
     material: [
       {
-        id: "which-pippa",
-        meaning: "A Pippa was mentioned who may not be Pippa Gumdrop — preserve ambiguity.",
-        meaningTokens: ["pippa", "marshmallow"],
+        id: "which-brick",
+        meaning: "A Brick was mentioned who may not be Brick Oakley — preserve ambiguity.",
+        meaningTokens: ["brick", "warehouse"],
         allowedDomains: ["person", "responsibility", "unknown"],
         existingVsNew: "ambiguous",
         expectedDisposition: ["ambiguous", "commentary"],
@@ -95,30 +106,30 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     allowedDomains: ["person", "responsibility", "unknown", "commentary"],
     expectedNeedsYou: true,
     prohibitedInterpretations: [
-      "Assert this is definitely Pippa Gumdrop",
-      "Create a second Pippa Gumdrop without flagging ambiguity",
+      "Assert this is definitely Brick Oakley",
+      "Create a second Brick Oakley without flagging ambiguity",
     ],
     prohibitedWrites: [
-      { reason: "Must not silently CREATE another Pippa", createTitleIncludes: "Pippa" },
-      { reason: "Must not overwrite Gumdrop identity", targetId: "person-gumdrop" },
+      { reason: "Must not silently CREATE another Brick", createTitleIncludes: "Brick" },
+      { reason: "Must not overwrite Oakley identity", targetId: "person-brick" },
     ],
   },
   {
     id: "responsibility-continues",
     title: "Responsibility continues",
     category: "responsibility-continue",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "gamingstudio5000",
+    projectId: GAMING_ID,
     evaluationMode: "live",
     transcript:
-      "Fizz Caramel continues as Designer on the parade float. No change there.",
+      "Pixel Ramos continues as Producer on the console sprint. No change there.",
     material: [
       {
-        id: "fizz-continues",
-        meaning: "Fizz Caramel still holds Designer; this is continuity, not replacement.",
-        meaningTokens: ["fizz", "caramel", "designer"],
+        id: "pixel-continues",
+        meaning: "Pixel Ramos still holds Producer; this is continuity, not replacement.",
+        meaningTokens: ["pixel", "ramos", "producer"],
         allowedDomains: ["responsibility", "person"],
-        existingTargetId: "person-fizz",
+        existingTargetId: "person-pixel",
         existingVsNew: "existing",
         expectedDisposition: ["no_change", "update_existing"],
         expectedNoChange: true,
@@ -127,35 +138,35 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     allowedDomains: ["responsibility", "person"],
     expectedNoChange: true,
     prohibitedInterpretations: [
-      "Replace Pippa Gumdrop",
-      "Treat Designer as vacant",
+      "Replace Pixel Ramos",
+      "Treat Producer as vacant",
     ],
     prohibitedWrites: [
-      { reason: "Must not replace UAT lead", targetId: "person-gumdrop" },
+      { reason: "Must not retarget Candyland people", targetId: "person-gumdrop" },
     ],
   },
   {
     id: "responsibility-replacement",
     title: "Responsibility replacement",
     category: "responsibility-replace",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "gamingstudio5000",
+    projectId: GAMING_ID,
     evaluationMode: "live",
     transcript:
-      "Marzipan Cole will replace Pippa Gumdrop as UAT lead from next week.",
+      "Nova Quill will replace Pixel Ramos as Producer from next week.",
     material: [
       {
-        id: "uat-replace",
-        meaning: "UAT lead moves from Pippa Gumdrop to Marzipan Cole (replace, not share).",
-        meaningTokens: ["replace", "uat"],
+        id: "producer-replace",
+        meaning: "Producer moves from Pixel Ramos to Nova Quill (replace, not share).",
+        meaningTokens: ["replace", "producer"],
         allowedDomains: ["responsibility", "person"],
         existingVsNew: "ambiguous",
         expectedDisposition: ["update_existing", "create_new", "ambiguous"],
       },
       {
-        id: "marzipan-mentioned",
-        meaning: "Marzipan Cole is introduced in this ownership change.",
-        meaningTokens: ["marzipan", "cole"],
+        id: "nova-mentioned",
+        meaning: "Nova Quill is introduced in this ownership change.",
+        meaningTokens: ["nova", "quill"],
         allowedDomains: ["person", "responsibility"],
         existingVsNew: "new",
       },
@@ -163,7 +174,7 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     allowedDomains: ["responsibility", "person"],
     prohibitedInterpretations: [
       "Treat this as share rather than replace",
-      "Leave Pippa as sole UAT lead with no change noted",
+      "Leave Pixel as sole Producer with no change noted",
     ],
     prohibitedWrites: [
       { reason: "Must not retarget Toyworld people", targetId: "person-brick" },
@@ -204,47 +215,48 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     id: "existing-risk-update",
     title: "Existing Risk update",
     category: "risk-update",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "toyworld",
+    projectId: TOYWORLD_ID,
     evaluationMode: "live",
     transcript:
-      "Gumdrop Bridge icing is getting worse after last night's frost.",
+      "Packaging delay is getting worse after the cardboard mill flooded.",
     material: [
       {
-        id: "bridge-worse",
-        meaning: "Existing Gumdrop Bridge icing risk is worsening, still open.",
-        meaningTokens: ["gumdrop", "bridge", "icing"],
+        id: "packaging-worse",
+        meaning: "Existing Packaging delay risk is worsening, still open.",
+        meaningTokens: ["packaging", "delay"],
         allowedDomains: ["risk"],
-        existingTargetId: "risk-bridge",
+        existingTargetId: "risk-packaging",
         existingVsNew: "existing",
         expectedDisposition: "update_existing",
       },
     ],
     allowedDomains: ["risk"],
     prohibitedInterpretations: [
-      "Create a second icing risk",
+      "Create a second packaging risk",
       "Mark the risk resolved",
       "Turn this into a To Do",
     ],
     prohibitedWrites: [
-      { reason: "Must not CREATE a duplicate bridge risk", createTitleIncludes: "Gumdrop Bridge" },
+      { reason: "Must not CREATE a duplicate packaging risk", createTitleIncludes: "Packaging delay" },
       { reason: "Must not create a To Do for an existing risk", operationType: "create_todo" },
+      { reason: "Must not retarget Candyland bridge risk", targetId: "risk-bridge" },
     ],
   },
   {
     id: "new-risk",
     title: "New Risk",
     category: "risk-new",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "gamingstudio5000",
+    projectId: GAMING_ID,
     evaluationMode: "live",
     transcript:
-      "The chocolate fountain pump is overheating and could stall the float.",
+      "The shader compile is stalling the cert build and could miss the nightlies.",
     material: [
       {
-        id: "fountain-pump",
-        meaning: "A new risk about the chocolate fountain pump overheating.",
-        meaningTokens: ["fountain", "pump"],
+        id: "shader-compile",
+        meaning: "A new risk about the shader compile stalling the cert build.",
+        meaningTokens: ["shader", "compile"],
         allowedDomains: ["risk"],
         existingVsNew: "new",
         expectedDisposition: "create_new",
@@ -252,10 +264,10 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     ],
     allowedDomains: ["risk"],
     prohibitedInterpretations: [
-      "Update Gumdrop Bridge icing instead",
+      "Update Console certification slip instead",
     ],
     prohibitedWrites: [
-      { reason: "Must not retarget the bridge risk", targetId: "risk-bridge" },
+      { reason: "Must not retarget the console cert risk", targetId: "risk-console" },
     ],
   },
   {
@@ -319,17 +331,17 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     id: "unchanged-date",
     title: "Unchanged date confirmation",
     category: "milestone-unchanged",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "toyworld",
+    projectId: TOYWORLD_ID,
     evaluationMode: "live",
-    transcript: "Just confirming: Parade day remains 15 October 2026.",
+    transcript: "Just confirming: Track freeze remains 1 September 2026.",
     material: [
       {
-        id: "parade-same",
-        meaning: "Parade day is unchanged at 15 October 2026.",
-        meaningTokens: ["parade", "15", "october"],
+        id: "freeze-same",
+        meaning: "Track freeze is unchanged at 1 September 2026.",
+        meaningTokens: ["track", "freeze", "september"],
         allowedDomains: ["milestone"],
-        existingTargetId: "ms-parade",
+        existingTargetId: "ms-freeze",
         existingVsNew: "existing",
         expectedDisposition: "no_change",
         expectedNoChange: true,
@@ -338,10 +350,10 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     allowedDomains: ["milestone", "commentary"],
     expectedNoChange: true,
     prohibitedInterpretations: [
-      "Move Parade day to a new date",
+      "Move Track freeze to a new date",
     ],
     prohibitedWrites: [
-      { reason: "Must not UPDATE the milestone date", targetId: "ms-parade" },
+      { reason: "Must not UPDATE the milestone date", targetId: "ms-freeze" },
       { reason: "Must not CREATE a todo", operationType: "create_todo" },
     ],
   },
@@ -406,18 +418,18 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     id: "duplicate-observation",
     title: "Duplicate / repeated observation",
     category: "duplicate",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "toyworld",
+    projectId: TOYWORLD_ID,
     evaluationMode: "live",
     transcript:
-      "Gumdrop Bridge icing is resolved. Also, the Gumdrop Bridge icing issue is resolved.",
+      "Packaging delay is resolved. Also, the packaging delay issue is resolved.",
     material: [
       {
-        id: "bridge-once",
-        meaning: "Bridge icing resolved — one durable intent, not two writes.",
-        meaningTokens: ["gumdrop", "bridge", "resolved"],
+        id: "packaging-once",
+        meaning: "Packaging delay resolved — one durable intent, not two writes.",
+        meaningTokens: ["packaging", "delay", "resolved"],
         allowedDomains: ["risk"],
-        existingTargetId: "risk-bridge",
+        existingTargetId: "risk-packaging",
         existingVsNew: "existing",
         expectedDisposition: ["update_existing", "merge"],
       },
@@ -427,7 +439,7 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
       "Emit two independent resolve writes",
     ],
     prohibitedWrites: [
-      { reason: "Must not CREATE a second risk", createTitleIncludes: "Gumdrop Bridge" },
+      { reason: "Must not CREATE a second risk", createTitleIncludes: "Packaging delay" },
     ],
     notes: "A merge disposition on the restatement is acceptable.",
   },
@@ -435,16 +447,16 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     id: "correction-of-wording",
     title: "Correction of earlier wording",
     category: "correction",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "gamingstudio5000",
+    projectId: GAMING_ID,
     evaluationMode: "live",
     transcript:
-      "The chocolate fountain pump is overheating. Wait — I meant the taffy mixer, not the fountain.",
+      "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
     material: [
       {
-        id: "taffy-mixer",
-        meaning: "The intended new risk is the taffy mixer, after a spoken correction.",
-        meaningTokens: ["taffy", "mixer"],
+        id: "audio-bus",
+        meaning: "The intended new risk is the audio bus mixer, after a spoken correction.",
+        meaningTokens: ["audio", "bus"],
         allowedDomains: ["risk"],
         existingVsNew: "new",
         expectedDisposition: "create_new",
@@ -452,11 +464,11 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     ],
     allowedDomains: ["risk", "commentary"],
     prohibitedInterpretations: [
-      "Keep the fountain pump as a current risk alongside the mixer",
+      "Keep the shader compile as a current risk alongside the mixer",
       "Ignore the correction",
     ],
     prohibitedWrites: [
-      { reason: "Must not write the retracted fountain pump as a durable current risk", createTitleIncludes: "fountain" },
+      { reason: "Must not write the retracted shader compile as a durable current risk", createTitleIncludes: "shader" },
     ],
   },
   {
@@ -507,15 +519,15 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     id: "pronoun-ambiguity",
     title: "Pronoun / reference ambiguity",
     category: "pronoun",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "gamingstudio5000",
+    projectId: GAMING_ID,
     evaluationMode: "live",
-    transcript: "She said she will own the UAT pack from now on.",
+    transcript: "She said she will own the boss balancing pass from now on.",
     material: [
       {
         id: "who-she",
         meaning: "The speaker did not name who 'she' is.",
-        meaningTokens: ["she", "uat"],
+        meaningTokens: ["she", "boss"],
         allowedDomains: ["person", "responsibility", "unknown", "commentary"],
         existingVsNew: "ambiguous",
         expectedDisposition: "ambiguous",
@@ -525,44 +537,42 @@ export const CAPTURE_V2_EVAL_CORPUS: BenchmarkCase[] = [
     allowedDomains: ["person", "responsibility", "unknown", "commentary"],
     expectedNeedsYou: true,
     prohibitedInterpretations: [
-      "Assign UAT to Pippa Gumdrop without evidence",
-      "Assign UAT to Fizz Caramel without evidence",
+      "Assign boss balancing to Pixel Ramos without evidence",
     ],
     prohibitedWrites: [
-      { reason: "Must not write UAT onto Pippa from a pronoun", targetId: "person-gumdrop" },
-      { reason: "Must not write UAT onto Fizz from a pronoun", targetId: "person-fizz" },
+      { reason: "Must not write ownership onto Pixel from a pronoun", targetId: "person-pixel" },
     ],
   },
   {
     id: "irrelevant-commentary",
     title: "Irrelevant commentary",
     category: "commentary",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "gamingstudio5000",
+    projectId: GAMING_ID,
     evaluationMode: "live",
     transcript:
-      "The fudge in the break room was excellent today, nothing about the parade.",
+      "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
     material: [],
     allowedDomains: ["commentary", "unknown"],
     expectedCommentary: true,
     expectedNoChange: true,
     prohibitedInterpretations: [
-      "Invent a parade risk or to-do from snack talk",
+      "Invent a certification risk or to-do from lobby chatter",
     ],
     prohibitedWrites: [
-      { reason: "Must not write anything from snack commentary", domain: "todo" },
-      { reason: "Must not write a risk from snack commentary", domain: "risk" },
+      { reason: "Must not write anything from lobby commentary", domain: "todo" },
+      { reason: "Must not write a risk from lobby commentary", domain: "risk" },
     ],
   },
   {
     id: "explicit-no-change",
     title: "Explicit no-change",
     category: "no-change",
-    world: "candyland",
-    projectId: CANDYLAND_ID,
+    world: "toyworld",
+    projectId: TOYWORLD_ID,
     evaluationMode: "live",
     transcript:
-      "Nothing has changed on Candyland this week. Leave the records as they are.",
+      "Nothing has changed on Toyworld this week. Leave the records as they are.",
     material: [],
     allowedDomains: ["commentary", "unknown"],
     expectedNoChange: true,
@@ -664,6 +674,18 @@ export const LIVE_EVAL_CASES = CAPTURE_V2_EVAL_CORPUS.filter(
 export const FIXTURE_ONLY_CASES = CAPTURE_V2_EVAL_CORPUS.filter(
   (c) => c.evaluationMode === "fixture-only",
 );
+
+export function corpusWorldCounts(): Record<EvalWorldId, number> {
+  const counts: Record<EvalWorldId, number> = {
+    candyland: 0,
+    toyworld: 0,
+    gamingstudio5000: 0,
+  };
+  for (const row of CAPTURE_V2_EVAL_CORPUS) {
+    counts[row.world] += 1;
+  }
+  return counts;
+}
 
 export const REQUIRED_CORPUS_CATEGORIES = [
   "person-existing",
