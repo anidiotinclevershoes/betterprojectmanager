@@ -1,0 +1,399 @@
+/**
+ * Offline rescore of archived first-live Capture V2 envelopes through scorer v2.
+ * No provider calls. Does not mutate original harness artifacts.
+ */
+
+import { FROZEN_CORPUS_COMPOSITION, FROZEN_V2_BASELINE } from "./baseline";
+import { CAPTURE_V2_EVAL_CORPUS } from "./corpus";
+import {
+  CAPTURE_V2_EVAL_SCORER_V1,
+  CAPTURE_V2_EVAL_SCORER_VERSION,
+} from "./lume-safety";
+import { evaluateAgainstCase } from "./pipeline";
+import type {
+  CaseEvalResult,
+  EvalProviderId,
+  LumeSafetyRow,
+  LumeSafetyTotals,
+  TokenUsageRecord,
+} from "./types";
+
+export const FIRST_LIVE_WORKFLOW_RUN_ID = "32979257452";
+export const FIRST_LIVE_ARTIFACT_NAME = "capture-v2-eval-evidence";
+export const FIRST_LIVE_ENVELOPE_ARCHIVE_ID =
+  "capture-v2-eval-first-live-envelopes-v1";
+
+export type ArchivedEnvelope = {
+  caseId: string;
+  runIndex: number;
+  provider: EvalProviderId;
+  model: string;
+  responseModel: string | null;
+  error: string | null;
+  rawJson: unknown;
+  usage: TokenUsageRecord | null;
+  latencyMs: number | null;
+  approximateCostUsd: number | null;
+  originalLume: LumeSafetyTotals | null;
+  originalRows: Array<Pick<LumeSafetyRow, "classification" | "reason" | "operationType" | "domain">>;
+};
+
+export type FirstLiveEnvelopeArchive = {
+  archiveId: typeof FIRST_LIVE_ENVELOPE_ARCHIVE_ID;
+  corpusVersion: string;
+  originalScorerVersion: string;
+  originalWorkflowRunId: string;
+  originalArtifactName: string;
+  note: string;
+  envelopes: ArchivedEnvelope[];
+};
+
+export type ModelSafetyTotals = {
+  provider: string;
+  model: string;
+  runs: number;
+  callErrors: number;
+  successfulRuns: number;
+  lumeFailures: number;
+  lumeCatches: number;
+  modelFailures: number;
+};
+
+export type RescoredCase = {
+  caseId: string;
+  runIndex: number;
+  provider: EvalProviderId;
+  model: string;
+  usedFrozenFixture: false;
+  original: {
+    lumeFailures: number;
+    lumeCatches: number;
+    modelFailures: number;
+    error: string | null;
+    rows: ArchivedEnvelope["originalRows"];
+  };
+  v2: {
+    lumeFailures: number;
+    lumeCatches: number;
+    modelFailures: number;
+    unresolvedTargetConvertedToCreate: number;
+    rows: Array<Pick<LumeSafetyRow, "classification" | "reason" | "operationType" | "domain">>;
+  };
+};
+
+export type RescoreReport = {
+  baselineVersion: string;
+  corpusVersion: string;
+  scorerVersion: string;
+  originalScorerVersion: string;
+  originalWorkflowRunId: string;
+  originalArtifactName: string;
+  note: string;
+  models: Array<{
+    provider: string;
+    model: string;
+    original: ModelSafetyTotals;
+    v2: ModelSafetyTotals;
+  }>;
+  cases: RescoredCase[];
+};
+
+function emptyTotals(): LumeSafetyTotals {
+  return {
+    applyReady: 0,
+    needsYou: 0,
+    noChange: 0,
+    rejected: 0,
+    illegalOperationsBlocked: 0,
+    foreignProjectTargetsBlocked: 0,
+    duplicatePersonCreationsBlocked: 0,
+    unresolvedTargetConvertedToCreate: 0,
+    wrongDomainLegalWrite: 0,
+    projectIsolationViolation: 0,
+    modelFailures: 0,
+    lumeCatches: 0,
+    lumeFailures: 0,
+  };
+}
+
+function asProvider(value: string | undefined): EvalProviderId {
+  if (value === "openai" || value === "anthropic" || value === "gemini") {
+    return value;
+  }
+  return "openai";
+}
+
+export type LooseHarness = {
+  results?: Array<{
+    caseId?: string;
+    runIndex?: number;
+    provider?: string;
+    model?: string;
+    lumeSafety?: {
+      totals?: Partial<LumeSafetyTotals>;
+      rows?: LumeSafetyRow[];
+    };
+    call?: {
+      provider?: string;
+      requestedModel?: string | null;
+      responseModel?: string | null;
+      rawJson?: unknown;
+      error?: string | null;
+      usage?: TokenUsageRecord | null;
+      latencyMs?: number | null;
+      approximateCostUsd?: number | null;
+    } | null;
+  }>;
+};
+
+export function envelopesFromHarnessReport(report: LooseHarness): ArchivedEnvelope[] {
+  const out: ArchivedEnvelope[] = [];
+  for (const row of report.results ?? []) {
+    const call = row.call ?? null;
+    out.push({
+      caseId: row.caseId ?? "unknown",
+      runIndex: row.runIndex ?? 0,
+      provider: asProvider(row.provider ?? call?.provider),
+      model: row.model ?? call?.requestedModel ?? "unknown",
+      responseModel: call?.responseModel ?? null,
+      error: call?.error ?? null,
+      rawJson: call?.rawJson ?? null,
+      usage: call?.usage ?? null,
+      latencyMs: call?.latencyMs ?? null,
+      approximateCostUsd: call?.approximateCostUsd ?? null,
+      originalLume: {
+        ...emptyTotals(),
+        ...(row.lumeSafety?.totals ?? {}),
+      },
+      originalRows: (row.lumeSafety?.rows ?? []).map((safety) => ({
+        classification: safety.classification,
+        reason: safety.reason,
+        operationType: safety.operationType,
+        domain: safety.domain,
+      })),
+    });
+  }
+  return out;
+}
+
+export function buildFirstLiveEnvelopeArchive(
+  reports: LooseHarness[],
+): FirstLiveEnvelopeArchive {
+  return {
+    archiveId: FIRST_LIVE_ENVELOPE_ARCHIVE_ID,
+    corpusVersion: FROZEN_CORPUS_COMPOSITION.version,
+    originalScorerVersion: CAPTURE_V2_EVAL_SCORER_V1,
+    originalWorkflowRunId: FIRST_LIVE_WORKFLOW_RUN_ID,
+    originalArtifactName: FIRST_LIVE_ARTIFACT_NAME,
+    note: "Compact copy of first-live raw envelopes for offline scorer v2 rescore. Not a second corpus. Original GitHub artifact is immutable.",
+    envelopes: reports.flatMap(envelopesFromHarnessReport),
+  };
+}
+
+function summarise(
+  provider: string,
+  model: string,
+  rows: Array<{
+    error: string | null;
+    lumeFailures: number;
+    lumeCatches: number;
+    modelFailures: number;
+  }>,
+): ModelSafetyTotals {
+  return {
+    provider,
+    model,
+    runs: rows.length,
+    callErrors: rows.filter((r) => r.error).length,
+    successfulRuns: rows.filter((r) => !r.error).length,
+    lumeFailures: rows.reduce((n, r) => n + r.lumeFailures, 0),
+    lumeCatches: rows.reduce((n, r) => n + r.lumeCatches, 0),
+    modelFailures: rows.reduce((n, r) => n + r.modelFailures, 0),
+  };
+}
+
+export function rescoreArchivedEnvelopes(
+  archive: FirstLiveEnvelopeArchive,
+): RescoreReport {
+  const cases: RescoredCase[] = [];
+
+  for (const envelope of archive.envelopes) {
+    const original = {
+      lumeFailures: envelope.originalLume?.lumeFailures ?? 0,
+      lumeCatches: envelope.originalLume?.lumeCatches ?? 0,
+      modelFailures: envelope.originalLume?.modelFailures ?? 0,
+      error: envelope.error,
+      rows: envelope.originalRows,
+    };
+
+    if (envelope.error) {
+      cases.push({
+        caseId: envelope.caseId,
+        runIndex: envelope.runIndex,
+        provider: envelope.provider,
+        model: envelope.model,
+        usedFrozenFixture: false,
+        original,
+        v2: {
+          lumeFailures: 0,
+          lumeCatches: 0,
+          modelFailures: 0,
+          unresolvedTargetConvertedToCreate: 0,
+          rows: [],
+        },
+      });
+      continue;
+    }
+
+    const testCase = CAPTURE_V2_EVAL_CORPUS.find((c) => c.id === envelope.caseId);
+    if (!testCase) {
+      throw new Error(`Archived envelope refers to unknown case ${envelope.caseId}`);
+    }
+
+    const evaluated = evaluateAgainstCase({
+      testCase,
+      rawModelJson: envelope.rawJson,
+    });
+    cases.push({
+      caseId: envelope.caseId,
+      runIndex: envelope.runIndex,
+      provider: envelope.provider,
+      model: envelope.model,
+      usedFrozenFixture: false,
+      original,
+      v2: {
+        lumeFailures: evaluated.lumeSafety.totals.lumeFailures,
+        lumeCatches: evaluated.lumeSafety.totals.lumeCatches,
+        modelFailures: evaluated.lumeSafety.totals.modelFailures,
+        unresolvedTargetConvertedToCreate:
+          evaluated.lumeSafety.totals.unresolvedTargetConvertedToCreate,
+        rows: evaluated.lumeSafety.rows.map((row) => ({
+          classification: row.classification,
+          reason: row.reason,
+          operationType: row.operationType,
+          domain: row.domain,
+        })),
+      },
+    });
+  }
+
+  const keys = [...new Set(cases.map((c) => `${c.provider}::${c.model}`))];
+  const models = keys.map((key) => {
+    const subset = cases.filter((c) => `${c.provider}::${c.model}` === key);
+    const first = subset[0]!;
+    return {
+      provider: first.provider,
+      model: first.model,
+      original: summarise(
+        first.provider,
+        first.model,
+        subset.map((c) => ({
+          error: c.original.error,
+          lumeFailures: c.original.lumeFailures,
+          lumeCatches: c.original.lumeCatches,
+          modelFailures: c.original.modelFailures,
+        })),
+      ),
+      v2: summarise(
+        first.provider,
+        first.model,
+        subset.map((c) => ({
+          error: c.original.error,
+          lumeFailures: c.v2.lumeFailures,
+          lumeCatches: c.v2.lumeCatches,
+          modelFailures: c.v2.modelFailures,
+        })),
+      ),
+    };
+  });
+
+  return {
+    baselineVersion: FROZEN_V2_BASELINE.version,
+    corpusVersion: FROZEN_CORPUS_COMPOSITION.version,
+    scorerVersion: CAPTURE_V2_EVAL_SCORER_VERSION,
+    originalScorerVersion: archive.originalScorerVersion,
+    originalWorkflowRunId: archive.originalWorkflowRunId,
+    originalArtifactName: archive.originalArtifactName,
+    note: "Scorer v2 rescore of archived first-live envelopes. Original artifact was not mutated. No provider calls.",
+    models,
+    cases,
+  };
+}
+
+export function rescoreReportToHarnessShape(report: RescoreReport): {
+  baselineVersion: string;
+  corpusVersion: string;
+  scorerVersion: string;
+  results: CaseEvalResult[];
+} {
+  return {
+    baselineVersion: report.baselineVersion,
+    corpusVersion: report.corpusVersion,
+    scorerVersion: report.scorerVersion,
+    results: report.cases.map((row) => ({
+      caseId: row.caseId,
+      runIndex: row.runIndex,
+      provider: row.provider,
+      model: row.model,
+      modelMetrics: {
+        materialRecall: null,
+        missedMaterial: [],
+        unsupportedCount: 0,
+        unsupportedObservationIds: [],
+        domainCorrectness: null,
+        domainMismatches: [],
+        existingVsNewCorrectness: null,
+        existingVsNewMismatches: [],
+        stableTargetCorrectness: null,
+        stableTargetMismatches: [],
+        ambiguityPreserved: null,
+        noChangeHandled: null,
+        commentaryHandled: null,
+      },
+      lumeSafety: {
+        rows: row.v2.rows.map((safety, index) => ({
+          observationId: `${row.caseId}:${row.runIndex}:${index}`,
+          statement: "",
+          classification: safety.classification,
+          decisionKind: "write",
+          domain: safety.domain ?? "",
+          operationType: safety.operationType,
+          targetId: null,
+          reason: safety.reason,
+        })),
+        totals: {
+          ...emptyTotals(),
+          lumeFailures: row.v2.lumeFailures,
+          lumeCatches: row.v2.lumeCatches,
+          modelFailures: row.v2.modelFailures,
+          unresolvedTargetConvertedToCreate: row.v2.unresolvedTargetConvertedToCreate,
+        },
+      },
+      call: row.original.error
+        ? {
+            provider: row.provider,
+            requestedModel: row.model,
+            responseModel: null,
+            responseText: "",
+            rawJson: null,
+            observations: [],
+            usage: {
+              inputTokens: null,
+              outputTokens: null,
+              totalTokens: null,
+              reasoningTokens: null,
+              cacheReadTokens: null,
+              cacheWriteTokens: null,
+              raw: null,
+            },
+            latencyMs: 0,
+            retries: 0,
+            error: row.original.error,
+            approximateCostUsd: null,
+            pricingNote: "Archived technical failure; not rescored.",
+          }
+        : null,
+      usedFrozenFixture: false,
+    })),
+  };
+}

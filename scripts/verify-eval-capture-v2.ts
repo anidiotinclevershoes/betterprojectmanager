@@ -23,6 +23,7 @@ import { evaluateAgainstCase, evaluateFrozenCase } from "../src/lib/eval-capture
 import { frozenEnvelopeFor, FROZEN_MODEL_OUTPUTS } from "../src/lib/eval-capture-v2/frozen-model-outputs";
 import { scoreModelObservations } from "../src/lib/eval-capture-v2/scoring";
 import { runCaptureV2Eval } from "../src/lib/eval-capture-v2/harness";
+import { CAPTURE_V2_EVAL_SCORER_VERSION } from "../src/lib/eval-capture-v2/lume-safety";
 import { PINNED_OPENAI_CHAT_MODEL } from "../src/lib/openai-model";
 import { isCaptureV2Enabled } from "../src/lib/capture-v2/flag";
 import { CANDYLAND_ID, GAMING_ID, TOYWORLD_ID } from "../src/lib/experiments/worlds";
@@ -262,6 +263,9 @@ async function main() {
       assert.equal(report.results.length, 0);
       assert.equal(report.skipped.length, 3);
       assert.ok(report.skipped.every((s) => s.reason.includes("No results were invented")));
+      assert.equal(report.scorerVersion, CAPTURE_V2_EVAL_SCORER_VERSION);
+      assert.equal(report.corpusVersion, FROZEN_CORPUS_COMPOSITION.version);
+      assert.equal(report.baselineVersion, FROZEN_V2_BASELINE.version);
     } finally {
       for (const [key, value] of Object.entries(prev)) {
         if (value === undefined) delete process.env[key];

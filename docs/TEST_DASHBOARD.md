@@ -45,7 +45,8 @@ The reporter **displays** values the Hulk harness and stacked Capture scripts al
 | Stability | not emitted by the harness | always — |
 | MODEL FAILURE / LUME CATCH / LUME FAILURE | `lumeSafety.totals` and per-row `classification` | 0 or — |
 | Tokens / latency / cost | summed `call.usage`, `latencyMs`, `approximateCostUsd` (USD) | — |
-| Corpus version | harness `baselineVersion`, else `capture-v2-eval-corpus-v1-hulk` | shown when present |
+| Corpus version | harness `corpusVersion`, else frozen `capture-v2-eval-corpus-v1-hulk` (not `baselineVersion`) | shown when present |
+| Scorer version | harness `scorerVersion`, else implicit `capture-v2-eval-scorer-v1` for historical files | shown as a Scorer column |
 | Stacked worlds | `test-results/stacked-{world}.json` | — |
 
 PASS / FAIL for a live model row:
@@ -120,6 +121,10 @@ Not persisted:
 - production application data
 
 History is stored as a hidden HTML comment in the Issue body (`lume-test-dashboard-state:v1`). Re-running the same GitHub `run_id` updates that row in place instead of duplicating it.
+
+Issue #73 already contains historical **scorer v1** labelled live-eval rows. Those bodies are evidence. Do not edit them to pretend the original scorer used v2 rules.
+
+A later dashboard publish that ingests `test-results/capture-v2-eval-scorer-v2.json` (or any harness JSON with `scorerVersion: capture-v2-eval-scorer-v2`) appends a new model row. Latest-per-model is keyed by provider + model + scorer version, so v1 and v2 can both show. This reporter does not rewrite previous Issue comments.
 
 ## Workflow semantics
 

@@ -14,6 +14,7 @@ import {
   summariseHarness,
 } from "../src/lib/eval-capture-v2/harness";
 import { FROZEN_V2_BASELINE } from "../src/lib/eval-capture-v2/baseline";
+import { CAPTURE_V2_EVAL_SCORER_VERSION } from "../src/lib/eval-capture-v2/lume-safety";
 import type { EvalProviderId } from "../src/lib/eval-capture-v2/types";
 
 function arg(name: string, fallback?: string): string | undefined {
@@ -52,6 +53,8 @@ async function main() {
 
   console.log("Capture V2 live evaluation (opt-in)");
   console.log(`baseline: ${FROZEN_V2_BASELINE.version}`);
+  console.log(`corpus: ${FROZEN_V2_BASELINE.corpusComposition.version}`);
+  console.log(`scorer: ${CAPTURE_V2_EVAL_SCORER_VERSION}`);
   console.log(`providers: ${providers.join(", ")}  runs: ${runs}`);
   console.log("This is a measuring instrument. Do not tune prompts against it.\n");
 

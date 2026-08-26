@@ -26,6 +26,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "phase0-capture-baseline", script: "scripts/verify-phase0-capture-baseline.ts" },
   { name: "capture-v2", script: "scripts/verify-capture-v2.ts" },
   { name: "eval-capture-v2-foundation", script: "scripts/verify-eval-capture-v2.ts" },
+  { name: "eval-capture-v2-scorer-v2", script: "scripts/verify-eval-scorer-v2.ts" },
   { name: "capture-v2-invariants", script: "scripts/verify-capture-v2-invariants.ts" },
   { name: "stacked-capture", script: "scripts/verify-stacked-capture.ts" },
   { name: "test-dashboard", script: "scripts/verify-test-dashboard.ts" },

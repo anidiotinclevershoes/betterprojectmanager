@@ -86,10 +86,19 @@ export function upsertRegression(
   };
 }
 
+function scorerKey(row: Pick<ModelRow, "scorerVersion">): string {
+  return row.scorerVersion?.trim() || "capture-v2-eval-scorer-v1";
+}
+
 export function upsertModelRow(state: DashboardState, row: ModelRow): DashboardState {
   const without = state.modelRows.filter(
     (r) =>
-      !(r.runId === row.runId && r.provider === row.provider && r.model === row.model),
+      !(
+        r.runId === row.runId &&
+        r.provider === row.provider &&
+        r.model === row.model &&
+        scorerKey(r) === scorerKey(row)
+      ),
   );
   return {
     ...state,

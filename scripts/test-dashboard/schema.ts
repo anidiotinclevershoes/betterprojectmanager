@@ -84,6 +84,8 @@ export type ModelRow = {
   provider: string;
   model: string;
   corpusVersion: string | null;
+  /** Safety classifier version. Missing on historical Issue #73 v1 rows. */
+  scorerVersion: string | null;
   caseCount: number | null;
   recall: number | null;
   falsePositives: number | null;

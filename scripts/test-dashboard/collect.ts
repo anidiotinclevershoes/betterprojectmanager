@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import {
   aggregateModelGroup,
   corpusVersionFromReport,
+  scorerVersionFromReport,
   extractFailures,
   groupKey,
   type LooseCaseResult,
@@ -30,6 +31,8 @@ const HARNESS_FILES = [
   "capture-v2-eval.json",
   "eval-capture-v2.json",
   "harness-report.json",
+  "capture-v2-eval-scorer-v2.json",
+  "capture-v2-eval-rescore-v2.json",
 ];
 
 type StackedWorldJson = {
@@ -153,6 +156,7 @@ export function modelRowsFromReport(
     groups.set(key, list);
   }
   const corpusVersion = corpusVersionFromReport(report);
+  const scorerVersion = scorerVersionFromReport(report);
   const rows: ModelRow[] = [];
   for (const group of groups.values()) {
     const agg = aggregateModelGroup(group);
@@ -165,6 +169,7 @@ export function modelRowsFromReport(
       provider: agg.provider,
       model: agg.model,
       corpusVersion,
+      scorerVersion,
       caseCount: agg.caseCount,
       recall: agg.recall,
       falsePositives: agg.falsePositives,
