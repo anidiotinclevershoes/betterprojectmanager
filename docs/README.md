@@ -65,6 +65,8 @@ They do not override (1)–(3) unless they are the specific contract for that se
 
 Plans describe **intended future work**. They do not override current architecture or code.
 
+`docs/v1-convergence-mp/` is the Magic Patterns / V1 UX convergence **reference** (Workstream C). It does not replace the visual constitution in `docs/v1-reference-pack/` and it is not a licence to implement a UX overhaul.
+
 ### 6. Historical handovers / audits / screenshots
 
 These explain why a change was made, previous architecture, historical testing/evaluation, and previous UI state.
@@ -94,6 +96,7 @@ For ordinary development:
 5. only the relevant historical `SLICE*` handover when extending that particular seam
 6. Intelligence Contract (`docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`) when doing Ask / eval / intelligence-scoring work
 7. `docs/EXPERIMENTAL_PROGRAMME.md` when working Capture V2, New Project V2, or Desert (experimental vs current)
+8. `docs/v1-convergence-mp/README.md` when reconciling Magic Patterns / V1 UX with the frozen V2 product (reference only; not an implementation licence)
 
 Then open operational docs only if the task is about tests, deploy, or persistence setup.
 
