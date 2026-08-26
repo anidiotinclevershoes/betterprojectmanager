@@ -521,7 +521,7 @@ Deterministic suite: `npm test` → `scripts/run-regression-suite.ts` (credentia
 
 **Rerun guidance:** touch Knowledge identity → reconcile + project-truth; Risks → risk-lifecycle; People → people-entities + people-context-ui; Ask → ask-context + tell-me + canonical; Ocean UI → matching ocean-* + capture-trust if Capture chrome; Capture apply → phase3b-capture-boundary; always `typecheck` + full `npm test` before merge of behavioural PRs.
 
-**Playwright / property testing:** **UNRESOLVED** as a testing-*shape* decision. This architecture does not mandate Playwright E2E or property-based tests. **CURRENT** safety net is the credential-free `verify-*` regression suite. Whether to add Playwright or property tests belongs to the Test workstream, provided it protects behaviour **before** risky structural deletion (canonical default-on, Capture V2 default-on, legacy-path removal).
+**Playwright / property testing:** **CURRENT.** Workstream B landed a small frozen Playwright Capture V2 journey set (`e2e/capture-v2-journeys.spec.ts`) and narrow `fast-check` invariants (`scripts/verify-capture-v2-invariants.ts`), beside the credential-free `verify-*` regression suite. This is not a test-framework rewrite, not a screenshot farm, and not live-provider CI. These tests must protect behaviour **before** risky structural deletion (canonical default-on, Capture V2 default-on, legacy-path removal).
 
 ---
 
@@ -861,7 +861,7 @@ Use the legend in the file header. This table is the ambiguity-remover for the d
 | Immediate-merge `capture()` / `captureWithAI` / `CaptureBar` | Code still in `store.tsx`; `CaptureBar` unmounted | Ocean analyse + `applyOne` | — | **Next implementation slice** | — |
 | Canonical truth (`serializeCanonicalTruth`) | Assembler exists; production flag **off** | **The** current-truth recall projection | `LUME_CANONICAL_TRUTH` dual Ask | Legacy Ask branch after default-on + one-release rollback | Production default-on **timing** waits on eval/Test workstream |
 | Person identity | Project-scoped `stakeholders` UUID | Workspace `people` + project participation. **Stable IDs own identity. A name is not identity.** Same-name people must remain representable. Name-only resolution if ambiguous → Needs you. No unique-name DB constraint. No fuzzy/global merge of existing rows | Exact-name match as conservative temporary resolver | — | When to ship the `people` table (not first slice) |
-| Playwright / property testing | Safety net = `verify-*` regression suite | Tests must protect behaviour **before** risky structural deletion | — | — | **Whether** to add Playwright E2E or property tests — Test workstream; this architecture does **not** mandate them |
+| Playwright / property testing | `verify-*` + frozen Playwright Capture V2 journeys + narrow fast-check invariants | Tests must protect behaviour **before** risky structural deletion | — | — | — |
 | Ocean | Default appearance | **Keep** | — | **Never** | — |
 | Desert | Supported appearance (`data-theme="desert"`) | **Keep both** (user-selectable) | — | — | MP token/UX polish (sibling stream) |
 | Coach | In AppShell / Intelligence strip / `/api/coach` | **Hide/retire** as V1 product surface | — | Coach product surface | Exact MP strip layout after hide |

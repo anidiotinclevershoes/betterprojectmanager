@@ -161,7 +161,7 @@ The dual-path table is written so it can get **shorter** as those slices land, n
 - Snapshot compression temptation (reject as a second truth projection).
 - Large-project control belongs in assembler caps, not a new snapshot store.
 - MP UX is in-scope but artefacts are absent locally.
-- Playwright / property tests are **UNRESOLVED** (Test workstream); existing `verify-*` suite is CURRENT.
+- Playwright frozen journeys and narrow fast-check invariants are **CURRENT** (Workstream B); existing `verify-*` suite remains CURRENT.
 - Privacy: server-load does not stop the model seeing project data; it stops the browser choosing which rows are “current.”
 
 ## 11. What you explicitly recommend NOT building

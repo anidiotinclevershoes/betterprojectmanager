@@ -1,6 +1,6 @@
 # V1 convergence — Workstream B (test foundation)
 
-This folder is the Capture V2 **test / evaluation** workstream. It must not be merged ahead of the Architecture PR.
+This folder is the Capture V2 **test / evaluation** workstream. Architecture (PR #69) is now on `main`; this pack records the landed test foundation.
 
 - Frozen programme base: `cursor/capture-v2-desert-new-project-56c9` @ `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`
 - Branch: `cursor/v1-convergence-test-foundation-610b`
