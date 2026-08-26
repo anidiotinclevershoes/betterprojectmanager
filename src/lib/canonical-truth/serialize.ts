@@ -1,8 +1,9 @@
 /**
  * Compact canonical truth serialiser for Tell Me / Knowledge Q&A.
- * Slice 1D: assemble from authoritative MissionState domains (Knowledge,
+ * Assembles from durable MissionState-shaped domain records (Knowledge,
  * risks.status, stakeholders, responsibilities, todos, milestones).
  * Does not determine new truth — only projects stored state.
+ * Tell Me HTTP (Slice 1B) always uses this assembler on server-loaded state.
  */
 import { emptyKnowledge } from "@/lib/knowledge";
 import {
@@ -17,7 +18,6 @@ import type {
 } from "@/lib/canonical-truth/types";
 import {
   isClosedRiskStatus,
-  isOpenRiskStatus,
   isResolvedProse,
   stripResolvedPrefix,
   titlesMatch,
@@ -264,17 +264,17 @@ export function serializeCanonicalTruth(args: {
 
   const lines = deduped.map(formatItemLine);
 
-  // Slice 1B/1D: Risk domain lifecycle (open/watch only for current mode)
-  const openDomainRisks = domainRisks.filter((r) =>
-    historical ? true : isOpenRiskStatus(r.status),
-  );
-  const riskLines = openDomainRisks.slice(0, 12).map((r) => {
+  // Domain Risk lifecycle — include every project risk with its durable status.
+  // Completeness over token trimming (Tell Me Slice 1B). Closed risks remain
+  // current truth (resolved/accepted); they must not be omitted so stale client
+  // "open" cannot look more complete than durable state.
+  const riskLines = domainRisks.map((r) => {
     return `[risk-${r.id}] (risk, ${r.status}) ${r.title}`;
   });
 
   // Stakeholders — durable Person identity (Slice 1C)
   const stakeholders = project?.stakeholders ?? [];
-  const stakeholderLines = stakeholders.slice(0, 16).map((s) => {
+  const stakeholderLines = stakeholders.map((s) => {
     return `[person-${s.id}] (person) ${s.name}${s.role ? ` · ${s.role}` : ""}`;
   });
 
@@ -290,16 +290,15 @@ export function serializeCanonicalTruth(args: {
     (t) =>
       t.kind !== "WAITING" && t.kind !== "CHASE" && !t.waitingOn,
   );
-  const waitingLines = waiting.slice(0, 8).map((t) => {
+  const waitingLines = waiting.map((t) => {
     return `[todo-${t.id}] (waiting, legacy) ${t.title}${t.waitingOn ? ` · waiting on ${t.waitingOn}` : ""}`;
   });
-  const todoLines = generalTodos.slice(0, 10).map((t) => {
+  const todoLines = generalTodos.map((t) => {
     return `[todo-${t.id}] (todo, ${t.kind ?? "ACTION"}) ${t.title}`;
   });
 
   const milestones = args.state.timeline
     .filter((t) => t.projectId === args.projectId)
-    .slice(0, 8)
     .map(
       (t) =>
         `[ms-${t.id}] (date, legacy) ${t.label}: ${(t.startAt ?? "").slice(0, 10)}`,
@@ -342,7 +341,7 @@ export function serializeCanonicalTruth(args: {
     ...(lines.length ? lines : ["(none recorded)"]),
     "",
     "RISKS (domain lifecycle):",
-    ...(riskLines.length ? riskLines : ["(none open)"]),
+    ...(riskLines.length ? riskLines : ["(none recorded)"]),
     "",
     "PEOPLE (stakeholders):",
     ...(stakeholderLines.length ? stakeholderLines : ["(none)"]),

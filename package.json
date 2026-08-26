@@ -29,6 +29,7 @@
     "verify:phase2-persistence": "npx --yes tsx scripts/verify-phase2-persistence.ts",
     "verify:production-config": "npx --yes tsx scripts/verify-production-config.ts",
     "verify:tell-me": "npx --yes tsx scripts/verify-tell-me.ts",
+    "verify:tell-me-server-truth": "npx --yes tsx scripts/verify-tell-me-server-truth.ts",
     "verify:hydrate-session": "npx --yes tsx scripts/verify-hydrate-session.ts",
     "verify:evals": "npx --yes tsx scripts/verify-evals.ts",
     "verify:eval-calibration": "npx --yes tsx scripts/verify-eval-calibration.ts",

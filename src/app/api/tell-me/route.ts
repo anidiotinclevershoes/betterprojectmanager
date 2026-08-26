@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireAiCaller } from "@/lib/ai-gate";
 import { answerTellMeQuestion } from "@/lib/tell-me/answer";
-import { loadSnapshotFromSupabase } from "@/lib/tell-me/snapshot-store";
+import {
+  TellMeServerTruthError,
+  clientPostedTruthFields,
+  loadServerCurrentTruthForTellMe,
+} from "@/lib/tell-me/server-truth";
 import { isOpenAIConfigured } from "@/lib/openai";
 import { isProductionRuntime } from "@/lib/runtime-config";
 import { serverLog } from "@/lib/server-log";
@@ -18,9 +22,13 @@ type Body = {
   question?: string;
   projectId?: string | null;
   conversation?: TellMeConversationTurn[];
+  userDisplayName?: string | null;
+  /**
+   * Leftover client fields. Accepted so old callers do not 400 on unknown
+   * shape, but NEVER used as current truth (Slice 1B).
+   */
   snapshot?: ProjectIntelligenceSnapshot | null;
   state?: MissionState;
-  userDisplayName?: string | null;
 };
 
 export async function POST(request: Request) {
@@ -44,25 +52,29 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    if (!body.state) {
+    const projectId = body.projectId?.trim();
+    if (!projectId) {
       return NextResponse.json(
-        { error: "Project state is required." },
+        { error: "Select a project first." },
         { status: 400 },
       );
     }
 
-    let snapshot = body.snapshot ?? null;
-    if (!snapshot && body.projectId) {
-      snapshot = await loadSnapshotFromSupabase(body.projectId);
-    }
+    const ignoredClientTruth = clientPostedTruthFields(body);
+
+    const loaded = await loadServerCurrentTruthForTellMe({
+      projectId,
+      question,
+    });
 
     const result = await answerTellMeQuestion({
       question,
-      state: body.state,
-      selectedProjectId: body.projectId ?? null,
-      snapshot,
+      state: loaded.state,
+      selectedProjectId: loaded.projectId,
+      snapshot: null,
       conversation: body.conversation ?? [],
       userDisplayName: body.userDisplayName ?? null,
+      useCanonicalTruth: true,
     });
 
     recordTellMeMetricsSafe({
@@ -74,13 +86,28 @@ export async function POST(request: Request) {
 
     serverLog.info("tell_me.answered", {
       userId: gate.userId,
+      projectId: loaded.projectId,
       provider: result.provider,
       confidence: result.confidence,
       records: result.contextStats.recordsSelected,
+      canonicalTruthChars: loaded.canonical.approxChars,
+      usedCanonicalTruth: result.usedCanonicalTruth,
+      ignoredClientTruth,
     });
 
     return NextResponse.json({ result });
   } catch (error) {
+    if (error instanceof TellMeServerTruthError) {
+      serverLog.error("tell_me.failed", {
+        error: error.message,
+        code: error.code,
+        status: error.status,
+      });
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.status },
+      );
+    }
     const message =
       error instanceof Error ? error.message : "Tell Me request failed";
     serverLog.error("tell_me.failed", { error: message });

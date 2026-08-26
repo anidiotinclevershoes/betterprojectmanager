@@ -530,19 +530,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | partial — Tell Me HTTP resolved (Slice 1B); Capture and Coach still open |
 | **Severity** | high |
 | **Domain** | Ask/Tell Me · Capture · Infra |
 | **Found in** | V1 Architectural Convergence (26 Aug 2026) |
-| **Failure class** | `/api/tell-me`, `/api/tell-me/refresh`, `/api/capture`, and `/api/coach` treat client-posted `MissionState` (full or sliced) as the project truth the model sees. Workspace RLS already prevents cross-tenant reads; this is not primarily IDOR. Harm is stale/forged *own-session* context, unpredictable prompts, unbounded payloads, and a second “truth” besides durable tables. |
-| **Evidence / repro** | `POST /api/tell-me` returns 400 without `body.state`. `/api/capture` builds `buildCaptureContext` / V2 world exclusively from `body.state`. `/api/workspace/projects` already loads server-side after persist. |
-| **Likely files** | `src/app/api/tell-me/route.ts`; `src/app/api/tell-me/refresh/route.ts`; `src/app/api/capture/route.ts`; `src/app/api/coach/route.ts`; `src/lib/store.tsx` `requestCaptureAnalysis`; `TellMeSessionContext.tsx` |
-| **Proposed fix direction** | `projectId` + intent → `requireAiCaller` → `loadMissionStateFromSupabase` → existing `serializeCanonicalTruth` / `captureApplyWorldFromState`. Lowest-risk surface: Tell Me first. Add payload caps and production telemetry on the same slices. |
+| **Failure class** | `/api/capture` and `/api/coach` still treat client-posted `MissionState` as the project truth the model sees. Workspace RLS already prevents cross-tenant reads; this is not primarily IDOR. Harm is stale/forged *own-session* context, unpredictable prompts, unbounded payloads, and a second “truth” besides durable tables. |
+| **Evidence / repro** | **Tell Me (fixed):** `POST /api/tell-me` requires `projectId` + `question`; leftover `state`/`snapshot` are ignored; truth is `loadMissionStateFromSupabase` → `serializeCanonicalTruth`. Failure is 401/404/503/500 — no client fallback. **Still open:** `/api/capture` builds `buildCaptureContext` / V2 world exclusively from `body.state`. |
+| **Likely files** | `src/app/api/capture/route.ts`; `src/app/api/coach/route.ts`; `src/lib/store.tsx` `requestCaptureAnalysis` |
+| **Proposed fix direction** | Same Tell Me pattern: `projectId` + intent → `requireAiCaller` → `loadMissionStateFromSupabase` → existing `serializeCanonicalTruth` / `captureApplyWorldFromState`. Next surface: Capture. |
 | **Explicit non-goals** | Claiming this as an RLS/IDOR repair; a new snapshot architecture; sending client-constructed current-truth JSON |
-| **Regression test to add** | Tell Me / Capture analysis ignore a client-supplied contradictory MissionState when supabase-mode (server load wins) |
-| **Target resolution / validation point** | Server-truth migration slices (Tell Me, then Capture) |
+| **Regression test to add** | Capture analysis ignore a client-supplied contradictory MissionState when supabase-mode (server load wins). Tell Me coverage: `scripts/verify-tell-me-server-truth.ts`. |
+| **Target resolution / validation point** | Capture server-truth slice (then Coach only if Coach remains) |
 | **Related docs** | Handoff Part C §C3–C4; D-010; D-032 |
-| **Notes** | Project scoping remains application-layer because RLS is workspace membership. `/api/new-project` already sends intent only. |
+| **Notes** | Project scoping remains application-layer because RLS is workspace membership. `/api/new-project` already sends intent only. Tell Me MissionState remains a **client hydrate/cache** for Search suggestions and local snapshot freshness — it is not HTTP current-truth authority. |
 
 ---
 
@@ -762,7 +762,7 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
 3. ~~**D-019**~~ — fixed in Slice 2D (D-R10)  
 4. ~~**Dead Capture merge path**~~ — unmounted `CaptureBar` / `captureWithAI` / `applyCaptureResult` **deleted in Slice 1A**  
-5. **D-033** — Tell Me server-load of canonical truth (then Capture)  
+5. **D-033** — ~~Tell Me server-load of canonical truth~~ (Slice 1B) → Capture next
 6. **D-010** — canonical production default after eval evidence  
 7. **D-032** — default Capture V2 / New Project V2 then delete legacy OpenAI understanding paths (after Test workstream gates)  
 8. **D-034 / D-005 remainder** — fresh apply world + persist-first remaining Capture hooks; `version` columns with that slice  

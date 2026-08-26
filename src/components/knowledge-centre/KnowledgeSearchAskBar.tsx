@@ -11,7 +11,8 @@ import { useTellMeSession } from "@/components/tell-me/TellMeSessionContext";
 
 /**
  * Deterministic Search Knowledge + ✦ Ask Lume — clearly distinct.
- * Search never calls AI. Ask uses existing Tell Me session (flag-respecting).
+ * Search never calls AI. Ask uses existing Tell Me session (server-loaded
+ * canonical truth on `/api/tell-me`; suggestions remain local MissionState cache).
  */
 export function KnowledgeSearchAskBar({ projectId }: { projectId: string }) {
   const { state } = useMission();

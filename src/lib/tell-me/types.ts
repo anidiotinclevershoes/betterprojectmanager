@@ -120,18 +120,13 @@ export type TellMeAnswer = {
 
 export type TellMeAskRequest = {
   question: string;
-  projectId?: string | null;
-  /** Lightweight conversation for follow-ups within a session. */
+  projectId: string;
+  /** Lightweight conversation for follow-ups within a session. Not project evidence. */
   conversation?: TellMeConversationTurn[];
-  /** Client-held snapshot for the selected project (optional). */
-  snapshot?: ProjectIntelligenceSnapshot | null;
-  /** Full mission state slice for context selection (same pattern as Capture/Coach). */
-  state: import("@/lib/types").MissionState;
   userDisplayName?: string | null;
 };
 
 export type TellMeRefreshRequest = {
   projectId: string;
-  state: import("@/lib/types").MissionState;
-  previousSnapshot?: ProjectIntelligenceSnapshot | null;
+  userDisplayName?: string | null;
 };
