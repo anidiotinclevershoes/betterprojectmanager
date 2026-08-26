@@ -30,5 +30,3 @@ export {
   staleExpectedTargetReason,
   type CaptureExpectedTarget,
 } from "./expected-target";
-export { applyApprovedCaptureSuggestion } from "./apply-approved";
-export { memoryCaptureApplyHooks } from "./memory-execute";

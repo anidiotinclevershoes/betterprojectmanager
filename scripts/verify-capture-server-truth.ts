@@ -8,11 +8,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  runCaptureV2FromModelJson,
+} from "../src/lib/capture-v2";
+import {
   CaptureServerTruthError,
   clientPostedTruthFields,
   loadServerCaptureWorld,
-  runCaptureV2FromModelJson,
-} from "../src/lib/capture-v2";
+} from "../src/lib/capture-v2/server-truth";
 import { applyApprovedCaptureSuggestion } from "../src/lib/capture/apply/apply-approved";
 import { fingerprintExpectedTarget } from "../src/lib/capture/apply/expected-target";
 import { planCaptureApply } from "../src/lib/capture/apply";

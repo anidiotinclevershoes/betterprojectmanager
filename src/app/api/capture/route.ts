@@ -32,14 +32,16 @@ import { requireAiCaller } from "@/lib/ai-gate";
 import { isProductionRuntime } from "@/lib/runtime-config";
 import { serverLog } from "@/lib/server-log";
 import {
-  CaptureServerTruthError,
-  clientPostedTruthFields,
   contextRecordsFromWorld,
   formatAuthoritativeStateForPrompt,
   isCaptureV2Enabled,
-  loadServerCaptureWorld,
   runCaptureV2FromModelJson,
 } from "@/lib/capture-v2";
+import {
+  CaptureServerTruthError,
+  clientPostedTruthFields,
+  loadServerCaptureWorld,
+} from "@/lib/capture-v2/server-truth";
 import { extractObservationsWithOpenAI } from "@/lib/capture-v2/extract";
 import { DurableWorkspaceError } from "@/lib/data/durable-workspace";
 

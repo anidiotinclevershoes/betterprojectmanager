@@ -4,11 +4,11 @@ import { applyApprovedCaptureSuggestion } from "@/lib/capture/apply/apply-approv
 import { parseExpectedTarget } from "@/lib/capture/apply/expected-target";
 import { supabaseCaptureApplyHooks } from "@/lib/capture/apply/persist-execute";
 import type { PendingSuggestion } from "@/lib/capture/suggestions";
+import { isCaptureV2Enabled } from "@/lib/capture-v2";
 import {
   CaptureServerTruthError,
-  isCaptureV2Enabled,
   loadServerCaptureWorld,
-} from "@/lib/capture-v2";
+} from "@/lib/capture-v2/server-truth";
 import {
   DurableWorkspaceError,
   loadAuthenticatedWorkspace,

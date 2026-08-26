@@ -4,7 +4,7 @@
  * against evolving MissionState. Test-only. Does not change production Capture.
  */
 
-import { applyApprovedCaptureSuggestion } from "@/lib/capture/apply";
+import { applyApprovedCaptureSuggestion } from "@/lib/capture/apply/apply-approved";
 import { worldFromCaptureState, runCaptureV2FromModelJson } from "@/lib/capture-v2";
 import type { CaptureV2Run } from "@/lib/capture-v2/run";
 import type { MissionState } from "@/lib/types";

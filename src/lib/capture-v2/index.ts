@@ -30,8 +30,3 @@ export {
   worldFromCaptureState,
   emptyV2Result,
 } from "./run";
-export {
-  CaptureServerTruthError,
-  loadServerCaptureWorld,
-  clientPostedTruthFields,
-} from "./server-truth";
