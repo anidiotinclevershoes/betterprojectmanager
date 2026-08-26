@@ -14,7 +14,7 @@ This folder contains the canonical product, UI, development and evaluation refer
    The UI contract that accompanies the approved Ocean Knowledge Centre mockup. It records the visual source-of-truth decisions and the functional rules that other V1 screens should inherit.
 
 3. **`LUME_DEVELOPMENT_AND_EVALUATION_ROADMAP_V1.md`**  
-   The anti-whack-a-mole development process, workstreams, evaluation strategy, **test-driven / behaviour-first rules**, Cursor task template, success measures and stopping/reassessment rules.
+   The anti-whack-a-mole development process, workstreams, evaluation strategy, **test-driven / behaviour-first rules**, Cursor task template, **Plain-English completion-report standard**, success measures and stopping/reassessment rules.
 
 4. **`LUME_V1_UI_BASELINE_OCEAN.png`**  
    The approved Knowledge Centre visual baseline. Treat this image as the visual parent for other V1 screens. Functional requirements should be applied as controlled deltas rather than used to redesign the visual language.
@@ -67,4 +67,4 @@ npm run evals:pre-baseline          # live AI benchmark (OpenAI required)
 
 Do **not** treat benchmark score, trust=0 alone, or token reduction as proof that product regressions are safe.
 
-See the Development & Evaluation Roadmap for the **test-driven / behaviour-first** Cursor task template.
+See the Development & Evaluation Roadmap for the **test-driven / behaviour-first** Cursor task template and the **Plain-English** standard for completion reports and checkpoints (§19).

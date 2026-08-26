@@ -914,7 +914,8 @@ Future Cursor work should treat this document as binding product philosophy.
 - test the failure class being fixed;
 - preserve rollback paths for experimental architecture;
 - distinguish genuine regressions from evaluator artefacts;
-- challenge implementation requests that conflict with this philosophy.
+- challenge implementation requests that conflict with this philosophy;
+- write the Plain-English section of completion reports and checkpoints for the product owner, not as an engineering status list (see Development & Evaluation Roadmap §19).
 
 ## Test-driven / behaviour-first development
 
@@ -960,7 +961,8 @@ Tests should protect **user-visible behaviour, project truth, persistence, ident
 - expose Evals to users;
 - resurrect light mode;
 - reinterpret the agreed navigation/sidebar;
-- change the approved visual system when asked for a functional delta.
+- change the approved visual system when asked for a functional delta;
+- write the Plain-English section as dense bullets, commit-style summaries, or a slightly simpler translation of the technical list.
 
 ---
 
