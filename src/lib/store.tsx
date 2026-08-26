@@ -895,9 +895,11 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     let nextDone = false;
     let projectId: string | null | undefined;
     let title = "";
+    let found = false;
     setState((prev) => {
       const todo = (prev.todos ?? []).find((t) => t.id === todoId);
       if (!todo) return prev;
+      found = true;
       nextDone = !todo.done;
       projectId = todo.projectId;
       title = todo.title;
@@ -918,11 +920,17 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       );
     });
     const meta = persistMetaRef.current;
-    if (meta.mode === "supabase" && meta.workspaceId) {
+    if (found && meta.mode === "supabase" && meta.workspaceId) {
       void (async () => {
         try {
           const client = createBrowserSupabaseClient();
-          await persistTodoUpdate(client, todoId, { done: nextDone });
+          await persistTodoUpdate(
+            client,
+            meta.workspaceId!,
+            projectId ?? null,
+            todoId,
+            { done: nextDone },
+          );
           await persistHistoryEvent(client, meta.workspaceId!, meta.userId, {
             type: nextDone ? "task_completed" : "task_updated",
             title: nextDone ? "You completed a To Do" : "You reopened a To Do",
@@ -940,16 +948,29 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const removeTodo = useCallback((todoId: string) => {
-    setState((prev) => ({
-      ...prev,
-      todos: (prev.todos ?? []).filter((t) => t.id !== todoId),
-    }));
+    let projectId: string | null | undefined;
+    let found = false;
+    setState((prev) => {
+      const todo = (prev.todos ?? []).find((t) => t.id === todoId);
+      if (!todo) return prev;
+      found = true;
+      projectId = todo.projectId;
+      return {
+        ...prev,
+        todos: (prev.todos ?? []).filter((t) => t.id !== todoId),
+      };
+    });
     const meta = persistMetaRef.current;
-    if (meta.mode === "supabase" && meta.workspaceId) {
+    if (found && meta.mode === "supabase" && meta.workspaceId) {
       void (async () => {
         try {
           const client = createBrowserSupabaseClient();
-          await persistTodoDelete(client, todoId);
+          await persistTodoDelete(
+            client,
+            meta.workspaceId!,
+            projectId ?? null,
+            todoId,
+          );
           markPersistSaved();
         } catch (err) {
           console.error("[removeTodo] persist failed", err);
@@ -1054,9 +1075,13 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateTodo = useCallback((todoId: string, patch: UpdateTodoInput) => {
+    let intendedProjectId: string | null | undefined;
+    let found = false;
     setState((prev) => {
       const before = (prev.todos ?? []).find((t) => t.id === todoId);
       if (!before) return prev;
+      found = true;
+      intendedProjectId = before.projectId ?? null;
       const projectId =
         patch.projectId !== undefined ? patch.projectId : before.projectId;
       const project = projectId
@@ -1146,19 +1171,25 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       );
     });
     const meta = persistMetaRef.current;
-    if (meta.mode === "supabase" && meta.workspaceId) {
+    if (found && meta.mode === "supabase" && meta.workspaceId) {
       void (async () => {
         try {
           const client = createBrowserSupabaseClient();
-          await persistTodoUpdate(client, todoId, {
-            title: patch.title,
-            detail: patch.detail,
-            dueAt: patch.dueAt,
-            done: patch.done,
-            projectId: patch.projectId,
-            kind: patch.kind,
-            waitingOn: patch.waitingOn,
-          });
+          await persistTodoUpdate(
+            client,
+            meta.workspaceId!,
+            intendedProjectId ?? null,
+            todoId,
+            {
+              title: patch.title,
+              detail: patch.detail,
+              dueAt: patch.dueAt,
+              done: patch.done,
+              projectId: patch.projectId,
+              kind: patch.kind,
+              waitingOn: patch.waitingOn,
+            },
+          );
           markPersistSaved();
         } catch (err) {
           console.error("[updateTodo] persist failed", err);
