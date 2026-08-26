@@ -530,19 +530,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | partial — Tell Me HTTP resolved (Slice 1B); Capture and Coach still open |
+| **Status** | partial — Tell Me HTTP resolved (Slice 1B); Capture V2 Analyse+Apply resolved (Slice 1C); Coach and legacy Capture still open |
 | **Severity** | high |
 | **Domain** | Ask/Tell Me · Capture · Infra |
 | **Found in** | V1 Architectural Convergence (26 Aug 2026) |
-| **Failure class** | `/api/capture` and `/api/coach` still treat client-posted `MissionState` as the project truth the model sees. Workspace RLS already prevents cross-tenant reads; this is not primarily IDOR. Harm is stale/forged *own-session* context, unpredictable prompts, unbounded payloads, and a second “truth” besides durable tables. |
-| **Evidence / repro** | **Tell Me (fixed):** `POST /api/tell-me` requires `projectId` + `question`; leftover `state`/`snapshot` are ignored; truth is `loadMissionStateFromSupabase` → `serializeCanonicalTruth`. Failure is 401/404/503/500 — no client fallback. **Still open:** `/api/capture` builds `buildCaptureContext` / V2 world exclusively from `body.state`. |
-| **Likely files** | `src/app/api/capture/route.ts`; `src/app/api/coach/route.ts`; `src/lib/store.tsx` `requestCaptureAnalysis` |
-| **Proposed fix direction** | Same Tell Me pattern: `projectId` + intent → `requireAiCaller` → `loadMissionStateFromSupabase` → existing `serializeCanonicalTruth` / `captureApplyWorldFromState`. Next surface: Capture. |
+| **Failure class** | `/api/coach` still treats client-posted `MissionState` as the project truth the model sees. Workspace RLS already prevents cross-tenant reads; this is not primarily IDOR. Harm is stale/forged *own-session* context, unpredictable prompts, unbounded payloads, and a second “truth” besides durable tables. |
+| **Evidence / repro** | **Tell Me (fixed):** `POST /api/tell-me` requires `projectId` + `question`; leftover `state`/`snapshot` are ignored; truth is `loadMissionStateFromSupabase` → `serializeCanonicalTruth`. **Capture V2 (fixed, Slice 1C):** `POST /api/capture` with `LUME_CAPTURE_V2=1` loads `loadServerCaptureWorld` (same durable loader as Tell Me, then `worldFromCaptureState` / `captureApplyWorldFromState`). Leftover `body.state` is ignored. Failure is 401/404/503/500 — no client fallback. Apply is `POST /api/capture/apply` against a fresh load. **Still open:** legacy `/api/capture` (flag off) still builds context from `body.state`; `/api/coach` still accepts client MissionState. |
+| **Likely files** | `src/app/api/coach/route.ts`; legacy branch of `src/app/api/capture/route.ts` |
+| **Proposed fix direction** | Same Tell Me / Capture V2 pattern for Coach, then delete the legacy Capture understanding path after the V2 default-on gate. |
 | **Explicit non-goals** | Claiming this as an RLS/IDOR repair; a new snapshot architecture; sending client-constructed current-truth JSON |
-| **Regression test to add** | Capture analysis ignore a client-supplied contradictory MissionState when supabase-mode (server load wins). Tell Me coverage: `scripts/verify-tell-me-server-truth.ts`. |
-| **Target resolution / validation point** | Capture server-truth slice (then Coach only if Coach remains) |
+| **Regression test to add** | Capture V2 coverage: `scripts/verify-capture-server-truth.ts`. Tell Me coverage: `scripts/verify-tell-me-server-truth.ts`. |
+| **Target resolution / validation point** | Coach (if it remains) then V2 default-on / legacy Capture deletion |
 | **Related docs** | Handoff Part C §C3–C4; D-010; D-032 |
-| **Notes** | Project scoping remains application-layer because RLS is workspace membership. `/api/new-project` already sends intent only. Tell Me MissionState remains a **client hydrate/cache** for Search suggestions and local snapshot freshness — it is not HTTP current-truth authority. |
+| **Notes** | Project scoping remains application-layer because RLS is workspace membership. Capture V2 MissionState remains a **client hydrate/cache** after Apply returns server state — it is not HTTP current-truth authority. |
 
 ---
 
@@ -550,19 +550,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | partial — Capture V2 Apply reloads fresh durable truth and compares an Analyse-time target fingerprint (Slice 1C). No schema `version` column. |
 | **Severity** | medium |
 | **Domain** | Capture · Infra |
 | **Found in** | V1 Architectural Convergence (26 Aug 2026) |
-| **Failure class** | `planCaptureApply` is pure over `captureApplyWorldFromState(MissionState)`. There is no fresh DB load and no `expectedVersion`. `updated_at` triggers exist but persist helpers update by id only. Concurrent tabs / stale apply review can write against a world that is no longer durable truth. |
-| **Evidence / repro** | `src/lib/capture/apply/world.ts`; grep shows no `expectedVersion` / version columns in product tables |
-| **Likely files** | `src/lib/capture/apply/*`; persist helpers; schema |
-| **Proposed fix direction** | On Capture apply (supabase mode): reload authoritative world, then `planCaptureApply`. Add integer `version` on hot tables and check it in persist helpers. Not a new mutation framework. Align remaining optimistic Capture hooks (todo complete/update, Confirm Owner) to persist-first. |
+| **Failure class** | `updated_at` triggers exist but persist helpers update by id only. Concurrent tabs / stale apply review can write against a world that is no longer durable truth if the client world is trusted. |
+| **Evidence / repro** | **Capture V2 Apply (Slice 1C):** `POST /api/capture/apply` reloads via `loadServerCaptureWorld`, compares `expectedTarget` (id + material fields: title/status/startAt/name/done) captured at Analyse, then `planCaptureApply` / `executeCaptureApply` on that fresh world. Deleted / materially changed / foreign targets fail closed (Needs you). No MissionState is posted on Apply. **Remaining:** no integer `version` column; fingerprint is not a universal concurrency contract; legacy Capture apply (flag off) still plans against client `MissionState`. |
+| **Likely files** | `src/lib/capture/apply/apply-approved.ts`; `src/lib/capture/apply/expected-target.ts`; `src/app/api/capture/apply/route.ts` |
+| **Proposed fix direction** | Keep fingerprint + fresh load for Capture. Add integer `version` on hot tables only if a later integrity slice proves fingerprints insufficient. Not a new mutation framework. |
 | **Explicit non-goals** | App-wide command bus; making Phase 3B own Knowledge Centre / New Project / delete; treating this as the project-membership invariant (that is **D-035**) |
-| **Regression test to add** | Apply against a stale client world fails closed or revalidates; version mismatch does not silently clobber |
-| **Target resolution / validation point** | After Capture server-load; with integrity/concurrency slice — not mixed into dead-path deletion |
+| **Regression test to add** | `scripts/verify-capture-server-truth.ts` cases D/E (changed / deleted between Analyse and Apply). |
+| **Target resolution / validation point** | Schema versioning only if fingerprints fail in production — not mixed into this slice |
 | **Related docs** | Handoff Part C §C5–C6; D-005; D-R13; D-035 |
-| **Notes** | Phase 3B remains the Capture mutation boundary. This gap is revalidation + DB concurrency, not a missing framework. Project-membership checks on persist helpers are **D-035**, not this entry. |
+| **Notes** | Phase 3B remains the Capture mutation boundary. Slice 1C did **not** add DB versioning; existing state comparison was sufficient for Capture Apply. |
 
 ---
 
@@ -570,19 +570,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | partial — Capture V2 Analyse/Apply enforce project membership of mutation targets (Slice 1C). Persist-helper audit still open. |
 | **Severity** | high |
 | **Domain** | Infra / all project-domain writes |
 | **Found in** | V1 Architectural Convergence; Thor amendment (26 Aug 2026) |
 | **Failure class** | **Invariant:** every project-domain mutation must verify that the target durable object belongs to the intended project before mutation. Workspace RLS is membership-wide, so an id-only UPDATE/DELETE can mutate another project’s row in the same workspace. `persistTodoUpdate` / `persistTodoDelete` (`.eq("id", todoId)` with no `project_id`) are **one known instance**, not the whole class. |
-| **Evidence / repro** | `persistTodoUpdate` in `src/lib/data/supabase/persist-mutations.ts` updates by todo id only. Equivalent helpers must be audited: risks, knowledge_items, milestones, stakeholders, memories, recommendations, history_events, capture_sessions, coach_sessions, and any other project-domain write. |
+| **Evidence / repro** | **Capture V2 (Slice 1C):** server world is filtered to the requested project; validator rejects foreign IDs (Person, Risk, Todo, milestone); Apply stale-check + Phase 3B `require*OnProject` refuse Toyworld/GamingStudio5000 IDs inside a Candyland Capture. **Still open:** `persistTodoUpdate` in `src/lib/data/supabase/persist-mutations.ts` updates by todo id only. Equivalent helpers must still be audited: risks (status helper is already project+workspace scoped), knowledge_items, milestones, stakeholders, memories, recommendations, history_events, sessions. |
 | **Likely files** | `src/lib/data/supabase/persist-mutations.ts`; Capture apply hooks; store mutations; workspace project routes |
-| **Proposed fix direction** | Treat the quoted invariant as a persist-layer rule. Later implementation/test pass: inventory every project-domain mutation; require intended `project_id` (and workspace) on the target row before write. Do **not** fix in the architecture-docs branch. |
+| **Proposed fix direction** | Treat the quoted invariant as a persist-layer rule. Later implementation/test pass: inventory every project-domain mutation; require intended `project_id` (and workspace) on the target row before write. |
 | **Explicit non-goals** | A generic mutation framework; conflating this with D-034 versioning; calling this an RLS/IDOR tenant bug |
-| **Regression test to add** | Property/characterisation: a persist helper given a foreign `projectId` or a row whose `project_id` is not the intended project must not mutate that row. Cover every audited helper, not todos alone. |
-| **Target resolution / validation point** | Later implementation + Test workstream audit — after this authority is merged, not in PR #69 |
+| **Regression test to add** | Capture V2: `scripts/verify-capture-server-truth.ts` isolation + foreign-ID cases. Persist-helper property tests remain a later pass. |
+| **Target resolution / validation point** | Later persist-helper audit — after Capture V2 server truth, not a schema migration in this slice |
 | **Related docs** | Handoff Part C §C5 gap 5, §C6, assumption 23; D-034 (separate: apply world / version) |
-| **Notes** | Application-layer project scoping already exists on many paths (Capture apply world, some persist helpers). The defect class is **inconsistent enforcement**. Do not document or fix this as Todo-only. |
+| **Notes** | Application-layer project scoping on Capture V2 is now live. The remaining defect class is **inconsistent persist-helper enforcement**. Do not document or fix this as Todo-only. |
 
 ---
 
@@ -762,11 +762,11 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
 3. ~~**D-019**~~ — fixed in Slice 2D (D-R10)  
 4. ~~**Dead Capture merge path**~~ — unmounted `CaptureBar` / `captureWithAI` / `applyCaptureResult` **deleted in Slice 1A**  
-5. **D-033** — ~~Tell Me server-load of canonical truth~~ (Slice 1B) → Capture next
+5. **D-033** — ~~Tell Me server-load~~ (Slice 1B); ~~Capture V2 Analyse+Apply~~ (Slice 1C) → Coach + legacy Capture remain
 6. **D-010** — canonical production default after eval evidence  
 7. **D-032** — default Capture V2 / New Project V2 then delete legacy OpenAI understanding paths (after Test workstream gates)  
-8. **D-034 / D-005 remainder** — fresh apply world + persist-first remaining Capture hooks; `version` columns with that slice  
-9. **D-035** — audit **all** project-domain persist paths against the project-membership invariant (`persistTodoUpdate` is one instance)  
+8. **D-034 remainder** — schema `version` columns only if fingerprints prove insufficient; legacy Capture apply still client-world  
+9. **D-035 remainder** — audit **all** project-domain persist paths (`persistTodoUpdate` is one instance); Capture V2 membership is live  
 10. **D-028** + New Project crash residual — bundle RPCs (dedicated integrity slice)  
 11. **D-003** — suggestion persist  
 12. **D-008 / D-021** — implement the decided waiting/open-loop split  

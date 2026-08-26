@@ -6,6 +6,7 @@ import {
   analyseFrozenTranscript,
   applyReadyIfPresent,
   dismissCoachIfPresent,
+  mockCaptureApplyFromDurable,
   openCapture,
   openKnowledgeCentre,
   readMissionState,
@@ -42,6 +43,7 @@ function computeCaptureResult(input: {
   rawModelJson: unknown;
   bindTarget?: { domain: string; titleIncludes: string };
   state: unknown;
+  clientState?: unknown;
 }): { result: unknown } {
   const run = spawnSync(
     "npx",
@@ -73,7 +75,13 @@ async function mockAuthAndStackedCapture(page: Page, story: StackedStory) {
     });
   });
 
+  await mockCaptureApplyFromDurable(page);
+
   await page.route("**/api/capture", async (route) => {
+    if (route.request().url().includes("/api/capture/apply")) {
+      await route.fallback();
+      return;
+    }
     if (route.request().method() === "GET") {
       await route.fulfill({
         json: {
@@ -100,12 +108,14 @@ async function mockAuthAndStackedCapture(page: Page, story: StackedStory) {
       });
       return;
     }
+    const durable = await readMissionState(page);
     const computed = computeCaptureResult({
       transcript: step.transcript,
       projectId: body.projectId || story.projectId,
       rawModelJson: step.rawModelJson,
       bindTarget: step.bindTarget,
-      state: body.state,
+      state: durable,
+      clientState: body.state,
     });
     await route.fulfill({
       json: {

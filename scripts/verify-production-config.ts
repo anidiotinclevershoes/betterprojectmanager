@@ -250,6 +250,7 @@ check("billing routes exist and webhook is signature-gated in code", () => {
 check("AI routes import requireAiCaller", () => {
   for (const rel of [
     "src/app/api/capture/route.ts",
+    "src/app/api/capture/apply/route.ts",
     "src/app/api/coach/route.ts",
     "src/app/api/transcribe/route.ts",
     "src/app/api/new-project/route.ts",

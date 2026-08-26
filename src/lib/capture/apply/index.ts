@@ -24,3 +24,9 @@ export {
   type CaptureApplyHooks,
   type CaptureExecuteResult,
 } from "./execute";
+export {
+  fingerprintExpectedTarget,
+  parseExpectedTarget,
+  staleExpectedTargetReason,
+  type CaptureExpectedTarget,
+} from "./expected-target";

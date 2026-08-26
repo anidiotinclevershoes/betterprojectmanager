@@ -294,6 +294,11 @@ type MissionContextValue = {
     title: string;
     content?: string;
   }) => Promise<{ ok: boolean; error?: string }>;
+  /**
+   * Slice 1C: replace the hydrate cache with server-returned Apply state.
+   * Does not treat this as a client-authored mutation.
+   */
+  adoptAppliedState: (next: MissionState) => void;
   refreshCoaching: () => void;
   /** Development: restore seeded demo baseline; preserve non-seeded data. */
   resetDemo: () => SeedResetResult;
@@ -2535,6 +2540,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const adoptAppliedState = useCallback((next: MissionState) => {
+    setState(normaliseState(next));
+  }, []);
+
   const refreshCoaching = useCallback(() => {
     setState((prev) => withProactiveCoaching(prev));
   }, []);
@@ -2617,6 +2626,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       ensureCapturePerson,
       addCaptureKnowledgeBullet,
       addCaptureMemory,
+      adoptAppliedState,
       refreshCoaching,
       resetDemo,
       persistenceMode,
@@ -2661,6 +2671,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       ensureCapturePerson,
       addCaptureKnowledgeBullet,
       addCaptureMemory,
+      adoptAppliedState,
       refreshCoaching,
       resetDemo,
     ],

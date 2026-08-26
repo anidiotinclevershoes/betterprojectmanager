@@ -35,6 +35,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "canonical-truth", script: "scripts/verify-canonical-truth.ts" },
   { name: "tell-me", script: "scripts/verify-tell-me.ts" },
   { name: "tell-me-server-truth", script: "scripts/verify-tell-me-server-truth.ts" },
+  { name: "capture-server-truth", script: "scripts/verify-capture-server-truth.ts" },
   { name: "capture-context", script: "scripts/verify-capture-context.ts" },
   { name: "capture-review", script: "scripts/verify-capture-review.ts" },
   { name: "capture-workspace", script: "scripts/verify-capture-workspace-refinement.ts" },

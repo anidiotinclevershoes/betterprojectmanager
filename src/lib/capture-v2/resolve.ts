@@ -4,6 +4,7 @@ import {
   type CaptureApplyWorld,
   type CaptureLegalDomain,
 } from "@/lib/capture/apply";
+import { fingerprintExpectedTarget } from "@/lib/capture/apply/expected-target";
 import type { PendingSuggestion, SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
 import { namesMatchExact } from "@/lib/people/identity";
 import type { CaptureObservationV2, ObservationDomain } from "./types";
@@ -157,6 +158,7 @@ function resolveOne(
     op,
     projectId,
   });
+  suggestion.expectedTarget = fingerprintExpectedTarget(args.world, suggestion);
 
   const decision = planCaptureApply({
     item: suggestion,

@@ -10,6 +10,7 @@ import {
   hasInvalidOwnershipSemantics,
   isOwnershipSemantics,
 } from "@/lib/capture/apply/types";
+import { parseExpectedTarget } from "@/lib/capture/apply/expected-target";
 
 export type SuggestionKind =
   | "action"
@@ -64,6 +65,11 @@ export type PendingSuggestion = {
   responsibilityScope?: string;
   replacePersonId?: string;
   proposedValues?: Record<string, unknown>;
+  /**
+   * Analyse-time fingerprint of the durable target. Apply revalidates this
+   * against fresh server truth. Not a MissionState snapshot.
+   */
+  expectedTarget?: import("./apply/expected-target").CaptureExpectedTarget | null;
 };
 
 export const KIND_LABEL: Record<SuggestionKind, string> = {
@@ -505,6 +511,7 @@ function buildSuggestionsFromProposedOps(
       typeof op.proposedValues?.replacePersonId === "string"
         ? String(op.proposedValues.replacePersonId)
         : undefined;
+    const expectedTarget = parseExpectedTarget(op.proposedValues?.expectedTarget);
     const legalDomain =
       !knownEntity ||
       parsedOp === null ||
@@ -562,6 +569,7 @@ function buildSuggestionsFromProposedOps(
       responsibilityScope,
       replacePersonId,
       proposedValues: op.proposedValues,
+      expectedTarget,
     });
   }
 

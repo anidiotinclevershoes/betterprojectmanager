@@ -338,7 +338,7 @@ Do not create extra To Dos merely to populate People detail. Person detail waiti
 | `1` / `true` / `on` | Force canonical assembler |
 | `0` / `false` / `off` | Force legacy assembler **in the library** (emergency rollback of serialiser, not of server load) |
 
-**Remaining deletion gate:** legacy `buildCaptureContext` branch inside `buildTellMeContext`; flag default-off for evals; Capture/Coach still accept client MissionState (D-033 remainder). Do not delete the library branch until Capture migrates and eval evidence supports flipping the default.
+**Remaining deletion gate:** legacy `buildCaptureContext` branch inside `buildTellMeContext`; flag default-off for evals; Coach still accepts client MissionState; **legacy Capture** (`LUME_CAPTURE_V2` unset) still uses `body.state`. Capture V2 Analyse+Apply use server load (Slice 1C). Do not delete the legacy Capture engine until the V2 default-on gate is authorised.
 
 ### Canonical Ask (HTTP + explicit / evals)
 
@@ -490,9 +490,9 @@ From `docs/LUME_V1_KNOWN_DISCOVERIES.md` as of this handoff. **Do not treat reso
 | D-030 | Leftover Knowledge prose vs domain after Capture apply | KC may still show old risk/date sentences | KC projection / reconcile |
 | D-031 | Coach drawer auto-opens over Capture/KC | Overlay can hide Analyse | Ocean/QOL — **convergence: hide/retire Coach as V1 surface** |
 | D-032 | Dual Capture / New Project OpenAI pipelines | Permanent dual engines reintroduce drift | After V2 gates; delete legacy understanding path |
-| D-033 | AI decision routes accept browser-supplied MissionState | Stale/forged own-session context; unbounded payloads | **Tell Me HTTP fixed (Slice 1B).** Capture then Coach remain. |
-| D-034 | Capture apply world is client MissionState; no row versioning | Planner cannot see concurrent durable writes | DB `version` + fresh load before write; not a new framework |
-| D-035 | Project-domain mutations must verify intended project membership | `persistTodoUpdate` is one known instance (id-only WHERE); class is broader | Later audit of all project-domain persist paths — not this docs PR |
+| D-033 | AI decision routes accept browser-supplied MissionState | Stale/forged own-session context; unbounded payloads | **Tell Me HTTP fixed (Slice 1B).** **Capture V2 Analyse+Apply fixed (Slice 1C).** Coach + legacy Capture remain. |
+| D-034 | Capture apply world is client MissionState; no row versioning | Planner cannot see concurrent durable writes | **Capture V2 Apply reloads fresh world + Analyse-time fingerprint (Slice 1C).** No schema `version`. Legacy apply still client-world. |
+| D-035 | Project-domain mutations must verify intended project membership | `persistTodoUpdate` is one known instance (id-only WHERE); class is broader | **Capture V2 membership live (Slice 1C).** Persist-helper audit remains. |
 
 **Resolved (do not reopen as missing architecture):** D-R01 durable Knowledge, D-R02 stable identity, D-R03 risk resurrection, D-R04/R05 Confirm Owner persist/UUIDs, D-R06 false unknown-owner, D-R07 multi-owner Ask, D-R08 Ocean Capture, D-R09 item detail, D-R10 share vs replace, D-R11 Phase 3A New Project integrity (includes D-006), D-R12 Phase 3A.1 Safe Project Deletion, D-R13 Phase 3B Capture mutation boundary (includes D-017).
 
@@ -663,9 +663,12 @@ Parallel writes:
 ### Capture
 
 - Components: `CaptureWorkspace`, `CaptureSessionContext`
-- API: `src/app/api/capture/route.ts`
-- Tests: capture-trust-boundary, capture-review, capture-reliability, ocean-capture
-- Discoveries: D-007, D-011, D-013, D-014, D-025
+- API: `src/app/api/capture/route.ts` (Analyse); `src/app/api/capture/apply/route.ts` (V2 Apply)
+- V2 truth: `loadServerCaptureWorld` (shared durable loader) → `captureApplyWorldFromState` / `worldFromCaptureState` (Phase 3B ID catalogue, not `serializeCanonicalTruth`)
+- V2 Apply: fresh load → expectedTarget fingerprint → `planCaptureApply` → `executeCaptureApply`
+- Flag `LUME_CAPTURE_V2` still default **off**. Legacy understanding path still uses client `body.state`.
+- Tests: capture-trust-boundary, capture-review, capture-v2, capture-server-truth, stacked-capture, ocean-capture
+- Discoveries: D-033 partial (Capture V2); D-034 partial (fingerprint, no schema version); D-035 partial (Capture membership; persist helpers remain)
 
 ### Ask / Tell Me
 
@@ -673,7 +676,7 @@ Parallel writes:
 - HTTP does not trust client MissionState
 - Library flag: `isCanonicalTruthEnabled` (evals / legacy assembler rollback)
 - Tests: ask-context-authority, canonical-truth, tell-me, tell-me-server-truth, context-integrity
-- Discoveries: D-033 partial (Tell Me); D-010 residual on library legacy branch
+- Discoveries: D-033 partial (Tell Me HTTP + Capture V2); Coach + legacy Capture remain; D-010 residual on library legacy branch
 
 ### History / provenance
 
@@ -996,7 +999,8 @@ This is **not** primarily an IDOR/tenant-isolation repair. Workspace RLS (`is_wo
 | --- | --- | --- | --- |
 | `POST /api/tell-me` | `projectId` + `question` + conversation (intent). Leftover `state`/`snapshot` **ignored** | **Yes** — `loadMissionStateFromSupabase` then `serializeCanonicalTruth` | `TellMeSessionContext.tsx` |
 | `POST /api/tell-me/refresh` | `projectId` (+ display name). Leftover `state` **ignored** | **Yes** — same server load; snapshot is derived UX, not AI truth | `TellMeSessionContext.tsx` |
-| `POST /api/capture` | **Partial MissionState** (sliced in `store.tsx`) | **No** | `requestCaptureAnalysis` in `store.tsx` |
+| `POST /api/capture` | V2: `projectId` + transcript. Leftover `state` **ignored**. Legacy (flag off): partial MissionState | **V2 yes** — `loadServerCaptureWorld` then `worldFromCaptureState`. Legacy no | `requestCaptureAnalysis` in `store.tsx` |
+| `POST /api/capture/apply` | V2: `projectId` + approved item + expectedTarget. **No MissionState** | **Yes** — fresh `loadServerCaptureWorld`, fingerprint revalidation, Phase 3B | `CaptureSessionContext.applyOne` when `capturePipeline === "v2"` |
 | `POST /api/coach` | Large MissionState slice | **No** | `CoachSessionContext.tsx`, `CoachButton.tsx` |
 | `POST /api/new-project` | Narrative / answers only | No (draft); persist is separate | `NewProjectExperience.tsx` |
 | `POST /api/workspace/projects` | `CreateProjectInput` | **Yes** — persist then `loadMissionStateFromSupabase` | `store.createProject` |

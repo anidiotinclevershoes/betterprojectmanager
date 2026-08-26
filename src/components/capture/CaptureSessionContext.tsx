@@ -218,6 +218,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     toggleTodo,
     removeTodo,
     updateTodo,
+    adoptAppliedState,
   } = useMission();
 
   const [slice, setSlice] = useState<CapturePersistSlice>(emptySlice);
@@ -560,12 +561,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       scopedProjectId?: string,
     ): Promise<CaptureApplyDecision> => {
       const text = (slice.editing[item.id] ?? item.content).trim();
-      const decision = planCaptureApply({
-        item,
-        text,
-        world: captureApplyWorldFromState(state),
-        captureEntryProjectId: scopedProjectId || slice.projectId || null,
-      });
+      const projectId = scopedProjectId || slice.projectId || item.projectId || "";
 
       const finishApplied = (message: string) => {
         setSlice((prev) => {
@@ -578,6 +574,99 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         });
         announce(message);
       };
+
+      if (slice.result?.capturePipeline === "v2") {
+        if (!projectId) {
+          const decision: CaptureApplyDecision = {
+            kind: "needs_you",
+            domain: item.legalDomain ?? "unsupported",
+            reason: "Select a project first.",
+          };
+          announce(decision.reason);
+          return decision;
+        }
+        try {
+          const response = await fetch("/api/capture/apply", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              projectId,
+              item,
+              text,
+              expectedTarget: item.expectedTarget ?? null,
+            }),
+          });
+          const data = (await response.json()) as {
+            decision?: CaptureApplyDecision;
+            executed?: {
+              kind: string;
+              reason?: string;
+              domain?: string;
+            };
+            state?: import("@/lib/types").MissionState;
+            error?: string;
+          };
+          if (!response.ok) {
+            const reason = data.error || "Could not apply this change.";
+            announce(reason);
+            return {
+              kind: "needs_you",
+              domain: item.legalDomain ?? "unsupported",
+              reason,
+            };
+          }
+          const decision = data.decision ?? {
+            kind: "needs_you" as const,
+            domain: item.legalDomain ?? "unsupported",
+            reason: data.error || "Could not apply this change.",
+          };
+          if (data.executed?.kind === "failed") {
+            announce(data.executed.reason || "Could not save this change.");
+            return {
+              kind: "needs_you",
+              domain: decision.domain,
+              reason: data.executed.reason || "Could not save this change.",
+            };
+          }
+          if (data.state) {
+            adoptAppliedState(data.state);
+          }
+          if (decision.kind === "needs_you") {
+            announce(decision.reason);
+            return decision;
+          }
+          if (decision.kind === "no_change") {
+            finishApplied(decision.reason);
+            return decision;
+          }
+          if (data.executed?.kind === "wrote") {
+            finishApplied(
+              item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
+            );
+          } else if (data.executed?.kind === "no_change") {
+            finishApplied(data.executed.reason || decision.kind);
+          } else {
+            announce(data.executed?.reason || decision.kind);
+          }
+          return decision;
+        } catch (err) {
+          const reason =
+            err instanceof Error ? err.message : "Could not apply this change.";
+          announce(reason);
+          return {
+            kind: "needs_you",
+            domain: item.legalDomain ?? "unsupported",
+            reason,
+          };
+        }
+      }
+
+      const decision = planCaptureApply({
+        item,
+        text,
+        world: captureApplyWorldFromState(state),
+        captureEntryProjectId: scopedProjectId || slice.projectId || null,
+      });
 
       if (decision.kind === "needs_you") {
         announce(decision.reason);
@@ -734,6 +823,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       addCaptureRisk,
       addTimelineItem,
       addTodo,
+      adoptAppliedState,
       announce,
       confirmResponsibilityOwner,
       ensureCapturePerson,
