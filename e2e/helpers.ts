@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { spawnSync } from "node:child_process";
 import { type Page, expect } from "@playwright/test";
 
 export function walkthroughPath(name: string): string | null {
@@ -48,6 +49,64 @@ export async function seedExperimentalWorlds(page: Page, testId: string) {
   );
 }
 
+export async function mockCaptureApplyFromDurable(page: Page) {
+  await page.route("**/api/capture/apply", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fulfill({ status: 405, json: { error: "Method not allowed" } });
+      return;
+    }
+    const body = route.request().postDataJSON() as {
+      projectId?: string;
+      item?: unknown;
+      text?: string;
+      expectedTarget?: unknown;
+    };
+    const durable = await readMissionState(page);
+    if (!durable) {
+      await route.fulfill({
+        status: 503,
+        json: { error: "Durable project truth could not be loaded." },
+      });
+      return;
+    }
+    const run = spawnSync(
+      "npx",
+      ["--yes", "tsx", "scripts/capture-apply-step.ts"],
+      {
+        input: JSON.stringify({
+          projectId: body.projectId,
+          item: body.item,
+          text: body.text,
+          expectedTarget: body.expectedTarget,
+          state: durable,
+        }),
+        encoding: "utf8",
+        cwd: process.cwd(),
+        timeout: 25_000,
+      },
+    );
+    if (run.status !== 0) {
+      await route.fulfill({
+        status: 500,
+        json: {
+          error: `capture-apply-step failed: ${run.stderr || run.stdout || run.status}`,
+        },
+      });
+      return;
+    }
+    const text = (run.stdout || "").trim();
+    const start = text.indexOf("{");
+    if (start < 0) {
+      await route.fulfill({
+        status: 500,
+        json: { error: `capture-apply-step produced no JSON: ${text}` },
+      });
+      return;
+    }
+    await route.fulfill({ json: JSON.parse(text.slice(start)) });
+  });
+}
+
 export async function mockLocalAuthAndFrozenCapture(page: Page, caseId: string) {
   const frozen = loadFrozenCapture(caseId);
 
@@ -57,7 +116,13 @@ export async function mockLocalAuthAndFrozenCapture(page: Page, caseId: string) 
     });
   });
 
+  await mockCaptureApplyFromDurable(page);
+
   await page.route("**/api/capture", async (route) => {
+    if (route.request().url().includes("/api/capture/apply")) {
+      await route.fallback();
+      return;
+    }
     if (route.request().method() === "GET") {
       await route.fulfill({
         json: {
@@ -73,6 +138,7 @@ export async function mockLocalAuthAndFrozenCapture(page: Page, caseId: string) 
         result: frozen.result,
         openaiConfigured: true,
         captureV2Enabled: true,
+        capturePipeline: "v2",
         requestId: "e2e-frozen",
       },
     });

@@ -85,6 +85,9 @@ export function captureResultFromResolved(args: {
             name: observation.proposedValues?.name ?? observation.candidateTargetTitle,
           }
         : {}),
+      ...(row.resolved?.suggestion?.expectedTarget
+        ? { expectedTarget: row.resolved.suggestion.expectedTarget }
+        : {}),
     };
 
     findings.push({

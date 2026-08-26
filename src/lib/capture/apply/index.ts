@@ -24,3 +24,11 @@ export {
   type CaptureApplyHooks,
   type CaptureExecuteResult,
 } from "./execute";
+export {
+  fingerprintExpectedTarget,
+  parseExpectedTarget,
+  staleExpectedTargetReason,
+  type CaptureExpectedTarget,
+} from "./expected-target";
+export { applyApprovedCaptureSuggestion } from "./apply-approved";
+export { memoryCaptureApplyHooks } from "./memory-execute";

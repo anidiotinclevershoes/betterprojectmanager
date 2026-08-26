@@ -1,8 +1,8 @@
 /**
  * stdin JSON → CaptureResult for Playwright stacked journeys.
- * Used only when the Playwright worker cannot import `@/` modules.
+ * Durable `state` is the authority. Optional `clientState` is ignored.
  *
- * Input: { transcript, projectId, rawModelJson, state, bindTarget? }
+ * Input: { transcript, projectId, rawModelJson, state, clientState?, bindTarget? }
  */
 import { readFileSync } from "node:fs";
 import { worldFromCaptureState, runCaptureV2FromModelJson } from "../src/lib/capture-v2";
@@ -15,14 +15,18 @@ type Input = {
   projectId: string;
   rawModelJson: unknown;
   bindTarget?: StackedBindTarget;
+  /** Durable evolving state (localStorage / injected workspace). */
   state: Pick<
     MissionState,
     "projects" | "risks" | "todos" | "timeline" | "knowledge"
   >;
+  /** Forged client payload — never used as current truth. */
+  clientState?: unknown;
 };
 
 const raw = readFileSync(0, "utf8");
 const input = JSON.parse(raw) as Input;
+void input.clientState;
 const state = input.state as MissionState;
 const rawModelJson = bindEnvelopeToWorld(input.rawModelJson, state, input.bindTarget);
 const run = runCaptureV2FromModelJson({

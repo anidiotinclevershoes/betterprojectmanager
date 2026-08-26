@@ -4,17 +4,10 @@
  * against evolving MissionState. Test-only. Does not change production Capture.
  */
 
-import { emptyKnowledge } from "@/lib/knowledge";
-import { ensurePersonOnProject } from "@/lib/people/identity";
-import {
-  executeCaptureApply,
-  type CaptureApplyHooks,
-  type CaptureLegalOperation,
-} from "@/lib/capture/apply";
+import { applyApprovedCaptureSuggestion } from "@/lib/capture/apply";
 import { worldFromCaptureState, runCaptureV2FromModelJson } from "@/lib/capture-v2";
 import type { CaptureV2Run } from "@/lib/capture-v2/run";
-import type { MissionState, TodoItem } from "@/lib/types";
-import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
+import type { MissionState } from "@/lib/types";
 import { experimentalMissionState } from "./mission-state";
 import { classifyLumeSafety } from "./lume-safety";
 import type { StackedBindTarget, StackedStep, StackedStory } from "./stacked-stories";
@@ -43,10 +36,6 @@ export type StackedStepResult = {
 
 function cloneState(state: MissionState): MissionState {
   return structuredClone(state);
-}
-
-function newId(prefix: string): string {
-  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export function snapshotProject(
@@ -140,211 +129,6 @@ function findBoundId(state: MissionState, bind: StackedBindTarget): string | nul
   return null;
 }
 
-function knowledgeFor(
-  state: MissionState,
-  projectId: string,
-): MissionState["knowledge"][number] {
-  return (
-    state.knowledge.find((k) => k.projectId === projectId) ?? emptyKnowledge(projectId)
-  );
-}
-
-function setKnowledge(
-  state: MissionState,
-  projectId: string,
-  next: MissionState["knowledge"][number],
-): MissionState {
-  return {
-    ...state,
-    knowledge: [
-      ...(state.knowledge ?? []).filter((k) => k.projectId !== projectId),
-      next,
-    ],
-  };
-}
-
-function applyOperation(state: MissionState, op: CaptureLegalOperation): MissionState {
-  const now = new Date().toISOString();
-  switch (op.type) {
-    case "create_todo": {
-      const todo: TodoItem = {
-        id: newId("todo"),
-        projectId: op.projectId,
-        title: op.title,
-        detail: op.detail,
-        done: false,
-        createdAt: now,
-        dueAt: op.dueAt,
-        kind: op.todoKind,
-        waitingOn: op.waitingOn,
-      };
-      return { ...state, todos: [todo, ...(state.todos ?? [])] };
-    }
-    case "update_todo":
-      return {
-        ...state,
-        todos: (state.todos ?? []).map((t) =>
-          t.id === op.todoId
-            ? { ...t, title: op.title ?? t.title, detail: op.detail ?? t.detail, dueAt: op.dueAt ?? t.dueAt }
-            : t,
-        ),
-      };
-    case "complete_todo":
-      return {
-        ...state,
-        todos: (state.todos ?? []).map((t) =>
-          t.id === op.todoId ? { ...t, done: true } : t,
-        ),
-      };
-    case "delete_todo":
-      return {
-        ...state,
-        todos: (state.todos ?? []).filter((t) => t.id !== op.todoId),
-      };
-    case "create_risk": {
-      const riskId = newId("risk");
-      const current = knowledgeFor(state, op.projectId);
-      return setKnowledge(
-        {
-          ...state,
-          risks: [
-            ...(state.risks ?? []),
-            {
-              id: riskId,
-              projectId: op.projectId,
-              title: op.title,
-              status: "open",
-              source: "capture",
-              createdAt: now,
-              updatedAt: now,
-            },
-          ],
-        },
-        op.projectId,
-        {
-          ...current,
-          sections: {
-            ...current.sections,
-            risks: [...(current.sections.risks ?? []), op.title],
-          },
-        },
-      );
-    }
-    case "update_risk_status":
-      return {
-        ...state,
-        risks: (state.risks ?? []).map((r) =>
-          r.id === op.riskId && r.projectId === op.projectId
-            ? { ...r, status: op.status, updatedAt: now }
-            : r,
-        ),
-      };
-    case "create_milestone":
-      return {
-        ...state,
-        timeline: [
-          ...(state.timeline ?? []),
-          {
-            id: newId("ms"),
-            projectId: op.projectId,
-            label: op.label,
-            type: "milestone",
-            startAt: op.startAt ?? now,
-            endAt: op.endAt,
-            notes: op.notes,
-            source: "capture",
-          },
-        ],
-      };
-    case "update_milestone":
-      return {
-        ...state,
-        timeline: (state.timeline ?? []).map((t) =>
-          t.id === op.milestoneId
-            ? {
-                ...t,
-                label: op.label ?? t.label,
-                startAt: op.startAt ?? t.startAt,
-                endAt: op.endAt ?? t.endAt,
-                notes: op.notes ?? t.notes,
-              }
-            : t,
-        ),
-      };
-    case "ensure_person": {
-      const result = ensurePersonOnProject(
-        state.projects,
-        op.projectId,
-        op.name,
-        op.personId,
-        op.roleHint,
-      );
-      return { ...state, projects: result.projects };
-    }
-    case "confirm_responsibility":
-      return state;
-    case "write_availability": {
-      const current = knowledgeFor(state, op.projectId);
-      const fromDay = op.awayFromIso.slice(0, 10);
-      const toDay = op.awayToIso.slice(0, 10);
-      const body =
-        fromDay === toDay
-          ? `${op.personName} — away ${fromDay}`
-          : `${op.personName} — away ${fromDay} to ${toDay}`;
-      const row: CanonicalTruthItem = {
-        id: newId("avail"),
-        projectId: op.projectId,
-        section: "people",
-        body,
-        kind: "availability",
-        epistemic: "confirmed",
-        lifecycle: "current",
-        meta: {
-          personId: op.personId,
-          availability: {
-            personId: op.personId,
-            personName: op.personName,
-            awayFromIso: op.awayFromIso,
-            awayToIso: op.awayToIso,
-            label: op.label ?? null,
-          },
-        },
-        provenance: [{ type: "capture", at: now }],
-      };
-      return setKnowledge(state, op.projectId, {
-        ...current,
-        structured: [...(current.structured ?? []), row],
-      });
-    }
-    case "write_knowledge":
-    case "write_memory":
-      return state;
-    default:
-      return state;
-  }
-}
-
-function hooksFor(box: { state: MissionState }): CaptureApplyHooks {
-  const apply = async (op: CaptureLegalOperation) => {
-    box.state = applyOperation(box.state, op);
-  };
-  return {
-    createTodo: apply,
-    updateTodo: apply,
-    completeTodo: apply,
-    deleteTodo: apply,
-    createRisk: apply,
-    updateRiskStatus: apply,
-    createMilestone: apply,
-    updateMilestone: apply,
-    ensurePerson: apply,
-    confirmResponsibility: apply,
-    writeAvailability: apply,
-    writeKnowledge: apply,
-    writeMemory: apply,
-  };
-}
-
 export function captureResultFromStackedStep(args: {
   step: StackedStep;
   projectId: string;
@@ -420,14 +204,23 @@ export async function runStackedStep(args: {
     (args.step.expectedReview === "apply_or_no_change" && review === "apply");
 
   if (shouldApply) {
-    const box = { state };
-    const hooks = hooksFor(box);
     for (const row of pipeline.resolved) {
-      if (row.decision.kind === "write") {
-        await executeCaptureApply(row.decision, hooks);
+      if (row.decision.kind !== "write" || !row.suggestion) continue;
+      const applied = await applyApprovedCaptureSuggestion({
+        item: row.suggestion,
+        text: args.step.transcript,
+        projectId: args.projectId,
+        expectedTarget: row.suggestion.expectedTarget,
+        loadWorkspace: async () => ({
+          workspaceId: "stacked",
+          userId: "stacked",
+          state,
+        }),
+      });
+      if (applied.executed.kind === "wrote") {
+        state = applied.state;
       }
     }
-    state = box.state;
   }
 
   return {

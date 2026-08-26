@@ -1,5 +1,5 @@
-import { captureApplyWorldFromState } from "@/lib/capture/apply";
-import type { CaptureApplyWorld } from "@/lib/capture/apply";
+import { captureApplyWorldFromState } from "@/lib/capture/apply/world";
+import type { CaptureApplyWorld } from "@/lib/capture/apply/types";
 import type { CaptureResult, MissionState } from "@/lib/types";
 import {
   contextRecordsFromWorld,
