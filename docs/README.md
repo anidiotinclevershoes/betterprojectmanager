@@ -23,7 +23,7 @@ Governs:
 - Capture review-before-write;
 - Known / ✦ Lume noticed / Needs you;
 - Ocean visual/interaction principles;
-- development/evaluation governance.
+- development/evaluation governance, including the Plain-English standard for completion reports and checkpoints.
 
 Stable product principles override historical *implementation* descriptions. They do **not** invent current code paths.
 
@@ -85,6 +85,8 @@ Start with the documentation authority map. Read canonical product intent, curre
 
 Product/trust constitution governs intended behaviour; current code/architecture handoff governs implementation reality; Known Discoveries governs known debt.
 
+Completion reports, PR checkpoints, and slice handovers must include a Plain-English section written for the product owner. See `docs/v1-reference-pack/LUME_DEVELOPMENT_AND_EVALUATION_ROADMAP_V1.md` §19. Do not rewrite historical reports to match.
+
 ---
 
 ## Normal first-read set
@@ -140,7 +142,7 @@ When a **substantive development slice** changes architecture:
 
 - update `LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` if the current architecture map materially changed (including Part C if a convergence decision is completed or reversed);
 - update `LUME_V1_KNOWN_DISCOVERIES.md` if open/resolved debt changed;
-- create/update that slice’s handover;
+- create/update that slice’s handover, with a Plain-English section for the product owner (Roadmap §19);
 - avoid copying mutable implementation status (feature flags, “not yet persisted”, Capture promotion state) into stable philosophy documents.
 
 The goal is to minimise future documentation drift.

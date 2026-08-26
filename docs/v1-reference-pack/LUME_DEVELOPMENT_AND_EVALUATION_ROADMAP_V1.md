@@ -1,7 +1,7 @@
 # Lume Development & Evaluation Roadmap v1
 
 **Status:** Operating roadmap / anti-whack-a-mole governance  
-**Date:** 19 August 2026
+**Date:** 19 August 2026 (Plain-English report standard added 26 August 2026)
 
 This document describes **how Lume should be developed and evaluated from here**, not a fixed PR sequence.
 
@@ -611,6 +611,10 @@ Search for consumers/types/contracts that may now be invalid.
 
 Relevant deterministic suite passes before the slice is considered complete.
 
+### Completion report
+
+Write the Plain-English section for the product owner before considering the slice reported. See §19.
+
 ## What tests are not for
 
 - maximising coverage percentage;
@@ -622,3 +626,64 @@ Relevant deterministic suite passes before the slice is considered complete.
 ## AI evals vs product tests
 
 Keep them separate. Benchmark improvement alone does not make a PR safe. Deterministic software regressions must not require calling OpenAI.
+
+---
+
+# 19. Completion reports and checkpoints — Plain-English section
+
+**Added:** 26 August 2026. This is now the default for future Lume completion reports, PR checkpoints, and slice handovers. Do not rewrite historical reports to match.
+
+Every meaningful completion report, PR checkpoint, and slice handover must include a **Plain-English** section written for the product owner.
+
+The rest of the report may stay technical, structured, and detailed. This section must not.
+
+This does **not** apply to engineering-only artefacts such as the architecture handoff, Known Discoveries, test dashboards, or the Technical / Tests sections of the same report.
+
+## Purpose
+
+This section exists so the product owner can read **only that part** and comfortably explain to someone else what changed, why it mattered, and what to still watch — without decoding an engineering status report.
+
+Write as though you are explaining the work conversationally, not reporting to another engineer.
+
+## What it must cover
+
+In ordinary language, explain:
+
+1. **What was wrong or risky before.**
+2. **What you changed.**
+3. **What that means for Lume now** — what it used to do, what it does now, what is safer or better.
+4. **Anything still worth knowing** — caveats, remaining risks, failed hypotheses, manual follow-up, and “do not treat this as done” warnings.
+
+Do not make the section less complete in order to make it easier to read. Completeness and readability are both required.
+
+## How to write it
+
+- Prefer a few short, natural paragraphs over long lists of bullets.
+- Use ordinary language wherever possible.
+- If a technical term is necessary, briefly explain what it means rather than assuming it is already known.
+- Focus on behaviour: what Lume used to do, what it does now, what is safer or better, and what to still be aware of.
+- Keep file names, flags, SHAs, function names, test commands, and commit-style shorthand out of this section unless they are genuinely needed — and if they are, explain them.
+
+## What this section is not
+
+Do not write it as:
+
+- a slightly simpler translation of the technical completion list;
+- dense bullets of implementation terminology;
+- a commit-style summary;
+- a list of files, flags, SHAs, or test command names;
+- engineer-to-engineer shorthand (“fail closed”, “MissionState”, “rebase onto #70”) without saying what that means for Lume.
+
+Those details belong in Technical / Tests / Implementation sections.
+
+## Quick calibration
+
+**Drifted — do not do this in Plain-English:**
+
+> V2 Analyse authenticates, loads durable truth via the shared Tell Me loader, and ignores leftover `body.state`. Stale / deleted / foreign targets fail closed. `LUME_CAPTURE_V2` remains default-off.
+
+**Readable — do this:**
+
+> Until now, Capture could trust a copy of the project that the browser had sent up with the request. If that copy was out of date or belonged to the wrong project, Lume could still try to write against it. Capture now loads the current saved project on the server after checking who you are, and it ignores any leftover project copy in the request. If the thing it wanted to change has been deleted, belongs to another project, or no longer matches, it stops and asks you instead of writing. The newer Capture path is still switched off by default, so everyday Lume behaviour does not change until that switch is turned on.
+
+The test: **could someone read only this section and explain the change without having to decode the rest of the report?**
