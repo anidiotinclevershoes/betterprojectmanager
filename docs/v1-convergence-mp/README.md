@@ -162,7 +162,7 @@ Do **not** start a design-system rewrite. Do not port MP Tailwind/framer-motion 
 
 - Coach in the active V1 shell (auto-open overlay, `/coaching`, unmounted `HeaderCoachButton`) — **decided removal / deprecation** unless later reactivated. Advise stays parked.
 - Unmounted light/dark `AppearanceToggle`
-- Unmounted `CaptureBar` (immediate merge — do not revive) and unwired `TellMePanel`
+- Unmounted `CaptureBar` was **deleted in Slice 1A**. Unwired `TellMePanel` remains.
 - Timeline **as a date authority**. If retained, it is a projection over milestone/date data; otherwise a deletion candidate after MP implementation
 - Legacy Capture engine **after** D-032 chooses V2
 - Paste New Project card (already gone from the chooser; Talk still tags paste as `"talk"`)

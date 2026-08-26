@@ -17,10 +17,9 @@ import {
   writeMissionSupabaseCache,
 } from "@/lib/mission-cache";
 import {
-  analyseCapture,
   generateProactiveRecommendations,
 } from "./coach";
-import { extractKnowledgePatchFromText, emptyKnowledge, mergeKnowledge } from "./knowledge";
+import { emptyKnowledge, mergeKnowledge } from "./knowledge";
 import { confirmResponsibilityOwner as applyConfirmResponsibilityOwner } from "@/lib/canonical-truth/confirm-responsibility";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import { ensurePersonOnProject as applyEnsurePersonOnProject } from "@/lib/people/identity";
@@ -46,7 +45,6 @@ import {
 import type { CaptureContextManifest } from "./capture/context";
 import type { CaptureReliabilityAssessment } from "./capture/reliability";
 import {
-  extractTimelinePatchFromText,
   mergeTimelineItems,
 } from "./timeline";
 import type {
@@ -73,7 +71,6 @@ import {
   loadMissionStateFromSupabase,
 } from "@/lib/data/supabase/load-mission-state";
 import {
-  persistCaptureSession,
   persistHistoryEvent,
   persistKnowledgeBullet,
   persistKnowledgeLifecycle,
@@ -161,8 +158,6 @@ type MissionContextValue = {
   hydrated: boolean;
   openaiConfigured: boolean | null;
   openaiDiagnostics: OpenAIDiagnostics | null;
-  capture: (input: CaptureInput) => CaptureResult;
-  captureWithAI: (input: CaptureInput) => Promise<CaptureResult>;
   /** Analyse without writing — user confirms additions in Capture review. */
   analyzeCaptureWithAI: (
     input: CaptureInput,
@@ -173,7 +168,6 @@ type MissionContextValue = {
     requestId: string | null;
     reliability: CaptureReliabilityAssessment | null;
   }>;
-  applyCaptureResult: (result: CaptureResult) => void;
   setRecommendationStatus: (
     id: string,
     status: Recommendation["status"],
@@ -354,77 +348,6 @@ function withProactiveCoaching(state: MissionState): MissionState {
 
 function persist(state: MissionState) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function applyKnowledgePatch(
-  knowledge: ProjectKnowledge[],
-  projectId: string,
-  patch?: Partial<ProjectKnowledge["sections"]>,
-): ProjectKnowledge[] {
-  if (!patch || !projectId) return knowledge;
-  const current = knowledge.find((k) => k.projectId === projectId);
-  const merged = mergeKnowledge(current, projectId, patch);
-  const others = knowledge.filter((k) => k.projectId !== projectId);
-  return [...others, merged];
-}
-
-function mergeCapture(prev: MissionState, result: CaptureResult): MissionState {
-  const projectId = result.knowledgeProjectId || result.memory.projectId;
-  let timeline = prev.timeline ?? [];
-  if (projectId && result.timelinePatch?.length) {
-    timeline = mergeTimelineItems(
-      timeline,
-      projectId,
-      result.timelinePatch,
-      "capture",
-    );
-  }
-
-  // Slice 1B: Capture risk adds mint genuine Risk-domain rows (stable ids).
-  // Do not mint for [Resolved] prose — that is legacy Knowledge-only display.
-  const priorRisks = prev.risks ?? [];
-  const mintedRisks: import("@/lib/types").ProjectRisk[] = [];
-  if (projectId && result.knowledgePatch?.risks?.length) {
-    for (const raw of result.knowledgePatch.risks) {
-      const title = raw.trim();
-      if (!title) continue;
-      if (/^\s*\[resolved\]/i.test(title)) continue;
-      const exists = priorRisks.some(
-        (r) =>
-          r.projectId === projectId &&
-          r.title.trim().toLowerCase() === title.toLowerCase(),
-      );
-      if (exists) continue;
-      const alreadyMinted = mintedRisks.some(
-        (r) => r.title.trim().toLowerCase() === title.toLowerCase(),
-      );
-      if (alreadyMinted) continue;
-      mintedRisks.push({
-        id: newClientId(),
-        projectId,
-        title,
-        status: "open",
-        source: "capture",
-        createdAt: new Date().toISOString(),
-      });
-    }
-  }
-
-  const next: MissionState = {
-    ...prev,
-    todos: prev.todos ?? [],
-    knowledge: applyKnowledgePatch(
-      prev.knowledge ?? [],
-      projectId ?? "",
-      result.knowledgePatch,
-    ),
-    risks: [...priorRisks, ...mintedRisks],
-    timeline,
-    memories: [result.memory, ...prev.memories],
-    recommendations: [...result.recommendations, ...prev.recommendations],
-    lastAnalyzedAt: new Date().toISOString(),
-  };
-  return withProactiveCoaching(next);
 }
 
 function id(prefix: string) {
@@ -805,112 +728,6 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const applyCaptureResult = useCallback((result: CaptureResult) => {
-    let mintedRiskIds = new Map<string, string>();
-    setState((prev) => {
-      const priorIds = new Set((prev.risks ?? []).map((r) => r.id));
-      const next = mergeCapture(prev, result);
-      mintedRiskIds = new Map(
-        (next.risks ?? [])
-          .filter((r) => !priorIds.has(r.id))
-          .map((r) => [r.title.trim().toLowerCase(), r.id]),
-      );
-      return next;
-    });
-    const meta = persistMetaRef.current;
-    if (meta.mode !== "supabase" || !meta.workspaceId) return;
-    void (async () => {
-      setSaveStatus("saving");
-      setSaveError(null);
-      try {
-        const client = createBrowserSupabaseClient();
-        const workspaceId = meta.workspaceId!;
-        const userId = meta.userId;
-        if (result.memory) {
-          await persistMemory(client, workspaceId, userId, result.memory);
-        }
-        const projectId =
-          result.knowledgeProjectId || result.memory.projectId || null;
-        if (projectId && result.knowledgePatch) {
-          for (const [section, bullets] of Object.entries(
-            result.knowledgePatch,
-          )) {
-            for (const body of bullets ?? []) {
-              if (!body?.trim()) continue;
-              const trimmed = body.trim();
-              const riskId =
-                section === "risks"
-                  ? mintedRiskIds.get(trimmed.toLowerCase())
-                  : undefined;
-              await persistKnowledgeBullet(
-                client,
-                workspaceId,
-                projectId,
-                section,
-                trimmed,
-                userId,
-                riskId ? { riskId } : undefined,
-              );
-            }
-          }
-        }
-        if (projectId && result.timelinePatch?.length) {
-          for (const item of result.timelinePatch) {
-            await persistTimelineItem(client, workspaceId, projectId, {
-              label: item.label,
-              type: item.type,
-              startAt: item.startAt,
-              endAt: item.endAt,
-              notes: item.notes,
-              source: "capture",
-            });
-          }
-        }
-        await persistCaptureSession(client, workspaceId, userId, {
-          projectId,
-          transcript: result.rawContent || result.memory.content || "",
-          result,
-          suggestions: result.recommendations,
-          status: "applied",
-        });
-        await persistHistoryEvent(client, workspaceId, userId, {
-          type: "capture_analysed",
-          title: "Capture applied",
-          detail: result.memory.title,
-          projectId,
-          source: "ai",
-        });
-        markPersistSaved();
-      } catch (err) {
-        console.error("[applyCaptureResult] persist failed", err);
-        reportPersistFailure(err, "Could not save Capture changes");
-      }
-    })();
-  }, []);
-
-  const capture = useCallback((input: CaptureInput) => {
-    let result!: CaptureResult;
-    setState((prev) => {
-      const analysed = analyseCapture(input, prev);
-      const projectId = analysed.memory.projectId || input.projectId;
-      result = {
-        ...analysed,
-        rawContent: input.content,
-        tidied: false,
-        provider: "local",
-        knowledgePatch: projectId
-          ? extractKnowledgePatchFromText(input.content)
-          : undefined,
-        knowledgeProjectId: projectId,
-        timelinePatch: projectId
-          ? extractTimelinePatchFromText(input.content)
-          : undefined,
-      };
-      return mergeCapture(prev, result);
-    });
-    return result;
-  }, []);
-
   const requestCaptureAnalysis = useCallback(
     async (input: CaptureInput, signal?: AbortSignal) => {
     const latest = stateRef.current;
@@ -1005,15 +822,6 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         })),
       );
       return { result, contextManifest, requestId, reliability };
-    },
-    [requestCaptureAnalysis],
-  );
-
-  const captureWithAI = useCallback(
-    async (input: CaptureInput) => {
-      const { result } = await requestCaptureAnalysis(input);
-      setState((prev) => mergeCapture(prev, result));
-      return result;
     },
     [requestCaptureAnalysis],
   );
@@ -2779,10 +2587,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       hydrated,
       openaiConfigured,
       openaiDiagnostics,
-      capture,
-      captureWithAI,
       analyzeCaptureWithAI,
-      applyCaptureResult,
       setRecommendationStatus,
       acceptSuggestion,
       dismissSuggestion,
@@ -2826,10 +2631,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       persistenceMode,
       saveStatus,
       saveError,
-      capture,
-      captureWithAI,
       analyzeCaptureWithAI,
-      applyCaptureResult,
       setRecommendationStatus,
       acceptSuggestion,
       dismissSuggestion,

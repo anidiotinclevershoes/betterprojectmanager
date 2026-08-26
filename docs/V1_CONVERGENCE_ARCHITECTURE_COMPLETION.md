@@ -142,7 +142,7 @@ Until then: stop adding new text-only relationships when a Person UUID is alread
 
 | Path | Earliest deletion |
 | --- | --- |
-| `CaptureBar` / `capture()` / `captureWithAI()` / `applyCaptureResult` immediate merge | **Next implementation slice** — already unmounted from Ocean |
+| `CaptureBar` / `capture()` / `captureWithAI()` / `applyCaptureResult` immediate merge | **DELETED Slice 1A** |
 | Legacy OpenAI Capture findings path | **When Capture V2 is default-on after required gates** (git rollback) |
 | Legacy New Project Talk assemble | After New Project V2 default-on |
 | Legacy Ask `buildCaptureContext` + snapshot-as-truth | After canonical default-on + one release of `LUME_CANONICAL_TRUTH=0` rollback |

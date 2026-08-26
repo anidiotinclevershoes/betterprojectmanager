@@ -157,7 +157,7 @@ PNG / MP canvas are not a mobile IA. Do not implement a separate mobile product 
 - `/coaching` + Coach auto-open; unmounted `HeaderCoachButton` — **V1 removal / deprecation**
 - **Timeline as a date authority.** If retained, projection over milestone/date data; else deletion candidate after MP implementation
 - `WorkspaceGrid` / `ProjectWidgetGrid` / `ProjectKnowledgeBrief`
-- `CaptureBar` immediate-merge; `TellMePanel`
+- `CaptureBar` immediate-merge (**deleted Slice 1A**); `TellMePanel`
 - Overview (already gone)
 - Paste card (already gone from choose)
 - Legacy Capture findings UI **after** D-032 chooses V2
