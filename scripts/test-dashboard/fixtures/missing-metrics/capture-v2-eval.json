@@ -1,0 +1,43 @@
+{
+  "baselineVersion": "capture-v2-eval-corpus-v1-hulk",
+  "startedAt": "2026-08-26T12:00:00.000Z",
+  "finishedAt": "2026-08-26T12:00:10.000Z",
+  "skipped": [],
+  "liveCallsAttempted": 1,
+  "liveCallsSucceeded": 1,
+  "results": [
+    {
+      "caseId": "todo-create",
+      "runIndex": 0,
+      "provider": "fixture-sparse",
+      "model": "sparse-0",
+      "modelMetrics": {
+        "materialRecall": null,
+        "unsupportedCount": null,
+        "domainCorrectness": null,
+        "existingVsNewCorrectness": null,
+        "stableTargetCorrectness": null,
+        "ambiguityPreserved": null,
+        "noChangeHandled": null,
+        "commentaryHandled": null
+      },
+      "lumeSafety": {
+        "rows": [],
+        "totals": {}
+      },
+      "call": {
+        "provider": "fixture-sparse",
+        "requestedModel": "sparse-0",
+        "usage": {
+          "inputTokens": null,
+          "outputTokens": null,
+          "totalTokens": null
+        },
+        "latencyMs": null,
+        "approximateCostUsd": null,
+        "error": null
+      },
+      "usedFrozenFixture": false
+    }
+  ]
+}

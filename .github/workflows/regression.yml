@@ -5,6 +5,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   regression:
     runs-on: ubuntu-latest
@@ -18,13 +21,43 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Typecheck
+        id: typecheck
         run: npm run typecheck
       - name: Deterministic regression suite
+        id: npm_test
         run: npm test
         env:
           OPENAI_API_KEY: ""
           ANTHROPIC_API_KEY: ""
           GEMINI_API_KEY: ""
+      - name: Record regression outcomes
+        if: always()
+        run: |
+          mkdir -p test-results
+          record() {
+            local name="$1"
+            local outcome="$2"
+            if [ "$outcome" = "success" ]; then echo pass > "test-results/${name}.outcome"
+            elif [ "$outcome" = "skipped" ]; then echo skip > "test-results/${name}.outcome"
+            else echo fail > "test-results/${name}.outcome"
+            fi
+          }
+          record typecheck "${{ steps.typecheck.outcome }}"
+          record npm-test "${{ steps.npm_test.outcome }}"
+          if [ "${{ steps.npm_test.outcome }}" = "success" ]; then
+            echo pass > test-results/stacked-capture.outcome
+          fi
+      - name: Job summary (regression evidence)
+        if: always()
+        continue-on-error: true
+        run: npx --yes tsx scripts/test-dashboard/publish.ts --mode summary --results-dir test-results
+      - name: Upload regression evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-evidence
+          path: test-results
+          if-no-files-found: ignore
 
   e2e:
     runs-on: ubuntu-latest
@@ -40,18 +73,85 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
       - name: Playwright frozen journeys + stacked Capture
+        id: playwright
         run: npm run test:e2e
         env:
           OPENAI_API_KEY: ""
           ANTHROPIC_API_KEY: ""
           GEMINI_API_KEY: ""
           CI: "true"
+      - name: Record Playwright outcome
+        if: always()
+        run: |
+          mkdir -p test-results
+          if [ "${{ steps.playwright.outcome }}" = "success" ]; then echo pass > test-results/playwright.outcome
+          elif [ "${{ steps.playwright.outcome }}" = "skipped" ]; then echo skip > test-results/playwright.outcome
+          else echo fail > test-results/playwright.outcome
+          fi
+      - name: Job summary (Playwright evidence)
+        if: always()
+        continue-on-error: true
+        run: npx --yes tsx scripts/test-dashboard/publish.ts --mode summary --results-dir test-results
       - name: Upload Playwright evidence
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-evidence
           path: |
             playwright-report
             test-results
+          if-no-files-found: ignore
+
+  dashboard:
+    name: Lume Test Dashboard
+    needs: [regression, e2e]
+    if: always()
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Download regression evidence
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: regression-evidence
+          path: test-results
+      - name: Download Playwright evidence
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-evidence
+          path: e2e-upload
+      - name: Merge evidence
+        if: always()
+        run: |
+          mkdir -p test-results
+          if [ -f e2e-upload/test-results/playwright.outcome ]; then
+            cp e2e-upload/test-results/playwright.outcome test-results/playwright.outcome
+          elif [ -f e2e-upload/playwright.outcome ]; then
+            cp e2e-upload/playwright.outcome test-results/playwright.outcome
+          fi
+      - name: Publish dashboard
+        if: always()
+        run: npx --yes tsx scripts/test-dashboard/publish.ts --mode both --results-dir test-results
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload normalised evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lume-test-dashboard
+          path: test-results/lume-dashboard-evidence.json
           if-no-files-found: ignore

@@ -57,9 +57,11 @@ Governs:
 
 ### 4. Relevant current operational / test documents
 
-Use only when the task needs them (for example test safety-net, Supabase setup, Vercel production, Intelligence Contract).
+Use only when the task needs them (for example test safety-net, Supabase setup, Vercel production, Intelligence Contract, or the Lume Test Dashboard).
 
 They do not override (1)–(3) unless they are the specific contract for that seam (Ask/eval scoring → Intelligence Contract).
+
+Test evidence / model comparison: `docs/TEST_DASHBOARD.md`. This is an engineering Issue + Actions summary, not a Lume product surface.
 
 ### 5. Active plans
 

@@ -9,4 +9,6 @@ This folder is the Capture V2 **test / evaluation** workstream. Architecture (PR
 - Test-debt inventory: `TEST_DEBT.md`
 - Vercel AI SDK spike: `VERCEL_AI_SDK_SPIKE.md`
 
+Regression / model evidence dashboard (engineering Issue, not a product route): `docs/TEST_DASHBOARD.md`.
+
 Corpus composition (`capture-v2-eval-corpus-v1-hulk`) was finalised **before any live provider result was seen**.

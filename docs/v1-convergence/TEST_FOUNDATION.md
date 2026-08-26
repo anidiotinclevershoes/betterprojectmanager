@@ -4,6 +4,8 @@ Workstream B (Test, Regression & Model Evaluation Foundation) of Lume V1 Archite
 
 This branch **adds tests and measuring instruments**. It does **not** change how Capture V2 thinks, writes, or looks in production.
 
+The later engineering evidence dashboard (GitHub Issue + Actions summary) is documented in `docs/TEST_DASHBOARD.md`. It consumes this foundation; it does not replace it.
+
 ---
 
 ## 1. What was built

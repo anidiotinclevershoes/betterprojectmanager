@@ -1,0 +1,97 @@
+{
+  "baselineVersion": "capture-v2-eval-corpus-v1-hulk",
+  "startedAt": "2026-08-26T11:00:00.000Z",
+  "finishedAt": "2026-08-26T11:02:00.000Z",
+  "skipped": [],
+  "liveCallsAttempted": 3,
+  "liveCallsSucceeded": 3,
+  "results": [
+    {
+      "caseId": "existing-person",
+      "runIndex": 0,
+      "provider": "fixture-alpha",
+      "model": "alpha-1",
+      "modelMetrics": {
+        "materialRecall": 0.9,
+        "unsupportedCount": 1,
+        "domainCorrectness": 1,
+        "existingVsNewCorrectness": 1,
+        "stableTargetCorrectness": 0.8,
+        "ambiguityPreserved": true,
+        "noChangeHandled": true,
+        "commentaryHandled": true
+      },
+      "lumeSafety": {
+        "rows": [],
+        "totals": { "modelFailures": 1, "lumeCatches": 1, "lumeFailures": 0 }
+      },
+      "call": {
+        "provider": "fixture-alpha",
+        "requestedModel": "alpha-1",
+        "usage": { "inputTokens": 200, "outputTokens": 80, "totalTokens": 280 },
+        "latencyMs": 1200,
+        "approximateCostUsd": 0.01,
+        "error": null
+      },
+      "usedFrozenFixture": false
+    },
+    {
+      "caseId": "new-person",
+      "runIndex": 0,
+      "provider": "fixture-beta",
+      "model": "beta-9",
+      "modelMetrics": {
+        "materialRecall": 0.7,
+        "unsupportedCount": 2,
+        "domainCorrectness": 0.5,
+        "existingVsNewCorrectness": 0.5,
+        "stableTargetCorrectness": null,
+        "ambiguityPreserved": false,
+        "noChangeHandled": null,
+        "commentaryHandled": null
+      },
+      "lumeSafety": {
+        "rows": [],
+        "totals": { "modelFailures": 2, "lumeCatches": 0, "lumeFailures": 1 }
+      },
+      "call": {
+        "provider": "fixture-beta",
+        "requestedModel": "beta-9",
+        "usage": { "inputTokens": 150, "outputTokens": 60, "totalTokens": 210 },
+        "latencyMs": 900,
+        "approximateCostUsd": 0.004,
+        "error": null
+      },
+      "usedFrozenFixture": false
+    },
+    {
+      "caseId": "new-risk",
+      "runIndex": 0,
+      "provider": "fixture-gamma",
+      "model": "gamma-z",
+      "modelMetrics": {
+        "materialRecall": 1,
+        "unsupportedCount": 0,
+        "domainCorrectness": 1,
+        "existingVsNewCorrectness": 1,
+        "stableTargetCorrectness": 1,
+        "ambiguityPreserved": null,
+        "noChangeHandled": null,
+        "commentaryHandled": null
+      },
+      "lumeSafety": {
+        "rows": [],
+        "totals": { "modelFailures": 0, "lumeCatches": 0, "lumeFailures": 0 }
+      },
+      "call": {
+        "provider": "fixture-gamma",
+        "requestedModel": "gamma-z",
+        "usage": { "inputTokens": 90, "outputTokens": 30, "totalTokens": 120 },
+        "latencyMs": 400,
+        "approximateCostUsd": 0.001,
+        "error": null
+      },
+      "usedFrozenFixture": false
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "storyId": "candyland",
+  "steps": [
+    { "id": "c1", "review": "write", "writeCount": 2, "needsYouCount": 0, "lumeFailures": 0 },
+    { "id": "c2", "review": "needs_you", "writeCount": 0, "needsYouCount": 1, "lumeFailures": 0 }
+  ]
+}
