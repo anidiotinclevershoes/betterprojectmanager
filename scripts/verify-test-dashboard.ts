@@ -10,7 +10,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { collectEvidence } from "./test-dashboard/collect";
-import type { GithubRunContext } from "./test-dashboard/context";
+import { readGithubContext, type GithubRunContext } from "./test-dashboard/context";
 import type { GithubClient, GithubIssue } from "./test-dashboard/github";
 import {
   InvalidDashboardStateError,
@@ -369,6 +369,49 @@ async function main() {
     assert.equal(state.modelRows.length, 3);
     const again = applyEvidence(state, evidence);
     assert.equal(again.modelRows.length, 3);
+  });
+
+  await check("pull_request context uses head SHA, not the merge ref", () => {
+    const dir = mkdtempSync(join(tmpdir(), "lume-dash-event-"));
+    const eventPath = join(dir, "event.json");
+    writeFileSync(
+      eventPath,
+      JSON.stringify({
+        number: 72,
+        pull_request: {
+          number: 72,
+          head: {
+            sha: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            ref: "cursor/v1-test-results-dashboard-08a0",
+            repo: { full_name: "example/lume" },
+          },
+        },
+        repository: { full_name: "example/lume" },
+      }),
+    );
+    const previous = {
+      GITHUB_EVENT_PATH: process.env.GITHUB_EVENT_PATH,
+      GITHUB_SHA: process.env.GITHUB_SHA,
+      GITHUB_RUN_ID: process.env.GITHUB_RUN_ID,
+      GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY,
+      GITHUB_HEAD_REF: process.env.GITHUB_HEAD_REF,
+    };
+    process.env.GITHUB_EVENT_PATH = eventPath;
+    process.env.GITHUB_SHA = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    process.env.GITHUB_RUN_ID = "32973184687";
+    process.env.GITHUB_REPOSITORY = "example/lume";
+    process.env.GITHUB_HEAD_REF = "cursor/v1-test-results-dashboard-08a0";
+    try {
+      const context = readGithubContext();
+      assert.equal(context.sha, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+      assert.equal(context.prNumber, 72);
+      assert.equal(context.isForkPullRequest, false);
+    } finally {
+      for (const [key, value] of Object.entries(previous)) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+    }
   });
 
   console.log("\nLume Test Dashboard reporter tests passed.");
