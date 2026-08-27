@@ -74,7 +74,7 @@ Cheap extras: resolved Risk stays resolved; superseded Knowledge item stays supe
 
 ### C. Visibility / server parity
 
-`scripts/verify-capture-server-truth.ts` check **L**
+`scripts/verify-capture-server-truth.ts` check **visibility**
 
 After successful Capture V2 Apply:
 
@@ -117,6 +117,58 @@ Do **not** qualify PR #89 itself as the freeze SHA until it has landed and this 
 
 ---
 
-## Results (filled as evidence lands)
+## Results — Stage 1 on `main` `e5cd9ba`
 
-See later sections / PR updates. Stage 1 script outcomes are recorded after the first run on this branch.
+Prep branch: `cursor/v1-v09-qualification-prep-610b` (PR #92).
+
+No production files were changed. `npx tsc --noEmit` passed.
+
+| Suite | Result |
+| --- | --- |
+| `verify-stable-object-identity` | **1 passed, 2 failed** (Thor gate; expected) |
+| `verify-resurrection` | **3/3 passed** |
+| `verify-capture-server-truth` | **18 passed** (includes new visibility check) |
+| `verify-stacked-capture` | **3 stories passed** (per-step sibling isolation) |
+
+### Stable identity — exact evidence
+
+Ordinary Todo **complete** already preserves title (`Prepare the jelly pack`, `done: true`). That path uses `complete_todo` and does not copy the transcript.
+
+Ordinary Todo **UPDATE** (due date → 20 Oct) currently writes the full Capture sentence as the title:
+
+```
+actual:   Please update Prepare the jelly pack so the due date is 20 October 2026 after the liquorice shipment slipped a week and the parade committee asked us to hold the pack until the banners are painted.
+expected: Prepare the jelly pack
+```
+
+Ordinary milestone **UPDATE** (Parade day → 29 Oct) currently writes the full Capture sentence as the label:
+
+```
+actual:   Parade day has moved to 29 October 2026 because the council moved the road closure and the float cannot leave the depot until the new date.
+expected: Parade day
+```
+
+Production hole (not patched here): `src/lib/capture/apply/dispatch.ts` `update_todo` sets `title: text`; `update_milestone` sets `label: text \|\| byId.label`.
+
+Classification: **E — unsafe / silent durable write** (identity destruction). This is Thor’s assigned structural fix (PR #89). Hulk does not patch it.
+
+`npm run verify:stable-object-identity` stays out of the aggregated `npm test` suite until Thor lands, so Stage 1 persistence/parity coverage can stay green. The script itself is not weakened.
+
+### Resurrection / parity / isolation
+
+- Deleted Todo remains absent after reload and after an unrelated persist. Project B’s same-named Todo is untouched.
+- Resolved Risk stays resolved; sibling Risk untouched.
+- Superseded Knowledge item stays superseded; sibling untouched.
+- After Apply, adopted state is the committed result; subsequent server load matches without a hard refresh.
+- After each stacked Candyland / Toyworld / GamingStudio5000 step, the other two project snapshots equal seed.
+
+### Stage 2 items (not run)
+
+1. Qualified SHA — **blocked**
+2. Thor PR included — **#89 draft, not landed**
+3. Frozen corpus / Deep New Project / 50-event marathon / messy handover — **blocked**
+4. Counts A–E for live model — **blocked**
+5. Freeze verdict — **not issued**
+
+Do not use FAIL merely because an adversarial sentence required Needs-you. Do not issue PASS until Stage 2 on the Thor-landed SHA shows **zero genuine unsafe silent durable writes**.
+

@@ -35,6 +35,7 @@ const MILESTONE_TRANSCRIPT =
   "Parade day has moved to 29 October 2026 because the council moved the road closure and the float cannot leave the depot until the new date.";
 
 let passed = 0;
+const failures: string[] = [];
 
 async function check(name: string, fn: () => void | Promise<void>) {
   try {
@@ -42,8 +43,9 @@ async function check(name: string, fn: () => void | Promise<void>) {
     passed += 1;
     console.log(`✓ ${name}`);
   } catch (err) {
+    failures.push(name);
     console.error(`✗ ${name}`);
-    throw err;
+    console.error(err);
   }
 }
 
@@ -259,7 +261,12 @@ async function main() {
     );
   });
 
-  console.log(`\nverify-stable-object-identity: ${passed} passed`);
+  console.log(`\nverify-stable-object-identity: ${passed} passed, ${failures.length} failed`);
+  if (failures.length) {
+    console.error("Thor gate still open:");
+    for (const name of failures) console.error(`  - ${name}`);
+    process.exit(1);
+  }
 }
 
 main().catch((err) => {

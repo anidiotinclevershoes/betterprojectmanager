@@ -324,7 +324,7 @@ async function main() {
     );
   });
 
-  await check("L: Apply adopted state is the committed result — subsequent server load matches without a hard refresh", async () => {
+  await check("visibility: Apply adopted state is committed — subsequent server load matches without a hard refresh", async () => {
     const applied = await applyApprovedCaptureSuggestion({
       item: {
         id: "s-visibility",
