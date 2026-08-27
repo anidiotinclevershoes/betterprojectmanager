@@ -138,12 +138,12 @@ async function assertReview(page: Page, expected: StackedStory["steps"][number][
   }
   if (expected === "no_change") {
     await expect(
-      page.getByText("No operational changes to review."),
+      page.getByText("Nothing to apply."),
     ).toBeVisible();
     return;
   }
   if (expected === "apply" || expected === "apply_or_no_change") {
-    const noChange = page.getByText("No operational changes to review.");
+    const noChange = page.getByText("Nothing to apply.");
     if (expected === "apply_or_no_change" && (await noChange.isVisible().catch(() => false))) {
       return;
     }
