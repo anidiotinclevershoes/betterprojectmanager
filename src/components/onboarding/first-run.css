@@ -50,6 +50,12 @@
   border-color: var(--border-strong);
 }
 
+/* Capture has its own first-use cue — don't stack both. */
+.ocean-project-page:has([data-project-mode="capture"])
+  [data-testid="first-project-guidance"] {
+  display: none;
+}
+
 @media (max-width: 720px) {
   .first-run-cue {
     flex-direction: column;

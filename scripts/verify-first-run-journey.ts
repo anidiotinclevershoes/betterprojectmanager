@@ -212,6 +212,9 @@ function main() {
     assert.match(oceanCss, /safe-area-inset-bottom/);
     assert.match(oceanCss, /position: sticky/);
     assert.match(oceanCss, /np-transcript-field textarea/);
+    const cueCss = readSrc("src/components/onboarding/first-run.css");
+    assert.match(cueCss, /first-project-guidance/);
+    assert.match(cueCss, /data-project-mode="capture"/);
   });
 
   check("Capture and persistence architecture unchanged", () => {
