@@ -1380,6 +1380,147 @@ That is the number every channel in Section T must be measured against, and it i
 3. **Make the reliability promise explicit and testable.** "It will never quietly tell you something is booked when it is not" is a promise a general platform cannot make without redesigning how its AI writes. Say it in the marketing, then let planners try to break it.
 4. **Accumulate a record the competitor cannot backfill.** Every month of evidenced, reconciled history is a month a switching competitor cannot reconstruct.
 5. **Stay narrow.** The moment the product adds invoicing, it is a worse HoneyBook.
+# T. Paid acquisition
+
+## T.1 The constraint that dominates everything
+
+Section E.1 established it: **there is no active public professional wedding-planner community on the open internet.** No live subreddit, no forum, no Hacker News equivalent. The candid discussion happens in closed Facebook groups. That removes the free organic channel a solo B2B SaaS would normally start with and pushes the entire acquisition plan onto paid, partnerships and direct outreach.
+
+The UK position is worse than the US: the **UK Alliance of Wedding Planners closed in 2023**, so the natural UK association partnership no longer exists.
+
+## T.2 Search
+
+The useful benchmark is not wedding-vendor CPC, which is a consumer-intent number. It is **B2B SaaS**: Google Search cost per lead commonly runs **$80–$300+**, against a cross-industry Google Search average of **$5.26 CPC and $70.11 CPL** (WordStream/LocaliQ, 16,000+ campaigns, April 2024–March 2025). Meta delivers $30–$80 CPL for B2B with materially worse lead quality.
+
+Applied to this product, with a €290 acquisition tolerance from Section R.5 and an optimistic one-in-three trial-to-paid conversion:
+
+| Google CPL | Implied acquisition cost | Verdict |
+| --- | ---: | --- |
+| $80 | ~€225 | Works |
+| $150 | ~€420 | Fails |
+| $300 | ~€840 | Fails badly |
+
+**Only the cheapest quartile of B2B search economics clears the bar.** That is the single most important number in this section and it should be treated as a live risk, not a planning assumption.
+
+Term-by-term, the intent picture:
+
+| Term | Intent | Assessment |
+| --- | --- | --- |
+| `wedding planner CRM` | High, professional | Best term available. Low volume. |
+| `wedding coordinator software` | High, professional | Good. Very low volume. |
+| `alternatives to HoneyBook` / `HoneyBook alternative` | Highest | Highest-converting term in the set. Already contested — 17hats runs an explicit HoneyBook-switcher campaign. |
+| `Aisle Planner alternative` | Highest | Smaller volume, less contested, best value. |
+| `wedding planner client management` | High | Good. |
+| `wedding planner software` | **Mixed and dangerous** | Large volume, majority consumer. Needs aggressive negatives. |
+| `wedding planning software` | Consumer | Avoid entirely. |
+| `event planner CRM` | Adjacent professional | Broadens beyond the ICP; test separately. |
+
+Consumer contamination is the dominant waste risk. Negative-keyword hygiene (`free`, `app`, `bride`, `my wedding`, `checklist`, `template`, `budget spreadsheet`) is not optimisation here, it is the difference between the channel working and not.
+
+## T.3 Other channels, assessed
+
+**Meta / Instagram.** Viable but blunt. Meta removed most granular professional-interest targeting; the realistic approach is interest and behaviour proxies plus lookalikes from a converted seed list — which does not exist at launch. Instagram is where wedding professionals genuinely live, so creative can be highly resonant even when targeting is loose. Best used for a low-friction offer (the interactive demo), not for a direct trial ask.
+
+**Associations.** Smaller than one would hope. **WIPA** has 3,000 members across 25 chapters and sells sponsorship and chapter-event access. The **Association of Bridal Consultants** sells education sponsorship at its World of Weddings conference. Both are legitimate and both are small. In the UK, the UKAWP is gone; the nearest substitute is **The Delegate Wranglers**, a 20,000-member events-professional Facebook community spanning the UK and Europe with a newsletter and trade-show presence — but it is events-industry-wide rather than wedding-specific, and its group format is strictly business requests rather than promotion.
+
+**WeddingPro** claims a 200,000-strong professional community and runs education and webinars. It is also owned by The Knot Worldwide, which sells to the same customer — a partnership is conceivable but the relationship is awkward.
+
+**Educator partnerships — the most promising channel, and the one that fits the evidence.** Section E.6 found planners saying they want a product built by *"an actual PLANNER and not just some tech company trying to sell to planners."* Planner-business educators, course sellers and podcast hosts already hold the trust and the mailing lists. An affiliate or co-development arrangement with two or three credible educators is cheaper than paid search, converts better, and directly addresses the credibility objection. It is also how the incumbents built their bases.
+
+**Closed Facebook groups.** Where the candid discussion actually is. Cannot be advertised into; must be earned into by a participating human. Slow, unscalable, and the highest-quality source of both early customers and product feedback.
+
+**Pinterest and YouTube.** Pinterest is overwhelmingly consumer — not viable. YouTube has a real planner-business education niche but the channels are small; better as sponsorship than as ads.
+
+**Reddit.** Not viable. The professional subreddits are effectively dead.
+
+## T.4 Ranked ad propositions
+
+Ranked by expected performance against the evidence, with the brief's candidates tested.
+
+**1. "Fifteen weddings. One place that knows where every one of them stands."**
+Leads with the cross-client pain that planners actually articulate (Section E.3). Concrete, specific, and does not compete with free notetakers. My recommended primary.
+
+**2. "Your CRM knows what they signed. It doesn't know what they said on Tuesday."**
+Names the incumbent's blind spot precisely without naming the incumbent. Works especially well on `HoneyBook alternative` searches, where the reader is already dissatisfied.
+
+**3. "Stop updating five tools after every couple call."**
+From the brief, and the strongest of the four given. Multi-product stacks are the most strongly evidenced pain in the whole corpus. Its weakness is that it promises consolidation, which the product deliberately does not provide — it adds a tool rather than removing four. Use it, but land on a page that resolves the tension immediately.
+
+**4. "Every decision. Every supplier. Every change. Remembered."**
+From the brief. Good rhythm, commodity claim. Works as a supporting line, not a headline.
+
+**5. "Your weddings change faster than your spreadsheets do."**
+From the brief. Recognisable and well-aimed at the evidenced spreadsheet reality. Downgraded because it implies replacing the spreadsheet, and Section E found the spreadsheet is often a considered choice — attacking it directly picks a fight the product will lose.
+
+**Rejected: "Tell it what happened. Your wedding plan updates itself."** For the reasons in Section G.1: it promises autonomy the trust model refuses.
+
+## T.5 Honest summary
+
+There is no cheap channel. The professional community is invisible, the association infrastructure is small and shrinking, the highest-intent search terms have low volume, and the mid-range B2B search economics do not close at €39 a month. **The plan that best fits the evidence is not a paid-acquisition plan at all: two or three educator partnerships, direct outreach into closed groups, and a small high-intent search budget on competitor-alternative terms only.** Paid social should be treated as a test, not a channel.
+
+---
+
+# U. Name shortlist
+
+Approximately two dozen candidates. **No legal clearance is claimed or implied.** Conflicts noted below are surface-level web signals only; anything taken forward needs a proper trademark search in the relevant classes and jurisdictions.
+
+## U.1 Strongest
+
+| Name | Rationale | Known signals |
+| --- | --- | --- |
+| **Verger** | A verger is the church officer who makes sure everything is in order before and during a ceremony — literally the product's job, and a wedding-native word that is not bridal. Short, professional, obscure enough to own. | No obvious software conflict found. Best fit in the list. |
+| **Banns** | The formal public record that a marriage is going ahead. Wedding-native, precise, professional, and quietly about *the record* rather than the romance. | No obvious conflict. Risk: obscure and easily misspelled. |
+| **Perron** | A grand external staircase — the place a couple stands. No semantic baggage, premium register, easy to say. | No obvious conflict found. Weakness: means nothing to most people. |
+| **Aplomb** | Self-possession under pressure. Describes what the planner sells and what the product delivers, without describing weddings at all. Distinctive and premium. | Generic-word risk; some small-business usage. |
+| **Foyer** | Where people gather before the event; warm, short, architectural rather than bridal. | Some usage; needs screening. |
+| **Bower** | A sheltered place in a garden; frequently a wedding structure. Short, warm, memorable. | Some usage; needs screening. |
+
+## U.2 Possible
+
+| Name | Note |
+| --- | --- |
+| **Plinth** | The base everything stands on. Distinctive, slightly cold. |
+| **Almanac** | A record kept over time — semantically apt. Prior startup usage in the docs space. |
+| **Precis** | A summary. Professional and short; likely contested in AI. |
+| **Trousseau** | Wedding-native and elegant, but long and arguably archaic-bridal. |
+| **Vestry** | Elegant and ceremony-adjacent; the religious connotation sits awkwardly with civil weddings. |
+| **Marque** | Premium, French, brand-adjacent. Some conflicts. |
+| **Bellwether** | Means the leading indicator. Slight finance connotation, slightly long. |
+| **Threadline** | Invented, plausible, available-feeling. Weak meaning. |
+| **Attendant** | A wedding role *and* "present alongside". Nice double meaning, slightly passive. |
+| **Continuity** | Exactly what the product maintains, borrowed from film. Long, and collides with business-continuity software. |
+| **Prompter** | The theatre role that remembers the line when you forget — the best metaphor in the list. Damaged by "prompt" now reading as AI jargon. |
+| **Curate** | Junior clergy *and* the verb. Double meaning is excellent; the verb is overused in tech. |
+
+## U.3 Reject or conflicted
+
+| Name | Reason |
+| --- | --- |
+| **Aisle**, **Aisleworks** | Direct collision with Aisle Planner, the incumbent this product coexists with. |
+| **Cadence** | Cadence Design Systems. |
+| **Certain** | Certain Inc. is an **event management software company** — the worst possible collision. |
+| **Lumen** | Lumen Technologies, and confusingly close to Lume. |
+| **Tessera** | Tessera Technologies. |
+| **Wren** | Wren Kitchens (UK) and Wren (climate) — heavily contested in the UK market. |
+| **Trellis** | Multiple SaaS products. |
+| **Dossier** | Large DTC fragrance brand. |
+| **Solace** | Solace (messaging middleware). |
+| **Cortege** | A funeral procession. Catastrophic. |
+| **Hearsay** | Means unverified testimony — the exact opposite of the product's promise. |
+| **Bridle** | Homophone of "bridal" meaning horse tack. Reads as a typo. |
+| **Nuptia** | Clinical, and "Nuptial" is already a competing product. |
+| **Confetti** | Bridal-cheesy and an established UK wedding brand. |
+| **Vow**, **Vowd** | Crowded with wedding products; consumer register. |
+| **Rite**, **Kept**, **Held**, **Attend**, **Onward**, **Tally**, **Ledger**, **Recall**, **Anvil**, **Loam**, **Pastel** | Too generic to protect, or wrong register, or existing product collisions. |
+| **Callsheet** | Film-industry term with an existing app; wrong industry signal. |
+| **Runsheet** | Genuinely industry-native in the UK, but it names an artefact the product deliberately does not build, and it is a generic industry term that will be hard to own. |
+
+## U.4 Recommendation
+
+**Verger** first, **Banns** second, **Perron** third. All three are short, professional, premium-compatible, unmistakably not bridal-cheesy, and free of AI-cliché vocabulary. Verger is the only one that is simultaneously wedding-native *and* a precise description of the job the software does, which makes the brand story write itself.
+
+---
+
 # V. Marketing site and new-user experience
 
 ## V.1 Testing the Monday–Friday narrative
