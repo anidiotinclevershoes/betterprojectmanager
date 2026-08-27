@@ -81,8 +81,7 @@ export function CaptureSummary({
 
       <p className="capture-summary-line" role="status">
         <span>
-          {changesDetected} project change{changesDetected === 1 ? "" : "s"}{" "}
-          detected
+          {changesDetected} change{changesDetected === 1 ? "" : "s"}
         </span>
         <span aria-hidden>·</span>
         <span>{readyCount} ready</span>

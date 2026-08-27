@@ -963,14 +963,22 @@ export function CaptureWorkspace({
               <span>
                 {result.observationAccount.proposedChanges} to change
               </span>
-              <span aria-hidden>·</span>
-              <span>
-                {result.observationAccount.alreadyKnown} already known
-              </span>
-              <span aria-hidden>·</span>
-              <span>
-                {result.observationAccount.needsYou} need you
-              </span>
+              {result.observationAccount.alreadyKnown > 0 ? (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>
+                    {result.observationAccount.alreadyKnown} already known
+                  </span>
+                </>
+              ) : null}
+              {result.observationAccount.needsYou > 0 ? (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>
+                    {result.observationAccount.needsYou} need you
+                  </span>
+                </>
+              ) : null}
               {result.observationAccount.commentary > 0 ? (
                 <>
                   <span aria-hidden>·</span>
