@@ -526,6 +526,26 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
+### D-034 — No in-product account deletion (workspace can orphan)
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Infra |
+| **Found in** | Legal Eagle V1 audit (27 Aug 2026) |
+| **Failure class** | Users can delete a project; they cannot delete their account in-app. Deleting `auth.users` cascades memberships/profiles but not `workspaces`, leaving project rows ownerless (hidden by RLS, still in backups). |
+| **Evidence / repro** | Account page has Sign out / billing only; schema `workspaces` has no ON DELETE from users |
+| **Likely files** | `src/app/account/page.tsx`; `supabase/migrations/20260812002748_workspace_schema.sql` |
+| **Proposed fix direction** | V1: Privacy Policy + support process (delete personal workspace, then Auth user). Later: one security-definer RPC. |
+| **Explicit non-goals** | DSAR portal; enterprise retention |
+| **Regression test to add** | If RPC ships: deleting account removes workspace projects |
+| **Target resolution / validation point** | before V1 launch (documented process); self-service post-V1 |
+| **Related docs** | `docs/LUME_V1_LEGAL_EAGLE_AUDIT.md` F-06 |
+| **Notes** | Legal Eagle did not build self-service deletion. |
+
+---
+
 ## Resolved discoveries (reference)
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
@@ -693,6 +713,17 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 | **Fixed in** | Phase 3B — Conservative Capture Mutation Boundary |
 | **Failure class** | Capture apply could fall through into the wrong authority (generic Todo, duplicate Person, Risk/date as Todo). Project scope could silently use whichever project was open. Demo-name heuristics steered interpretation. Availability could become Stakeholder. Ambiguous share-vs-replace could write. |
 | **Fix summary** | Exhaustive typed apply dispatcher (`src/lib/capture/apply`) with runtime validation. Each finding mutates only its legal domain or Needs you / no write. No generic Todo fallback. Project scope uses Capture entry context only when the finding is not uncertain. Durable IDs carried for Risk/Person/milestone; a supplied Risk ID that is not on the project does **not** title-fallback onto another Risk. Unassigned (`projectId: null`) Todos cannot be mutated from a project Capture. `kind` cannot be retargeted by a conflicting `legalDomain` sticker. Availability fields cannot retarget a typed Risk/Todo/milestone. Mapping `legalDomain: unsupported` (unknown op/entity) is honored before availability/responsibility refinements. People reuse `ensurePersonOnProject`. Responsibilities reuse Confirm Owner; a Person ID not on the project is Needs you. Unknown ownership semantics cannot be discarded into a Person write. Availability writes structured `kind=availability`. Milestone date moves persist; milestone *complete* is Needs you (D-029). CREATE against an existing on-project Todo/milestone ID, or an exact unique Risk title, is no-change rather than a duplicate. Local extract auto-ready updates/completions require the existing title and cue in the same sentence (no token-overlap auto-accept). Persist-first Capture paths for Risk create/status, milestone create/update, Person, availability. Tests in `scripts/verify-phase3b-capture-boundary.ts`. Resolves D-017; Capture portions of D-011 and D-020; duplicate-Person class of D-007. |
+
+---
+
+### D-R14 — Shared-browser project residue after logout / account-switch
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | Legal Eagle V1 audit — browser isolation |
+| **Failure class** | Logout missed Tell Me snapshots and project dictionary; login did not wipe paint cache, so User B could briefly navigate into User A’s cached Knowledge Centre. Capture GET returned OpenAI key prefix. |
+| **Fix summary** | `clearAuthenticatedBrowserState` now covers Tell Me snapshots, dictionary, and layout prefixes. Login/signup/logout full-navigate after wipe. Hydrate discards cache when `cached.userId` ≠ signed-in user. Capture GET uses `requireSignedIn` and hides key diagnostics outside development. |
 
 ---
 

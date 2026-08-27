@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { auditProductionConfig } from "../src/lib/runtime-config";
-import { getAuthMode } from "../src/lib/auth-mode";
+import { authBackendUnavailable, getAuthMode } from "../src/lib/auth-mode";
 import { getPersistenceMode } from "../src/lib/persistence-mode";
 import {
   getSupabaseAnonKey,
@@ -14,6 +14,11 @@ import {
 import { evaluateEntitlement, mapStripeSubscriptionStatus } from "../src/lib/billing/entitlements";
 import { mapStripeSubscriptionToLume } from "../src/lib/billing/stripe-map";
 import { checkRateLimit, resetRateLimitStoreForTests } from "../src/lib/rate-limit";
+import {
+  MAX_TRANSCRIBE_BYTES,
+  transcribeAudioRejection,
+} from "../src/lib/transcribe-guard";
+import { publicAiFailureMessage } from "../src/lib/ai-public-error";
 
 let passed = 0;
 function check(name: string, fn: () => void) {
@@ -66,6 +71,41 @@ check("production auth mode never returns demo", () => {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon",
   } as NodeJS.ProcessEnv);
   assert.equal(mode, "supabase");
+});
+
+check("production without Supabase keys fails closed instead of opening the app", () => {
+  assert.equal(
+    authBackendUnavailable({
+      NODE_ENV: "production",
+    } as NodeJS.ProcessEnv),
+    true,
+  );
+  assert.equal(
+    authBackendUnavailable({
+      NODE_ENV: "production",
+      NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon",
+    } as NodeJS.ProcessEnv),
+    false,
+  );
+  assert.equal(
+    authBackendUnavailable({
+      NODE_ENV: "development",
+    } as NodeJS.ProcessEnv),
+    false,
+  );
+  assert.equal(
+    authBackendUnavailable({
+      NODE_ENV: "development",
+      AUTH_REQUIRED: "true",
+    } as NodeJS.ProcessEnv),
+    true,
+  );
+  const proxy = fs.readFileSync(path.join(root, "src/proxy.ts"), "utf8");
+  assert.match(proxy, /authBackendUnavailable/);
+  assert.doesNotMatch(proxy, /!authIsRequired\(\) \|\| mode === "none"/);
+  assert.match(proxy, /Service unavailable/);
+  assert.match(proxy, /503/);
 });
 
 check("production persistence is supabase", () => {
@@ -259,6 +299,90 @@ check("AI routes import requireAiCaller", () => {
     const src = fs.readFileSync(path.join(root, rel), "utf8");
     assert.match(src, /requireAiCaller/);
   }
+});
+
+check("Capture GET requires a signed-in user and hides key diagnostics in production", () => {
+  const src = fs.readFileSync(
+    path.join(root, "src/app/api/capture/route.ts"),
+    "utf8",
+  );
+  assert.match(src, /export async function GET/);
+  assert.match(src, /requireSignedIn/);
+  assert.match(src, /NODE_ENV === "development"/);
+  const getBlock = src.slice(
+    src.indexOf("export async function GET"),
+    src.indexOf("export async function POST"),
+  );
+  assert.match(getBlock, /keyPrefix/);
+  assert.doesNotMatch(
+    getBlock.replace(/if \(process\.env\.NODE_ENV === "development"\) \{[\s\S]*?\}/, ""),
+    /keyPrefix/,
+  );
+});
+
+check("transcribe rejects oversized or non-audio uploads", () => {
+  assert.equal(MAX_TRANSCRIBE_BYTES, 25 * 1024 * 1024);
+  assert.match(
+    transcribeAudioRejection({ size: 0, type: "audio/webm" }) ?? "",
+    /empty/i,
+  );
+  assert.match(
+    transcribeAudioRejection({
+      size: MAX_TRANSCRIBE_BYTES + 1,
+      type: "audio/webm",
+    }) ?? "",
+    /too large/i,
+  );
+  assert.match(
+    transcribeAudioRejection({ size: 12, type: "application/pdf" }) ?? "",
+    /file type/i,
+  );
+  assert.equal(
+    transcribeAudioRejection({ size: 12, type: "audio/webm" }),
+    null,
+  );
+});
+
+check("product OpenAI chat calls opt out of store", () => {
+  const openai = fs.readFileSync(path.join(root, "src/lib/openai.ts"), "utf8");
+  assert.match(openai, /store: false/);
+  for (const rel of [
+    "src/lib/tell-me/answer.ts",
+    "src/lib/pm-coach.ts",
+    "src/lib/capture-v2/extract.ts",
+    "src/app/api/new-project/route.ts",
+  ]) {
+    const src = fs.readFileSync(path.join(root, rel), "utf8");
+    assert.match(src, /withOpenAiChatPrivacy/, rel);
+  }
+});
+
+check("product AI routes do not return raw provider error text", () => {
+  const leaked = publicAiFailureMessage(
+    new Error("Incorrect API key provided: sk-proj-SECRET org-xyz"),
+    "Capture coaching failed",
+  );
+  assert.equal(leaked.publicMessage, "Capture coaching failed");
+  assert.match(leaked.detail, /sk-proj-SECRET/);
+  for (const rel of [
+    "src/app/api/capture/route.ts",
+    "src/app/api/coach/route.ts",
+    "src/app/api/transcribe/route.ts",
+    "src/app/api/new-project/route.ts",
+    "src/app/api/tell-me/route.ts",
+    "src/app/api/tell-me/refresh/route.ts",
+  ]) {
+    const src = fs.readFileSync(path.join(root, rel), "utf8");
+    assert.match(src, /publicAiFailureMessage/, rel);
+  }
+});
+
+check("evals denial UI does not embed a personal email", () => {
+  const src = fs.readFileSync(
+    path.join(root, "src/app/evals/layout.tsx"),
+    "utf8",
+  );
+  assert.doesNotMatch(src, /@[a-z0-9.-]+\.[a-z]{2,}/i);
 });
 
 check("ai-gate enforces entitlement for supabase callers", () => {

@@ -4,6 +4,7 @@ import { answerTellMeQuestion } from "@/lib/tell-me/answer";
 import { loadSnapshotFromSupabase } from "@/lib/tell-me/snapshot-store";
 import { isOpenAIConfigured } from "@/lib/openai";
 import { isProductionRuntime } from "@/lib/runtime-config";
+import { publicAiFailureMessage } from "@/lib/ai-public-error";
 import { serverLog } from "@/lib/server-log";
 import { recordTellMeMetricsSafe } from "@/lib/dev/cockpit/tell-me-record";
 import type { MissionState } from "@/lib/types";
@@ -81,9 +82,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ result });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Tell Me request failed";
-    serverLog.error("tell_me.failed", { error: message });
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { publicMessage, detail } = publicAiFailureMessage(
+      error,
+      "Tell Me request failed",
+    );
+    serverLog.error("tell_me.failed", { error: detail });
+    return NextResponse.json({ error: publicMessage }, { status: 500 });
   }
 }

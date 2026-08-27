@@ -2,7 +2,11 @@
  * Tell Me answer engine — grounded recall. AI only on explicit ask.
  */
 import { knowledgeHasContent } from "@/lib/knowledge";
-import { getOpenAIKey, isOpenAIConfigured } from "@/lib/openai";
+import {
+  getOpenAIKey,
+  isOpenAIConfigured,
+  withOpenAiChatPrivacy,
+} from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { buildTellMeContext } from "@/lib/tell-me/context";
 import {
@@ -270,15 +274,17 @@ export async function answerTellMeQuestion(args: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: modelRequested,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userContent },
-      ],
-    }),
+    body: JSON.stringify(
+      withOpenAiChatPrivacy({
+        model: modelRequested,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userContent },
+        ],
+      }),
+    ),
   });
 
   if (!response.ok) {

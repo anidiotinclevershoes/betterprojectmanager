@@ -15,6 +15,7 @@ export {
 } from "@/lib/auth-demo";
 
 export {
+  authBackendUnavailable,
   authIsRequired,
   getAuthMode,
   isDemoAuth,

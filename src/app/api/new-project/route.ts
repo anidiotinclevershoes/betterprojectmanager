@@ -6,9 +6,14 @@ import {
   type CreateProjectInput,
   type InterviewAnswers,
 } from "@/lib/create-project";
-import { getOpenAIKey, isOpenAIConfigured } from "@/lib/openai";
+import {
+  getOpenAIKey,
+  isOpenAIConfigured,
+  withOpenAiChatPrivacy,
+} from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { requireAiCaller } from "@/lib/ai-gate";
+import { publicAiFailureMessage } from "@/lib/ai-public-error";
 import { isProductionRuntime } from "@/lib/runtime-config";
 import {
   draftFromProvisional,
@@ -147,9 +152,11 @@ export async function POST(request: Request) {
       });
     }
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Could not assemble project";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { publicMessage } = publicAiFailureMessage(
+      error,
+      "Could not assemble project",
+    );
+    return NextResponse.json({ error: publicMessage }, { status: 500 });
   }
 }
 
@@ -205,19 +212,21 @@ ${JSON.stringify(fallback, null, 2)}`;
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: resolveOpenAIChatModel(),
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "You extract structured project setup data for a PM coaching app. Never invent facts. Preserve useful Knowledge overlap.",
-        },
-        { role: "user", content: prompt },
-      ],
-    }),
+    body: JSON.stringify(
+      withOpenAiChatPrivacy({
+        model: resolveOpenAIChatModel(),
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              "You extract structured project setup data for a PM coaching app. Never invent facts. Preserve useful Knowledge overlap.",
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
+    ),
   });
 
   if (!response.ok) {
@@ -279,19 +288,21 @@ ${JSON.stringify(fallback, null, 2)}`;
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: resolveOpenAIChatModel(),
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "You extract structured project setup data for a PM coaching app. Never invent facts.",
-        },
-        { role: "user", content: prompt },
-      ],
-    }),
+    body: JSON.stringify(
+      withOpenAiChatPrivacy({
+        model: resolveOpenAIChatModel(),
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              "You extract structured project setup data for a PM coaching app. Never invent facts.",
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
+    ),
   });
 
   if (!response.ok) {

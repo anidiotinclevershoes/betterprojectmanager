@@ -28,7 +28,8 @@ import type {
   Recommendation,
   TodoItem,
 } from "@/lib/types";
-import { requireAiCaller } from "@/lib/ai-gate";
+import { requireAiCaller, requireSignedIn } from "@/lib/ai-gate";
+import { publicAiFailureMessage } from "@/lib/ai-public-error";
 import { isProductionRuntime } from "@/lib/runtime-config";
 import { serverLog } from "@/lib/server-log";
 import {
@@ -66,15 +67,22 @@ function requestId() {
 }
 
 export async function GET() {
+  const gate = await requireSignedIn("status");
+  if (!gate.ok) return gate.response;
+
   const diagnostics = getOpenAIKeyDiagnostics();
-    return NextResponse.json({
-      openaiConfigured: diagnostics.openaiConfigured,
-      model: resolveOpenAIChatModel(),
-      keyPrefix: diagnostics.prefix,
-      keyLength: diagnostics.length,
-      reason: diagnostics.reason,
-      captureV2Enabled: isCaptureV2Enabled(),
-    });
+  const payload: Record<string, unknown> = {
+    openaiConfigured: diagnostics.openaiConfigured,
+    model: resolveOpenAIChatModel(),
+    captureV2Enabled: isCaptureV2Enabled(),
+  };
+  // Key shape is a secret-adjacent diagnostic — development only.
+  if (process.env.NODE_ENV === "development") {
+    payload.keyPrefix = diagnostics.prefix;
+    payload.keyLength = diagnostics.length;
+    payload.reason = diagnostics.reason;
+  }
+  return NextResponse.json(payload);
 }
 
 export async function POST(request: Request) {
@@ -405,8 +413,11 @@ export async function POST(request: Request) {
       reliability,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Capture coaching failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { publicMessage, detail } = publicAiFailureMessage(
+      error,
+      "Capture coaching failed",
+    );
+    serverLog.error("capture.failed", { error: detail });
+    return NextResponse.json({ error: publicMessage }, { status: 500 });
   }
 }

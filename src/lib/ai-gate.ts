@@ -44,8 +44,12 @@ function displayNameFromUser(user: {
   return trimmed || undefined;
 }
 
-export async function requireAiCaller(
-  feature: "capture" | "coach" | "transcribe" | "new-project" | "tell-me",
+/**
+ * Signed-in caller without spending an AI rate-limit token.
+ * Used for cheap status GETs that must not advertise secrets.
+ */
+export async function requireSignedIn(
+  feature: "capture" | "coach" | "transcribe" | "new-project" | "tell-me" | "status" = "status",
 ): Promise<AiGateOk | AiGateFail> {
   const mode = getAuthMode();
 
@@ -57,15 +61,10 @@ export async function requireAiCaller(
   let userId: string | null = null;
   let email: string | undefined;
   let displayName: string | undefined;
-  // Keep a supabase client when we already authenticated via it.
-  let supabaseClient: Awaited<
-    ReturnType<typeof createServerSupabaseClient>
-  > | null = null;
 
   if (isSupabaseAuth()) {
     try {
       const supabase = await createServerSupabaseClient();
-      supabaseClient = supabase;
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -100,10 +99,22 @@ export async function requireAiCaller(
     };
   }
 
+  return { ok: true, userId, email, displayName };
+}
+
+export async function requireAiCaller(
+  feature: "capture" | "coach" | "transcribe" | "new-project" | "tell-me",
+): Promise<AiGateOk | AiGateFail> {
+  const signedIn = await requireSignedIn(feature);
+  if (!signedIn.ok) return signedIn;
+
+  const { userId, email, displayName } = signedIn;
+
   // Entitlement is separate from auth. Enforce only for Supabase-backed product paths.
   let entitlement: WorkspaceEntitlement | undefined;
-  if (isSupabaseAuth() && supabaseClient) {
+  if (isSupabaseAuth()) {
     try {
+      const supabaseClient = await createServerSupabaseClient();
       const { workspaceId } = await ensurePersonalWorkspace(supabaseClient);
       await ensureWorkspaceTrial(supabaseClient, workspaceId);
       entitlement = await getWorkspaceEntitlement(supabaseClient, workspaceId);

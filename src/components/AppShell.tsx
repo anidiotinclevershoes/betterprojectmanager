@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/app-shell/Sidebar";
 import { TopHeader } from "@/components/app-shell/TopHeader";
 import { CaptureSessionProvider } from "@/components/capture/CaptureSessionContext";
@@ -68,7 +68,6 @@ function AppShellWithTellMe({ children }: { children: ReactNode }) {
 
 function AppShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
   const { state, saveStatus, saveError } = useMission();
   const { drawerOpen, openDrawer } = useCoachSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -121,9 +120,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
     clearAuthenticatedBrowserState();
-    setUser(null);
-    router.replace("/login");
-    router.refresh();
+    window.location.assign("/login");
   }
 
   const toggleCollapse = () => {

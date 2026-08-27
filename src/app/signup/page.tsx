@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import {
   AuthLinkRow,
@@ -12,9 +11,9 @@ import {
   passwordRequirementsCopy,
   validatePassword,
 } from "@/lib/auth-password";
+import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,8 +47,8 @@ export default function SignupPage() {
         setCheckEmail(true);
         return;
       }
-      router.replace("/");
-      router.refresh();
+      clearAuthenticatedBrowserState();
+      window.location.assign("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create account");
     } finally {

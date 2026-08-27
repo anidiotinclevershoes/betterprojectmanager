@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
 import {
   AuthLinkRow,
@@ -8,9 +8,9 @@ import {
   AuthShell,
 } from "@/components/auth/AuthShell";
 import { friendlyAuthError } from "@/lib/auth-password";
+import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 
 function LoginForm() {
-  const router = useRouter();
   const search = useSearchParams();
   const next = search.get("next") || "/";
   const notice = search.get("notice");
@@ -42,8 +42,9 @@ function LoginForm() {
       if (!response.ok) {
         throw new Error(friendlyAuthError(data.error));
       }
-      router.replace(next.startsWith("/") ? next : "/");
-      router.refresh();
+      clearAuthenticatedBrowserState();
+      const nextPath = next.startsWith("/") ? next : "/";
+      window.location.assign(nextPath);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed");
     } finally {

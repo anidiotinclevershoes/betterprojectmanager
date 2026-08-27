@@ -30,13 +30,12 @@ export default async function EvalsLayout({
                   Vercel → Project → Settings → Environment Variables
                 </li>
                 <li>
-                  Add{" "}
-                  <code>LUME_EVAL_ALLOWED_EMAILS=spud.hughes@gmail.com</code>{" "}
-                  for Production (and Preview if you use it)
+                  Add <code>LUME_EVAL_ALLOWED_EMAILS</code> with the operator
+                  email(s), for Production (and Preview if you use it)
                 </li>
                 <li>Redeploy the Production deployment</li>
                 <li>
-                  Sign in with that exact email, then open{" "}
+                  Sign in with an allowlisted email, then open{" "}
                   <code>/evals</code>
                 </li>
               </ol>

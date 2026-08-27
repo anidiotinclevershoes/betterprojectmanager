@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { LumeThemePicker } from "@/components/app-shell/LumeThemePicker";
 import { TrialExpiredPanel } from "@/components/billing/TrialExpiredPanel";
@@ -17,7 +16,6 @@ type StatusResponse = {
 };
 
 export default function AccountPage() {
-  const router = useRouter();
   const [user, setUser] = useState<{ email: string; name: string } | null>(
     null,
   );
@@ -47,8 +45,7 @@ export default function AccountPage() {
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
     clearAuthenticatedBrowserState();
-    router.replace("/login");
-    router.refresh();
+    window.location.assign("/login");
   }
 
   async function startCheckout() {

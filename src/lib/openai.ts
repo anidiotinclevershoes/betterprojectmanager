@@ -39,6 +39,12 @@ export function getOpenAIKey() {
   return key;
 }
 
+export function withOpenAiChatPrivacy<T extends Record<string, unknown>>(
+  body: T,
+): T & { store: false } {
+  return { ...body, store: false };
+}
+
 export function isOpenAIConfigured() {
   const key = getOpenAIKey();
   return key.startsWith("sk-") && key.length > 20;
@@ -206,15 +212,17 @@ export async function tidyAndCoachWithOpenAI(
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model,
-      temperature: 0.3,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: COACHING_SYSTEM_PROMPT },
-        { role: "user", content: promptAssembly.text },
-      ],
-    }),
+    body: JSON.stringify(
+      withOpenAiChatPrivacy({
+        model,
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: COACHING_SYSTEM_PROMPT },
+          { role: "user", content: promptAssembly.text },
+        ],
+      }),
+    ),
   });
 
   if (!response.ok) {

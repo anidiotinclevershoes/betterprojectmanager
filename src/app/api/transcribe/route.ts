@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { isOpenAIConfigured, transcribeWithWhisper } from "@/lib/openai";
 import { requireAiCaller } from "@/lib/ai-gate";
+import { transcribeAudioRejection } from "@/lib/transcribe-guard";
+import { publicAiFailureMessage } from "@/lib/ai-public-error";
 import { serverLog } from "@/lib/server-log";
 
 export const runtime = "nodejs";
@@ -34,15 +36,22 @@ export async function POST(request: Request) {
         ? audio.name
         : "capture.webm";
 
+    const rejected = transcribeAudioRejection(audio);
+    if (rejected) {
+      return NextResponse.json({ error: rejected }, { status: 400 });
+    }
+
     const text = await transcribeWithWhisper(audio, filename);
     return NextResponse.json({ text, provider: "openai-whisper" });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Transcription failed";
+    const { publicMessage, detail } = publicAiFailureMessage(
+      error,
+      "Transcription failed",
+    );
     serverLog.error("transcribe.failed", {
       userId: gate.userId,
-      error: message,
+      error: detail,
     });
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: publicMessage }, { status: 500 });
   }
 }

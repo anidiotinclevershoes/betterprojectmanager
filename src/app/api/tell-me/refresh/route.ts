@@ -7,6 +7,7 @@ import {
 } from "@/lib/tell-me/snapshot-store";
 import { isOpenAIConfigured } from "@/lib/openai";
 import { isProductionRuntime } from "@/lib/runtime-config";
+import { publicAiFailureMessage } from "@/lib/ai-public-error";
 import { serverLog } from "@/lib/server-log";
 import { recordTellMeMetricsSafe } from "@/lib/dev/cockpit/tell-me-record";
 import type { MissionState } from "@/lib/types";
@@ -106,9 +107,11 @@ export async function POST(request: Request) {
       provider: refreshed.provider,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Snapshot refresh failed";
-    serverLog.error("tell_me.refresh_failed", { error: message });
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { publicMessage, detail } = publicAiFailureMessage(
+      error,
+      "Snapshot refresh failed",
+    );
+    serverLog.error("tell_me.refresh_failed", { error: detail });
+    return NextResponse.json({ error: publicMessage }, { status: 500 });
   }
 }
