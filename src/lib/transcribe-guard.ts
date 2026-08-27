@@ -8,8 +8,14 @@ const ALLOWED_AUDIO_TYPES = [
   "application/ogg",
 ];
 
+export type TranscribeAudioInput = {
+  size: number;
+  type?: string;
+  name?: string;
+};
+
 export function transcribeAudioRejection(
-  audio: Blob & { name?: string; type?: string },
+  audio: TranscribeAudioInput,
 ): string | null {
   const size = typeof audio.size === "number" ? audio.size : 0;
   if (size <= 0) {
