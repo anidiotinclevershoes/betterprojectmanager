@@ -50,25 +50,50 @@ This report is deliberately unflattering in places. The prompt authorised challe
 
 ## A. Executive assessment
 
-### **PROMISING — VALIDATE FIRST**
+### **WEAK OPPORTUNITY** — for the product as briefed
 
-That verdict comes with a stated prior: I put roughly a **one-in-three chance** that a properly designed willingness-to-pay test clears the bar described in section W. It is not a confident yes. The classification is "promising" rather than "strong" because the underlying job is real and the retention curve is genuinely attractive, and it is not "uncertain" because further desk research will not settle it — only money changing hands will.
+> **Note on this verdict.** An earlier draft of this report concluded *PROMISING — VALIDATE FIRST*. A deeper competitive sweep then found **six shipping products on the exact wedge**, a price floor of **$25/month for unlimited clients**, and **two venture-funded companies in this market shutting down within the last fourteen months**. The verdict is downgraded on evidence. The earlier reasoning is preserved where it still holds, and the specific things that changed are named in section C so the change is auditable rather than a mood swing.
 
-Three findings drive the assessment.
+The job is real. The product is not differentiated enough, arriving late enough, into a market small enough and price-compressed enough, to justify building it as a standalone self-serve subscription.
 
-**First, the job is real and coaches are already doing it by hand.** The most persuasive market evidence is not a complaint; it is a workaround. Practising coaches publicly describe maintaining a per-client "context file" that they update after every session and paste into ChatGPT before the next one. When people are hand-rolling your product with a text file and a prompt, the job exists. The pain is not "I forget my clients" — coaches are offended by that framing. The pain is "reconstructing six months of a person costs me twenty minutes I don't have, and I still miss the thing that mattered."
+**First, the job is real and coaches are already doing it by hand.** The most persuasive evidence is not a complaint; it is a workaround. Practising coaches publicly describe maintaining a per-client "context file" they update after every session and paste into ChatGPT before the next one. When people are hand-rolling your product with a text file and a prompt, the job exists. The pain is not "I forget my clients" — coaches are offended by that framing. It is "reconstructing six months of a person costs me twenty minutes I don't have, and I still miss the thing that mattered."
 
-**Second, the specific wedge is already occupied, and the proposed proposition is already someone's live homepage copy.** The candidate line "Remember every client like they're your only client" is, in substance, Coachful's current headline: *"The coaching CRM that remembers your clients for you"* / *"Stop forgetting your clients. Start coaching."* Wundamental sells longitudinal dashboards and cross-session pattern detection at €29–€159/month. CoachNova sells per-client memory at €19 per active client. Osmo launched in June 2026 with a credible founder. This is not a gap; it is a queue. The category is best described as **rapidly crowding**, and the honest reading is that the window opened around eighteen months ago and several credible entrants are already through it.
+**Second, the wedge is not crowded — it is occupied.** This is the finding that moved the verdict. It is not that competitors are adjacent or that they describe similar features differently. Six products ship the specific mechanism described in the brief — extract structure from sessions, hold it across months, brief the coach beforehand, answer questions across the whole history — and several market it in almost the brief's own words:
 
-**Third, there is nonetheless one uncontested position, and it is architectural rather than rhetorical.** Every AI-native competitor found in this research is built on **recording and transcribing the session**. At the same time, the profession's own rules moved against exactly that: the ICF Code of Ethics (effective April 2025) makes the coach personally accountable for any technology touching client material, and coach-training bodies have gone further — one explicitly forbids putting any real session content into an AI system at all. A product that **never enters the room**, takes only what the coach chooses to write afterwards, and **writes nothing to the client's record without the coach's approval**, is differentiated in a way that incumbents cannot cheaply copy, because their entire value chain starts with a transcript.
+- **CoachRocks** runs a section headed **"Perfect client memory"**, promises *"Ask anything about any client — answered from every session you've ever had with them"*, and closes with *"Remember every session. Understand every client."* **$25/month, unlimited clients, plus a genuinely usable free tier at 3 clients.**
+- **CoachUI** sells *"an always-updating client ledger"* where *"session 8 is analyzed in the context of sessions 1 through 7."*
+- **Coachful**: *"AI coaching assistant that actually knows your clients"* and *"ChatGPT doesn't know your clients. Michelle does."*
+- **CoachNova**: *"Walk into every session knowing where you left off"* — and, critically, *"The AI proposes. You approve. That's what coach-supervised means."*
+- **SessionFlow**: *"grounded in your approved session notes."*
+- **Kivo** (waitlist): *"All the little things you wished you remembered? Kivo does."*
 
-The strategic answer to the question the brief actually asks — is this a genuine unfair head start, or merely technically adaptable? — is **partial, and narrower than hoped**. What transfers is real: the review-before-write trust boundary, the typed observation/disposition model, the supersession-and-provenance record, the ambiguity-becomes-a-question rule, the project-scope isolation invariants, and above all an evaluation harness that distinguishes *the model was wrong* from *the model was wrong and we caught it* from *we let a wrong thing become truth*. No small competitor in this space has that last thing, and in a domain where mixing up two clients is a career-ending error for the coach, it is the right asset to own.
+Two independent products have converged on the identical sentence *"walk into every session knowing where you left off."* When that happens, the positioning is gone.
 
-What does not transfer is the persistence layer, which is modelled around delivery projects, and — more uncomfortably — the current measured reliability. Lume's own published benchmark shows a generic GPT baseline scoring **32/45** against Lume's **30/45** on the legacy path and **23/45** on the canonical path, and the most recent live Capture V2 evaluation records genuine **LUME FAILURE** events on precisely the cases that matter most here: an ambiguous same-first-name mention silently creating a duplicate person, and an unresolved target becoming a `CREATE`. Reliability is currently an ambition supported by excellent instrumentation, not a demonstrated advantage. That is a solvable problem and the instrumentation is why it is solvable — but it must not be sold as a moat today.
+**Third, the differentiators identified in the earlier draft each turned out to be thinner than claimed.** The no-recording stance is real but partially available elsewhere — CoachRocks accepts unlimited manual transcript uploads alongside its recording. The approve-before-truth boundary is a genuine architectural difference, but CoachNova already markets "the AI proposes, you approve" and SessionFlow already says "your approved session notes", so the *language* is taken even where the *implementation* is not. Nobody exposes a typed, reviewable fact ledger with supersession and provenance — that gap is real — but it is a feature a competitor could ship in a sprint, not a moat.
 
-**Recommendation.** Do not build. Run the validation experiment in section W, at a cost of roughly €2,000–€3,500 over six weeks, against a **narrowed** proposition and a **narrower** customer than the brief proposed. Treat thirty-day retention of a hand-held founding cohort — not signups — as the decision metric. If it clears, the smallest compelling product in section H is a focused, plausible, profitable business of perhaps €50k–€100k ARR run by one or two people. If it does not clear, this is a **NO-GO**, and the correct response is to stop, not to iterate the landing page.
+**Fourth, the price has already compressed below the level this product needs.** CoachRocks Pro is $25/month with unlimited clients. Granola Business at $14 plus Claude Pro at $20 gets a competent coach perhaps 70% of the way for $34, with no vendor risk. The €39 the earlier draft proposed is now the *middle* of a range whose floor was set by someone else, and the floor has a free tier under it.
 
-One further honest note on ambition. Even the winning case here is small. There are roughly 123,000 coach practitioners worldwide; the realistically addressable slice — English-working, independent, enough concurrent clients, willing to pay for a second subscription — is plausibly 15,000–40,000 people. This is a good focused product. It is not a large outcome, and it should not be resourced as though it were.
+**Fifth — and this is the structural finding — this market has twice killed venture-scale attempts and rewarded only tiny, profitable ones.** Practice.do raised $10M and shut down on 3 November 2025, giving users roughly two weeks' notice and no read-only export. Profi raised $8M and closed on 31 December 2025. Meanwhile CoachAccountable has run for twelve years, Paperbell and Life Coach Hub for a decade or more, all bootstrapped and quiet. Every current AI-native entrant is one to three people: CoachNova publicly states three staff, **"around €350 a month in burn," and cash-flow positive**; Wundamental's Estonian register shows headcount falling from 2 to 1 and equity from €41.5k to €17.7k. The near-zero capital requirement means the entry rate will not slow, and the customer base has demonstrated twice that it cannot support anything larger than a lifestyle business.
+
+**On the question the brief actually asks** — is this an unfair head start, or merely technically adaptable? The honest answer is now **neither, quite**. Lume's transferable assets are real and specific: the review-before-write trust boundary, the typed observation model, supersession with provenance, the ambiguity-becomes-a-question rule, project-scope isolation, and above all an evaluation harness that distinguishes *the model was wrong* from *we caught it* from *we let a wrong thing become truth*. No competitor in this space has that last thing. But an evaluation harness is an internal engineering asset that is completely illegible to a buyer comparing two $25 products, and Lume's own numbers currently argue against the reliability claim it would support: the published benchmark shows a **generic GPT baseline at 32/45 against Lume's 30/45** (legacy) and **23/45** (canonical), and the latest live evaluation records **LUME FAILURE** on exactly the identity-ambiguity cases that would be fatal here.
+
+### What I would do instead
+
+**Do not build the standalone product as briefed.** Being the seventh entrant, later, with a narrower feature set and no distribution advantage, into a market with a $25 price floor and two recent funded corpses, is not a good use of the codebase.
+
+Three variants are worth more than the briefed product, in descending order of interest:
+
+**1. Be the memory layer for CoachAccountable and Paperbell rather than replacing them.** This is the one genuinely open position found in the entire sweep, and it has been publicly invited. CoachAccountable's founder wrote in April 2026 that he is *"reluctant to grease those rails"* by adding AI, and then in August 2026 shipped the compromise — an API and webhooks explicitly so that *"[an agent] from whichever source can readily post whatever [to the] `Session.add` API."* Paperbell has no AI at all. Both have large installed bases, twelve-plus years of trust, and a stated intention not to compete. An integration play is smaller and less glamorous than a platform, but it inherits distribution instead of fighting for it, and distribution is the thing this market punishes you for lacking.
+
+**2. Point the same capability at a different profession.** The retention argument that makes coaching better than project management applies at least as well to therapists and supervisors, independent financial advisers with recurring client reviews, non-executive directors across board portfolios, and clinicians with long-term caseloads. Several have better economics, harder regulatory moats and far less crowding. This investigation was scoped to coaching and answered that question; it is not evidence that coaching is the best available application, only that it beats the PM one.
+
+**3. Proceed with the standalone product only if you have distribution the incumbents lack** — an existing audience of executive coaches, a relationship with ICF or EMCC, or a corporate-sponsor channel where SOC 2 and EU residency are procurement gates that a two-person competitor cannot pass. Note that Simply.Coach already claims SOC 2 Type II, HIPAA and GDPR on all plans *and* has AI notes in development, so even that gate is closing. Absent real distribution, this is a **NO-GO**.
+
+If variant 3 is pursued anyway, the validation experiment in section W still applies, but its thresholds have been raised and it must now be run **against CoachRocks specifically** rather than against a generic notion of the competition.
+
+### On ambition
+
+Even the winning case is small. Of roughly 123,000 coach practitioners worldwide, the realistically addressable slice — English-working, independent, enough concurrent clients, willing to pay for a *second* subscription — is plausibly 15,000–40,000 people, now sharing a market with six competitors and a $25 floor. A very good outcome is a one-person business at €50k–€100k ARR. That is a legitimate thing to want. It is not a reason to spend a year of engineering, and the codebase deserves a better-chosen market.
 
 ---
 
@@ -76,11 +101,19 @@ One further honest note on ambition. Even the winning case here is small. There 
 
 This section is written to kill the idea. It is not balanced on purpose.
 
-### B1. The proposition is already taken, by more than one company
+### B1. The proposition is not "already taken" — it is being sold by six companies, and one of them has built your product
 
-The brief's candidate line is functionally live copy at a competitor. Coachful's site reads *"The coaching CRM that remembers your clients for you"*, *"Your client memory is scattered across five different apps"*, *"Show up to every call already prepared"*, and *"Stop forgetting your clients."* If you build this product and write the obvious headline, you will be the second or third company saying it, to an audience that has already been pitched it.
+This is the argument that should decide the matter.
 
-Worse, the competitors are not all weak. Wundamental has a coherent four-layer product (session recaps, ICF competency benchmarking, longitudinal dashboards, sponsor ROI evidence) and claims 9M+ data points and 35+ languages. Osmo launched in June 2026 with an ex-NVIDIA product founder and a scalable-measurable-coaching narrative. CoachNova has a per-active-client pricing model and a genuinely sharper business insight than ours (monetising *former* clients, not just current ones). You would be entering a fight, late, with a narrower product.
+**CoachRocks is, functionally, the product described in this brief, already shipped, at $25/month with unlimited clients and a free tier at three.** Verbatim from its site: a section headed *"Perfect client memory"*; *"Ask anything about any client — answered from every session you've ever had with them"*; *"When you see a client every couple of weeks, the details blur — what they committed to, what shifted, what they said five sessions back. CoachRocks holds the full arc of each client's journey"*; *"Next-session prep — Walk in already knowing where you left off. Before each session you get a brief: last time's recap, a suggested agenda, and the patterns and blind spots to watch for."* It maps a client transformation timeline, accepts unlimited manual transcript uploads (so the no-recording path exists there too), states that client data is never used to train models, and offers a DPA on request.
+
+The remaining differences are: no coach-approval step on extracted facts, and no explicit third-party-people model. Both are sprints, not moats.
+
+Around it: **CoachUI** ($59/$119) sells *"an always-updating client ledger"* where *"session 8 is analyzed in the context of sessions 1 through 7"*. **Coachful** ($49) sells *"AI coaching assistant that actually knows your clients"* and per-client 30-second briefings. **CoachNova** (€19/active client) sells *"Walk into every session knowing where you left off"* — and already markets the approval boundary as *"The AI proposes. You approve."* **SessionFlow** ($29/$50, free in beta) already uses the phrase *"grounded in your approved session notes."* **Wundamental** (€29–€159) sells cross-session pattern detection and longitudinal dashboards. **Kivo** is on a waitlist with *"All the little things you wished you remembered? Kivo does."*
+
+Two of these independently arrived at the identical sentence about walking into a session knowing where you left off. That is what an exhausted positioning looks like.
+
+The timing is the sharpest part. Practice.do died in November 2025; CoachNova launched April 2026; Osmo launched 16 June 2026; CoachRocks' design case study is dated March 2026. **This went from thin to saturated in roughly four to eight months**, and the entry rate will not slow, because the capital requirement is near zero.
 
 ### B2. The free substitute is good enough, and getting better on someone else's roadmap
 
@@ -136,7 +169,25 @@ Translated into the coaching domain: the pipeline currently, sometimes, silently
 
 At €39/month with realistic solo-professional churn, lifetime value is roughly €450–€650. Google Search in this category runs $2–$6 per click against incumbents with an affiliate army and far higher LTV; a realistic cost per paying customer from cold paid search is €150–€500. The margin for error is thin, and the organic alternative is blocked: the "best coaching software" SERP is saturated with AI-generated affiliate content farms. You cannot out-publish them and you cannot outbid them.
 
-### B12. The creepiness risk is concentrated in the most attractive feature
+### B12. This market has killed venture attempts twice in fourteen months and rewards only tiny operators
+
+**Practice.do — raised $10M, shut down 3 November 2025.** The CEO's notice: *"I am sad to tell you that we've made the decision to wind down Practice… The company was not where we needed it to be to sustain itself… After a failed acquisition process, the team has decided to put the company to rest."* Users got about two weeks' warning via an in-app banner, no read-only mode, no acquirer. Unexported session notes are gone.
+
+**Profi — raised $8M, closed 31 December 2025.**
+
+**VoxcoachAI** abandoned self-serve on 15 May 2026: *"We're closing direct self-service access to the platform. We're becoming a B2B partner."*
+
+What survived: CoachAccountable (twelve years), Paperbell, Life Coach Hub (fifteen years) — all bootstrapped, all quiet, all profitable. And every current AI-native entrant is minuscule: CoachNova publicly reports three people, **"around €350 a month in burn," cash-flow positive**; Wundamental's Estonian register shows headcount 2 → 1 and equity €41,520 → €17,714; CoachRocks appears to be roughly two people who outsourced the design.
+
+The inference is not "small teams can win here" — it is that **this customer base is low-ACV, high-churn and price-sensitive enough that it has repeatedly failed to support anything larger than one person's income**, and that entrants with real money behind them chose to die rather than keep going. Both deaths were practice-management suites rather than memory products, but they died of the customer, not the feature.
+
+### B13. The price floor is already below the plan, and the substitute stack is cheaper still
+
+CoachRocks Pro: **$25/month, unlimited clients**, with a free tier at three. Granola Business ($14) plus Claude Pro ($20) = **$34/month** for maybe 70% of the job with no vendor risk and no migration. SessionFlow is currently **free while in beta**.
+
+A new entrant with a narrower product cannot price above that on trust it has not yet earned. The €39 proposed in section S was modelled before this floor was known, and it is now a premium price for the seventh-best-known option.
+
+### B14. The creepiness risk is concentrated in the most attractive feature
 
 "Themes and patterns across sessions" is the feature that makes the demo sing and the feature most likely to produce something a coach would be mortified to have on a screen when a client glances at it. The line between *"delegation has come up in four of the last six sessions"* and *"Sarah struggles to delegate"* is one prompt away, and models cross it unbidden. Ship it wrong once and the coach does not file a bug; they cancel, and they tell their supervision group.
 
@@ -154,17 +205,31 @@ At €39/month with realistic solo-professional churn, lifetime value is roughly
 | 6 | Privacy sensitivity is high | **Confirmed** | ICF Standard 2.5 (April 2025) makes coaches accountable for their AI tools; ICF AI Coaching Framework (Nov 2024); training bodies banning session data in AI; NYC Bar opinion; US state legislation |
 | 7 | Coaches carry approximately **10–40** active clients | **Rejected as stated** | ICF: average 12.4 active clients, 11.6 coaching hours/week. Independent executive coaches commonly 8–20. Revise the ICP band to **10–25** |
 | 8 | Memory is the coach's *deeper* / primary pain | **Rejected** | Memory ranks below client acquisition, pricing and aggregate admin in every ranked source found. It is a real but second-tier pain, and it is felt as *preparation cost*, not as forgetting |
-| 9 | This is an under-served gap | **Rejected** | At least six AI-native coaching products launched or shipped memory/longitudinal features in 2025–26, plus AI features arriving in the incumbent suites |
-| 10 | "Remember every client like they're your only client" is a fresh proposition | **Rejected** | Substantively live competitor copy (Coachful). Must be replaced |
+| 9 | This is an under-served gap | **Rejected, emphatically** | Six products ship the exact mechanism (CoachRocks, CoachUI, Coachful, CoachNova, SessionFlow, Wundamental), one more is on a waitlist (Kivo), price floor is $25/month unlimited with a free tier, and the category saturated in roughly four to eight months |
+| 10 | "Remember every client like they're your only client" is a fresh proposition | **Rejected** | Substantively live competitor copy at Coachful *and* CoachRocks (*"Remember every client without remembering anything"*). Two competitors independently use the identical sentence *"walk into every session knowing where you left off"* |
+| 10a | The market can support a new self-serve subscription at €29–€49 | **Rejected** | CoachRocks $25 unlimited + free tier; SessionFlow free in beta; Granola + Claude $34. Practice.do ($10M) and Profi ($8M) both shut down in 2025 |
+| 10b | Human approval of AI output is an unclaimed position | **Rejected as positioning; survives narrowly as architecture** | CoachNova markets *"The AI proposes. You approve."*; SessionFlow says *"your approved session notes."* Nobody exposes a typed, superseding, provenance-linked fact ledger — but that is a sprint, not a moat |
+| 10c | "Never in the room" is architecturally uncontested | **Partly rejected** | CoachRocks accepts unlimited manual transcript uploads; SessionFlow accepts voice-memo uploads. Recording is their default, not their only path |
+| 10d | Modelling the client's *world* (named third parties, tracked relationship change) is unserved | **Confirmed** | No competitor found models the people around the client as durable entities. The one differentiator that strengthened under deeper search |
 | 11 | Lume could solve this *substantially better* than the alternatives | **Not supported today; conditionally supportable** | Lume's own 45-case benchmark has generic GPT at 32/45 vs Lume 30/45 (legacy) and 23/45 (canonical). Latest live eval shows LUME FAILURE on identity-ambiguity cases. The *harness* is the asset; the *measured advantage* is not there yet |
 | 12 | Coaches want cross-session pattern recognition | **Mixed — treat as a risk, not a feature** | Vendors sell it heavily; craft literature is ambivalent and warns against clinical framing. Recommend read-only, evidence-linked, non-personal (see section N) |
 | 13 | Coaches will upload confidential client information | **Unresolved — segment-dependent** | Some already paste into ChatGPT; some are contractually or ethically forbidden. This splits the market and must be tested, not assumed |
 | 14 | Willingness to pay €19–€49/month for a *second* subscription | **Unresolved — this is the thing to test** | Price anchors exist at $9–$99; nothing establishes that a memory-only companion clears the bar alongside an existing suite |
 
-Two additional findings the brief did not anticipate:
+### C1. What changed between drafts, and why
 
-- **The strongest differentiator is not memory; it is "we are never in the room."** Every AI-native competitor is transcript-first. That is an architectural commitment they cannot cheaply reverse, and it collides with a hardening professional norm.
-- **The most under-served need is not the client; it is the client's world.** Competitors model the coachee — goals, progress, commitments. None models *Martin the skip-level, the board, the reorg, the peer who went quiet*. Executive coaching lives in that political landscape, and it happens to be the thing Lume's people-and-scoped-responsibility model already does.
+Recorded explicitly so the verdict change is auditable rather than a change of mood. Four claims in the first draft did not survive the deeper competitive sweep:
+
+| First draft claimed | Now known | Effect |
+| --- | --- | --- |
+| "Every AI-native competitor is transcript-first, so *never in the room* is uncontested" | **Partly wrong.** CoachRocks accepts unlimited manual transcript uploads alongside recording; SessionFlow accepts phone voice-memo uploads. The no-recording *path* exists at competitors even where recording is the default | Differentiator downgraded from architectural to positional |
+| "Nobody separates proposal from truth" | **Wrong as stated.** CoachNova markets *"The AI proposes. You approve."*; SessionFlow says *"grounded in your approved session notes"*; Coachful gates write actions behind confirmation cards. Nobody exposes a *typed fact ledger* with supersession — that narrower gap survives | Differentiator narrowed to something a competitor could ship in a sprint |
+| "Price band €29–€49 is defensible" | **Wrong.** CoachRocks is $25 unlimited with a free tier; SessionFlow is free in beta; Granola + Claude is $34 | Pricing plan invalidated |
+| "The category is rapidly crowding" | **Understated.** It is occupied — six shipping products on the exact mechanism, saturated in four to eight months, and two funded companies in this market died in the preceding fourteen | Verdict downgraded |
+
+One claim strengthened rather than weakened: **the client's world remains genuinely unmodelled.** No competitor found in the sweep models named third parties — the skip-level, the board, the peer who went quiet — as durable entities with tracked relationship change. Competitors model the *coachee*. That gap survived the deeper search, and it is the one place Lume's existing people-and-scoped-responsibility machinery has no analogue in the market.
+
+One entirely new finding the brief did not anticipate: **CoachAccountable has publicly refused to build AI and then opened an API for someone else to do it.** Its founder wrote in April 2026 that he is *"reluctant to grease those rails,"* and in August 2026 shipped `Session.add` plus webhooks precisely so third-party agents could write in. Paperbell has no AI at all. That is an invitation, and it is the only uncontested commercial position this research found.
 
 ---
 
@@ -311,17 +376,25 @@ Life coaches. Health and wellness coaches (Practice Better owns them and HIPAA c
 
 ## F. Competitive gap
 
-Four genuine gaps, ordered by defensibility. Everything not on this list is comprehensively served and should not be claimed as differentiation.
+**This section was substantially rewritten after the deeper competitive sweep.** Three of the four gaps claimed in the first draft turned out to be thinner than stated. What follows is the honest remainder, ordered by how much of it survives contact with CoachRocks.
 
-### F1. Nobody serves the coach who will never record (highest confidence)
+### F0. What is not a gap — stated first, because the list is long
 
-Wundamental records. Osmo captures and analyses in real time. CoachNova trains a twin on sessions. Granola takes device audio. These are architectural commitments — Wundamental's ICF competency benchmarking *requires* a transcript to cite evidence against markers.
+Session notes. Templates. AI session summaries. Pre-session prep briefs. Cross-session Q&A over a client's whole history. Longitudinal client timelines. Theme and pattern detection. Goal tracking. Commitment tracking. Client portals. Scheduling, billing, contracts, courses. ICF competency feedback. Sponsor ROI reporting.
 
-Meanwhile the professional norm is moving the other way: ICF 2.5, training bodies banning session material in AI, the NYC Bar opinion, clients declining bots, and coach craft writing that says plainly *"AI belongs around the session, not in it."*
+Every one of these ships today, most of them at $25–$59/month. Do not build them and do not claim them.
 
-A product where the coach writes the note and the AI never hears the client is not just a privacy stance — it is a **different consent conversation**. The coach can truthfully tell a client: *"I write my own notes after our sessions, as I always have. I use a tool that helps me organise them. Nothing you say is recorded or transcribed, and nothing about you is stored that I haven't personally read and approved."* No competitor can say that sentence.
+### F1. Nobody serves the coach who will never record — **downgraded**
 
-### F2. Nobody models the client's world (highest commercial upside)
+The first draft called this architectural and uncontested. It is neither, quite.
+
+It is true that Wundamental, Osmo and CoachNova are transcript-first, that Wundamental's ICF benchmarking *requires* a transcript to cite evidence against markers, and that the professional norm is hardening — ICF Standard 2.5, training bodies banning session material in AI, the NYC Bar opinion, clients declining bots, and coach craft writing that says plainly *"AI belongs around the session, not in it."*
+
+But **CoachRocks accepts unlimited manual transcript uploads on both its free and paid tiers**, and SessionFlow accepts phone voice-memo uploads. A coach who refuses to record can already use them. Recording is their default, not their gate.
+
+What survives is narrower and rhetorical rather than structural: no competitor *leads* with never being in the room, and none can say the whole sentence — *"nothing you say is recorded or transcribed, and nothing about you is stored that I haven't personally read and approved."* That is a marketing position with real value in ICF and training-school channels. It is not a defence.
+
+### F2. Nobody models the client's world — **the one gap that strengthened**
 
 Every competitor models the *coachee*: their goals, their progress, their commitments, their journey arc. That is the coaching-textbook model, and it is incomplete for executive work.
 
@@ -331,17 +404,33 @@ Lume already models exactly this: durable person identity, **scoped** responsibi
 
 The sharpest positioning line available: **"Coaching software tracks your client. It doesn't track the people around them."**
 
-### F3. Nobody separates proposal from truth
+### F3. Nobody separates proposal from truth — **downgraded to a narrow architectural remainder**
 
-Every competitor auto-generates. The summary appears; the coach may edit it; the record is whatever the model wrote. There is no boundary between "the model thinks" and "this is now true about my client."
+The first draft claimed this outright. The claim was wrong as stated. **CoachNova already markets** *"Nothing reaches your client without your review. Ever. The AI proposes. You approve. That's what coach-supervised means."* **SessionFlow already says** *"grounded in your approved session notes."* **Coachful** gates data-changing actions behind confirmation cards.
 
-Lume's locked rule — *nothing becomes maintained truth until the user has reviewed the complete extracted set and confirmed it* — maps onto ICF Standard 2.5's human-accountability requirement almost word for word. It is simultaneously a trust feature, an ethics feature and a compliance artefact. It is copyable in principle, but copying it late means rebuilding your data model, because a summary-per-session architecture has nowhere to put an approved, superseding, provenance-linked fact.
+The distinction that survives is real but fine-grained, and hard to sell. Those products approve **summaries** (an editable draft) or **outbound messages** (a confirmation card). None exposes a **typed, reviewable fact ledger** — goals, commitments, people, dates, decisions and concerns as individually approved records, each with a lifecycle, a supersession pointer and provenance. CoachUI's *"always-updating client ledger"* is the closest and it is genuinely close; the difference is that theirs updates itself and the coach never sees the ledger as a set of decisions.
 
-### F4. Nobody can answer change-over-time questions properly
+Be honest about what that is worth: it is better engineering, it produces a materially better record, and **CoachRocks could ship a version of it in a sprint.** It is a reason the product would be good. It is not a reason it would survive.
+
+### F4. Nobody can answer change-over-time questions properly — **partly holds**
 
 "What has changed about her relationship with Martin?" and "when did she first mention leaving?" are not summarisation questions. They require that every fact carries a lifecycle (`current` / `superseded` / `historical`), a `supersedes` pointer, and provenance back to the sentence in the note that produced it — recorded at write time, not reconstructed later.
 
 A competitor who stores a summary per session can search the summaries. They cannot tell you the date a belief changed, or show you the exact sentence that changed it, because they never modelled beliefs as things that change. Lume did, from the beginning, and it is the single most transferable piece of the data model.
+
+### F4b. The one genuinely open commercial position: be the memory layer, not the platform
+
+This did not appear in the first draft and it is the most valuable finding in the section.
+
+**CoachAccountable has publicly refused to build AI, and then built the door for someone else to.** Founder John Larson, April 2026: *"I don't think coaches using AI for coaching their clients particularly benefits clients… so I'm reluctant to grease those rails for thousands of coaches by adding such AI shortcuts."* Four months later, on 17 August 2026, he shipped the compromise — an API and webhooks explicitly framed for third-party AI: *"I've heard interest from numerous note takers… it doesn't make sense for me to build full-on integrations with each one. But because AI knows how to AI, [an agent] from whichever source can readily post whatever [to the] `Session.add` API."*
+
+**Paperbell has no AI whatsoever** — none on its pricing page, none in its feature list — and a large installed base.
+
+Both have run for a decade or more, both are trusted, and neither intends to compete on this. Their customers are exactly the ICP in section E, already paying, already keeping session notes, and already inside a system with an open write API.
+
+This is smaller and less glamorous than a platform. It is also the only route found in this research that inherits distribution rather than fighting six competitors for it, in a market that has twice punished companies for lacking distribution. It changes the product from "the seventh client-memory app" to "the thing that makes the tool you already trust remember," which is a much easier sentence to sell and a much harder one for CoachRocks to copy — because CoachRocks needs you to leave the platform, not enrich it.
+
+The obvious counter is dependency risk: you would be building on someone else's API, at their discretion, with their churn. That is a real cost and it caps the outcome. It is still better than the alternative.
 
 ### F4a. A fifth, smaller gap: restraint as a feature
 
@@ -1112,7 +1201,24 @@ Two constraints follow. This product is a **companion**, not a suite replacement
 
 One anchor deserves separating out, because it is easy to misread. CoachNova charges **€19 per active client per month**, which is roughly **€380 a month** for a twenty-client practice — an order of magnitude above anything else in the category. That is not a memory price. It is priced against *revenue expansion*: their pitch is that former clients keep paying €50–500 a month for continued access, so the subscription funds itself several times over. The lesson is that coaches will discuss large numbers **when the product makes them money**, and the trap is concluding that this product can borrow that anchor. It cannot. A memory-only companion saves time and improves preparedness; it does not generate revenue, and pricing it as though it did would fail loudly.
 
-### S2. Recommendation
+### S1a. The floor, discovered late
+
+The deeper competitive sweep found the price floor is already below the plan this section originally proposed, and it is defended by a free tier:
+
+| Competitor | Price | Clients |
+| --- | --- | --- |
+| **CoachRocks Free** | **$0** | 3 active, 10 AI questions/mo, unlimited manual uploads |
+| **CoachRocks Pro** | **$25/mo** | **Unlimited**, 300 AI questions/mo |
+| SessionFlow | **Free while in beta**; then $29 (3 clients) / $50 unlimited | |
+| Granola Business + Claude Pro | **$34/mo** | Unlimited, ~70% of the job |
+| Coachful | $49/mo | Unlimited |
+| CoachUI | $59/mo (5 clients) / $119 unlimited | |
+
+**The €39 recommendation below was modelled before this was known and should be treated as invalidated.** A seventh entrant with a narrower feature set and no brand cannot open above the best-known competitor's unlimited-client price. Realistically the standalone product would have to launch at **€19–€25** to be considered at all, which roughly halves every figure in the economics table and pushes the 200-customer case down to around €4,000 MRR — below the level that supports one full-time person once churn and acquisition are paid for.
+
+This is a large part of why section A downgrades the verdict. The remainder of this section is retained because it is still the right *method*, and because the integration variant in F4b prices differently: a memory layer sold to an existing CoachAccountable or Paperbell customer is an add-on to a tool they already trust, which supports a €15–€25 add-on price against a much lower CAC.
+
+### S2. Recommendation *(superseded by S1a for the standalone product; retained as method)*
 
 **One plan. €39 per month, or €390 per year. Up to 25 active clients. Archived clients don't count. Cancel any time. Export everything.**
 
@@ -1253,37 +1359,70 @@ Recolla · Contexa · Perenn · Sesso · Anteia · Corran
 **Coaching-native phrase-names**
 Where We Left Off · Last Time · Before The Session
 
-### U3. Assessment
+### U3. Assessment, after registry and conflict checks
 
-**Strongest**
+Domain status below is from **RDAP** (Verisign for `.com`, Identity Digital for `.ai` and `.coach`, Google Registry for `.app`) and port-43 whois for `.co`, each validated against a known-registered control and a known-free control. Note that the `rdap.org` aggregator returns false negatives for `.co` — it reports 404 for `google.co` — so it was discarded for that TLD. A sample was cross-validated against independent whois and the two methods agreed. Registration was then separated from *use* by fetching each domain and reading its title.
 
-| Name | Why | Known conflict risk |
-| --- | --- | --- |
-| **Throughline** | Best conceptual fit of any candidate — the throughline is exactly what a coach loses between sessions and what the product restores. Native to narrative and coaching language. Professional, warm, not clinical, not AI-flavoured | The word is used generically in consulting/comms and there are agencies using it. Needs a distinctive TLD and careful clearance. Likely `.com` taken |
-| **Cairn** | A cairn is a mark left so the next traveller knows the way — a near-perfect metaphor for a session note. Short, memorable, pronounceable, quietly professional | Generic-word risk; some financial and consulting usage. Worth checking hard |
-| **Holdfast** | A holdfast is the structure by which seaweed grips rock — steady attachment through changing conditions. Distinctive, strong, unusual, and "hold" is native coaching vocabulary | Marine/climbing/furniture usage; low SaaS collision expected |
-| **Anchorage** | Sheltered water where something is held steady. Warm, professional, evocative of the coaching relationship | City name in Alaska — significant SEO drag |
-| **Limn** | To describe or depict in detail; also to illuminate. Short, distinctive, literary, quietly clever, and a graceful nod to Lume's own light territory | Obscure — needs teaching. Possible small-product collisions |
+#### Strongest
 
-**Potentially usable**
+**Ballast** — the recommendation.
 
-*Tend* (lovely and warm; too short and too common a verb to own in search) · *Regard* (professional and warm; unsearchable) · *Weft* (the thread woven across the warp — beautiful metaphor, hard to spell aloud) · *Clerestory* (a high window admitting light — evocative, too long) · *Recolla* / *Perenn* / *Corran* (coined, clean, but arbitrary and therefore expensive to build meaning into) · *Where We Left Off* (unimprovable as a *tagline*; unusable as a brand)
+Ballast is the weight carried low in the hull that lets a vessel hold its line in weather. It is not cargo, it does not steer, and it is never seen — it is the thing that makes the skipper's own judgement reliable. That is precisely the product's relationship to the coach, and it is warm without being soft, professional without being corporate, and entirely free of clinical or surveillance flavour.
 
-**Reject / conflicted**
+No coaching product, platform or coach-facing tool exists under the name. The live software use is `ballast.now`, a CLI scoring code durability from git history — different category, small team. Ballast Lane Applications is a dev agency, a two-word services mark. The notable trademark presence is BALLAST POINT (Reg. #3475098), registered in Nice **Class 32 (light beverages)** and **Class 40** — beer, comfortably distant from software Classes 9 and 42, though that distance is exactly what an attorney should confirm.
 
-*Lumen* — heavily used across lighting, health tech and metabolic devices; also too close to Lume itself, which creates confusion if both exist · *Fathom* — established AI meeting-notes product; direct collision in an adjacent category · *Beacon* — extremely crowded in SaaS · *Thread* — Meta's product; unusable · *Sequel* — SQL collision · *Harbour* — crowded, and a Granola-adjacent product name exists in the meeting space · *Present* / *Depth* / *Kept* — unsearchable common words · *Vigil*, *Custody*, *Keepsake* — wrong emotional register (funereal, carceral, sentimental) · Anything beginning *Coach* — generic and confusable with at least six live products · Anything containing *AI*, *GPT*, *Mind*, *Brain*, *Memory*, *Recall* — category-generic, and the last three carry clinical drift
+**`ballast.coach` is available** (RDAP 404). `ballast.com` (1995, live), `ballast.ai` (registered 2024), `ballast.app` (2025) and `ballast.co` (2020) are all taken, as are the get/use/hq/try variants. For a coach-facing product, `.coach` is arguably the better address anyway.
+
+**Weft** — strong second.
+
+The weft is the thread carried back and forth across the fixed warp; without it you have parallel strands, with it you have cloth. Individual sessions are the warp. Short, one syllable, unmistakably pronounceable, quietly literate, and it names continuity without ever saying "memory."
+
+No coaching product found — a genuine negative result, since "Weft coaching" returns only weaving. Conflicts are confined to AI developer tooling (`weavemind.ai` uses Weft as an orchestration language; `weftcli.com` is a developer CLI), which is a different buyer entirely and none of it large.
+
+**`weft.coach` is available.** Best signal of the exercise: **`weft.ai` is openly for sale** — it returns HTTP 200 with the title *"Weft.ai for sale | Spaceship.com"* — so the `.ai` is acquirable rather than held by a competitor. `weft.com` is registered (1999) but does not respond at all.
+
+#### Potentially usable
+
+**Limn** has the cleanest domain position found — `limn.coach` and `limnhq.com` both confirmed unregistered — and no coaching conflict. It fails on pronounceability: the `n` is silent, so most people will misread it, and a name coaches cannot confidently say will not be passed on by word of mouth, which is the primary channel here.
+
+**Tenon** (`tenon.coach` available; good joinery metaphor) is blocked in spirit by Tenon.io, an accessibility-testing SaaS acquired by Level Access in 2021 and still trading — a live B2B software brand with a corporate owner.
+
+**Whetstone** (`whetstone.coach` available; exactly right metaphor — sharpens the practitioner, is not the practitioner) carries category history: Whetstone Education was a teacher-observation and instructional-coaching platform, acquired by SchoolMint in 2021 and sold on to Level Data in 2025, since renamed "Grow." The brand is being retired in coaching software, which helps, but residual association and possibly-live marks remain. Three syllables is also long.
+
+**Keepsake, Steward, Poise, Salient, Sounding, Plumbline, Solen, Verso** all have `.coach` free and no coaching conflict, and all fail on register. *Keepsake* is sentimental and backward-looking. *Steward* edges toward patronising and reads as governance software. *Poise* is a major US incontinence brand. *Salient* is consultant-dry. *Sounding* and *Plumbline* both read as measurement, tipping toward the evaluative feel the brief ruled out. *Solen*, *Verso* and *Nyra* say nothing and would cost full freight to build meaning into.
+
+#### Reject — conflicted
+
+**Throughline** — the first draft's lead candidate, and **disqualified on category grounds.** `throughlinesolutions.com` sells *"Executive AI Coaching"* — literally this category with AI attached. `findyourthroughline.com` is a leadership coaching LLC. `throughlinecare.com` is a mental-health crisis product (*"Privacy-first. Clinically grounded."*) — precisely the clinical adjacency to avoid. Agile 2 Academy asserts "Throughline™" for an AI agent platform. Plus Throughline Labs, throughlineplatform.com and a live throughline.com. **`throughline.coach` is already registered** — someone in coaching has taken it. This name is not available in any meaningful sense.
+
+**Vellum** — `vellum.ai` reads *"Your Personal Intelligence — An assistant that knows you deeply, evolves alongside you… Powered by memory that remembers the way you do."* That is this proposition almost word for word. Fatal.
+
+**Mneme** — collides inside the AI-memory category (`mnemeai.com` iOS notes app; two separate open-source "memory layer" projects) and sits phonetically next to Mem. Also unpronounceable to most English speakers.
+
+**Fathom** — a major AI notetaker, routinely benchmarked against Granola and Otter. `fathom.coach` already registered. Unusable.
+
+**Cairn** — the first draft's second choice, and crowded *in category*: `cairnleadership.com` sells executive team coaching; `getcairnapp.com` is an AI journaling app for founders with *"Deep cross-month pattern analysis"*. `cairn.coach` and all six fallbacks are registered.
+
+**Holdfast** — the first draft's dark horse. `holdfastai.com` is an AI dispatch product that *"delivers a complete dispatch brief"* — overlapping language. A HoldFast men's-health app has an AI coaching feature. `holdfast.coach` registered; `holdfast.ai` is listed for sale. Also a well-known video game.
+
+**Attune** (`attune.ai` is an active healthcare AI company; clinical drag) · **Perenna** (`perenna.com` is a UK mortgage bank — unhelpful for a UK-facing B2B product; also shares the Latinate house style of Delenta and Ovida) · **Lumen** (lighting, health tech, metabolic devices; and confusingly close to Lume) · **Beacon**, **Thread**, **Sequel**, **Harbour**, **Anchorage** (crowded, owned, or SEO-poisoned) · anything beginning **Coach** · anything containing **AI**, **GPT**, **Mind**, **Brain**, **Memory** or **Recall**.
 
 ### U4. Recommendation
 
-**Lead candidate: Throughline.** Nothing else in the list matches the proposition as precisely, and it is a word coaches already use. Its weakness is genericness in adjacent professional-services use, which is a clearance and SEO problem rather than a positioning one, and which a distinctive TLD plus a strong tagline can substantially offset.
+**Lead: Ballast.** Take `ballast.coach`.
+**Alternative: Weft.** Take `weft.coach`, and open a conversation on `weft.ai`, which is actively listed for sale.
 
-**Best alternative if Throughline is blocked: Cairn** — shorter, more ownable, and the metaphor rewards explanation.
+Both are cheap to secure and neither has a coaching conflict. Put both in front of a trademark attorney for Class 9/42 clearance before spending anything on identity. **Nothing in this section is legal clearance** — no trademark register was searched systematically, no classes analysed, no common-law rights assessed.
 
-**Dark horse: Holdfast** — the most distinctive and the least likely to be contested, at the cost of needing a sentence of explanation.
+Pair either with a tagline that does the work. *"Where we left off"* is unavailable — it is inside CoachNova's headline. Use **"Nothing lost between sessions."**
 
-Whichever is chosen, pair it with a tagline that does the actual work. The natural candidate — *"Where we left off"* — is unavailable, because CoachNova's headline is *"Walk into every session knowing where you left off."* Use instead: **"Nothing lost between sessions."** Or, if the brand is Throughline, simply **"Hold the thread."**
+### U5. Why the territory changed
 
-*(An automated conflict and domain-signal check was commissioned as part of this investigation; where its findings are available they should be appended to this section before any naming commitment. Nothing here constitutes legal clearance.)*
+The first draft recommended the **continuity/thread** territory and picked the most literal word in it. That word turned out to be taken five times over, including by a firm selling Executive AI Coaching — which is itself the lesson. Continuity is still the right territory, because it names what the coach actually sells: an eighteen-month relationship whose value is that session eleven knows what session two committed to. The failure being fixed is not forgetting facts; it is the engagement fraying into disconnected hours.
+
+But the *abstract thread nouns* in that territory are exhausted. Adding a **concrete, physical, steadying object** — Ballast, Weft — keeps continuity's meaning while restoring distinctiveness.
+
+Three territories were ruled out along the way. **Memory** is the most contested naming space in AI right now (Mem, Mneme, Vellum, Rewind, Limitless, Personal.ai), it describes the mechanism rather than the coach's benefit, and "a system that remembers everything about a person" is one bad framing from surveillance. **Depth, attention and presence** describe what the coach already does, so claiming them is subtly insulting; and the measurement words in that family make the tool sound like it is assessing the client. **Holding and keeping** is both faintly clinical — it borrows from therapeutic "holding" — and already in use by the nearest competitor, whose copy reads *"clients feel held across the whole engagement."*
 
 ---
 
