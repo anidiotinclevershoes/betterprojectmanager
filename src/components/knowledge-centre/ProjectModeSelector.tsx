@@ -1,9 +1,34 @@
 "use client";
 
-export type OceanProjectMode = "capture" | "knowledge" | "advise";
+export type OceanProjectMode =
+  | "capture"
+  | "knowledge"
+  | "catch-me-up"
+  | "advise";
+
+const MODES: Array<{
+  id: Exclude<OceanProjectMode, "advise">;
+  label: string;
+  testId: string;
+  ai?: boolean;
+}> = [
+  { id: "capture", label: "Capture", testId: "ocean-mode-capture", ai: true },
+  {
+    id: "knowledge",
+    label: "Knowledge Centre",
+    testId: "ocean-mode-knowledge",
+  },
+  {
+    id: "catch-me-up",
+    label: "Catch Me Up",
+    testId: "ocean-mode-catch-me-up",
+    ai: true,
+  },
+];
 
 /**
- * Capture / Knowledge Centre / Advise — project modes, not sidebar nav.
+ * Capture / Knowledge Centre / Catch Me Up / Advise — project modes, not sidebar nav.
+ * Advise stays parked (Coming soon). Coach is not a mode.
  */
 export function ProjectModeSelector({
   mode,
@@ -19,29 +44,27 @@ export function ProjectModeSelector({
       aria-label="Project mode"
       data-testid="ocean-mode-selector"
     >
-      <button
-        type="button"
-        role="tab"
-        aria-selected={mode === "capture"}
-        className={`ocean-mode-tab is-capture ${mode === "capture" ? "is-selected" : ""}`}
-        onClick={() => onChange("capture")}
-        data-testid="ocean-mode-capture"
-      >
-        <span className="ocean-ai-glyph" aria-hidden>
-          ✦
-        </span>
-        Capture
-      </button>
-      <button
-        type="button"
-        role="tab"
-        aria-selected={mode === "knowledge"}
-        className={`ocean-mode-tab is-knowledge ${mode === "knowledge" ? "is-selected" : ""}`}
-        onClick={() => onChange("knowledge")}
-        data-testid="ocean-mode-knowledge"
-      >
-        Knowledge Centre
-      </button>
+      {MODES.map((item) => {
+        const selected = mode === item.id;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            className={`ocean-mode-tab is-${item.id} ${selected ? "is-selected" : ""}`}
+            onClick={() => onChange(item.id)}
+            data-testid={item.testId}
+          >
+            {item.ai ? (
+              <span className="ocean-ai-glyph" aria-hidden>
+                ✦
+              </span>
+            ) : null}
+            {item.label}
+          </button>
+        );
+      })}
       <button
         type="button"
         role="tab"

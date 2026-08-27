@@ -470,7 +470,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | resolved (presentation / v0.9 UX slice) |
 | **Severity** | medium (trust/readability, not a wrong-domain write) |
 | **Domain** | Knowledge Centre / Capture |
 | **Found in** | Phase 3B visual/browser pass (25 Aug 2026) |
@@ -478,6 +478,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Evidence / repro** | Candyland: resolve “Gumdrop Bridge icing” → `risks.status=resolved` and intelligence “I see 0 risks”, but `knowledge.sections.risks` still contains “Gumdrop Bridge icing remains open.” Ocean frames only skip knowledge bullets whose stripped title *equals* the domain title. |
 | **Likely files** | `src/lib/knowledge-centre/ocean-frames.ts`; Capture apply knowledge projection (not the 3B dispatcher) |
 | **Proposed fix direction** | When Capture legally resolves/updates a domain record, retire or rewrite the matching Knowledge projection using carried IDs — not fuzzy title match. Until then, testers should trust the domain frame + intelligence strip over leftover sentences. |
+| **Fix applied (presentation only)** | Display precedence in `buildOpenRiskRows` / `buildCurrentPositionRows`: if a project has any domain `risks` rows, Risks & blockers shows only open/watch domain risks. Knowledge `sections.risks` prose is not painted as peer current truth. Current position excludes `kind=date`/`kind=risk` and `sectionItemIds` that match a domain risk or timeline id. Unlinked leftover sentences are preserved. No fuzzy match, no Knowledge mutation, no reconcile engine. Data rewrite remains a later architecture item. |
 | **Explicit non-goals** | Fuzzy matching leftover bullets to domain titles; treating Knowledge prose as Risk authority |
 | **Regression test to add** | After Capture Risk resolve, KC open-risk rows exclude leftover prose for that durable Risk ID |
 | **Target resolution / validation point** | KC projection / knowledge reconcile — not Phase 3D session UX |
@@ -502,7 +503,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Capture mode is usable without dismissing Coach |
 | **Target resolution / validation point** | Ocean/QOL — not Phase 3B or 3D Capture session |
 | **Related docs** | D-025 |
-| **Notes** | 3B testing dismissed the overlay; it did not cause a wrong-domain write. |
+| **Notes** | 3B testing dismissed the overlay; it did not cause a wrong-domain write. **v0.9 UX slice:** `CoachDrawer` / `CoachResultsCard` are unmounted from `AppShell`. The drawer cannot auto-open over Capture/KC. Coach logic remains in-repo but is not a product surface. |
 
 ---
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { KnowledgeItemCard } from "@/components/knowledge-centre/KnowledgeItemCard";
 import { KnowledgeItemDetailDrawer } from "@/components/knowledge-centre/KnowledgeItemDetailDrawer";
 import { emptyKnowledge } from "@/lib/knowledge";
@@ -19,6 +19,7 @@ import {
   type KnowledgeItemRef,
 } from "@/lib/knowledge-centre/knowledge-item-detail";
 import {
+  buildCurrentPositionRows,
   buildDateRows,
   buildOpenRiskRows,
   buildPeopleRows,
@@ -68,8 +69,8 @@ function epistemicLabel(
 }
 
 /**
- * Ocean Knowledge frames: three large default columns, remainder via scroll.
- * Slice 2C: cards open a reusable item-detail drawer (stable id, not index).
+ * Ocean Knowledge frames: operational To Do + Risks, then context via scroll.
+ * Slice 2C: cards open a reusable item-detail overlay (stable id, not index).
  */
 export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
   const { state } = useMission();
@@ -79,6 +80,10 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
   const knowledge =
     state.knowledge.find((k) => k.projectId === projectId) ??
     emptyKnowledge(projectId);
+
+  useEffect(() => {
+    setSelected(null);
+  }, [projectId]);
 
   const select = (ref: KnowledgeItemRef) => {
     setSelected((prev) =>
@@ -90,36 +95,26 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
     knowledgeDetailEquals(selected, ref);
 
   const currentPosition = useMemo(() => {
-    const structured = (knowledge.structured ?? []).filter(
-      (i) =>
-        i.lifecycle === "current" &&
-        (i.section === "now" || i.kind === "fact" || i.kind === "date"),
-    );
-    if (structured.length) {
-      return structured.map((i) => ({
-        id: i.id,
-        title: i.body,
-        meta: null as string | null,
-        epistemic: epistemicLabel(i.epistemic),
-        priority: "none" as PriorityDot,
-        ref: refForStructuredItem(i.id),
-      }));
-    }
-    const ids = knowledge.sectionItemIds?.now;
-    return (knowledge.sections.now ?? []).map((b, idx) => {
-      const itemId =
-        Array.isArray(ids) && typeof ids[idx] === "string" ? ids[idx] : null;
-      const ref = refForSectionLine("now", b, itemId);
+    return buildCurrentPositionRows(state, projectId).map((item) => {
+      const fromStructured = Boolean(
+        item.itemId &&
+          knowledge.structured?.some((s) => s.id === item.itemId),
+      );
+      const ref = fromStructured && item.itemId
+        ? refForStructuredItem(item.itemId)
+        : refForSectionLine("now", item.body, item.itemId);
       return {
-        id: itemId && isKnowledgeUuid(itemId) ? itemId : `now-body:${b}`,
-        title: b,
-        meta: null as string | null,
-        epistemic: null as string | null,
+        ...item,
+        id:
+          item.itemId && isKnowledgeUuid(item.itemId)
+            ? item.itemId
+            : item.id,
+        epistemic: epistemicLabel(item.epistemic),
         priority: "none" as PriorityDot,
         ref,
       };
     });
-  }, [knowledge]);
+  }, [state, projectId, knowledge.structured]);
 
   const risks = useMemo(
     () => buildOpenRiskRows(state, projectId),
@@ -218,26 +213,23 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
         className="ocean-knowledge-frames-primary"
         data-testid="ocean-frames-primary"
       >
-        <FrameShell
-          title="Current position"
-          accent="position"
-          testId="ocean-frame-current-position"
-        >
-          {currentPosition.length ? (
-            currentPosition.map((item) => (
-              <KnowledgeItemCard
-                key={item.id}
-                title={item.title}
-                meta={item.meta}
-                priority={item.priority}
-                epistemic={item.epistemic}
-                selected={isSelected(item.ref)}
-                onSelect={() => select(item.ref)}
-                testId={`ocean-card-${item.id}`}
-              />
-            ))
+        <FrameShell title="To Do" accent="todo" testId="ocean-frame-todo">
+          {todos.length ? (
+            todos.map((item) => {
+              const ref = refForTodo(item.id);
+              return (
+                <KnowledgeItemCard
+                  key={item.id}
+                  title={item.title}
+                  meta={item.meta}
+                  selected={isSelected(ref)}
+                  onSelect={() => select(ref)}
+                  testId={`ocean-card-todo-${item.id}`}
+                />
+              );
+            })
           ) : (
-            <p className="ocean-frame-empty">Nothing recorded yet.</p>
+            <p className="ocean-frame-empty">No open to-dos.</p>
           )}
         </FrameShell>
 
@@ -266,32 +258,35 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
             <p className="ocean-frame-empty">No open risks.</p>
           )}
         </FrameShell>
-
-        <FrameShell title="To Do" accent="todo" testId="ocean-frame-todo">
-          {todos.length ? (
-            todos.map((item) => {
-              const ref = refForTodo(item.id);
-              return (
-                <KnowledgeItemCard
-                  key={item.id}
-                  title={item.title}
-                  meta={item.meta}
-                  selected={isSelected(ref)}
-                  onSelect={() => select(ref)}
-                  testId={`ocean-card-todo-${item.id}`}
-                />
-              );
-            })
-          ) : (
-            <p className="ocean-frame-empty">No open to-dos.</p>
-          )}
-        </FrameShell>
       </div>
 
       <div
         className="ocean-knowledge-frames-secondary"
         data-testid="ocean-frames-secondary"
       >
+        <FrameShell
+          title="Current position"
+          accent="position"
+          testId="ocean-frame-current-position"
+        >
+          {currentPosition.length ? (
+            currentPosition.map((item) => (
+              <KnowledgeItemCard
+                key={item.id}
+                title={item.title}
+                meta={item.meta}
+                priority={item.priority}
+                epistemic={item.epistemic}
+                selected={isSelected(item.ref)}
+                onSelect={() => select(item.ref)}
+                testId={`ocean-card-${item.id}`}
+              />
+            ))
+          ) : (
+            <p className="ocean-frame-empty">Nothing recorded yet.</p>
+          )}
+        </FrameShell>
+
         <FrameShell
           title="People & context"
           accent="people"

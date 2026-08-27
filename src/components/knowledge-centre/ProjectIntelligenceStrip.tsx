@@ -10,6 +10,8 @@ import { useTellMeSession } from "@/components/tell-me/TellMeSessionContext";
 
 /**
  * Compact persistent Lume status strip (Ocean baseline).
+ * Catch Me Up is a project *mode* (`ProjectModeSelector` + `CatchMeUpPanel`),
+ * not a strip control. Black Widow should mount briefing UI in that panel.
  */
 export function ProjectIntelligenceStrip({ projectId }: { projectId: string }) {
   const { state } = useMission();
