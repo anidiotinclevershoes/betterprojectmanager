@@ -614,6 +614,10 @@ ChatGPT will summarise anything you paste, and it will do it well. Three things 
 
 **It will not show you where a claim came from.** ChatGPT's summary is a wall of confident prose with no seams. This product's every statement traces to a sentence in a dated note. When a coach is about to walk into a room and say "last time you said you'd talk to Martin," the difference between *the AI told me* and *here is the sentence, from 14 May* is the difference between using it and not.
 
+> **Correction — this does not currently work in Lume, and it is the central demo.** Verification of the code found that Capture writes provenance as `[{ type: "capture", at: <timestamp> }]` with the optional `id` field **left unset**. The `capture_sessions` table stores the raw transcript, but durable facts are not foreign-keyed to it, and todos, risks and milestones have no provenance column at all. So the product can today say *"learned from a Capture"* and *when*, but it **cannot** show you the sentence that produced a fact.
+>
+> That is a small schema change and a discipline change, not a redesign — but it is load-bearing for the entire proposition in this section, and it is currently absent. It is raised as question Y9a.
+
 **It will invent Martin.** Ask a model who Martin is and it will oblige. This product's answer to an ambiguous Martin is a question, and the coach who watches it *decline to guess* in minute four learns something about it that no amount of accurate output would teach.
 
 The compressed demo answer, then: **paste two sessions, watch it tell you what changed, click a statement, see the sentence.** Provenance is the wow. Everything else is table stakes by 2026.
@@ -1510,6 +1514,18 @@ A feature grid above the fold. Logos of companies that have not used it. Testimo
 
 The objective is to test **willingness to pay and habit formation**, not interest. Surveys and waitlists are excluded because they measure neither.
 
+### W0. Do this first, this week, for £0
+
+Before spending anything on the experiment below, spend two hours on the cheapest test available:
+
+**Sign up for CoachRocks' free tier. Load three real anonymised clients with three sessions each. Use its prep briefs and its client-memory chat.** Then do the same on SessionFlow, which is currently free in beta, and on Coachful's trial.
+
+Then answer one question honestly: *is the thing I would build meaningfully better than this, for a coach who does not care about my architecture?*
+
+If the answer is no, stop — sections W1 to W7 are moot and you have saved six weeks and €3,000. If the answer is yes, you will have learned exactly which two or three differences matter, which is the only sound basis for the landing page. Either way this is the highest-value hour in the whole plan, and the first draft of this report failed to propose it because it did not yet know CoachRocks existed.
+
+Note also that the experiment below must now be run **against a named competitor** rather than against a generic notion of the alternatives, and the price tested must be **€19–€25**, not €39 — see S1a.
+
 ### W1. Design
 
 **An interactive demo, a real price, a real checkout, and a concierge behind it.**
@@ -1555,9 +1571,11 @@ Independent leadership and executive coaches, English-working, credentialed or c
 
 | Outcome | Definition | Action |
 | --- | --- | --- |
-| **Strong** | ≥20 paid, **≥8 of them from cold channels**; ≥60% of the cohort active at day 30; ≥5 unsolicited requests to import real clients; demo completion ≥35% | **Build.** Proceed to Part 2's technical assessment |
-| **Ambiguous** | 8–19 paid; day-30 activity 35–60%; conversions concentrated in warm channels | **One more cycle**, with a sharpened proposition and a different price. Do not build the product |
-| **Weak** | <8 paid; **or** day-30 activity <30% regardless of signup volume; **or** all conversions from personal network | **NO-GO.** Stop |
+| **Strong** | ≥25 paid at €19–€25, **≥10 of them from cold channels**; ≥65% of the cohort active at day 30; ≥5 unsolicited requests to import real clients; demo completion ≥35%; **and at least 3 who say unprompted that they looked at CoachRocks and chose this** | **Build.** Proceed to Part 2's technical assessment |
+| **Ambiguous** | 12–24 paid; day-30 activity 40–65%; conversions concentrated in warm channels | **Stop and reconsider the integration variant in F4b.** Do not run another cycle of the same experiment |
+| **Weak** | <12 paid; **or** day-30 activity <35% regardless of signup volume; **or** all conversions from personal network | **NO-GO.** Stop |
+
+**Thresholds were raised from the first draft** because the competitive picture changed: at a €19–€25 price the same revenue requires more customers, and in a market with a free-tier competitor a signup is weaker evidence than it was. The added CoachRocks-comparison criterion exists because "would have bought something" and "chose this over the incumbent" are different findings, and only the second one justifies building.
 
 The asymmetry is deliberate. **High signups with poor day-30 retention is a weak result, not an ambiguous one.** The demo is designed to be impressive and impressiveness converts; a coach who signs up, gets their notes imported for free, and does not open the app before a session a month later has told you the habit does not form. That is the most informative failure available and it should be respected rather than explained away.
 
@@ -1581,7 +1599,7 @@ Cut paid channels entirely, spend €300 on the landing page and demo hosting, a
 | **Customer clarity** | Poor. "Individual PM" is a role inside a company; it is ambiguous whether they buy personally or their employer buys | Good. A self-employed professional with a company card and purchasing autonomy | **Coaching** |
 | **Willingness to pay** | Low personally. PMs expect their employer to buy tools, and employers buy Jira, not a second brain for one person | Moderate and defensible. €39 is roughly eight minutes of billable time and is an ordinary business expense | **Coaching** |
 | **Acquisition** | Hard. No targetable channel; PMs are inside companies and the tool market is dominated by incumbents with enterprise motions | Cheaper and far more targetable — ICF chapters at $25–$150, identifiable individuals on LinkedIn, training schools. But the audience is small and six competitors are already courting it | **Coaching, narrowly** |
-| **Competition** | Atlassian, Notion, Linear, Monday, Granola, ChatGPT, plus every AI-second-brain startup. The most crowded category in software | Six-plus AI-native coaching entrants plus the incumbent suites plus ChatGPT and Granola. Crowded, but *countable* | **Coaching, narrowly** |
+| **Competition** | Atlassian, Notion, Linear, Monday, Granola, ChatGPT, plus every AI-second-brain startup. The most crowded category in software | Six shipping products on the exact mechanism, a $25 unlimited-client floor with a free tier beneath it, plus ChatGPT and Granola. Countable, but *occupied*, and two funded entrants died here in fourteen months | **Draw — both are bad** |
 | **Retention** | **Weak, and structurally so.** A PM changes project every 6–18 months and the accumulated memory dies with the project. The value curve resets, permanently | **Strong, and structurally so.** Client relationships run for years, engagements repeat, and the record compounds across the whole practice | **Coaching, decisively** |
 | **Privacy** | Corporate IP. The employer's security team will block a personal tool holding project data, and the PM cannot authorise it | The coach owns the confidentiality obligation and can decide alone. Real third-party-data exposure, but no gatekeeper | **Coaching** |
 | **Differentiation** | Very hard. "AI second brain for work" is undifferentiable, and the incumbents already own the workflow surface | Narrower and clearer. The no-recording, approve-before-truth, model-the-client's-world combination is currently unoccupied | **Coaching** |
@@ -1591,7 +1609,9 @@ Cut paid channels entirely, spend €300 on the landing page and demo hosting, a
 
 ### X2. The answer
 
-> **Coaching is a genuinely better market for Lume's underlying intelligence — not because it is bigger, but because the customer exists as a purchasable individual, the value is legible in one sentence, and the memory compounds instead of resetting.**
+> **Coaching is a genuinely better market for Lume's underlying intelligence than individual project managers — not because it is bigger, but because the customer exists as a purchasable individual, the value is legible in one sentence, and the memory compounds instead of resetting. That does not make it a good market. It makes it a better bad one.**
+
+Both propositions can be true at once and the report should not blur them. Coaching wins nine of the eleven dimensions below. It also has six shipping competitors, a $25 price floor, a free tier under that floor, and two venture-funded corpses from the last fourteen months. Winning a comparison against a market you had already decided against is a low bar.
 
 The decisive argument is **retention**, and it is structural rather than a matter of execution. Lume's core capability is maintaining durable truth about a long-lived subject. For a project manager, the subject dies every twelve to eighteen months and the accumulated value dies with it — which means the product must re-earn its value repeatedly and can never build a switching cost. For a coach, the subject is a human relationship that runs for years, recurs after gaps, and accumulates across an entire practice. The same technology, pointed at a subject that persists, produces a fundamentally different retention curve.
 
@@ -1603,7 +1623,9 @@ So: better, and genuinely so — not merely another plausible application. But *
 
 **Coaching does not inherit Lume's reliability as an advantage — only its instrumentation.** Section B10 and section O4 are unresolved. Until the current LUME FAILURE rate is measured under the v3 scorer and driven to something near zero on identity-ambiguity cases, "more reliable" is a claim about architecture rather than about behaviour, and it should not appear in marketing.
 
-**A third option exists and was not examined here.** The same capability pointed at other long-lived, individually-owned, relationship-heavy subjects — independent therapists and supervisors, financial advisers with recurring client reviews, agents and talent managers, non-executive directors across board portfolios, physiotherapists and clinicians with long-term caseloads. Several of these have better economics, harder regulatory moats and less crowding than coaching. This investigation was scoped to coaching and answered the question asked; it should not be read as evidence that coaching is the *best* available application, only that it is better than the PM one.
+**A third option exists and was not examined here, and after the competitive findings it is the one I would examine next.** The same capability pointed at other long-lived, individually-owned, relationship-heavy subjects — independent therapists and clinical supervisors, financial advisers with recurring client reviews, agents and talent managers, non-executive directors across board portfolios, physiotherapists and clinicians with long-term caseloads. Several have better economics, harder regulatory moats and far less crowding than coaching.
+
+The test that would have caught the coaching problem before three days of work is worth stating as a reusable filter: **before assessing a market, search for the product's own headline.** If two independent competitors are already running your sentence, the analysis is over. That check takes ten minutes and it is now the first thing that should happen in any successor to this investigation.
 
 ---
 
@@ -1629,7 +1651,9 @@ Three options with very different costs: hard-fork the repository; extract the A
 
 ### Y5. How far does the existing domain abstraction actually get you?
 
-`src/ai/domain` already separates a domain document (`project-domain.md`), a term dictionary, a typed entity/operation vocabulary and a sectioned prompt assembler (`role`, `domain`, `dictionary`, `context`, `capture`, `schema`). Likewise `CaptureObservationV2` is parameterised by a string union of domains and dispositions and is otherwise domain-neutral. **Write a `coaching-domain.md`, swap the entity union, and measure extraction quality on real coaching notes.** This is the single cheapest experiment available and it would substantially de-risk the whole assessment.
+`src/ai/domain` separates a domain document (`project-domain.md`), a term dictionary, a typed entity/operation vocabulary and a sectioned prompt assembler (`role`, `domain`, `dictionary`, `context`, `capture`, `schema`). Likewise `CaptureObservationV2` is parameterised by string unions of domains and dispositions and is otherwise domain-neutral.
+
+**But note the correction in A1.10a: Capture V2 does not use that assembler for its live model call.** It builds its own short prompt in `src/lib/capture-v2/prompt.ts`; the assembler serves the *legacy* path and is invoked by V2 only for metrics. So writing a `coaching-domain.md` would reconfigure the extractor that is being retired, not the one that is the target. The experiment is still worth running — swap the domain vocabulary, rewrite the V2 prompt for coaching, and measure extraction quality on real coaching notes — but it is a somewhat larger experiment than the first draft assumed, and Part 2 should decide whether the assembler is worth pointing V2 at or whether it should be deleted with the legacy path.
 
 ### Y6. Client above engagement
 
@@ -1646,6 +1670,20 @@ Part C §C7 already decides workspace-scoped Person identity with project-scoped
 ### Y9. Reported speech through the whole pipeline
 
 Adding `reported` to the `epistemic` enum is trivial. The real question is whether the attribution survives extraction, validation, storage, `serializeCanonicalTruth`, the prompt, the answer, and the rendering — end to end, under test. If it can be lost anywhere in that chain, the product will eventually state that Martin is unsupportive.
+
+### Y9a. Provenance to the source sentence — newly identified as blocking
+
+Verification found that Capture writes provenance without a source id, that no durable fact is foreign-keyed to `capture_sessions`, and that todos, risks and milestones have no provenance column at all. **The product cannot currently show the sentence that produced a fact**, which is the centrepiece of the demo in sections J and V and the clearest thing ChatGPT cannot do.
+
+What does it cost to make every durable fact traceable to a session and, ideally, to a character range within the stored note? This is probably a small schema change plus discipline at every write site — but it must be costed, because the proposition depends on it.
+
+### Y9b. Relative-date resolution
+
+There is no chrono-style normaliser. *"Next Friday"*, *"a fortnight ago"* and *"before the board thing"* are unresolved, and the session date differs from the note-creation date. What is the smallest correct approach — model-side normalisation against an explicitly supplied session date, a deterministic library, or both with a reconciliation check?
+
+### Y9c. Document import
+
+`addFileName` exists with no caller and there is no file input. Section H treats bulk first-load of existing notes as load-bearing for activation, and the concierge validation in section W depends on it. This is new work.
 
 ### Y10. Goals
 
@@ -1835,6 +1873,32 @@ Classified failures include `ambiguous-same-first-name → write — Must not si
 
 These rows are labelled scorer v1; commit history shows a v3 scorer landing ("Capture V2 eval scorer v3 measures genuine durable-truth failures"), so current figures may differ materially. Establishing the current number is question Y1.
 
+### A1.10a Findings that correct or sharpen the picture
+
+Verified directly against code. Several matter more than their size suggests.
+
+**Provenance does not reach the source.** Capture writes `provenance: [{ type: "capture", at: ... }]` and leaves the optional `id` unset (`src/lib/capture/apply/persist-execute.ts`). `capture_sessions` holds the raw transcript, but no durable fact is foreign-keyed to it, and `todos`, `risks` and `milestones` have no provenance column at all. **The "click a statement, see the sentence that produced it" capability — the centrepiece of the demo in sections J and V — does not exist.** The detail drawer is honest about this (it renders humanised provenance from stored entries only, with explicit honesty notes when empty), which is good behaviour over a weak substrate.
+
+**Catch Me Up does not exist.** A whole-repository search for `Catch Me Up`, `catch-me-up`, `catchMeUp` and `catch_me_up` returns zero hits. The only near-match is suggestion copy reading *"What open loops could catch me out?"*, which is unrelated.
+
+**Meeting Prep is stored data, not AI, and it does not persist.** The `meetings` table exists and is read on hydrate, and the prep UI renders stored fields (opening script, objectives, talking points, questions, leadership moments). But `updateMeeting` in `store.tsx` **only mutates local state** — there are no `.from("meetings")` writes anywhere outside the loader. Meeting Prep edits are lost on reload. The feature is seed and demo data with an editor that does not save.
+
+**No relative-date normalisation exists.** Form validation accepts `YYYY-MM-DD` only; Capture V2 expects the model to have already produced ISO strings; there is no chrono-style library in the dependency tree. *"Next Friday"* is unresolved. For a product whose input is prose written days after the session, this is a real gap, and it interacts badly with the session-date-versus-note-date distinction argued in section M2.
+
+**File upload is a stub.** `addFileName` and `source: "uploaded"` exist in the session model, but the function has **no caller** anywhere in the repository and there is no file input in the Capture UI. Bulk paste works; document import does not. Section H listed bulk first-load as load-bearing for activation, so this is new work, not reuse.
+
+**D-035 is further along than the documentation says.** The Known Discoveries register and the architecture handoff both still describe `persistTodoUpdate` as keying by id alone. The code now scopes by workspace *and* project through `scopeExistingTodo`, covered by `scripts/verify-d035-project-isolation.ts`. The documentation is stale on the Todo instance; it remains correct that the broader class of persist helpers has not been audited.
+
+**Capture V2 does not use the shared domain assembler for its live model call.** `src/lib/capture-v2/prompt.ts` builds its own short prompt; `project-domain.md` and `assemblePrompt` are used by the **legacy** path, and V2 builds the legacy assembly only for metrics and the developer cockpit. This materially weakens the cheap experiment proposed in question Y5 — writing a `coaching-domain.md` would reconfigure the *legacy* extractor, not the target one.
+
+**There is no numeric confidence on knowledge.** Certainty is carried entirely by the `epistemic` enum. Numeric confidence exists only on `Recommendation` and on Tell Me's answer band. Separately, `modelConfidence` in Capture V2 is rescaled with `Math.round(x * 100)` in `toResult.ts` while the schema does not pin whether the model returns 0–1 or 0–100 — a latent inconsistency, currently harmless because V2 treats confidence as informational.
+
+**History is coarser than "change intelligence" implies.** `history_events` is insert-only with a fixed sixteen-value type enum, capped at 500 entries in memory, and there is no structured "what changed since timestamp X" query. Historical Ask selection is token overlap against event titles, falling back to the last six events. Answering *"when did she first mention leaving?"* would today depend on an event happening to mention it, or on a row's `created_at`.
+
+**Smaller precise corrections.** There are **52** `verify-*.ts` scripts totalling roughly 20,151 lines with about 2,234 assertions; 45 run in `npm test` and 7 are excluded. The request gate is `src/proxy.ts` (Next 16 convention), not `middleware.ts`. There is no Zod — validation is hand-rolled in `src/lib/data/validate.ts` plus domain validators. `supabase/config.toml` points at a `seed.sql` that **does not exist** in the repository. The trial is 14 days via `ensure_workspace_trial`, enforced through `evaluateEntitlement` and `requireAiCaller`, with `past_due` deliberately still permitted as grace. The `/capture` route redirects to `/` — the real Capture UI is inside the Ocean workspace. `workspace_usage.analyses_this_month` is not wired into hydrate at all (`load-mission-state` hardcodes zero).
+
+**One correction to the market research, for completeness.** Section D classified Osmo as a direct competitor on longitudinal memory. On closer inspection it is a **coach self-improvement** product — per-session notes benchmarked against ICF Core Competencies, plus a peer community — with no cross-session memory layer. It is not on this wedge. That does not change the verdict, because CoachRocks, CoachUI, Coachful, CoachNova, SessionFlow and Wundamental are.
+
 ### A1.11 Known debt most relevant to a coaching product
 
 | ID | Issue | Why it matters here |
@@ -1869,7 +1933,11 @@ Read the market sections with these caveats.
 
 **Reddit was inaccessible.** Direct fetches to `reddit.com` returned HTTP 403 throughout. Practitioner voice was therefore sourced from coaching craft blogs written by named practising coaches, from professional-body publications, and from search snippets. A dedicated subagent was tasked with alternative routes to community evidence; where its findings are available they should be appended here. **The absence of first-hand practitioner posts describing memory failure as an acute pain is a genuine gap in this research and is treated as evidence in section D5 rather than papered over.**
 
-**Vendor claims are unverified.** Wundamental's "9M+ data points" and "9.2/10 coaches recommend us", CoachNova's "12 clients to 28", and Osmo's "60% admin reduction" are marketing assertions reported as such. None was independently verifiable, and small vendors in early-stage categories routinely overstate.
+**Vendor claims are unverified.** Wundamental's "9M+ data points" and "9.2/10 coaches recommend us", CoachNova's "12 clients to 28", and Osmo's "60% admin reduction" are marketing assertions reported as such. None was independently verifiable, and small vendors in early-stage categories routinely overstate. Corporate facts that *were* verified against primary registers — CoachNova's headcount and its own published burn figure, Wundamental OÜ's Estonian business-register decline from 2 employees to 1 and equity from €41,520 to €17,714, and the Practice.do and Profi shutdown notices — are treated as firmer than the marketing.
+
+**Two competitor prices are second-hand.** `coachui.io` and `getsessionflow.co` sit behind Cloudflare bot protection; their figures were read from the search index of those pages rather than fetched directly. Verify before relying on them. Satori's tiers come only from psychology.com, one of the content farms described below, and could not be corroborated on the vendor site — treat as unverified.
+
+**One classification in section D was corrected on closer inspection.** Osmo is a coach *self-improvement* product (per-session notes benchmarked against ICF Core Competencies, plus a peer community), not a longitudinal memory product. It was initially counted as a direct competitor and should not be. The verdict does not depend on it.
 
 **ICF figures are self-reported survey data**, though the 2025 study was PwC-conducted with 10,000+ participants across 127 countries and is the most reliable source available for this market.
 
