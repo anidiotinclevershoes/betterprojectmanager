@@ -560,25 +560,52 @@ But it is a head start **in engineering quality, not in time to market**, and it
 
 ## M. Privacy and security cost
 
-*(Detailed audit pending from a background task; the following rests on verified structure.)*
+Audited against actual code. The platform is in better shape than expected in most respects and has four specific gaps that matter disproportionately for a confidential-data product.
 
 | Area | State | Classification |
 | --- | --- | --- |
-| **RLS / tenant isolation** | Enabled and FORCED on all tenant tables; `is_workspace_member()` with `row_security = off`; child INSERT policies verify the parent project's workspace | **Adequate already** |
-| **Auth** | Supabase SSR cookies; `getUser()` (JWT-validating) for authorisation; `proxy.ts` refresh + redirect | **Adequate already** |
-| **Client-scope isolation** | `D-035` implemented for todos, **open as a class** | **Meaningful new work** — the existential invariant |
-| **Deletion** | `persistProjectDelete` deletes SET-NULL children then the project; CASCADE handles the rest. **No account-level delete** | **Minor launch requirement** — add account delete; change `capture_sessions.project_id` to CASCADE so transcripts cannot orphan |
-| **Export** | **Does not exist anywhere** | **Minor launch requirement.** Part 1 §P and §Q both require it; it is a serialiser and a download route |
-| **Logging** | `src/lib/server-log.ts` | **Must be audited before launch.** If any capture transcript, prompt or client name reaches Vercel logs, that is a breach in this domain. Pending detailed audit |
-| **Analytics / error reporting** | Appears absent (no SDK in `package.json`) | **Adequate**, and deliberately so. Whatever is added later must be content-free |
-| **AI request handling** | Raw fetch to OpenAI; `requireAiCaller` gate; rate limiting | **Minor work** — payload caps, and confirm no dev/cockpit path persists prompts containing client data |
-| **Rate limiting** | `src/lib/rate-limit.ts`, in-memory | **Future requirement** — per-instance on serverless. Not a launch blocker at 200 users |
-| **Data residency** | Supabase region choice | **Adequate** — a fork with its own project can be EU-resident from day one. Model inference residency remains a disclosure matter |
+| **RLS completeness** | Enabled **and FORCED** on every tenant table, each with explicit SELECT/INSERT/UPDATE/DELETE policies scoped through `is_workspace_member()`. **No user-facing table has RLS enabled with zero policies.** The two tables that do — `billing_events` and `eval_runs` — are deliberate deny-all, documented in the SQL: *"RLS enabled + no policies ⇒ denied for anon/authenticated"* | **Adequate already** |
+| **Service-role usage** | Four call sites, **all correctly gated**: eval store (behind an email allowlist), the Stripe webhook (after signature verification), and checkout/portal (after `getUser()` *and* an explicit `workspace_members` check before trusting a client-supplied workspace id) | **Adequate already** |
+| **Auth hardening** | `getUser()` (JWT-validating) at every authorisation decision. The **only** `getSession()` call in the codebase is a browser-init probe in `wait-for-browser-user.ts` whose result is immediately re-validated with `getUser()`. All 28 API routes authenticate or are intentionally public | **Adequate already** |
+| **Analytics / telemetry** | **None exists.** No Sentry, PostHog, Mixpanel, Amplitude, Segment, GA or Vercel Analytics in `package.json`; no client-side tracking script | **Adequate, and a genuine asset** — zero third-party leakage vector. The corollary is zero production error visibility beyond the Vercel log stream |
+| **Dev cockpit** | Gated twice on `NODE_ENV === "development"`, and **does not persist prompt or response text** — `CaptureRunMetrics` contains only counts and token measurements | **Adequate** — a worry raised in Part 1 that turns out not to apply |
+| **Client-scope isolation** | `D-035` implemented for todos via `scopeExistingTodo`, **open as a class** | **Meaningful new work** — the existential invariant |
+| **Deletion** | Real and correct for projects. **But `PROJECT_BUNDLE_SET_NULL_TABLES` is a hand-maintained array of six tables** — `todos`, `memories`, `recommendations`, `history_events`, `capture_sessions`, `coach_sessions` — deleted explicitly because their FK is `ON DELETE SET NULL`. The two holding verbatim content (`capture_sessions.transcript`, `coach_sessions.markdown`) are cleaned *only because someone remembered to list them* | **Meaningful new work** — see M1 |
+| **Account deletion** | **Does not exist.** No route, no UI, no code path. There is an RLS policy permitting an owner to delete their workspace row, but nothing calls it. A right-to-erasure request today requires manual work in the Supabase dashboard | **Launch blocker** for a GDPR-facing product |
+| **Export** | **Does not exist anywhere.** No route, no button, no serialiser | **Launch requirement** — Part 1 §P and §Q both require it |
+| **Logging** | `server-log.ts` redacts by **key name only** (`password`, `token`, `secret`, `apikey`…) plus a 500-character truncation. **No current call site logs capture content** — they log ids, feature names and `error.message` | **Meaningful new work** — see M2 |
+| **AI payload caps** | **None on the Capture route.** Content is `.trim()`ed and checked non-empty, then sent. Only New Project truncates, at 12,000 characters, and only inside a template string | **Minor work** |
+| **Rate limiting** | In-memory `Map`, per-process, self-documented as *"Per-process only — fine for single-instance"*. On serverless the effective limit is `limit × instances` | **Future requirement**, not a launch blocker at 200 users — but note it is also an exfiltration control |
+| **Production config guard** | `auditProductionConfig()` is thorough — rejects demo auth, local persistence, missing keys. **But `assertProductionConfigOrThrow()` is never called from `proxy.ts`, `next.config.ts` or any request path.** It runs only in `scripts/verify-production-config.ts` | **Minor work** — wire it to boot. It is currently a test you must remember to run |
+| **Staging exposure** | `requireAiCaller` has an open-dev bypass gated on `NODE_ENV !== "production"`. A publicly reachable staging deploy without `NODE_ENV=production` would be unauthenticated | **Minor work** — real but easily closed |
+| **Data residency** | Supabase region choice | **Adequate** — a fork with its own project is EU-resident from day one |
 | **DPA / sub-processor list** | Not present | **Minor launch requirement** — documentation, not engineering |
-| **Third-party data (Part 1 §P3)** | Not modelled | **Meaningful new work** — role-only/initial-only people, attributed storage, deletion cascade |
-| **SOC 2** | Absent | **Future enterprise requirement.** Note Simply.Coach already claims SOC 2 Type II + HIPAA + GDPR on all plans |
+| **Third-party data (Part 1 §P3)** | Not modelled | **Meaningful new work** |
+| **SOC 2** | Absent | **Future enterprise requirement.** Simply.Coach already claims SOC 2 Type II + HIPAA + GDPR on all plans |
 
-**Net.** Privacy is **not** where the cost is. The platform is in good shape, and a fork with its own Supabase project starts ahead of most two-person competitors. The two items that are genuinely meaningful — exhaustive client-scope isolation and third-party data modelling — are both things Part 1 already identified as product requirements, so they are not additional. Estimated privacy-specific effort: **5–8% of the total refit.**
+### M1. Erasure depends on a hand-maintained array
+
+The single sharpest finding in the audit. Project deletion works today, but the guarantee is procedural rather than structural: six tables are deleted by an explicit loop over `PROJECT_BUNDLE_SET_NULL_TABLES` because their foreign keys are `ON DELETE SET NULL`. If a future migration adds a project-scoped table with a SET NULL foreign key and nobody updates that array, **its rows survive deletion indefinitely with an orphaned null `project_id`, still holding content.**
+
+In a PM tool that is a tidiness bug. In a product whose deletion promise is *"delete a client and everything goes, including everyone mentioned in them"* — Part 1 §V4's marketing copy — it is a compliance failure waiting for a schema change.
+
+The coaching fork should make the content-bearing tables `ON DELETE CASCADE` so the database enforces what the array currently remembers, and add a verify script asserting that every table with a client-scoped foreign key is either CASCADE or explicitly listed.
+
+### M2. Logging is safe by accident, not by design
+
+No current call site logs a transcript, prompt or client name — every one logs ids, feature names, status strings and `error.message`. That is good practice, and it is also, as the audit puts it, "an emergent property of every developer having been careful."
+
+Two exposures follow. Redaction is key-name-based, so a 400-character note about a named executive passed under a field called `detail` or `title` would be written verbatim to the Vercel log stream. And `error.message` is logged widely, while Postgres constraint-violation messages routinely embed the offending row's text.
+
+The fix is small and should be non-negotiable in a coaching build: an allowlist rather than a denylist for logged fields, a lint rule or test asserting that no content-bearing field name reaches `serverLog`, and sanitising database error messages before logging them.
+
+### M3. Net
+
+**Privacy is not where the bulk of the cost is, but it is not free either, and two items are launch blockers rather than nice-to-haves.** Account deletion and export do not exist at all, and both are required by the promises Part 1's landing page makes. Erasure integrity and log discipline are meaningful new work. Everything else — RLS, auth, service-role gating, the absence of third-party analytics — is genuinely good and starts the fork ahead of most two-person competitors.
+
+Revised estimate for privacy-specific effort: **8–12% of the total refit**, up from the 5–8% estimated before the audit.
+
+**And one finding directly validates section E.** The audit's own conclusion on data isolation between two products sharing a Supabase project: *"the realistic options are either (a) a second, fully separate Supabase project for the coaching product, or (b) adding a `product` column to every user-data table and rewriting every RLS policy to also filter on it — a much larger change."* It also notes that the service-role key is a single shared secret whose blast radius is the entire project, so a bug or leak in either product would expose both. That was reasoned to independently in §E1 on confidentiality grounds; it is now confirmed on implementation grounds.
 
 ---
 
@@ -588,17 +615,34 @@ But it is a head start **in engineering quality, not in time to market**, and it
 
 Stripe (`stripe@18.5`), lazily constructed. `billing_customers` (workspace UNIQUE, stripe customer UNIQUE), `subscriptions` (workspace UNIQUE, status `trialing|active|past_due|cancelled|expired`, trial and period fields, `cancel_at_period_end`), `billing_events` with UNIQUE `(provider, provider_event_id)` for idempotency. A single price from `STRIPE_PRICE_ID` — no plan catalogue in the database. A 14-day no-card trial created idempotently by `ensure_workspace_trial`. Entitlement via `evaluateEntitlement` → `canUseLume`, enforced in the UI by `EntitlementGate` and on the server by `requireAiCaller`, which returns 403 `entitlement_required`. `past_due` deliberately still permitted as grace.
 
+The webhook is correctly built: signature-verified via `constructEvent`, idempotent through the `unique (provider, provider_event_id)` constraint with an early `{ ok: true, duplicate: true }` return, and unknown event types are recorded and no-op'd with a 200 so Stripe does not retry-storm.
+
 ### N2. Can it support two brands?
 
-**Under the recommended fork: trivially, and no code changes at all.** Two Supabase projects, two deployments, two `STRIPE_PRICE_ID` values, two Stripe Products under one Stripe account. Separate brands, separate pricing, separate entitlement, shared Stripe reporting. Nothing to design.
+**Under the recommended fork: trivially, and with no code changes at all.** Two Supabase projects, two deployments, two `STRIPE_PRICE_ID` values, two Stripe Products under one Stripe account. Separate brands, separate pricing, separate entitlement, shared Stripe reporting.
 
-**Under a shared database it would need a schema change.** `subscriptions.workspace_id` is UNIQUE — one subscription per workspace, so a workspace could not hold both products. You would need `UNIQUE (workspace_id, product)` plus a product column on entitlement, plus product-aware webhook routing. That is not hard, but it is work that the fork makes unnecessary.
+**Under a shared database it needs a schema change, now costed precisely.** Both constraints block it:
 
-This is a small but clean argument for the fork: **the billing model is already single-product by constraint, and honouring that is free while working around it is not.**
+```sql
+-- billing_customers
+workspace_id uuid not null unique references public.workspaces (id) on delete cascade,
+-- subscriptions
+workspace_id uuid not null unique references public.workspaces (id) on delete cascade,
+```
 
-### N3. The one real gap
+One workspace = at most one Stripe customer = at most one subscription = one entitlement = one price. There is **no `product`, `product_key` or `app_id` column anywhere in the schema**, and `getWorkspaceEntitlement` queries by `workspace_id` alone with `.maybeSingle()`.
 
-`D-024`: "actions left" is a local analysis meter (`workspace_usage`), not a Stripe entitlement — and `analyses_this_month` is not even wired into hydrate (`load-mission-state` hardcodes zero). Part 1 §S proposes an active-client limit, which requires a real, archive-aware, server-enforced entitlement. **Small but genuinely new work**, and shared with Lume's own backlog.
+The smallest change is well-bounded: add `product text not null default 'lume'` to both tables, replace `unique (workspace_id)` with `unique (workspace_id, product)`, thread a `product` argument through `ensure_workspace_trial`, `getWorkspaceEntitlement`, `applySubscriptionPatch`, `recordBillingEventIfNew` and `requireAiCaller`, add per-product price configuration, and include `product` in Stripe metadata alongside `workspace_id`. Roughly five files and one migration. **Moderate, not trivial — and entirely avoided by the fork.**
+
+Critically, that change would give product-scoped *billing* and would **not** give product-scoped *data*. The user-data tables have no product discriminator either, so a coaching row and a PM row in a shared project are structurally indistinguishable. Achieving real isolation would mean a `product` column on every user-data table plus rewritten RLS on all of them — which is precisely the argument in §E1 for two Supabase projects.
+
+**This is the cleanest single argument for the fork in the whole report: the billing model is already single-product by constraint, and honouring that constraint is free while working around it costs a migration, five files, and still does not isolate the data.**
+
+### N3. Two real gaps
+
+**`D-024` — entitlement is not a real meter.** "Actions left" is a local `workspace_usage` counter, not a Stripe entitlement, and `analyses_this_month` is not even wired into hydrate (`load-mission-state` hardcodes zero). Part 1 §S proposes an active-client limit, which needs a real, archive-aware, server-enforced entitlement. Small but genuinely new, and shared with Lume's own backlog.
+
+**Entitlement gates AI, not the product.** `evaluateEntitlement` is enforced only inside `requireAiCaller`, so an expired trial blocks Capture, Coach, Tell Me, transcription and New Project — but leaves `workspace/projects` and `workspace/state` open. A lapsed user can still create, read and delete their data. For Lume that may be deliberate. For a coaching product it needs a decision: Part 1 §Q identifies "practice contraction" as a churn moment and recommends downgrade-not-cancel, which is easier to offer if read access survives a lapse. Worth choosing on purpose rather than inheriting.
 
 ---
 
@@ -688,7 +732,7 @@ Framed as *what fraction of a from-scratch build does Lume save?* — which is t
 
 | Area | Share of total build | Saved by Lume | Reasoning |
 | --- | --- | --- | --- |
-| **Platform** — auth, tenancy, RLS, billing scaffolding, deployment, config | ~15% | **70–80%** | Genuinely generic and well made |
+| **Platform** — auth, tenancy, RLS, billing scaffolding, deployment, config | ~15% | **65–75%** | Genuinely generic and well made. Revised down slightly after the privacy audit: account deletion and export do not exist at all, erasure integrity rests on a hand-maintained array, and log discipline needs enforcing (§M) |
 | **AI / extraction / trust architecture** | ~25% | **40–55%** | Contract shape, validation, identity gate, fail-closed patterns, invariants. Prompt, ontology, dispatcher, serialiser all new |
 | **Test and eval machinery** | ~10% | **50–60%** on machinery, **0%** on corpus | Taxonomy and harness transfer; content does not |
 | **Domain model and persistence** | ~15% | **25–35%** | `knowledge_items` overlay and `stakeholders` transfer well; four new tables |
