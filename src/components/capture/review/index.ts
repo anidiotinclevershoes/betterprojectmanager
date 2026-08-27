@@ -1,3 +1,4 @@
+export { AnnotatedTranscript } from "./AnnotatedTranscript";
 export { CaptureSummary } from "./CaptureSummary";
 export { CompactChangeCard } from "./CompactChangeCard";
 export { CorrectionActions } from "./CorrectionActions";

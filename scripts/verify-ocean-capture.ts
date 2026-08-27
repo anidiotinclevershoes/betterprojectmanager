@@ -117,8 +117,9 @@ function testOceanCaptureAiAffordanceAndInputs() {
   assert.match(capture, /ocean-capture-record/);
   assert.match(capture, /Record/);
   assert.match(capture, /ocean-capture-review-boundary/);
-  assert.match(capture, /Nothing enters maintained project truth/);
-  assert.match(capture, /until you approve/);
+  assert.match(capture, /Nothing is saved until you approve/);
+  assert.match(capture, /Tell Lume what changed/);
+  assert.match(capture, /AnnotatedTranscript/);
 }
 
 function testAnalyseDoesNotWriteMaintainedTruth() {

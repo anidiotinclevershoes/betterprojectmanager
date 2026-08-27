@@ -24,7 +24,7 @@ test.describe("Capture V2 frozen journeys", () => {
     await expect(page.getByRole("heading", { name: "Candyland" })).toBeVisible();
     await analyseFrozenTranscript(page, frozen.transcript);
     await expect(
-      page.getByText("No operational changes to review."),
+      page.getByText("Nothing to apply."),
     ).toBeVisible();
     await openKnowledgeCentre(page);
     const people = page.getByTestId("ocean-frame-people");
@@ -231,6 +231,60 @@ test.describe("Capture Review Needs-you interactions", () => {
     );
     await page.getByTestId("review-existing-or-new-update").click();
     await expect(page.getByRole("button", { name: "Approve" })).toBeVisible();
+  });
+});
+
+test.describe("Capture experience — annotated transcript", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await seedExperimentalWorlds(page, testInfo.testId);
+  });
+
+  test("matched evidence is highlighted; mixed siblings stay independent", async ({
+    page,
+  }) => {
+    const frozen = await mockLocalAuthAndFrozenCapture(
+      page,
+      "sibling-ready-and-needs-you",
+    );
+    await openCapture(page);
+    await expect(page.getByPlaceholder("Tell Lume what changed…")).toBeVisible();
+    await analyseFrozenTranscript(page, frozen.transcript);
+
+    const notes = page.getByTestId("annotated-transcript");
+    await expect(notes).toBeVisible();
+    await expect(notes).toContainText(frozen.transcript);
+    const marks = notes.getByTestId("transcript-mark");
+    await expect(marks).toHaveCount(2);
+    await expect(notes.locator('[data-category="risks"]')).toContainText(
+      "Gumdrop Bridge",
+    );
+    await expect(notes.locator('[data-category="people"]')).toContainText(
+      "Fizz Caramel",
+    );
+    await expect(page.getByText("Needs you").first()).toBeVisible();
+    await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Apply Ready \(1\)/i }),
+    ).toBeVisible();
+  });
+
+  test("Needs-you choices stay tappable on a narrow viewport", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const frozen = await mockLocalAuthAndFrozenCapture(
+      page,
+      "share-vs-replace-ambiguous",
+    );
+    await openCapture(page);
+    await analyseFrozenTranscript(page, frozen.transcript);
+    const share = page.getByTestId("review-ownership-share");
+    await expect(share).toBeVisible();
+    const box = await share.boundingBox();
+    expect(box).toBeTruthy();
+    expect(box!.height).toBeGreaterThanOrEqual(40);
+    await expect(page.getByTestId("review-ownership-replace")).toBeVisible();
+    await expect(page.getByTestId("annotated-transcript")).toBeVisible();
   });
 });
 

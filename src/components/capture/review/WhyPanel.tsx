@@ -5,14 +5,14 @@ export function WhyPanel({
   onToggle,
   evidence,
   interpretation,
-  confidence,
   controlId,
 }: {
   open: boolean;
   onToggle: () => void;
   evidence: string[];
   interpretation: string;
-  confidence: number | null;
+  /** Informational only — not shown. Kept so callers need not change. */
+  confidence?: number | null;
   controlId: string;
 }) {
   return (
@@ -30,7 +30,7 @@ export function WhyPanel({
         <div id={controlId} className="why-panel-body" role="region" aria-label="Why this change">
           {evidence.length > 0 ? (
             <div className="why-panel-block">
-              <p className="why-panel-label">Evidence</p>
+              <p className="why-panel-label">From your notes</p>
               {evidence.map((ex) => (
                 <blockquote key={ex} className="why-panel-evidence">
                   “{ex}”
@@ -41,12 +41,6 @@ export function WhyPanel({
           {interpretation ? (
             <div className="why-panel-block">
               <p className="why-panel-copy">{interpretation}</p>
-            </div>
-          ) : null}
-          {confidence != null ? (
-            <div className="why-panel-block">
-              <p className="why-panel-label">Confidence</p>
-              <p className="why-panel-confidence">{Math.round(confidence)}%</p>
             </div>
           ) : null}
         </div>

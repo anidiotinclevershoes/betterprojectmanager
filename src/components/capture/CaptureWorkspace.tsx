@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
-import { CaptureBestPractice } from "@/components/capture/CaptureBestPractice";
+import "@/components/capture/capture-experience.css";
 import { CaptureContextInspector } from "@/components/capture/CaptureContextInspector";
 import { CaptureReliabilityNotice } from "@/components/capture/CaptureReliabilityNotice";
 import { useCaptureSession } from "@/components/capture/CaptureSessionContext";
@@ -20,7 +20,9 @@ import {
 import {
   CaptureSummary,
   SuggestedChangesList,
+  AnnotatedTranscript,
 } from "@/components/capture/review";
+import { annotationSourcesFromResult } from "@/lib/capture/review/annotateTranscript";
 import type { TargetOption } from "@/components/capture/review/TargetPicker";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
 import { KIND_LABEL } from "@/lib/capture/suggestions";
@@ -295,6 +297,10 @@ export function CaptureWorkspace({
         ? buildCaptureObservations(result, content, reviewCardIdsByFinding)
         : [],
     [result, content, reviewCardIdsByFinding],
+  );
+  const annotationSources = useMemo(
+    () => annotationSourcesFromResult(result, reviewCardIdsByFinding),
+    [result, reviewCardIdsByFinding],
   );
   const counts = useMemo(
     () =>
@@ -582,10 +588,15 @@ export function CaptureWorkspace({
 
   function onSelectObservation(obs: CaptureObservation) {
     if (!obs.reviewCardId) return;
-    const el = document.getElementById(`review-card-${obs.reviewCardId}`);
+    onFocusReviewCard(obs.reviewCardId);
+  }
+
+  /** Isolated presentation helper — no CaptureSessionContext change required. */
+  function onFocusReviewCard(reviewCardId: string) {
+    const el = document.getElementById(`review-card-${reviewCardId}`);
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "center" });
-    setHighlightedCardId(obs.reviewCardId);
+    setHighlightedCardId(reviewCardId);
     window.setTimeout(() => setHighlightedCardId(null), 1400);
   }
 
@@ -626,11 +637,7 @@ export function CaptureWorkspace({
             )}
           </h2>
           {!showSessionActions ? (
-            <p className="capture-support">
-              {isOcean
-                ? "Type an update or record your thoughts. Lume proposes changes — nothing is saved until you review and approve."
-                : "Type an update or record your thoughts — Lume will organise what you share."}
-            </p>
+            <p className="capture-support">Tell Lume what changed.</p>
           ) : analysedLabel ? (
             <p className="capture-support meta">Last analysed {analysedLabel}</p>
           ) : null}
@@ -683,15 +690,24 @@ export function CaptureWorkspace({
       >
         {isAnalysed ? (
           <h3 id="capture-transcript-title" className="capture-review-section-title">
-            Capture Transcript
+            Your notes
           </h3>
         ) : null}
         <form onSubmit={onSubmit} className="capture-form">
+        {isAnalysed ? null : (
           <label className="sr-only" htmlFor="capture-input">
             Capture notes
           </label>
-          <div className={!isAnalysed ? "capture-compose-row" : undefined}>
-            <div className="capture-blocks" aria-label="Capture notes">
+        )}
+          <div className={!isAnalysed ? "capture-compose" : undefined}>
+            {isAnalysed ? (
+              <AnnotatedTranscript
+                transcript={content}
+                sources={annotationSources}
+                onFocusReviewCard={onFocusReviewCard}
+              />
+            ) : (
+              <div className="capture-blocks" aria-label="Capture notes">
               {blocks.map((block, index) => (
                 <div
                   key={block.id}
@@ -737,7 +753,7 @@ export function CaptureWorkspace({
                     disabled={busy === "analysing"}
                     placeholder={
                       index === 0
-                        ? "What happened? Type notes or press Record…"
+                        ? "Tell Lume what changed…"
                         : block.source === "recorded"
                           ? "Recording transcript…"
                           : "Continue typing…"
@@ -753,8 +769,8 @@ export function CaptureWorkspace({
                   />
                 </div>
               ))}
-            </div>
-            {!isAnalysed ? <CaptureBestPractice /> : null}
+              </div>
+            )}
           </div>
 
           <div className="capture-toolbar">
@@ -916,8 +932,7 @@ export function CaptureWorkspace({
           data-testid="ocean-capture-review"
         >
           <p className="ocean-capture-review-boundary" role="note">
-            Review every finding below. Nothing enters maintained project truth
-            until you approve it (Approve / Apply Ready / Remember).
+            Here’s what I understood. Check anything I need you on. Nothing is saved until you approve.
           </p>
           <CaptureSummary
             observations={observations}
@@ -933,11 +948,11 @@ export function CaptureWorkspace({
               role="status"
             >
               <span>
-                {result.observationAccount.total} observations
+                {result.observationAccount.total} understood
               </span>
               <span aria-hidden>·</span>
               <span>
-                {result.observationAccount.proposedChanges} proposed
+                {result.observationAccount.proposedChanges} to change
               </span>
               <span aria-hidden>·</span>
               <span>
@@ -945,12 +960,16 @@ export function CaptureWorkspace({
               </span>
               <span aria-hidden>·</span>
               <span>
-                {result.observationAccount.needsYou} Needs you
+                {result.observationAccount.needsYou} need you
               </span>
-              <span aria-hidden>·</span>
-              <span>
-                {result.observationAccount.commentary} commentary
-              </span>
+              {result.observationAccount.commentary > 0 ? (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>
+                    {result.observationAccount.commentary} noted
+                  </span>
+                </>
+              ) : null}
             </p>
           ) : null}
           <SuggestedChangesList

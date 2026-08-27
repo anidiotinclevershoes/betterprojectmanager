@@ -681,7 +681,7 @@ function buildCoverageGapViewModels(
       reviewReason,
       needsReviewReason: reasonText,
       diff: {
-        label: item.disposition === "unmatched" ? "Unmatched" : "Needs Review",
+        label: item.disposition === "unmatched" ? "Unmatched" : "Needs you",
         from: "",
         to: finding.fact,
         layout: "suggested_only",

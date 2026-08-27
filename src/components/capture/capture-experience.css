@@ -1,0 +1,193 @@
+/* Capture experience polish — component-local. Do not dump into globals.css. */
+
+.ocean-capture-workspace .capture-support {
+  max-width: 36rem;
+  font-size: 0.92rem;
+}
+
+.ocean-capture-workspace .capture-textarea-idle:not(.is-readonly) {
+  min-height: 8.5rem;
+}
+
+.ocean-capture-review-boundary {
+  border-color: color-mix(in srgb, var(--accent-primary) 22%, transparent);
+  background: color-mix(in srgb, var(--accent-primary) 7%, transparent);
+  color: var(--text-secondary);
+}
+
+.capture-v2-account {
+  margin-top: 0.35rem;
+}
+
+.annotated-transcript {
+  margin: 0;
+  padding: 0.85rem 0.95rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg-surface-raised) 88%, transparent);
+  min-width: 0;
+}
+
+.annotated-transcript-body {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.annotated-transcript-mark {
+  display: inline;
+  margin: 0;
+  padding: 0 0.05em;
+  border: 0;
+  border-radius: 3px;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  background: color-mix(in srgb, var(--transcript-mark, var(--info)) 12%, transparent);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(
+    in srgb,
+    var(--transcript-mark, var(--info)) 55%,
+    transparent
+  );
+  cursor: default;
+}
+
+button.annotated-transcript-mark {
+  cursor: pointer;
+}
+
+button.annotated-transcript-mark:hover,
+button.annotated-transcript-mark:focus-visible {
+  background: color-mix(in srgb, var(--transcript-mark, var(--info)) 20%, transparent);
+  outline: none;
+}
+
+button.annotated-transcript-mark:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--transcript-mark, var(--info)) 45%, transparent);
+}
+
+.annotated-transcript-mark.is-people {
+  --transcript-mark: var(--accent-meeting);
+}
+.annotated-transcript-mark.is-dates {
+  --transcript-mark: var(--accent-timeline);
+}
+.annotated-transcript-mark.is-risks {
+  --transcript-mark: var(--accent-risk);
+}
+.annotated-transcript-mark.is-todos {
+  --transcript-mark: var(--accent-todo);
+}
+
+.annotated-transcript-glyph {
+  display: inline;
+  margin-left: 0.18em;
+  font-size: 0.72em;
+  font-weight: 650;
+  color: var(--transcript-mark, var(--text-muted));
+  vertical-align: super;
+  line-height: 0;
+}
+
+.annotated-transcript-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.9rem;
+  margin: 0.7rem 0 0;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border-subtle);
+  list-style: none;
+}
+
+.annotated-transcript-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.annotated-transcript-legend-item.is-people {
+  --transcript-mark: var(--accent-meeting);
+}
+.annotated-transcript-legend-item.is-dates {
+  --transcript-mark: var(--accent-timeline);
+}
+.annotated-transcript-legend-item.is-risks {
+  --transcript-mark: var(--accent-risk);
+}
+.annotated-transcript-legend-item.is-todos {
+  --transcript-mark: var(--accent-todo);
+}
+
+.capture-review-workspace .compact-change-action-row > button,
+.capture-review-workspace .compact-change-date-input {
+  min-height: 2.5rem;
+}
+
+.capture-review-workspace .compact-change-date-input {
+  min-width: 9.5rem;
+}
+
+.capture-apply-ready-btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 699px) {
+  .annotated-transcript {
+    padding: 0.75rem 0.8rem 0.65rem;
+  }
+
+  .annotated-transcript-body {
+    font-size: 0.92rem;
+  }
+
+  .capture-observation-row {
+    flex-wrap: wrap;
+  }
+
+  .capture-observation-action {
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+  }
+
+  .capture-changes-counts {
+    width: 100%;
+  }
+
+  .capture-apply-ready-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 2.75rem;
+  }
+
+  .capture-review-workspace {
+    padding-bottom: 1.25rem;
+  }
+
+  .capture-review-workspace .compact-change-action-row {
+    gap: 8px;
+  }
+
+  .capture-review-workspace .compact-change-action-row > button {
+    min-height: 2.75rem;
+    padding-inline: 0.85rem;
+  }
+
+  .capture-review-workspace .compact-change-date-input {
+    width: 100%;
+    min-height: 2.75rem;
+  }
+}
