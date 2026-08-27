@@ -160,6 +160,13 @@ export async function runStackedStep(args: {
   step: StackedStep;
   projectId: string;
   state: MissionState;
+  /**
+   * When true, persist every Apply Ready write regardless of expectedReview.
+   * Stress journeys use this to observe actual durable mutations (including
+   * mixed siblings and unexpected writes). Existing stacked regression keeps
+   * the default: only apply when the step expected an apply.
+   */
+  applyReadyWrites?: boolean;
 }): Promise<StackedStepResult> {
   let state = cloneState(args.state);
   const pipeline = captureResultFromStackedStep({
@@ -199,9 +206,12 @@ export async function runStackedStep(args: {
   });
 
   const review = summariseReview(pipeline);
-  const shouldApply =
-    args.step.expectedReview === "apply" ||
-    (args.step.expectedReview === "apply_or_no_change" && review === "apply");
+  const shouldApply = args.applyReadyWrites
+    ? pipeline.resolved.some((row) => row.decision.kind === "write")
+    : args.step.expectedReview === "apply" ||
+      args.step.expectedReview === "mixed" ||
+      (args.step.expectedReview === "apply_or_no_change" &&
+        (review === "apply" || review === "mixed"));
 
   if (shouldApply) {
     for (const row of pipeline.resolved) {
@@ -269,6 +279,9 @@ export function reviewMatches(
 ): boolean {
   if (expected === "apply_or_no_change") {
     return actual === "apply" || actual === "no_change";
+  }
+  if (expected === "mixed") {
+    return actual === "mixed" || actual === "apply" || actual === "needs_you";
   }
   return expected === actual;
 }

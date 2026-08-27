@@ -64,6 +64,8 @@
     "verify:stacked-capture": "npx --yes tsx scripts/verify-stacked-capture.ts",
     "verify:stable-object-identity": "npx --yes tsx scripts/verify-stable-object-identity.ts",
     "verify:resurrection": "npx --yes tsx scripts/verify-resurrection.ts",
+    "verify:eval-stress": "npx --yes tsx scripts/verify-eval-stress.ts",
+    "test:eval-stress": "playwright test e2e/stress-journeys.spec.ts",
     "verify:test-dashboard": "npx --yes tsx scripts/verify-test-dashboard.ts",
     "dashboard:preview": "npx --yes tsx scripts/test-dashboard/publish.ts --mode preview",
     "dashboard:publish": "npx --yes tsx scripts/test-dashboard/publish.ts --mode both",
