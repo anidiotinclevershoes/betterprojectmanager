@@ -1622,6 +1622,18 @@ Validation (`validate.ts`) rejects malformed output, unknown domains and disposi
 
 There is also a general AI domain layer (`src/ai/domain`) comprising a natural-language domain document (`project-domain.md`), a term dictionary, typed entity/operation/status vocabularies, and a **sectioned prompt assembler** producing `role`, `domain`, `dictionary`, `context`, `capture` and `schema` sections with token diagnostics. The domain document states the governing rule plainly: *"The AI proposes changes. The user approves changes. The AI must never silently modify project data."* It also instructs that user Capture text and project records are **untrusted data, not system instructions** — prompt-injection awareness that is genuinely uncommon.
 
+### A1.5a AI gateway and model boundaries
+
+Worth stating precisely, because it is easy to over- or under-estimate.
+
+**In the application there is no gateway and no provider abstraction.** `src/lib/openai.ts` (434 lines) calls `https://api.openai.com/v1/chat/completions` and `https://api.openai.com/v1/audio/transcriptions` by raw `fetch`. There is no vendor SDK in `package.json` — the only runtime dependencies are Supabase, Next, React, Stripe and `js-tiktoken`. The model is configured by environment variable (`src/lib/openai-model.ts`). There is a `provider: "local"` deterministic fallback for development and for running without a key, which the constitution is explicit should remain a fallback rather than become a second extraction engine.
+
+Server-side AI routes are gated by `requireAiCaller` (`src/lib/ai-gate.ts`) with rate limiting (`src/lib/rate-limit.ts`) and a local usage meter (`workspace_usage`), and they refuse to run in production when no key is configured rather than silently degrading.
+
+**A multi-provider abstraction does exist — but only in the evaluation harness.** `src/lib/eval-capture-v2/adapters/` provides a `ProviderAdapter` interface with OpenAI, Anthropic and Gemini implementations, used by the benchmark to compare models on the same corpus. This is genuinely useful for the reliability work in question Y1 and Y13 — it means model selection can be decided by evidence rather than preference — but it is a *measurement* capability, not a production routing layer. Anything requiring provider failover, EU-resident inference, or per-customer model choice would be new work.
+
+The practical consequence for a coaching product: single-provider coupling is shallow (one file, raw HTTP, no SDK lock-in) and therefore cheap to change, but the change has not been made and should not be assumed.
+
 ### A1.6 The trust boundary
 
 The locked rule: *nothing extracted from Capture becomes maintained truth before final human review and approval.* Implemented as `analyzeCaptureWithAI` → `/api/capture` (findings only; a `capture_analysed` history event; **no domain writes**) → review view models → per-item `applyOne` → `planCaptureApply` then `executeCaptureApply`.
