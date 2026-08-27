@@ -66,12 +66,21 @@ export function SuggestedChangeCard({
       : undefined;
 
   const handlers: CorrectionHandlers = {
-    onUseThis: () => onUseThis?.() ?? onApprove(),
+    onUseThis: () => {
+      if (onUseThis) onUseThis();
+      else onApprove();
+    },
     onChooseTarget: (option) => onChooseTarget?.(option),
     onChooseProject: (project) => onChooseProject?.(project),
     onCreateNew: () => onCreateNew?.(),
-    onResolve: () => onResolve?.() ?? onApprove(),
-    onKeepOpen: () => onKeepOpen?.() ?? onDismiss(),
+    onResolve: () => {
+      if (onResolve) onResolve();
+      else onApprove();
+    },
+    onKeepOpen: () => {
+      if (onKeepOpen) onKeepOpen();
+      else onDismiss();
+    },
     onDismiss,
     onApprove,
     onChangeEntityKind: (kind) => onChangeEntityKind?.(kind),
