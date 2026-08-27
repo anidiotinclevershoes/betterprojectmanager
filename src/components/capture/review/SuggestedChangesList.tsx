@@ -104,7 +104,7 @@ export function SuggestedChangesList({
               Check these changes
             </h3>
             <p className="capture-review-progress" role="status">
-              Reviewed {opReviewed} of {opTotal}
+              Checked {opReviewed} of {opTotal}
             </p>
           </div>
           <div className="capture-changes-counts" aria-label="Review counts">

@@ -248,6 +248,8 @@ test.describe("Capture experience — annotated transcript", () => {
     );
     await openCapture(page);
     await expect(page.getByPlaceholder("Tell Lume what changed…")).toBeVisible();
+    const inputShot = walkthroughPath("capture_experience_input.png");
+    if (inputShot) await page.screenshot({ path: inputShot, fullPage: true });
     await analyseFrozenTranscript(page, frozen.transcript);
 
     const notes = page.getByTestId("annotated-transcript");
