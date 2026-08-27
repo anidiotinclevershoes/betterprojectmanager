@@ -220,6 +220,28 @@ export async function readMissionState(page: Page) {
   }, STORAGE_KEY);
 }
 
+export async function seedMissionState(
+  page: Page,
+  state: unknown,
+  testId: string,
+) {
+  await page.addInitScript(
+    ({ storageKey, sessionKey, stateJson, testId: runId }) => {
+      const marker = "lume-e2e-run";
+      if (window.sessionStorage.getItem(marker) === runId) return;
+      window.localStorage.setItem(storageKey, stateJson);
+      window.sessionStorage.removeItem(sessionKey);
+      window.sessionStorage.setItem(marker, runId);
+    },
+    {
+      storageKey: STORAGE_KEY,
+      sessionKey: CAPTURE_SESSION_KEY,
+      stateJson: JSON.stringify(state),
+      testId,
+    },
+  );
+}
+
 export async function writeStackedSnapshot(name: string, value: unknown) {
   const { mkdirSync, writeFileSync } = await import("node:fs");
   const { join } = await import("node:path");

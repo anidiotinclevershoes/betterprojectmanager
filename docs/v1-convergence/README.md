@@ -6,6 +6,7 @@ This folder is the Capture V2 **test / evaluation** workstream. Architecture (PR
 - Branch: `cursor/v1-convergence-test-foundation-610b`
 - Completion report: `TEST_FOUNDATION.md`
 - Stacked Capture regression: `STACKED_CAPTURE.md`
+- Deep stress (Harbourline): `DEEP_STRESS.md`
 - Test-debt inventory: `TEST_DEBT.md`
 - Vercel AI SDK spike: `VERCEL_AI_SDK_SPIKE.md`
 

@@ -25,7 +25,8 @@ Routine data-integrity confidence after architecture changes:
 - Visual polish / Magic Patterns feel
 - Whether the review flow feels calm
 
-Automated tests cannot judge product feel.
+See also: Deep stress journeys (`DEEP_STRESS.md`) — Harbourline Civic Archive, 50-event marathon, New Project brain-dump, PM handover. Separate from these three-world packs.
+
 
 ## Commands
 
