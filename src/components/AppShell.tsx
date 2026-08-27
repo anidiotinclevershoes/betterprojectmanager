@@ -5,12 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/app-shell/Sidebar";
 import { TopHeader } from "@/components/app-shell/TopHeader";
 import { CaptureSessionProvider } from "@/components/capture/CaptureSessionContext";
-import { CoachDrawer } from "@/components/coach/CoachDrawer";
-import { CoachResultsCard } from "@/components/coach/CoachResultsCard";
-import {
-  CoachSessionProvider,
-  useCoachSession,
-} from "@/components/coach/CoachSessionContext";
+import { CoachSessionProvider } from "@/components/coach/CoachSessionContext";
 import { TellMeSessionProvider } from "@/components/tell-me/TellMeSessionContext";
 import { EntitlementGate } from "@/components/billing/EntitlementGate";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
@@ -70,7 +65,6 @@ function AppShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { state, saveStatus, saveError } = useMission();
-  const { drawerOpen, openDrawer } = useCoachSession();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<{
@@ -111,12 +105,6 @@ function AppShellInner({ children }: { children: ReactNode }) {
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
-
-  useEffect(() => {
-    const open = () => openDrawer();
-    window.addEventListener("lume:open-coach", open);
-    return () => window.removeEventListener("lume:open-coach", open);
-  }, [openDrawer]);
 
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -223,7 +211,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className={`app-shell ${collapsed ? "sidebar-collapsed" : ""} ${drawerOpen ? "coach-open" : ""} ${activeProject ? "has-project-workspace" : ""}`}
+      className={`app-shell ${collapsed ? "sidebar-collapsed" : ""} ${activeProject ? "has-project-workspace" : ""}`}
       data-active-project={activeProject?.code ?? undefined}
       data-project-status={activeProject?.status ?? undefined}
     >
@@ -256,14 +244,9 @@ function AppShellInner({ children }: { children: ReactNode }) {
               maintained project truth. {saveError}
             </div>
           ) : null}
-          <div className="mb-4">
-            <CoachResultsCard />
-          </div>
           <EntitlementGate>{children}</EntitlementGate>
         </main>
       </div>
-
-      <CoachDrawer />
     </div>
   );
 }

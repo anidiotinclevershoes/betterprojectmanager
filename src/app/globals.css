@@ -8028,10 +8028,9 @@ body {
 
 .ocean-project-header {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
 }
 
 .ocean-project-title {
@@ -8040,12 +8039,14 @@ body {
   font-weight: 650;
   letter-spacing: -0.02em;
   color: var(--text-primary);
+  overflow-wrap: anywhere;
 }
 
 .ocean-project-subtitle {
   margin: 0.25rem 0 0;
   color: var(--text-muted);
   font-size: 0.88rem;
+  overflow-wrap: anywhere;
 }
 
 .ocean-delete-project {
@@ -8067,31 +8068,36 @@ body {
 }
 
 .ocean-mode-selector {
-  display: inline-flex;
-  gap: 0.35rem;
-  padding: 0.28rem;
-  border-radius: 12px;
-  border: 1px solid var(--border-subtle);
-  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 0.15rem;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: transparent;
 }
 
 .ocean-mode-tab {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.45rem 0.85rem;
-  border-radius: 9px;
-  border: 1px solid transparent;
+  padding: 0.55rem 0.95rem;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-weight: 560;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .ocean-mode-tab.is-selected {
-  background: color-mix(in srgb, var(--info) 18%, transparent);
-  border-color: color-mix(in srgb, var(--info) 35%, transparent);
+  background: color-mix(in srgb, var(--info) 10%, transparent);
+  border-bottom-color: var(--info);
   color: var(--text-primary);
 }
 
@@ -8278,10 +8284,10 @@ body {
 
 .ocean-knowledge-frames-primary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.85rem;
   align-items: stretch;
-  min-height: 28rem;
+  min-height: 26rem;
 }
 
 .ocean-knowledge-frames-secondary {
@@ -8293,11 +8299,15 @@ body {
 .ocean-knowledge-frame {
   display: flex;
   flex-direction: column;
-  min-height: 22rem;
+  min-height: 16rem;
   border-radius: 12px;
   border: 1px solid var(--border-subtle);
   background: var(--bg-surface);
   overflow: hidden;
+}
+
+.ocean-knowledge-frames-primary .ocean-knowledge-frame {
+  min-height: 26rem;
 }
 
 .ocean-knowledge-frame-header {
@@ -8575,6 +8585,11 @@ body {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.ocean-advise-soon,
+.ocean-catch-me-up-mode {
+  padding: 0;
+}
+
 .ocean-advise-soon {
   padding: 2rem;
   border: 1px dashed var(--border-subtle);
@@ -8589,6 +8604,9 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     min-height: 0;
   }
+  .ocean-knowledge-frames-primary .ocean-knowledge-frame {
+    min-height: 20rem;
+  }
   .ocean-search-ask-row {
     grid-template-columns: 1fr;
   }
@@ -8598,13 +8616,34 @@ body {
 }
 
 @media (max-width: 720px) {
+  .ocean-project-workspace {
+    padding-bottom: 1.5rem;
+  }
   .ocean-knowledge-frames-primary,
   .ocean-knowledge-frames-secondary {
     grid-template-columns: 1fr;
   }
+  .ocean-knowledge-frames-primary .ocean-knowledge-frame,
+  .ocean-knowledge-frame {
+    min-height: 0;
+  }
   .ocean-mode-selector {
     width: 100%;
-    overflow-x: auto;
+  }
+  .ocean-mode-tab {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 44px;
+    font-size: 0.82rem;
+    padding: 0.5rem 0.65rem;
+    white-space: normal;
+    text-align: center;
+  }
+  .ocean-intel-strip {
+    padding: 0.65rem 0.75rem;
+  }
+  .ocean-knowledge-item {
+    padding: 0.7rem 0.75rem;
   }
 }
 
@@ -8621,7 +8660,7 @@ body {
   border: 0;
   padding: 0;
   margin: 0;
-  background: rgba(4, 10, 24, 0.45);
+  background: rgba(6, 9, 14, 0.4);
   cursor: pointer;
 }
 
@@ -8629,17 +8668,20 @@ body {
   position: fixed;
   top: 0;
   right: 0;
+  bottom: 0;
   z-index: 71;
   display: flex;
   flex-direction: column;
-  width: min(420px, 100vw);
+  width: 26rem;
+  max-width: 100vw;
   height: 100vh;
-  background: #0b1528;
-  border-left: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+  max-height: 100dvh;
+  background: var(--bg-surface, #0b1528);
+  border-left: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
   color: var(--text-primary, #e8eef8);
-  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.35);
+  box-shadow: -24px 0 60px -30px rgba(0, 0, 0, 0.9);
   transform: translateX(100%);
-  transition: transform 0.2s ease;
+  transition: transform 0.22s ease;
 }
 
 .ocean-item-detail-drawer.is-open {
@@ -8657,10 +8699,18 @@ body {
 
 .ocean-item-detail-kicker {
   margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted, #8b9bb4);
+}
+
+.ocean-item-detail-heading {
+  margin: 0.35rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .ocean-item-detail-subtitle {
@@ -8675,7 +8725,8 @@ body {
   background: transparent;
   color: inherit;
   border-radius: 8px;
-  padding: 0.35rem 0.65rem;
+  padding: 0.4rem 0.7rem;
+  min-height: 44px;
   font-size: 0.8rem;
   cursor: pointer;
 }
@@ -8789,5 +8840,9 @@ body {
 @media (max-width: 720px) {
   .ocean-item-detail-drawer {
     width: 100vw;
+    padding-bottom: env(safe-area-inset-bottom, 0.75rem);
+  }
+  .ocean-item-detail-actions {
+    padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
   }
 }

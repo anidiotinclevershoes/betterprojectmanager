@@ -174,6 +174,7 @@ check("3. Closing detail is modeled as clearing selection (same KC)", () => {
     "src/components/knowledge-centre/KnowledgeItemDetailDrawer.tsx",
   );
   assert.match(drawer, /ocean-item-detail-drawer/);
+  assert.match(drawer, /data-overlay="true"/);
   assert.match(drawer, /Escape/);
 });
 

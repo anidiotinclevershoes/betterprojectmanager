@@ -1,5 +1,19 @@
 /**
  * Pure Ocean Knowledge frame row builders — used by UI and verify scripts.
+ *
+ * D-030 display precedence (presentation only — no mutate, no fuzzy match):
+ *
+ * 1. Risks & blockers: if the project has any domain `risks` rows (open, watch,
+ *    resolved, or accepted), that table is the sole current-truth source.
+ *    Knowledge `sections.risks` prose is not painted as peer open-risk cards.
+ *    Knowledge-only risk bullets appear only when the project has zero domain
+ *    risk rows (legacy projects that never dual-wrote Risks).
+ * 2. Important dates: domain `timeline` / milestones only.
+ * 3. Current position: structured `lifecycle=current` facts (`section=now` or
+ *    `kind=fact`) excluding `kind=date` and `kind=risk`. Fallback `sections.now`
+ *    lines are skipped when their `sectionItemIds` match a domain risk id,
+ *    timeline id, or a structured item that is non-current / date / risk.
+ *    Unlinked leftover sentences are preserved — no title/semantic matching.
  */
 import { emptyKnowledge } from "@/lib/knowledge";
 import {
@@ -13,17 +27,15 @@ import {
   isClosedRiskStatus,
   isOpenRiskStatus,
   isResolvedProse,
-  stripResolvedPrefix,
 } from "@/lib/risks/lifecycle";
+import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import type { MissionState } from "@/lib/types";
 
-export const OCEAN_PRIMARY_FRAMES = [
-  "Current position",
-  "Risks & blockers",
-  "To Do",
-] as const;
+/** v8 operational row — To Do + Risks, not Current position. */
+export const OCEAN_PRIMARY_FRAMES = ["To Do", "Risks & blockers"] as const;
 
 export const OCEAN_SECONDARY_FRAMES = [
+  "Current position",
   "People & context",
   "Dependencies",
   "Decisions",
@@ -42,6 +54,53 @@ export const OCEAN_SIDEBAR_FORBIDDEN = [
   "Capture",
 ] as const;
 
+export type OceanCurrentPositionRow = {
+  id: string;
+  title: string;
+  meta: string | null;
+  epistemic: string | null;
+  priority: PriorityDot;
+  itemId: string | null;
+  body: string;
+};
+
+function domainRisksForProject(state: MissionState, projectId: string) {
+  return (state.risks ?? []).filter((r) => r.projectId === projectId);
+}
+
+function domainOwnedIds(state: MissionState, projectId: string): Set<string> {
+  const ids = new Set<string>();
+  for (const risk of domainRisksForProject(state, projectId)) {
+    ids.add(risk.id);
+  }
+  for (const item of state.timeline ?? []) {
+    if (item.projectId === projectId) ids.add(item.id);
+  }
+  return ids;
+}
+
+function structuredById(
+  structured: CanonicalTruthItem[] | undefined,
+): Map<string, CanonicalTruthItem> {
+  const map = new Map<string, CanonicalTruthItem>();
+  for (const item of structured ?? []) {
+    map.set(item.id, item);
+  }
+  return map;
+}
+
+function isDomainKind(kind: CanonicalTruthItem["kind"] | undefined): boolean {
+  return kind === "date" || kind === "risk";
+}
+
+function isCurrentLifecycle(item: CanonicalTruthItem): boolean {
+  return !item.lifecycle || item.lifecycle === "current";
+}
+
+/**
+ * Open-risk cards for the Risks & blockers frame.
+ * Domain `risks` wins whenever the project has risk rows.
+ */
 export function buildOpenRiskRows(
   state: MissionState,
   projectId: string,
@@ -49,12 +108,10 @@ export function buildOpenRiskRows(
   const knowledge =
     state.knowledge.find((k) => k.projectId === projectId) ??
     emptyKnowledge(projectId);
+  const domain = domainRisksForProject(state, projectId);
   const rows: Array<{ id: string; title: string; priority: PriorityDot }> = [];
-  const domainTitles = new Set<string>();
 
-  for (const risk of state.risks ?? []) {
-    if (risk.projectId !== projectId) continue;
-    domainTitles.add(stripResolvedPrefix(risk.title).toLowerCase());
+  for (const risk of domain) {
     if (isClosedRiskStatus(risk.status)) continue;
     if (!isOpenRiskStatus(risk.status)) continue;
     rows.push({
@@ -64,20 +121,14 @@ export function buildOpenRiskRows(
     });
   }
 
+  // D-030: leftover Knowledge risk prose is not peer current truth when the
+  // domain risk model exists for this project — including all-resolved.
+  if (domain.length > 0) {
+    return rows;
+  }
+
   for (const [index, title] of (knowledge.sections.risks ?? []).entries()) {
     if (isResolvedProse(title)) continue;
-    const key = stripResolvedPrefix(title).toLowerCase();
-    if (domainTitles.has(key)) continue;
-    if (
-      (state.risks ?? []).some(
-        (r) =>
-          r.projectId === projectId &&
-          isClosedRiskStatus(r.status) &&
-          stripResolvedPrefix(r.title).toLowerCase() === key,
-      )
-    ) {
-      continue;
-    }
     rows.push({ id: `kr-${index}`, title, priority: "none" });
   }
   return rows;
@@ -92,6 +143,60 @@ export function buildTodoRows(state: MissionState, projectId: string) {
       title: t.title,
       meta: formatDueLabel(t.dueAt),
     }));
+}
+
+export function buildCurrentPositionRows(
+  state: MissionState,
+  projectId: string,
+): OceanCurrentPositionRow[] {
+  const knowledge =
+    state.knowledge.find((k) => k.projectId === projectId) ??
+    emptyKnowledge(projectId);
+  const owned = domainOwnedIds(state, projectId);
+  const byId = structuredById(knowledge.structured);
+
+  const structuredFacts = (knowledge.structured ?? []).filter((item) => {
+    if (!isCurrentLifecycle(item)) return false;
+    if (isDomainKind(item.kind)) return false;
+    if (item.kind !== "fact" && item.section !== "now") return false;
+    if (owned.has(item.id)) return false;
+    return true;
+  });
+
+  if (structuredFacts.length) {
+    return structuredFacts.map((item) => ({
+      id: item.id,
+      title: item.body,
+      meta: null,
+      epistemic: item.epistemic ?? null,
+      priority: "none" as PriorityDot,
+      itemId: item.id,
+      body: item.body,
+    }));
+  }
+
+  const ids = knowledge.sectionItemIds?.now;
+  const rows: OceanCurrentPositionRow[] = [];
+  for (const [idx, body] of (knowledge.sections.now ?? []).entries()) {
+    const itemId =
+      Array.isArray(ids) && typeof ids[idx] === "string" ? ids[idx] : null;
+    if (itemId && owned.has(itemId)) continue;
+    const overlay = itemId ? byId.get(itemId) : undefined;
+    if (overlay) {
+      if (!isCurrentLifecycle(overlay)) continue;
+      if (isDomainKind(overlay.kind)) continue;
+    }
+    rows.push({
+      id: itemId ?? `now-body:${body}`,
+      title: body,
+      meta: null,
+      epistemic: null,
+      priority: "none",
+      itemId,
+      body,
+    });
+  }
+  return rows;
 }
 
 export function buildPeopleRows(state: MissionState, projectId: string) {

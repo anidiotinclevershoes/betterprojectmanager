@@ -27,7 +27,7 @@ export default function ProjectDashboardPage() {
       data-project-id={project.id}
       data-project-code={project.code}
     >
-      <OceanProjectWorkspace project={project} />
+      <OceanProjectWorkspace key={project.id} project={project} />
     </div>
   );
 }
