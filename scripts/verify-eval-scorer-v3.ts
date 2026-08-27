@@ -42,6 +42,21 @@ function sha256File(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
+function resolveProductionSha(): string {
+  for (const ref of ["origin/main", "main", "HEAD"]) {
+    try {
+      return execSync(`git rev-parse ${ref}`, {
+        cwd: ROOT,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim();
+    } catch {
+      continue;
+    }
+  }
+  return "unavailable";
+}
+
 function check(name: string, fn: () => void | Promise<void>) {
   return Promise.resolve(fn()).then(() => console.log(`✓ ${name}`));
 }
@@ -684,10 +699,7 @@ async function main() {
     };
     assert.equal(historical.scorerVersion, CAPTURE_V2_EVAL_SCORER_V2);
 
-    const productionSha = execSync("git rev-parse origin/main", {
-      cwd: ROOT,
-      encoding: "utf8",
-    }).trim();
+    const productionSha = resolveProductionSha();
     const report = replayArchivedThroughCurrentProduction({ archive, productionSha });
     assert.equal(report.scorerVersion, CAPTURE_V2_EVAL_SCORER_V3);
     assert.equal(report.replayId, SCORER_V3_REPLAY_ID);

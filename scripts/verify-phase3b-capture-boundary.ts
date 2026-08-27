@@ -15,9 +15,16 @@ import {
   type CaptureApplyWorld,
   type CaptureLegalOperation,
 } from "../src/lib/capture/apply";
+import { memoryCaptureApplyHooks } from "../src/lib/capture/apply/memory-execute";
 import type { PendingSuggestion } from "../src/lib/capture/suggestions";
 import { buildSuggestions } from "../src/lib/capture/suggestions";
 import type { CaptureResult } from "../src/lib/types";
+import { experimentalMissionState } from "../src/lib/eval-capture-v2/mission-state";
+import {
+  persistTimelineUpdate,
+  persistTodoUpdate,
+} from "../src/lib/data/supabase/persist-mutations";
+import { FakeWorkspaceClient } from "./lib/fake-supabase-workspace";
 import { mapFindingToOperation } from "../src/lib/capture/findings/map";
 import {
   extractLocalFindings,
@@ -1470,6 +1477,326 @@ await check("wrong Person UUID cannot write when another recorded name is eviden
       },
     }),
     { world: shared },
+  );
+  assert.equal(decision.kind, "needs_you");
+  assert.equal(writes.length, 0);
+});
+
+await check("todo due-date update preserves the original title", async () => {
+  const sentence = "The jelly pack due date has moved to 8 October";
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "todo-due",
+      kind: "action",
+      op: "update",
+      content: sentence,
+      projectId: "proj-candy",
+      targetTodoId: "todo-pack",
+      date: "2026-10-08",
+    }),
+  );
+  assert.equal(decision.kind, "write");
+  assert.equal(writes[0]?.type, "update_todo");
+  if (writes[0]?.type !== "update_todo") throw new Error("expected update_todo");
+  assert.equal(writes[0].title, undefined);
+  assert.notEqual(writes[0].title, sentence);
+  assert.ok(writes[0].dueAt?.startsWith("2026-10-08"));
+});
+
+await check("todo detail update preserves the original title", async () => {
+  const sentence = "The jelly pack now also needs spare liquorice ropes";
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "todo-detail",
+      kind: "action",
+      op: "update",
+      content: sentence,
+      projectId: "proj-candy",
+      targetTodoId: "todo-pack",
+      recommendation: {
+        id: "rec-detail",
+        kind: "dependency",
+        urgency: "today",
+        title: sentence,
+        action: "Include spare liquorice ropes",
+        why: "Capture notes",
+        leadershipImpact: "",
+        createdAt: "2026-08-26T12:00:00.000Z",
+        status: "active",
+      },
+    }),
+  );
+  assert.equal(decision.kind, "write");
+  if (writes[0]?.type !== "update_todo") throw new Error("expected update_todo");
+  assert.equal(writes[0].title, undefined);
+  assert.equal(writes[0].detail, "Include spare liquorice ropes");
+});
+
+await check("todo complete preserves the original title", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "todo-done",
+      kind: "action",
+      op: "complete",
+      content: "We finished preparing the jelly pack this morning",
+      projectId: "proj-candy",
+      targetTodoId: "todo-pack",
+    }),
+  );
+  assert.equal(decision.kind, "write");
+  assert.equal(writes[0]?.type, "complete_todo");
+  if (writes[0]?.type !== "complete_todo") throw new Error("expected complete_todo");
+  assert.equal("title" in writes[0], false);
+});
+
+await check("milestone date update preserves the original label", async () => {
+  const sentence = "The spec freeze has moved to 9 October";
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "ms-identity",
+      kind: "milestone",
+      op: "update",
+      content: sentence,
+      projectId: "proj-candy",
+      targetEntityId: "ms-parade",
+      date: "2026-10-09",
+      proposedValues: {
+        label: sentence,
+        startAt: "2026-10-09T12:00:00.000Z",
+      },
+    }),
+  );
+  assert.equal(decision.kind, "write");
+  assert.equal(writes[0]?.type, "update_milestone");
+  if (writes[0]?.type !== "update_milestone") {
+    throw new Error("expected update_milestone");
+  }
+  assert.equal(writes[0].label, undefined);
+  assert.notEqual(writes[0].label, sentence);
+  assert.ok(writes[0].startAt?.startsWith("2026-10-09"));
+});
+
+await check("applied todo/milestone updates keep stable identity in memory", async () => {
+  const box = { state: experimentalMissionState() };
+  const hooks = memoryCaptureApplyHooks(box);
+  const todoDecision = planCaptureApply({
+    item: suggestion({
+      id: "mem-todo",
+      kind: "action",
+      op: "update",
+      content: "The jelly pack due date has moved to 8 October",
+      projectId: "proj-candy",
+      targetTodoId: "todo-pack",
+      date: "2026-10-08",
+    }),
+    text: "The jelly pack due date has moved to 8 October",
+    world: world(),
+    captureEntryProjectId: "proj-candy",
+  });
+  await executeCaptureApply(todoDecision, hooks);
+  const msDecision = planCaptureApply({
+    item: suggestion({
+      id: "mem-ms",
+      kind: "milestone",
+      op: "update",
+      content: "The spec freeze has moved to 9 October",
+      projectId: "proj-candy",
+      targetEntityId: "ms-parade",
+      date: "2026-10-09",
+    }),
+    text: "The spec freeze has moved to 9 October",
+    world: world(),
+    captureEntryProjectId: "proj-candy",
+  });
+  await executeCaptureApply(msDecision, hooks);
+
+  const todo = box.state.todos.find((t) => t.id === "todo-pack");
+  const milestone = box.state.timeline.find((t) => t.id === "ms-parade");
+  const toyTodo = box.state.todos.find((t) => t.id === "todo-track");
+  assert.equal(todo?.title, "Prepare the jelly pack");
+  assert.ok(todo?.dueAt?.startsWith("2026-10-08"));
+  assert.equal(milestone?.label, "Parade day");
+  assert.ok(milestone?.startAt?.startsWith("2026-10-09"));
+  assert.equal(toyTodo?.title, "Print the track map");
+  assert.equal(toyTodo?.dueAt, undefined);
+});
+
+await check("durable reload still has original todo title and milestone label", async () => {
+  const PROJECT_A = "11111111-1111-4111-8111-111111111111";
+  const PROJECT_B = "22222222-2222-4222-8222-222222222222";
+  const TODO_A = "aaaa1111-1111-4111-8111-aaaaaaaaaaaa";
+  const TODO_B = "bbbb2222-2222-4222-8222-bbbbbbbbbbbb";
+  const MS_A = "aa333333-3333-4333-8333-aaaaaaaaaaaa";
+  const MS_B = "bb333333-3333-4333-8333-bbbbbbbbbbbb";
+  const fake = new FakeWorkspaceClient();
+  fake.seedProject({
+    id: PROJECT_A,
+    workspace_id: fake.workspaceId,
+    name: "Project A",
+    code: "PA",
+  });
+  fake.seedProject({
+    id: PROJECT_B,
+    workspace_id: fake.workspaceId,
+    name: "Project B",
+    code: "PB",
+  });
+  fake.tables.todos.push(
+    {
+      id: TODO_A,
+      workspace_id: fake.workspaceId,
+      project_id: PROJECT_A,
+      title: "Scan specification freeze",
+      done: false,
+    },
+    {
+      id: TODO_B,
+      workspace_id: fake.workspaceId,
+      project_id: PROJECT_B,
+      title: "B todo",
+      done: false,
+    },
+  );
+  fake.tables.milestones.push(
+    {
+      id: MS_A,
+      workspace_id: fake.workspaceId,
+      project_id: PROJECT_A,
+      label: "Scan specification freeze",
+      type: "milestone",
+      start_on: "2026-10-01",
+    },
+    {
+      id: MS_B,
+      workspace_id: fake.workspaceId,
+      project_id: PROJECT_B,
+      label: "B date",
+      type: "milestone",
+      start_on: "2026-11-01",
+    },
+  );
+  const identityWorld = world({
+    projectIds: new Set([PROJECT_A, PROJECT_B]),
+    todos: [
+      { id: TODO_A, projectId: PROJECT_A, title: "Scan specification freeze" },
+      { id: TODO_B, projectId: PROJECT_B, title: "B todo" },
+    ],
+    timeline: [
+      {
+        id: MS_A,
+        projectId: PROJECT_A,
+        label: "Scan specification freeze",
+        startAt: "2026-10-01T12:00:00.000Z",
+      },
+      {
+        id: MS_B,
+        projectId: PROJECT_B,
+        label: "B date",
+        startAt: "2026-11-01T12:00:00.000Z",
+      },
+    ],
+  });
+  const todoDecision = planCaptureApply({
+    item: suggestion({
+      id: "persist-todo",
+      kind: "action",
+      op: "update",
+      content: "The spec freeze has moved to 9 October",
+      projectId: PROJECT_A,
+      targetTodoId: TODO_A,
+      date: "2026-10-09",
+    }),
+    text: "The spec freeze has moved to 9 October",
+    world: identityWorld,
+    captureEntryProjectId: PROJECT_A,
+  });
+  assert.equal(todoDecision.kind, "write");
+  if (todoDecision.kind !== "write" || todoDecision.operation.type !== "update_todo") {
+    throw new Error("expected update_todo");
+  }
+  await persistTodoUpdate(
+    fake as never,
+    fake.workspaceId,
+    PROJECT_A,
+    TODO_A,
+    {
+      title: todoDecision.operation.title,
+      detail: todoDecision.operation.detail,
+      dueAt: todoDecision.operation.dueAt,
+    },
+  );
+  const msDecision = planCaptureApply({
+    item: suggestion({
+      id: "persist-ms",
+      kind: "milestone",
+      op: "update",
+      content: "The spec freeze has moved to 9 October",
+      projectId: PROJECT_A,
+      targetEntityId: MS_A,
+      date: "2026-10-09",
+    }),
+    text: "The spec freeze has moved to 9 October",
+    world: identityWorld,
+    captureEntryProjectId: PROJECT_A,
+  });
+  assert.equal(msDecision.kind, "write");
+  if (
+    msDecision.kind !== "write" ||
+    msDecision.operation.type !== "update_milestone"
+  ) {
+    throw new Error("expected update_milestone");
+  }
+  await persistTimelineUpdate(
+    fake as never,
+    fake.workspaceId,
+    PROJECT_A,
+    MS_A,
+    {
+      label: msDecision.operation.label,
+      startAt: msDecision.operation.startAt,
+    },
+  );
+
+  const todoA = fake.tables.todos.find((row) => row.id === TODO_A);
+  const todoB = fake.tables.todos.find((row) => row.id === TODO_B);
+  const msA = fake.tables.milestones.find((row) => row.id === MS_A);
+  const msB = fake.tables.milestones.find((row) => row.id === MS_B);
+  assert.equal(todoA?.title, "Scan specification freeze");
+  assert.equal(todoA?.due_on, "2026-10-09");
+  assert.equal(todoB?.title, "B todo");
+  assert.equal(msA?.label, "Scan specification freeze");
+  assert.equal(msA?.start_on, "2026-10-09");
+  assert.equal(msB?.label, "B date");
+  assert.equal(msB?.start_on, "2026-11-01");
+});
+
+await check("foreign-project todo update remains isolated", async () => {
+  const { decision, writes } = await apply(
+    suggestion({
+      id: "todo-foreign",
+      kind: "action",
+      op: "update",
+      content: "Print the track map due date moved to 12 October",
+      projectId: "proj-candy",
+      targetTodoId: "todo-track",
+      date: "2026-10-12",
+    }),
+    {
+      world: world({
+        todos: [
+          {
+            id: "todo-pack",
+            projectId: "proj-candy",
+            title: "Prepare the jelly pack",
+          },
+          {
+            id: "todo-track",
+            projectId: "proj-toy",
+            title: "Print the track map",
+          },
+        ],
+      }),
+    },
   );
   assert.equal(decision.kind, "needs_you");
   assert.equal(writes.length, 0);

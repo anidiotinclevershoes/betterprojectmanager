@@ -521,10 +521,12 @@ async function main() {
     assert.match(route, /postCaptureV2/);
     assert.match(route, /ignoredClientTruth/);
     const v2Fn = route.slice(route.indexOf("async function postCaptureV2"));
-    const v2Body = v2Fn.slice(0, v2Fn.indexOf("async function postCaptureLegacy"));
-    assert.doesNotMatch(v2Body, /worldFromCaptureState\(\{[\s\S]*body\.state/);
-    assert.doesNotMatch(v2Body, /body\.state\?\.projects/);
-    assert.match(v2Body, /loadServerCaptureWorld/);
+    assert.doesNotMatch(route, /postCaptureLegacy/);
+    assert.doesNotMatch(route, /tidyAndCoachWithOpenAI/);
+    assert.doesNotMatch(route, /isCaptureV2Enabled\(\)/);
+    assert.doesNotMatch(v2Fn, /worldFromCaptureState\(\{[\s\S]*body\.state/);
+    assert.doesNotMatch(v2Fn, /body\.state\?\.projects/);
+    assert.match(v2Fn, /loadServerCaptureWorld/);
 
     const apply = readFileSync(
       join(ROOT, "src/app/api/capture/apply/route.ts"),
@@ -534,6 +536,8 @@ async function main() {
     assert.match(apply, /loadServerCaptureWorld/);
     assert.match(apply, /planCaptureApply|applyApprovedCaptureSuggestion/);
     assert.doesNotMatch(apply, /body\.state/);
+    assert.doesNotMatch(apply, /isCaptureV2Enabled/);
+    assert.doesNotMatch(apply, /v2_disabled/);
     assert.match(apply, /requireAiCaller/);
   });
 
@@ -543,6 +547,8 @@ async function main() {
       "utf8",
     );
     assert.match(client, /fetch\("\/api\/capture\/apply"/);
+    assert.doesNotMatch(client, /planCaptureApply/);
+    assert.doesNotMatch(client, /executeCaptureApply/);
     const applyBlock = client.slice(client.indexOf("/api/capture/apply"));
     const payload = applyBlock.slice(
       applyBlock.indexOf("JSON.stringify"),

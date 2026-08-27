@@ -128,13 +128,20 @@ function planTodo(
     if (!requireTodoOnProject(world, projectId, todoId)) {
       return needsYou("todo", "This To Do cannot be updated — the target is not on this project.");
     }
+    const detail = item.recommendation?.action;
+    const dueAt = item.date;
+    if (!dueAt && detail === undefined) {
+      return needsYou(
+        "todo",
+        "This To Do update is not specific enough to apply automatically.",
+      );
+    }
     return write("todo", {
       type: "update_todo",
       projectId,
       todoId,
-      title: text,
-      detail: item.recommendation?.action,
-      dueAt: item.date,
+      detail,
+      dueAt,
     });
   }
   if (item.op !== "create") {
@@ -274,13 +281,13 @@ function planMilestone(
       parseIsoDate(asString(values.date));
     const currentDay = isoDay(byId.startAt);
     const nextDay = isoDay(nextDate);
-    if (nextDay && currentDay && nextDay === currentDay && !asString(values.label)) {
+    if (nextDay && currentDay && nextDay === currentDay) {
       return noChange("milestone", "This date is already recorded.");
     }
-    if (!nextDate && !asString(values.label) && text === byId.label) {
-      return noChange("milestone", "This date is already recorded.");
-    }
-    if (!nextDate && !asString(values.label) && !item.date) {
+    if (!nextDate) {
+      if (text === byId.label) {
+        return noChange("milestone", "This date is already recorded.");
+      }
       return needsYou(
         "milestone",
         "This date change is not specific enough to apply automatically.",
@@ -290,7 +297,6 @@ function planMilestone(
       type: "update_milestone",
       projectId,
       milestoneId: byId.id,
-      label: text || byId.label,
       startAt: nextDate,
     });
   }
