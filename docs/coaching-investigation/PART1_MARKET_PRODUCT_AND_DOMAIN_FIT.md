@@ -211,13 +211,23 @@ This is the most important section of the research.
 | --- | --- | --- | --- |
 | **Wundamental** | €29 / €59 / €99 / €159 per month; 3 free sessions | Records sessions; session recaps with progress tracking; ICF ACC/PCC/MCC competency benchmarking with transcript-linked evidence; **cross-session pattern detection**; **longitudinal client dashboard**; AI chat with full context across entire session history; client progress portal; sponsor ROI evidence; states GDPR-safe | **Yes — core** |
 | **Coachful** | Not published in research | *"The coaching CRM that remembers your clients for you."* *"Your client memory is scattered across five different apps."* One client view with goals, notes, tags, tasks, intake; **AI briefing per client** pulling calls, tasks, habits, goals; *"Show up to every call already prepared."* *"Stop forgetting your clients."* | Calls summarised |
-| **CoachNova** | €19 per active client | AI "twin" trained on the coach's sessions and archive; **themes tracked**; goals followed from session two into session six; nudges drafted in the coach's voice; monetises *former* clients with an ongoing AI relationship | Session-derived |
+| **CoachNova** | **Free for 2 months with one client, then €19 per active client per month** (≈€380/month at 20 clients) | AI "twin" trained on the coach's sessions and archive; **themes tracked and counted** (their own screenshot shows *"avoidance · 3× · pacing · 2× · scope · new"* and *"Avoidance under pressure — 3 sessions"*); goals followed from session two into session six; commitments tracked ("Friday 90-min block · 3 of 4 held · since session 2"); nudges drafted in the coach's voice for the coach to sign off; monetises *former* clients at €50–500/month. Headline: **"Walk into every session knowing where you left off."** Claims 70+ coaches interviewed, 40 co-building, a named design cohort with photos and LinkedIn links, a cohort stock-option pool, and alignment with ICF and EMCC ethics codes | Session-derived |
 | **Osmo** | Launched June 2026 | Captures and analyses coaching sessions in real time; automates admin; data-backed insights; claims up to 60% admin reduction. Founded by ex-NVIDIA product leader Antons Davis, San Francisco | **Yes — core** |
 | **CoachBase** | Not published | Centralised client timeline with AI summaries; strong craft-led content marketing on session notes | Partial |
 | **Kaido** | Not published | Session tracking, notes craft content | — |
 | **AgentCoach (Ability.ai)** | Custom, 4–6 week build | Client-facing AI coach agent with comprehensive memory across interactions | N/A |
 
 **Verdict on crowding: rapidly crowding, and the specific "client memory" positioning is already claimed.** Note the shared architectural commitment: with the partial exception of Coachful, every one of these begins with a recorded or transcribed session. That is the seam.
+
+Three details from CoachNova's site are worth isolating because they change decisions elsewhere in this report.
+
+**They own the obvious headline.** *"Walk into every session knowing where you left off."* This was, independently, the phrasing this investigation had arrived at as the strongest available proposition. It is taken. Section G and section V have been revised accordingly, and the collision is a useful warning: the obvious line in this category is obvious to everybody.
+
+**They are already doing the thing section N warns against.** Their own product screenshots display a client tagged *"avoidance · 3×"* and a panel headed *"Tracked across this engagement — Avoidance under pressure · 3 sessions."* That is a psychological characterisation of a named individual, counted and displayed. It validates the risk described in section N, and it is a concrete differentiation opportunity: a product that will not do that, and says so, is making a claim a competitor cannot match without changing its own screenshots.
+
+**Their price is far above the range in the brief.** €19 per *active client* per month means a coach with twenty clients pays around €380 a month. That is not a memory price; it is priced against *revenue expansion* (continuity income from former clients at €50–500 each). The read for section S is that coaches will discuss much larger numbers when the frame is revenue rather than time saved — but that a memory-only companion cannot borrow that anchor, because it does not make the coach any money.
+
+Note also that CoachNova's competitive framing explicitly targets ChatGPT — *"Unsupervised. Flatters back. No coach in the loop"* — alongside the observation that *"1.1B people use ChatGPT weekly. 420M of those conversations are about life and work. No coach in any of them."* They have correctly identified that the real competitor is not other coaching software.
 
 ### D4. Adjacent substitutes
 
@@ -333,6 +343,14 @@ Lume's locked rule — *nothing becomes maintained truth until the user has revi
 
 A competitor who stores a summary per session can search the summaries. They cannot tell you the date a belief changed, or show you the exact sentence that changed it, because they never modelled beliefs as things that change. Lume did, from the beginning, and it is the single most transferable piece of the data model.
 
+### F4a. A fifth, smaller gap: restraint as a feature
+
+Related to F3 but worth separating, because it is marketable in a way the others are not. Competitors are actively racing toward characterising the client — counted themes, tracked traits, progress arcs, ROI evidence. A product that publicly commits to *not* doing that (see section N) can make a promise none of them can:
+
+> *"This organises what you write. It does not assess, diagnose, score or form opinions about your clients."*
+
+That sentence is a differentiator, an ethics position, and a roadmap constraint at the same time. Its value is that it is costly to say — a competitor who has already shipped theme-tagging cannot adopt it without deleting a feature from their homepage.
+
 ### F5. Explicitly not gaps
 
 Session notes. Templates. AI session summaries. Pre-session briefs *in general* (Coachful ships one). Goal tracking with progress bars. Commitment/accountability tracking (CoachAccountable's entire product). Client portals. Scheduling. Billing. Contracts. Course delivery. ICF competency feedback. Sponsor ROI reporting. Do not build any of these and do not claim any of them.
@@ -349,21 +367,27 @@ Session notes. Templates. AI session summaries. Pre-session briefs *in general* 
 
 The brief's alternative ad line — *"Your client remembers what they told you six months ago. Do you?"* — is a strong **hook** and a weak **proposition**. It is accusatory, and coaching culture is built on non-judgement; a profession that prizes unconditional positive regard will notice being shamed by an advert. Test it as a high-variance ad headline; do not build the brand on it.
 
-### G2. Recommended proposition
+### G2. A near-miss worth recording
 
-> **Walk into every session like they're your only client.**
+This investigation independently arrived at *"Walk into every session like they're your only client"* as the strongest available line — and then found that CoachNova's live site reads **"Walk into every session knowing where you left off."** Same verb, same moment, same promise. The obvious line in this category is obvious to everybody, which is itself a measure of how crowded it has become. Both the hero and the natural tagline ("Where we left off") are therefore unavailable, and the recommendation below is the revised one.
+
+### G3. Recommended proposition
+
+> **Everything they've told you. Ready before you are.**
 >
-> You write a few lines after each session. Before the next one, you get the whole picture back — what they committed to, who's in their world, what's changed, and what you left unfinished.
+> Write a few lines after each session. Before the next one, get the whole picture back — what they committed to, who's in their world, what's changed, and what you left unfinished.
 >
-> **Your sessions are never recorded. Nothing enters a client's picture until you've approved it.**
+> **We're never in the room. Nothing enters a client's picture until you've approved it.**
 
-Why this works where the candidate does not: it puts the coach, not the software, in the subject position. "Walk into" is the moment of value — the doorway, the Zoom join, the two minutes before. "Like they're your only client" is a professional-pride outcome rather than a memory-deficit accusation. And the third line does the differentiation in eighteen words, unprompted.
+Why this survives where the alternatives do not. It puts the *client's disclosures* in the subject position rather than the coach's memory, which sidesteps the accusation entirely — nobody is being told they forget. "Ready before you are" carries the whole product in four words: it is already done, and it is waiting. It does not collide with any competitor copy found in this research. And the third line does the differentiation in fifteen words, unprompted, which matters because the differentiation is the part competitors cannot copy.
 
-### G3. The one-sentence version
+The strongest alternative, and the better line for search traffic where intent is already formed, is **"Six months of context. Sixty seconds."**
+
+### G4. The one-sentence version
 
 > **The place a coach keeps what they know about each client, so that six months of context takes sixty seconds to get back.**
 
-### G4. What the product is emphatically not
+### G5. What the product is emphatically not
 
 Not a CRM. Not a practice-management suite. Not a scheduling or billing tool. Not a client portal — the client never logs in and never sees anything. Not an AI coach — it never speaks to the client. Not a notetaker — it is not in the room. Not a supervision or competency-assessment tool. Not a reporting tool for sponsors.
 
@@ -839,6 +863,8 @@ Yes — it is the single largest ethical and commercial risk in the product, and
 
 The mechanism is drift. A model asked to identify patterns across twelve sessions will, unprompted, produce trait language, because trait language is how the training corpus discusses recurring human behaviour. *"Delegation came up four times"* becomes *"a pattern of over-control"* becomes *"she struggles to trust her team"* in three unremarkable prompt iterations. Nobody decides to build a profiling tool; the product drifts into one.
 
+**This is not hypothetical, and a competitor has already arrived at the far end of the drift.** CoachNova's own marketing screenshots show a named client tagged *"avoidance · 3× · pacing · 2× · scope · new"*, under a panel headed *"Tracked across this engagement — Avoidance under pressure · 3 sessions."* That is a counted psychological characterisation of an individual, displayed as a product feature, by a company that also states alignment with the ICF and EMCC ethics codes. Whether or not it causes them a problem, it establishes two things: the drift is real and it happens to serious teams, and there is a clear, currently unoccupied position on the other side of it.
+
 The consequence is not embarrassment. A coach whose screen displays an AI-generated psychological characterisation of a named executive has, depending on jurisdiction, created a document that could be disclosable, that they are not qualified to have authored, and that would end the coaching relationship if the client saw it.
 
 **Safeguards, all required:**
@@ -1082,7 +1108,9 @@ Plan accordingly. This is a product to run profitably and narrowly, not one to d
 
 Simply.Coach $9 · Granola $14 · CoachNova €19 per active client · CoachAccountable $20 (2 clients) rising to ~$70 (10) and ~$120 (20) · ChatGPT Plus $20 · Quenza $25 · Delenta and CoachVantage $29 · Wundamental €29 → €99 · Practice ~$35–39 · Paperbell $47.50–57.
 
-Two constraints follow. This product is a **companion**, not a suite replacement, so it competes for a *second* subscription slot alongside something the coach already pays for — which caps the price. And it must not be cheap: €9–€19 signals a toy to a professional billing $300 an hour, and CoachNova already anchors the per-client model at €19.
+Two constraints follow. This product is a **companion**, not a suite replacement, so it competes for a *second* subscription slot alongside something the coach already pays for — which caps the price. And it must not be cheap: €9–€19 signals a toy to a professional billing $300 an hour.
+
+One anchor deserves separating out, because it is easy to misread. CoachNova charges **€19 per active client per month**, which is roughly **€380 a month** for a twenty-client practice — an order of magnitude above anything else in the category. That is not a memory price. It is priced against *revenue expansion*: their pitch is that former clients keep paying €50–500 a month for continued access, so the subscription funds itself several times over. The lesson is that coaches will discuss large numbers **when the product makes them money**, and the trap is concluding that this product can borrow that anchor. It cannot. A memory-only companion saves time and improves preparedness; it does not generate revenue, and pricing it as though it did would fail loudly.
 
 ### S2. Recommendation
 
@@ -1157,26 +1185,26 @@ The two headline findings. **ICF chapter advertising is extraordinarily cheap fo
 
 ### T2. Acquisition propositions, ranked
 
-**1. "Walk into every session like they're your only client."**
-Outcome-led, appeals to professional pride, avoids accusation, and hard to say without describing the product. The strongest all-round line and the recommended default.
+**1. "Everything they've told you. Ready before you are."**
+Outcome-led, appeals to professional pride, avoids accusation, and — importantly — collides with nothing found in this research. The recommended default.
 
-**2. "Your prep, done. Before every session."**
-Concrete, immediately understood, sells to the calendar rather than the ego. Likely the best-converting line on search traffic, where intent is already formed and the reader wants to know what it does.
+**2. "Six months of context. Sixty seconds."**
+Clean, quantified, benefit-forward. Likely the best-converting line on search traffic, where intent is already formed and the reader wants to know what it does, fast.
 
-**3. "Never record a session. Never forget one either."**
-The differentiator in eight words. Only fully legible to coaches who have already worried about AI notetakers — but that is a growing and self-selecting group, and this line converts them hard. The best line for ICF and training-school audiences, where the ethics conversation is live.
+**3. "Never in the room. Never lose the thread."**
+The differentiator in eight words. Only fully legible to coaches who have already worried about AI notetakers — but that is a growing, self-selecting group, and this line converts them hard. The best line for ICF chapter and training-school audiences, where the ethics conversation is live.
 
 **4. "Coaching software tracks your client. It doesn't track the people around them."**
-The sharpest *competitive* line, aimed at coaches who already own a suite and are wondering why they need anything else. Narrow, but it wins the comparison directly.
+The sharpest *competitive* line, aimed at coaches who already own a suite and are wondering why they need anything else. Narrow, but it wins the comparison directly and nobody else can run it.
 
 **5. "Your client remembers what they told you six months ago. Do you?"** *(from the brief)*
 High-variance. It will earn attention because it stings. It stings because it accuses a professional of a lapse in the thing they are proudest of, in a profession culturally committed to non-judgement. Expect a good click-through rate and a poor conversion rate, and expect a proportion of the audience to dislike you for it. **Test it precisely because it is high-variance** — it may well win on cold traffic — but do not make it the brand.
 
-**6. "Six months of context in sixty seconds."**
-Clean, quantified, benefit-forward, and slightly generic. A good subhead; a weak hero.
-
-**7. "Stop rereading three months of notes before every call."**
+**6. "Stop rereading three months of notes before every call."**
 Pain-first and very concrete. Works well as an ad body line under any of the above. Weak as a hero because it describes a chore rather than an outcome.
+
+**7. "Walk into every session like they're your only client."** *(now unavailable)*
+Recorded here only to note that it is out. CoachNova's live headline is *"Walk into every session knowing where you left off"*, which is close enough that running this would read as imitation to anyone who had seen both. Same reasoning retires the natural tagline *"Where we left off."*
 
 Note that the recommended ranking puts *pride* and *time* above *accusation* and *fear*. That is a judgement about this audience specifically: coaches are self-employed professionals whose entire craft is holding people without judging them, and marketing that judges them will be noticed as such.
 
@@ -1253,7 +1281,7 @@ Where We Left Off · Last Time · Before The Session
 
 **Dark horse: Holdfast** — the most distinctive and the least likely to be contested, at the cost of needing a sentence of explanation.
 
-Whichever is chosen, pair it with the tagline that does the actual work: **"Where we left off."**
+Whichever is chosen, pair it with a tagline that does the actual work. The natural candidate — *"Where we left off"* — is unavailable, because CoachNova's headline is *"Walk into every session knowing where you left off."* Use instead: **"Nothing lost between sessions."** Or, if the brand is Throughline, simply **"Hold the thread."**
 
 *(An automated conflict and domain-signal check was commissioned as part of this investigation; where its findings are available they should be appended to this section before any naming commitment. Nothing here constitutes legal clearance.)*
 
@@ -1265,13 +1293,13 @@ The site must sell the outcome. It must not explain language models, must not us
 
 ### V1. Hero
 
-> # Walk into every session like they're your only client.
+> # Everything they've told you. Ready before you are.
 >
 > Write a few lines after each session. Before the next one, get the whole picture back — what they committed to, who's in their world, what's changed, and what you left unfinished.
 >
 > **[ Start with one client ]**  ·  30 days free, no card
 >
-> *Your sessions are never recorded. Nothing enters a client's picture until you've approved it.*
+> *We're never in the room. Nothing enters a client's picture until you've approved it.*
 
 The CTA describes the first action rather than the transaction. "Start with one client" is honest about what happens next, sets an achievable expectation, and removes the implied obligation to migrate a practice.
 
