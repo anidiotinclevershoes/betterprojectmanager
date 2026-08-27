@@ -42,7 +42,7 @@ test.describe("Capture V2 frozen journeys", () => {
     const frozen = await mockLocalAuthAndFrozenCapture(page, "risk-resolution");
     await openCapture(page);
     await analyseFrozenTranscript(page, frozen.transcript);
-    await expect(page.getByRole("button", { name: /Resolve Risk/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Apply Ready/i })).toBeVisible();
     const riskShot = walkthroughPath("capture_v2_risk_review.png");
     if (riskShot) await page.screenshot({ path: riskShot, fullPage: true });
     await applyReadyIfPresent(page);
@@ -110,7 +110,15 @@ test.describe("Capture V2 frozen journeys", () => {
     await openCapture(page);
     await analyseFrozenTranscript(page, frozen.transcript);
     await expect(page.getByText(/Needs Review|Needs you/i).first()).toBeVisible();
+    await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
+    await expect(
+      page.getByText(/Pippa Gumdrop already owns UAT lead/i),
+    ).toBeVisible();
+    await expect(page.getByTestId("review-ownership-share")).toBeVisible();
+    await expect(page.getByTestId("review-ownership-replace")).toBeVisible();
+    await expect(page.getByTestId("review-ownership-keep")).toBeVisible();
     await expect(page.locator(".capture-apply-ready-btn")).toHaveCount(0);
+    await page.getByTestId("review-ownership-keep").click();
     await openKnowledgeCentre(page);
     await expect(
       page.getByTestId("ocean-frame-people").getByText("Pippa Gumdrop"),
@@ -152,6 +160,77 @@ test.describe("Capture V2 frozen journeys", () => {
     await expect(page.getByText(/candy-cane banners/i)).toHaveCount(0);
     const isoShot = walkthroughPath("capture_v2_toyworld_isolation.png");
     if (isoShot) await page.screenshot({ path: isoShot, fullPage: true });
+  });
+});
+
+test.describe("Capture Review Needs-you interactions", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await seedExperimentalWorlds(page, testInfo.testId);
+  });
+
+  test("sibling Apply Ready does not freeze the ownership card", async ({
+    page,
+  }) => {
+    const frozen = await mockLocalAuthAndFrozenCapture(
+      page,
+      "sibling-ready-and-needs-you",
+    );
+    await openCapture(page);
+    await analyseFrozenTranscript(page, frozen.transcript);
+    await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Apply Ready \(1\)/i }),
+    ).toBeVisible();
+    await applyReadyIfPresent(page);
+    await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
+    await expect(
+      page.getByText(/Fizz Caramel|Share with Fizz/i).first(),
+    ).toBeVisible();
+    await page.getByTestId("review-ownership-share").click();
+    await expect(page.getByText("Approved").first()).toBeVisible();
+  });
+
+  test("missing milestone date asks for a date and does not invent today", async ({
+    page,
+  }) => {
+    const frozen = await mockLocalAuthAndFrozenCapture(
+      page,
+      "milestone-date-missing",
+    );
+    await openCapture(page);
+    await analyseFrozenTranscript(page, frozen.transcript);
+    await expect(page.getByTestId("review-missing-date")).toBeVisible();
+    await expect(page.getByText(/What date should I use for Parade day/i)).toBeVisible();
+    const dateInput = page.getByTestId("review-missing-date-input");
+    await expect(dateInput).toHaveValue("");
+    await dateInput.fill("2026-10-29");
+    await page.getByTestId("review-missing-date-apply").click();
+    await openKnowledgeCentre(page);
+    await expect(page.getByTestId("ocean-frame-dates").getByText("Parade day")).toBeVisible();
+    await expect(page.getByTestId("ocean-frame-dates").getByText(/29 Oct/)).toBeVisible();
+  });
+
+  test("named existing target offers update vs create, without fuzzy matching", async ({
+    page,
+  }) => {
+    const frozen = await mockLocalAuthAndFrozenCapture(
+      page,
+      "existing-or-new-uncertain",
+    );
+    await openCapture(page, TOYWORLD_ID);
+    await analyseFrozenTranscript(page, frozen.transcript);
+    await expect(page.getByTestId("review-existing-or-new")).toBeVisible();
+    await expect(
+      page.getByText(/existing “Packaging delay” risk/i),
+    ).toBeVisible();
+    await expect(page.getByTestId("review-existing-or-new-update")).toHaveText(
+      /Update Packaging delay/,
+    );
+    await expect(page.getByTestId("review-existing-or-new-create")).toHaveText(
+      /Create a new risk/,
+    );
+    await page.getByTestId("review-existing-or-new-update").click();
+    await expect(page.getByRole("button", { name: "Approve" })).toBeVisible();
   });
 });
 

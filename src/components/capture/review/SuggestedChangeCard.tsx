@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import type { ReviewChangeViewModel } from "@/lib/capture/review/viewModel";
+import type { ReviewOwnerHit } from "@/lib/capture/review/reviewReason";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
 import { CompactChangeCard } from "./CompactChangeCard";
 import { WhyPanel } from "./WhyPanel";
@@ -24,6 +25,9 @@ export function SuggestedChangeCard({
   onCreateNew,
   onResolve,
   onChangeEntityKind,
+  onChooseOwnership,
+  onProvideDate,
+  currentOwners = [],
   initialWhyOpen = false,
   highlighted = false,
 }: {
@@ -43,6 +47,12 @@ export function SuggestedChangeCard({
   onCreateNew?: () => void;
   onResolve?: () => void;
   onChangeEntityKind?: (kind: SuggestionKind) => void;
+  onChooseOwnership?: (
+    choice: "share" | "replace" | "keep",
+    replacePersonId?: string | null,
+  ) => void;
+  onProvideDate?: (isoDate: string) => void;
+  currentOwners?: ReviewOwnerHit[];
   initialWhyOpen?: boolean;
   highlighted?: boolean;
 }) {
@@ -65,6 +75,8 @@ export function SuggestedChangeCard({
     onDismiss,
     onApprove,
     onChangeEntityKind: (kind) => onChangeEntityKind?.(kind),
+    onChooseOwnership,
+    onProvideDate,
   };
 
   return (
@@ -111,6 +123,7 @@ export function SuggestedChangeCard({
                 model={model}
                 targetOptions={targetOptions}
                 handlers={handlers}
+                currentOwners={currentOwners}
               />
             ) : (
               <div className="compact-change-action-row">

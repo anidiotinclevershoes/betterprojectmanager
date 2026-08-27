@@ -1,0 +1,112 @@
+{
+  "caseId": "sibling-ready-and-needs-you",
+  "transcript": "The icing on Gumdrop Bridge has melted; that risk is closed. Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it.",
+  "result": {
+    "memory": {
+      "id": "mem-sibling-ready-needs-you",
+      "type": "conversation",
+      "projectId": "proj-candy",
+      "title": "Bridge closed; UAT ownership unclear",
+      "content": "The icing on Gumdrop Bridge has melted; that risk is closed. Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T12:00:00.000Z",
+      "createdAt": "2026-08-26T12:00:00.000Z",
+      "source": "capture"
+    },
+    "insights": [],
+    "assumptions": [],
+    "recommendations": [],
+    "rawContent": "The icing on Gumdrop Bridge has melted; that risk is closed. Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-candy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 2,
+      "proposedChanges": 1,
+      "alreadyKnown": 0,
+      "merged": 0,
+      "needsYou": 1,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-bridge-closed",
+        "fact": "Gumdrop Bridge icing is resolved",
+        "evidence": "The icing on Gumdrop Bridge has melted; that risk is closed.",
+        "findingType": "ENTITY_COMPLETED",
+        "target": {
+          "entityType": "risk",
+          "entityId": "risk-bridge",
+          "title": "Gumdrop Bridge icing"
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Gumdrop Bridge icing is resolved",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      },
+      {
+        "id": "find-obs-share-replace",
+        "fact": "UAT may be shared or replaced between Fizz and Pippa",
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it.",
+        "findingType": "AMBIGUOUS",
+        "confidence": 0,
+        "requiresClarification": true,
+        "clarificationQuestion": "Share versus replace is not decided.",
+        "reasoningSummary": "UAT may be shared or replaced between Fizz and Pippa",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-bridge-closed",
+        "sourceFindingId": "find-obs-bridge-closed",
+        "operation": "COMPLETE",
+        "entityType": "risk",
+        "targetId": "risk-bridge",
+        "targetTitle": "Gumdrop Bridge icing",
+        "proposedValues": {
+          "status": "resolved"
+        },
+        "reason": "Gumdrop Bridge icing is resolved",
+        "evidence": "The icing on Gumdrop Bridge has melted; that risk is closed.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      },
+      {
+        "id": "v2op-obs-share-replace",
+        "sourceFindingId": "find-obs-share-replace",
+        "operation": "NO_CHANGE",
+        "entityType": "stakeholder",
+        "targetTitle": "UAT may be shared or replaced between Fizz and Pippa",
+        "proposedValues": {
+          "ownershipSemantics": "ambiguous",
+          "scope": "UAT lead",
+          "personName": "Fizz Caramel"
+        },
+        "reason": "Share versus replace is not decided.",
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": true,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ]
+  }
+}

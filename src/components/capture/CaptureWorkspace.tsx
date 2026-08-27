@@ -25,6 +25,9 @@ import type { TargetOption } from "@/components/capture/review/TargetPicker";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
 import { KIND_LABEL } from "@/lib/capture/suggestions";
 import { ConfirmOwnerDialog } from "@/components/intelligence/ConfirmOwnerDialog";
+import type { OwnershipIntent } from "@/lib/people/confirm-owner-choice";
+import { findConfirmedOwners } from "@/lib/people/identity";
+import type { ReviewOwnerHit } from "@/lib/capture/review/reviewReason";
 
 type CaptureBlock = {
   id: string;
@@ -126,6 +129,8 @@ export function CaptureWorkspace({
     scope: string;
     personName: string;
     personId?: string | null;
+    intent?: OwnershipIntent | null;
+    replacePersonId?: string | null;
   } | null>(null);
   const recordingIdRef = useRef<string | null>(null);
   const pushingContentRef = useRef(false);
@@ -361,6 +366,23 @@ export function CaptureWorkspace({
     state.timeline,
   ]);
 
+  const ownersByCardId = useMemo(() => {
+    const map: Record<string, ReviewOwnerHit[]> = {};
+    for (const m of reviewModels) {
+      const scope = m.suggestion.responsibilityScope?.trim();
+      if (!scope) continue;
+      const pid = m.projectId || defaultProjectId;
+      if (!pid) continue;
+      const knowledge = state.knowledge.find((k) => k.projectId === pid);
+      map[m.id] = findConfirmedOwners(knowledge, scope).map((o) => ({
+        personId: o.personId,
+        personName: o.personName,
+        scope: o.scope,
+      }));
+    }
+    return map;
+  }, [reviewModels, state.knowledge, defaultProjectId]);
+
   function approveById(id: string) {
     const model = reviewModels.find((m) => m.id === id);
     if (!model) return;
@@ -485,6 +507,77 @@ export function CaptureWorkspace({
       readiness: "ready",
       reviewReason: null,
     });
+  }
+
+  function onChooseOwnership(
+    id: string,
+    choice: "share" | "replace" | "keep",
+    replacePersonId?: string | null,
+  ) {
+    if (choice === "keep") {
+      dismissOne(id);
+      return;
+    }
+    const model = reviewModels.find((m) => m.id === id);
+    if (!model) return;
+    const personName = model.suggestion.personName?.trim() || "";
+    const scope = model.suggestion.responsibilityScope?.trim() || "";
+    const projectId =
+      model.projectId || defaultProjectId || effectiveProjectId;
+    const next = {
+      ...model.suggestion,
+      ownershipSemantics: choice,
+      replacePersonId:
+        choice === "replace" ? replacePersonId ?? undefined : undefined,
+      proposedValues: {
+        ...(model.suggestion.proposedValues ?? {}),
+        ownershipSemantics: choice,
+        ...(choice === "replace" && replacePersonId
+          ? { replacePersonId }
+          : {}),
+      },
+    };
+    updateSuggestion(id, {
+      ownershipSemantics: choice,
+      replacePersonId:
+        choice === "replace" ? replacePersonId ?? undefined : undefined,
+    });
+    if (!personName || !scope || !projectId) {
+      if (projectId && scope) {
+        setConfirmOwner({
+          suggestionId: id,
+          projectId,
+          scope,
+          personName,
+          personId: model.suggestion.personId ?? null,
+          intent: choice,
+          replacePersonId: replacePersonId ?? null,
+        });
+      }
+      return;
+    }
+    void applyOne(next, defaultProjectId).then((decision) => {
+      if (decision.kind === "needs_you" && decision.confirmOwner) {
+        setConfirmOwner({
+          suggestionId: id,
+          ...decision.confirmOwner,
+          intent: choice,
+          replacePersonId: replacePersonId ?? null,
+        });
+      }
+    });
+  }
+
+  function onProvideDate(id: string, isoDate: string) {
+    const model = reviewModels.find((m) => m.id === id);
+    if (!model || !isoDate.trim()) return;
+    updateSuggestion(id, { date: isoDate });
+    setReviewOverride(id, {
+      accepted: true,
+      readiness: "ready",
+      reviewReason: null,
+    });
+    void applyOne({ ...model.suggestion, date: isoDate }, defaultProjectId);
   }
 
   function onSelectObservation(obs: CaptureObservation) {
@@ -806,6 +899,8 @@ export function CaptureWorkspace({
           projectId={confirmOwner.projectId}
           scope={confirmOwner.scope}
           defaultPersonName={confirmOwner.personName}
+          defaultReplacePersonId={confirmOwner.replacePersonId}
+          defaultIntent={confirmOwner.intent}
           onDone={() => {
             const id = confirmOwner.suggestionId;
             setConfirmOwner(null);
@@ -878,6 +973,9 @@ export function CaptureWorkspace({
             onCreateNew={onCreateNew}
             onResolve={onResolve}
             onChangeEntityKind={onChangeEntityKind}
+            onChooseOwnership={onChooseOwnership}
+            onProvideDate={onProvideDate}
+            ownersByCardId={ownersByCardId}
           />
         </div>
       ) : null}

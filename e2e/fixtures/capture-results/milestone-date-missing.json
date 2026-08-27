@@ -1,0 +1,78 @@
+{
+  "caseId": "milestone-date-missing",
+  "transcript": "Parade day needs a new date.",
+  "result": {
+    "memory": {
+      "id": "mem-milestone-date-missing",
+      "type": "conversation",
+      "projectId": "proj-candy",
+      "title": "Parade day needs a new date.",
+      "content": "Parade day needs a new date.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T12:00:00.000Z",
+      "createdAt": "2026-08-26T12:00:00.000Z",
+      "source": "capture"
+    },
+    "insights": [],
+    "assumptions": [],
+    "recommendations": [],
+    "rawContent": "Parade day needs a new date.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-candy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 1,
+      "proposedChanges": 1,
+      "alreadyKnown": 0,
+      "merged": 0,
+      "needsYou": 1,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-parade-date",
+        "fact": "Parade day moved",
+        "evidence": "Parade day needs a new date.",
+        "findingType": "ENTITY_UPDATED",
+        "target": {
+          "entityType": "milestone",
+          "entityId": "ms-parade",
+          "title": "Parade day"
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Parade day moved",
+        "invalidTarget": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-parade-date",
+        "sourceFindingId": "find-obs-parade-date",
+        "operation": "UPDATE",
+        "entityType": "milestone",
+        "targetId": "ms-parade",
+        "targetTitle": "Parade day",
+        "proposedValues": {},
+        "reason": "This date change is not specific enough to apply automatically.",
+        "evidence": "Parade day needs a new date.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-candy",
+        "projectName": "Candyland"
+      }
+    ]
+  }
+}

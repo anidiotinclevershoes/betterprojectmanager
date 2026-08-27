@@ -1,0 +1,97 @@
+{
+  "caseId": "existing-or-new-uncertain",
+  "transcript": "Packaging delay is getting worse after the cardboard mill flooded.",
+  "result": {
+    "memory": {
+      "id": "mem-existing-or-new",
+      "type": "conversation",
+      "projectId": "proj-toy",
+      "title": "Packaging delay is getting worse after the cardboard mill flooded.",
+      "content": "Packaging delay is getting worse after the cardboard mill flooded.",
+      "tags": [],
+      "people": [],
+      "occurredAt": "2026-08-26T12:00:00.000Z",
+      "createdAt": "2026-08-26T12:00:00.000Z",
+      "source": "capture"
+    },
+    "insights": [],
+    "assumptions": [],
+    "recommendations": [],
+    "rawContent": "Packaging delay is getting worse after the cardboard mill flooded.",
+    "tidied": true,
+    "provider": "openai",
+    "knowledgeProjectId": "proj-toy",
+    "findingsValidation": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "invalidTargetCount": 0
+    },
+    "capturePipeline": "v2",
+    "observationAccount": {
+      "total": 1,
+      "proposedChanges": 0,
+      "alreadyKnown": 0,
+      "merged": 0,
+      "needsYou": 1,
+      "commentary": 0,
+      "rejected": 0
+    },
+    "findings": [
+      {
+        "id": "find-obs-packaging-uncertain",
+        "fact": "Packaging delay is getting worse",
+        "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+        "findingType": "ENTITY_UPDATED",
+        "target": {
+          "entityType": "risk",
+          "entityId": "risk-packaging",
+          "title": "Packaging delay"
+        },
+        "confidence": 0,
+        "requiresClarification": false,
+        "reasoningSummary": "Packaging delay is getting worse",
+        "invalidTarget": false,
+        "projectId": "proj-toy",
+        "projectName": "Toyworld"
+      }
+    ],
+    "proposedOperations": [
+      {
+        "id": "v2op-obs-packaging-uncertain",
+        "sourceFindingId": "find-obs-packaging-uncertain",
+        "operation": "UPDATE",
+        "entityType": "risk",
+        "targetId": "risk-packaging",
+        "targetTitle": "Packaging delay",
+        "proposedValues": {
+          "title": "Packaging delay is getting worse"
+        },
+        "reason": "Could not confidently identify which existing risk this refers to.",
+        "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+        "confidence": 0,
+        "destructive": false,
+        "requiresClarification": false,
+        "projectId": "proj-toy",
+        "projectName": "Toyworld"
+      }
+    ],
+    "findingCoverage": {
+      "items": [
+        {
+          "findingId": "find-obs-packaging-uncertain",
+          "fact": "Packaging delay is getting worse",
+          "disposition": "unmatched",
+          "reason": "Could not confidently identify which existing risk this refers to."
+        }
+      ],
+      "actionableCount": 1,
+      "readyCount": 0,
+      "needsReviewCount": 0,
+      "unmatchedCount": 1,
+      "noChangeCount": 0,
+      "ignoredCount": 0,
+      "silentDropCount": 0
+    }
+  }
+}

@@ -16,7 +16,14 @@ export type ReviewReason =
   | "STATE_UNCERTAIN"
   | "OPERATION_UNCERTAIN"
   | "VALUE_UNCERTAIN"
-  | "PROJECT_UNCERTAIN";
+  | "PROJECT_UNCERTAIN"
+  | "OWNERSHIP_UNCERTAIN";
+
+export type ReviewOwnerHit = {
+  personId: string | null;
+  personName: string;
+  scope: string;
+};
 
 export function deriveReviewReason(args: {
   readiness: "ready" | "needs_review" | "unmatched";
@@ -25,6 +32,7 @@ export function deriveReviewReason(args: {
   coverage?: FindingCoverageItem;
   suggestion?: PendingSuggestion;
   needsReviewReason?: string;
+  capturePipeline?: "legacy" | "v2";
 }): ReviewReason | undefined {
   const {
     readiness,
@@ -33,6 +41,7 @@ export function deriveReviewReason(args: {
     coverage,
     suggestion,
     needsReviewReason,
+    capturePipeline,
   } = args;
   if (readiness === "ready") return undefined;
 
@@ -44,6 +53,10 @@ export function deriveReviewReason(args: {
     suggestion?.projectUncertain
   ) {
     return "PROJECT_UNCERTAIN";
+  }
+
+  if (suggestion?.ownershipSemantics === "ambiguous") {
+    return "OWNERSHIP_UNCERTAIN";
   }
 
   const blob = [
@@ -58,6 +71,13 @@ export function deriveReviewReason(args: {
 
   if (/which project|project uncertain|ambiguous project/i.test(blob)) {
     return "PROJECT_UNCERTAIN";
+  }
+
+  if (
+    /share or replace|already owns|ownership/i.test(blob) &&
+    suggestion?.legalDomain === "responsibility"
+  ) {
+    return "OWNERSHIP_UNCERTAIN";
   }
 
   if (readiness === "unmatched") return "TARGET_UNCERTAIN";
@@ -106,10 +126,14 @@ export function deriveReviewReason(args: {
     return "OPERATION_UNCERTAIN";
   }
 
+  const confidence = operation?.confidence ?? finding?.confidence;
+  const confidenceIsInformational = capturePipeline === "v2";
   if (
-    /confidence|value|date|owner|due|proposed|which value/i.test(blob) ||
-    (typeof (operation?.confidence ?? finding?.confidence) === "number" &&
-      (operation?.confidence ?? finding?.confidence)! < 70)
+    /value|date|due|proposed|which value/i.test(blob) ||
+    (!confidenceIsInformational && /confidence/i.test(blob)) ||
+    (!confidenceIsInformational &&
+      typeof confidence === "number" &&
+      confidence < 70)
   ) {
     return "VALUE_UNCERTAIN";
   }
@@ -130,6 +154,9 @@ export function reviewReasonCopy(
     recordName?: string;
     entityLabel?: string;
     projectCandidates?: Array<{ name: string; code?: string }>;
+    currentOwnerNames?: string[];
+    incomingPersonName?: string;
+    scope?: string;
   },
 ): string {
   switch (reason) {
@@ -140,9 +167,10 @@ export function reviewReasonCopy(
             .join(" · ")}`
         : "Which project does this refer to?";
     case "TARGET_UNCERTAIN":
-      return opts?.recordName
-        ? `Lume thinks this refers to:\n${opts.recordName}`
-        : "Lume couldn't confidently identify which existing record this refers to.";
+      return existingOrNewCopy({
+        entityLabel: opts?.entityLabel,
+        recordName: opts?.recordName,
+      }).question;
     case "ENTITY_TYPE_UNCERTAIN":
       return opts?.entityLabel
         ? `Lume interpreted this as:\n${opts.entityLabel}`
@@ -155,5 +183,107 @@ export function reviewReasonCopy(
       return "Lume needs confirmation before applying this change.";
     case "VALUE_UNCERTAIN":
       return "Lume isn't sure about the proposed value.";
+    case "OWNERSHIP_UNCERTAIN":
+      return ownershipChoiceCopy({
+        currentOwnerNames: opts?.currentOwnerNames ?? [],
+        scope: opts?.scope,
+        incomingPersonName: opts?.incomingPersonName,
+      }).question;
   }
+}
+
+/** Known identity-gate reasons → terse Review copy. No new identity semantics. */
+export function friendlierNeedsYouCopy(reason: string | undefined): string | undefined {
+  if (!reason) return reason;
+  if (
+    reason ===
+    "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+  ) {
+    return "I need a full name before adding someone new.";
+  }
+  if (reason === "A new person needs a name before Lume will write a stakeholder.") {
+    return "What name should I use?";
+  }
+  if (
+    reason ===
+    "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+  ) {
+    return "I need to know which person this refers to.";
+  }
+  if (reason === "Share versus replace is not decided.") {
+    return "Someone already owns this. Share or replace?";
+  }
+  if (reason === "Should this share or replace the current owner?") {
+    return "Someone already owns this. Share or replace?";
+  }
+  if (reason === "This date change is not specific enough to apply automatically.") {
+    return "What date should I use?";
+  }
+  return undefined;
+}
+
+export function ownershipChoiceCopy(args: {
+  currentOwnerNames: string[];
+  scope?: string;
+  incomingPersonName?: string;
+}): {
+  question: string;
+  shareLabel: string;
+  replaceLabel: string;
+  keepLabel: string;
+} {
+  const owners = args.currentOwnerNames.filter(Boolean);
+  const ownerList = formatNameList(owners);
+  const scope = args.scope?.trim();
+  const incoming = args.incomingPersonName?.trim();
+  const owned = scope ? (ownerList ? `${ownerList} already owns ${scope}` : `Someone already owns ${scope}`) : ownerList ? `${ownerList} already owns this` : "Someone already owns this";
+  return {
+    question: `${owned}. What should happen?`,
+    shareLabel: incoming ? `Share with ${incoming}` : "Share",
+    replaceLabel:
+      incoming && owners.length === 1
+        ? `Replace ${owners[0]} with ${incoming}`
+        : incoming
+          ? `Replace with ${incoming}`
+          : "Replace",
+    keepLabel:
+      owners.length === 1 ? `Keep ${owners[0]} only` : ownerList ? `Keep ${ownerList} only` : "Keep current owner only",
+  };
+}
+
+export function existingOrNewCopy(args: {
+  entityLabel?: string;
+  recordName?: string;
+}): {
+  question: string;
+  updateLabel: string;
+  createLabel: string;
+} {
+  const kind = args.entityLabel?.trim() || "item";
+  const name = args.recordName?.trim();
+  if (name) {
+    return {
+      question: `Is this a new ${kind.toLowerCase()} or the existing “${name}” ${kind.toLowerCase()}?`,
+      updateLabel: `Update ${name}`,
+      createLabel: `Create a new ${kind.toLowerCase()}`,
+    };
+  }
+  return {
+    question:
+      "Lume couldn't confidently identify which existing record this refers to.",
+    updateLabel: "Use this",
+    createLabel: `Create a new ${kind.toLowerCase()}`,
+  };
+}
+
+export function missingDateCopy(recordName?: string): string {
+  const name = recordName?.trim();
+  return name ? `What date should I use for ${name}?` : "What date should I use?";
+}
+
+function formatNameList(names: string[]): string {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0]!;
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
 }

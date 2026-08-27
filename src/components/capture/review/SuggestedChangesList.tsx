@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReviewChangeViewModel } from "@/lib/capture/review/viewModel";
+import type { ReviewOwnerHit } from "@/lib/capture/review/reviewReason";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
 import { SuggestedChangeCard } from "./SuggestedChangeCard";
 import { KnowledgeRememberList } from "./KnowledgeRememberList";
@@ -34,6 +35,9 @@ export function SuggestedChangesList({
   onCreateNew,
   onResolve,
   onChangeEntityKind,
+  onChooseOwnership,
+  onProvideDate,
+  ownersByCardId,
   whyOpenIds,
 }: {
   models: ReviewChangeViewModel[];
@@ -58,6 +62,13 @@ export function SuggestedChangesList({
   onCreateNew: (id: string) => void;
   onResolve: (id: string) => void;
   onChangeEntityKind: (id: string, kind: SuggestionKind) => void;
+  onChooseOwnership?: (
+    id: string,
+    choice: "share" | "replace" | "keep",
+    replacePersonId?: string | null,
+  ) => void;
+  onProvideDate?: (id: string, isoDate: string) => void;
+  ownersByCardId?: Record<string, ReviewOwnerHit[]>;
   whyOpenIds?: string[];
 }) {
   const rememberModels = models.filter(isKnowledgeRemember);
@@ -159,6 +170,11 @@ export function SuggestedChangesList({
                 onChangeEntityKind={(kind) =>
                   onChangeEntityKind(model.id, kind)
                 }
+                onChooseOwnership={(choice, replacePersonId) =>
+                  onChooseOwnership?.(model.id, choice, replacePersonId)
+                }
+                onProvideDate={(isoDate) => onProvideDate?.(model.id, isoDate)}
+                currentOwners={ownersByCardId?.[model.id] ?? []}
                 initialWhyOpen={whyOpenIds?.includes(model.id)}
               />
             ))}
