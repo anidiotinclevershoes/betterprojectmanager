@@ -23,7 +23,7 @@ Governs:
 - Capture review-before-write;
 - Known / ✦ Lume noticed / Needs you;
 - Ocean visual/interaction principles;
-- development/evaluation governance, including the Plain-English standard for completion reports and checkpoints.
+- development/evaluation governance, including the always-on Plain-English standard for every user-facing completion (final Cursor message, PR body, reports, and checkpoints).
 
 Stable product principles override historical *implementation* descriptions. They do **not** invent current code paths.
 
@@ -85,7 +85,7 @@ Start with the documentation authority map. Read canonical product intent, curre
 
 Product/trust constitution governs intended behaviour; current code/architecture handoff governs implementation reality; Known Discoveries governs known debt.
 
-Completion reports, PR checkpoints, and slice handovers must include a Plain-English section written for the product owner. See `docs/v1-reference-pack/LUME_DEVELOPMENT_AND_EVALUATION_ROADMAP_V1.md` §19. Do not rewrite historical reports to match.
+Every user-facing completion — the agent’s final Cursor message, the pull-request body, and any written report or handover — must **open** with a Plain-English section for the product owner. This is required **even when the prompt does not ask for it**. Do not open with git SHAs, “Starting main SHA”, checkout logs, or engineering-status lists. See `AGENTS.md` and `docs/v1-reference-pack/LUME_DEVELOPMENT_AND_EVALUATION_ROADMAP_V1.md` §19. Do not rewrite historical reports to match.
 
 ---
 

@@ -1,0 +1,14 @@
+---
+description: Always open every product-owner completion with friendly Plain-English, even when the prompt does not ask for it.
+alwaysApply: true
+---
+
+# Always-on Plain-English completion voice
+
+Every user-facing completion (final Cursor message, PR body, written report, checkpoint, handover) **must open with friendly conversational English**.
+
+This is required **even when the prompt does not mention Plain-English, a report, or a summary**. Silence in the prompt is not a waiver.
+
+Do **not** open with git SHAs, “Starting main SHA”, checkout logs, numbered engineering checklists, file lists, or commit-style bullets. Technical detail may follow after the Plain-English lead.
+
+See `AGENTS.md` and `docs/v1-reference-pack/LUME_DEVELOPMENT_AND_EVALUATION_ROADMAP_V1.md` §19.
