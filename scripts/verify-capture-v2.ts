@@ -32,9 +32,9 @@ function check(name: string, fn: () => void) {
 }
 
 function main() {
-  check("flag defaults off", () => {
-    assert.equal(isCaptureV2Enabled({}), false);
-    assert.equal(isCaptureV2Enabled({ LUME_CAPTURE_V2: "0" }), false);
+  check("flag cannot disable Capture V2", () => {
+    assert.equal(isCaptureV2Enabled({}), true);
+    assert.equal(isCaptureV2Enabled({ LUME_CAPTURE_V2: "0" }), true);
     assert.equal(isCaptureV2Enabled({ LUME_CAPTURE_V2: "1" }), true);
   });
 

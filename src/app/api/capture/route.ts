@@ -6,20 +6,16 @@ import {
 } from "@/lib/capture/context";
 import {
   buildCapturePromptAssembly,
-  buildCaptureResultFromAi,
   getOpenAIKeyDiagnostics,
   isOpenAIConfigured,
   localCaptureFallback,
-  tidyAndCoachWithOpenAI,
 } from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
-import { logPromptAssemblyDiagnostic } from "@/ai/domain";
 import { recordCaptureMetricsSafe } from "@/lib/dev/cockpit";
 import {
   assessCaptureReliability,
   reliabilityForCockpit,
 } from "@/lib/capture/reliability/assess";
-import { COACHING_SYSTEM_PROMPT } from "@/lib/mission";
 import type {
   CaptureInput,
   HistoryEvent,
@@ -34,7 +30,6 @@ import { serverLog } from "@/lib/server-log";
 import {
   contextRecordsFromWorld,
   formatAuthoritativeStateForPrompt,
-  isCaptureV2Enabled,
   runCaptureV2FromModelJson,
 } from "@/lib/capture-v2";
 import {
@@ -82,7 +77,7 @@ export async function GET() {
     keyPrefix: diagnostics.prefix,
     keyLength: diagnostics.length,
     reason: diagnostics.reason,
-    captureV2Enabled: isCaptureV2Enabled(),
+    captureV2Enabled: true,
   });
 }
 
@@ -113,17 +108,7 @@ export async function POST(request: Request) {
 
     const analysisRequestId = requestId();
 
-    if (isCaptureV2Enabled()) {
-      return await postCaptureV2({
-        gateUserId: gate.userId,
-        body,
-        content,
-        startedAt,
-        analysisRequestId,
-      });
-    }
-
-    return await postCaptureLegacy({
+    return await postCaptureV2({
       gateUserId: gate.userId,
       body,
       content,
@@ -330,228 +315,5 @@ async function postCaptureV2(args: {
     captureContextDiagnostics: captureContext.diagnostics,
     reliability,
     capturePipeline: "v2",
-  });
-}
-
-async function postCaptureLegacy(args: {
-  gateUserId: string;
-  body: Body;
-  content: string;
-  startedAt: number;
-  analysisRequestId: string;
-}) {
-  const { body, content, startedAt, analysisRequestId } = args;
-  const projects = body.state?.projects ?? [];
-  const knowledge = body.state?.knowledge ?? [];
-  const timeline = body.state?.timeline ?? [];
-  const todos = (body.state?.todos ?? []) as TodoItem[];
-  const recommendations = (body.state?.recommendations ??
-    []) as Recommendation[];
-  const history = (body.state?.history ?? []) as HistoryEvent[];
-  const meetings = body.state?.meetings ?? [];
-  const releases = body.state?.releases ?? [];
-  const risks = body.state?.risks ?? [];
-
-  const input: CaptureInput = {
-    content,
-    projectId: body.projectId,
-    sourceType: body.sourceType,
-  };
-
-  const captureContext = buildCaptureContext({
-    projectId: body.projectId,
-    captureText: content,
-    state: {
-      projects,
-      todos,
-      meetings,
-      releases,
-      knowledge,
-      timeline,
-      recommendations,
-      history,
-      risks,
-    },
-  });
-  const contextManifest = buildCaptureContextManifest(
-    captureContext,
-    analysisRequestId,
-  );
-  logCaptureContextDiagnostic(contextManifest);
-
-  if (!isOpenAIConfigured()) {
-    const fallbackState = {
-      projects,
-      memories: body.state?.memories ?? [],
-      recommendations,
-      meetings,
-      releases,
-      todos,
-      knowledge,
-      timeline,
-    };
-    const result = localCaptureFallback(input, fallbackState, captureContext);
-    let enrichedManifest = contextManifest;
-    let promptAssemblyForMetrics = null as ReturnType<
-      typeof buildCapturePromptAssembly
-    > | null;
-    try {
-      const promptAssembly = buildCapturePromptAssembly({
-        rawText: content,
-        projectId: body.projectId,
-        sourceType: body.sourceType,
-        projects,
-        existingKnowledge:
-          knowledge.find((k) => k.projectId === body.projectId) ?? null,
-        existingTimeline: timeline.filter(
-          (t) => t.projectId === body.projectId,
-        ),
-        openTodos: todos
-          .filter((t) => !t.done)
-          .slice(0, 40)
-          .map((t) => ({
-            id: t.id,
-            title: t.title,
-            projectId: t.projectId,
-            dueAt: t.dueAt,
-          })),
-        captureContext,
-      });
-      promptAssemblyForMetrics = promptAssembly;
-      logPromptAssemblyDiagnostic(promptAssembly);
-      enrichedManifest = {
-        ...contextManifest,
-        promptAssembly: {
-          sections: promptAssembly.sections.map((s) => ({
-            id: s.id,
-            label: s.label,
-            present: true,
-          })),
-          approximateCharacters:
-            promptAssembly.diagnostics.approximateCharacters,
-          estimatedTokens: promptAssembly.diagnostics.estimatedTokens,
-          contextRecordCount: promptAssembly.diagnostics.contextRecordCount,
-          dictionaryEntryCount:
-            promptAssembly.diagnostics.dictionaryEntryCount,
-        },
-      };
-    } catch {
-      /* prompt assembly must not break local fallback */
-    }
-    const reliability = assessCaptureReliability({
-      captureText: content,
-      result,
-      contextManifest: enrichedManifest,
-    });
-    if (promptAssemblyForMetrics) {
-      recordCaptureMetricsSafe({
-        startedAt,
-        requestId: analysisRequestId,
-        source: "capture",
-        promptAssembly: promptAssemblyForMetrics,
-        captureContext,
-        result,
-        providerUsage: null,
-        responseText: JSON.stringify({
-          findings: result.findings ?? [],
-          operations: result.proposedOperations ?? [],
-        }),
-        model: null,
-        systemPrompt: COACHING_SYSTEM_PROMPT,
-        reliability: reliabilityForCockpit(reliability),
-      });
-    }
-    return NextResponse.json({
-      result,
-      openaiConfigured: false,
-      requestId: analysisRequestId,
-      contextManifest: enrichedManifest,
-      captureContextDiagnostics: captureContext.diagnostics,
-      reliability,
-      notice:
-        "OPENAI_API_KEY not set — used local coaching. Add your OpenAI key to enable tidy-up.",
-    });
-  }
-
-  const existingKnowledge: ProjectKnowledge | null =
-    knowledge.find((k) => k.projectId === body.projectId) ?? null;
-
-  const { ai, promptAssembly, providerUsage, responseText, model } =
-    await tidyAndCoachWithOpenAI({
-      rawText: content,
-      projectId: body.projectId,
-      sourceType: body.sourceType,
-      projects,
-      existingKnowledge,
-      existingTimeline: timeline.filter((t) => t.projectId === body.projectId),
-      openTodos: todos
-        .filter((t) => !t.done)
-        .slice(0, 40)
-        .map((t) => ({
-          id: t.id,
-          title: t.title,
-          projectId: t.projectId,
-          dueAt: t.dueAt,
-        })),
-      captureContext,
-    });
-
-  const result = buildCaptureResultFromAi({
-    rawText: content,
-    projectId: body.projectId,
-    sourceType: body.sourceType,
-    ai,
-    captureContext,
-    allOpenTodos: todos
-      .filter((t) => !t.done)
-      .map((t) => ({
-        id: t.id,
-        title: t.title,
-        projectId: t.projectId,
-      })),
-  });
-
-  const enrichedManifest = {
-    ...contextManifest,
-    promptAssembly: {
-      sections: promptAssembly.sections.map((s) => ({
-        id: s.id,
-        label: s.label,
-        present: true,
-      })),
-      approximateCharacters: promptAssembly.diagnostics.approximateCharacters,
-      estimatedTokens: promptAssembly.diagnostics.estimatedTokens,
-      contextRecordCount: promptAssembly.diagnostics.contextRecordCount,
-      dictionaryEntryCount: promptAssembly.diagnostics.dictionaryEntryCount,
-    },
-  };
-
-  const reliability = assessCaptureReliability({
-    captureText: content,
-    result,
-    contextManifest: enrichedManifest,
-  });
-
-  recordCaptureMetricsSafe({
-    startedAt,
-    requestId: analysisRequestId,
-    source: "capture",
-    promptAssembly,
-    captureContext,
-    result,
-    providerUsage,
-    responseText,
-    model,
-    systemPrompt: COACHING_SYSTEM_PROMPT,
-    reliability: reliabilityForCockpit(reliability),
-  });
-
-  return NextResponse.json({
-    result,
-    openaiConfigured: true,
-    requestId: analysisRequestId,
-    contextManifest: enrichedManifest,
-    captureContextDiagnostics: captureContext.diagnostics,
-    reliability,
   });
 }

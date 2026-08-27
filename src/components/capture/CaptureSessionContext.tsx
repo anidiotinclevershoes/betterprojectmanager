@@ -11,12 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { useMission } from "@/lib/store";
-import {
-  executeCaptureApply,
-  planCaptureApply,
-  captureApplyWorldFromState,
-  type CaptureApplyDecision,
-} from "@/lib/capture/apply";
+import { type CaptureApplyDecision } from "@/lib/capture/apply";
 import {
   buildSuggestions,
   CAPTURE_SESSION_KEY,
@@ -207,19 +202,6 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
   const {
     state,
     analyzeCaptureWithAI,
-    addTodo,
-    addTimelineItem,
-    addCaptureRisk,
-    setCaptureRiskStatus,
-    updateTimelineItem,
-    addAvailabilityItem,
-    ensureCapturePerson,
-    addCaptureKnowledgeBullet,
-    addCaptureMemory,
-    confirmResponsibilityOwner,
-    toggleTodo,
-    removeTodo,
-    updateTodo,
     adoptAppliedState,
   } = useMission();
 
@@ -579,83 +561,38 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         announce(message);
       };
 
-      if (slice.result?.capturePipeline === "v2") {
-        if (!projectId) {
-          const decision: CaptureApplyDecision = {
-            kind: "needs_you",
-            domain: item.legalDomain ?? "unsupported",
-            reason: "Select a project first.",
+      if (!projectId) {
+        const decision: CaptureApplyDecision = {
+          kind: "needs_you",
+          domain: item.legalDomain ?? "unsupported",
+          reason: "Select a project first.",
+        };
+        announce(decision.reason);
+        return decision;
+      }
+      try {
+        const response = await fetch("/api/capture/apply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId,
+            item,
+            text,
+            expectedTarget: item.expectedTarget ?? null,
+          }),
+        });
+        const data = (await response.json()) as {
+          decision?: CaptureApplyDecision;
+          executed?: {
+            kind: string;
+            reason?: string;
+            domain?: string;
           };
-          announce(decision.reason);
-          return decision;
-        }
-        try {
-          const response = await fetch("/api/capture/apply", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              projectId,
-              item,
-              text,
-              expectedTarget: item.expectedTarget ?? null,
-            }),
-          });
-          const data = (await response.json()) as {
-            decision?: CaptureApplyDecision;
-            executed?: {
-              kind: string;
-              reason?: string;
-              domain?: string;
-            };
-            state?: import("@/lib/types").MissionState;
-            error?: string;
-          };
-          if (!response.ok) {
-            const reason = data.error || "Could not apply this change.";
-            announce(reason);
-            return {
-              kind: "needs_you",
-              domain: item.legalDomain ?? "unsupported",
-              reason,
-            };
-          }
-          const decision = data.decision ?? {
-            kind: "needs_you" as const,
-            domain: item.legalDomain ?? "unsupported",
-            reason: data.error || "Could not apply this change.",
-          };
-          if (data.executed?.kind === "failed") {
-            announce(data.executed.reason || "Could not save this change.");
-            return {
-              kind: "needs_you",
-              domain: decision.domain,
-              reason: data.executed.reason || "Could not save this change.",
-            };
-          }
-          if (data.state) {
-            adoptAppliedState(data.state);
-          }
-          if (decision.kind === "needs_you") {
-            announce(decision.reason);
-            return decision;
-          }
-          if (decision.kind === "no_change") {
-            finishApplied(decision.reason);
-            return decision;
-          }
-          if (data.executed?.kind === "wrote") {
-            finishApplied(
-              item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
-            );
-          } else if (data.executed?.kind === "no_change") {
-            finishApplied(data.executed.reason || decision.kind);
-          } else {
-            announce(data.executed?.reason || decision.kind);
-          }
-          return decision;
-        } catch (err) {
-          const reason =
-            err instanceof Error ? err.message : "Could not apply this change.";
+          state?: import("@/lib/types").MissionState;
+          error?: string;
+        };
+        if (!response.ok) {
+          const reason = data.error || "Could not apply this change.";
           announce(reason);
           return {
             kind: "needs_you",
@@ -663,183 +600,56 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
             reason,
           };
         }
-      }
-
-      const decision = planCaptureApply({
-        item,
-        text,
-        world: captureApplyWorldFromState(state),
-        captureEntryProjectId: scopedProjectId || slice.projectId || null,
-      });
-
-      if (decision.kind === "needs_you") {
-        announce(decision.reason);
-        return decision;
-      }
-      if (decision.kind === "no_change") {
-        finishApplied(decision.reason);
-        return decision;
-      }
-
-      const executed = await executeCaptureApply(decision, {
-        createTodo: (op) => {
-          addTodo({
-            title: op.title,
-            detail: op.detail,
-            projectId: op.projectId,
-            dueAt: op.dueAt,
-            kind: op.todoKind,
-            waitingOn: op.waitingOn,
-          });
-        },
-        updateTodo: (op) => {
-          updateTodo(op.todoId, {
-            title: op.title,
-            detail: op.detail,
-            dueAt: op.dueAt,
-          });
-        },
-        completeTodo: (op) => {
-          const todo = state.todos.find((t) => t.id === op.todoId);
-          if (todo && !todo.done) toggleTodo(op.todoId);
-        },
-        deleteTodo: (op) => {
-          removeTodo(op.todoId);
-        },
-        createRisk: async (op) => {
-          const result = await addCaptureRisk(op.projectId, op.title);
-          if (!result.ok) {
-            throw new Error(result.error || "Could not save risk");
-          }
-        },
-        updateRiskStatus: async (op) => {
-          const result = await setCaptureRiskStatus(
-            op.riskId,
-            op.status,
-            op.projectId,
+        const decision = data.decision ?? {
+          kind: "needs_you" as const,
+          domain: item.legalDomain ?? "unsupported",
+          reason: data.error || "Could not apply this change.",
+        };
+        if (data.executed?.kind === "failed") {
+          announce(data.executed.reason || "Could not save this change.");
+          return {
+            kind: "needs_you",
+            domain: decision.domain,
+            reason: data.executed.reason || "Could not save this change.",
+          };
+        }
+        if (data.state) {
+          adoptAppliedState(data.state);
+        }
+        if (decision.kind === "needs_you") {
+          announce(decision.reason);
+          return decision;
+        }
+        if (decision.kind === "no_change") {
+          finishApplied(decision.reason);
+          return decision;
+        }
+        if (data.executed?.kind === "wrote") {
+          finishApplied(
+            item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
           );
-          if (!result.ok) {
-            throw new Error(result.error || "Could not save risk status");
-          }
-        },
-        createMilestone: async (op) => {
-          const result = await addTimelineItem(op.projectId, {
-            label: op.label,
-            type: "milestone",
-            startAt: op.startAt ?? new Date().toISOString(),
-            endAt: op.endAt,
-            notes: op.notes,
-            source: "capture",
-          });
-          if (!result.ok) {
-            throw new Error(result.error || "Could not save date");
-          }
-        },
-        updateMilestone: async (op) => {
-          const result = await updateTimelineItem(op.projectId, op.milestoneId, {
-            label: op.label,
-            startAt: op.startAt,
-            endAt: op.endAt,
-            notes: op.notes,
-          });
-          if (!result.ok) {
-            throw new Error(result.error || "Could not save date change");
-          }
-        },
-        ensurePerson: async (op) => {
-          const result = await ensureCapturePerson({
-            projectId: op.projectId,
-            name: op.name,
-            personId: op.personId,
-            roleHint: op.roleHint,
-          });
-          if (!result.ok) {
-            throw new Error(result.error || "Could not save person");
-          }
-        },
-        confirmResponsibility: (op) => {
-          confirmResponsibilityOwner({
-            projectId: op.projectId,
-            scope: op.scope,
-            personName: op.personName,
-            personId: op.personId,
-            replacePersonId: op.replacePersonId,
-          });
-        },
-        writeAvailability: async (op) => {
-          const result = await addAvailabilityItem({
-            projectId: op.projectId,
-            personId: op.personId,
-            personName: op.personName,
-            awayFromIso: op.awayFromIso,
-            awayToIso: op.awayToIso,
-            label: op.label,
-          });
-          if (!result.ok) {
-            throw new Error(result.error || "Could not save availability");
-          }
-        },
-        writeKnowledge: async (op) => {
-          const result = await addCaptureKnowledgeBullet({
-            projectId: op.projectId,
-            section: op.section,
-            text: op.text,
-          });
-          if (!result.ok) {
-            throw new Error(result.error || "Could not save knowledge");
-          }
-        },
-        writeMemory: async (op) => {
-          const result = await addCaptureMemory({
-            projectId: op.projectId,
-            title: op.title,
-            content: slice.result?.memory.content,
-          });
-          if (!result.ok) {
-            throw new Error(result.error || "Could not save memory");
-          }
-        },
-      });
-
-      if (executed.kind === "failed") {
-        announce(executed.reason);
+        } else if (data.executed?.kind === "no_change") {
+          finishApplied(data.executed.reason || decision.kind);
+        } else {
+          announce(data.executed?.reason || decision.kind);
+        }
+        return decision;
+      } catch (err) {
+        const reason =
+          err instanceof Error ? err.message : "Could not apply this change.";
+        announce(reason);
         return {
           kind: "needs_you",
-          domain: decision.domain,
-          reason: executed.reason,
+          domain: item.legalDomain ?? "unsupported",
+          reason,
         };
       }
-      if (executed.kind === "wrote") {
-        finishApplied(
-          item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
-        );
-      } else if (executed.kind === "no_change") {
-        finishApplied(executed.reason);
-      } else {
-        announce(executed.reason);
-      }
-      return decision;
     },
     [
-      addAvailabilityItem,
-      addCaptureKnowledgeBullet,
-      addCaptureMemory,
-      addCaptureRisk,
-      addTimelineItem,
-      addTodo,
       adoptAppliedState,
       announce,
-      confirmResponsibilityOwner,
-      ensureCapturePerson,
-      removeTodo,
-      setCaptureRiskStatus,
       slice.editing,
       slice.projectId,
-      slice.result,
-      state,
-      toggleTodo,
-      updateTimelineItem,
-      updateTodo,
     ],
   );
 
