@@ -135,6 +135,7 @@ check("dev pages call notFound outside development", () => {
     "src/app/dev/review-preview/page.tsx",
     "src/app/dev/reliability-preview/page.tsx",
     "src/app/dev/reset-preview/page.tsx",
+    "src/app/dev/catch-me-up-preview/page.tsx",
   ]) {
     const src = fs.readFileSync(path.join(root, rel), "utf8");
     assert.match(src, /notFound/);
@@ -295,6 +296,7 @@ check("AI routes import requireAiCaller", () => {
     "src/app/api/new-project/route.ts",
     "src/app/api/tell-me/route.ts",
     "src/app/api/tell-me/refresh/route.ts",
+    "src/app/api/catch-me-up/route.ts",
   ]) {
     const src = fs.readFileSync(path.join(root, rel), "utf8");
     assert.match(src, /requireAiCaller/);
@@ -351,6 +353,7 @@ check("product OpenAI chat calls opt out of store", () => {
     "src/lib/pm-coach.ts",
     "src/lib/capture-v2/extract.ts",
     "src/app/api/new-project/route.ts",
+    "src/lib/catch-me-up/briefing.ts",
   ]) {
     const src = fs.readFileSync(path.join(root, rel), "utf8");
     assert.match(src, /withOpenAiChatPrivacy/, rel);
@@ -371,6 +374,7 @@ check("product AI routes do not return raw provider error text", () => {
     "src/app/api/new-project/route.ts",
     "src/app/api/tell-me/route.ts",
     "src/app/api/tell-me/refresh/route.ts",
+    "src/app/api/catch-me-up/route.ts",
   ]) {
     const src = fs.readFileSync(path.join(root, rel), "utf8");
     assert.match(src, /publicAiFailureMessage/, rel);

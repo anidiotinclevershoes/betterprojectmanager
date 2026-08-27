@@ -30,6 +30,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "phase6-worlds", script: "scripts/verify-phase6-worlds.ts" },
   { name: "canonical-truth", script: "scripts/verify-canonical-truth.ts" },
   { name: "tell-me", script: "scripts/verify-tell-me.ts" },
+  { name: "catch-me-up", script: "scripts/verify-catch-me-up.ts" },
   { name: "capture-context", script: "scripts/verify-capture-context.ts" },
   { name: "capture-review", script: "scripts/verify-capture-review.ts" },
   { name: "capture-workspace", script: "scripts/verify-capture-workspace-refinement.ts" },

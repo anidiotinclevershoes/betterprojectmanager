@@ -8781,3 +8781,159 @@ body {
     width: 100vw;
   }
 }
+
+/* ── Catch Me Up v0.9 briefing surface ─────────────────────────────── */
+.ocean-catch-me-up {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 52rem;
+}
+
+.ocean-catch-me-up-preview-note {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.ocean-catch-me-up-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ocean-catch-me-up-header h2 {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.ocean-catch-me-up-lede {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  max-width: 38rem;
+}
+
+.ocean-catch-me-up-kicker {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ocean-catch-me-up-briefing {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ocean-catch-me-up-section {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  padding: 0.95rem 1.05rem;
+}
+
+.ocean-catch-me-up-section h3 {
+  margin: 0.2rem 0 0.65rem;
+  font-size: 1.02rem;
+  font-weight: 650;
+}
+
+.ocean-catch-me-up-section.is-inferred {
+  border-color: color-mix(in srgb, var(--accent-primary) 28%, transparent);
+  background: color-mix(in srgb, var(--accent-primary) 6%, var(--bg-surface));
+}
+
+.ocean-catch-me-up-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.ocean-catch-me-up-item {
+  margin: 0;
+}
+
+.ocean-catch-me-up-epistemic {
+  margin: 0 0 0.18rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ocean-catch-me-up-item[data-epistemic="inferred"] .ocean-catch-me-up-epistemic {
+  color: color-mix(in srgb, var(--accent-primary) 80%, var(--text-secondary));
+}
+
+.ocean-catch-me-up-prose {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.ocean-catch-me-up-facts {
+  margin-top: 0.4rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.ocean-catch-me-up-facts summary {
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.ocean-catch-me-up-facts ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.ocean-catch-me-up-status,
+.ocean-catch-me-up-error {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1rem 1.05rem;
+  background: var(--bg-surface);
+}
+
+.ocean-catch-me-up-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+}
+
+.ocean-catch-me-up-error p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 720px) {
+  .ocean-catch-me-up {
+    max-width: none;
+  }
+  .ocean-catch-me-up-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ocean-catch-me-up-header .ocean-refresh-btn {
+    align-self: flex-start;
+  }
+}
