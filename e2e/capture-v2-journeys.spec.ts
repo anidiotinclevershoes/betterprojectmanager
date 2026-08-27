@@ -252,7 +252,13 @@ test.describe("Capture experience — annotated transcript", () => {
 
     const notes = page.getByTestId("annotated-transcript");
     await expect(notes).toBeVisible();
-    await expect(notes).toContainText(frozen.transcript);
+    const body = notes.locator(".annotated-transcript-body");
+    await expect(body).toContainText(
+      "The icing on Gumdrop Bridge has melted; that risk is closed.",
+    );
+    await expect(body).toContainText(
+      "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it.",
+    );
     const marks = notes.getByTestId("transcript-mark");
     await expect(marks).toHaveCount(2);
     await expect(notes.locator('[data-category="risks"]')).toContainText(
@@ -266,6 +272,8 @@ test.describe("Capture experience — annotated transcript", () => {
     await expect(
       page.getByRole("button", { name: /Apply Ready \(1\)/i }),
     ).toBeVisible();
+    const annotatedShot = walkthroughPath("capture_experience_annotated.png");
+    if (annotatedShot) await page.screenshot({ path: annotatedShot, fullPage: true });
   });
 
   test("Needs-you choices stay tappable on a narrow viewport", async ({
@@ -285,6 +293,8 @@ test.describe("Capture experience — annotated transcript", () => {
     expect(box!.height).toBeGreaterThanOrEqual(40);
     await expect(page.getByTestId("review-ownership-replace")).toBeVisible();
     await expect(page.getByTestId("annotated-transcript")).toBeVisible();
+    const mobileShot = walkthroughPath("capture_experience_mobile_needs_you.png");
+    if (mobileShot) await page.screenshot({ path: mobileShot, fullPage: true });
   });
 });
 

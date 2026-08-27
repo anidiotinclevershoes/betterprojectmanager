@@ -932,7 +932,7 @@ export function CaptureWorkspace({
           data-testid="ocean-capture-review"
         >
           <p className="ocean-capture-review-boundary" role="note">
-            Here’s what I understood. Check anything I need you on. Nothing is saved until you approve.
+            Check anything I need you on. Nothing is saved until you approve.
           </p>
           <CaptureSummary
             observations={observations}
