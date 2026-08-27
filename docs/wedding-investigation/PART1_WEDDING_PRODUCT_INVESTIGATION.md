@@ -12,6 +12,8 @@
 | **HEAD commit** | `Merge pull request #84 from anidiotinclevershoes/cursor/v1-review-needs-you-ux-08a0` |
 | **Working branch for this report** | `cursor/wedding-product-investigation-part1-ad60` |
 | **Part 2 consumes** | this file |
+| **Part 2 report** | `docs/wedding-investigation/PART2_WEDDING_ARCHITECTURE_AND_DECISION.md` — **read it alongside this one.** Part 2 corrects several claims here, most importantly §S and §Q on change intelligence, which Part 1 wrongly identified as a strong reuse area. |
+| **Evidence appendix** | `docs/wedding-investigation/PART1_APPENDIX_PRACTITIONER_EVIDENCE.md` |
 
 ---
 
