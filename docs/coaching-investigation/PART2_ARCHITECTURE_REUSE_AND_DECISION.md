@@ -561,24 +561,71 @@ Part 1's wow moment: name a client, paste whatever exists, watch extraction prop
 
 ## L. Test migration
 
-*(Detailed per-file classification pending from a background audit; the structural conclusions below rest on directly verified evidence.)*
+Audited per file. **52 `verify-*.ts` scripts, 20,151 lines, 2,435 assertions.** 46 run in `npm test` via `scripts/run-regression-suite.ts` (which forces `OPENAI_API_KEY: ""` so nothing can call a live model); 6 are excluded, two of them because they need live Supabase credentials. Plus ~858 lines of Playwright, ~3,790 lines of fixtures, and two evaluation systems totalling ~8,090 lines.
 
-52 `verify-*.ts` scripts, ~20,151 lines, ~2,234 assertions. 45 run in `npm test` via `scripts/run-regression-suite.ts` (credential-stripping); 7 are excluded. Plus 3 Playwright specs (~858 lines), `fast-check` invariants, and two evaluation systems.
+| Class | Files | LOC | % | Asserts | Transfer |
+| --- | ---: | ---: | ---: | ---: | --- |
+| **INFRASTRUCTURE** | 10 | 2,278 | 11.3% | 357 | Survives untouched — auth, RLS, tenant isolation, production config, session hydration, model pinning, dashboard reporter |
+| **DOMAIN-SHAPED INFRASTRUCTURE** | 29 | 13,559 | **67.3%** | 1,461 | **The invariant transfers; the fixtures and types do not.** The bulk of the suite and the bulk of the migration |
+| **DOMAIN-COUPLED** | 7 | 1,519 | **7.5%** | 240 | Discard — risk lifecycle, golden PM scenarios, Ocean sidebar copy, legacy coach |
+| **HARNESS** | 6 | 2,795 | 13.9% | 377 | Code survives, corpus does not |
 
-| Class | Examples | Transfer |
-| --- | --- | --- |
-| **Fully reusable** | `verify-rls-policies`, `verify-tenant-isolation`, `verify-phase2-auth`, `verify-phase2-persistence`, `verify-production-config`, `verify-hydrate-session`, `verify-test-dashboard` | Copy with renamed fixtures |
-| **Reusable as shared-core tests** | `verify-d035-project-isolation` (the cross-client invariant, renamed to client scope), `verify-person-identity-safety`, `verify-project-truth-safety`, `verify-capture-v2-invariants` (property tests), `verify-knowledge-reconcile` | **The invariant transfers; the fixtures do not.** Highest-value group |
-| **Needs coaching equivalents** | `verify-capture-v2`, `verify-phase3b-capture-boundary`, `verify-capture-review`, `verify-capture-reliability`, `verify-tell-me`, `verify-ask-context-authority`, `verify-canonical-truth`, `verify-ocean-*` | Same shape, new domain |
-| **PM-only** | `verify-risk-lifecycle`, `verify-people-entities` (share-vs-replace), `verify-new-project*`, `verify-seed-reset`, `verify-coach`, `verify-desert-theme` | Discard |
+> **78.6% survives as logic. Only 7.5% is dead weight. But the 67.3% middle bucket is not free** — every one of those 29 files imports PM fixture builders (`experimentalApplyWorld`, `createSeedState`, `CANDYLAND_ID`) and PM entity types (`Risk`, `Todo`, `Milestone`, `Stakeholder`). Migrating them is a mechanical fixture-and-type port across 29 files, not a redesign of test intent — substantial work, but the cheapest kind.
 
-### L1. The eval harness
+The runner helps: `SUITE` is a flat array of 46 entries spawned as independent child processes with no shared dependency graph or ordering requirement, so a coaching fork can filter it down with a one-line edit. There is no shared assertion helper — every script imports `node:assert/strict` and defines its own copy-pasted `check()` wrapper — but `scripts/lib/fake-supabase-workspace.ts`, an in-memory Supabase-shaped fake used for persistence tests without a live database, is genuinely reusable infrastructure.
 
-The genuinely strategic asset, and it splits cleanly. **Machinery** — provider adapters (OpenAI/Anthropic/Gemini), run orchestration, cost and token accounting, result serialisation, the dashboard reporter, and `classifyLumeSafety` — is domain-neutral. **Content** — the Candyland/Toyworld/GamingStudio5000 corpus, the stacked stories, the 45-case intelligence benchmark over Meridian and Northline — is entirely PM.
+### L1. Two fixture families with opposite properties — the actionable finding
 
-`classifyLumeSafety` deserves specific mention because Part 1 called the taxonomy the crown jewel. Scorer v3's documented rule — *"CREATE-title prohibitions match asserted durable text, not a token that appears only in a local denial of that material"* — is a genuinely subtle idea about what constitutes a truth failure, and it is expressed in terms of writes and evidence rather than PM entities. It transfers.
+This is the most useful thing in the audit and it directly shapes Slice B.
 
-### L2. The coaching qualification pack
+**`CaptureApplyWorld`** (`src/lib/experiments/worlds.ts`) hard-codes PM entities **in its type**:
+
+```ts
+export type CaptureApplyWorld = {
+  projectIds: Set<string>;
+  projects: Array<{ id: string; name: string; code?: string; stakeholders: … }>;
+  risks: Array<{ id: string; projectId: string; title: string; status: string }>;
+  todos: Array<{ id: string; projectId?: string | null; title: string; done?: boolean }>;
+  timeline: Array<{ id: string; projectId: string; label: string; … }>;
+  knowledge: Array<{ projectId: string; sections: { people?: string[]; risks?: string[] }; … }>;
+};
+```
+
+A coaching world cannot be expressed in this shape without adding arrays and touching every function that destructures it. This type backs the Capture V2 harness and most verify scripts.
+
+**`EvalWorldFixture`** (`src/lib/evals/types.ts`) is **already domain-parameterised**:
+
+```ts
+export type EvalCaptureEvent = { id: string; at: string; title: string; content: string; knownTruth?: string[] };
+export type EvalStage = { id: string; label: string; captureIds: string[]; summary: string; knownTruth: string[] };
+export type EvalCaseFixture = { id: string; worldId: string; stageId: string; question: string; …; expectedFacts?: string[] };
+```
+
+A world is an ordered list of free-text captures producing free-text known-truths, queried by free-text questions with expected-fact strings. **A coaching world — client sessions producing known truths, queried by recall questions — fits this with zero structural change.** And `scoring.ts` (566 LOC), which consumes it, contains no PM type anywhere: it is a semantic string-matching engine over free text.
+
+> **This pair is the closest thing to a genuinely portable asset in the repository**, and it means the Part 1 §Y11 corpus work has a ready-made home — *if* the coaching corpus is built against the intelligence-harness fixture format rather than the Capture V2 one. Slice B should start there. That was not obvious before this audit and it is worth several weeks.
+
+### L2. The eval harness, quantified
+
+**Capture V2 harness** (4,031 LOC): ~11% pure domain-neutral machinery (provider adapters, cost tables), ~52% domain-shaped machinery whose algorithms transfer but whose types carry `projectId` and `todoId`/`riskId`/`milestoneId`, ~37% irreducible PM content (the 100+ case corpus, frozen prompts, stacked stories) that must be authored from scratch.
+
+**Intelligence harness** (4,059 LOC): ~41% domain-neutral machinery, ~16% domain-shaped orchestration, ~43% PM fixture content.
+
+**Playwright** (858 LOC): the config is entirely reusable and `helpers.ts` is mostly reusable page-object scaffolding — auth bypass, navigation, state IO. The three spec files (~593 LOC) are fully PM journeys, and all 641 lines of JSON fixtures are serialised PM `MissionState` snapshots that do not transfer. Roughly 31% scaffolding, 69% rewrite.
+
+**Property tests** (`verify-capture-v2-invariants.ts`, 414 LOC): the strongest transfer story in the codebase. Ten `fast-check` properties — fail-closed parsing, idempotency, ordering independence, isolation by ID, ambiguity-must-not-resolve, structural-validity-is-not-semantic-confidence — and **eight of the ten need no fixture changes at all**, because their generators produce arbitrary strings and IDs with no PM semantics.
+
+### L3. `classifyLumeSafety` — the crown-jewel claim, tested
+
+Part 1 called the three-way taxonomy the crown jewel. The audit's verdict, which I accept: **the taxonomy is domain-neutral as a pattern and roughly two-thirds domain-shaped as an implementation.**
+
+The decision tree genuinely never inspects business meaning — only structural facts: was the model wrong, what kind of decision resulted, did a write violate a rule. That control flow would classify a coaching pipeline's outputs identically, provided it exposes the same four decision kinds (`write`, `needs_you`, `no_change`, `reject`).
+
+But the helpers it calls are PM-wired: `writeTarget` keys on `todoId`/`riskId`/`milestoneId`/`personId`, `isolationViolation` consults an `ID_PROJECT` map hard-coding the three fictional world IDs, and `isPersonLinkedWrite`, `operationCreatesNewRecord` and `prohibitedWriteHit` are all PM-shaped. **Roughly 180 of the file's 517 lines need rewriting; the control flow does not.**
+
+That is still a genuine asset — knowing that "the model was wrong" and "we let a wrong thing become truth" are different metrics is the hard part, and no two-person competitor has it. But Part 1 §R was right to classify it as an internal engineering advantage that is invisible to a buyer, and Part 2 should not inflate it beyond that.
+
+### L4. Coaching qualification pack
 
 Twelve cases, per the brief, with the specific trap each must catch:
 
@@ -601,7 +648,7 @@ Cases 7, 11 and 12 have no PM analogue and are the most important. Case 12 in pa
 
 Add two beyond the brief: a **psychological-inference trap** (a note inviting trait language, where any characterisation is a hard failure), and a **hedge-preservation case** (*"she might be thinking about leaving"* must not become *"she is leaving"*).
 
-### L3. Does the existing reliability work materially reduce refit risk?
+### L5. Does the existing reliability work materially reduce refit risk?
 
 **Yes — and this is the strongest positive finding in Part 2.** Not because the tests transfer, but because three harder things do: knowing *which* failures matter (the three-way taxonomy), having the machinery to measure them across providers at known cost, and having a written body of invariants — a name is not identity, missing retrieval is not proof of absence, resolved things must not resurrect, mutations must prove scope — that took a year of failures to discover.
 
@@ -787,7 +834,7 @@ Framed as *what fraction of a from-scratch build does Lume save?* — which is t
 | --- | --- | --- | --- |
 | **Platform** — auth, tenancy, RLS, billing scaffolding, deployment, config | ~15% | **65–75%** | Genuinely generic and well made. Revised down slightly after the privacy audit: account deletion and export do not exist at all, erasure integrity rests on a hand-maintained array, and log discipline needs enforcing (§M) |
 | **AI / extraction / trust architecture** | ~25% | **40–55%** | Contract shape, validation, identity gate, fail-closed patterns, invariants. Prompt, ontology, dispatcher, serialiser all new |
-| **Test and eval machinery** | ~10% | **50–60%** on machinery, **0%** on corpus | Taxonomy and harness transfer; content does not |
+| **Test and eval machinery** | ~10% | **55–65%** on machinery, **0%** on corpus | Revised up after the per-file audit: 78.6% of verify LOC survives as logic and only 7.5% is dead weight, though the 67.3% middle bucket needs a fixture-and-type migration across 29 files. Eight of ten property tests need no changes at all, and the intelligence-harness fixture format is already domain-parameterised (§L1) |
 | **Domain model and persistence** | ~15% | **25–35%** | `knowledge_items` overlay and `stakeholders` transfer well; four new tables |
 | **Product UI** | ~25% | **15–25%** | Revised up slightly after the component audit: the reuse envelope is ~30% of component LOC (GENERIC + CHROME) plus a token-only theme system, better than first assumed. Offset by nav being hard-coded JSX rather than config, and by 49% of components being deleted or never copied |
 | **Onboarding and wow moment** | ~10% | **~5%** | Multi-session diff and provenance-to-source are both new |
@@ -834,10 +881,11 @@ Only if something proceeds. Derived from the repository's actual state, not a ge
 
 ### Slice B — Coaching qualification corpus
 
-**Objective.** Build the twelve-case pack from §L2 plus the two additions, as three worlds with 20+ stacked sessions each.
-**Dependencies.** Slice A. Reuses the `eval-capture-v2` machinery.
+**Objective.** Build the twelve-case pack from §L4 plus the two additions, as three worlds with 20+ stacked sessions each.
+**Dependencies.** Slice A.
+**Build it against `EvalWorldFixture`, not `CaptureApplyWorld`.** This is the concrete payoff of the §L1 finding. The intelligence-harness fixture format — ordered free-text captures producing known-truths, queried by questions with expected facts — is already domain-parameterised and accepts coaching worlds with no structural change, and `scoring.ts` consumes it without a single PM type. `CaptureApplyWorld` hard-codes `risks`, `todos`, `timeline` and `stakeholders` in its type and cannot express a coaching world without being rewritten. Choosing the right fixture family before writing the corpus is worth several weeks.
 **Gate.** The Part 1 §Y1 numeric gate: zero LUME FAILURE on cross-client and identity cases, under 2% elsewhere.
-**Risk.** The most under-estimated item in the whole plan, and the one with no precedent to size from.
+**Risk.** Still the most under-estimated item in the plan and the one with no precedent to size from — but less so than before this audit, because the fixture shape and the matcher already exist.
 
 ### Slice C — Fork and platform
 
