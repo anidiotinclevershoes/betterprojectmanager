@@ -1,0 +1,37 @@
+- generic [active] [ref=f2e1]:
+  - navigation [ref=f2e2]:
+    - link "redlib." [ref=f2e4] [cursor=pointer]:
+      - /url: /
+    - generic [ref=f2e5]:
+      - link "reddit" [ref=f2e6] [cursor=pointer]:
+        - /url: "#popup"
+      - link "settings" [ref=f2e7] [cursor=pointer]:
+        - /url: /settings
+  - main [ref=f2e8]:
+    - generic [ref=f2e9]:
+      - 'heading "Reddit rate limit exceeded. Try refreshing in a few seconds.Rate limit will reset in: 148" [level=1] [ref=f2e10]'
+      - heading [level=3] [ref=f2e11]:
+        - link "Reddit Status" [ref=f2e12] [cursor=pointer]:
+          - /url: https://www.redditstatus.com/
+      - heading [level=3]
+      - heading [level=3]
+      - heading [level=3] [ref=f2e13]:
+        - text: Expected something to work?
+        - link "Report an issue" [ref=f2e14] [cursor=pointer]:
+          - /url: "https://github.com/redlib-org/redlib/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%F0%9F%90%9B+Bug+Report%3A+Reddit rate limit exceeded. Try refreshing in a few seconds.Rate limit will reset in: 148"
+      - paragraph [ref=f2e15]:
+        - text: If you're getting a "Failed to parse page JSON data" error, please check
+        - link "#446" [ref=f2e16] [cursor=pointer]:
+          - /url: https://github.com/redlib-org/redlib/issues/446
+      - heading [level=3] [ref=f2e17]:
+        - text: Head back
+        - link "home" [ref=f2e18] [cursor=pointer]:
+          - /url: /
+        - text: "?"
+  - contentinfo [ref=f2e19]:
+    - paragraph [ref=f2e21] [cursor=pointer]:
+      - text: v0.36.0-yunyun
+      - link "ⓘ View instance info" [ref=f2e22]:
+        - /url: /info
+      - link "<> Code" [ref=f2e23]:
+        - /url: https://github.com/redlib-org/redlib

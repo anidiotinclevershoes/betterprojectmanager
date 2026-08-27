@@ -1,0 +1,10 @@
+[     265ms] [LOG] {hash: 000276dd3a6e1cadca5483e828fc3c9dbf71ed5a8fcaf5e834fac944abe09ccd, nonce: 168} @ https://safereddit.com/.within.website/x/cmd/anubis/static/js/main.mjs?cacheBuster=devel:30
+[    6139ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://safereddit.com/r/weddingindustry/search?q=spreadsheet&restrict_sr=on&sort=relevance&t=all:0
+[    6245ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ https://safereddit.com/manifest.json:0
+[    9338ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ https://safereddit.com/manifest.json:0
+[   53143ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ https://safereddit.com/manifest.json:0
+[   53399ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ https://safereddit.com/manifest.json:0
+[   57047ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ https://safereddit.com/manifest.json:0
+[   57094ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ https://safereddit.com/manifest.json:0
+[   60850ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ https://safereddit.com/manifest.json:0
+[   60899ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ https://safereddit.com/manifest.json:0
