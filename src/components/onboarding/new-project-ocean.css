@@ -1,0 +1,277 @@
+/* New Project — Ocean visual family. Tokens only; no layout/architecture change. */
+
+.np-experience {
+  max-width: 56rem;
+}
+
+.np-experience.is-first-run {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.np-hero {
+  text-align: left;
+  padding: 4px 0 0;
+}
+
+.np-experience.is-first-run .np-hero {
+  text-align: center;
+}
+
+.np-hero-logo {
+  color: var(--accent-primary);
+  margin: 0 0 8px;
+}
+
+.np-experience.is-first-run .np-hero-logo {
+  margin: 0 auto 8px;
+}
+
+.np-brand {
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.np-hero-title {
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.np-hero-lead {
+  max-width: 38rem;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+}
+
+.np-experience.is-first-run .np-hero-lead {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.np-trust {
+  max-width: none;
+  text-align: left;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--info) 26%, var(--border-subtle));
+  background: color-mix(in srgb, var(--info) 8%, var(--bg-surface));
+}
+
+.np-experience.is-first-run .np-trust {
+  text-align: center;
+}
+
+.np-trust p {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.np-trust strong {
+  font-weight: 650;
+  color: var(--text-primary);
+}
+
+.np-path-grid-two {
+  gap: 12px;
+}
+
+.np-path-card {
+  min-height: 0;
+  border-radius: 12px;
+  padding: 1.05rem 1rem 1rem;
+  background: var(--bg-surface);
+}
+
+.np-path-card.is-recommended {
+  border-color: color-mix(in srgb, var(--info) 32%, var(--border-subtle));
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--info) 10%, transparent),
+      transparent 42%
+    ),
+    var(--bg-surface);
+  box-shadow: none;
+}
+
+.np-path-card.is-quiet {
+  opacity: 1;
+}
+
+.np-recommended-badge {
+  color: var(--info);
+  background: color-mix(in srgb, var(--info) 14%, transparent);
+}
+
+.np-path-card h2 {
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.np-experience .primary-btn,
+.np-experience .ghost-btn,
+.np-experience .muted-btn {
+  min-height: 40px;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.84rem;
+}
+
+.np-experience .primary-btn {
+  gap: 0.35rem;
+}
+
+.np-panel-head h2 {
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.np-record-panel {
+  border-radius: 10px;
+  background: var(--bg-surface);
+}
+
+.np-guidance,
+.np-knowledge-callout,
+.np-example {
+  border-radius: 10px;
+}
+
+.np-knowledge-callout {
+  border-color: color-mix(in srgb, var(--accent-knowledge) 28%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent-knowledge) 6%, var(--bg-surface));
+}
+
+.np-review-summary {
+  border-radius: 10px;
+  border-color: color-mix(in srgb, var(--info) 24%, var(--border-subtle));
+  background: color-mix(in srgb, var(--info) 7%, var(--bg-surface));
+}
+
+.np-review-title {
+  font-size: 1.4rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.np-section {
+  border-radius: 10px;
+}
+
+.np-section.accent-position .np-section-toggle {
+  box-shadow: inset 3px 0 0 var(--accent-knowledge);
+}
+
+.np-section.accent-dates .np-section-toggle {
+  box-shadow: inset 3px 0 0 var(--accent-timeline);
+}
+
+.np-section.accent-todo .np-section-toggle {
+  box-shadow: inset 3px 0 0 var(--accent-todo);
+}
+
+.np-section.accent-risks .np-section-toggle {
+  box-shadow: inset 3px 0 0 var(--danger);
+}
+
+.np-section.accent-people .np-section-toggle {
+  box-shadow: inset 3px 0 0 var(--success);
+}
+
+.np-section.accent-knowledge .np-section-toggle {
+  box-shadow: inset 3px 0 0 var(--accent-knowledge);
+}
+
+.np-categorise-item {
+  border-radius: 10px;
+}
+
+.np-blank-form {
+  max-width: 28rem;
+}
+
+.np-blank-form input,
+.np-talk textarea,
+.np-review input,
+.np-review textarea,
+.np-review select,
+.np-categorise input,
+.np-categorise textarea,
+.np-categorise select {
+  width: 100%;
+}
+
+.np-success-block {
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--success) 28%, var(--border-subtle));
+  background: color-mix(in srgb, var(--success) 10%, var(--bg-surface));
+}
+
+.np-success {
+  padding: 0;
+  background: transparent;
+}
+
+.np-create-failed {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .np-experience {
+    padding: 0 0 calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .np-hero-title {
+    font-size: 1.28rem;
+  }
+
+  .np-path-card {
+    min-height: 0;
+  }
+
+  .np-experience .primary-btn,
+  .np-experience .ghost-btn,
+  .np-experience .muted-btn {
+    min-height: 44px;
+  }
+
+  .np-transcript-field textarea,
+  .np-blank-form input,
+  .np-review input,
+  .np-review textarea,
+  .np-review select,
+  .np-categorise input,
+  .np-categorise textarea,
+  .np-categorise select {
+    font-size: 16px;
+    min-height: 2.75rem;
+  }
+
+  .np-transcript-field textarea {
+    min-height: 10.5rem;
+  }
+
+  .np-talk-footer,
+  .np-review-sticky {
+    position: sticky;
+    bottom: 0;
+    z-index: 6;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, var(--bg-app) 94%, transparent) 22%,
+      var(--bg-app)
+    );
+  }
+
+  .np-create-btn,
+  .np-talk-footer .primary-btn {
+    width: 100%;
+  }
+}

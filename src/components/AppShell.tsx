@@ -137,6 +137,12 @@ function AppShellInner({ children }: { children: ReactNode }) {
 
   const header = useMemo(() => {
     if (pathname === "/") {
+      if (state.projects.length === 0) {
+        return {
+          title: "New project",
+          subtitle: "Tell Lume what this project is about.",
+        };
+      }
       return {
         title: "Lume",
         subtitle: MISSION_MESSAGE,

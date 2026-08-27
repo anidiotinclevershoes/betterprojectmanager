@@ -48,6 +48,7 @@
     "verify:phase3b-capture-boundary": "npx --yes tsx scripts/verify-phase3b-capture-boundary.ts",
     "verify:capture-v2": "npx --yes tsx scripts/verify-capture-v2.ts",
     "verify:new-project-v2": "npx --yes tsx scripts/verify-new-project-v2.ts",
+    "verify:first-run-journey": "npx --yes tsx scripts/verify-first-run-journey.ts",
     "verify:desert-theme": "npx --yes tsx scripts/verify-desert-theme.ts",
     "typecheck": "tsc --noEmit",
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",
