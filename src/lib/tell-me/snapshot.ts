@@ -1,7 +1,11 @@
 /**
  * AI snapshot refresh — server-only. Do not import from client components.
  */
-import { getOpenAIKey, isOpenAIConfigured } from "@/lib/openai";
+import {
+  getOpenAIKey,
+  isOpenAIConfigured,
+  withOpenAiChatPrivacy,
+} from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { buildDeterministicSnapshot } from "@/lib/tell-me/snapshot-deterministic";
 import type { MissionState } from "@/lib/types";
@@ -67,19 +71,21 @@ export async function refreshSnapshotWithAi(args: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "You compress project memory for a PM coaching product called Lume. Never invent project facts. Snapshot refresh must not invent todos, owners, dates, or approvals.",
-        },
-        { role: "user", content: userPrompt },
-      ],
-    }),
+    body: JSON.stringify(
+      withOpenAiChatPrivacy({
+        model,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              "You compress project memory for a PM coaching product called Lume. Never invent project facts. Snapshot refresh must not invent todos, owners, dates, or approvals.",
+          },
+          { role: "user", content: userPrompt },
+        ],
+      }),
+    ),
   });
 
   if (!response.ok) {

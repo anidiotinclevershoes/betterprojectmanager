@@ -80,6 +80,53 @@ check("logout clears authenticated browser caches helper", () => {
   );
   assert.match(cleanup, /mission-control-state-v5/);
   assert.match(cleanup, /lume-capture-sessions-v1/);
+  assert.match(cleanup, /lume-tell-me-snapshots-v1/);
+  assert.match(cleanup, /lume-project-dictionary-v1/);
+  assert.match(cleanup, /mc-workspace-layout-v3:/);
+});
+
+check("login and signup wipe browser project state before entering the app", () => {
+  const login = fs.readFileSync(path.join(root, "src/app/login/page.tsx"), "utf8");
+  const signup = fs.readFileSync(path.join(root, "src/app/signup/page.tsx"), "utf8");
+  assert.match(login, /clearAuthenticatedBrowserState/);
+  assert.match(login, /window\.location\.assign/);
+  assert.match(signup, /clearAuthenticatedBrowserState/);
+  assert.match(signup, /window\.location\.assign/);
+});
+
+check("browser wipe removes project-domain keys including prefixes", () => {
+  const mem: Record<string, string> = {
+    "lume-tell-me-snapshots-v1": "snap",
+    "lume-project-dictionary-v1": "dict",
+    "lume-mission-supabase-cache-v1": "cache",
+    "mc-workspace-layout-v3:proj-a": "layout",
+    "mc-appearance-v1": "keep-theme",
+  };
+  const makeStorage = () => {
+    const storage = {
+      removeItem(key: string) {
+        delete mem[key];
+      },
+      key(index: number) {
+        return Object.keys(mem)[index] ?? null;
+      },
+      get length() {
+        return Object.keys(mem).length;
+      },
+    };
+    return storage;
+  };
+  (globalThis as { window?: unknown }).window = {
+    localStorage: makeStorage(),
+    sessionStorage: makeStorage(),
+  };
+  clearAuthenticatedBrowserState();
+  assert.equal(mem["lume-tell-me-snapshots-v1"], undefined);
+  assert.equal(mem["lume-project-dictionary-v1"], undefined);
+  assert.equal(mem["lume-mission-supabase-cache-v1"], undefined);
+  assert.equal(mem["mc-workspace-layout-v3:proj-a"], undefined);
+  assert.equal(mem["mc-appearance-v1"], "keep-theme");
+  delete (globalThis as { window?: unknown }).window;
 });
 
 check("phase 2 workspace bootstrap migration exists", () => {

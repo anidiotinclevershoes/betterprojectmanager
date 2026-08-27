@@ -96,6 +96,8 @@ For ordinary development:
 
 Then open operational docs only if the task is about tests, deploy, or persistence setup.
 
+Legal / privacy / security (V1 launch): `docs/LUME_V1_LEGAL_EAGLE_AUDIT.md` — not product constitution; use for launch claims, Terms/Privacy inputs, and solicitor handoff.
+
 ---
 
 ## If documents conflict

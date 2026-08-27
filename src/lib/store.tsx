@@ -12,10 +12,12 @@ import {
   type ReactNode,
 } from "react";
 import {
+  clearMissionSupabaseCache,
   readMissionSupabaseCache,
   shouldWriteDurableMissionCache,
   writeMissionSupabaseCache,
 } from "@/lib/mission-cache";
+import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import {
   analyseCapture,
   generateProactiveRecommendations,
@@ -618,6 +620,9 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       setSaveStatus("error");
       setSaveError(message);
       setHydrated(true);
+      if (!userId) {
+        clearMissionSupabaseCache();
+      }
     }
 
     function applyLocalHydrate() {
@@ -687,6 +692,18 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         // Supabase persistence: keep showing "Loading…" and retry — never
         // fail-fast into the error/empty screens while the session is settling.
         if (me?.persistence === "supabase") {
+          const signedInId = me.user?.id ?? null;
+          const cached = readMissionSupabaseCache();
+          if (cached && signedInId && cached.userId !== signedInId) {
+            clearAuthenticatedBrowserState();
+            persistMetaRef.current = {
+              mode: "supabase",
+              workspaceId: null,
+              userId: signedInId,
+            };
+            setState(emptyMissionState());
+          }
+
           attachAuthRecovery();
 
           let lastError: unknown = null;

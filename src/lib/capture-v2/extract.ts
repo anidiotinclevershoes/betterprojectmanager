@@ -1,4 +1,4 @@
-import { getOpenAIKey } from "@/lib/openai";
+import { getOpenAIKey, withOpenAiChatPrivacy } from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { buildObservationExtractionPrompt } from "./prompt";
 
@@ -50,19 +50,21 @@ export async function extractObservationsWithOpenAI(args: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "You extract atomic project observations as JSON. You do not mutate a database. You never invent record IDs.",
-        },
-        { role: "user", content: prompt },
-      ],
-    }),
+    body: JSON.stringify(
+      withOpenAiChatPrivacy({
+        model,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              "You extract atomic project observations as JSON. You do not mutate a database. You never invent record IDs.",
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
+    ),
   });
 
   if (!response.ok) {

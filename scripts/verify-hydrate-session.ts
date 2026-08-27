@@ -102,6 +102,13 @@ async function main() {
     assert.match(cleanup, /lume-mission-supabase-cache-v1/);
   });
 
+  await check("hydrate discards paint cache when signed-in user differs", () => {
+    const store = fs.readFileSync(storePath, "utf8");
+    assert.match(store, /cached\.userId !== signedInId/);
+    assert.match(store, /clearAuthenticatedBrowserState/);
+    assert.match(store, /if \(!userId\) \{[\s\S]*clearMissionSupabaseCache/);
+  });
+
   await check("waitForBrowserUser resolves from auth event", async () => {
     type Listener = (
       event: string,

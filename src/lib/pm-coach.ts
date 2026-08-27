@@ -1,4 +1,8 @@
-import { getOpenAIKey, isOpenAIConfigured } from "./openai";
+import {
+  getOpenAIKey,
+  isOpenAIConfigured,
+  withOpenAiChatPrivacy,
+} from "./openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import type { MissionState, Project } from "./types";
 
@@ -266,14 +270,16 @@ ${JSON.stringify(context, null, 2)}`;
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: resolveOpenAIChatModel(),
-      temperature: 0.35,
-      messages: [
-        { role: "system", content: buildPmCoachSystemPrompt(who) },
-        { role: "user", content: userPrompt },
-      ],
-    }),
+    body: JSON.stringify(
+      withOpenAiChatPrivacy({
+        model: resolveOpenAIChatModel(),
+        temperature: 0.35,
+        messages: [
+          { role: "system", content: buildPmCoachSystemPrompt(who) },
+          { role: "user", content: userPrompt },
+        ],
+      }),
+    ),
   });
 
   if (!response.ok) {
@@ -338,15 +344,17 @@ ${JSON.stringify(context, null, 2)}`;
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: resolveOpenAIChatModel(),
-      temperature: 0.35,
-      stream: true,
-      messages: [
-        { role: "system", content: buildPmCoachSystemPrompt(who) },
-        { role: "user", content: userPrompt },
-      ],
-    }),
+    body: JSON.stringify(
+      withOpenAiChatPrivacy({
+        model: resolveOpenAIChatModel(),
+        temperature: 0.35,
+        stream: true,
+        messages: [
+          { role: "system", content: buildPmCoachSystemPrompt(who) },
+          { role: "user", content: userPrompt },
+        ],
+      }),
+    ),
   });
 
   if (!response.ok || !response.body) {
