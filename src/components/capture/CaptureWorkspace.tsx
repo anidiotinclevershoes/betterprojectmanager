@@ -5,6 +5,7 @@ import { CaptureBestPractice } from "@/components/capture/CaptureBestPractice";
 import { CaptureContextInspector } from "@/components/capture/CaptureContextInspector";
 import { CaptureReliabilityNotice } from "@/components/capture/CaptureReliabilityNotice";
 import { useCaptureSession } from "@/components/capture/CaptureSessionContext";
+import { FirstCaptureCue } from "@/components/onboarding/FirstRunCue";
 import { useMission } from "@/lib/store";
 import { analysesRemaining } from "@/lib/workspace/history";
 import { shouldWarnBeforeAnalysis } from "@/lib/capture/reliability";
@@ -676,6 +677,14 @@ export function CaptureWorkspace({
         </p>
       ) : null}
 
+      {isOcean && !collapsed ? (
+        <FirstCaptureCue
+          composeEmpty={!content.trim()}
+          analysing={busy === "analysing"}
+          reviewOpen={Boolean(reviewOpen)}
+        />
+      ) : null}
+
       {/* Transcript stays visible after analysis (read-only), including when collapsed. */}
       <section
         className="capture-transcript-panel"
@@ -916,7 +925,7 @@ export function CaptureWorkspace({
           data-testid="ocean-capture-review"
         >
           <p className="ocean-capture-review-boundary" role="note">
-            Review every finding below. Nothing enters maintained project truth
+            Check what Lume understood before anything changes. Nothing enters maintained project truth
             until you approve it (Approve / Apply Ready / Remember).
           </p>
           <CaptureSummary

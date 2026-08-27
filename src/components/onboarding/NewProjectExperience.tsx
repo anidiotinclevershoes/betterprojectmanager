@@ -12,6 +12,7 @@ import {
 import { LumeLogo } from "@/components/brand/LumeLogo";
 import { ProjectSetupReview } from "@/components/onboarding/ProjectSetupReview";
 import { NewProjectCategorisation } from "@/components/onboarding/NewProjectCategorisation";
+import "./new-project-ocean.css";
 import {
   assembleFromNarrative,
   suggestCode,
@@ -69,6 +70,7 @@ export function NewProjectExperience({
         setSuccess(`${input.name.trim() || input.code} is ready.`);
         router.push(`/projects/${id}`);
       } catch (err) {
+        setSuccess(null);
         setError(
           err instanceof Error
             ? err.message
@@ -176,6 +178,8 @@ export function NewProjectExperience({
   return (
     <div
       className={`np-experience ${variant === "first-run" ? "is-first-run" : ""}`}
+      data-testid="np-experience"
+      data-np-variant={variant}
     >
       {path === "choose" ? (
         <ChoosePaths
@@ -252,14 +256,10 @@ export function NewProjectExperience({
       ) : null}
 
       {success ? (
-        <div className="np-success-block" role="status">
+        <div className="np-success-block" role="status" data-testid="np-create-success">
           <p className="np-success">
-            {success} Lume has created your starting project from what you
-            provided.
-          </p>
-          <p className="np-tell-me-nudge">
-            Lume has started learning your project. Try asking Tell Me: “What
-            are the biggest risks I mentioned?”
+            {success} Opening the workspace — Capture is how you tell Lume what
+            happens next.
           </p>
         </div>
       ) : null}
@@ -279,25 +279,25 @@ function ChoosePaths({
   return (
     <div className="np-choose">
       <header className="np-hero">
-        <LumeLogo size={variant === "first-run" ? 72 : 56} className="np-hero-logo" />
-        <p className="np-brand">LUME</p>
-        <h1 className="np-hero-title">Project Intelligence</h1>
+        <LumeLogo size={variant === "first-run" ? 36 : 28} className="np-hero-logo" />
+        <p className="np-brand">lume</p>
+        <h1 className="np-hero-title">
+          {variant === "first-run"
+            ? "Tell Lume what this project is about."
+            : "New project"}
+        </h1>
         <p className="np-hero-lead">
-          Give Lume what you know about your project.
-          <br />
-          We&apos;ll organise the work, risks, people, dates and knowledge —
-          then let you review everything before anything is created.
+          Describe it in your own words. Lume organises people, dates, risks and
+          work into a starting structure — then you review before anything is
+          created.
         </p>
       </header>
 
       <div className="np-trust" role="note">
         <p>
-          <strong>Nothing will be added until you review it.</strong>
+          <strong>Nothing is created until you review it.</strong>
         </p>
-        <p className="meta">
-          You&apos;ll be able to edit, remove or add anything before confirming
-          your project.
-        </p>
+        <p className="meta">Edit, remove or add anything before you confirm.</p>
       </div>
 
       <div className="np-path-grid np-path-grid-two">
@@ -305,11 +305,10 @@ function ChoosePaths({
           <span className="np-recommended-badge">Recommended</span>
           <h2>Talk It Through</h2>
           <p>
-            Tell Lume about the project in your own words. Talk through what
-            you&apos;re delivering, who&apos;s involved, what you&apos;re
-            worried about and anything else you know.
+            Tell Lume about the project in your own words — what you&apos;re
+            delivering, who&apos;s involved, what you&apos;re worried about.
           </p>
-          <p className="meta">Lume will structure it for you.</p>
+          <p className="meta">Lume will structure it for you to check.</p>
           <button type="button" className="primary-btn" onClick={onTalk}>
             Talk it through
           </button>
@@ -318,8 +317,8 @@ function ChoosePaths({
         <article className="np-path-card is-quiet">
           <h2>Start Blank</h2>
           <p>
-            Prefer to build it yourself? Create an empty project and add things
-            as you go.
+            Just a name. Add the rest from Capture once you&apos;re in the
+            workspace.
           </p>
           <button type="button" className="ghost-btn" onClick={onBlank}>
             Start blank
@@ -500,13 +499,13 @@ function TalkPath({
       <header className="np-panel-head">
         <h2>Tell Lume about your project</h2>
         <p className="np-panel-lead">
-          The more context you give, the better Lume can understand how your
-          project works.
+          The more you share, the better the starting structure. You review
+          everything before it is created.
         </p>
       </header>
 
       <div className="np-trust is-inline" role="note">
-        Nothing will be added until you review it.
+        Nothing is created until you review it.
       </div>
 
       <div className="np-talk-layout">
@@ -558,9 +557,8 @@ function TalkPath({
               )}
             </div>
             <p className="np-reassure meta">
-              Don&apos;t worry about making it perfect. You can ramble, change
-              your mind or remember things out of order. You&apos;ll review
-              everything Lume extracts before creating the project.
+              Don&apos;t worry about making it perfect. Ramble if you need to —
+              you&apos;ll review what Lume understood before anything is created.
             </p>
           </div>
 
@@ -595,6 +593,9 @@ function TalkPath({
                 disabled={!transcript.trim()}
                 onClick={() => onBuild(transcript.trim())}
               >
+                <span className="ocean-ai-glyph" aria-hidden>
+                  ✦
+                </span>
                 Build My Project
               </button>
             )}
@@ -606,9 +607,7 @@ function TalkPath({
           <div className="np-guidance">
             <h3>What should I talk about?</h3>
             <p className="meta">
-              Talk naturally — you don&apos;t need to cover everything. The more
-              useful context you give Lume, the better it can build and remember
-              your project.
+              Talk naturally. You don&apos;t need to cover everything.
             </p>
             <ul className="np-guidance-list">
               {TALK_GUIDANCE_TOPICS.map((topic) => (
@@ -632,10 +631,7 @@ function TalkPath({
                 brief
               </li>
             </ul>
-            <p className="meta">
-              The more of this context you share, the more useful Lume becomes
-              later.
-            </p>
+            <p className="meta">Share this kind of context when you have it.</p>
           </div>
 
           <div className="np-example">
@@ -698,8 +694,7 @@ function BlankPath({
       <header className="np-panel-head">
         <h2>Start blank</h2>
         <p className="np-panel-lead">
-          Just a name — you can add everything else once you&apos;re in the
-          workspace.
+          Just a name. Capture is how you tell Lume the rest.
         </p>
       </header>
       <form className="np-blank-form" onSubmit={onSubmit}>
@@ -723,7 +718,11 @@ function BlankPath({
             placeholder="HORIZON"
           />
         </label>
-        {error ? <p className="error-copy">{error}</p> : null}
+        {error ? (
+          <p className="error-copy np-create-failed" role="alert" data-testid="np-create-error">
+            {error}
+          </p>
+        ) : null}
         <div className="np-talk-footer">
           <button type="button" className="ghost-btn" onClick={onBack}>
             Back

@@ -1,0 +1,91 @@
+/* Auth first-run polish — Ocean family, mobile-safe. Does not rebuild auth. */
+
+.auth-page {
+  padding: 1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  background:
+    radial-gradient(
+      ellipse at 18% 8%,
+      color-mix(in srgb, var(--accent-primary) 16%, transparent),
+      transparent 46%
+    ),
+    var(--bg-app);
+}
+
+.auth-page .auth-card {
+  width: min(26rem, 100%);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.4rem 1.35rem 1.3rem;
+  box-shadow: none;
+}
+
+.auth-page .auth-brand-logo {
+  color: var(--accent-primary);
+}
+
+.auth-page .auth-brand-name {
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: lowercase;
+  color: var(--text-muted);
+}
+
+.auth-page .auth-brand-tag {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.auth-page .auth-card h1 {
+  font-family: inherit;
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.auth-page .lede {
+  color: var(--text-secondary);
+}
+
+.auth-page .login-form input {
+  min-height: 2.6rem;
+}
+
+.auth-page .login-submit {
+  min-height: 44px;
+  margin-top: 0.55rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+.auth-page .auth-notice {
+  background: color-mix(in srgb, var(--info) 10%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, var(--info) 26%, var(--border-subtle));
+  color: var(--text-primary);
+}
+
+.auth-page .auth-text-link {
+  color: var(--accent-hover);
+}
+
+.auth-next-step {
+  margin: 0.15rem 0 0.85rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+@media (max-width: 720px) {
+  .auth-page .login-form input {
+    font-size: 16px;
+    min-height: 2.85rem;
+  }
+
+  .auth-page .login-submit,
+  .auth-page .ghost-btn {
+    min-height: 44px;
+  }
+}

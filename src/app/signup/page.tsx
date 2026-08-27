@@ -69,8 +69,12 @@ export default function SignupPage() {
         }
       >
         <p className="auth-notice" role="status">
-          Open the link in that email to activate your Lume workspace, then come
-          back and sign in.
+          Open the link in that email, then come back and sign in. Next you
+          describe the project — Lume organises a starting structure for you to
+          review.
+        </p>
+        <p className="auth-next-step">
+          No email yet? Check spam, or ask whoever invited you.
         </p>
       </AuthShell>
     );
@@ -79,7 +83,7 @@ export default function SignupPage() {
   return (
     <AuthShell
       title="Create account"
-      lede="Start a personal Lume workspace — no billing, no team setup."
+      lede="Start a personal Lume workspace. After you confirm your email, you can describe your first project."
       footer={
         <AuthLinkRow>
           Already have an account?{" "}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LumeLogo } from "@/components/brand/LumeLogo";
+import "./auth-first-run.css";
 
 export function AuthShell({
   title,
@@ -19,9 +20,8 @@ export function AuthShell({
     <div className="login-page auth-page">
       <div className="login-card auth-card">
         <div className="auth-brand">
-          <LumeLogo size={40} className="auth-brand-logo" />
-          <p className="auth-brand-name">LUME</p>
-          <p className="auth-brand-tag">Project Intelligence</p>
+          <LumeLogo size={28} className="auth-brand-logo" />
+          <p className="auth-brand-name">lume</p>
         </div>
         <h1>{title}</h1>
         {lede ? <p className="lede">{lede}</p> : null}

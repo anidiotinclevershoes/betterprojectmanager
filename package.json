@@ -72,6 +72,7 @@
     "dashboard:publish": "npx --yes tsx scripts/test-dashboard/publish.ts --mode both",
     "fixtures:e2e": "npx --yes tsx scripts/write-e2e-fixtures.ts",
     "verify:new-project-v2": "npx --yes tsx scripts/verify-new-project-v2.ts",
+    "verify:first-run-journey": "npx --yes tsx scripts/verify-first-run-journey.ts",
     "verify:desert-theme": "npx --yes tsx scripts/verify-desert-theme.ts",
     "typecheck": "tsc --noEmit",
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",

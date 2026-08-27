@@ -47,10 +47,10 @@ export function ProjectSetupReview({
     <div className="np-review">
       <header className="np-review-head">
         <p className="np-kicker">Project setup review</p>
-        <h2 className="np-review-title">Here&apos;s the project Lume built</h2>
+        <h2 className="np-review-title">Here&apos;s what Lume understood</h2>
         <p className="np-review-lead">
-          Review anything you&apos;d like to change. Nothing will be created until
-          you confirm.
+          Check this before anything is created. Edit freely — this is a starting
+          structure, not a finished plan.
         </p>
       </header>
 
@@ -78,6 +78,7 @@ export function ProjectSetupReview({
       <Section
         id="project"
         title="Project"
+        accent="position"
         open={open.project}
         onToggle={() => setOpen((s) => ({ ...s, project: !s.project }))}
       >
@@ -129,6 +130,7 @@ export function ProjectSetupReview({
       <Section
         id="dates"
         title={`Important dates · ${counts.dates}`}
+        accent="dates"
         open={open.dates}
         onToggle={() => setOpen((s) => ({ ...s, dates: !s.dates }))}
       >
@@ -141,6 +143,7 @@ export function ProjectSetupReview({
       <Section
         id="todos"
         title={`To Do · ${counts.todos}`}
+        accent="todo"
         open={open.todos}
         onToggle={() => setOpen((s) => ({ ...s, todos: !s.todos }))}
       >
@@ -153,6 +156,7 @@ export function ProjectSetupReview({
       <Section
         id="risks"
         title={`Risks · ${counts.risks}`}
+        accent="risks"
         open={open.risks}
         onToggle={() => setOpen((s) => ({ ...s, risks: !s.risks }))}
       >
@@ -174,6 +178,7 @@ export function ProjectSetupReview({
       <Section
         id="stakeholders"
         title={`Stakeholders · ${counts.stakeholders}`}
+        accent="people"
         open={open.stakeholders}
         onToggle={() =>
           setOpen((s) => ({ ...s, stakeholders: !s.stakeholders }))
@@ -189,13 +194,13 @@ export function ProjectSetupReview({
         id="knowledge"
         title="Things Lume will remember"
         badge="Knowledge"
+        accent="knowledge"
         open={open.knowledge}
         onToggle={() => setOpen((s) => ({ ...s, knowledge: !s.knowledge }))}
         emphasis
       >
         <p className="np-knowledge-intro meta">
-          These are useful project facts Lume can use later in Capture, Coach
-          and Meeting Prep.
+          Useful project facts Lume can use later in Capture and Knowledge Centre.
         </p>
         <KnowledgeList
           items={
@@ -224,7 +229,11 @@ export function ProjectSetupReview({
         </div>
       ) : null}
 
-      {error ? <p className="error-copy">{error}</p> : null}
+      {error ? (
+        <p className="error-copy np-create-failed" role="alert" data-testid="np-create-error">
+          {error}
+        </p>
+      ) : null}
 
       <div className="np-review-sticky">
         <button type="button" className="ghost-btn" onClick={onBack} disabled={busy}>
@@ -256,10 +265,12 @@ function Section({
   onToggle,
   children,
   emphasis,
+  accent,
 }: {
   id: string;
   title: string;
   badge?: string;
+  accent?: string;
   open: boolean;
   onToggle: () => void;
   children: React.ReactNode;
@@ -267,7 +278,7 @@ function Section({
 }) {
   return (
     <section
-      className={`np-section ${emphasis ? "is-emphasis" : ""} ${open ? "is-open" : ""}`}
+      className={`np-section ${emphasis ? "is-emphasis" : ""} ${open ? "is-open" : ""} ${accent ? `accent-${accent}` : ""}`}
     >
       <button type="button" className="np-section-toggle" onClick={onToggle}>
         <span>

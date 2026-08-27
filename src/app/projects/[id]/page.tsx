@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { FirstProjectGuidance } from "@/components/onboarding/FirstRunCue";
 import { OceanProjectWorkspace } from "@/components/knowledge-centre/OceanProjectWorkspace";
 import { useMission } from "@/lib/store";
 
@@ -27,6 +28,7 @@ export default function ProjectDashboardPage() {
       data-project-id={project.id}
       data-project-code={project.code}
     >
+      <FirstProjectGuidance />
       <OceanProjectWorkspace key={project.id} project={project} />
     </div>
   );
