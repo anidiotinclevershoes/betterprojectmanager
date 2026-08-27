@@ -229,7 +229,7 @@ function actionFromFinding(
   if (projectUncertain) {
     return {
       status: "needs_review",
-      label: "Needs Review · Which project?",
+      label: "Needs you · Which project?",
     };
   }
 
@@ -240,7 +240,7 @@ function actionFromFinding(
   ) {
     return {
       status: "needs_review",
-      label: targetBit ? `Needs Review · ${targetBit}` : "Needs Review",
+      label: targetBit ? `Needs you · ${targetBit}` : "Needs you",
       reviewCardId: op
         ? undefined // resolved below by caller with suggestion id
         : `coverage-${finding.id}`,
@@ -283,14 +283,14 @@ function actionFromFinding(
   if (op?.operation === "ARCHIVE" || op?.operation === "DELETE") {
     return {
       status: "needs_review",
-      label: `Needs Review · ${targetBit ?? entity}`,
+      label: `Needs you · ${targetBit ?? entity}`,
     };
   }
 
   if (finding.findingType === "NEW_INFORMATION") {
     return {
       status: "needs_review",
-      label: "Needs Review",
+      label: "Needs you",
       reviewCardId: `coverage-${finding.id}`,
     };
   }
@@ -299,7 +299,7 @@ function actionFromFinding(
 }
 
 /**
- * Concise project-relevant observations for “What Lume Understood”,
+ * Concise project-relevant observations for “Here’s what I understood”,
  * each linked to the downstream review action when available.
  */
 export function buildCaptureObservations(

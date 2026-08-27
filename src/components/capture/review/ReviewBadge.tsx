@@ -50,7 +50,7 @@ export function ReadinessBadge({
         <span className="review-badge-ico" aria-hidden>
           ⚠
         </span>
-        <span>Needs Review</span>
+        <span>Needs you</span>
       </span>
     );
   }

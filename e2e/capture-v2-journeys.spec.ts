@@ -24,7 +24,7 @@ test.describe("Capture V2 frozen journeys", () => {
     await expect(page.getByRole("heading", { name: "Candyland" })).toBeVisible();
     await analyseFrozenTranscript(page, frozen.transcript);
     await expect(
-      page.getByText("No operational changes to review."),
+      page.getByText("Nothing to apply."),
     ).toBeVisible();
     await openKnowledgeCentre(page);
     const people = page.getByTestId("ocean-frame-people");
@@ -231,6 +231,72 @@ test.describe("Capture Review Needs-you interactions", () => {
     );
     await page.getByTestId("review-existing-or-new-update").click();
     await expect(page.getByRole("button", { name: "Approve" })).toBeVisible();
+  });
+});
+
+test.describe("Capture experience — annotated transcript", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await seedExperimentalWorlds(page, testInfo.testId);
+  });
+
+  test("matched evidence is highlighted; mixed siblings stay independent", async ({
+    page,
+  }) => {
+    const frozen = await mockLocalAuthAndFrozenCapture(
+      page,
+      "sibling-ready-and-needs-you",
+    );
+    await openCapture(page);
+    await expect(page.getByPlaceholder("Tell Lume what changed…")).toBeVisible();
+    const inputShot = walkthroughPath("capture_experience_input.png");
+    if (inputShot) await page.screenshot({ path: inputShot, fullPage: true });
+    await analyseFrozenTranscript(page, frozen.transcript);
+
+    const notes = page.getByTestId("annotated-transcript");
+    await expect(notes).toBeVisible();
+    const body = notes.locator(".annotated-transcript-body");
+    await expect(body).toContainText(
+      "The icing on Gumdrop Bridge has melted; that risk is closed.",
+    );
+    await expect(body).toContainText(
+      "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it.",
+    );
+    const marks = notes.getByTestId("transcript-mark");
+    await expect(marks).toHaveCount(2);
+    await expect(notes.locator('[data-category="risks"]')).toContainText(
+      "Gumdrop Bridge",
+    );
+    await expect(notes.locator('[data-category="people"]')).toContainText(
+      "Fizz Caramel",
+    );
+    await expect(page.getByText("Needs you").first()).toBeVisible();
+    await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Apply Ready \(1\)/i }),
+    ).toBeVisible();
+    const annotatedShot = walkthroughPath("capture_experience_annotated.png");
+    if (annotatedShot) await page.screenshot({ path: annotatedShot, fullPage: true });
+  });
+
+  test("Needs-you choices stay tappable on a narrow viewport", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const frozen = await mockLocalAuthAndFrozenCapture(
+      page,
+      "share-vs-replace-ambiguous",
+    );
+    await openCapture(page);
+    await analyseFrozenTranscript(page, frozen.transcript);
+    const share = page.getByTestId("review-ownership-share");
+    await expect(share).toBeVisible();
+    const box = await share.boundingBox();
+    expect(box).toBeTruthy();
+    expect(box!.height).toBeGreaterThanOrEqual(40);
+    await expect(page.getByTestId("review-ownership-replace")).toBeVisible();
+    await expect(page.getByTestId("annotated-transcript")).toBeVisible();
+    const mobileShot = walkthroughPath("capture_experience_mobile_needs_you.png");
+    if (mobileShot) await page.screenshot({ path: mobileShot, fullPage: true });
   });
 });
 

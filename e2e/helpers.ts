@@ -177,7 +177,9 @@ export async function analyseFrozenTranscript(page: Page, transcript: string) {
   if (await anyway.isVisible().catch(() => false)) {
     await anyway.click();
   }
-  await expect(page.getByText("Review Changes")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("ocean-capture-review")).toBeVisible({
+    timeout: 20_000,
+  });
 }
 
 export async function applyReadyIfPresent(page: Page) {
