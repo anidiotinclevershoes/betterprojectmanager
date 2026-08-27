@@ -406,7 +406,60 @@ Everything else in Part 1's trust model is already expressible.
 
 ## I. UX-code mapping
 
-79 components, 17,246 lines. The Ocean frames are pure row-builder functions consumed by both UI and verify scripts — good architecture, and rewrite-not-refactor for a new domain.
+**80 components, 17,254 lines**, plus 5,035 lines of routes and an 8,793-line `globals.css`. Every component is `"use client"` except two (`DashboardChrome.tsx`, `brand/LumeLogo.tsx`).
+
+### I0. Quantified coupling
+
+Every component classified, one class each:
+
+| Class | Files | LOC | % of component LOC | Meaning for a fork |
+| --- | ---: | ---: | ---: | --- |
+| **DOMAIN-COUPLED** | 21 | 9,510 | **55.1%** | Business logic must be rewritten, not relabelled |
+| **GENERIC** | 25 | 2,626 | 15.2% | Portable essentially as-is |
+| **DEAD / LEGACY** | 10 | 2,588 | **15.0%** | Delete before porting — see I0b |
+| **DOMAIN-LABELLED** | 13 | 1,385 | 8.0% | Renaming only; strings and icon maps |
+| **CHROME** | 11 | 1,145 | 6.6% | Portable structure, product copy baked in |
+| **Total** | **80** | **17,254** | 100% | |
+
+> **The realistic reuse envelope for the frontend is ~30%** — GENERIC plus CHROME, 3,771 lines across 36 files. Add the 8% DOMAIN-LABELLED as near-free and it reaches ~38%. The remaining 55% is rewrite.
+
+This is close to the section P estimate arrived at independently, and slightly better: the review-card layer turned out to be more genuinely generic than assumed.
+
+### I0a. Four findings that sharpen the picture
+
+**Navigation is hard-coded JSX, not configuration.** `Sidebar.tsx` has no `NAV_ITEMS` array and no config file — Master To Do, History, Captures, Evals, Account and Help are individually written `<Link>` blocks each with its own glyph, label and `data-testid` (lines 114–221). `AppShell.tsx` derives page titles from a chain of `pathname.startsWith(...)` checks (lines 141–211) rather than a route→title map. **A different product cannot swap the nav by supplying data; it must edit both files.** This is the most invasive thing to genericise and the clearest argument that "shared frontend shell" is not available.
+
+**Theming is genuinely clean and a third identity is tokens-only.** `[data-theme="dark"]` (Ocean) and `[data-theme="desert"]` are pure CSS custom-property blocks; `applyLumeTheme` sets `document.documentElement.dataset.theme` and `LumeThemePicker` renders a static `OPTIONS` array. No Tailwind config fork, no component forks, and no hard-coded hex found in any `.tsx`. One caveat worth recording: the token blocks are **not co-located** — some variables are defined at the top of `globals.css` and others around line 5690 — so a third theme risks silently missing variables.
+
+**There is no form or input primitive library.** No `Input`, `Select`, `Checkbox` or `TextField` component exists anywhere. Every form element is a bare `<input>`/`<select>`/`<textarea>` with global utility classes. `DashboardChrome` exports layout primitives (`Panel`, `StatTile`, `PageHeader`, `StatusPill`) but nothing for input. This is a genericity gap **independent of domain** — it has to be built for either product, so it is neither a reuse win nor a coaching-specific cost.
+
+**State access is universal and PM-shaped.** `useMission` is imported in 39 files; the `MissionState` type in 74. No component reads an opaque state shape — every consumer either calls `useMission()` or receives already-PM-typed props (`Project`, `TodoItem`, `RiskStatus`, `ProjectKnowledge`). The only state-agnostic components are presentational leaves: `KnowledgeItemCard`, `DetailModal`, `ReviewBadge`, `WhyPanel`, `TargetPicker`, `CaptureSummary`.
+
+### I0b. The dead code has a better architecture than the live code
+
+The most interesting finding in the audit, and a genuinely useful one.
+
+**2,588 lines across 10 files are unreachable from any route** — `ProjectWidgetGrid`, `ProjectKnowledgeBrief`, `CloneRelOpsButton`, `CoachButton` (463 LOC, imported nowhere), `CoachPreview`, `HeaderCoachButton`, `frames/RiskFrame`, `frames/NudgeFrame`, `workspace/WorkspaceGrid`, `workspace/WorkspaceCustomiser`. Part 2 had listed `CoachButton` and `RiskFrame` as live components to remove; they are already dead.
+
+And among that dead code sits the pattern the live code lacks:
+
+```ts
+export const frameRegistry: Record<string, ComponentType<FrameProps>> = {
+  todo: TodoFrame,
+  meetingPrep: MeetingPrepFrame,
+  risks: RiskFrame,
+  nudge: NudgeFrame,
+  timeline: TimelineFrame,
+};
+```
+
+The pre-Ocean workspace had a **real frame registry** plus `WorkspaceCustomiser`, a generic show/hide/reorder UI over `WorkspaceFrameConfig[]`. That is exactly the architecture a second product would want, and it was replaced by hand-written JSX during the Ocean redesign.
+
+Two consequences. It confirms that frame composition *can* be data-driven in this codebase — this is not a hypothetical refactor, it shipped once. And it means Lume should probably delete this code (it is 15% of the component tree and it decays), while a coaching fork could study the registry pattern before writing its frames. Neither product benefits from leaving it where it is.
+
+Four routes are similarly stranded: `/memory`, `/meetings`, `/meetings/[id]` and `/releases` are live URLs unreachable from the Ocean sidebar.
+
+### I1. Surface-by-surface mapping
 
 | Surface | Existing code | Verdict |
 | --- | --- | --- |
@@ -415,21 +468,21 @@ Everything else in Part 1's trust model is already expressible.
 | **Account / billing** | `src/app/account`, `components/billing/**` | **Reuse with styling** |
 | **Client list** | *(none)* — home redirects to the first project | **New.** Part 1 §L2 wants next-session ordering, which has no analogue |
 | **Create client** | `onboarding/NewProjectExperience.tsx` (743) + `ProjectSetupReview.tsx` (660) | **Remove; rebuild far smaller.** 1,403 lines of PM project-setup against Part 1's single paste box. The *review* pattern is worth studying, not porting |
-| **Current picture** | `knowledge-centre/OceanKnowledgeFrames.tsx` (443), `ocean-frames.ts` (191) | **Substantial refit.** Frames are not a registry — `OCEAN_PRIMARY_FRAMES` is a `const string[]` and each frame is a bespoke `buildXRows`. But they are *pure functions*, tested independently of React, so the coaching equivalents are clean rewrites of ~200 lines |
+| **Current picture** | `OceanKnowledgeFrames.tsx` (443), `ocean-frames.ts` (191) | **Major rewrite — the most invasive surface in the app.** `OCEAN_PRIMARY_FRAMES` / `OCEAN_SECONDARY_FRAMES` are string-literal arrays used for tests and documentation; they are never `.map()`ed to render anything. The real render is eight bespoke `useMemo` blocks (lines 92–213) and a hand-written sequence of `<FrameShell>` JSX (lines 215–434). `FrameShell` and `KnowledgeItemCard` are genuinely generic and survive; everything between them is rewritten |
 | **People frame** | `buildPeopleRows` (ocean-frames.ts:97) | **Reuse with terminology — the best single fit in the codebase.** Already renders `@Name · scope` cards with shared/unconfirmed markers from `getPersonBundle` |
 | **Session input** | `capture/CaptureWorkspace.tsx` (1,251), `CaptureSessionContext.tsx` (981) | **Substantial refit.** The input half (text, voice, transcription, session lifecycle) is largely reusable; the review half is PM-shaped |
-| **Review UI** | `capture/review/**` — `CorrectionActions` (375), `SuggestedChangesList` (200), `CompactChangeCard` (174), `SuggestedChangeCard` (164), `KnowledgeRememberList` (125) | **Substantial refit.** Cards are per-entity-type, not generic. Part 1 §L4 wants grouping *by meaning* rather than by entity, which is a different information architecture |
-| **Item detail drawer** | `KnowledgeItemDetailDrawer.tsx` (568), `knowledge-item-detail.ts` | **Reuse with terminology.** Genuinely generic inspect-provenance-and-correct pattern; `KnowledgeItemRef` is a discriminated union that extends naturally |
+| **Review UI** | `capture/review/**` — `CorrectionActions` (375), `SuggestedChangesList` (200), `CompactChangeCard` (174), `SuggestedChangeCard` (164), `KnowledgeRememberList` (125) | **Better than assumed — split verdict.** The card layer *is* genuinely generic over a `ReviewChangeViewModel` (`{entityKind, entityLabel, recordName, diff, why, actions}`); `ReviewBadge`, `WhyPanel`, `TargetPicker`, `CaptureSummary` and `KnowledgeRememberList` need no changes. Coupling re-enters in exactly three places: the `KIND_ICON`/`KIND_LABEL` maps over 10 PM `SuggestionKind`s, `CorrectionActions`' per-concept branches (ownership share/replace, risk "Resolve" vs generic "Complete", an `ENTITY_CHOICES` dropdown), and `targetOptions` in `CaptureWorkspace` built from `state.todos/risks/stakeholders/timeline/meetings`. **Reuse the shell, rewrite the taxonomy and the correction branches** |
+| **Item detail drawer** | `KnowledgeItemDetailDrawer.tsx` (568), `knowledge-item-detail.ts` (**778**, larger than assumed) | **Split, and heavier than Part 2 first estimated.** The drawer *chrome* is a genuinely generic inspect-and-correct pattern — "Previously", "Why Lume believes this", "Related", "Evidence limits" all render off a generic `KnowledgeDetailModel`. But `resolveKnowledgeItemDetail` (lines 269–703) is a 430-line `if (ref.kind === …)` chain encoding PM semantics per branch, and the footer actions wire to `toggleTodo`, `setRiskStatus`, `confirmResponsibilityOwner`. Keep the chrome, replace the `KnowledgeItemRef` union, rewrite the resolver |
 | **Ask** | `tell-me/TellMePanel.tsx` (354), `TellMeSessionContext.tsx` (403), `KnowledgeSearchAskBar.tsx` (204) | **Reuse with terminology.** Search/Ask distinction, citation rendering and suggested questions all transfer |
 | **Session prep** | `frames/MeetingPrepFrame.tsx` (160), `meetings/MeetingBriefModal.tsx` (250) | **New.** These render *stored* prep fields and never persist. Part 1 wants generated prose |
 | **Catch me up** | *(none)* | **New** |
 | **Goals / commitments** | `frames/TodoFrame.tsx` (377) | **Substantial refit.** No goal UI exists; todos need the owner axis |
 | **History** | `src/app/history` | **Substantial refit** |
-| **Coach / Advise** | `CoachButton.tsx` (463), `coach/**` (722) | **Remove.** Already slated for retirement in Lume |
-| **Legacy PM frames** | `ProjectWidgetGrid.tsx` (557), `ProjectKnowledgeBrief.tsx` (466), `ProjectTimelineGantt.tsx` (165), `NudgeFrame.tsx` (363), `RiskFrame.tsx` (267), `CloneRelOpsButton.tsx` (184) | **Remove** — ~2,000 lines |
-| **Dev / evals UI** | `dev/**` (~1,770), `evals/**` (~1,170) | **Remove from the coaching build**; keep the eval *harness* |
+| **Coach / Advise** | `coach/**` (1,239) | **Remove.** Note `CoachButton` (463), `CoachPreview` and `HeaderCoachButton` are **already dead** — imported nowhere |
+| **Legacy PM frames** | `ProjectWidgetGrid` (557), `ProjectKnowledgeBrief` (466), `NudgeFrame` (363), `RiskFrame` (267), `CloneRelOpsButton` (184), `ProjectTimelineGantt` (165) | **Remove.** All but `ProjectTimelineGantt` are already dead |
+| **Dev / evals UI** | `dev/**` (1,916), `evals/**` (1,264) | **Remove from the coaching build**; keep the eval *harness* |
 
-**Rough LOC disposition of the 17,246:** approximately 2,900 dev/evals, 1,200 coach, 2,000 legacy PM frames and 1,400 project-onboarding are **not taken** — about **7,500 lines, 44%, simply deleted**. Of the remainder, perhaps 3,000–4,000 lines carry across with terminology and styling changes (shell, auth, billing, drawer, Ask, capture input), and 5,000–6,000 are substantially rewritten.
+**LOC disposition of the 17,254.** About **3,180 dev/evals, 1,239 coach, 2,588 already-dead and 1,403 project-onboarding are not taken** — roughly **8,400 lines, 49%, deleted or never copied.** Of what remains, ~3,771 lines (GENERIC + CHROME) port largely as-is, ~1,385 need renaming only, and the balance is rewritten against Client/Session/Goal/Commitment semantics.
 
 ### I1. Would parameterising the PM components help?
 
@@ -736,7 +789,7 @@ Framed as *what fraction of a from-scratch build does Lume save?* — which is t
 | **AI / extraction / trust architecture** | ~25% | **40–55%** | Contract shape, validation, identity gate, fail-closed patterns, invariants. Prompt, ontology, dispatcher, serialiser all new |
 | **Test and eval machinery** | ~10% | **50–60%** on machinery, **0%** on corpus | Taxonomy and harness transfer; content does not |
 | **Domain model and persistence** | ~15% | **25–35%** | `knowledge_items` overlay and `stakeholders` transfer well; four new tables |
-| **Product UI** | ~25% | **10–20%** | Patterns, not code. 44% of components deleted outright |
+| **Product UI** | ~25% | **15–25%** | Revised up slightly after the component audit: the reuse envelope is ~30% of component LOC (GENERIC + CHROME) plus a token-only theme system, better than first assumed. Offset by nav being hard-coded JSX rather than config, and by 49% of components being deleted or never copied |
 | **Onboarding and wow moment** | ~10% | **~5%** | Multi-session diff and provenance-to-source are both new |
 | **Weighted total** | 100% | **≈ 35–45%** | |
 
