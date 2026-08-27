@@ -48,21 +48,19 @@ export function supabaseCaptureApplyHooks(args: {
       });
     },
     updateTodo: async (op) => {
-      await persistTodoUpdate(client, op.todoId, {
+      await persistTodoUpdate(client, workspaceId, op.projectId, op.todoId, {
         title: op.title,
         detail: op.detail ?? undefined,
         dueAt: op.dueAt ?? undefined,
-        projectId: op.projectId,
       });
     },
     completeTodo: async (op) => {
-      await persistTodoUpdate(client, op.todoId, {
+      await persistTodoUpdate(client, workspaceId, op.projectId, op.todoId, {
         done: true,
-        projectId: op.projectId,
       });
     },
     deleteTodo: async (op) => {
-      await persistTodoDelete(client, op.todoId);
+      await persistTodoDelete(client, workspaceId, op.projectId, op.todoId);
     },
     createRisk: async (op) => {
       await persistKnowledgeBullet(

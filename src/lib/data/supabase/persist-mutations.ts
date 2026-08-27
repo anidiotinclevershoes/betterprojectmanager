@@ -658,9 +658,29 @@ export async function persistTodoCreate(
   };
 }
 
+/**
+ * Every To Do UPDATE/DELETE is constrained to the intended workspace + current
+ * project + todo id. `patch.projectId` is a SET destination only, never WHERE proof.
+ */
+function scopeExistingTodo(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  workspaceId: string,
+  projectId: string | null,
+  todoId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+) {
+  const scoped = query.eq("id", todoId).eq("workspace_id", workspaceId);
+  return projectId === null
+    ? scoped.is("project_id", null)
+    : scoped.eq("project_id", projectId);
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function persistTodoUpdate(
   client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string | null,
   todoId: string,
   patch: Partial<{
     title: string;
@@ -672,28 +692,61 @@ export async function persistTodoUpdate(
     waitingOn: string | null;
   }>,
 ): Promise<void> {
-  const { error } = await client
-    .from("todos")
-    .update({
-      title: patch.title,
-      detail: patch.detail,
-      due_on: patch.dueAt === undefined ? undefined : isoToDateOnly(patch.dueAt),
-      done: patch.done,
-      project_id: patch.projectId,
-      kind: patch.kind ?? undefined,
-      waiting_on: patch.waitingOn,
-    })
-    .eq("id", todoId);
+  const scopedWorkspaceId = requireUuid(workspaceId, "workspaceId");
+  const scopedTodoId = requireUuid(todoId, "todoId");
+  const scopedProjectId =
+    projectId === null ? null : requireUuid(projectId, "projectId");
+
+  const update: Record<string, unknown> = {};
+  if (patch.title !== undefined) update.title = patch.title;
+  if (patch.detail !== undefined) update.detail = patch.detail;
+  if (patch.dueAt !== undefined) update.due_on = isoToDateOnly(patch.dueAt);
+  if (patch.done !== undefined) update.done = patch.done;
+  if (patch.projectId !== undefined) update.project_id = patch.projectId;
+  if (patch.kind !== undefined) update.kind = patch.kind;
+  if (patch.waitingOn !== undefined) update.waiting_on = patch.waitingOn;
+  if (!Object.keys(update).length) {
+    throw new Error("[supabase] update todo: empty patch");
+  }
+
+  const { data, error } = await scopeExistingTodo(
+    client.from("todos").update(update),
+    scopedWorkspaceId,
+    scopedProjectId,
+    scopedTodoId,
+  )
+    .select("id")
+    .maybeSingle();
   if (error) throw new Error(`[supabase] update todo: ${error.message}`);
+  if (!data) {
+    throw new Error("[supabase] update todo: not found in this project");
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function persistTodoDelete(
   client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string | null,
   todoId: string,
 ): Promise<void> {
-  const { error } = await client.from("todos").delete().eq("id", todoId);
+  const scopedWorkspaceId = requireUuid(workspaceId, "workspaceId");
+  const scopedTodoId = requireUuid(todoId, "todoId");
+  const scopedProjectId =
+    projectId === null ? null : requireUuid(projectId, "projectId");
+
+  const { data, error } = await scopeExistingTodo(
+    client.from("todos").delete(),
+    scopedWorkspaceId,
+    scopedProjectId,
+    scopedTodoId,
+  )
+    .select("id")
+    .maybeSingle();
   if (error) throw new Error(`[supabase] delete todo: ${error.message}`);
+  if (!data) {
+    throw new Error("[supabase] delete todo: not found in this project");
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

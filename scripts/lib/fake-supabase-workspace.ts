@@ -162,7 +162,10 @@ export class FakeWorkspaceClient {
 
 class FakeQuery {
   private filters: Array<{ column: string; value: unknown }> = [];
+  private inFilters: Array<{ column: string; values: unknown[] }> = [];
+  private nullFilters: string[] = [];
   private insertRows: FakeRow[] | null = null;
+  private updatePatch: FakeRow | null = null;
   private deleting = false;
   private selecting = false;
   private singleMode = false;
@@ -188,8 +191,27 @@ class FakeQuery {
     return this;
   }
 
+  update(patch: FakeRow) {
+    this.updatePatch = patch;
+    return this;
+  }
+
   eq(column: string, value: unknown) {
     this.filters.push({ column, value });
+    return this;
+  }
+
+  is(column: string, value: unknown) {
+    if (value === null) {
+      this.nullFilters.push(column);
+      return this;
+    }
+    this.filters.push({ column, value });
+    return this;
+  }
+
+  in(column: string, values: unknown[]) {
+    this.inFilters.push({ column, values });
     return this;
   }
 
@@ -215,7 +237,11 @@ class FakeQuery {
   }
 
   private matches(row: FakeRow) {
-    return this.filters.every((f) => row[f.column] === f.value);
+    return (
+      this.filters.every((f) => row[f.column] === f.value) &&
+      this.inFilters.every((f) => f.values.includes(row[f.column])) &&
+      this.nullFilters.every((column) => row[column] == null)
+    );
   }
 
   private async execute(): Promise<{ data: unknown; error: FakeError | null }> {
@@ -275,7 +301,42 @@ class FakeQuery {
       } else {
         this.db.tables[this.table] = tableRows.filter((row) => !this.matches(row));
       }
-      return { data: null, error: null };
+      if (this.singleMode) {
+        if (removing.length !== 1) {
+          return {
+            data: null,
+            error: { message: `single() expected 1 row, got ${removing.length}` },
+          };
+        }
+        return { data: removing[0], error: null };
+      }
+      if (this.maybeSingleMode) {
+        return { data: removing[0] ?? null, error: null };
+      }
+      return { data: this.selecting ? removing : null, error: null };
+    }
+
+    if (this.updatePatch) {
+      const matched = tableRows.filter((row) => this.matches(row));
+      for (const row of matched) {
+        for (const [key, value] of Object.entries(this.updatePatch)) {
+          if (value !== undefined) row[key] = value;
+        }
+        row.updated_at = now();
+      }
+      if (this.singleMode) {
+        if (matched.length !== 1) {
+          return {
+            data: null,
+            error: { message: `single() expected 1 row, got ${matched.length}` },
+          };
+        }
+        return { data: matched[0], error: null };
+      }
+      if (this.maybeSingleMode) {
+        return { data: matched[0] ?? null, error: null };
+      }
+      return { data: this.selecting ? matched : matched, error: null };
     }
 
     const matched = tableRows.filter((row) => this.matches(row));
