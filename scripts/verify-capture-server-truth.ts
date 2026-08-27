@@ -65,6 +65,26 @@ function riskEnvelope(targetId: string, status = "resolved") {
   };
 }
 
+function projectTruth(state: MissionState, projectId: string) {
+  return {
+    people: (state.projects.find((p) => p.id === projectId)?.stakeholders ?? [])
+      .map((s) => ({ id: s.id, name: s.name, role: s.role }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    risks: (state.risks ?? [])
+      .filter((r) => r.projectId === projectId)
+      .map((r) => ({ id: r.id, title: r.title, status: r.status }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    todos: (state.todos ?? [])
+      .filter((t) => t.projectId === projectId)
+      .map((t) => ({ id: t.id, title: t.title, done: Boolean(t.done) }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    dates: (state.timeline ?? [])
+      .filter((t) => t.projectId === projectId)
+      .map((t) => ({ id: t.id, label: t.label, startAt: t.startAt }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+  };
+}
+
 let passed = 0;
 async function check(name: string, fn: () => void | Promise<void>) {
   await Promise.resolve()
@@ -300,6 +320,59 @@ async function main() {
     );
     assert.equal(
       applied.state.risks?.find((r) => r.id === "risk-packaging")?.status,
+      "open",
+    );
+  });
+
+  await check("visibility: Apply adopted state is committed — subsequent server load matches without a hard refresh", async () => {
+    const applied = await applyApprovedCaptureSuggestion({
+      item: {
+        id: "s-visibility",
+        kind: "risk",
+        op: "complete",
+        content: "Gumdrop Bridge icing is resolved",
+        destination: "project",
+        projectId: CANDY,
+        legalDomain: "risk",
+        targetEntityId: "risk-bridge",
+        proposedValues: { status: "resolved" },
+      },
+      text: "Gumdrop Bridge icing is resolved",
+      projectId: CANDY,
+      expectedTarget: {
+        id: "risk-bridge",
+        domain: "risk",
+        title: "Gumdrop Bridge icing",
+        status: "open",
+      },
+      loadWorkspace: async () => workspaceFrom(clone(durable)),
+    });
+    assert.equal(applied.executed.kind, "wrote");
+    assert.equal(
+      applied.state.risks?.find((r) => r.id === "risk-bridge")?.status,
+      "resolved",
+      "returned Apply state must already represent the committed result",
+    );
+
+    const subsequent = await loadServerCaptureWorld({
+      projectId: CANDY,
+      loadWorkspace: async () => workspaceFrom(applied.state),
+    });
+    assert.equal(
+      subsequent.world.risks.find((r) => r.id === "risk-bridge")?.status,
+      "resolved",
+    );
+    assert.deepEqual(
+      projectTruth(subsequent.workspaceState, CANDY),
+      projectTruth(applied.state, CANDY),
+      "a subsequent server load must return the same relevant project truth — no hard refresh required",
+    );
+    assert.deepEqual(
+      projectTruth(subsequent.state, CANDY),
+      projectTruth(applied.state, CANDY),
+    );
+    assert.equal(
+      subsequent.workspaceState.risks?.find((r) => r.id === "risk-packaging")?.status,
       "open",
     );
   });

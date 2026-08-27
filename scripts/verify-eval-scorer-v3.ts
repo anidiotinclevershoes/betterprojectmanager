@@ -42,6 +42,7 @@ function sha256File(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
+/** Provenance label only. PR checkouts often lack `origin/main`. */
 function resolveProductionSha(): string {
   for (const ref of ["origin/main", "main", "HEAD"]) {
     try {

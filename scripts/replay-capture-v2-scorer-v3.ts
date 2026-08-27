@@ -28,7 +28,15 @@ function sha256File(path: string): string {
 function productionSha(): string {
   const argIdx = process.argv.indexOf("--production-sha");
   if (argIdx >= 0 && process.argv[argIdx + 1]) return process.argv[argIdx + 1]!;
-  return execSync("git rev-parse origin/main", { cwd: ROOT, encoding: "utf8" }).trim();
+  try {
+    return execSync("git rev-parse --verify origin/main", {
+      cwd: ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim();
+  } catch {
+    return execSync("git rev-parse HEAD", { cwd: ROOT, encoding: "utf8" }).trim();
+  }
 }
 
 function main() {

@@ -31,6 +31,10 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "capture-v2-invariants", script: "scripts/verify-capture-v2-invariants.ts" },
   { name: "person-identity-safety", script: "scripts/verify-person-identity-safety.ts" },
   { name: "stacked-capture", script: "scripts/verify-stacked-capture.ts" },
+  // Thor gate: `npm run verify:stable-object-identity` is expected red until
+  // PR #89 (stable object identity) lands. Do not weaken that script. Add it
+  // to this suite in Stage 2 on the qualified SHA.
+  { name: "resurrection", script: "scripts/verify-resurrection.ts" },
   { name: "test-dashboard", script: "scripts/verify-test-dashboard.ts" },
   { name: "new-project-v2", script: "scripts/verify-new-project-v2.ts" },
   { name: "desert-theme", script: "scripts/verify-desert-theme.ts" },

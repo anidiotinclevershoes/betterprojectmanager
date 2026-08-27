@@ -54,6 +54,43 @@ async function main() {
       if (spec.expectedReview === "no_change") {
         assert.equal(step.writeCount, 0, `${step.stepId} must not write`);
       }
+
+      if (story.id === "candyland") {
+        assert.deepEqual(
+          snapshotProject(step.state, TOYWORLD_ID),
+          run.seedSnapshots.toyworld,
+          `${step.stepId}: Toyworld must be unchanged after a Candyland Capture`,
+        );
+        assert.deepEqual(
+          snapshotProject(step.state, GAMING_ID),
+          run.seedSnapshots.gamingstudio5000,
+          `${step.stepId}: GamingStudio5000 must be unchanged after a Candyland Capture`,
+        );
+      }
+      if (story.id === "toyworld") {
+        assert.deepEqual(
+          snapshotProject(step.state, CANDYLAND_ID),
+          run.seedSnapshots.candyland,
+          `${step.stepId}: Candyland must be unchanged after a Toyworld Capture`,
+        );
+        assert.deepEqual(
+          snapshotProject(step.state, GAMING_ID),
+          run.seedSnapshots.gamingstudio5000,
+          `${step.stepId}: GamingStudio5000 must be unchanged after a Toyworld Capture`,
+        );
+      }
+      if (story.id === "gamingstudio5000") {
+        assert.deepEqual(
+          snapshotProject(step.state, CANDYLAND_ID),
+          run.seedSnapshots.candyland,
+          `${step.stepId}: Candyland must be unchanged after a GamingStudio5000 Capture`,
+        );
+        assert.deepEqual(
+          snapshotProject(step.state, TOYWORLD_ID),
+          run.seedSnapshots.toyworld,
+          `${step.stepId}: Toyworld must be unchanged after a GamingStudio5000 Capture`,
+        );
+      }
     }
 
     const final = run.final;
