@@ -48,6 +48,16 @@ export function authIsRequired(env: NodeJS.ProcessEnv = process.env) {
   return getAuthMode(env) !== "none";
 }
 
+/**
+ * Auth is required but no identity backend is configured.
+ * Production missing Supabase keys must never be treated as an open app.
+ */
+export function authBackendUnavailable(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return authIsRequired(env) && getAuthMode(env) === "none";
+}
+
 export function isSupabaseAuth(env?: NodeJS.ProcessEnv): boolean {
   return getAuthMode(env) === "supabase";
 }

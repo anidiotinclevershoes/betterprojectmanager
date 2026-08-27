@@ -13,6 +13,7 @@ import {
 } from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { requireAiCaller } from "@/lib/ai-gate";
+import { publicAiFailureMessage } from "@/lib/ai-public-error";
 import { isProductionRuntime } from "@/lib/runtime-config";
 import {
   draftFromProvisional,
@@ -151,9 +152,11 @@ export async function POST(request: Request) {
       });
     }
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Could not assemble project";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { publicMessage } = publicAiFailureMessage(
+      error,
+      "Could not assemble project",
+    );
+    return NextResponse.json({ error: publicMessage }, { status: 500 });
   }
 }
 

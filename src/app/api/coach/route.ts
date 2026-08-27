@@ -2,6 +2,7 @@ import { isOpenAIConfigured } from "@/lib/openai";
 import { streamPmCoaching, type CoachScope } from "@/lib/pm-coach";
 import type { MissionState } from "@/lib/types";
 import { requireAiCaller } from "@/lib/ai-gate";
+import { publicAiFailureMessage } from "@/lib/ai-public-error";
 import { isProductionRuntime } from "@/lib/runtime-config";
 
 export const runtime = "nodejs";
@@ -52,9 +53,11 @@ export async function POST(request: Request) {
             send(event);
           }
         } catch (error) {
-          const message =
-            error instanceof Error ? error.message : "Coach request failed";
-          send({ type: "error", error: message });
+          const { publicMessage } = publicAiFailureMessage(
+            error,
+            "Coach request failed",
+          );
+          send({ type: "error", error: publicMessage });
         } finally {
           controller.close();
         }
@@ -69,9 +72,11 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Coach request failed";
-    return new Response(JSON.stringify({ error: message }), {
+    const { publicMessage } = publicAiFailureMessage(
+      error,
+      "Coach request failed",
+    );
+    return new Response(JSON.stringify({ error: publicMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

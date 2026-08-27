@@ -397,6 +397,46 @@ User browser
 
 ---
 
+### F-17 — Production with missing Supabase keys opens the app (`mode === "none"` bypass)
+
+**Risk level:** High (misconfiguration)  
+
+**Why it matters:** If production is missing `NEXT_PUBLIC_SUPABASE_URL` / anon key, `getAuthMode()` returns `"none"`. `authIsRequired()` is still true, but `src/proxy.ts` previously treated `mode === "none"` as an open gate (`NextResponse.next()`). Pages and unguarded endpoints would be public. Individual AI POSTs still 401 via `requireAiCaller`, but that is not a substitute for a closed front door. `assertProductionConfigOrThrow` exists and is not called at boot.
+
+**Evidence:** Independent review of `src/proxy.ts` (`if (!authIsRequired() || mode === "none")`) and `src/lib/auth-mode.ts` production branch. Confirmed by `scripts/verify-tenant-isolation` / auth-mode unit paths.
+
+**Recommended action:** When auth is required and no identity backend is configured, fail closed (503 APIs, redirect pages to login). Keep login/signup/webhook public. Do not add a boot-time crash unless Vercel deploy-time env checks are preferred later.
+
+**V1 necessity:** Must fix before launch  
+
+**Estimated change size:** Tiny  
+
+**Build / Buy / Configure:** Small Lume implementation  
+
+**Over-engineering check:** Fail-closed proxy is cheaper and safer than a new config service.
+
+---
+
+### F-18 — AI routes return raw `error.message` to the client
+
+**Risk level:** Medium  
+
+**Why it matters:** OpenAI SDK failures can include request/org identifiers or other provider text. Returning that string in a 500 body is unnecessary disclosure. Auth routes already map errors through `friendlyAuthError` on the client.
+
+**Evidence:** Catch blocks in `/api/capture`, `/api/coach`, `/api/transcribe`, `/api/tell-me`, `/api/tell-me/refresh`, `/api/new-project`.
+
+**Recommended action:** Log the detail server-side; return a stable generic message to the client.
+
+**V1 necessity:** Obvious small fix  
+
+**Estimated change size:** Tiny  
+
+**Build / Buy / Configure:** Small Lume implementation  
+
+**Over-engineering check:** Do not build an error-taxonomy platform.
+
+---
+
 ### Compact V1 data inventory
 
 | Data class | Origin | Stored | Transmitted | Persists | Personal? | Employer-confidential? | Necessary? |
@@ -427,6 +467,8 @@ User browser
 2. Stop Capture GET from returning key prefix/length; require a signed-in user.
 3. Cap transcription size/type.
 4. Remove founder email from the public evals denial UI.
+5. Fail closed in `src/proxy.ts` when auth is required and the identity backend is missing (`mode === "none"`).
+6. Do not return raw OpenAI `error.message` from product AI routes.
 
 **Founder / legal (not code):**
 
@@ -609,7 +651,7 @@ Questions for an Irish solicitor / privacy specialist (bounded, inexpensive if t
 
 ## Authentication / tenant isolation (audit conclusion)
 
-Production auth is Supabase (`getAuthMode` never returns `demo` in production when configured). `src/proxy.ts` requires a user for non-public pages and `/api/*` except `/api/auth/*` and `/api/billing/webhook`. AI POSTs call `requireAiCaller` (auth + entitlement + rate limit). Workspace load/create/delete use `createServerSupabaseClient` + `auth.getUser()`. RLS is membership-based (`is_workspace_member` security definer). Billing writes are service-role or security-definer trial RPC. Dev pages call `notFound()` outside development. `/evals` is allowlisted.
+Production auth is Supabase (`getAuthMode` never returns `demo` in production when configured). `src/proxy.ts` requires a user for non-public pages and `/api/*` except `/api/auth/*` and `/api/billing/webhook`. If production has no Supabase keys, the proxy **fails closed** (503 APIs / login redirect) instead of treating `mode === "none"` as open. AI POSTs call `requireAiCaller` (auth + entitlement + rate limit). Workspace load/create/delete use `createServerSupabaseClient` + `auth.getUser()`. RLS is membership-based (`is_workspace_member` security definer). Billing writes are service-role or security-definer trial RPC. Dev pages call `notFound()` outside development. `/evals` is allowlisted.
 
 **No redesign of authentication is recommended.** Cross-tenant DB access was not found in code review; **live RLS verification on the production project remains a founder must**.
 

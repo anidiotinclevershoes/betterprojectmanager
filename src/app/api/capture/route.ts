@@ -29,6 +29,7 @@ import type {
   TodoItem,
 } from "@/lib/types";
 import { requireAiCaller, requireSignedIn } from "@/lib/ai-gate";
+import { publicAiFailureMessage } from "@/lib/ai-public-error";
 import { isProductionRuntime } from "@/lib/runtime-config";
 import { serverLog } from "@/lib/server-log";
 import {
@@ -412,8 +413,11 @@ export async function POST(request: Request) {
       reliability,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Capture coaching failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { publicMessage, detail } = publicAiFailureMessage(
+      error,
+      "Capture coaching failed",
+    );
+    serverLog.error("capture.failed", { error: detail });
+    return NextResponse.json({ error: publicMessage }, { status: 500 });
   }
 }

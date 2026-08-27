@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { auditProductionConfig } from "../src/lib/runtime-config";
-import { getAuthMode } from "../src/lib/auth-mode";
+import { authBackendUnavailable, getAuthMode } from "../src/lib/auth-mode";
 import { getPersistenceMode } from "../src/lib/persistence-mode";
 import {
   getSupabaseAnonKey,
@@ -18,6 +18,7 @@ import {
   MAX_TRANSCRIBE_BYTES,
   transcribeAudioRejection,
 } from "../src/lib/transcribe-guard";
+import { publicAiFailureMessage } from "../src/lib/ai-public-error";
 
 let passed = 0;
 function check(name: string, fn: () => void) {
@@ -70,6 +71,41 @@ check("production auth mode never returns demo", () => {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon",
   } as NodeJS.ProcessEnv);
   assert.equal(mode, "supabase");
+});
+
+check("production without Supabase keys fails closed instead of opening the app", () => {
+  assert.equal(
+    authBackendUnavailable({
+      NODE_ENV: "production",
+    } as NodeJS.ProcessEnv),
+    true,
+  );
+  assert.equal(
+    authBackendUnavailable({
+      NODE_ENV: "production",
+      NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon",
+    } as NodeJS.ProcessEnv),
+    false,
+  );
+  assert.equal(
+    authBackendUnavailable({
+      NODE_ENV: "development",
+    } as NodeJS.ProcessEnv),
+    false,
+  );
+  assert.equal(
+    authBackendUnavailable({
+      NODE_ENV: "development",
+      AUTH_REQUIRED: "true",
+    } as NodeJS.ProcessEnv),
+    true,
+  );
+  const proxy = fs.readFileSync(path.join(root, "src/proxy.ts"), "utf8");
+  assert.match(proxy, /authBackendUnavailable/);
+  assert.doesNotMatch(proxy, /!authIsRequired\(\) \|\| mode === "none"/);
+  assert.match(proxy, /Service unavailable/);
+  assert.match(proxy, /503/);
 });
 
 check("production persistence is supabase", () => {
@@ -318,6 +354,26 @@ check("product OpenAI chat calls opt out of store", () => {
   ]) {
     const src = fs.readFileSync(path.join(root, rel), "utf8");
     assert.match(src, /withOpenAiChatPrivacy/, rel);
+  }
+});
+
+check("product AI routes do not return raw provider error text", () => {
+  const leaked = publicAiFailureMessage(
+    new Error("Incorrect API key provided: sk-proj-SECRET org-xyz"),
+    "Capture coaching failed",
+  );
+  assert.equal(leaked.publicMessage, "Capture coaching failed");
+  assert.match(leaked.detail, /sk-proj-SECRET/);
+  for (const rel of [
+    "src/app/api/capture/route.ts",
+    "src/app/api/coach/route.ts",
+    "src/app/api/transcribe/route.ts",
+    "src/app/api/new-project/route.ts",
+    "src/app/api/tell-me/route.ts",
+    "src/app/api/tell-me/refresh/route.ts",
+  ]) {
+    const src = fs.readFileSync(path.join(root, rel), "utf8");
+    assert.match(src, /publicAiFailureMessage/, rel);
   }
 });
 

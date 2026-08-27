@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
   SESSION_COOKIE,
+  authBackendUnavailable,
   authIsRequired,
   getAuthMode,
   verifySessionToken,
@@ -70,13 +71,27 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // --- Demo auth (legacy) ---
+  // --- Demo auth, or fail-closed when no identity backend ---
   if (isPublicPath(pathname) || pathname.startsWith("/api/auth/")) {
     return NextResponse.next();
   }
 
-  if (!authIsRequired() || mode === "none") {
+  if (!authIsRequired()) {
     return NextResponse.next();
+  }
+
+  // Missing identity backend (typical: production without Supabase keys).
+  // Never treat this as an open app — login pages stay public, everything else fails closed.
+  if (authBackendUnavailable() || mode === "none") {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { error: "Service unavailable." },
+        { status: 503 },
+      );
+    }
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   const token = request.cookies.get(SESSION_COOKIE)?.value;
