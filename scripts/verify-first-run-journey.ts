@@ -31,6 +31,7 @@ function main() {
   const home = readSrc("src/app/page.tsx");
   const login = readSrc("src/app/login/page.tsx");
   const signup = readSrc("src/app/signup/page.tsx");
+  const shell = readSrc("src/components/AppShell.tsx");
   const store = readSrc("src/lib/store.tsx");
   const persist = readSrc("src/lib/data/supabase/persist-mutations.ts");
   const oceanCss = readSrc("src/components/onboarding/new-project-ocean.css");
@@ -203,7 +204,8 @@ function main() {
     assert.match(signup, /first project/);
     assert.match(signup, /Check your email/);
     assert.match(login, /confirmation link/);
-    assert.match(login, /clearAuthenticatedBrowserState/);
+    assert.match(login, /Open your Lume workspace/);
+    assert.match(shell, /clearAuthenticatedBrowserState/);
   });
 
   check("mobile layout keeps usable controls and sticky CTAs", () => {
