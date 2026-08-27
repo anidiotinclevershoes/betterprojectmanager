@@ -324,9 +324,347 @@ But it is a *narrower* difference than the brief assumes, it is harder to demons
 
 So: not a no-go, because the residual differentiation is real, the segment is reachable, and the refit cost is genuinely low relative to building from nothing. Not a strong opportunity, because the incumbent has already moved, the pain evidence is thinner and more circular than it first appears, and the acquisition maths is unproven. The correct next action is a paid willingness-to-pay experiment (Section X) with pre-committed kill criteria, not a build.
 
-**The single fact most likely to change this rating** is whether planners who have used HoneyBook's AI Notetaker for a season report that it solved the problem or merely relocated it. That is answerable cheaply and should be answered before anything is built.
+## A.1 One correction to the brief that changes the product
+
+The primary research turned up a finding significant enough that it should sit next to the rating rather than three sections later.
+
+The brief frames the product per-wedding: *"Catch me up on Laura & James."* The practitioner evidence says per-wedding is the part that already works. Planners run a spreadsheet per wedding and it is frequently a considered choice rather than neglect — chosen for real-time propagation to suppliers and zero learning curve for clients. What breaks is the level above:
+
+> "to track everything across all of our clients manually, was really, really frustrating."
+> — a working wedding planner, corroborated by another who caps her volume at ten to fifteen weddings a year specifically so she does not *"confuse my couples names or details"*
+
+**Per-client organisation is broadly solved. Cross-client is not.** And the asymmetry is commercially interesting: the pains that wedding-software vendors assert most loudly in their marketing — WhatsApp fragmentation, day-of surprises, timeline churn — are precisely the ones with no practitioner evidence behind them, while the pain planners state most clearly gets almost no vendor airtime.
+
+So the proposition should lead with the portfolio question — *across all my weddings, what needs me this week* — and treat the maintained per-wedding picture as the substrate that makes the portfolio answer trustworthy rather than as the product itself. Sections G, H, I and L are written to that framing. This is also, notably, the one area Lume's own constitution explicitly parks: portfolio intelligence is out of V1 scope, with Master To Do and "✦ Lume Thinks" as the deliberate exception. That exception turns out to be the most directly reusable surface in the product.
+
+## A.2 What would change the rating
+
+**Most likely to raise it:** evidence that the cross-client framing lands harder in the validation experiment than the per-wedding one, or confirmation that planners who used HoneyBook's AI Notetaker for a season found it relocated the problem rather than solving it.
+
+**Most likely to lower it:** the segment-mix problem in the entry market (Section D.5), any incumbent announcing reconciled cross-conversation truth, or a validation result showing planners respond to "AI takes your notes" and not to reconciliation — which would mean the differentiated half is not the half they will pay for.
+
+Both are answerable cheaply and should be answered before anything is built.
 
 ---
+# B. Strongest bear case
+
+Written to kill the idea. Nothing here is softened, and several of these points are, in my judgement, correct.
+
+## B.1 The incumbent already shipped the visible half, free, and does it better on mobile
+
+HoneyBook shipped an AI meeting notetaker for video calls around November 2024 and **in-person recording from the mobile app in July 2025**. It transcribes, summarises, extracts action items, converts them to tasks in one click, and files everything into the client's project. It is included on every tier at no extra cost, including the $29/month entry plan. Its mobile app is rated 4.77 from over sixteen thousand ratings. Dubsado shipped a notetaker in June 2026, free on all plans. Fathom records and transcribes unlimited meetings on a $0 plan.
+
+So the demonstrable, explicable, ad-friendly half of the proposition — *stop typing up your notes* — has a market price of zero and is already installed on the customer's phone. Everything this product has left to sell is the invisible half, and the invisible half is hard to put in a headline.
+
+## B.2 Planners have never paid for internal organisation
+
+This is the most damaging finding in the entire investigation and it comes from the market's own revealed behaviour, not from opinion.
+
+There are 46 wedding-planner-business templates in the Notion marketplace at $10–$18.50, and equivalents at $5–$11.51 on Gumroad, covering client CRM, vendor trackers, budgets, payment schedules, contract trackers and checklists. Those templates persist alongside a market where Aisle Planner charges $840/year and HoneyBook $588–$1,308/year. What the templates cannot do is the client-facing layer — branded portals, e-signature, payment processing, automated reminders.
+
+**Planners pay for client-facing professionalism and for moving money. They solve internal organisation for twelve dollars.** This product sells internal organisation exclusively. It has deliberately excluded contracts, invoices, portals and payments — which is to say it has deliberately excluded everything the market has demonstrated it will pay for.
+
+## B.3 The market is crowded, and it is consolidating right now
+
+Fifteen-plus products compete for a solo planner's subscription. More importantly, the space is consolidating under exactly the thesis being proposed here: That's The One — planner-native, deep planning features, £45/month, seven languages, already filing Zoom transcripts and converting run-of-show files into timelines — **was acquired on 6 August 2026 by Helium Ventures**, which had already bought Maroo (payments) earlier in the year. An AI-native holding company is assembling planning plus payments right now, with a product that is closer to this proposition than anything else on the market and that already has customers in thirty-plus countries.
+
+Behind that: Ayyla ($75–$199/month, AI-native planner OS), Nuptial ($39–$149), Breezit AI ($99–$399), Zennvue, Wedflo (UK, waitlist). Some are vapour. It only takes one to be real.
+
+## B.4 The addressable market is small and the outcome is capped
+
+At €39/month, two hundred paying planners is €94,000 of annual recurring revenue. The professional wedding planner population is small, unregulated, uncounted, and heavily weighted towards part-timers and hobbyists who will not pay. To reach even a modest venture-scale outcome would require thousands of paying solo planners, which almost certainly means expanding beyond weddings — and expanding beyond weddings destroys the focus that makes the product good.
+
+The honest framing is that this is a lifestyle business unless something unexpected happens. That may be perfectly acceptable. It should be a decision, not a discovery.
+
+## B.5 Wedding information may be too bespoke to structure reliably
+
+Every planner has a personal method. The words they use for booking states, the way they split responsibility, what they consider a decision versus a preference, whether "confirmed" means signed or means the venue nodded — none of it is standardised, and the industry has no regulator, no certification requirement and no shared vocabulary. A structured truth model imposes an ontology on a profession that has actively avoided one.
+
+The failure mode is specific and likely: the planner looks at the extracted picture, sees things filed in categories that do not match how they think, and concludes the software does not understand their business. The generic-tool evidence supports this reading — planners choose Notion and spreadsheets precisely *because* they impose no ontology.
+
+## B.6 The trust model is friction that competitors will not impose
+
+Review-before-write is the product's principal engineering achievement and it is a tax on the user. A competitor who lets the model write directly will feel faster, will demo better, and will be wrong occasionally in ways the planner may not notice for weeks. Markets do not reliably reward the careful option — they reward the one that feels effortless. "Nothing is recorded until you approve it" is a sentence that sounds like protection to an engineer and like homework to a user with fourteen items in a queue.
+
+## B.7 Lume's reliability advantage is partly aspirational
+
+The containment machinery is genuinely good, and it is not as finished as the philosophy document implies. Capture V2 — the pipeline with server-authoritative truth and the full apply boundary — **is behind a feature flag and is not the default**; the legacy pipeline still runs in production and still trusts client-posted state. Live multi-tenant isolation is verified in CI by asserting on migration text, not by a live database test. Twenty-six open discoveries are tracked, including optimistic writes with silent failure (D-005) and suggestion state that vanishes on reload (D-003). The "Known / ✦ Lume noticed / Needs you" epistemic model is substantially a UI label rather than a tested persistence invariant.
+
+Any pitch built on "we solved reliability" is currently overstating the position.
+
+## B.8 The real competitor is not a wedding CRM
+
+HoneyBook has shipped an MCP connector, so a planner can already point Claude at their client pipeline, notes, invoices and contracts and ask questions in natural language. If general assistant AI keeps improving — persistent memory, connectors to the tools people already use, agentic write-back — then "tell it what happened and it maintains a picture" stops being a product and becomes a capability that arrives free with something the planner already pays for.
+
+Building a specialised memory product in 2026 is a bet that general memory stays bad for longer than it takes to reach durable scale. That is not obviously a good bet.
+
+## B.9 Value at trial is approximately zero
+
+The product is worth nothing until roughly twenty updates have accumulated on a wedding, which is six to ten weeks of real use. A trial does not reach that. Every mitigation proposed in this report — the manufactured first-run moment, the intake paste, the forced second capture — is an attempt to fake a value curve that genuinely takes two months to climb. Those mitigations may simply not work, and if they do not, the conversion rate will be dreadful regardless of how good the product is.
+
+## B.10 The acquisition arithmetic barely closes
+
+Tolerable acquisition cost is around €290 at a 3:1 ratio on a twenty-four-month life. That requires roughly sixty high-intent clicks per customer at €4 a click with five per cent click-to-trial and a third trial-to-paid. Every one of those numbers is optimistic, and the dominant risk is unmodelled: most search volume on wedding-planning terms is *couples*, not professionals, so a large fraction of paid clicks will be wasted on people who will never buy. There is also no obvious organic channel — the UK Alliance of Wedding Planners, the natural UK association partner, **closed in 2023**.
+
+## B.11 Planners will not add another product
+
+Two subscriptions is already what most planners tolerate, and both of the ones they have are load-bearing: one moves money, one holds the client relationship. A third tool that holds neither, whose value is invisible for two months, and which requires a new daily habit, is a hard sell. "Nothing to migrate" reduces the switching cost but does not create a reason to start.
+
+## B.12 The strategic pattern is a warning
+
+This is the third domain the same engine has been proposed for — project managers, executive coaches, wedding planners. That flexibility is real and it is also the classic signature of a product searching for a market rather than a market pulling a product. The right response is not to reject the pivot; it is to notice that a fourth domain will look equally appealing in six months, and to require an evidence bar high enough that domain number four does not get proposed before this one has been tested.
+
+## B.13 The bear case in one paragraph
+
+Wedding planners buy client-facing professionalism and payment processing, not internal organisation, which they have solved with twelve-dollar templates for a decade. The one part of this proposition they would visibly value — automatic note-taking — is already free inside the CRM they use, works on mobile, and is better resourced. The remaining differentiation is a reliability property that is invisible in a demo, currently incomplete in the codebase, and hard to explain in an advertisement. The market is small enough to cap the outcome, crowded enough that a consolidator with payments and planning is already assembling, and exposed to general assistant AI making the whole category redundant. The product's value takes two months to appear and the trial lasts fourteen days.
+
+---
+
+# C. Assumptions challenged
+
+| Assumption in the brief | Verdict | Reasoning |
+| --- | --- | --- |
+| Existing Lume creates an *unfair* head start | **Partly false** | It creates a genuine head start of engineering months in containment, identity discipline, supersession and evaluation. "Unfair" overstates it: none of that is visible to a buyer, none of it is protected, and the capture surface it would compete against is already free. |
+| The customer is the independent full-service planner | **Challenged** | Full-service planners have the most context per wedding but the fewest weddings (8–20). Section D argues the better first target is the high-volume partial/full mix at 15–25 weddings, where memory load per unit of revenue peaks. |
+| Wedding truth arrives through fragmented channels | **True** | Well supported, including by four competing vendors independently naming spreadsheets and email threads as the incumbent. |
+| Planners manually maintain the picture across systems and memory | **True but incomplete** | They do. What is not established is that they experience it as a *problem worth paying to solve*, as opposed to the job. |
+| The pain is strong and recurring | **Recurring, yes. Strong, unproven.** | Frequency is well evidenced. Intensity is not, and the revealed-preference evidence in B.2 cuts against it. |
+| "Tell it what happened instead of updating the system" is the wedge | **Half occupied** | The capture half is shipped by HoneyBook and Dubsado and free from Fathom. The reconciliation half is genuinely unbuilt anywhere — no incumbent CRM does conversational write-back. |
+| "Every decision. Every supplier. Every change. Remembered." | **Weak** | Commodity memory claim, no benefit verb. Section G. |
+| "The wedding that remembers everything." | **Reject** | Consumer bridal register; anthropomorphises the wrong object. |
+| "Tell it what changed. Your wedding plan updates itself." | **Actively dangerous** | Promises autonomy the trust model deliberately refuses. Sets up a week-one disappointment. |
+| Existing wedding software does not do this | **True, and now precisely documented** | Aisle Planner has the deepest planning and *zero* AI. HoneyBook has the best AI and *no* planning workflow. Only Timeline Genius does anything like conversational updates, and only inside one timeline. |
+| The market is crowded | **True, and worse than stated** | Fifteen-plus products, plus active consolidation — That's The One acquired August 2026 by a holding company that also owns a payments product. |
+| Incumbents could copy it trivially | **HoneyBook yes, others no** | HoneyBook has the AI capability and the distribution but its centre of gravity is payments and it serves photographers and coaches as well as planners, which makes wedding-specific truth semantics unattractive. Aisle Planner has the intent and not the velocity — an eight-person company with no AI on its roadmap. |
+| Planners will not add another product | **Largely true** | Mitigated only by refusing to require migration. Not eliminated. |
+| Seasonal churn damages SaaS economics | **Overstated for the target segment** | Wedding *dates* are seasonal; wedding *planning* is not, because next summer's weddings are worked all winter. Established planners have live engagements year-round. It is a real threat only for day-of coordinators and part-timers — which is an argument about segment choice, not about the model. |
+| Customers expect all-in-one | **True and must be actively refused** | Every step towards all-in-one makes the product a worse Aisle Planner. Coexistence positioning is the only viable answer. |
+| Timeline Genius may be defunct | **False** | Trading, thirteen years old, shipped AI in 2026. |
+| Vendor must be first-class | **Confirmed** | Stable across weddings, carries booking state, primary source of contradiction. |
+| Payments are needed for the wedge | **False** | Only the deposit *deadline* matters, and that is a date. |
+| Guest count is structured truth | **The number yes, the list emphatically no** | Also the decisive GDPR mitigation — keeping the guest list out avoids special-category dietary data almost entirely. |
+| The wedding-day timeline is V1 | **False** | Late-engagement, highest-stakes, largest build, most entrenched incumbents. Expansion, with a read-only "what I know about the day" view as the V1 bridge. |
+| Mobile matters | **True, and it is a live competitive gap** | Aisle Planner — sold on day-of coordination — has no native mobile app, and its own docs say drag-and-drop does not work on mobile. Timeline Genius, Planning Pod and Rock Paper Coin have none either. |
+| AI is a moat | **False, and it must never be claimed** | |
+| Reliability engineering is a moat | **False** | It is a head start and a promise. Sections P and S. |
+# D. Best initial customer
+
+## D.1 The definition that matters is not the one in the brief
+
+The brief segments by *service type* — full-service, partial, month-of, day-of, destination, luxury. That is how the industry describes itself, and it is the wrong axis for this product.
+
+The binding variable is **concurrent live weddings**, not weddings per year or service tier. A planner running twelve-month full-service engagements at fifteen weddings a year is carrying roughly fifteen live weddings simultaneously, all at different stages. A day-of coordinator doing forty weddings a year carries perhaps six weeks of context each and almost none of it overlaps.
+
+Two independent pieces of evidence support this reframe. First, **Aisle Planner prices in bands of active projects** — 15 / 25 / 50 / 100 — which is a revealed-preference statement by the market's most planning-native vendor about how planners actually segment. Second, the only first-person account of volume-setting found in the research explains the cap in exactly these terms:
+
+> "I keep it real and attend to 10-12, sometimes 15 weddings a year. That's plenty! I want to make sure that I can keep the facts straight and **don't confuse my couples names or details** and manage to follow up on all of the many to dos."
+> — Strings & Champagne Events
+
+A planner capping her own revenue because of cross-client cognitive load is the product thesis stated by a practitioner, unprompted, on her own blog.
+
+## D.2 Scoring by segment
+
+Scored 1–5. These are judgements informed by the evidence, not measurements, and the volume figures are the weakest-sourced item in the entire investigation — no industry body publishes per-segment throughput.
+
+| | Concurrent load | Complexity | WTP | Current spend | Buying authority | Memory reliance | Targetable | Retention | Fit |
+| --- | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| **Full-service, high volume (15–25/yr)** | 5 | 5 | 4 | 4 | 5 | 5 | 3 | 4 | **5** |
+| Full-service, low volume (6–12/yr) | 3 | 5 | 4 | 3 | 5 | 3 | 3 | 4 | 3 |
+| **Partial planning** | 4 | 3 | 3 | 3 | 5 | 4 | 3 | 3 | **4** |
+| Month-of coordination | 2 | 2 | 2 | 2 | 5 | 2 | 3 | 2 | 2 |
+| Day-of coordination | 1 | 1 | 1 | 1 | 5 | 1 | 3 | 1 | 1 |
+| **Destination planners** | 4 | 5 | 5 | 4 | 5 | 5 | 2 | 4 | **5** |
+| Luxury planners | 3 | 5 | 5 | 5 | 4 | 4 | 2 | 4 | 3 |
+| Small studios (2–4 people) | 5 | 4 | 4 | 4 | 4 | 5 | 2 | 4 | 4 |
+| Venue coordinators | 4 | 2 | 1 | 1 | **1** | 3 | 4 | 3 | 2 |
+| Corporate/broader event planners | 4 | 4 | 4 | 4 | 3 | 4 | 3 | 4 | 3 |
+
+## D.3 Reading the table
+
+**Day-of and month-of coordinators are the worst possible starting customers**, and it is worth being explicit because their high annual volume makes them superficially attractive. Their context per wedding is thin, their engagement is weeks, their fee floor is low, and their subscription is the most seasonal thing in the market. They would churn every November.
+
+**Venue coordinators fail on the one column that cannot be compensated for.** They are employees. They do not buy software; their venue does, and their venue buys Planning Pod at $199–$319 a month with a procurement conversation attached. Everything else about them is attractive and none of it matters.
+
+**Luxury planners have the highest willingness to pay and are the wrong first customer.** Their processes are the most bespoke, their expectations of polish are highest, they frequently have assistants doing exactly the work this product automates, and their requirements will drag a young product towards bespoke complexity. They are a year-two customer.
+
+**Destination planners score as highly as high-volume full-service and are harder to reach.** They have genuinely the strongest fit: many suppliers, unfamiliar suppliers, time zones, travel, in-person site visits, and the most fragmented communication of any segment. But they are a small, geographically scattered population with no obvious channel. Treat as a high-value secondary target reached through content rather than a primary acquisition focus.
+
+**Small studios of two to four people score better than their size suggests**, for a reason absent from the brief: when a lead planner hands a wedding to an associate for the day, or goes on holiday, the context has to *transfer*. A maintained, evidenced picture is far more valuable when more than one person needs it. They also have four to five times the budget tolerance of a sole trader. They are a strong second target and a natural expansion path from the solo plan.
+
+## D.4 Recommended first ICP
+
+> **Independent wedding planners carrying twelve or more concurrent live weddings, on engagements of nine months or longer, selling full-service or substantial partial planning, working alone or with one part-time assistant, and already paying for at least one professional tool.**
+
+Deliberately *not* "full-service planners", for three reasons. Service tier is the wrong axis (D.1). A low-volume full-service planner with six weddings has plenty of depth per wedding and not enough breadth to feel the pain the evidence actually documents. And a high-volume partial planner carrying eighteen concurrent engagements has the pain acutely, whatever they call their packages.
+
+The "already paying for a tool" qualifier is doing real work. It filters out hobbyists, establishes that the buyer accepts software as a cost of business, and — given the strongly evidenced resentment of multi-product stacks — identifies someone already unhappy with their current arrangement.
+
+## D.5 The geographic tension, stated honestly
+
+I recommended UK and Ireland as the entry market in Section S on the grounds that HoneyBook's AI Notetaker is US and Canada only, so the incumbent alternative is genuinely absent. The segment evidence complicates that and the complication should not be buried.
+
+Bridebook's 2026 report puts **average UK spend on a wedding planner at £1,543**, down from £1,892 the prior year. The Irish equivalent is **€2,054**. Those figures are averages across couples who spent anything at all, and they imply a market dominated by on-the-day coordination rather than full-service planning — which is precisely the segment scoring lowest in D.2. The full-service UK planner exists and charges several times that, but she is a smaller fraction of a smaller population than the equivalent in the US.
+
+So the two markets trade off against each other directly: **the US has the better segment mix and the incumbent has already moved; the UK and Ireland have a genuine incumbent gap and a worse segment mix.** There is no clean answer. The validation experiment in Section X is designed to run both as parallel cells for exactly this reason, and the decision should be made on measured response rather than on this argument.
+
+---
+
+# E. Market evidence
+
+Full evidence log with sources: `docs/wedding-investigation/PART1_APPENDIX_PRACTITIONER_EVIDENCE.md`.
+
+## E.1 The methodological finding that governs everything else
+
+**There is no large, active, public professional wedding-planner community anywhere on the open internet.** The subreddit `r/weddingindustry` has one post, from 2013. `r/weddingplanners` is empty. `r/eventplanning` is dead. `r/WeddingProfessionals` is ten days old with top posts scoring two to four points. The richest planner-on-planner operational detail found in the entire research came from planners answering a *client's* question in `r/BigBudgetBrides`.
+
+This has two consequences and both are serious.
+
+For **evidence**, it means every claim below rests on small samples. Nobody — including the companies currently selling to this market — has strong public evidence about how these people work. Capterra, G2 and GetApp were Cloudflare-blocked during research, so the two-and-three-star reviews that carry the real signal could not be retrieved; on Trustpilot only HoneyBook has a usable sample, with Dubsado at one review, Aisle Planner at two and Planning Pod at one.
+
+For **acquisition**, it removes the channel a solo B2B SaaS product would normally rely on. There is no Hacker News, no active subreddit, no public forum. The candid discussion happens in **closed Facebook groups**, which is where a go-to-market has to earn its way in. Section T treats this as the central acquisition constraint.
+
+## E.2 Strongly evidenced
+
+**Multi-product stacks, and resentment of them.** Named, first-person and repeated: HoneyBook plus Aisle Planner plus Google Docs; Dubsado plus Drive plus Sheets; Aisle Planner plus Asana plus Sheets plus floorplan software. The clearest statement of intent found anywhere in the research is a planner asking for help building her back end *"so I'm not using multiple CRMs."*
+
+**Google Sheets and Drive are the real system of record, including at the $15,000-plus tier.** And — this is the part that matters and cuts against the product — **it is frequently a considered choice rather than neglect.** Planners cite real-time propagation to vendors and zero client learning curve. One planner states she is fully capable of automating her own spreadsheets and chooses not to because she does not want to maintain her own software ecosystem.
+
+Any product replacing the spreadsheet must beat those two specific properties. The product described in this report does neither: it does not propagate anything to vendors and it has no client-facing surface at all. That is a genuine gap in the value proposition, not a positioning problem.
+
+**Channel fragmentation and context switching.** Two quotes carry it: *"email + texting + drive + a floor plan software"*, and *"the part that fries your brain isn't the tasks, it's the context switching."* Note that the evidenced channels are **email, SMS and Instagram DMs**. WhatsApp specifically, with couples, is *not* evidenced — see E.4.
+
+**Supplier unreliability and late-arriving information**, treated by planners as structural rather than exceptional.
+
+**Admin load and burnout as the dominant self-reported challenge**, with more than half of a 500-plus professional survey naming workflows and automation as a 2026 priority.
+
+**A 2026 demand slowdown.** Booked-levels reported falling from 66% in 2025 to 42% in 2026, longer decision cycles and a hollowing middle market. IBISWorld records the US wedding-planner industry declining 12.2% in 2024 and a further 4.2% in 2025 to $1.5bn before a modest 2.1% recovery to $1.6bn in 2026, attributing part of the contraction to *"more couples have opted to plan their weddings themselves."* **This is a headwind and belongs in the bear case:** the target customer's own business is under pressure and their appetite for a new subscription is correspondingly lower.
+
+## E.3 The pain planners actually articulate — and it is not the one in the brief
+
+This is the single most important finding of the investigation.
+
+> "I am very adept at building Google sheets, can automate everything/write my own code to have it automated, but choose not to because I do not want to maintain my own software ecosystem. Also, **to track everything across all of our clients manually, was really, really frustrating.**"
+> — u/oso_events, wedding planner
+
+Corroborated independently by the planner who caps her volume at ten to fifteen weddings so she does not *"confuse my couples names or details"*.
+
+**Per-client organisation is broadly solved. Cross-client tracking is not.** A spreadsheet per wedding works. Eighteen spreadsheets across eighteen weddings at eighteen different stages does not, and the failure mode is the planner's own attention rather than any individual document.
+
+The brief's core loop — *"Catch me up on Laura & James"* — is per-wedding, and per-wedding is the part that already works. The product framing needs to move up a level: the primary question is not "where does this wedding stand" but **"across all my weddings, what needs me this week."** The per-wedding picture is the substrate that makes the portfolio answer trustworthy; it is not the proposition. Sections G, I and L have been written to reflect this.
+
+## E.4 Weakly evidenced or unevidenced
+
+Listed plainly because several of these were load-bearing assumptions in the brief.
+
+- **Poor mobile capture during venue visits — no practitioner evidence whatsoever.** Only vendor marketing copy. If a product thesis rests on this, it is currently an assumption.
+- **Wedding-day surprises caused by something unrecorded — no evidence.** A Reddit thread constructed to elicit exactly those stories drew zero replies.
+- **Repeated late timeline churn — asserted throughout vendor marketing, evidenced nowhere.** Timeline maintenance is real and cyclical but is described by planners as the job, not as pain.
+- **WhatsApp fragmentation with couples — not evidenced.** Instagram DMs and SMS are.
+- **Planner counts for the UK, Ireland or the EU — none exist.** The US figure is unusable: IBISWorld's own two pages state 58,141 businesses in 2026 and 21,714 in 2025, which cannot both be true.
+- **Per-segment wedding volumes — no credible source.** The widely circulated "15–30 per year" and the "$1,500 day-of / $6,000 partial / $12,000 full" tiering both originate in content-marketing sites for training products and propagate verbatim across AI-generated pages.
+- **Any credible churn statistic for wedding-planning businesses.**
+
+## E.5 Moderately evidenced, and the most valuable of them
+
+**Disputed verbal decisions.** One outstanding, specific, first-person account from a planner-educator: *"I knew we had talked about the budget. I knew we had reviewed the numbers together on a call months earlier... A lot gets decided. And couples, understandably, don't always remember the specifics of what was said six months ago."* Discounted because the author sells training and links an affiliate tool, but too specific and too consequential to dismiss. **This is the highest value per unit of evidence in the whole corpus and it maps directly onto the evidence-quote and change-history design.** It also badly needs primary validation.
+
+**Information going stale**, best evidenced from the client side — two independent clients at $16,000 and $18,500 describing planners whose Aisle Planner and Drive were not kept current. The reframe that matters: the constraint is not access to a tool, it is **the marginal cost of keeping it current**. That is precisely the cost this product attacks.
+
+## E.6 The AI attitude finding, which is a product specification
+
+Planner sentiment towards AI is neither enthusiasm nor fear. It is fatigue with AI marketing, scepticism of anything client-facing, specific hunger for back-office automation, and — critically — **conditional on verifiability**:
+
+> "unless it linked me to the appropriate document... so I can double check manually"
+> — u/dzzi
+
+> "**Why I'm still doing event specs manually and I can't forward all my documents to AI to create deadlines and a project plan off of contracts is beyond me.** Until an actual PLANNER and not just some tech company trying to sell to planners decides to figure out how to really make this work…I'm not hopeful."
+> — u/FittestEventProf
+
+Three things follow directly.
+
+The first quote is **an unprompted specification of the evidence-quote feature.** The requirement that every extracted fact shows the source is not a nicety of Lume's design philosophy; it is the stated precondition for this market trusting AI at all. That is the strongest single piece of validation for the existing architecture found anywhere in this investigation.
+
+The second quote is **an unprompted demand statement** — and note what it asks for. It is not about calls. It is about **forwarding documents and contracts** and getting deadlines and a plan out of them. That nudges document ingestion up the roadmap relative to my V1.1 placement in Section M, and it is worth testing directly in the validation experiment.
+
+The third is the tone: *"an actual PLANNER and not just some tech company trying to sell to planners."* Credibility in this market is not established by product quality alone. Whatever is built needs a practitioner attached to it visibly.
+
+## E.7 The vendor-marketing mirror
+
+Every pain in the brief is asserted, confidently and in near-identical language, by at least one company selling software to wedding planners — InvitiApp, Mitra Planner, WeddingFlow, Nuptial, Paige. Two readings, not mutually exclusive: convergent validation from several teams who each did customer development, or founder consensus copied between AI-generated SEO pages.
+
+The asymmetry decides it. **The pains vendors assert most loudly — WhatsApp fragmentation, missed line-item changes, day-of surprises — are precisely the ones with no practitioner evidence. The pain planners articulate most clearly, cross-client tracking, gets almost no vendor airtime.**
+
+That asymmetry is simultaneously the strongest argument for this product and the clearest warning about how it has been conceived so far. The market is crowded with products solving the pains that are easiest to write a landing page about, and comparatively empty of products solving the one a planner actually named.
+# F. Competitors
+
+## F.1 Corrections to assumptions in the brief
+
+Four things stated or implied in the brief are wrong and change the analysis.
+
+**Timeline Genius has not shut down.** It is trading, posted a thirteen-year anniversary in August 2026 claiming over 300,000 timelines created, and shipped a conversational AI assistant called Genie in early 2026 with further capability in July 2026. It is roughly a five-person company, so it is small — but it is alive and it shipped AI before Aisle Planner did.
+
+**Táve is the product that effectively disappeared.** It is now VSCO Workspace and, since 23 June 2026, is no longer sold standalone — new customers must buy the $499.99/year VSCO One bundle. Existing subscribers are grandfathered.
+
+**Planning Pod has abandoned solo planners.** Self-serve pricing is gone, the tiers are quote-only, and its own FAQ states the software, support and roadmap are venue-first. Typical single-location venues are quoted $199–$319 per month. It is no longer a competitor for this customer.
+
+**Prismm (formerly AllSeated)**, the floorplan tool many planners depend on, was acquired by Cvent and **sunsets on 31 December 2026**, going view-only from 1 October 2026. HoneyBook's floorplan story is an integration with a product that is about to be switched off. This creates a short-term disruption in the market, though not one this product should chase.
+
+## F.2 The landscape
+
+| Product | Price (Aug 2026) | Solo plan | Planning depth | AI status |
+| --- | --- | :--: | :--: | --- |
+| **HoneyBook** | $29–$109/mo annual; $36–$129 monthly | Yes | **None** | **Far ahead** — video + in-person notetaker, AI chat, automations builder, lead enrichment, Gmail lead finder, MCP/Claude connector |
+| **Dubsado** | $35 / $55 per mo | Yes | None | **Shipping fast** — email-thread summaries Nov 2025; Notetaker June 2026, free on all plans while in Labs |
+| **Aisle Planner** | $49.99–$229.99/mo by *active project count* | Yes | **Deepest of the incumbents** — timelines, checklists, budgets, seating, guest management | **Zero.** No AI anywhere in its changelog to 22 July 2026, and none on its published roadmap |
+| **Planning Pod** | $199–$319/mo, quote only | **No** | Venue operations | None |
+| **Timeline Genius** | $54.95/mo, $549.95/yr | Yes | Run-of-show timelines only | **"Genie"** — reviews timelines for errors, parses contracts, drafts emails, parses pasted contact lists |
+| **Rock Paper Coin** | Free / $33 / $41 per mo | Yes, free tier | None | None found |
+| **WeddingPro (Knot/WeddingWire)** | Unpublished; est. $50–$1,200/mo | N/A | N/A — advertising | None vendor-side |
+| **17hats** | $60/mo all-in | Yes | None | Minimal — email tone rewriting, ~2023 |
+| **Studio Ninja** | $16 / $27 / $40 per mo; **native GBP** | Yes | None | **None** |
+| **Moxie** | $10 / $20 / $32 per mo | Yes | None | Undocumented "AI assistant" |
+| **Bridebook SupplierPro (UK)** | £20 / £99 per mo +VAT | Yes | Light CRM | Couple-side only (ChatGPT venue search) |
+| **That's The One (UK/global)** | £45/mo, unlimited weddings | Yes | **Deep** — timelines, seating, RSVP, budgets, 7 languages | **Yes** — run-of-show file → timeline; files Zoom transcripts and summaries |
+| **Ayyla** (2026) | $75 / $120 / $199 per mo | Yes | AI-native planner OS | AI-first — but effectively pre-launch, unfunded |
+| **Nuptial** (new) | $39 / $79 / $149 per mo | Yes | Claimed | Unverified — no reviews, press or funding found |
+| **Breezit AI** | $99–$399/mo by inquiry volume | Yes | None — AI sales assistant only | AI *is* the product; most credible new entrant |
+| **RSVP'd** | Free / $49 per mo | — | Claimed all-in-one | **Targets couples, not planners.** Own counters read "20 active planners, 79 events" |
+
+## F.3 The four observations that matter
+
+**One. Nobody has combined wedding-native planning depth with AI.** This is the clearest structural finding in the whole investigation. Aisle Planner owns the planning workflow — timelines, checklists, budgets, seating, guest management — and has shipped **zero AI**, with none on its announced roadmap. HoneyBook has the best AI in the category by a wide margin and **no wedding planning workflow at all** — no day-of timeline, no checklists tied to a wedding date, no couple's budget, no seating. Dubsado has a good notetaker and no planning workflow. Timeline Genius has AI and timelines but no CRM, no contracts, no invoicing and no mobile app.
+
+**Two. No incumbent CRM does conversational write-back.** Every AI feature that has shipped is *read-oriented*: transcribe, summarise, draft, suggest. HoneyBook extracts action items and can convert them to tasks with a click — the closest anyone comes. Dubsado's roadmap includes "Ask Dubsado", explicitly read-only Q&A. The only product doing anything resembling conversational updates is Timeline Genius's Genie, and only within a single timeline. **Telling a system what changed and having it maintain the record is genuinely unbuilt.** That is the wedge, and it survives contact with the evidence.
+
+**Three. Mobile is a real and surprising weakness in the planning-depth products.** Aisle Planner — sold substantially on day-of coordination — **has no native mobile app**, and its own help documentation warns that drag-and-drop in checklists, budgets and seating does not work on mobile. Planning Pod, Timeline Genius and Rock Paper Coin have no native apps either. HoneyBook is the outlier with a 4.77 rating from over sixteen thousand ratings, and its in-person notetaker is mobile-only. So the products a planner would use *at a venue* are the ones without AI, and the product with AI is the one without planning.
+
+**Four. Consolidation has started, and it is aimed at exactly this space.** That's The One — £45/month, planner-native, deep planning features, seven languages, already shipping transcript filing — was **acquired by Helium Ventures on 6 August 2026**. Helium also acquired Maroo (payments) earlier in 2026. A planning-plus-payments consolidation under an AI-native owner is now underway, and TTO is the single closest competitor to the product described in this report. It is not an American product with a UK skin; it prices in GBP and operates in thirty-plus countries.
+
+## F.4 What the planner actually pays today
+
+Typical realistic stacks, at 2026 prices:
+
+- **US full-service planner:** HoneyBook Essentials ($59) + Aisle Planner ($69.99 for ≤15 projects) ≈ **$129/month**, plus WeddingPro advertising which can dwarf both.
+- **US budget-conscious planner:** Rock Paper Coin free tier + Google Sheets ≈ **$0/month plus 2.5% processing**.
+- **UK planner:** Studio Ninja (£13–£29) or Dubsado ($35) + Bridebook (£20) + spreadsheets ≈ **£40–£70/month**, or TTO at £45 as a single tool.
+
+A €39/month product must fit into that picture as an addition, which reinforces the coexistence positioning in Section G. It also means the realistic competitive question is not "would they switch" but "would they add a third line item".
+
+## F.5 Generic tools
+
+No methodologically sound survey of what professional planners use exists — that should be stated plainly, because a lot of confident percentages circulate and none of them are traceable. What does exist is unusually strong circumstantial evidence, because **four competing vendors independently name spreadsheets as the incumbent they displace**: Planning Pod ("most venues come to us running on Google Sheets, Google Calendar, and emailed PDF contracts"), HoneyBook's pricing page listing Trello/Asana as a line item it replaces, Nuptial's homepage ("day-of coordination is still a spreadsheet"), and Aisle Planner's own marketing addressing planners "still managing event logistics through email threads and spreadsheets" — while recommending Asana and Monday.com alongside its own product.
+
+The Notion template market is small but real: 46 templates in the official marketplace for "wedding planner business", at $10–$18.50, plus equivalents at $5–$11.51 on Gumroad and Payhip covering client CRM, vendor trackers, budgets, payment schedules and checklists.
+
+**The price comparison is the finding.** A planner can buy a functionally comparable tracker system once for $5–$20, versus $600–$1,320 a year for Aisle Planner or HoneyBook. What the templates cannot do is the client-facing layer — no branded portal, no e-signature, no payment processing, no automated reminders. That tells you precisely what planners are willing to pay for: **client-facing professionalism and money movement, not internal organisation.** Internal organisation, which is exactly what this product sells, is the part they have historically solved for twelve dollars.
+
+That is the most uncomfortable single fact in this report and it belongs in the bear case as much as here.
+
+## F.6 A warning about the evidence base
+
+A large share of what surfaces when searching for AI wedding software in 2026 is machine-generated affiliate content produced by the startups themselves, and it contains fabricated statistics and wrong competitor prices. Concrete instances found during this research: RSVP'd's blog cites a $399/month tier that does not exist on its own pricing page and states an Aisle Planner price that is verifiably wrong; Wedy Pro AI's site implies a Mark Cuban endorsement when the Shark Tank record shows all five sharks declined and Cuban specifically criticised the valuation, and its homepage counters render as "$0M processed"; several content sites publish precise-sounding AI benefit figures with no attribution.
+
+All such numbers have been excluded from this report. The practical consequence for Part 2 and for any investor conversation: **any market statistic about AI in the wedding industry should be assumed fabricated until traced to a primary source.**
 # G. Exact product proposition
 
 ## G.1 The three candidate propositions, tested
@@ -344,11 +682,14 @@ This is the closest to the actual mechanism and the most dangerous. "Updates its
 
 ## G.2 Recommended proposition
 
-> **After every call, tell it what happened. It keeps each wedding's current picture straight — and shows you exactly what changed.**
+The practitioner evidence in Section E moves the emphasis up a level. Planners do not describe losing track of one wedding; they describe losing track *across* weddings. So the promise leads with the portfolio and the mechanism follows it.
 
-Supporting one-liner for the top of the site:
+> **Fifteen weddings. One place that knows where every one of them actually stands.**
+> **Tell it what happened after each call — it keeps the picture straight and shows you exactly what changed.**
 
-> **One place that always knows where every wedding actually stands.**
+Supporting one-liner:
+
+> **Stop being the only system that knows what's going on.**
 
 Category framing, which matters more than the words:
 
@@ -384,7 +725,9 @@ So: the loop as written is the right loop, and it is sufficient *if and only if*
 
 ## H.2 The smallest compelling product
 
-Seven things. Nothing else.
+Eight things. Nothing else.
+
+0. **The week view across every wedding.** One screen answering "what needs me". Not a dashboard and not a score — a list of concrete unresolved things drawn from maintained truth: deadlines falling due, confirmations outstanding, decisions unanswered, contradictions unresolved, each labelled with which couple it belongs to. This is listed first because the evidence in Section E says it is the pain planners actually name, and because it is the only screen that is valuable on day one rather than in week six. Everything below exists to make this screen true.
 
 1. **Create a wedding.** Couple names, date, venue name, and nothing else mandatory. Under thirty seconds.
 2. **One intake capture.** Paste an existing planning document, a handover note, an email thread, or dictate five minutes of everything currently in the planner's head. This produces the initial picture and is also the activation event (Section J).
@@ -436,7 +779,13 @@ A planner evaluating a tool with none of the above will ask "so what does it act
 
 Not at capture. Capture is a *cost* the planner pays, and paying it depends on believing in a later payoff.
 
-**The habit forms at preparation.** Specifically: the first time the planner is about to get on a call with a couple, opens "Catch me up", and does not have to scroll back through WhatsApp and email to remember where things stood. That single experience converts capture from optional admin into obviously-worth-it, because the planner can now feel what the capture bought.
+**The habit forms at preparation, and there are two preparation moments rather than one.**
+
+The *weekly* one is the stronger and it is the one the evidence supports. Monday morning, fifteen live weddings, and the planner opens one screen that tells her what needs her across all of them. That is the moment the product replaces an act of memory she currently performs herself and resents performing — and it recurs every week regardless of which weddings are active.
+
+The *per-call* one is the moment the brief describes: about to speak to a couple, opens "Catch me up", does not have to scroll back through email to remember where things stood. It is real, and it is secondary, because per-wedding recall is the part planners have already solved tolerably well.
+
+Both convert capture from optional admin into obviously-worth-it, because the planner can feel what the capture bought.
 
 The design consequence is significant: **the product must engineer that moment early and deliberately rather than waiting for it to occur naturally.** A planner who captures four times and never once uses Catch Me Up before a call will churn, having experienced only the cost. Prompting Catch Me Up ahead of a known upcoming interaction is therefore not a nice-to-have notification feature; it is the mechanism by which the loop closes.
 
@@ -557,7 +906,15 @@ Reduce to **three surfaces plus two overlays.**
 
 ## L.2 The recommended architecture
 
-**Surface one — the wedding list.** The planner's home. One row per active wedding, sorted by date. Each row carries the couple's names, the date with a plain-language distance ("14 weeks"), and — the only non-obvious element — a short honest state line generated from maintained truth, such as "3 unconfirmed · final numbers due in 9 days" or "nothing outstanding". No health scores, no percentages, no traffic lights. A planner will not believe a computed readiness score for a wedding they know intimately, and a wrong one destroys trust in everything else on the page. Archived weddings sit behind a filter.
+**Surface one — the week.** The planner's home, and on the evidence in Section E the most important screen in the product.
+
+It answers one question across the whole portfolio: *what needs me*. The content is a single flat list of concrete unresolved things, each tagged with the couple it belongs to and ordered by consequence and proximity — deadlines falling due, confirmations a supplier owes, decisions the couple has not answered, contradictions the product could not resolve, commitments now overdue. "Venue needs final numbers for Laura & James in 9 days." "Photographer hasn't confirmed timings for Priya & Sam." "Two different ceremony times recorded for Hannah & Rob."
+
+Everything on it is an item the planner can act on or dismiss, and every item is derived from maintained truth rather than from anything the planner filed.
+
+Below that list sits the wedding index: one row per active wedding, sorted by date, carrying the couple's names, the date with a plain-language distance ("14 weeks"), and a short honest state line — "3 unconfirmed", or "nothing outstanding". Archived weddings behind a filter.
+
+**No health scores, no percentages, no traffic lights, and no readiness score.** A planner will not believe a computed score for a wedding they know intimately, and one wrong score contaminates trust in the accurate parts of the page. A count of specific unresolved things is trustworthy in a way a score never is, because the planner can click it and check.
 
 **Surface two — the Wedding Picture.** The core screen. A single scrolling page, not a tabbed workspace.
 
@@ -587,7 +944,7 @@ Every item on this page is selectable and opens the detail overlay. Nothing on t
 
 **A countdown.** Expected, and cheap. Include it as text in the header, not as a hero element — a large countdown is consumer bridal styling and undermines the professional register.
 
-**A dashboard across all weddings.** Expected, and the temptation should be resisted in V1. A cross-wedding dashboard is only trustworthy when the underlying truth is complete for every wedding, which it will not be during the first season. A wrong portfolio view damages confidence in the individual wedding views that are the actual product. The wedding list's state line is the minimum viable version and is enough.
+**A dashboard across all weddings.** Expected — and the distinction between a dashboard and the week view above is the whole argument. A *dashboard* aggregates into summary indicators, which requires the underlying truth to be complete for every wedding to be trustworthy, which it will not be in the first season. The *week view* enumerates specific unresolved items, which is honest even when the picture is partial: an incomplete list of real things is useful, whereas an incomplete score is misleading. Build the enumeration. Never build the aggregate.
 
 **A timeline / run sheet.** Strongly expected — this is arguably the most-used artefact in the profession. It is deliberately excluded from V1 (Section N) and this will be the most common feature objection. The honest answer is that the product feeds the run sheet rather than replacing it, and Part 2 should evaluate a read-only "everything I know about the day" export as the cheapest possible bridge.
 
@@ -603,9 +960,13 @@ Every screen should be readable without the planner having maintained it. The mo
 
 # M. Mobile and in-the-moment use
 
-## M.1 Where the planner actually is
+## M.1 Where the planner actually is — and a warning about this section
 
-Venue visits are the strongest case: standing up, walking, hands partly occupied, talking to a venue coordinator, generating a dense stream of facts that will otherwise be reconstructed from memory in the car afterwards. Immediately after a call is the second strongest and the most frequent — the two-minute window in which the planner either records what happened or defers it. Travel between appointments is a real capture window in a profession that does a lot of driving. Supplier meetings resemble venue visits. Wedding week is confirmation-heavy and mobile. Wedding day is execution, not capture.
+**A caveat first, because it undercuts the section's most intuitive argument.** The research found **no practitioner evidence at all** for poor mobile capture during venue visits. It is asserted throughout vendor marketing and nowhere by an actual planner. The evidenced note-taking habit is the opposite of what a mobile-capture thesis assumes: typed notes into a Google Doc during the call, followed by a recap email. That is a desk behaviour.
+
+So the venue-visit case below is an **assumption**, not a finding, and it should be tested directly in the validation experiment rather than built on. What survives without it is still enough to make mobile capture necessary — immediately after a call is the most frequent capture window by a wide margin, and it is the two-minute gap in which the planner either records what happened or defers it indefinitely.
+
+With that caveat: venue visits are the theoretically strongest case — standing up, hands partly occupied, generating a dense stream of facts otherwise reconstructed from memory in the car. Travel between appointments is a real window in a profession that drives a great deal. Supplier meetings resemble venue visits. Wedding week is confirmation-heavy and mobile. Wedding day is execution, not capture.
 
 ## M.2 Assessment of each capability
 
@@ -613,7 +974,9 @@ Venue visits are the strongest case: standing up, walking, hands partly occupied
 
 **Voice capture — required V1.** This is the venue-visit and in-the-car case and it is where the product is most clearly better than the alternative. Lume already has the transcription path (`/api/transcribe` → `whisper-1`). Two things it does not have and needs: capture that continues while the screen is off or the app is backgrounded, and clear handling of a failed upload. A voice note that is silently lost is worse than no product.
 
-**Copy and paste from WhatsApp — required V1, and cheaper than it looks.** WhatsApp fragmentation is one of the more credible pains in the domain, and the entire feature is "accept a pasted block of chat and extract from it". No integration, no API, no permissions. The only real work is prompt handling for multi-speaker chat format with timestamps. High value per unit of build.
+**Paste from any messaging channel — required V1, and cheaper than it looks.** Framed deliberately as *any channel* rather than WhatsApp specifically, because WhatsApp-with-couples turned out to be unevidenced; the channels planners actually name are email, SMS and Instagram DMs. The feature is identical either way: accept a pasted block of multi-speaker chat and extract from it. No integration, no API, no permissions. The only real work is prompt handling for timestamped multi-speaker format, including the fact that a sentence means different things depending on who said it. High value per unit of build.
+
+**Document and contract ingestion — promote from "later" to a V1 candidate.** The single most direct demand statement found in the research is a working event professional asking why she still does specs manually and cannot *"forward all my documents to AI to create deadlines and a project plan off of contracts."* That is an unprompted request for exactly this capability, and it is about documents rather than conversations. It also solves the cold-start problem in Section J — a supplier contract is dense with dates, deposits and responsibilities. Text-bearing documents (PDF and Word) are a modest build; scanned images are not. **Recommend text-based document ingestion in V1 and defer image OCR.**
 
 **Mobile review — required V1, in reduced form.** If capture is mobile and review is desktop, the loop breaks. But full review on mobile invites long queues on a small screen. The right shape is: confirm the ready items and answer the Needs-you questions on mobile, defer detailed correction to desktop.
 
@@ -633,12 +996,13 @@ Venue visits are the strongest case: standing up, walking, hands partly occupied
 | --- | --- |
 | Quick text capture | Required V1 |
 | Voice capture with reliable upload | Required V1 |
-| Paste from WhatsApp | Required V1 |
+| Paste from any messaging channel | Required V1 |
 | Mobile review (confirm + answer) | Required V1 |
-| Offline queue for captures | Required V1 |
+| Text-document / contract ingestion | Required V1 — evidenced demand |
+| Offline queue for captures | Valuable V1 — but see M.1; the venue case is unevidenced |
 | Photo as evidence attachment | Valuable V1.1 |
 | Email forwarding address | Valuable V1.1 |
-| Photo content extraction | Later, if ever |
+| Photo and scan content extraction | Later, if ever |
 | Native apps | Unnecessary |
 | Wedding-day mode | Unnecessary in V1 |
 | Full offline read/review | Unnecessary |
