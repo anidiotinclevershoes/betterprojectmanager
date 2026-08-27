@@ -200,7 +200,9 @@ function testImmediateMergeCapturePathDeleted() {
   assert.match(store, /analyzeCaptureWithAI/);
   const session = readSrc("src/components/capture/CaptureSessionContext.tsx");
   assert.match(session, /applyOne/);
-  assert.match(session, /planCaptureApply/);
+  assert.match(session, /\/api\/capture\/apply/);
+  assert.doesNotMatch(session, /planCaptureApply/);
+  assert.doesNotMatch(session, /executeCaptureApply/);
   assert.equal(existsSync(join(ROOT, "src/components/CaptureBar.tsx")), false);
   assert.equal(
     existsSync(join(ROOT, "src/components/RecommendationItem.tsx")),
