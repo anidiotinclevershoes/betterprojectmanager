@@ -915,7 +915,7 @@ Future Cursor work should treat this document as binding product philosophy.
 - preserve rollback paths for experimental architecture;
 - distinguish genuine regressions from evaluator artefacts;
 - challenge implementation requests that conflict with this philosophy;
-- write the Plain-English section of completion reports and checkpoints for the product owner, not as an engineering status list (see Development & Evaluation Roadmap §19).
+- always open the product-owner completion (final Cursor message, PR body, and any written report) with conversational Plain-English, even when the prompt does not ask for it (see `AGENTS.md` and Development & Evaluation Roadmap §19).
 
 ## Test-driven / behaviour-first development
 
@@ -962,7 +962,8 @@ Tests should protect **user-visible behaviour, project truth, persistence, ident
 - resurrect light mode;
 - reinterpret the agreed navigation/sidebar;
 - change the approved visual system when asked for a functional delta;
-- write the Plain-English section as dense bullets, commit-style summaries, or a slightly simpler translation of the technical list.
+- open a completion with git SHAs, “Starting main SHA”, checkout logs, numbered engineering checklists, dense bullets, commit-style summaries, or a slightly simpler translation of the technical list;
+- skip the Plain-English lead because the prompt did not ask for a report.
 
 ---
 

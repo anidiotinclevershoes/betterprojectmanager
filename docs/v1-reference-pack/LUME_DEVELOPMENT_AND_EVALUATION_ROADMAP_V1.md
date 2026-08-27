@@ -1,7 +1,7 @@
 # Lume Development & Evaluation Roadmap v1
 
 **Status:** Operating roadmap / anti-whack-a-mole governance  
-**Date:** 19 August 2026 (Plain-English report standard added 26 August 2026)
+**Date:** 19 August 2026 (Plain-English report standard added 26 August 2026; always-on user-facing completion voice added 27 August 2026)
 
 This document describes **how Lume should be developed and evaluated from here**, not a fixed PR sequence.
 
@@ -613,7 +613,7 @@ Relevant deterministic suite passes before the slice is considered complete.
 
 ### Completion report
 
-Write the Plain-English section for the product owner before considering the slice reported. See §19.
+Always. The prompt does not have to ask. Open the product-owner completion — the final Cursor message, the pull-request body, and any written report — with the Plain-English section before considering the work reported. Do not open with git SHAs, checkout logs, or engineering-status lists. See §19.
 
 ## What tests are not for
 
@@ -631,13 +631,36 @@ Keep them separate. Benchmark improvement alone does not make a PR safe. Determi
 
 # 19. Completion reports and checkpoints — Plain-English section
 
-**Added:** 26 August 2026. This is now the default for future Lume completion reports, PR checkpoints, and slice handovers. Do not rewrite historical reports to match.
+**Added:** 26 August 2026. **Tightened:** 27 August 2026 so the same voice is required on *every* user-facing completion, whether or not the prompt asks for it. Do not rewrite historical reports to match.
 
-Every meaningful completion report, PR checkpoint, and slice handover must include a **Plain-English** section written for the product owner.
+This is an **always-on** writing rule, not an optional report template.
 
-The rest of the report may stay technical, structured, and detailed. This section must not.
+Every completion the product owner sees must **open** with a **Plain-English** section written for them. That includes:
 
-This does **not** apply to engineering-only artefacts such as the architecture handoff, Known Discoveries, test dashboards, or the Technical / Tests sections of the same report.
+- the agent’s **final message** in Cursor (the thing that is actually read);
+- the pull-request description;
+- written completion reports, PR checkpoints, and slice handovers.
+
+The prompt does **not** have to request Plain-English, a summary, or a report. If the prompt is silent, still write it. If the prompt asks only for a technical dump, still lead with Plain-English and put the technical dump after.
+
+The rest of the report may stay technical, structured, and detailed. This opening must not.
+
+This does **not** apply to engineering-only artefacts such as the architecture handoff, Known Discoveries, test dashboards, or the Technical / Tests sections of the same report. Those remain technical. They still must not be the first thing the product owner reads when work is being completed to them.
+
+`AGENTS.md` restates the always-on rule so Cursor agents see it even when they have not opened this pack.
+
+## What the product owner must see first
+
+The first sentences they read must be friendly conversational English: what was going on, what changed, what that means for Lume now, and anything still worth watching.
+
+Do **not** open a completion with:
+
+- “Starting main SHA”, a git hash, a commit subject, or a checkout / rebase / status log;
+- a numbered list of git operations or engineering steps;
+- file names, flags, test command names, or commit-style bullets;
+- engineer-to-engineer shorthand with no explanation.
+
+Those details may appear later, under Technical / Tests / Implementation, **after** the Plain-English lead.
 
 ## Purpose
 
@@ -672,13 +695,24 @@ Do not write it as:
 - dense bullets of implementation terminology;
 - a commit-style summary;
 - a list of files, flags, SHAs, or test command names;
+- a git SHA dump or “Starting main SHA …” opener, even as a numbered step;
 - engineer-to-engineer shorthand (“fail closed”, “MissionState”, “rebase onto #70”) without saying what that means for Lume.
 
 Those details belong in Technical / Tests / Implementation sections.
 
+Skipping the Plain-English lead because “the prompt didn’t ask for a report” is also a miss against this standard.
+
 ## Quick calibration
 
-**Drifted — do not do this in Plain-English:**
+**Drifted — do not open a completion like this:**
+
+> 1. Starting main SHA
+>
+> 060d147a9b465bbddf26326074ee37cf619e4513 (docs: require conversational Plain-English in completion reports (#79))
+
+That is an engineering checkout log. It is not a completion for the product owner, even if a technical report follows later.
+
+**Also drifted — do not do this in Plain-English:**
 
 > V2 Analyse authenticates, loads durable truth via the shared Tell Me loader, and ignores leftover `body.state`. Stale / deleted / foreign targets fail closed. `LUME_CAPTURE_V2` remains default-off.
 
@@ -686,4 +720,4 @@ Those details belong in Technical / Tests / Implementation sections.
 
 > Until now, Capture could trust a copy of the project that the browser had sent up with the request. If that copy was out of date or belonged to the wrong project, Lume could still try to write against it. Capture now loads the current saved project on the server after checking who you are, and it ignores any leftover project copy in the request. If the thing it wanted to change has been deleted, belongs to another project, or no longer matches, it stops and asks you instead of writing. The newer Capture path is still switched off by default, so everyday Lume behaviour does not change until that switch is turned on.
 
-The test: **could someone read only this section and explain the change without having to decode the rest of the report?**
+The test: **could someone read only the opening of this completion and explain the change without having to decode SHAs, files, or the rest of the report?**
