@@ -561,7 +561,13 @@ function main() {
     assert.ok(
       (run.result.proposedOperations ?? []).every((op) => op.operation === "NO_CHANGE"),
     );
-    assert.equal(buildSuggestions(run.result).length, 0);
+    const suggestions = buildSuggestions(run.result);
+    assert.equal(suggestions.length, 1);
+    assert.notEqual(suggestions[0]!.op, "create");
+    assert.notEqual(
+      suggestions[0]!.legalDomain,
+      "unsupported",
+    );
   });
 
   check("client barrel does not re-export OpenAI extract", () => {

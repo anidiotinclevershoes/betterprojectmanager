@@ -2914,6 +2914,16 @@ body {
   color: var(--text-primary);
 }
 
+.compact-change-date-input {
+  min-width: 140px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
 .capture-target-picker {
   margin-top: 2px;
   padding: 8px;

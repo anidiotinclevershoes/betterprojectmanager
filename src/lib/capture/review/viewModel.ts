@@ -20,6 +20,8 @@ import {
 } from "@/lib/capture/suggestions";
 import {
   deriveReviewReason,
+  friendlierNeedsYouCopy,
+  missingDateCopy,
   reviewReasonCopy,
   type ReviewReason,
 } from "./reviewReason";
@@ -77,6 +79,8 @@ export type ReviewChangeViewModel = {
   projectName?: string | null;
   projectCode?: string | null;
   showProjectLabel?: boolean;
+  /** Structured missing field already failed-closed by apply. */
+  missingRequiredField?: "date";
 };
 
 function formatShortDate(value: string): string {
@@ -360,6 +364,17 @@ function opsDisagree(
   return false;
 }
 
+function namedTargetTitle(
+  finding?: CaptureFinding,
+  suggestion?: PendingSuggestion,
+): string | undefined {
+  if (finding?.target?.entityId && finding.target.title) return finding.target.title;
+  if (suggestion?.targetEntityId || suggestion?.targetTodoId) {
+    return suggestion.content;
+  }
+  return undefined;
+}
+
 function coverageForFinding(
   result: CaptureResult,
   findingId: string | undefined,
@@ -368,12 +383,41 @@ function coverageForFinding(
   return result.findingCoverage?.items.find((i) => i.findingId === findingId);
 }
 
+function proposedString(
+  values: Record<string, unknown> | undefined,
+  key: string,
+): string | undefined {
+  const raw = values?.[key];
+  return typeof raw === "string" && raw.trim() ? raw.trim() : undefined;
+}
+
+function milestoneUpdateMissingDate(
+  item: PendingSuggestion,
+  op: ProposedOperation | undefined,
+): boolean {
+  const isMilestone =
+    item.kind === "milestone" || op?.entityType === "milestone";
+  const isUpdate = item.op === "update" || op?.operation === "UPDATE";
+  if (!isMilestone || !isUpdate) return false;
+  const values = op?.proposedValues ?? item.proposedValues;
+  if (
+    item.date?.trim() ||
+    proposedString(values, "date") ||
+    proposedString(values, "startAt") ||
+    proposedString(values, "label")
+  ) {
+    return false;
+  }
+  return true;
+}
+
 function assessReadiness(
   item: PendingSuggestion,
   finding: CaptureFinding | undefined,
   op: ProposedOperation | undefined,
   coverage?: FindingCoverageItem,
-): { readiness: ReviewReadiness; reason?: string } {
+  capturePipeline?: "legacy" | "v2",
+): { readiness: ReviewReadiness; reason?: string; missingRequiredField?: "date" } {
   if (
     item.projectUncertain ||
     (finding?.projectCandidates &&
@@ -473,12 +517,26 @@ function assessReadiness(
       return { readiness: "ready" };
     }
   }
-  const confidence = op?.confidence ?? finding?.confidence ?? item.recommendation?.confidence;
-  if (typeof confidence === "number" && confidence < 70) {
+  if (milestoneUpdateMissingDate(item, op)) {
     return {
       readiness: "needs_review",
-      reason: "Confidence is below the ready threshold.",
+      reason: missingDateCopy(
+        op?.targetTitle || item.content || finding?.target?.title,
+      ),
+      missingRequiredField: "date",
     };
+  }
+  // Capture V2: modelConfidence is informational. Do not gate Apply Ready on it.
+  // Legacy findings still use the confidence threshold.
+  if (capturePipeline !== "v2") {
+    const confidence =
+      op?.confidence ?? finding?.confidence ?? item.recommendation?.confidence;
+    if (typeof confidence === "number" && confidence < 70) {
+      return {
+        readiness: "needs_review",
+        reason: "Confidence is below the ready threshold.",
+      };
+    }
   }
   if (!op && finding?.findingType === "NEW_INFORMATION") {
     return {
@@ -537,6 +595,27 @@ function buildCoverageGapViewModels(
     const op = opFromFinding(finding);
     const projectUncertain =
       Boolean(finding.projectCandidates?.length) && !finding.projectId;
+    const matchingOp = (result.proposedOperations ?? []).find(
+      (op) => op.sourceFindingId === item.findingId,
+    );
+    const ownershipRaw = matchingOp?.proposedValues?.ownershipSemantics;
+    const ownershipSemantics =
+      ownershipRaw === "share" ||
+      ownershipRaw === "replace" ||
+      ownershipRaw === "continue" ||
+      ownershipRaw === "ambiguous"
+        ? ownershipRaw
+        : undefined;
+    const personName =
+      typeof matchingOp?.proposedValues?.personName === "string"
+        ? String(matchingOp.proposedValues.personName)
+        : typeof matchingOp?.proposedValues?.name === "string"
+          ? String(matchingOp.proposedValues.name)
+          : undefined;
+    const responsibilityScope =
+      typeof matchingOp?.proposedValues?.scope === "string"
+        ? String(matchingOp.proposedValues.scope)
+        : undefined;
     const suggestion: PendingSuggestion = {
       id: `coverage-${item.findingId}`,
       kind,
@@ -551,6 +630,13 @@ function buildCoverageGapViewModels(
       projectName: projectUncertain ? null : (finding.projectName ?? null),
       projectUncertain,
       projectCandidates: finding.projectCandidates,
+      legalDomain: ownershipSemantics || responsibilityScope
+        ? "responsibility"
+        : undefined,
+      personName,
+      ownershipSemantics,
+      responsibilityScope,
+      proposedValues: matchingOp?.proposedValues,
     };
 
     const readiness = item.disposition;
@@ -560,8 +646,29 @@ function buildCoverageGapViewModels(
       coverage: item,
       suggestion,
       needsReviewReason: item.reason,
+      capturePipeline: result.capturePipeline,
     });
     const recordName = finding.target?.title || finding.fact.slice(0, 80);
+    const rawReason = item.reason;
+    const friendly = friendlierNeedsYouCopy(
+      rawReason || finding.clarificationQuestion,
+    );
+    const reasonText =
+      friendly ??
+      (reviewReason
+        ? reviewReasonCopy(reviewReason, {
+            recordName:
+              reviewReason === "TARGET_UNCERTAIN"
+                ? finding.target?.title
+                : recordName,
+            entityLabel: KIND_LABEL[kind],
+            projectCandidates: finding.projectCandidates,
+            incomingPersonName: suggestion.personName,
+            scope: suggestion.responsibilityScope,
+          })
+        : item.disposition === "unmatched"
+          ? `Lume understood: ${finding.fact}\n\nLume couldn't confidently identify the existing item this should update.`
+          : rawReason);
     gaps.push({
       id: suggestion.id,
       suggestion,
@@ -572,15 +679,7 @@ function buildCoverageGapViewModels(
       operationLabel: OP_LABEL[op],
       readiness,
       reviewReason,
-      needsReviewReason: reviewReason
-        ? reviewReasonCopy(reviewReason, {
-            recordName,
-            entityLabel: KIND_LABEL[kind],
-            projectCandidates: finding.projectCandidates,
-          })
-        : item.disposition === "unmatched"
-          ? `Lume understood: ${finding.fact}\n\nLume couldn't confidently identify the existing item this should update.`
-          : item.reason,
+      needsReviewReason: reasonText,
       diff: {
         label: item.disposition === "unmatched" ? "Unmatched" : "Needs Review",
         from: "",
@@ -655,11 +754,19 @@ function applyOverride(
     readiness,
     reviewReason,
     needsReviewReason: reviewReason
-      ? reviewReasonCopy(reviewReason, {
-          recordName,
-          entityLabel,
-          projectCandidates: suggestion.projectCandidates,
-        })
+      ? friendlierNeedsYouCopy(
+          model.needsReviewReason || model.finding?.clarificationQuestion,
+        ) ??
+        reviewReasonCopy(reviewReason, {
+            recordName:
+              reviewReason === "TARGET_UNCERTAIN"
+                ? namedTargetTitle(model.finding, suggestion)
+                : recordName,
+            entityLabel,
+            projectCandidates: suggestion.projectCandidates,
+            incomingPersonName: suggestion.personName,
+            scope: suggestion.responsibilityScope,
+          })
       : undefined,
     diff:
       op === "create"
@@ -676,6 +783,10 @@ function applyOverride(
     projectId: suggestion.projectId,
     projectName: suggestion.projectName,
     projectCode: suggestion.projectCode ?? model.projectCode,
+    missingRequiredField:
+      override.accepted || override.readiness === "ready"
+        ? undefined
+        : model.missingRequiredField,
   };
 }
 
@@ -695,11 +806,12 @@ export function buildReviewChangeViewModels(
           )
         : undefined);
     const coverage = coverageForFinding(result, finding?.id);
-    const { readiness, reason } = assessReadiness(
+    const { readiness, reason, missingRequiredField } = assessReadiness(
       item,
       finding,
       operationSource,
       coverage,
+      result.capturePipeline,
     );
     const recordName =
       operationSource?.targetTitle ||
@@ -722,7 +834,29 @@ export function buildReviewChangeViewModels(
       coverage,
       suggestion: item,
       needsReviewReason: reason,
+      capturePipeline: result.capturePipeline,
     });
+    const friendly = friendlierNeedsYouCopy(
+      reason || finding?.clarificationQuestion,
+    );
+    let reasonText =
+      friendly ??
+      (reviewReason
+        ? reviewReasonCopy(reviewReason, {
+            recordName:
+              reviewReason === "TARGET_UNCERTAIN"
+                ? namedTargetTitle(finding, item)
+                : recordName,
+            entityLabel: KIND_LABEL[item.kind],
+            projectCandidates:
+              item.projectCandidates ?? finding?.projectCandidates,
+            incomingPersonName: item.personName,
+            scope: item.responsibilityScope,
+          })
+        : reason);
+    if (missingRequiredField === "date") {
+      reasonText = missingDateCopy(recordName);
+    }
 
     const model: ReviewChangeViewModel = {
       id: item.id,
@@ -739,14 +873,7 @@ export function buildReviewChangeViewModels(
             : OP_LABEL[item.op],
       readiness,
       reviewReason,
-      needsReviewReason: reviewReason
-        ? reviewReasonCopy(reviewReason, {
-            recordName,
-            entityLabel: KIND_LABEL[item.kind],
-            projectCandidates:
-              item.projectCandidates ?? finding?.projectCandidates,
-          })
-        : reason,
+      needsReviewReason: reasonText,
       diff: buildDiff(item, operationSource, finding),
       evidence: evidenceExcerpts(finding, captureText),
       interpretation: buildInterpretation(item, finding),
@@ -761,6 +888,7 @@ export function buildReviewChangeViewModels(
       projectId,
       projectName,
       projectCode: item.projectCode,
+      missingRequiredField,
     };
     return applyOverride(model, overrides[item.id]);
   });

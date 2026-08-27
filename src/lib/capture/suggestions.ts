@@ -403,7 +403,9 @@ function buildSuggestionsFromProposedOps(
   const items: PendingSuggestion[] = [];
 
   for (const op of result.proposedOperations ?? []) {
-    if (op.operation === "NO_CHANGE") continue;
+    const clarifyingNoChange =
+      op.operation === "NO_CHANGE" && Boolean(op.requiresClarification);
+    if (op.operation === "NO_CHANGE" && !clarifyingNoChange) continue;
     const availabilityHint =
       op.proposedValues?.kind === "availability" ||
       typeof op.proposedValues?.awayFromIso === "string";
@@ -438,7 +440,9 @@ function buildSuggestionsFromProposedOps(
                     : op.entityType === "nudge"
                       ? "action"
                       : "meeting";
-    const parsedOp = parseSuggestionOp(op.operation, op.id);
+    const parsedOp = clarifyingNoChange
+      ? ("update" as SuggestionOp)
+      : parseSuggestionOp(op.operation, op.id);
     const suggestionOp: SuggestionOp = parsedOp ?? "create";
     const matched =
       op.entityType === "todo" || op.entityType === "nudge"
@@ -496,7 +500,9 @@ function buildSuggestionsFromProposedOps(
     const personName =
       typeof op.proposedValues?.personName === "string"
         ? String(op.proposedValues.personName)
-        : undefined;
+        : typeof op.proposedValues?.name === "string"
+          ? String(op.proposedValues.name)
+          : undefined;
     const personId =
       typeof op.proposedValues?.personId === "string"
         ? String(op.proposedValues.personId)
@@ -587,6 +593,7 @@ export type CaptureReviewOverride = {
     | "OPERATION_UNCERTAIN"
     | "VALUE_UNCERTAIN"
     | "PROJECT_UNCERTAIN"
+    | "OWNERSHIP_UNCERTAIN"
     | null;
   kind?: SuggestionKind;
   op?: SuggestionOp;

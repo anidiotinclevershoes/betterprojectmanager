@@ -20,6 +20,7 @@ export function ConfirmOwnerDialog({
   truthItemId,
   defaultPersonName,
   defaultReplacePersonId,
+  defaultIntent = null,
   allowScopeEdit = false,
   onDone,
   onCancel,
@@ -31,6 +32,8 @@ export function ConfirmOwnerDialog({
   defaultPersonName?: string | null;
   /** Prefill replace target (e.g. hand over from this person). */
   defaultReplacePersonId?: string | null;
+  /** Prefill share vs replace when Review already chose the intent. */
+  defaultIntent?: OwnershipIntent | null;
   /** Allow editing scope (person detail assign flow). */
   allowScopeEdit?: boolean;
   onDone?: () => void;
@@ -49,7 +52,7 @@ export function ConfirmOwnerDialog({
     defaultPersonName?.trim() || stakeholders[0]?.name || "",
   );
   const [intent, setIntent] = useState<OwnershipIntent | null>(
-    defaultReplacePersonId ? "replace" : null,
+    defaultIntent ?? (defaultReplacePersonId ? "replace" : null),
   );
   const [replacePersonId, setReplacePersonId] = useState<string>(
     defaultReplacePersonId ?? "",

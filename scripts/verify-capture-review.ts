@@ -22,9 +22,26 @@ import {
   buildReviewChangeViewModels,
   type ReviewChangeViewModel,
 } from "../src/lib/capture/review/viewModel";
-import type { CaptureFinding } from "../src/lib/capture/findings";
-import type { PendingSuggestion } from "../src/lib/capture/suggestions";
+import type {
+  CaptureFinding,
+  ProposedOperation,
+} from "../src/lib/capture/findings";
+import {
+  buildSuggestions,
+  type PendingSuggestion,
+} from "../src/lib/capture/suggestions";
 import type { CaptureResult, Recommendation } from "../src/lib/types";
+import {
+  existingOrNewCopy,
+  friendlierNeedsYouCopy,
+  missingDateCopy,
+  ownershipChoiceCopy,
+} from "../src/lib/capture/review/reviewReason";
+import { planCaptureApply } from "../src/lib/capture/apply";
+import {
+  CANDYLAND_ID,
+  experimentalApplyWorld,
+} from "../src/lib/experiments/worlds";
 
 function stubResult(partial: Partial<CaptureResult> = {}): CaptureResult {
   return {
@@ -560,6 +577,684 @@ function model(
   assert.equal(createModels[1].diff?.layout, "remove");
   assert.match(createModels[1].diff!.to, /Remove from project/i);
   assert.equal(createModels[1].readiness, "needs_review");
+}
+
+function proposedOp(
+  partial: Partial<ProposedOperation> &
+    Pick<ProposedOperation, "id" | "sourceFindingId" | "operation">,
+): ProposedOperation {
+  return {
+    entityType: "risk",
+    reason: partial.reason ?? "test",
+    evidence: partial.evidence ?? "test",
+    confidence: partial.confidence ?? 90,
+    destructive: false,
+    requiresClarification: false,
+    ...partial,
+  };
+}
+
+function suggestionIdFor(opId: string, index = 0) {
+  return `op-${opId}-${index}`;
+}
+
+// --- 8. V2 confidence is informational; legacy threshold is unchanged ---
+{
+  const v2Update = (confidence: number | undefined, extra: Partial<ProposedOperation> = {}) => {
+    const op = proposedOp({
+      id: "v2op-risk",
+      sourceFindingId: "find-risk",
+      operation: "UPDATE",
+      entityType: "risk",
+      targetId: "risk-bridge",
+      targetTitle: "Gumdrop Bridge icing",
+      confidence: confidence ?? 0,
+      requiresClarification: false,
+      projectId: "proj-candy",
+      ...extra,
+    });
+    const models = buildReviewChangeViewModels(
+      [
+        suggestion({
+          id: suggestionIdFor(op.id),
+          kind: "risk",
+          op: "update",
+          content: "Gumdrop Bridge icing is worse",
+          targetEntityId: "risk-bridge",
+          projectId: "proj-candy",
+        }),
+      ],
+      stubResult({
+        capturePipeline: "v2",
+        findings: [
+          finding({
+            id: "find-risk",
+            fact: "Gumdrop Bridge icing is worse",
+            findingType: "ENTITY_UPDATED",
+            target: {
+              entityType: "risk",
+              entityId: "risk-bridge",
+              title: "Gumdrop Bridge icing",
+            },
+            confidence: confidence ?? 0,
+            requiresClarification: false,
+          }),
+        ],
+        proposedOperations: [op],
+      }),
+      "The icing is worse.",
+    );
+    return models[0]!;
+  };
+
+  assert.equal(v2Update(12).readiness, "ready", "low confidence V2 update stays Apply Ready");
+  assert.equal(v2Update(0).readiness, "ready", "zero confidence V2 update stays Apply Ready");
+  assert.equal(
+    v2Update(undefined).readiness,
+    "ready",
+    "missing/zero confidence V2 update stays Apply Ready",
+  );
+
+  const v2Create = buildReviewChangeViewModels(
+    [
+      suggestion({
+        id: suggestionIdFor("v2op-new"),
+        kind: "action",
+        op: "create",
+        content: "Polish the candy-cane banners",
+        projectId: "proj-candy",
+      }),
+    ],
+    stubResult({
+      capturePipeline: "v2",
+      findings: [
+        finding({
+          id: "find-new",
+          fact: "Polish the candy-cane banners",
+          findingType: "NEW_INFORMATION",
+          target: { entityType: "todo", title: "Polish the candy-cane banners" },
+          confidence: 8,
+          requiresClarification: false,
+        }),
+      ],
+      proposedOperations: [
+        proposedOp({
+          id: "v2op-new",
+          sourceFindingId: "find-new",
+          operation: "CREATE",
+          entityType: "todo",
+          targetTitle: "Polish the candy-cane banners",
+          confidence: 8,
+          projectId: "proj-candy",
+        }),
+      ],
+    }),
+    "Please add a to-do to polish the candy-cane banners.",
+  );
+  assert.equal(v2Create[0]!.readiness, "ready", "V2 CREATE still Apply Ready at low confidence");
+
+  const legacyLow = buildReviewChangeViewModels(
+    [
+      suggestion({
+        id: suggestionIdFor("legacy-op"),
+        kind: "risk",
+        op: "update",
+        content: "CDN still delayed",
+        targetEntityId: "risk-cdn",
+      }),
+    ],
+    stubResult({
+      findings: [
+        finding({
+          id: "find-legacy",
+          fact: "CDN still delayed",
+          findingType: "ENTITY_UPDATED",
+          target: { entityType: "risk", entityId: "risk-cdn", title: "CDN" },
+          confidence: 40,
+          requiresClarification: false,
+        }),
+      ],
+      proposedOperations: [
+        proposedOp({
+          id: "legacy-op",
+          sourceFindingId: "find-legacy",
+          operation: "UPDATE",
+          entityType: "risk",
+          targetId: "risk-cdn",
+          targetTitle: "CDN",
+          confidence: 40,
+        }),
+      ],
+    }),
+    "CDN still delayed",
+  );
+  assert.equal(
+    legacyLow[0]!.readiness,
+    "needs_review",
+    "legacy path still gates confidence < 70",
+  );
+  assert.equal(legacyLow[0]!.reviewReason, "VALUE_UNCERTAIN");
+
+  const ambiguous = v2Update(95, {
+    requiresClarification: true,
+    proposedValues: { ownershipSemantics: "ambiguous", scope: "UAT lead" },
+  });
+  const ambiguousModels = buildReviewChangeViewModels(
+    [
+      suggestion({
+        id: suggestionIdFor("v2op-risk"),
+        kind: "stakeholder",
+        op: "update",
+        content: "UAT may be shared or replaced",
+        ownershipSemantics: "ambiguous",
+        responsibilityScope: "UAT lead",
+        personName: "Fizz Caramel",
+        legalDomain: "responsibility",
+        projectId: "proj-candy",
+      }),
+    ],
+    stubResult({
+      capturePipeline: "v2",
+      findings: [
+        finding({
+          id: "find-risk",
+          fact: "UAT may be shared or replaced",
+          findingType: "AMBIGUOUS",
+          confidence: 95,
+          requiresClarification: true,
+          clarificationQuestion: "Share versus replace is not decided.",
+        }),
+      ],
+      proposedOperations: [
+        proposedOp({
+          id: "v2op-risk",
+          sourceFindingId: "find-risk",
+          operation: "NO_CHANGE",
+          entityType: "stakeholder",
+          confidence: 95,
+          requiresClarification: true,
+          proposedValues: {
+            ownershipSemantics: "ambiguous",
+            scope: "UAT lead",
+            personName: "Fizz Caramel",
+          },
+          projectId: "proj-candy",
+        }),
+      ],
+    }),
+    "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it.",
+  );
+  assert.equal(ambiguousModels[0]!.readiness, "needs_review");
+  assert.equal(ambiguousModels[0]!.reviewReason, "OWNERSHIP_UNCERTAIN");
+  void ambiguous;
+
+  const foreign = buildReviewChangeViewModels(
+    [
+      suggestion({
+        id: suggestionIdFor("v2op-foreign"),
+        kind: "risk",
+        op: "update",
+        content: "Update imaginary risk",
+        targetEntityId: "risk-does-not-exist",
+        projectId: "proj-candy",
+      }),
+    ],
+    stubResult({
+      capturePipeline: "v2",
+      findings: [
+        finding({
+          id: "find-foreign",
+          fact: "Update imaginary risk",
+          findingType: "AMBIGUOUS",
+          confidence: 90,
+          requiresClarification: true,
+          invalidTarget: true,
+          validationWarning: "Target id not in context",
+        }),
+      ],
+      proposedOperations: [
+        proposedOp({
+          id: "v2op-foreign",
+          sourceFindingId: "find-foreign",
+          operation: "NO_CHANGE",
+          entityType: "risk",
+          targetId: "risk-does-not-exist",
+          confidence: 90,
+          requiresClarification: true,
+        }),
+      ],
+    }),
+    "Please attach this update to the console certification risk.",
+  );
+  assert.notEqual(foreign[0]!.readiness, "ready");
+  assert.ok(
+    foreign[0]!.readiness === "unmatched" ||
+      foreign[0]!.readiness === "needs_review",
+  );
+}
+
+// --- 9. Clarifying NO_CHANGE ops become Needs-you cards ---
+{
+  const result = stubResult({
+    capturePipeline: "v2",
+    findings: [
+      finding({
+        id: "find-own",
+        fact: "UAT may be shared or replaced",
+        findingType: "AMBIGUOUS",
+        confidence: 0,
+        requiresClarification: true,
+        clarificationQuestion: "Share versus replace is not decided.",
+      }),
+    ],
+    proposedOperations: [
+      proposedOp({
+        id: "v2op-own",
+        sourceFindingId: "find-own",
+        operation: "NO_CHANGE",
+        entityType: "stakeholder",
+        targetTitle: "UAT may be shared or replaced",
+        confidence: 0,
+        requiresClarification: true,
+        proposedValues: {
+          ownershipSemantics: "ambiguous",
+          scope: "UAT lead",
+          personName: "Fizz Caramel",
+        },
+        projectId: "proj-candy",
+      }),
+      proposedOp({
+        id: "v2op-known",
+        sourceFindingId: "find-known",
+        operation: "NO_CHANGE",
+        entityType: "stakeholder",
+        targetTitle: "Pippa Gumdrop",
+        confidence: 0,
+        requiresClarification: false,
+        projectId: "proj-candy",
+      }),
+    ],
+  });
+  const items = buildSuggestions(result);
+  assert.equal(items.length, 1);
+  assert.equal(items[0]!.ownershipSemantics, "ambiguous");
+  assert.equal(items[0]!.responsibilityScope, "UAT lead");
+  assert.equal(items[0]!.personName, "Fizz Caramel");
+  assert.equal(items[0]!.legalDomain, "responsibility");
+}
+
+// --- 10. Ownership copy + legal apply path; sibling stays ready ---
+{
+  const labels = ownershipChoiceCopy({
+    currentOwnerNames: ["Pippa Gumdrop"],
+    scope: "UAT lead",
+    incomingPersonName: "Fizz Caramel",
+  });
+  assert.match(labels.question, /Pippa Gumdrop already owns UAT lead/);
+  assert.equal(labels.shareLabel, "Share with Fizz Caramel");
+  assert.equal(labels.replaceLabel, "Replace Pippa Gumdrop with Fizz Caramel");
+  assert.equal(labels.keepLabel, "Keep Pippa Gumdrop only");
+
+  const world = experimentalApplyWorld();
+  const shareDecision = planCaptureApply({
+    item: suggestion({
+      id: "own-share",
+      kind: "stakeholder",
+      op: "update",
+      content: "Share UAT lead with Fizz Caramel",
+      projectId: CANDYLAND_ID,
+      legalDomain: "responsibility",
+      personName: "Fizz Caramel",
+      ownershipSemantics: "share",
+      responsibilityScope: "UAT lead",
+    }),
+    text: "Share UAT lead with Fizz Caramel",
+    world,
+    captureEntryProjectId: CANDYLAND_ID,
+  });
+  assert.equal(shareDecision.kind, "write");
+  if (shareDecision.kind === "write") {
+    assert.equal(shareDecision.operation.type, "confirm_responsibility");
+    if (shareDecision.operation.type === "confirm_responsibility") {
+      assert.equal(shareDecision.operation.personName, "Fizz Caramel");
+      assert.equal(shareDecision.operation.scope, "UAT lead");
+      assert.equal(shareDecision.operation.replacePersonId, null);
+    }
+  }
+
+  const replaceDecision = planCaptureApply({
+    item: suggestion({
+      id: "own-replace",
+      kind: "stakeholder",
+      op: "update",
+      content: "Replace Pippa with Fizz on UAT lead",
+      projectId: CANDYLAND_ID,
+      legalDomain: "responsibility",
+      personName: "Fizz Caramel",
+      ownershipSemantics: "replace",
+      responsibilityScope: "UAT lead",
+      replacePersonId: "person-gumdrop",
+    }),
+    text: "Replace Pippa with Fizz on UAT lead",
+    world,
+    captureEntryProjectId: CANDYLAND_ID,
+  });
+  assert.equal(replaceDecision.kind, "write");
+  if (replaceDecision.kind === "write") {
+    assert.equal(replaceDecision.operation.type, "confirm_responsibility");
+    if (replaceDecision.operation.type === "confirm_responsibility") {
+      assert.equal(replaceDecision.operation.replacePersonId, "person-gumdrop");
+    }
+  }
+
+  const siblingModels = buildReviewChangeViewModels(
+    [
+      suggestion({
+        id: suggestionIdFor("v2op-ready"),
+        kind: "risk",
+        op: "complete",
+        content: "Gumdrop Bridge icing is resolved",
+        targetEntityId: "risk-bridge",
+        projectId: CANDYLAND_ID,
+      }),
+      suggestion({
+        id: suggestionIdFor("v2op-own"),
+        kind: "stakeholder",
+        op: "update",
+        content: "UAT may be shared or replaced",
+        ownershipSemantics: "ambiguous",
+        responsibilityScope: "UAT lead",
+        personName: "Fizz Caramel",
+        legalDomain: "responsibility",
+        projectId: CANDYLAND_ID,
+      }),
+    ],
+    stubResult({
+      capturePipeline: "v2",
+      findings: [
+        finding({
+          id: "find-ready",
+          fact: "Gumdrop Bridge icing is resolved",
+          findingType: "ENTITY_COMPLETED",
+          target: {
+            entityType: "risk",
+            entityId: "risk-bridge",
+            title: "Gumdrop Bridge icing",
+          },
+          confidence: 0,
+          requiresClarification: false,
+        }),
+        finding({
+          id: "find-own",
+          fact: "UAT may be shared or replaced",
+          findingType: "AMBIGUOUS",
+          confidence: 0,
+          requiresClarification: true,
+        }),
+      ],
+      proposedOperations: [
+        proposedOp({
+          id: "v2op-ready",
+          sourceFindingId: "find-ready",
+          operation: "COMPLETE",
+          entityType: "risk",
+          targetId: "risk-bridge",
+          targetTitle: "Gumdrop Bridge icing",
+          confidence: 0,
+          projectId: CANDYLAND_ID,
+        }),
+        proposedOp({
+          id: "v2op-own",
+          sourceFindingId: "find-own",
+          operation: "NO_CHANGE",
+          entityType: "stakeholder",
+          confidence: 0,
+          requiresClarification: true,
+          proposedValues: {
+            ownershipSemantics: "ambiguous",
+            scope: "UAT lead",
+            personName: "Fizz Caramel",
+          },
+          projectId: CANDYLAND_ID,
+        }),
+      ],
+    }),
+    "Bridge is closed. Fizz may share or replace UAT.",
+  );
+  const ready = siblingModels.find((m) => m.operation === "complete")!;
+  const needsYou = siblingModels.find(
+    (m) => m.suggestion.ownershipSemantics === "ambiguous",
+  )!;
+  assert.equal(ready.readiness, "ready");
+  assert.equal(needsYou.readiness, "needs_review");
+  const pendingReady = pendingReadyModels(siblingModels, {}, {});
+  assert.equal(pendingReady.length, 1);
+  assert.equal(pendingReady[0]!.id, ready.id);
+}
+
+// --- 11. Existing vs new copy only when a named target already exists ---
+{
+  const named = existingOrNewCopy({
+    entityLabel: "Risk",
+    recordName: "Security sign-off",
+  });
+  assert.equal(
+    named.question,
+    'Is this a new risk or the existing “Security sign-off” risk?',
+  );
+  assert.equal(named.updateLabel, "Update Security sign-off");
+  assert.equal(named.createLabel, "Create a new risk");
+
+  const unnamed = existingOrNewCopy({ entityLabel: "Risk" });
+  assert.match(unnamed.question, /couldn'?t confidently identify/i);
+
+  const models = buildReviewChangeViewModels(
+    [
+      suggestion({
+        id: suggestionIdFor("v2op-exist"),
+        kind: "risk",
+        op: "update",
+        content: "Packaging delay is getting worse",
+        targetEntityId: "risk-packaging",
+        projectId: "proj-toy",
+      }),
+    ],
+    stubResult({
+      capturePipeline: "v2",
+      findings: [
+        finding({
+          id: "find-exist",
+          fact: "Packaging delay is getting worse",
+          findingType: "ENTITY_UPDATED",
+          target: {
+            entityType: "risk",
+            entityId: "risk-packaging",
+            title: "Packaging delay",
+          },
+          confidence: 0,
+          requiresClarification: false,
+        }),
+      ],
+      proposedOperations: [
+        proposedOp({
+          id: "v2op-exist",
+          sourceFindingId: "find-exist",
+          operation: "UPDATE",
+          entityType: "risk",
+          targetId: "risk-packaging",
+          targetTitle: "Packaging delay",
+          confidence: 0,
+          projectId: "proj-toy",
+        }),
+      ],
+      findingCoverage: {
+        items: [
+          {
+            findingId: "find-exist",
+            fact: "Packaging delay is getting worse",
+            disposition: "unmatched",
+            reason: "Could not confidently identify which existing risk this refers to.",
+          },
+        ],
+        actionableCount: 1,
+        readyCount: 0,
+        needsReviewCount: 0,
+        unmatchedCount: 1,
+        noChangeCount: 0,
+        ignoredCount: 0,
+        silentDropCount: 0,
+      },
+    }),
+    "Packaging delay is getting worse after the mill flooded.",
+  );
+  assert.equal(models[0]!.readiness, "unmatched");
+  assert.equal(models[0]!.reviewReason, "TARGET_UNCERTAIN");
+  assert.match(models[0]!.needsReviewReason ?? "", /existing “Packaging delay” risk/);
+}
+
+// --- 12. Missing required date on milestone update; create does not invent a date ---
+{
+  assert.equal(missingDateCopy("UAT"), "What date should I use for UAT?");
+  const missing = buildReviewChangeViewModels(
+    [
+      suggestion({
+        id: suggestionIdFor("v2op-date"),
+        kind: "milestone",
+        op: "update",
+        content: "Parade day",
+        targetEntityId: "ms-parade",
+        projectId: CANDYLAND_ID,
+      }),
+    ],
+    stubResult({
+      capturePipeline: "v2",
+      findings: [
+        finding({
+          id: "find-date",
+          fact: "Parade day moved",
+          findingType: "ENTITY_UPDATED",
+          target: {
+            entityType: "milestone",
+            entityId: "ms-parade",
+            title: "Parade day",
+          },
+          confidence: 0,
+          requiresClarification: false,
+        }),
+      ],
+      proposedOperations: [
+        proposedOp({
+          id: "v2op-date",
+          sourceFindingId: "find-date",
+          operation: "UPDATE",
+          entityType: "milestone",
+          targetId: "ms-parade",
+          targetTitle: "Parade day",
+          confidence: 0,
+          proposedValues: {},
+          projectId: CANDYLAND_ID,
+        }),
+      ],
+    }),
+    "Move Parade day.",
+  );
+  assert.equal(missing[0]!.readiness, "needs_review");
+  assert.equal(missing[0]!.missingRequiredField, "date");
+  assert.match(missing[0]!.needsReviewReason ?? "", /What date should I use/);
+
+  const createMile = buildReviewChangeViewModels(
+    [
+      suggestion({
+        id: suggestionIdFor("v2op-create-date"),
+        kind: "milestone",
+        op: "create",
+        content: "Float rehearsal",
+        projectId: CANDYLAND_ID,
+      }),
+    ],
+    stubResult({
+      capturePipeline: "v2",
+      findings: [
+        finding({
+          id: "find-create-date",
+          fact: "Float rehearsal",
+          findingType: "NEW_INFORMATION",
+          target: { entityType: "milestone", title: "Float rehearsal" },
+          confidence: 0,
+          requiresClarification: false,
+        }),
+      ],
+      proposedOperations: [
+        proposedOp({
+          id: "v2op-create-date",
+          sourceFindingId: "find-create-date",
+          operation: "CREATE",
+          entityType: "milestone",
+          targetTitle: "Float rehearsal",
+          confidence: 0,
+          projectId: CANDYLAND_ID,
+        }),
+      ],
+    }),
+    "Add a float rehearsal date.",
+  );
+  assert.equal(createMile[0]!.readiness, "ready");
+  assert.equal(createMile[0]!.missingRequiredField, undefined);
+}
+
+// --- 13. Identity-gate copy is human; no invented Person candidate list ---
+{
+  assert.equal(
+    friendlierNeedsYouCopy(
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder.",
+    ),
+    "I need a full name before adding someone new.",
+  );
+  const identity = buildReviewChangeViewModels(
+    [
+      suggestion({
+        id: suggestionIdFor("v2op-sam"),
+        kind: "stakeholder",
+        op: "update",
+        content: "Sam should join the parade",
+        projectId: CANDYLAND_ID,
+        personName: "Sam",
+      }),
+    ],
+    stubResult({
+      capturePipeline: "v2",
+      findings: [
+        finding({
+          id: "find-sam",
+          fact: "Sam should join the parade",
+          findingType: "AMBIGUOUS",
+          confidence: 0,
+          requiresClarification: true,
+          clarificationQuestion:
+            "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder.",
+        }),
+      ],
+      proposedOperations: [
+        proposedOp({
+          id: "v2op-sam",
+          sourceFindingId: "find-sam",
+          operation: "NO_CHANGE",
+          entityType: "stakeholder",
+          confidence: 0,
+          requiresClarification: true,
+          proposedValues: { name: "Sam" },
+          projectId: CANDYLAND_ID,
+        }),
+      ],
+    }),
+    "Sam should join the parade.",
+  );
+  assert.equal(identity[0]!.readiness, "needs_review");
+  assert.equal(
+    identity[0]!.needsReviewReason,
+    "I need a full name before adding someone new.",
+  );
+  assert.equal(identity[0]!.suggestion.proposedValues?.candidates, undefined);
 }
 
 console.log("verify-capture-review: all checks passed");
