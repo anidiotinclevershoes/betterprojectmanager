@@ -33,8 +33,14 @@ export function CaptureSummary({
             const content = (
               <>
                 <span className="capture-observation-main">
-                  <span className="capture-observation-check" aria-hidden>
-                    ✓
+                  <span
+                    className={`capture-observation-check ${statusClass}`}
+                    aria-hidden
+                  >
+                    {obs.actionStatus === "needs_review" ||
+                    obs.actionStatus === "unmatched"
+                      ? "⚠"
+                      : "✓"}
                   </span>
                   <span className="capture-observation-text">{obs.text}</span>
                 </span>

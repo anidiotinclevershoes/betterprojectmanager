@@ -19,6 +19,20 @@
   margin-top: 0.35rem;
 }
 
+.capture-observation-action {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.capture-observation-check.is-status-needs_review {
+  color: var(--warning);
+}
+
+.capture-observation-check.is-status-unmatched {
+  color: var(--accent-timeline);
+}
+
 .annotated-transcript {
   margin: 0;
   padding: 0.85rem 0.95rem 0.75rem;
