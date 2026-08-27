@@ -233,7 +233,7 @@ test.describe("Harbourline deep stress slices", () => {
 
     await startNewCapture(page);
     await analyseFrozenTranscript(page, slice.steps[1].transcript);
-    await expect(page.getByText("Review Changes")).toBeVisible();
+    await expect(page.getByTestId("ocean-capture-review")).toBeVisible();
     // Do not apply the stale-date envelope here. Node stress applies it to
     // observe durable mutation. This slice proves Review still gates the write.
 
