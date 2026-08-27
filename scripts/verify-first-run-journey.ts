@@ -227,7 +227,8 @@ function main() {
     assert.doesNotMatch(createBody, /persistNewProject\(/);
     assert.match(persist, /export async function persistNewProject/);
     assert.doesNotMatch(capture, /planCaptureApply|executeCaptureApply/);
-    assert.match(capture, /Nothing enters maintained project truth/);
+    assert.match(capture, /FirstCaptureCue/);
+    assert.match(capture, /Nothing is saved until you approve/);
   });
 
   check("review still happens before create", () => {
