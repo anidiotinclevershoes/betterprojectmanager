@@ -154,6 +154,8 @@ Classification: **E — unsafe / silent durable write** (identity destruction). 
 
 `npm run verify:stable-object-identity` stays out of the aggregated `npm test` suite until Thor lands, so Stage 1 persistence/parity coverage can stay green. The script itself is not weakened.
 
+Cross-check (not a freeze): the same script is **3/3 green** on Thor PR #89 head `be3c76e4a579b4c278fcfc9e1ddafcf06527f331`. That SHA is still draft / unlanded and is **not** the qualified freeze SHA.
+
 ### Resurrection / parity / isolation
 
 - Deleted Todo remains absent after reload and after an unrelated persist. Project B’s same-named Todo is untouched.
