@@ -683,7 +683,8 @@ async function main() {
 
   await check("Tell Me / Ask server-truth behaviour remains unaffected", () => {
     const tellMe = readSrc("src/app/api/tell-me/route.ts");
-    assert.match(tellMe, /body\.state/);
+    assert.match(tellMe, /loadServerCurrentTruthForTellMe/);
+    assert.match(tellMe, /ignoredClientTruth/);
     assert.match(tellMe, /answerTellMeQuestion/);
     assert.match(tellMe, /requireAiCaller\("tell-me"\)/);
     const serialize = readSrc("src/lib/canonical-truth/serialize.ts");
