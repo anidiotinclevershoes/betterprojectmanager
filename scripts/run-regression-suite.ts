@@ -31,6 +31,8 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "capture-v2-invariants", script: "scripts/verify-capture-v2-invariants.ts" },
   { name: "person-identity-safety", script: "scripts/verify-person-identity-safety.ts" },
   { name: "stacked-capture", script: "scripts/verify-stacked-capture.ts" },
+  { name: "stable-object-identity", script: "scripts/verify-stable-object-identity.ts" },
+  { name: "resurrection", script: "scripts/verify-resurrection.ts" },
   { name: "test-dashboard", script: "scripts/verify-test-dashboard.ts" },
   { name: "new-project-v2", script: "scripts/verify-new-project-v2.ts" },
   { name: "desert-theme", script: "scripts/verify-desert-theme.ts" },
