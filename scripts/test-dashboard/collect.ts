@@ -32,6 +32,7 @@ const HARNESS_FILES = [
   "eval-capture-v2.json",
   "harness-report.json",
   "capture-v2-eval-scorer-v2.json",
+  "capture-v2-eval-scorer-v3.json",
   "capture-v2-eval-rescore-v2.json",
 ];
 

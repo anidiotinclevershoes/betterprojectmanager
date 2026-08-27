@@ -1,6 +1,7 @@
 /**
- * Offline scorer-v2 rescore of archived first-live Capture V2 envelopes.
- * No provider calls. Does not mutate the original GitHub artifact.
+ * Offline rescore of archived first-live Capture V2 envelopes through the
+ * current scorer. No provider calls. Does not mutate the original GitHub
+ * artifact or the committed scorer-v2 JSON.
  *
  *   npx tsx scripts/rescore-capture-v2.ts
  *   npx tsx scripts/rescore-capture-v2.ts --from /tmp/hulk-eval/evidence
@@ -61,7 +62,7 @@ function summarise(report: ReturnType<typeof rescoreArchivedEnvelopes>): string 
       `${model.provider}/${model.model}: original lumeFailure=${model.original.lumeFailures} lumeCatch=${model.original.lumeCatches} modelFailure=${model.original.modelFailures} errors=${model.original.callErrors}`,
     );
     lines.push(
-      `  scorer-v2 lumeFailure=${model.v2.lumeFailures} lumeCatch=${model.v2.lumeCatches} modelFailure=${model.v2.modelFailures} errors=${model.v2.callErrors}`,
+      `  current-scorer lumeFailure=${model.v2.lumeFailures} lumeCatch=${model.v2.lumeCatches} modelFailure=${model.v2.modelFailures} errors=${model.v2.callErrors}`,
     );
   }
   return lines.join("\n");

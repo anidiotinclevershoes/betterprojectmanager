@@ -124,7 +124,7 @@ History is stored as a hidden HTML comment in the Issue body (`lume-test-dashboa
 
 Issue #73 already contains historical **scorer v1** labelled live-eval rows. Those bodies are evidence. Do not edit them to pretend the original scorer used v2 rules.
 
-A later dashboard publish that ingests `test-results/capture-v2-eval-scorer-v2.json` (or any harness JSON with `scorerVersion: capture-v2-eval-scorer-v2`) appends a new model row. Latest-per-model is keyed by provider + model + scorer version, so v1 and v2 can both show. This reporter does not rewrite previous Issue comments.
+A later dashboard publish that ingests `test-results/capture-v2-eval-scorer-v2.json` or `test-results/capture-v2-eval-scorer-v3.json` (or any harness JSON with an explicit `scorerVersion`) appends a new model row. Latest-per-model is keyed by provider + model + scorer version, so v1, v2, and v3 can all show. This reporter does not rewrite previous Issue comments.
 
 ## Workflow semantics
 
