@@ -42,11 +42,17 @@ function sha256File(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-/** Provenance label only. PR checkouts often lack `origin/main`. */
+/** Provenance label only. Replay scoring does not read this SHA. */
 function resolveProductionSha(): string {
-  for (const ref of ["origin/main", "main", "HEAD"]) {
+  const refs = ["origin/main", "main"];
+  const base = process.env.GITHUB_BASE_REF?.trim();
+  if (base && /^[A-Za-z0-9._/-]+$/.test(base)) {
+    refs.push(`origin/${base}`, base);
+  }
+  refs.push("HEAD");
+  for (const ref of refs) {
     try {
-      return execSync(`git rev-parse ${ref}`, {
+      return execSync(`git rev-parse --verify ${ref}`, {
         cwd: ROOT,
         encoding: "utf8",
         stdio: ["ignore", "pipe", "ignore"],
