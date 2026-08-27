@@ -388,6 +388,53 @@ function main() {
     );
   });
 
+  check("ordinary todo update_existing preserves the stable title", () => {
+    const resolved = resolveCandy([
+      {
+        id: "obs-todo-identity",
+        statement: "The jelly pack due date has moved to 8 October",
+        evidence: "The jelly pack due date has moved to 8 October",
+        domain: "todo",
+        disposition: "update_existing",
+        candidateTargetId: "todo-pack",
+        proposedValues: { date: "2026-10-08" },
+      },
+    ]);
+    assert.equal(resolved.length, 1);
+    const decision = resolved[0]!.decision;
+    assert.equal(decision.kind, "write");
+    if (decision.kind !== "write" || decision.operation.type !== "update_todo") {
+      throw new Error("expected update_todo");
+    }
+    assert.equal(decision.operation.title, undefined);
+    assert.ok(decision.operation.dueAt?.startsWith("2026-10-08"));
+  });
+
+  check("ordinary milestone update_existing preserves the stable label", () => {
+    const resolved = resolveCandy([
+      {
+        id: "obs-ms-identity",
+        statement: "The spec freeze has moved to 9 October",
+        evidence: "The spec freeze has moved to 9 October",
+        domain: "milestone",
+        disposition: "update_existing",
+        candidateTargetId: "ms-parade",
+        proposedValues: { startAt: "2026-10-09T12:00:00.000Z" },
+      },
+    ]);
+    assert.equal(resolved.length, 1);
+    const decision = resolved[0]!.decision;
+    assert.equal(decision.kind, "write");
+    if (
+      decision.kind !== "write" ||
+      decision.operation.type !== "update_milestone"
+    ) {
+      throw new Error("expected update_milestone");
+    }
+    assert.equal(decision.operation.label, undefined);
+    assert.ok(decision.operation.startAt?.startsWith("2026-10-09"));
+  });
+
   check("malformed envelopes fail closed", () => {
     fc.assert(
       fc.property(
