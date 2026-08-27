@@ -164,7 +164,7 @@ test.describe("Harbourline deep stress slices", () => {
     await page.locator("label.field.np-transcript-field textarea").fill(payload.narrative);
     await page.getByRole("button", { name: "Build My Project" }).click();
     await expect(page.getByTestId("np-v2-categorise")).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText("Miriam Cole")).toBeVisible();
+    await expect(page.getByText("Miriam Cole is programme sponsor")).toBeVisible();
     await page.getByTestId("np-v2-approve-categorisation").click();
     await page.getByRole("button", { name: "Create Project" }).click();
     await expect(page.getByRole("heading", { name: /Harbourline Civic Archive Refresh/i })).toBeVisible({
