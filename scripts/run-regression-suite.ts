@@ -33,7 +33,11 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "stacked-capture", script: "scripts/verify-stacked-capture.ts" },
   { name: "stable-object-identity", script: "scripts/verify-stable-object-identity.ts" },
   { name: "resurrection", script: "scripts/verify-resurrection.ts" },
-  { name: "eval-stress", script: "scripts/verify-eval-stress.ts" },
+  // Harbourline frozen-envelope stress (`npm run verify:eval-stress`) is Gate 3
+  // observe-only. It exits 1 on adversarial envelopes that become Apply Ready.
+  // Do not heuristic-patch production to make it green. Live gpt-4o-mini is
+  // the freeze authority.
+  { name: "test-dashboard", script: "scripts/verify-test-dashboard.ts" },
   { name: "test-dashboard", script: "scripts/verify-test-dashboard.ts" },
   { name: "new-project-v2", script: "scripts/verify-new-project-v2.ts" },
   { name: "desert-theme", script: "scripts/verify-desert-theme.ts" },
