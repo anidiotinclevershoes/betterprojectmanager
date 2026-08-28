@@ -1,0 +1,16 @@
+{
+  "n": 1,
+  "projectMs": 652,
+  "historyMs": 1292,
+  "overflow": {
+    "scrollWidth": 1280,
+    "clientWidth": 1280,
+    "overflow": false
+  },
+  "consoleErrors": [
+    "console:Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "console:Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "console:Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "console:Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ]
+}

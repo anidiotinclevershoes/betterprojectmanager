@@ -1,0 +1,265 @@
+{
+  "mainSha": "09d85c07dec44a7a68be02cb98e0deffd96a4c1a",
+  "harnessSha": "09d85c07dec44a7a68be02cb98e0deffd96a4c1a",
+  "mode": "deterministic",
+  "liveBlocked": null,
+  "model": "deterministic-oracle-envelope",
+  "capturesAttempted": 100,
+  "capturesCompleted": 100,
+  "askCalls": 30,
+  "liveExtractCalls": 0,
+  "totalAiCalls": 0,
+  "elapsedMs": 666,
+  "firstDivergence": {
+    "n": 9,
+    "detail": "todos.todo:login-error-handling.title: expected Login error handling actual Please add a to-do for login error handling."
+  },
+  "divergenceCount": 92,
+  "stoppedAt": null,
+  "captureRequestChars": {
+    "n": 100,
+    "min": 2212,
+    "median": 6881,
+    "p90": 7828,
+    "p95": 8167,
+    "max": 8520,
+    "mean": 6233
+  },
+  "captureEstimatedInputTokens": {
+    "n": 100,
+    "min": 493,
+    "median": 2082,
+    "p90": 2404,
+    "p95": 2492,
+    "max": 2596,
+    "mean": 1874
+  },
+  "askContextChars": {
+    "n": 30,
+    "min": 952,
+    "median": 6716,
+    "p90": 8475,
+    "p95": 8568,
+    "max": 8678,
+    "mean": 5237
+  },
+  "askEstimatedInputTokens": {
+    "n": 30,
+    "min": 280,
+    "median": 2203,
+    "p90": 2796,
+    "p95": 2856,
+    "max": 2904,
+    "mean": 1737
+  },
+  "historyCount": {
+    "n": 100,
+    "min": 2,
+    "median": 46,
+    "p90": 67,
+    "p95": 73,
+    "max": 81,
+    "mean": 45
+  },
+  "currentTruthObjects": {
+    "n": 100,
+    "min": 3,
+    "median": 40,
+    "p90": 43,
+    "p95": 45,
+    "max": 46,
+    "mean": 35
+  },
+  "earlyVsLateRequestChars": {
+    "captures1to20": 3263,
+    "captures81to100": 7827,
+    "ratio": 2.399
+  },
+  "tokenGrowth": {
+    "captureExtract": {
+      "requestChars": {
+        "n": 100,
+        "min": 2212,
+        "median": 6881,
+        "p90": 7828,
+        "p95": 8167,
+        "max": 8520,
+        "mean": 6233
+      },
+      "estimatedInputTokens": {
+        "n": 100,
+        "min": 493,
+        "median": 2082,
+        "p90": 2404,
+        "p95": 2492,
+        "max": 2596,
+        "mean": 1874
+      },
+      "projectBlockChars": {
+        "n": 100,
+        "min": 275,
+        "median": 4959,
+        "p90": 5911,
+        "p95": 5911,
+        "max": 6425,
+        "mean": 4289
+      },
+      "captureContextChars": {
+        "n": 100,
+        "min": 1661,
+        "median": 17766,
+        "p90": 19800,
+        "p95": 20249,
+        "max": 20612,
+        "mean": 15842
+      },
+      "captureContextHistoryChars": {
+        "n": 100,
+        "min": 34,
+        "median": 1926,
+        "p90": 2115,
+        "p95": 2163,
+        "max": 2210,
+        "mean": 1798
+      },
+      "historyCount": {
+        "n": 100,
+        "min": 2,
+        "median": 46,
+        "p90": 67,
+        "p95": 73,
+        "max": 81,
+        "mean": 45
+      },
+      "currentTruthObjects": {
+        "n": 100,
+        "min": 3,
+        "median": 40,
+        "p90": 43,
+        "p95": 45,
+        "max": 46,
+        "mean": 35
+      },
+      "earlyVsLate": {
+        "requestChars": {
+          "captures1to20": 3263,
+          "captures81to100": 7827,
+          "ratio": 2.399
+        },
+        "estimatedInputTokens": {
+          "captures1to20": 898,
+          "captures81to100": 2395,
+          "ratio": 2.665
+        },
+        "projectBlockChars": {
+          "captures1to20": 1329,
+          "captures81to100": 5863,
+          "ratio": 4.41
+        },
+        "currentTruthObjects": {
+          "captures1to20": 14.6,
+          "captures81to100": 42.1,
+          "ratio": 2.884
+        },
+        "historyCount": {
+          "captures1to20": 13.2,
+          "captures81to100": 68.8,
+          "ratio": 5.212
+        }
+      }
+    },
+    "askContext": {
+      "requestChars": {
+        "n": 30,
+        "min": 952,
+        "median": 6716,
+        "p90": 8475,
+        "p95": 8568,
+        "max": 8678,
+        "mean": 5237
+      },
+      "estimatedInputTokens": {
+        "n": 30,
+        "min": 280,
+        "median": 2203,
+        "p90": 2796,
+        "p95": 2856,
+        "max": 2904,
+        "mean": 1737
+      },
+      "currentState": {
+        "requestChars": {
+          "n": 24,
+          "min": 952,
+          "median": 6700,
+          "p90": 7100,
+          "p95": 7101,
+          "max": 7102,
+          "mean": 4981
+        },
+        "estimatedInputTokens": {
+          "n": 24,
+          "min": 280,
+          "median": 2201,
+          "p90": 2363,
+          "p95": 2363,
+          "max": 2364,
+          "mean": 1654
+        }
+      },
+      "historical": {
+        "requestChars": {
+          "n": 6,
+          "min": 1327,
+          "median": 8475,
+          "p90": 8678,
+          "p95": 8678,
+          "max": 8678,
+          "mean": 6260
+        },
+        "estimatedInputTokens": {
+          "n": 6,
+          "min": 400,
+          "median": 2796,
+          "p90": 2904,
+          "p95": 2904,
+          "max": 2904,
+          "mean": 2069
+        }
+      },
+      "earlyVsLate": {
+        "captures1to25MeanChars": 3190,
+        "captures75to100MeanChars": 7231,
+        "ratio": 2.267
+      }
+    },
+    "analyseProbes": {
+      "n": 12,
+      "requestChars": {
+        "n": 12,
+        "min": 2261,
+        "median": 7427,
+        "p90": 8344,
+        "p95": 8371,
+        "max": 8371,
+        "mean": 6506
+      },
+      "estimatedInputTokens": {
+        "n": 12,
+        "min": 519,
+        "median": 2266,
+        "p90": 2560,
+        "p95": 2560,
+        "max": 2560,
+        "mean": 1960
+      }
+    },
+    "note": "estimatedInputTokens are js-tiktoken cl100k_base of the production extract/Ask prompt. API usage fields stay null unless --mode=live."
+  },
+  "proof": {
+    "persistenceApply": "TEST-PROVEN",
+    "extractQuality": "NOT LIVE — deterministic envelopes",
+    "askAnswers": "CODE-PROVEN context size only",
+    "tokenApiUsage": "INFERRED from prompt chars"
+  }
+}

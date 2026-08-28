@@ -1,0 +1,219 @@
+{
+  "people": [
+    {
+      "id": "b333ae88-6c8c-43e4-a1cc-eb9223d6fd59",
+      "name": "Priya Shah",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "f8cee269-13b8-4841-b467-11a723180784",
+      "name": "Liam Brooks",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "4ffc8347-1eff-4dca-9029-5f2d902bd738",
+      "name": "Sarah Okonkwo",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "f0b1278d-54d2-42c7-8caa-cb9d891fa731",
+      "name": "Marcus Chen",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "0ad16814-72a9-4950-8028-4e726365109e",
+      "name": "Elena Voss",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "d53e8dad-c38d-4fe8-a31c-0caa96cfac6d",
+      "name": "Jordan Hale",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "8ca39dc4-cda7-47d4-86a2-3ea75e2aab0d",
+      "name": "Dev Patel",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "75f9cf2f-1be4-42a3-b2e5-4c45b515a06c",
+      "name": "Amira Rahman",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "51ebdcdb-f94f-4f64-b7ed-0002651ac318",
+      "name": "Tomiko Sato",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "525102ba-f8ea-4628-a437-9cc16b5bc072",
+      "name": "Chris Bell",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "5f75117d-aa4e-456a-a335-c696a13e6956",
+      "name": "Nadia Qureshi",
+      "role": "Stakeholder"
+    }
+  ],
+  "todos": [
+    {
+      "id": "dae3661d-044a-4354-8e29-4592523b0147",
+      "title": "Confirm project baseline with key stakeholders",
+      "done": false
+    },
+    {
+      "id": "f1bdab86-4096-47ef-a7b3-e762c3790bad",
+      "title": "Please add a to-do for login error handling.",
+      "done": true
+    },
+    {
+      "id": "e424aab5-afa3-492c-ab9e-bb772022a562",
+      "title": "Please add a to-do for analytics event changes.",
+      "done": true
+    },
+    {
+      "id": "8e916358-071a-4312-8332-b32bb14944ff",
+      "title": "Jordan Hale needs a proper UAT script. Please add that as a to-do — UAT script — and Jordan Hale owns UAT.",
+      "done": true,
+      "dueAt": "2026-10-15T12:00:00.000Z"
+    },
+    {
+      "id": "b0181aef-8f0f-411a-b382-45a541578dc6",
+      "title": "Amira wants a CAB pack to-do. Please add CAB pack as an action for her.",
+      "done": true
+    },
+    {
+      "id": "031aaaee-713c-45ea-9c38-0ebb89cf60c0",
+      "title": "Export: NimbusPay currently supplies the member CSV export. That's the current arrangement — I'll write it down even if it might change later.",
+      "done": false
+    },
+    {
+      "id": "e7aa72a8-19fb-4d46-8464-1b3445ec1da2",
+      "title": "Marcus wants a performance budget to-do — keep the member home under 2 seconds on mid-range Android. Also Elena has started SSO migration — add a to-do for SSO migration.",
+      "done": true
+    },
+    {
+      "id": "96a7fe83-99d9-41d3-abde-6ef73ce13400",
+      "title": "Marcus wants a performance budget to-do — keep the member home under 2 seconds on mid-range Android. Also Elena has started SSO migration — add a to-do for SSO migration.",
+      "done": true
+    },
+    {
+      "id": "e6a33c25-6874-4ce6-b5d0-3b259663d770",
+      "title": "Sarah Okonkwo asked for an accessibility pass before UAT. Add that as a to-do.",
+      "done": true
+    },
+    {
+      "id": "be8c70aa-1a60-4222-b475-519b98980dc3",
+      "title": "Chris Bell is DevOps for cutover. Please add Chris Bell, and add cutover runbook as an action.",
+      "done": true
+    },
+    {
+      "id": "8681cdcd-b97c-4169-9499-f450807a9e87",
+      "title": "We also need a rollback plan. Separate to-do from the runbook — rollback plan.",
+      "done": true
+    },
+    {
+      "id": "0d04cf6e-d09e-4d93-99ad-39714cdf5bcf",
+      "title": "We never store PII in application logs on Northstar. Please remember that. Also add member comms as a to-do for Sarah Okonkwo. UAT is still the 14th — no change there.",
+      "done": true,
+      "dueAt": "2026-10-26T12:00:00.000Z"
+    },
+    {
+      "id": "007b4f29-789f-42a8-8903-1e25b692fd72",
+      "title": "Sarah Kim is security — different Sarah from Sarah Okonkwo on product. Please add Sarah Kim. She raised pen-test findings we need to close before CAB; add a to-do for pen-test findings.",
+      "done": true
+    },
+    {
+      "id": "47566229-3496-4c3f-ba29-81f305fad493",
+      "title": "Elena wants a rate-limit to-do on the session service. Please add rate limit on session API.",
+      "done": true
+    },
+    {
+      "id": "9cd590dd-ee69-4966-a223-0b4f3898ae3c",
+      "title": "Add session timeout as a to-do — members get dumped after 20 minutes on legacy and we should match that.",
+      "done": false
+    },
+    {
+      "id": "86dbcf3e-d7ae-4fba-ab4b-63ae3a5b8a8c",
+      "title": "Sorry — Sarah Okonkwo meant the threat model is product's job, not Sarah Kim's. Add a to-do for threat model, owned as product work.",
+      "done": true
+    },
+    {
+      "id": "ceb941a4-cdc7-45e5-b977-f34c355e3dda",
+      "title": "Catch-up dump: session timeout still open, member comms still open, perf budget still open, accessibility still open, and please add vendor contract check as a new to-do for Liam. Also Jordan is still UAT.",
+      "done": false
+    },
+    {
+      "id": "8bf7ba5c-f032-43dc-8c6f-e31f6ff11afd",
+      "title": "New defect from Jordan: login loop on password reset. Please add that to-do — login loop on password reset.",
+      "done": true,
+      "dueAt": "2026-10-17T12:00:00.000Z"
+    },
+    {
+      "id": "a45d17aa-a63a-462f-b310-9e88a7074d11",
+      "title": "Follow-up: add a to-do to regression-test password reset on staging.",
+      "done": true
+    },
+    {
+      "id": "53e57d77-b854-4836-9f6f-9db1efc018bd",
+      "title": "UAT script is done. Add a follow-up: UAT evidence pack.",
+      "done": true
+    },
+    {
+      "id": "dcd89000-a90f-4f85-b337-8de5d5a3e422",
+      "title": "Jordan found a defect: export encoding is mangling names. Add export encoding defect.",
+      "done": true
+    },
+    {
+      "id": "38433319-60aa-4758-89d6-09fe58694ac1",
+      "title": "Another defect: login loop is back on Safari 16. New to-do, not the old completed one — Safari login loop.",
+      "done": true
+    },
+    {
+      "id": "206aec32-3801-46f1-9bd3-e78a05f0d262",
+      "title": "Standup dump. Marcus fixed Safari login loop — mark it done. Elena is back, sick leave over.\nNadia Qureshi is shadowing dashboards. Password-reset regression is done.\nSession timeout parity still open. Feature-flag cleanup should be added as a post-release to-do.",
+      "done": false
+    },
+    {
+      "id": "df624d31-ef9a-483e-80b5-7d3b2d44892b",
+      "title": "Post-release: add hypercare rota as a to-do for Priya. Session timeout parity can wait until after go-live — leave it open.",
+      "done": false
+    }
+  ],
+  "risks": [
+    {
+      "id": "e8acb256-1ca2-4b6d-a7f2-16db0910aa7e",
+      "title": "Two risks I want on the board. The API timeout on the legacy session call is a real risk, and NimbusPay have already flagged a possible vendor delay on the wallet sandbox.",
+      "status": "open"
+    },
+    {
+      "id": "54877298-7f3e-4c2e-ad8f-33dc85d595d2",
+      "title": "New risk: legacy session cookies might not map cleanly onto the React app. Call it legacy session mapping.",
+      "status": "accepted"
+    },
+    {
+      "id": "1ee925c8-b460-416c-be89-bbb67534b4f8",
+      "title": "New risk: CAB rejection if the threat model is thin. Call it CAB rejection.",
+      "status": "resolved"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "b7938bfe-b932-4902-8fb5-0fc69a46c812",
+      "label": "Dates, finally. UAT starts 14 October 2026, CAB is 18 October, and the target release is 27 October 2026. That's the working plan, not a wish.",
+      "startAt": "2026-10-18T12:00:00.000Z"
+    },
+    {
+      "id": "91124edd-0b53-4041-b3a1-864960778d4b",
+      "label": "Dates, finally. UAT starts 14 October 2026, CAB is 18 October, and the target release is 27 October 2026. That's the working plan, not a wish.",
+      "startAt": "2026-10-18T12:00:00.000Z"
+    },
+    {
+      "id": "8d38d211-c115-4df1-9bf1-731295ab1448",
+      "label": "Dates, finally. UAT starts 14 October 2026, CAB is 18 October, and the target release is 27 October 2026. That's the working plan, not a wish.",
+      "startAt": "2026-10-27T12:00:00.000Z"
+    }
+  ],
+  "historyCount": 81
+}
