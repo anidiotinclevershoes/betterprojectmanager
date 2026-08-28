@@ -21,9 +21,12 @@ import {
 import {
   buildCurrentPositionRows,
   buildDateRows,
+  buildDecisionRows,
+  buildDependencyRows,
   buildOpenRiskRows,
   buildPeopleRows,
   buildTodoRows,
+  buildWaitingRows,
 } from "@/lib/knowledge-centre/ocean-frames";
 import { isKnowledgeUuid } from "@/lib/knowledge-identity";
 import { useMission } from "@/lib/store";
@@ -126,18 +129,14 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
     [state, projectId],
   );
 
-  const decisionLines = useMemo(() => {
-    const ids = knowledge.sectionItemIds?.decisions;
-    return (knowledge.sections.decisions ?? []).map((b, i) => {
-      const itemId =
-        Array.isArray(ids) && typeof ids[i] === "string" ? ids[i] : null;
-      return {
-        id: itemId && isKnowledgeUuid(itemId) ? itemId : `dec-body:${b}`,
-        title: b,
-        ref: refForSectionLine("decisions", b, itemId),
-      };
-    });
-  }, [knowledge]);
+  const decisionLines = useMemo(
+    () =>
+      buildDecisionRows(state, projectId).map((row) => ({
+        ...row,
+        ref: refForSectionLine("decisions", row.title, row.itemId),
+      })),
+    [state, projectId],
+  );
 
   const peopleCards = useMemo(() => {
     const base = buildPeopleRows(state, projectId);
@@ -160,15 +159,14 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
     });
   }, [state, projectId, project]);
 
-  const dependencies = useMemo(() => {
-    return (knowledge.structured ?? [])
-      .filter((i) => i.kind === "dependency" && i.lifecycle === "current")
-      .map((i) => ({
-        id: i.id,
-        title: i.body,
-        ref: refForStructuredItem(i.id),
-      }));
-  }, [knowledge.structured]);
+  const dependencies = useMemo(
+    () =>
+      buildDependencyRows(state, projectId).map((row) => ({
+        ...row,
+        ref: refForStructuredItem(row.id),
+      })),
+    [state, projectId],
+  );
 
   const dates = useMemo(
     () =>
@@ -179,33 +177,17 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
     [state, projectId],
   );
 
-  const waiting = useMemo(() => {
-    const fromTodos = (state.todos ?? [])
-      .filter(
-        (t) =>
-          t.projectId === projectId &&
-          !t.done &&
-          (t.kind === "WAITING" || t.kind === "CHASE" || Boolean(t.waitingOn)),
-      )
-      .map((t) => ({
-        id: t.id,
-        title: t.title,
-        meta: t.waitingOn ? `Waiting on ${t.waitingOn}` : null,
-        ref: refForTodo(t.id) as KnowledgeItemRef,
-      }));
-    const ids = knowledge.sectionItemIds?.openLoops;
-    const fromLoops = (knowledge.sections.openLoops ?? []).map((b, i) => {
-      const itemId =
-        Array.isArray(ids) && typeof ids[i] === "string" ? ids[i] : null;
-      return {
-        id: itemId && isKnowledgeUuid(itemId) ? itemId : `loop-body:${b}`,
-        title: b,
-        meta: null as string | null,
-        ref: refForSectionLine("openLoops", b, itemId),
-      };
-    });
-    return [...fromTodos, ...fromLoops];
-  }, [state.todos, knowledge.sections.openLoops, knowledge.sectionItemIds, projectId]);
+  const waiting = useMemo(
+    () =>
+      buildWaitingRows(state, projectId).map((row) => ({
+        ...row,
+        ref:
+          row.origin === "todo"
+            ? (refForTodo(row.id) as KnowledgeItemRef)
+            : refForSectionLine("openLoops", row.title, row.itemId),
+      })),
+    [state, projectId],
+  );
 
   return (
     <div className="ocean-knowledge-frames" data-testid="ocean-knowledge-frames">

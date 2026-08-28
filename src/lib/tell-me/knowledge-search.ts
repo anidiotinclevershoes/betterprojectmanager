@@ -12,7 +12,11 @@ export type KnowledgeSearchHit = {
   matchRanges: Array<{ start: number; end: number }>;
 };
 
-function rangesFor(haystack: string, needle: string): Array<{ start: number; end: number }> {
+/** Deterministic case-insensitive substring ranges. Shared with KC Search. */
+export function matchRangesFor(
+  haystack: string,
+  needle: string,
+): Array<{ start: number; end: number }> {
   const ranges: Array<{ start: number; end: number }> = [];
   if (!needle.trim()) return ranges;
   const lower = haystack.toLowerCase();
@@ -37,7 +41,7 @@ export function searchProjectKnowledge(
   for (const section of KNOWLEDGE_SECTIONS) {
     const bullets = knowledge.sections[section.id] ?? [];
     bullets.forEach((bullet, bulletIndex) => {
-      const matchRanges = rangesFor(bullet, q);
+      const matchRanges = matchRangesFor(bullet, q);
       const sectionMatch = section.label.toLowerCase().includes(q.toLowerCase());
       if (matchRanges.length || sectionMatch) {
         hits.push({

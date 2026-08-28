@@ -16,6 +16,7 @@ export {
 } from "@/lib/tell-me/freshness";
 export {
   highlightMatches,
+  matchRangesFor,
   searchProjectKnowledge,
   sectionsMatchingQuery,
 } from "@/lib/tell-me/knowledge-search";
