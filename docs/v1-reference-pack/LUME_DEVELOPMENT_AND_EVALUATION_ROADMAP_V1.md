@@ -3,6 +3,8 @@
 **Status:** Operating roadmap / anti-whack-a-mole governance  
 **Date:** 19 August 2026 (Plain-English report standard added 26 August 2026)
 
+> **v0.9 note (28 August 2026):** Capture V2 is the sole live engine. `LUME_CAPTURE_V2` is not a selector. Closed-alpha freeze and remaining work live in [`docs/LUME_V09_TO_V1_HANDOFF.md`](../LUME_V09_TO_V1_HANDOFF.md). Process rules in this file (evidence-driven, no benchmark-as-implementation) still apply. Flag/default-off sentences later in this document are historical.
+
 This document describes **how Lume should be developed and evaluated from here**, not a fixed PR sequence.
 
 There is no arbitrary limit on the number of legitimate fixes. There is a hard requirement that fixes remain evidence-driven, correctly layered and scoped.

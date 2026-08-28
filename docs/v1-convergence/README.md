@@ -2,6 +2,8 @@
 
 This folder is the Capture V2 **test / evaluation** workstream. Architecture (PR #69) is now on `main`; this pack records the landed test foundation.
 
+**Current freeze (28 August 2026):** Capture V2 is the sole live engine on merged `main` `2e024d0` (PR #95). Live `gpt-4o-mini-2024-07-18` qualification is recorded in [`V09_QUALIFICATION.md`](./V09_QUALIFICATION.md) (scorer v3: LUME FAILURE 0, LUME CATCH 22). Product operating picture: [`docs/LUME_V09_TO_V1_HANDOFF.md`](../LUME_V09_TO_V1_HANDOFF.md). Do not treat older scorer-v1 counts or “Stage 2 blocked” language in historical sections as current.
+
 - Frozen programme base: `cursor/capture-v2-desert-new-project-56c9` @ `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`
 - Branch: `cursor/v1-convergence-test-foundation-610b`
 - Completion report: `TEST_FOUNDATION.md`

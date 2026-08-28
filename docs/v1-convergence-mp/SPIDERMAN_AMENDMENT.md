@@ -5,6 +5,8 @@
 **Branch:** `cursor/v1-convergence-mp-08a0`  
 **Scope:** documentation / reference only. No production UI. No Magic Patterns source edits. No merge.
 
+> **v0.9 (28 August 2026):** Knowledge Centre **already ships** the v8 order: To Dos and Risks prominent, Current position below, secondary frames, inspector overlay, D-030 structured-domain precedence. Coach is hidden. This pack remains UX reference, not an implementation licence. Current product: [`docs/LUME_V09_TO_V1_HANDOFF.md`](../LUME_V09_TO_V1_HANDOFF.md).
+
 These decisions **supersede** earlier “unresolved PO” flags in this pack. They do **not** implement schema, Capture, or screens.
 
 The unaltered v8 dump in `docs/v1-convergence-mp/mp-source/` was **not** modified.
@@ -16,7 +18,9 @@ V1 Knowledge Centre target order:
 - **To Dos + Risks** prioritised at the top;
 - **Current Position** below them.
 
-Treat as the V1 target unless later implementation or usability testing materially challenges it. Shipping product and the 19 Aug PNG still lead with Current position; that is **current implementation / older constitution**, not the V1 target.
+Treat as the V1 target unless later implementation or usability testing materially challenges it. **v0.9 shipping KC already uses this order** (`OCEAN_PRIMARY_FRAMES` = To Do + Risks & blockers; Current position is secondary). The 19 Aug PNG is visual history.
+
+The sentence below about “shipping product still leads with Current position” was true on 26 Aug 2026 and is **no longer true** on merged `main` `2e024d0`.
 
 Do not treat v6’s “do not create a permanent type ranking” as a veto of this scanning hierarchy. It remains a V1 default scan order, not a claim that these types outrank a future Issue forever.
 

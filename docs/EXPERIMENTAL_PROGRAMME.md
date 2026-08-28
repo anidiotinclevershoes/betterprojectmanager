@@ -1,10 +1,18 @@
 # Lume Experimental Programme — decision record
 
-**Status:** Experimental (25 August 2026)  
+> **SUPERSEDED (28 August 2026):** This file is a **decision record**, not current-engine guidance.
+>
+> - **Capture V2 is the sole live production Capture engine.** The `LUME_CAPTURE_V2` flag does not select engines. Legacy findings cannot be restored.
+> - New Project V2 remains env-flagged (`LUME_NEW_PROJECT_V2`) and is **on** in current Production.
+> - Desert remains a supported appearance.
+>
+> Do not treat the tables below (“unset = legacy OpenAI findings path”, “Not current production truth unless the flag is on”) as live. Current picture: [`docs/LUME_V09_TO_V1_HANDOFF.md`](./LUME_V09_TO_V1_HANDOFF.md).
+
+**Status:** Historical decision record (written 25 August 2026; superseded as engine guidance 28 August 2026)  
 **Branch:** `cursor/capture-v2-desert-new-project-56c9`  
 **Does not replace:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` as the current-implementation map (Part C of that file is the 26 Aug V1 convergence *target* delta).
 
-This file records the three independent workstreams from the Experimental Programme. Treat items marked **experimental** as flagged or newly added; do not describe them as the only production path until a workstream is **accepted**.
+This file records the three independent workstreams from the Experimental Programme. Items marked **experimental** below described the 25 Aug flagged state. **Capture V2 is now accepted production.**
 
 **V1 convergence binding (docs only, 26 Aug 2026):** Capture V2 is the target V1 Capture *understanding* engine; Phase 3B remains the mutation gate; delete the legacy OpenAI findings path after the required V2 gates (D-032). Do not merge this experimental PR (#66) from the architecture review.
 

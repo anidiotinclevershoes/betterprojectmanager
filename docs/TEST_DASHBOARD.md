@@ -122,6 +122,8 @@ Not persisted:
 
 History is stored as a hidden HTML comment in the Issue body (`lume-test-dashboard-state:v1`). Re-running the same GitHub `run_id` updates that row in place instead of duplicating it.
 
+**Closed-alpha freeze (28 August 2026):** current Capture scorer is **v3**. Live qualification on `gpt-4o-mini-2024-07-18` at engine SHA `2131444` / merged `main` `2e024d0` is LUME FAILURE **0**, LUME CATCH **22**. See `docs/v1-convergence/V09_QUALIFICATION.md` and `docs/LUME_V09_TO_V1_HANDOFF.md`. Do **not** treat historical scorer-v1 failure counts in Issue #73 as current product safety.
+
 Issue #73 already contains historical **scorer v1** labelled live-eval rows. Those bodies are evidence. Do not edit them to pretend the original scorer used v2 rules.
 
 A later dashboard publish that ingests `test-results/capture-v2-eval-scorer-v2.json` or `test-results/capture-v2-eval-scorer-v3.json` (or any harness JSON with an explicit `scorerVersion`) appends a new model row. Latest-per-model is keyed by provider + model + scorer version, so v1, v2, and v3 can all show. This reporter does not rewrite previous Issue comments.

@@ -23,7 +23,9 @@ This folder contains the canonical product, UI, development and evaluation refer
 
 This pack is the **product / trust / UI constitution**. It is not replaced by the architecture handoff.
 
-The architecture handoff describes **implementation reality**. It does not replace this constitution.
+**v0.9 operating picture (28 August 2026):** [`docs/LUME_V09_TO_V1_HANDOFF.md`](../LUME_V09_TO_V1_HANDOFF.md) is the current closed-alpha / v0.9→V1 authority for what shipped, what is frozen, what is parked, and what remains. This pack still governs philosophy and Ocean UI. Implementation flags in the architecture handoff that mention `LUME_CAPTURE_V2` as optional are **stale** — Capture V2 is the sole live engine.
+
+The architecture handoff describes **implementation reality** (with that Capture-flag caveat). It does not replace this constitution.
 
 Start at `docs/README.md` for the full authority map.
 

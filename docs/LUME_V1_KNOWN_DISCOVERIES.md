@@ -2,14 +2,17 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 26 August 2026 (Thor Slice 1D: model-supplied Person UUID is not identity proof)  
+**Last housekeeping:** 28 August 2026 (v0.9 final closure: isolation D-036, Capture freeze, Coach/Catch-Me-Up/Ask reality)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
-**Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
+**v0.9 operating picture:** `docs/LUME_V09_TO_V1_HANDOFF.md`  
+**Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` (Capture-flag tables in Part A are stale — code + v0.9 handoff win)  
 **Docs entry point:** `docs/README.md`  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
 
 Use it so future slices do not re-discover the same failure class, do not greenwash known gaps as tests, and have enough context to fix safely.
+
+**v0.9 closed-alpha reading rule:** Capture is frozen. Do not reopen Capture because an old discovery still exists. Classify remaining items with the v0.9 vocabulary in `docs/LUME_V09_TO_V1_HANDOFF.md` §10: CLOSED / ACCEPTED v0.9 / V1 MUST / V1 SHOULD / TESTER EVIDENCE / DEFERRED / SUPERSEDED. The **Status** field below remains `open | partial | deferred | fixed` for history.
 
 ---
 
@@ -80,7 +83,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Accept/dismiss plan does not resurrect after hydrate simulation |
 | **Target resolution / validation point** | V1 product hardening; must be resolved before V1 launch |
 | **Related docs** | Architecture audit §3.1; RiskFrame recommendation path (Slice 1B left this intentional) |
-| **Notes** | Risk recommendations must remain suggestions until explicitly converted (Slice 1B product rule). No dedicated “Suggestions slice” is named yet — revisit under general V1 product hardening. |
+| **Notes** | Risk recommendations must remain suggestions until explicitly converted (Slice 1B product rule). **v0.9 classification: V1 SHOULD / TESTER EVIDENCE** — still memory-only (`setRecommendationStatus` / accept / dismiss). Dismissed suggestions can return after reload; accepted derived To Dos may be memory-only. Classify by actual V1 prominence after alpha, not by building a suggestion platform now. |
 
 ---
 
@@ -100,7 +103,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Selected mutations emit durable history rows in plan/fake client |
 | **Target resolution / validation point** | V1 product hardening |
 | **Related docs** | Architecture audit; philosophy (History = evidence/chronology) |
-| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. **Phase 3A create-path decision:** New Project History is **secondary evidence after authoritative bundle success**. A failed/rolled-back create must not write `project_created`. Failure of the History insert must not roll back the project bundle. Broader `pushHistory` without `persistHistoryEvent` remains open. |
+| **Notes** | Prefer sparse, high-signal events over logging everything. Broader `pushHistory` without `persistHistoryEvent` remains open. **v0.9:** `history_events` stores `type`, `title`, `detail`, `source`, `project_id` — **no** entity/field/old/new columns. Diffs are prose. This is why Project Change Intelligence must not pretend History already is a deterministic change log. **v0.9 classification: ACCEPTED v0.9**; promote when building the narrow old→new primitive (`docs/LUME_V09_TO_V1_HANDOFF.md` §8). |
 
 ---
 
@@ -120,7 +123,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Hard without UI; at least ensure error paths set `saveStatus` and do not claim success |
 | **Target resolution / validation point** | V1 product hardening; must be checked before V1 launch (incremental per write path is OK) |
 | **Related docs** | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` §C.4 |
-| **Notes** | **Phase 3A (partial):** Ocean chrome now shows `saveStatus=error` via `ocean-save-error` (does not require opening a drawer or devtools). Failed persist paths call `reportPersistFailure`, which reconciles MissionState from `/api/workspace/state` and does not write dirty state to the paint cache. Success of a later persist clears the banner (`markPersistSaved`). **Phase 3A.1:** project deletion is persist-first (same failure banner; MissionState is not stripped until the server confirms). **Phase 3B:** Capture apply for Risk create/status, milestone create/update, Person ensure, and structured availability is persist-first (failed persist is Needs you / visible failure, not a false Apply). Todo create/update/complete and Confirm Owner remain optimistic-then-persist with the Phase 3A save-error + reconcile path. **Still open:** most other mutations remain optimistic-then-persist; concurrent in-flight mutations can be overwritten by a coarse rehydrate. App-wide per-field “not saved” badges remain out of scope. |
+| **Notes** | **Phase 3A (partial):** Ocean chrome now shows `saveStatus=error` via `ocean-save-error`. Failed persist paths call `reportPersistFailure`, reconcile from `/api/workspace/state`, and do not write dirty state to the paint cache. **Phase 3B:** Capture apply for Risk/milestone/Person/availability is persist-first. Todo create/update/complete and Confirm Owner remain optimistic-then-persist. **Still open / user-reachable:** ordinary KC/Todo mutations that are optimistic with reconcile-on-failure; **D-043 Meeting Prep** is memory-only with no persist. Do not call the entire persistence layer unsafe. Capture V2 Apply is persist-first/server authoritative. **v0.9 classification: V1 SHOULD** for remaining optimistic UX; **V1 MUST** for D-043 if reachable. |
 
 ---
 
@@ -180,7 +183,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Keep the injected project-delete failure test: A remains in `projects` and UI must not claim success |
 | **Target resolution / validation point** | V1 product hardening (bundle RPC) — not Phase 3B Capture dispatcher |
 | **Related docs** | Phase 3A compensating cleanup; this file D-R12 |
-| **Notes** | SET NULL-first is required so a successful project delete cannot leave workspace orphans. The residual is failure-after-partial-cleanup, not silent cross-project damage. |
+| **Notes** | SET NULL-first is required so a successful project delete cannot leave workspace orphans. The residual is failure-after-partial-cleanup, not silent cross-project damage. **Live production smoke (v0.9):** project deletion succeeded; do **not** describe project deletion as currently unsafe. Hand-maintained `PROJECT_BUNDLE_SET_NULL_TABLES` (todos, memories, recommendations, history_events, capture_sessions, coach_sessions) is future-proofing debt if a new SET-NULL table is added without the list. **v0.9 classification: ACCEPTED v0.9** (tech debt / V1 SHOULD bundle RPC, not a launch blocker). |
 
 ---
 
@@ -228,19 +231,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | partial |
-| **Severity** | medium |
+| **Status** | partial — **production Ask HTTP path closed**; residual is the unused/legacy library default |
+| **Severity** | low (was medium when production default was off) |
 | **Domain** | Ask/Tell Me |
 | **Found in** | Architecture audit §3.3.4 |
-| **Failure class** | Legacy `buildCaptureContext` injects history into many prompts despite “History is evidence, not current truth” |
-| **Evidence / repro** | Production default `LUME_CANONICAL_TRUTH` off; Ask with history-heavy project |
-| **Likely files** | `src/lib/tell-me/context.ts`; Capture context builders |
-| **Proposed fix direction** | Tighten history injection to historical questions only; prefer domain authority for current-state |
-| **Explicit non-goals** | Deleting History feature |
-| **Regression test to add** | Context-integrity: current-state question excludes superseded history as truth |
-| **Target resolution / validation point** | Canonical production default decision (after Ask UI integration + eval evidence); residual legacy path until then |
-| **Related docs** | Philosophy; Phase2C2 context integrity; `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
-| **Notes** | **Slice 1D validated/fixed on canonical path:** current-state MODE omits History evidence; historical/change questions retrieve scoped evidence. **Slice 2A** wires Ask into Ocean Knowledge Centre via existing Tell Me session without flipping production default. Residual risk remains on legacy path until flag default changes. Do not remove legacy rollback yet. |
+| **Failure class** | Legacy `buildCaptureContext` can still inject history into prompts if called without canonical truth. **Live product Ask does not take that path.** |
+| **Evidence / repro** | **Production (v0.9):** `POST /api/tell-me` always passes `useCanonicalTruth: true`, loads durable workspace truth, ignores leftover `state`/`snapshot`. Live two-account isolation (28 Aug 2026) returned 404 `project_not_found` for a foreign `projectId` and did not leak Account B facts when asking “Who is Brian Boundary?” on Account A. **Residual:** `isCanonicalTruthEnabled()` still defaults **off** when neither `explicit` nor `forEval` is set and `LUME_CANONICAL_TRUTH` is unset. That default is **not** the live HTTP path. |
+| **Likely files** | `src/app/api/tell-me/route.ts`; `src/lib/canonical-truth/flag.ts`; `src/lib/tell-me/context.ts` |
+| **Proposed fix direction** | Optionally flip the library default to on so evals/scripts cannot accidentally use legacy. Do not treat this as “Ask still uses History as truth.” |
+| **Explicit non-goals** | Deleting History; reopening Capture |
+| **Regression test to add** | Context-integrity on canonical path already exists; keep live Ask isolation as a manual/alpha check |
+| **Target resolution / validation point** | Library-default cleanup — ACCEPTED v0.9; not a Capture unfreeze |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md`; Philosophy; `docs/SLICE1D_ASK_CONTEXT_AUTHORITY_HANDOVER.md` |
+| **Notes** | **v0.9 classification: ACCEPTED v0.9** (library default) / **CLOSED** for the live Ask product path. Do not restore “canonical truth is optional in production” guidance. |
 
 ---
 
@@ -320,7 +323,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Live Capture apply job with secrets — not in `npm test` |
 | **Target resolution / validation point** | before Capture is declared V1-ready (live job); deterministic apply-failure path validated in 3B |
 | **Related docs** | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` |
-| **Notes** | **Phase 3B:** the previous `knownGap("End-to-end Capture apply → Supabase round-trip")` skip is retired. Dispatcher tests prove persist-failure does not announce success and does not fall through to another domain. Hosted Supabase apply is still not in CI. |
+| **Notes** | **Phase 3B:** the previous `knownGap("End-to-end Capture apply → Supabase round-trip")` skip is retired. Dispatcher tests prove persist-failure does not announce success and does not fall through to another domain. Hosted Supabase apply is still not in CI. **v0.9:** live production Capture Apply was smoke-tested; live two-account **server** isolation was proven manually (28 Aug 2026). CI still does not run live tenant isolation (D-014 remainder + D-036 is a separate session-switch defect). **v0.9 classification: ACCEPTED v0.9** for missing live CI job. |
 
 ---
 
@@ -470,20 +473,16 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | resolved (presentation / v0.9 UX slice) |
+| **Status** | fixed (presentation / v0.9 UX slice) — data-rewrite remainder is D-038 if a Todo delete still leaves a Current-position fact |
 | **Severity** | medium (trust/readability, not a wrong-domain write) |
 | **Domain** | Knowledge Centre / Capture |
 | **Found in** | Phase 3B visual/browser pass (25 Aug 2026) |
-| **Failure class** | After a legal Capture apply, domain truth updates (Risk resolved, date moved) but leftover Knowledge section bullets with *different wording* still show in KC. Intelligence may say 0 risks while Risks & blockers still shows an old “remains open” sentence. Current position may still name the old date while Important dates is correct. |
-| **Evidence / repro** | Candyland: resolve “Gumdrop Bridge icing” → `risks.status=resolved` and intelligence “I see 0 risks”, but `knowledge.sections.risks` still contains “Gumdrop Bridge icing remains open.” Ocean frames only skip knowledge bullets whose stripped title *equals* the domain title. |
-| **Likely files** | `src/lib/knowledge-centre/ocean-frames.ts`; Capture apply knowledge projection (not the 3B dispatcher) |
-| **Proposed fix direction** | When Capture legally resolves/updates a domain record, retire or rewrite the matching Knowledge projection using carried IDs — not fuzzy title match. Until then, testers should trust the domain frame + intelligence strip over leftover sentences. |
-| **Fix applied (presentation only)** | Display precedence in `buildOpenRiskRows` / `buildCurrentPositionRows`: if a project has any domain `risks` rows, Risks & blockers shows only open/watch domain risks. Knowledge `sections.risks` prose is not painted as peer current truth. Current position excludes `kind=date`/`kind=risk` and `sectionItemIds` that match a domain risk or timeline id. Unlinked leftover sentences are preserved. No fuzzy match, no Knowledge mutation, no reconcile engine. Data rewrite remains a later architecture item. |
-| **Explicit non-goals** | Fuzzy matching leftover bullets to domain titles; treating Knowledge prose as Risk authority |
-| **Regression test to add** | After Capture Risk resolve, KC open-risk rows exclude leftover prose for that durable Risk ID |
-| **Target resolution / validation point** | KC projection / knowledge reconcile — not Phase 3D session UX |
-| **Related docs** | D-R13; D-015 |
-| **Notes** | Does not mean the 3B dispatcher wrote the wrong object. It makes manual regression easy to misread if the reviewer only looks at leftover bullets. |
+| **Failure class** | After a legal Capture apply, domain truth updates (Risk resolved, date moved) but leftover Knowledge section bullets with *different wording* still show in KC. |
+| **Evidence / repro** | Historical Candyland: resolve “Gumdrop Bridge icing” → domain risk resolved while leftover prose still painted as a peer. |
+| **Fix applied (presentation only)** | Display precedence in `buildOpenRiskRows` / `buildCurrentPositionRows`: if a project has any domain `risks` rows, Risks & blockers shows only open/watch domain risks. Knowledge `sections.risks` prose is not painted as peer current truth. Current position excludes `kind=date`/`kind=risk` and `sectionItemIds` that match a domain risk or timeline id. Unlinked leftover sentences are preserved. No fuzzy match, no Knowledge mutation, no reconcile engine. |
+| **v0.9 classification** | **CLOSED** for the D-030 “stale peer prose beside current Risks/dates” presentation bug. Remaining mirrored-fact-after-Todo-delete is **D-038**, a different remainder. |
+| **Related docs** | D-R13; D-015; D-038; `docs/LUME_V09_TO_V1_HANDOFF.md` |
+| **Notes** | Does not mean the 3B dispatcher wrote the wrong object. Do not unfreeze Capture to “reconcile Knowledge.” |
 
 ---
 
@@ -491,19 +490,16 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | fixed (v0.9 UX — Coach unmounted) |
 | **Severity** | low |
 | **Domain** | Ocean / Coach |
 | **Found in** | Phase 3B visual pass (25 Aug 2026) |
-| **Failure class** | On project load the Coach dialog overlays Capture and KC, including the Capture Analyse control. Close is outside the default viewport in some layouts. |
-| **Evidence / repro** | Open `/projects/:id` in local mode; Coach “Ready when you are” dialog is present before any Capture action |
-| **Likely files** | Coach drawer / Ocean shell |
-| **Proposed fix direction** | Do not auto-open Coach on Capture/KC entry; keep it opt-in. Do not redesign Ocean in 3B. |
-| **Explicit non-goals** | Coach product revival; Ocean redesign |
-| **Regression test to add** | Capture mode is usable without dismissing Coach |
-| **Target resolution / validation point** | Ocean/QOL — not Phase 3B or 3D Capture session |
-| **Related docs** | D-025 |
-| **Notes** | 3B testing dismissed the overlay; it did not cause a wrong-domain write. **v0.9 UX slice:** `CoachDrawer` / `CoachResultsCard` are unmounted from `AppShell`. The drawer cannot auto-open over Capture/KC. Coach logic remains in-repo but is not a product surface. |
+| **Failure class** | On project load the Coach dialog overlaid Capture and KC. |
+| **Evidence / repro (historical)** | Open `/projects/:id` in local mode; Coach “Ready when you are” dialog present before any Capture action. |
+| **Fix applied** | `CoachDrawer` / `CoachResultsCard` are **unmounted** from `AppShell`. `openCoachDrawer()` still dispatches `lume:open-coach` with no mounted listener. Coach logic remains in-repo. Leftover route `/coaching` is not a v0.9 mode. Advise is parked/coming soon. |
+| **v0.9 classification** | **CLOSED** as a v0.9 product surface. Leftover `/coaching` + `/api/coach` client-state acceptance is **ACCEPTED v0.9** (hide/remove before public V1 if testers find it). Do **not** rebuild Coach. |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md`; D-033 remainder |
+| **Notes** | Auto-open cannot happen because the drawer is not mounted. |
 
 ---
 
@@ -511,19 +507,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
-| **Severity** | medium |
+| **Status** | partial — **Capture dual-engine CLOSED**; New Project V2 still env-flagged |
+| **Severity** | low (was medium while Capture still had a live flag) |
 | **Domain** | Capture / New Project |
 | **Found in** | Experimental Programme (25 Aug 2026) |
-| **Failure class** | `LUME_CAPTURE_V2` and `LUME_NEW_PROJECT_V2` keep legacy OpenAI/local paths alongside observation pipelines. Permanent dual engines would reintroduce matching/heuristic drift. |
-| **Evidence / repro** | Unset flags → `/api/capture` uses findings + `tidyAndCoachWithOpenAI` / local regex; flags `=1` + OpenAI → `src/lib/capture-v2` / `src/lib/new-project-v2`. Phase 3B apply is shared. |
-| **Likely files** | `src/app/api/capture/route.ts`; `src/app/api/new-project/route.ts`; `src/lib/capture-v2`; `src/lib/new-project-v2`; `docs/EXPERIMENTAL_PROGRAMME.md` |
-| **Proposed fix direction** | **Convergence decision:** Capture V2 is the V1 Capture engine. After the required server-backed/manual/automated V2 gates, default V2 on and **delete** the legacy OpenAI findings path (git is rollback). Keep Phase 3B. Local/no-OpenAI Capture remains a fallback — V2 does not add regex. Same pattern for New Project V2 vs Talk assemble. |
-| **Explicit non-goals** | A second NLP/matching engine; weakening 3A/3B; permanent dual engines |
-| **Regression test to add** | `verify-capture-v2`; `verify-new-project-v2`; phase 3B suite still green |
-| **Target resolution / validation point** | Close to V2 default-on (not a terminal cleanup PR) |
-| **Related docs** | `docs/EXPERIMENTAL_PROGRAMME.md`; D-011; D-R13; handoff Part C §C8 |
-| **Notes** | Desert is not flagged. Ocean remains the default appearance. Immediate-merge `captureWithAI` / unmounted `CaptureBar` were **deleted in Slice 1A**. D-032 remaining scope is the live legacy `/api/capture` findings path vs V2. |
+| **Failure class** | Permanent dual engines would reintroduce matching/heuristic drift. |
+| **Evidence / repro** | **Capture (v0.9):** `src/lib/capture-v2/flag.ts` `isCaptureV2Enabled()` **always returns true**. `LUME_CAPTURE_V2` is ignored. Legacy findings cannot be restored. Engine frozen at SHA `2131444` / `main` `2e024d0`. **New Project:** `isNewProjectV2Enabled()` still requires `LUME_NEW_PROJECT_V2=1\|true`. Current Production has that flag on (Talk It Through → “Here’s what Lume understood”). Unset locally still selects legacy Talk assemble. |
+| **Likely files** | `src/lib/capture-v2/flag.ts`; `src/lib/new-project-v2/flag.ts`; `src/app/api/new-project/route.ts` |
+| **Proposed fix direction** | Leave Capture frozen. Optionally pin New Project V2 the same way as Capture if local/preview drift becomes a problem. Do not restore a Capture engine flag. |
+| **Explicit non-goals** | A second NLP/matching engine; unfreezing Capture; deleting New Project V2 |
+| **Regression test to add** | Existing `verify-capture-v2` / `verify-new-project-v2` |
+| **Target resolution / validation point** | New Project flag pin — ACCEPTED v0.9 unless preview/local drift appears |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md`; `docs/EXPERIMENTAL_PROGRAMME.md` (superseded as engine guidance) |
+| **Notes** | **v0.9 classification: CLOSED** for Capture dual-engine / `LUME_CAPTURE_V2` deployment requirement. **ACCEPTED v0.9** for New Project still being env-gated. `docs/EXPERIMENTAL_PROGRAMME.md` must not govern Capture implementation. |
 
 ---
 
@@ -531,19 +527,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | partial — Tell Me HTTP resolved (Slice 1B); Capture V2 Analyse+Apply resolved (Slice 1C); Coach and legacy Capture still open |
-| **Severity** | high |
+| **Status** | partial — **Tell Me + Capture HTTP CLOSED**; Coach leftover API still accepts client MissionState |
+| **Severity** | low for v0.9 product (Coach unmounted); medium if `/api/coach` is called directly |
 | **Domain** | Ask/Tell Me · Capture · Infra |
 | **Found in** | V1 Architectural Convergence (26 Aug 2026) |
-| **Failure class** | `/api/coach` still treats client-posted `MissionState` as the project truth the model sees. Workspace RLS already prevents cross-tenant reads; this is not primarily IDOR. Harm is stale/forged *own-session* context, unpredictable prompts, unbounded payloads, and a second “truth” besides durable tables. |
-| **Evidence / repro** | **Tell Me (fixed):** `POST /api/tell-me` requires `projectId` + `question`; leftover `state`/`snapshot` are ignored; truth is `loadMissionStateFromSupabase` → `serializeCanonicalTruth`. **Capture V2 (fixed, Slice 1C):** `POST /api/capture` with `LUME_CAPTURE_V2=1` loads `loadServerCaptureWorld` (same durable loader as Tell Me, then `worldFromCaptureState` / `captureApplyWorldFromState`). Leftover `body.state` is ignored. Failure is 401/404/503/500 — no client fallback. Apply is `POST /api/capture/apply` against a fresh load. **Still open:** legacy `/api/capture` (flag off) still builds context from `body.state`; `/api/coach` still accepts client MissionState. |
-| **Likely files** | `src/app/api/coach/route.ts`; legacy branch of `src/app/api/capture/route.ts` |
-| **Proposed fix direction** | Same Tell Me / Capture V2 pattern for Coach, then delete the legacy Capture understanding path after the V2 default-on gate. |
-| **Explicit non-goals** | Claiming this as an RLS/IDOR repair; a new snapshot architecture; sending client-constructed current-truth JSON |
-| **Regression test to add** | Capture V2 coverage: `scripts/verify-capture-server-truth.ts`. Tell Me coverage: `scripts/verify-tell-me-server-truth.ts`. |
-| **Target resolution / validation point** | Coach (if it remains) then V2 default-on / legacy Capture deletion |
-| **Related docs** | Handoff Part C §C3–C4; D-010; D-032 |
-| **Notes** | Project scoping remains application-layer because RLS is workspace membership. Capture V2 MissionState remains a **client hydrate/cache** after Apply returns server state — it is not HTTP current-truth authority. |
+| **Failure class** | `/api/coach` still treats client-posted `MissionState` as the project truth the model sees. This is not primarily IDOR (RLS still applies). |
+| **Evidence / repro** | **Tell Me (fixed):** `POST /api/tell-me` requires `projectId` + `question`; leftover `state`/`snapshot` ignored; server load. **Capture (fixed, v0.9 sole engine):** Analyse/Apply load durable truth; leftover `body.state` ignored; foreign project 404. **Legacy Capture branch:** not reachable (`isCaptureV2Enabled()` always true). **Still open:** `/api/coach` accepts client MissionState. Coach UI is unmounted. |
+| **Likely files** | `src/app/api/coach/route.ts` |
+| **Proposed fix direction** | Before public V1, disable or server-load `/api/coach` if the route remains. Do not rebuild Coach. |
+| **Explicit non-goals** | Claiming this as an RLS/IDOR repair; restoring Coach as a product surface |
+| **Regression test to add** | Existing `verify-capture-server-truth.ts` / `verify-tell-me-server-truth.ts` |
+| **Target resolution / validation point** | Hide leftover Coach API — V1 SHOULD / ACCEPTED v0.9 |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md`; D-010; D-032; D-031 |
+| **Notes** | **v0.9 classification: CLOSED** for Capture Apply client-world and live Ask. **ACCEPTED v0.9** for unmounted Coach API. Client MissionState is still a hydrate/cache after Apply — it is not HTTP current-truth authority. D-036 is a *display* leak of that cache across SPA login, not this HTTP class. |
 
 ---
 
@@ -551,19 +547,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | partial — Capture V2 Apply reloads fresh durable truth and compares an Analyse-time target fingerprint (Slice 1C). No schema `version` column. |
-| **Severity** | medium |
+| **Status** | partial — **Capture V2 Apply fresh-load + fingerprint CLOSED**; no schema `version` column (intentionally not a v0.9/V1 requirement) |
+| **Severity** | low |
 | **Domain** | Capture · Infra |
 | **Found in** | V1 Architectural Convergence (26 Aug 2026) |
-| **Failure class** | `updated_at` triggers exist but persist helpers update by id only. Concurrent tabs / stale apply review can write against a world that is no longer durable truth if the client world is trusted. |
-| **Evidence / repro** | **Capture V2 Apply (Slice 1C):** `POST /api/capture/apply` reloads via `loadServerCaptureWorld`, compares `expectedTarget` (id + material fields: title/status/startAt/name/done) captured at Analyse, then `planCaptureApply` / `executeCaptureApply` on that fresh world. Deleted / materially changed / foreign targets fail closed (Needs you). No MissionState is posted on Apply. **Remaining:** no integer `version` column; fingerprint is not a universal concurrency contract; legacy Capture apply (flag off) still plans against client `MissionState`. |
+| **Failure class** | Concurrent tabs / stale apply review could write against a world that is no longer durable truth **if the client world is trusted**. Live Capture Apply does not trust client world. |
+| **Evidence / repro** | `POST /api/capture/apply` reloads via `loadServerCaptureWorld`, compares Analyse-time `expectedTarget`, fail-closed on deleted/changed/foreign. No MissionState posted on Apply. Legacy client-world apply is unreachable. **Remaining:** no integer `version` column; fingerprint is not a universal concurrency contract. |
 | **Likely files** | `src/lib/capture/apply/apply-approved.ts`; `src/lib/capture/apply/expected-target.ts`; `src/app/api/capture/apply/route.ts` |
-| **Proposed fix direction** | Keep fingerprint + fresh load for Capture. Add integer `version` on hot tables only if a later integrity slice proves fingerprints insufficient. Not a new mutation framework. |
-| **Explicit non-goals** | App-wide command bus; making Phase 3B own Knowledge Centre / New Project / delete; treating this as the project-membership invariant (that is **D-035**) |
-| **Regression test to add** | `scripts/verify-capture-server-truth.ts` cases D/E (changed / deleted between Analyse and Apply). |
-| **Target resolution / validation point** | Schema versioning only if fingerprints fail in production — not mixed into this slice |
-| **Related docs** | Handoff Part C §C5–C6; D-005; D-R13; D-035 |
-| **Notes** | Phase 3B remains the Capture mutation boundary. Slice 1C did **not** add DB versioning; existing state comparison was sufficient for Capture Apply. |
+| **Proposed fix direction** | Keep fingerprint + fresh load. Do **not** promote schema versioning to V1 unless fingerprints fail in production. Version columns were explicitly rejected for v0.9. |
+| **Explicit non-goals** | App-wide command bus; treating this as D-035 project-membership |
+| **Regression test to add** | `scripts/verify-capture-server-truth.ts` cases D/E |
+| **Target resolution / validation point** | Schema versioning only if fingerprints fail — **DEFERRED** |
+| **Related docs** | Handoff Part C §C5–C6; D-005; D-R13; D-035; `docs/LUME_V09_TO_V1_HANDOFF.md` |
+| **Notes** | **v0.9 classification: CLOSED** for client-world Capture Apply. **DEFERRED** for integer `version` columns. |
 
 ---
 
@@ -571,19 +567,182 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | partial — Capture V2 Analyse/Apply enforce project membership of mutation targets (Slice 1C). Persist-helper audit still open. |
-| **Severity** | high |
+| **Status** | partial — **Todo persist helpers CLOSED**; wider persist-helper audit still open |
+| **Severity** | medium (was high while Todo update/delete were id-only) |
 | **Domain** | Infra / all project-domain writes |
 | **Found in** | V1 Architectural Convergence; Thor amendment (26 Aug 2026) |
-| **Failure class** | **Invariant:** every project-domain mutation must verify that the target durable object belongs to the intended project before mutation. Workspace RLS is membership-wide, so an id-only UPDATE/DELETE can mutate another project’s row in the same workspace. `persistTodoUpdate` / `persistTodoDelete` (`.eq("id", todoId)` with no `project_id`) are **one known instance**, not the whole class. |
-| **Evidence / repro** | **Capture V2 (Slice 1C):** server world is filtered to the requested project; validator rejects foreign IDs (Person, Risk, Todo, milestone); Apply stale-check + Phase 3B `require*OnProject` refuse Toyworld/GamingStudio5000 IDs inside a Candyland Capture. **Still open:** `persistTodoUpdate` in `src/lib/data/supabase/persist-mutations.ts` updates by todo id only. Equivalent helpers must still be audited: risks (status helper is already project+workspace scoped), knowledge_items, milestones, stakeholders, memories, recommendations, history_events, sessions. |
-| **Likely files** | `src/lib/data/supabase/persist-mutations.ts`; Capture apply hooks; store mutations; workspace project routes |
-| **Proposed fix direction** | Treat the quoted invariant as a persist-layer rule. Later implementation/test pass: inventory every project-domain mutation; require intended `project_id` (and workspace) on the target row before write. |
-| **Explicit non-goals** | A generic mutation framework; conflating this with D-034 versioning; calling this an RLS/IDOR tenant bug |
-| **Regression test to add** | Capture V2: `scripts/verify-capture-server-truth.ts` isolation + foreign-ID cases. Persist-helper property tests remain a later pass. |
-| **Target resolution / validation point** | Later persist-helper audit — after Capture V2 server truth, not a schema migration in this slice |
-| **Related docs** | Handoff Part C §C5 gap 5, §C6, assumption 23; D-034 (separate: apply world / version) |
-| **Notes** | Application-layer project scoping on Capture V2 is now live. The remaining defect class is **inconsistent persist-helper enforcement**. Do not document or fix this as Todo-only. |
+| **Failure class** | Workspace RLS is membership-wide, so an id-only UPDATE/DELETE can mutate another project’s row in the **same** workspace. This is not cross-account IDOR. |
+| **Evidence / repro** | **Capture V2:** server world filtered to requested project; foreign IDs fail closed. **Todos (v0.9):** `persistTodoUpdate` / `persistTodoDelete` use `scopeExistingTodo` with `workspace_id` **and** `project_id` (or `project_id IS NULL`). Old “Todo persist helpers are ID-only” wording is **false**. **Still open:** equivalent helpers for other domains (knowledge_items, milestones, stakeholders, memories, recommendations, history_events, sessions) must still be inventoried. |
+| **Likely files** | `src/lib/data/supabase/persist-mutations.ts` |
+| **Proposed fix direction** | Later persist-helper audit: require intended `project_id` + workspace on every project-domain write. Do not document this as Todo-only, and do not re-open the Todo sub-case as if it were still id-only. |
+| **Explicit non-goals** | A generic mutation framework; conflating with D-034 versioning; calling this an RLS/IDOR tenant bug |
+| **Regression test to add** | Capture V2 isolation tests exist. Persist-helper property tests remain a later pass. |
+| **Target resolution / validation point** | V1 SHOULD persist-helper audit — not a Capture unfreeze |
+| **Related docs** | Handoff Part C §C5; D-034; `docs/LUME_V09_TO_V1_HANDOFF.md` |
+| **Notes** | **v0.9 classification: CLOSED** for Todo update/delete project membership. **V1 SHOULD** for the remaining helper inventory. Live two-account isolation (28 Aug) proved cross-account mutate/delete fail-closed (404). Same-account project isolation is application-layer. |
+
+---
+
+### D-036 — Same-browser SPA logout → login displays previous user's in-memory workspace
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | high (display / shared-device; not RLS/IDOR) |
+| **Domain** | Auth / hydrate / tenant display |
+| **Found in** | v0.9 live two-account isolation (28 August 2026) |
+| **Failure class** | After Sign out → SPA login as a different user without remounting `MissionProvider`, the UI can still paint the previous user's project (name, people, todos) while chrome shows the new user. Authenticated APIs fail-closed. Mutations do not succeed. `lume-mission-supabase-cache-v1` is cleared on logout. The leak is **in-memory React state**. |
+| **Evidence / repro** | Account B on TENANT-B → Sign out → Account A login via `router.replace`. URL stayed `/projects/<B-id>`. UI showed Brian Boundary / Digitise red ledger while chrome user was Account A. `GET /api/workspace/state` returned only A's workspace. Ask on the leaked B id: “Project not found or you do not have access to it.” Full `page.goto` remounted and showed A's truth. Cause: hydrate `useEffect([])` runs once; `onAuthStateChange` returns early if `hydrateSucceeded`; logout does not `setState(emptyMissionState())`; login uses `router.replace` not full load. |
+| **Likely files** | `src/lib/store.tsx` (hydrate + `onAuthStateChange`); `src/components/AppShell.tsx` signOut; `src/app/login/page.tsx` |
+| **Proposed fix direction** | Smallest bounded repair (pick one, prefer 2+3): (1) reset MissionState + persist meta on logout; (2) on `SIGNED_IN`, re-hydrate when `session.user.id` ≠ last hydrated user (ignore `hydrateSucceeded`); (3) login/logout via `window.location` full load. Do **not** redesign RLS or the data layer. |
+| **Explicit non-goals** | Service-role attacker tests; Capture unfreeze; new persistence architecture |
+| **Regression test to add** | Two-account Playwright: logout B → login A without full reload must not paint B's project |
+| **Target resolution / validation point** | **V1 MUST** before shared-browser / public use. Trusted testers on **separate browsers** do not hit this. |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md` §6 |
+| **Notes** | **v0.9 classification: V1 MUST.** This is why live two-account isolation is **FAIL** on the display gate and **PASS** on server/API/RLS. Do not close D-013 merely because cache clear on logout works. |
+
+---
+
+### D-037 — Review Ready vs Apply reject for missing responsibility scope
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low (safety is correct; signalling is not) |
+| **Domain** | Capture Review UX |
+| **Found in** | v0.9 production smoke (Owen / Person bind) |
+| **Failure class** | After the user binds a Person, Review can show Ready while the Apply gate still rejects because required responsibility scope is missing. Fail-closed is correct. UX readiness is inconsistent. |
+| **Evidence / repro** | Bind Person in Review → Ready chrome → Apply refused for missing scope |
+| **Proposed fix direction** | Align Ready with the Apply gate, or show why Apply will refuse. Do **not** unfreeze Capture logic to make Apply more lenient. |
+| **Explicit non-goals** | Weakening Apply; Capture retune |
+| **Target resolution / validation point** | **TESTER EVIDENCE** first; **V1 SHOULD** if frequent |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md` |
+| **Notes** | **v0.9 classification: TESTER EVIDENCE / V1 SHOULD.** Safety behaviour stays. |
+
+---
+
+### D-038 — Todo deletion leaves mirrored Knowledge fact
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | Knowledge Centre / Todos |
+| **Found in** | v0.9 production smoke |
+| **Failure class** | Structured Todo deletes correctly and stays deleted across reload. A Knowledge/fact representation with the same text can remain in Current Position / Waiting. Not Todo resurrection. |
+| **Evidence / repro** | Delete a Todo → structured list empty after reload → Current position still shows the sentence |
+| **Proposed fix direction** | When a domain Todo is deleted, retire the linked Knowledge projection by id (not fuzzy title). Distinct from D-030 (risks/dates presentation precedence, now closed). |
+| **Explicit non-goals** | Fuzzy match; treating this as Todo persist failure |
+| **Target resolution / validation point** | **V1 SHOULD** / **TESTER EVIDENCE** |
+| **Related docs** | D-030 (closed presentation); `docs/LUME_V09_TO_V1_HANDOFF.md` |
+| **Notes** | **v0.9 classification: V1 SHOULD.** |
+
+---
+
+### D-039 — `openaiConfigured` can stay false after login-page 401
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | Capture chrome / hydrate |
+| **Found in** | v0.9 production smoke |
+| **Failure class** | `/api/capture` 401s on the login page (`MissionProvider` fetch). After login, `openaiConfigured` can remain false until hard refresh. Final smoke worked post-login / after refresh. |
+| **Evidence / repro** | Hit `/login` while signed out (401 on capture probe) → log in without full remount → Analyse appears unavailable until refresh |
+| **Likely files** | `src/lib/store.tsx` hydrate; Capture workspace config fetch |
+| **Proposed fix direction** | Re-probe OpenAI/config after `SIGNED_IN` (same remount family as D-036). |
+| **Explicit non-goals** | Capture engine change |
+| **Target resolution / validation point** | **V1 SHOULD** (may ride with D-036 remount) |
+| **Related docs** | D-036 |
+| **Notes** | **v0.9 classification: V1 SHOULD.** |
+
+---
+
+### D-040 — New Project naming quality
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | New Project |
+| **Found in** | v0.9 production smoke |
+| **Failure class** | Awkward titles (“Parade Day Is”), verbose CREATE titles, clumsy phrasing. Product quality, not integrity. |
+| **Proposed fix direction** | Do not elevate into architecture. Observe during alpha. Prompt/label polish only if testers complain. |
+| **Explicit non-goals** | Capture unfreeze; New Project engine rewrite |
+| **Target resolution / validation point** | **TESTER EVIDENCE** |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md` |
+| **Notes** | **v0.9 classification: TESTER EVIDENCE.** |
+
+---
+
+### D-041 — No whole-account deletion
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium for public/commercial; not an alpha blocker |
+| **Domain** | Auth / legal / settings |
+| **Found in** | v0.9 closure audit (28 Aug 2026) |
+| **Failure class** | No user-facing or API path deletes the whole account/workspace. Testers on trusted alpha can be cleaned by the owner. Paying public users need an exit. |
+| **Evidence / repro** | Repo grep: no `deleteAccount` / account-delete flow. Settings do not offer it. |
+| **Proposed fix direction** | Small settings action: delete workspace + auth user (or document owner process). Do not invent enterprise admin. |
+| **Explicit non-goals** | Building this during closed alpha |
+| **Target resolution / validation point** | **V1 MUST** before public/commercial launch |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md` |
+| **Notes** | **v0.9 classification: V1 MUST.** |
+
+---
+
+### D-042 — No user/project export
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium for public/commercial |
+| **Domain** | Settings / legal |
+| **Found in** | v0.9 closure audit (28 Aug 2026) |
+| **Failure class** | No export of a user's project truth. |
+| **Evidence / repro** | Repo grep: no export workspace/project download path. |
+| **Proposed fix direction** | JSON (or similar) dump of the authorised project bundle. Product/legal can choose MUST vs high SHOULD; treat as **V1 MUST** unless legal says otherwise. |
+| **Explicit non-goals** | Generic ETL; portfolio export |
+| **Target resolution / validation point** | **V1 MUST** (or high V1 SHOULD pending legal) |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md` |
+| **Notes** | **v0.9 classification: V1 MUST.** |
+
+---
+
+### D-043 — Meeting Prep edits are memory-only
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | high if the UI is reachable and implies save; otherwise leftover chrome |
+| **Domain** | Meetings |
+| **Found in** | Persistence audit; verified on `main` 28 Aug 2026 |
+| **Failure class** | `updateMeeting` in `src/lib/store.tsx` patches `MissionState` only. Hydrate reads durable meetings. User can believe a meeting edit saved when reload restores the previous row. |
+| **Evidence / repro** | `updateMeeting` has no `persistMeeting` call. Leftover route `/meetings` is not a v0.9 mode. |
+| **Proposed fix direction** | Persist the edit **or** disable/remove the misleading mutation. Do not create another meeting architecture. |
+| **Explicit non-goals** | Meeting product rebuild |
+| **Target resolution / validation point** | **V1 MUST** if users can reach the editor; otherwise hide `/meetings` with leftover chrome |
+| **Related docs** | D-005; `docs/LUME_V09_TO_V1_HANDOFF.md` |
+| **Notes** | **v0.9 classification: V1 MUST** (persist or remove). `/meetings` is leftover; still a lying-save if opened. |
+
+---
+
+### D-044 — Terms / Privacy not in production (trusted alpha only)
+
+| Field | Value |
+| --- | --- |
+| **Status** | open (deliberately deferred for trusted closed alpha) |
+| **Severity** | high for public/commercial; none for trusted alpha |
+| **Domain** | Legal |
+| **Found in** | v0.9 closure |
+| **Failure class** | Formal Terms/Privacy framework is not current production. Legal Eagle PR #88 is **not** the v0.9 merge. |
+| **Proposed fix direction** | Public/commercial V1 needs an appropriate legal/privacy launch, not this closure task. |
+| **Explicit non-goals** | Treating #88 as live; writing legal copy in Known Discoveries |
+| **Target resolution / validation point** | **V1 MUST** before public/commercial |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md` |
+| **Notes** | **v0.9 classification: V1 MUST.** Not forgotten. |
 
 ---
 
@@ -770,28 +929,30 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 ## Suggested fix order (non-binding)
 
+This is **not** a licence to start V1 implementation from this closure PR. Capture stays frozen. Alpha learning comes first except D-036 if testers share a browser.
+
 1. ~~**D-006**~~ — fixed in Phase 3A (D-R11)  
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
 3. ~~**D-019**~~ — fixed in Slice 2D (D-R10)  
-4. ~~**Dead Capture merge path**~~ — unmounted `CaptureBar` / `captureWithAI` / `applyCaptureResult` **deleted in Slice 1A**  
-5. **D-033** — ~~Tell Me server-load~~ (Slice 1B); ~~Capture V2 Analyse+Apply~~ (Slice 1C) → Coach + legacy Capture remain
-6. **D-010** — canonical production default after eval evidence  
-7. **D-032** — default Capture V2 / New Project V2 then delete legacy OpenAI understanding paths (after Test workstream gates)  
-8. **D-034 remainder** — schema `version` columns only if fingerprints prove insufficient; legacy Capture apply still client-world  
-9. **D-035 remainder** — audit **all** project-domain persist paths (`persistTodoUpdate` is one instance); Capture V2 membership is live  
-10. **D-028** + New Project crash residual — bundle RPCs (dedicated integrity slice)  
-11. **D-003** — suggestion persist  
-12. **D-008 / D-021** — implement the decided waiting/open-loop split  
-13. **D-007** remainder — leftover Knowledge people prose without a stakeholder link  
-14. **Person identity** — workspace `people` + participation (later; not first slice). **No unique-name constraint.**  
-15. **D-014** remainder — live Supabase Capture apply job  
-16. **D-011** remainder — New Project extractors only  
-17. **D-004** remainder — history persist gaps outside New Project create  
-18. **D-026** — product decision on project-code uniqueness  
-19. **D-027** — Archive/undo only if product asks  
-20. **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031** — as scheduled (D-031: hide/retire Coach rather than rewrite)  
+4. ~~**Dead Capture merge path**~~ — deleted in Slice 1A  
+5. ~~**D-032 Capture dual-engine / `LUME_CAPTURE_V2`**~~ — v0.9: V2 is the sole live engine  
+6. ~~**D-033 Capture + Ask HTTP client-world**~~ — closed; Coach leftover API is ACCEPTED v0.9  
+7. ~~**D-030 stale Risks/dates peer prose**~~ — presentation closed; remainder is D-038  
+8. ~~**D-031 Coach auto-open**~~ — Coach unmounted  
+9. **D-036** — session-switch remount (**V1 MUST**; smallest bounded repair in the v0.9 handoff)  
+10. **D-041 / D-042 / D-044** — account delete, export, Terms/Privacy (**V1 MUST** for public launch)  
+11. **D-043** — Meeting Prep persist **or** remove misleading edit (**V1 MUST** if reachable)  
+12. **D-003** — suggestion persist if testers use suggestions  
+13. **D-037 / D-038 / D-039** — Ready-vs-Apply, Knowledge remnant, openaiConfigured — **TESTER EVIDENCE** then V1 SHOULD  
+14. **D-035 remainder** — persist-helper audit excluding the closed Todo sub-case  
+15. **D-028** — bundle RPC (tech debt, not current delete-unsafe)  
+16. **D-008 / D-021 / D-007 remainder / D-011 remainder** — data-model debt; do not start from alpha  
+17. **D-004** — history persist — relevant if Project Change Intelligence reads History  
+18. **D-027 / D-029 / D-034 version columns** — **DEFERRED** unless evidence changes  
+19. **D-040** — New Project naming — tester evidence only  
+20. **D-012, D-013, D-014, D-015, D-024, D-025, D-026** — ACCEPTED v0.9 / ops hygiene  
 
-Do **not** treat this order as a mandate to broaden an in-flight slice. Do **not** begin implementation from the architecture review PR.
+Do **not** treat this order as a mandate to broaden an in-flight slice. Do **not** reopen Capture. The next production-development decision should be an actual alpha blocker, recurring tester evidence, or the agreed V1 roadmap in `docs/LUME_V09_TO_V1_HANDOFF.md`.
 
 ---
 

@@ -33,7 +33,7 @@ npm run verify:production-config
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes |
-| `NEXT_PUBLIC_SITE_URL` | Yes (exact public origin) |
+| `NEXT_PUBLIC_SITE_URL` | Yes (exact public origin). **Confirmed 28 Aug 2026** on Vercel Production and Preview as `https://betterprojectmanager.vercel.app`. Live signup confirmation redirected to `/auth/callback` on that host. Treat closed unless live evidence contradicts. |
 
 ### Server-only
 
@@ -50,7 +50,7 @@ npm run verify:production-config
 | Name | Notes |
 |---|---|
 | `OPENAI_MODEL` | Defaults to gpt-4o-mini |
-| `LUME_TRIAL_DAYS` | Defaults to 14 |
+| `LUME_TRIAL_DAYS` | Defaults to 14 in code; **production closed-alpha is 90 days** (live Account A trial ended 11/26/2026 as of 28 Aug 2026) |
 | `LUME_RATE_LIMIT_*_PER_HOUR` | AI abuse limits |
 
 ### Never set in production

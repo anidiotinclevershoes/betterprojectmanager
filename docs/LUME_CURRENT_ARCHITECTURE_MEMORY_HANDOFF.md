@@ -1,7 +1,13 @@
 # Lume — Current Architecture Memory Handoff
 
+> **STALE-FLAG BANNER (28 August 2026):** Capture V2 is the **sole live** Analyse → Review → Apply engine on merged `main` `2e024d0` (PR #95). `isCaptureV2Enabled()` always returns true; `LUME_CAPTURE_V2` **cannot** restore legacy Capture. Coach is **unmounted**. Catch Me Up exists. Production Ask uses authenticated server-loaded canonical truth.
+>
+> Part A/B **flag tables** that still say “unset `LUME_CAPTURE_V2` = legacy OpenAI findings path” are **historical**. Do not implement from them.
+>
+> Current operating picture: [`docs/LUME_V09_TO_V1_HANDOFF.md`](./LUME_V09_TO_V1_HANDOFF.md). If this file and the code disagree, **the code wins**.
+
 **Status:** Documentation of CURRENT implementation, plus the V1 Architectural Convergence delta (Part C)  
-**Date:** 26 August 2026 (Thor amendment: name ≠ identity; project-scoped mutation invariant; status categories)  
+**Date:** 26 August 2026 (Thor amendment: name ≠ identity; project-scoped mutation invariant; status categories). Banner added 28 August 2026.  
 **Code observed:** `cursor/capture-v2-desert-new-project-56c9` @ `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`  
 **Ancestry verified:** Phase 3B / PR #64 HEAD `b52995c3b7eb80971d052e875c1d372ebb424ebe` is an ancestor. This SHA also contains Capture V2, New Project V2, and Desert. PR #66 is **not** merged and must not be merged from this review.  
 **Docs entry point:** `docs/README.md`  

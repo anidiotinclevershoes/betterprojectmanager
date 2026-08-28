@@ -1,6 +1,6 @@
 # Lume V1 UX / Magic Patterns convergence
 
-**Workstream C** — target-state clarification. Not the UX overhaul.
+**Workstream C** — target-state clarification. Not the UX overhaul. **Reference only:** Coach has already left the live shell (unmounted). This pack is not an implementation licence to restore Coach or restyle production. Current product: [`docs/LUME_V09_TO_V1_HANDOFF.md`](../LUME_V09_TO_V1_HANDOFF.md).
 
 | Frozen HEAD | Isolated branch |
 | --- | --- |

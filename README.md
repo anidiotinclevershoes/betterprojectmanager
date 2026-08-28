@@ -1,111 +1,54 @@
-# Mission Control
+# Lume
 
-> **Current Lume development documentation begins at [`docs/README.md`](docs/README.md).**  
-> This root README still describes an older Overview / localStorage-era product surface. Do not treat it as current product or architecture authority.
+**You can't keep an entire project in your head. Lume can.**
 
-**AI Chief Project Officer · Executive Coach · Second Brain**
+Lume is an individual-first project-memory companion for project managers. Capture notes, review before anything is written, keep truth in Knowledge Centre, ask questions, and catch up on a project.
 
-Mission Control is not a project management application.
+v0.9 is the **safe closed-alpha product**. Durable authority is **Supabase**. Production auth is **Supabase Auth**. Capture V2 is the sole Analyse → Review → Apply engine.
 
-Its primary responsibility is not to manage projects.
+This root README is onboarding only. It is **not** the product specification.
 
-Its primary responsibility is to make **you** a better Project Manager.
+| Start here | Why |
+| --- | --- |
+| [`docs/README.md`](docs/README.md) | Documentation authority map |
+| [`docs/LUME_V09_TO_V1_HANDOFF.md`](docs/LUME_V09_TO_V1_HANDOFF.md) | What v0.9 is, what is frozen, remaining debt, path to V1 |
+| [`docs/v1-reference-pack/`](docs/v1-reference-pack/) | Product / trust / Ocean UI constitution |
+| [`docs/LUME_V1_KNOWN_DISCOVERIES.md`](docs/LUME_V1_KNOWN_DISCOVERIES.md) | Open vs resolved defects |
 
-Every feature answers:
+Do **not** treat older Phase/SLICE handovers, `docs/EXPERIMENTAL_PROGRAMME.md`, or Mission Control / localStorage copy as current architecture.
 
-> Will this help the user sound like the confident person leading the project?
-
-Every recommendation is generated as if by an exceptional Programme Manager asking:
-
-> If I were an exceptional Programme Manager, what would I do next?
-
-## What it does
-
-- **Quick capture on Overview** — type or speak from the top of the main dashboard
-- **Voice notes** — record → Whisper transcription → ChatGPT tidy-up → coaching updates
-- **Overview dashboard** — KPIs and the most pertinent coaching moves
-- **Project tabs** — ATLAS, HORIZON (and more) each with a focused leadership dashboard
-- **Meeting strategy** — before / during / after prep so you lead the room
-- **Institutional memory** — answer questions months later (“Why did we delay Release 8?”)
-- **Release playbook** — monthly lifecycle coaching from merge window through hypercare and closure
+Production: https://betterprojectmanager.vercel.app
 
 ## Quick start
 
 ```bash
 npm install
 cp .env.local.example .env.local
-# Put your OpenAI API key in .env.local
+# Set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, OPENAI_API_KEY
+# Production also needs SUPABASE_SERVICE_ROLE_KEY and NEXT_PUBLIC_SITE_URL
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Connect your ChatGPT / OpenAI account
-
-1. Create an API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-2. Add it to `.env.local`:
+Hosted setup: [`docs/VERCEL_PRODUCTION_SETUP.md`](docs/VERCEL_PRODUCTION_SETUP.md).
 
 ```bash
-OPENAI_API_KEY=sk-...
-# optional
-# OPENAI_MODEL=gpt-4o-mini
+npm run build
+npm run lint
+npm test
 ```
 
-3. Restart `npm run dev`
+`DEMO_USERS` / localStorage-as-truth is **not** the production path. Do not enable demo auth in production.
 
-**Note:** ChatGPT Plus and the OpenAI API are billed separately. Same OpenAI login can use both; the app needs an **API key**, not your ChatGPT password.
+## What v0.9 is (one paragraph)
 
-Without a key, typed capture still works with the local coaching engine. Voice transcription requires the key (Whisper).
-
-```bash
-npm run build   # production build
-npm run lint    # eslint
-npm run verify  # coaching engine smoke checks
-```
-
-## Demo login (for private previews)
-
-Mission Control has a **simple sign-in gate** so you can share a cloud URL with a few testers.
-
-Add to `.env.local` (and to your host’s environment variables):
-
-```bash
-# email:password:Display Name  (comma-separated)
-DEMO_USERS=tom@example.com:try-mission-1:Tom,alice@example.com:preview-42:Alice
-
-# 16+ random characters — e.g. openssl rand -base64 32
-AUTH_SECRET=replace-with-a-long-random-secret
-```
-
-- When `DEMO_USERS` is set, unauthenticated visitors are redirected to `/login`.
-- Locally, leave `DEMO_USERS` empty to keep the app open while developing.
-- This is a lightweight demo gate, not a full account system. Project data still lives in each browser’s `localStorage`.
-
-## Deploy to the cloud (Vercel)
-
-1. Push this branch (or merge to `main`).
-2. Import the GitHub repo at [vercel.com/new](https://vercel.com/new).
-3. Set environment variables in the Vercel project:
-   - `OPENAI_API_KEY`
-   - `AUTH_SECRET`
-   - `DEMO_USERS` (one entry per tester)
-   - optional: `OPENAI_MODEL`
-4. Deploy. Share the URL + each person’s email/password.
-5. Testers open the URL → **Demo sign-in** → use the app.
-
-Framework preset: **Next.js**. Build command / output defaults are fine.
+Modes: **Capture | Knowledge Centre | Catch Me Up | Advise (coming soon)**. Coach is hidden. Nothing durable is written until the user approves Capture Review. Needs-you is success for difficult cases. Ask Lume and Catch Me Up use authenticated server-loaded project truth.
 
 ## Stack
 
-- Next.js App Router · React 19 · TypeScript · Tailwind CSS 4
-- OpenAI Whisper (voice) + Chat Completions (tidy + coach)
-- Simple cookie session login for private demos
-- Local fallback coaching in `src/lib/coach.ts`
+Next.js App Router · React · TypeScript · Tailwind · Supabase (Postgres + Auth + RLS) · OpenAI (`gpt-4o-mini-2024-07-18` for frozen Capture)
 
-## Product north star
+## Historical name
 
-Mission Control should never ask *“What task should I create?”*
-
-It should ask:
-
-> How can I make this Project Manager look calm, prepared, proactive and trusted today?
+The repository and some leftover copy still say “Mission Control”. The product is **Lume**.

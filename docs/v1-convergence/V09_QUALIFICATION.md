@@ -10,18 +10,32 @@ Needs-you is success. Category E (unsafe / silent durable write) is the blocker.
 
 ---
 
-## Status
+## Status (current — 28 August 2026)
 
-**Stage 2 (authoritative live qualification) is BLOCKED.**
+**Stage 2 live qualification is COMPLETE. Capture is frozen for closed alpha.**
 
-Do not treat this document, this branch, or current `main` as a freeze.
+| Item | Value |
+| --- | --- |
+| Qualification model | `gpt-4o-mini-2024-07-18` (frozen; no bake-off) |
+| Qualified engine SHA | `2131444c77c3b06b666df393362a50112d2de56f` |
+| Merged `main` (PR #95) | `2e024d0bd04db87e7375a4c5b0106ccf4d4de31a` |
+| Scorer | **v3** (`src/lib/eval-capture-v2/scorer.ts`) |
+| Live result | LUME FAILURE **0** · LUME CATCH **22** · domain 100% · target-ID 100% |
+| Verdict | **PASS for closed-alpha freeze** |
 
-Authoritative `gpt-4o-mini-2024-07-18` runs happen only after Thor’s:
+The model still makes mistakes. Lume prevented those from becoming genuine unsafe/silent durable writes. That is the product standard. Do **not** reopen Capture tuning because model-level metrics are imperfect.
 
-1. stable-object-identity fix; and
-2. Capture V2-only convergence
+**Do not treat scorer-v1 historical failure counts as current product safety.** Those rows remain in artifacts as chronology, not as the freeze verdict.
 
-have landed on the SHA being qualified.
+Operating picture: [`docs/LUME_V09_TO_V1_HANDOFF.md`](../LUME_V09_TO_V1_HANDOFF.md).
+
+The remainder of this file is the **qualification programme as originally written**. Stages 1–2 below describe the work that has now happened; their “blocked / not yet” language is historical.
+
+---
+
+## Status (historical — as of Stage 2 blocked)
+
+**Stage 2 (authoritative live qualification) was blocked until Thor’s identity + V2-only work landed.** That work is now on `main` (PR #95). Keep the table below for chronology only. The freeze language in this historical block is **no longer current** — see Status (current) above.
 
 | Item | Value |
 | --- | --- |

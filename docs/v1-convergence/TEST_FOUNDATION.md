@@ -2,6 +2,8 @@
 
 Workstream B (Test, Regression & Model Evaluation Foundation) of Lume V1 Architectural Convergence.
 
+**Historical pack (28 August 2026):** this file records the test foundation as landed. Capture V2 is now the sole live engine. Closed-alpha qualification is in [`V09_QUALIFICATION.md`](./V09_QUALIFICATION.md) (scorer v3). The flag row below (`LUME_CAPTURE_V2` unset = legacy) is **no longer live**. Operating picture: [`docs/LUME_V09_TO_V1_HANDOFF.md`](../LUME_V09_TO_V1_HANDOFF.md).
+
 This branch **adds tests and measuring instruments**. It does **not** change how Capture V2 thinks, writes, or looks in production.
 
 The later engineering evidence dashboard (GitHub Issue + Actions summary) is documented in `docs/TEST_DASHBOARD.md`. It consumes this foundation; it does not replace it.

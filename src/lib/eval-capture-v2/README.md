@@ -28,7 +28,9 @@ Missing keys: explicit skip, exit 2, no invented pass.
 
 ## Frozen baseline
 
-See `src/lib/eval-capture-v2/baseline.ts`. Prompt/schema/model frozen against SHA `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`.
+See `src/lib/eval-capture-v2/baseline.ts`. Original eval-foundation freeze: SHA `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`.
+
+**Closed-alpha Capture freeze (28 August 2026):** qualified engine SHA `2131444c77c3b06b666df393362a50112d2de56f`, merged `main` `2e024d0bd04db87e7375a4c5b0106ccf4d4de31a` (PR #95). Live model `gpt-4o-mini-2024-07-18`, scorer **v3**, LUME FAILURE 0 / LUME CATCH 22. See `docs/v1-convergence/V09_QUALIFICATION.md` and `docs/LUME_V09_TO_V1_HANDOFF.md`. Historical scorer-v1 artifact rows are chronology, not current safety.
 
 Corpus composition (`capture-v2-eval-corpus-v1-hulk`) was **finalised BEFORE any live provider result was seen**. 22 cases: Candyland remains the largest world; Toyworld and GamingStudio5000 each hold several genuine semantic cases (not bait-only). After the first live run, do not alter the semantic corpus in response to model output.
 

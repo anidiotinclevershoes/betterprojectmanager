@@ -1,15 +1,33 @@
 # Lume documentation
 
-**Status:** Documentation authority map (26 August 2026)  
+**Status:** Documentation authority map (28 August 2026)  
 **Scope:** How to read Lume docs. This file does not replace product philosophy or current architecture.
 
 Use this page first. Then read only what the task needs.
+
+**v0.9 closed-alpha operating picture:** [`docs/LUME_V09_TO_V1_HANDOFF.md`](./LUME_V09_TO_V1_HANDOFF.md). That file is the current answer to what shipped, what is frozen, what debt remains, and the path to public V1. It does not replace the product constitution.
 
 ---
 
 ## Authority hierarchy
 
 Later files do **not** automatically win. “Newest file wins” is **not** the rule.
+
+### 0. v0.9 operating picture (closed alpha → V1)
+
+`docs/LUME_V09_TO_V1_HANDOFF.md`
+
+Governs:
+
+- what v0.9 actually is;
+- Capture freeze and qualification SHA;
+- parked surfaces (Coach hidden, Advise coming soon);
+- live two-account isolation evidence (including D-036);
+- remaining debt classifications;
+- tester-learning questions;
+- the compact v0.9 → V1 roadmap.
+
+If this file and an older PHASE / SLICE / experimental / architecture-flag table disagree on *current product reality*, **this file + the code win**.
 
 ### 1. Stable product / trust / UI constitution
 
@@ -94,13 +112,16 @@ Completion reports, PR checkpoints, and slice handovers must include a Plain-Eng
 For ordinary development:
 
 1. `docs/README.md` (this file)
-2. `docs/v1-reference-pack/README.md`
-3. `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` (including **Part C** — V1 Architectural Convergence decisions, 26 Aug 2026)
+2. `docs/LUME_V09_TO_V1_HANDOFF.md` (what v0.9 is, freeze, isolation, remaining debt, V1 path)
+3. `docs/v1-reference-pack/README.md`
 4. `docs/LUME_V1_KNOWN_DISCOVERIES.md`
-5. only the relevant historical `SLICE*` handover when extending that particular seam
-6. Intelligence Contract (`docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`) when doing Ask / eval / intelligence-scoring work
-7. `docs/EXPERIMENTAL_PROGRAMME.md` when working Capture V2, New Project V2, or Desert (experimental vs current)
-8. `docs/v1-convergence-mp/README.md` (and `SPIDERMAN_AMENDMENT.md`) when reconciling Magic Patterns / V1 UX with the frozen V2 product (reference only; not an implementation licence)
+5. `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` (implementation map — **Part A flag tables that still describe `LUME_CAPTURE_V2` as optional are stale**; code + v0.9 handoff win)
+6. only the relevant historical `SLICE*` handover when extending that particular seam
+7. Intelligence Contract (`docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`) when doing Ask / eval / intelligence-scoring work
+8. `docs/v1-convergence/V09_QUALIFICATION.md` when citing Capture eval evidence (scorer **v3**; historical v1 counts are not current safety)
+9. `docs/v1-convergence-mp/README.md` (and `SPIDERMAN_AMENDMENT.md`) when reconciling Magic Patterns / V1 UX (reference only; not an implementation licence)
+
+`docs/EXPERIMENTAL_PROGRAMME.md` is **superseded** as current-engine guidance. Capture V2 is the sole live Analyse → Review → Apply engine. New Project V2 remains env-flagged (`LUME_NEW_PROJECT_V2`) and is on in current Production.
 
 Then open operational docs only if the task is about tests, deploy, or persistence setup.
 
@@ -111,8 +132,9 @@ Then open operational docs only if the task is about tests, deploy, or persisten
 | Kind of question | Trust this | Do not silently prefer |
 | --- | --- | --- |
 | What should the product do? (trust, Capture, Ocean, V1 scope) | `docs/v1-reference-pack/`, except V1 KC scan order / Desert / first-run / Coach / Timeline / Accept-as-known UX rule → `docs/v1-convergence-mp/SPIDERMAN_AMENDMENT.md` | Historical handovers, old UI snapshots, root README product copy |
-| What does the code do now? | Current Architecture Handoff, then the code | 19 Aug Project Truth Audit; `docs/current-state/`; SLICE/PHASE bodies |
-| What debt is open vs fixed? | Known Discoveries (open vs resolved sections) | Duplicate headings, historical “still missing” notes, plans |
+| What does the code do now? | The code, then the v0.9 handoff, then the Current Architecture Handoff (with stale Capture-flag caveat) | 19 Aug Project Truth Audit; `docs/current-state/`; SLICE/PHASE bodies; `docs/EXPERIMENTAL_PROGRAMME.md` flag tables |
+| What is in v0.9 / what is frozen / what is next? | `docs/LUME_V09_TO_V1_HANDOFF.md` | Phase 3 “unfinished programme” language; old scorer-v1 counts; Coach-as-live-surface docs |
+| What debt is open vs fixed? | Known Discoveries (open vs resolved sections) + v0.9 handoff §10 | Duplicate headings, historical “still missing” notes, plans |
 | How should Ask/evals score? | Intelligence Contract, reconciled with the pack | Benchmark-chasing notes in old phase handovers |
 
 A newer historical handover does **not** outrank the constitution, the current architecture handoff, or Known Discoveries.
@@ -128,7 +150,9 @@ Left in place on purpose. They record *why* the architecture evolved.
 | Pre-slice architecture snapshot | `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` (19 Aug 2026) | Original failure analysis; **superseded as an implementation map** |
 | UI/application snapshot | `docs/current-state/` (11 Aug 2026) | Screenshots and pre-Ocean / pre-Supabase UI evidence |
 | Slice / phase handovers | `docs/SLICE*.md`, `docs/PHASE*.md`, completion reports, `docs/V1_CONVERGENCE_ARCHITECTURE_COMPLETION.md` | Seam history when extending that slice; architecture review checkpoint |
-| Older product copy | repository root `README.md` | Setup remnants; not current product/architecture authority |
+| Older product copy | repository root `README.md` (corrected enough to point here; remaining Mission Control copy is historical) | Setup remnants; not current product/architecture authority |
+| Experimental programme | `docs/EXPERIMENTAL_PROGRAMME.md` | Decision record from 25 Aug 2026. **Capture V2 is no longer experimental.** |
+| Capture qualification (pre-freeze) | Historical “Stage 2 blocked” sections inside `docs/v1-convergence/V09_QUALIFICATION.md` | Chronology only; current status is at the top of that file |
 
 Do not move or delete these in ordinary work. Do not rewrite them to pretend they always described today’s system.
 
