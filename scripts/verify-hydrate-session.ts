@@ -100,6 +100,7 @@ async function main() {
       "utf8",
     );
     assert.match(cleanup, /lume-mission-supabase-cache-v1/);
+    assert.match(cleanup, /lume-hydrated-auth-user-id/);
   });
 
   await check("waitForBrowserUser resolves from auth event", async () => {

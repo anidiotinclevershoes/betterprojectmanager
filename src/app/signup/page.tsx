@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import {
   AuthLinkRow,
@@ -8,13 +7,16 @@ import {
   AuthShell,
 } from "@/components/auth/AuthShell";
 import {
+  navigateAuthBoundary,
+} from "@/lib/auth-mission-ownership";
+import {
   friendlyAuthError,
   passwordRequirementsCopy,
   validatePassword,
 } from "@/lib/auth-password";
+import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,8 +50,8 @@ export default function SignupPage() {
         setCheckEmail(true);
         return;
       }
-      router.replace("/");
-      router.refresh();
+      clearAuthenticatedBrowserState();
+      navigateAuthBoundary("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create account");
     } finally {

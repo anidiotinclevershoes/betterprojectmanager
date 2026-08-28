@@ -65,6 +65,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "production-config", script: "scripts/verify-production-config.ts" },
   { name: "phase2-auth", script: "scripts/verify-phase2-auth.ts" },
   { name: "hydrate-session", script: "scripts/verify-hydrate-session.ts" },
+  { name: "d036-session-switch", script: "scripts/verify-d036-session-switch.ts" },
   { name: "model-tidy", script: "scripts/verify-model-tidy.ts" },
 ];
 

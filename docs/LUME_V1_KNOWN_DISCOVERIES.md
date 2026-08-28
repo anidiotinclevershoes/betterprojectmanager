@@ -587,6 +587,23 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
+### D-036 — Same-browser SPA logout → login displays previous user's in-memory workspace
+
+| Field | Value |
+| --- | --- |
+| **Status** | open — code repair in this slice; **CLOSED only after live two-account retest on deployed production** |
+| **Severity** | high (display / shared-device; not RLS/IDOR) |
+| **Domain** | Auth / hydrate / tenant display |
+| **Found in** | v0.9 live two-account isolation (28 August 2026) |
+| **Failure class** | After Sign out → SPA login as a different user without remounting `MissionProvider`, the UI can paint the previous user's project while chrome shows the new user. Authenticated APIs fail-closed. |
+| **Proposed fix direction** | Auth-boundary full document navigation on login/logout/signup; reset MissionState when authenticated `user.id` changes; do not paint supabase cache unless it matches the hydrated user. |
+| **Regression test to add** | `scripts/verify-d036-session-switch.ts` |
+| **Target resolution / validation point** | v0.9 closure — live B→A / A→B session switch |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md` (when present on main) |
+| **Notes** | Server isolation already proven. Do not unfreeze Capture. Do not treat this as an RLS bug. |
+
+---
+
 ## Resolved discoveries (reference)
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
