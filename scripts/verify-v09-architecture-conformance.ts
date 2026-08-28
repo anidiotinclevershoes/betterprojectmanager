@@ -266,8 +266,8 @@ async function main() {
           assert.ok(mock.calls.length >= 1, "OpenAI extract seam was not called");
           const prompt = mock.calls.join("\n");
           assert.match(prompt, /You extract atomic project observations/);
-          assert.match(prompt, RAW_NARRATIVE.trim().slice(0, 40));
-          assert.match(prompt, CAPTURE_V2_OBSERVATION_SCHEMA.slice(0, 40));
+          assert.ok(prompt.includes(RAW_NARRATIVE.trim().slice(0, 40)));
+          assert.ok(prompt.includes(CAPTURE_V2_OBSERVATION_SCHEMA.slice(0, 40)));
           assert.doesNotMatch(prompt, /You organise messy project start notes/);
           assert.doesNotMatch(prompt, /You extract a Lume project setup draft/);
           const body = (await res.json()) as {
@@ -435,7 +435,7 @@ async function main() {
           risks: [{ title: "Vendor SLA slip" }],
         });
         let state = await load(fake);
-        const risk = state.risks.find((r) => r.projectId === PROJECT_A);
+        const risk = (state.risks ?? []).find((r) => r.projectId === PROJECT_A);
         assert.ok(risk);
         const world = worldFromCaptureState(state);
         const pipeline = runCaptureV2FromModelJson({
@@ -482,7 +482,7 @@ async function main() {
         assert.equal(applied.executed.kind, "needs_you");
         assert.equal(durableSnapshot(fake), before);
         assert.equal(
-          (await load(fake)).risks.find((r) => r.id === risk!.id)?.status,
+          (await load(fake)).risks?.find((r) => r.id === risk!.id)?.status,
           "watch",
         );
       },
@@ -495,7 +495,7 @@ async function main() {
         const fake = new FakeWorkspaceClient();
         await seedAB(fake);
         const state = await load(fake);
-        const foreign = state.risks.find((r) => r.projectId === PROJECT_B);
+        const foreign = (state.risks ?? []).find((r) => r.projectId === PROJECT_B);
         assert.ok(foreign, "Project B must have a risk to steal");
         const before = durableSnapshot(fake);
         const applied = await applyApprovedCaptureSuggestion({
@@ -531,10 +531,10 @@ async function main() {
         assert.equal(durableSnapshot(fake), before);
         const reloaded = await load(fake);
         assert.equal(
-          reloaded.risks.find((r) => r.id === foreign!.id)?.status,
+          reloaded.risks?.find((r) => r.id === foreign!.id)?.status,
           foreign!.status ?? "open",
         );
-        assert.equal(reloaded.risks.find((r) => r.id === foreign!.id)?.projectId, PROJECT_B);
+        assert.equal(reloaded.risks?.find((r) => r.id === foreign!.id)?.projectId, PROJECT_B);
       },
     );
 
