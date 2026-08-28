@@ -54,7 +54,7 @@ function LoginForm() {
   return (
     <AuthShell
       title="Sign in"
-      lede="Access your Lume workspace."
+      lede="Open your Lume workspace."
       footer={
         <>
           <AuthLinkRow>
@@ -68,7 +68,8 @@ function LoginForm() {
     >
       {notice === "check-email" ? (
         <p className="auth-notice" role="status">
-          Check your email for a confirmation link, then sign in.
+          Check your email for a confirmation link, then sign in. You&apos;ll
+          land on New Project if this is your first workspace.
         </p>
       ) : null}
       {notice === "password-updated" ? (

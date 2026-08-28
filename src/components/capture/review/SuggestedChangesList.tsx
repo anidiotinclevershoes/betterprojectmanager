@@ -101,10 +101,10 @@ export function SuggestedChangesList({
               id="capture-changes-title"
               className="capture-review-section-title"
             >
-              Review Changes
+              Check these changes
             </h3>
             <p className="capture-review-progress" role="status">
-              Reviewed {opReviewed} of {opTotal}
+              Checked {opReviewed} of {opTotal}
             </p>
           </div>
           <div className="capture-changes-counts" aria-label="Review counts">
@@ -115,7 +115,7 @@ export function SuggestedChangesList({
               ·
             </span>
             <span className="capture-count-inline">
-              Needs Review <strong>{needsReviewCount}</strong>
+              Needs you <strong>{needsReviewCount}</strong>
             </span>
             {unmatchedCount > 0 ? (
               <>
@@ -141,7 +141,7 @@ export function SuggestedChangesList({
         </div>
 
         {opTotal === 0 ? (
-          <p className="empty-copy">No operational changes to review.</p>
+          <p className="empty-copy">Nothing to apply.</p>
         ) : (
           <ul className="suggested-change-list">
             {ordered.map((model) => (

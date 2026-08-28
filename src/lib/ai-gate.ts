@@ -45,7 +45,13 @@ function displayNameFromUser(user: {
 }
 
 export async function requireAiCaller(
-  feature: "capture" | "coach" | "transcribe" | "new-project" | "tell-me",
+  feature:
+    | "capture"
+    | "coach"
+    | "transcribe"
+    | "new-project"
+    | "tell-me"
+    | "catch-me-up",
 ): Promise<AiGateOk | AiGateFail> {
   const mode = getAuthMode();
 
@@ -154,7 +160,9 @@ export async function requireAiCaller(
           ? limits.transcribePerHour
           : feature === "tell-me"
             ? limits.tellMePerHour
-            : limits.newProjectPerHour;
+            : feature === "catch-me-up"
+              ? limits.catchMeUpPerHour
+              : limits.newProjectPerHour;
 
   const result = checkRateLimit({
     key: `${feature}:${userId}`,

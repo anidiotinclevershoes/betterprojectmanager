@@ -4,7 +4,6 @@ import { applyApprovedCaptureSuggestion } from "@/lib/capture/apply/apply-approv
 import { parseExpectedTarget } from "@/lib/capture/apply/expected-target";
 import { supabaseCaptureApplyHooks } from "@/lib/capture/apply/persist-execute";
 import type { PendingSuggestion } from "@/lib/capture/suggestions";
-import { isCaptureV2Enabled } from "@/lib/capture-v2";
 import {
   CaptureServerTruthError,
   loadServerCaptureWorld,
@@ -29,13 +28,6 @@ export async function POST(request: Request) {
   try {
     const gate = await requireAiCaller("capture");
     if (!gate.ok) return gate.response;
-
-    if (!isCaptureV2Enabled()) {
-      return NextResponse.json(
-        { error: "Capture V2 apply is not enabled.", code: "v2_disabled" },
-        { status: 404 },
-      );
-    }
 
     const body = (await request.json()) as Body;
     const projectId = body.projectId?.trim();

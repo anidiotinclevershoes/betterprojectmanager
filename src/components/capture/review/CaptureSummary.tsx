@@ -13,18 +13,18 @@ export function CaptureSummary({
   /** Unique validated project-state changes. */
   changesDetected: number;
   readyCount: number;
-  /** Needs Review + Unmatched. */
+  /** Needs you + Unmatched. */
   needsAttentionCount: number;
   onSelectObservation?: (observation: CaptureObservation) => void;
 }) {
   return (
     <section className="capture-summary-panel" aria-labelledby="capture-understood-title">
       <h3 id="capture-understood-title" className="capture-review-section-title">
-        What Lume Understood
+        Here’s what I understood
       </h3>
 
       {observations.length === 0 ? (
-        <p className="meta">No clear project observations extracted.</p>
+        <p className="meta">Nothing clear enough to act on yet.</p>
       ) : (
         <ul className="capture-observation-list">
           {observations.map((obs) => {
@@ -33,8 +33,14 @@ export function CaptureSummary({
             const content = (
               <>
                 <span className="capture-observation-main">
-                  <span className="capture-observation-check" aria-hidden>
-                    ✓
+                  <span
+                    className={`capture-observation-check ${statusClass}`}
+                    aria-hidden
+                  >
+                    {obs.actionStatus === "needs_review" ||
+                    obs.actionStatus === "unmatched"
+                      ? "⚠"
+                      : "✓"}
                   </span>
                   <span className="capture-observation-text">{obs.text}</span>
                 </span>
@@ -75,15 +81,13 @@ export function CaptureSummary({
 
       <p className="capture-summary-line" role="status">
         <span>
-          {changesDetected} project change{changesDetected === 1 ? "" : "s"}{" "}
-          detected
+          {changesDetected} change{changesDetected === 1 ? "" : "s"}
         </span>
         <span aria-hidden>·</span>
         <span>{readyCount} ready</span>
         <span aria-hidden>·</span>
         <span>
-          {needsAttentionCount} need{needsAttentionCount === 1 ? "s" : ""}{" "}
-          attention
+          {needsAttentionCount} need{needsAttentionCount === 1 ? "s" : ""} you
         </span>
       </p>
     </section>

@@ -1,11 +1,10 @@
 /**
- * Capture V2 experimental path — flag only.
- * Unset / "0" = legacy Capture. "1" = observation extraction + resolver + Phase 3B apply.
+ * Capture V2 is the only production Capture engine.
+ * `LUME_CAPTURE_V2` is ignored so a missing or mis-set flag cannot
+ * route Analyse/Apply back to the deleted legacy findings path.
  */
-
 export function isCaptureV2Enabled(
-  env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
+  _env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
 ): boolean {
-  const raw = env.LUME_CAPTURE_V2?.trim();
-  return raw === "1" || raw === "true";
+  return true;
 }

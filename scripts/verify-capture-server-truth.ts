@@ -65,6 +65,26 @@ function riskEnvelope(targetId: string, status = "resolved") {
   };
 }
 
+function projectTruth(state: MissionState, projectId: string) {
+  return {
+    people: (state.projects.find((p) => p.id === projectId)?.stakeholders ?? [])
+      .map((s) => ({ id: s.id, name: s.name, role: s.role }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    risks: (state.risks ?? [])
+      .filter((r) => r.projectId === projectId)
+      .map((r) => ({ id: r.id, title: r.title, status: r.status }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    todos: (state.todos ?? [])
+      .filter((t) => t.projectId === projectId)
+      .map((t) => ({ id: t.id, title: t.title, done: Boolean(t.done) }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    dates: (state.timeline ?? [])
+      .filter((t) => t.projectId === projectId)
+      .map((t) => ({ id: t.id, label: t.label, startAt: t.startAt }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+  };
+}
+
 let passed = 0;
 async function check(name: string, fn: () => void | Promise<void>) {
   await Promise.resolve()
@@ -304,6 +324,59 @@ async function main() {
     );
   });
 
+  await check("visibility: Apply adopted state is committed — subsequent server load matches without a hard refresh", async () => {
+    const applied = await applyApprovedCaptureSuggestion({
+      item: {
+        id: "s-visibility",
+        kind: "risk",
+        op: "complete",
+        content: "Gumdrop Bridge icing is resolved",
+        destination: "project",
+        projectId: CANDY,
+        legalDomain: "risk",
+        targetEntityId: "risk-bridge",
+        proposedValues: { status: "resolved" },
+      },
+      text: "Gumdrop Bridge icing is resolved",
+      projectId: CANDY,
+      expectedTarget: {
+        id: "risk-bridge",
+        domain: "risk",
+        title: "Gumdrop Bridge icing",
+        status: "open",
+      },
+      loadWorkspace: async () => workspaceFrom(clone(durable)),
+    });
+    assert.equal(applied.executed.kind, "wrote");
+    assert.equal(
+      applied.state.risks?.find((r) => r.id === "risk-bridge")?.status,
+      "resolved",
+      "returned Apply state must already represent the committed result",
+    );
+
+    const subsequent = await loadServerCaptureWorld({
+      projectId: CANDY,
+      loadWorkspace: async () => workspaceFrom(applied.state),
+    });
+    assert.equal(
+      subsequent.world.risks.find((r) => r.id === "risk-bridge")?.status,
+      "resolved",
+    );
+    assert.deepEqual(
+      projectTruth(subsequent.workspaceState, CANDY),
+      projectTruth(applied.state, CANDY),
+      "a subsequent server load must return the same relevant project truth — no hard refresh required",
+    );
+    assert.deepEqual(
+      projectTruth(subsequent.state, CANDY),
+      projectTruth(applied.state, CANDY),
+    );
+    assert.equal(
+      subsequent.workspaceState.risks?.find((r) => r.id === "risk-packaging")?.status,
+      "open",
+    );
+  });
+
   await check("H: Candyland / Toyworld / GamingStudio5000 isolation", async () => {
     const candy = await loadServerCaptureWorld({
       projectId: CANDY,
@@ -521,10 +594,12 @@ async function main() {
     assert.match(route, /postCaptureV2/);
     assert.match(route, /ignoredClientTruth/);
     const v2Fn = route.slice(route.indexOf("async function postCaptureV2"));
-    const v2Body = v2Fn.slice(0, v2Fn.indexOf("async function postCaptureLegacy"));
-    assert.doesNotMatch(v2Body, /worldFromCaptureState\(\{[\s\S]*body\.state/);
-    assert.doesNotMatch(v2Body, /body\.state\?\.projects/);
-    assert.match(v2Body, /loadServerCaptureWorld/);
+    assert.doesNotMatch(route, /postCaptureLegacy/);
+    assert.doesNotMatch(route, /tidyAndCoachWithOpenAI/);
+    assert.doesNotMatch(route, /isCaptureV2Enabled\(\)/);
+    assert.doesNotMatch(v2Fn, /worldFromCaptureState\(\{[\s\S]*body\.state/);
+    assert.doesNotMatch(v2Fn, /body\.state\?\.projects/);
+    assert.match(v2Fn, /loadServerCaptureWorld/);
 
     const apply = readFileSync(
       join(ROOT, "src/app/api/capture/apply/route.ts"),
@@ -534,6 +609,8 @@ async function main() {
     assert.match(apply, /loadServerCaptureWorld/);
     assert.match(apply, /planCaptureApply|applyApprovedCaptureSuggestion/);
     assert.doesNotMatch(apply, /body\.state/);
+    assert.doesNotMatch(apply, /isCaptureV2Enabled/);
+    assert.doesNotMatch(apply, /v2_disabled/);
     assert.match(apply, /requireAiCaller/);
   });
 
@@ -543,6 +620,8 @@ async function main() {
       "utf8",
     );
     assert.match(client, /fetch\("\/api\/capture\/apply"/);
+    assert.doesNotMatch(client, /planCaptureApply/);
+    assert.doesNotMatch(client, /executeCaptureApply/);
     const applyBlock = client.slice(client.indexOf("/api/capture/apply"));
     const payload = applyBlock.slice(
       applyBlock.indexOf("JSON.stringify"),

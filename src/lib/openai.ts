@@ -39,6 +39,12 @@ export function getOpenAIKey() {
   return key;
 }
 
+export function withOpenAiChatPrivacy<T extends Record<string, unknown>>(
+  body: T,
+): T & { store: false } {
+  return { ...body, store: false };
+}
+
 export function isOpenAIConfigured() {
   const key = getOpenAIKey();
   return key.startsWith("sk-") && key.length > 20;

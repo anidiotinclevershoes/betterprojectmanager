@@ -48,9 +48,9 @@ async function main() {
     assert.ok(extract.includes("resolveOpenAIChatModel()"));
   });
 
-  await check("V2 flag behaviour is unchanged", () => {
-    assert.equal(isCaptureV2Enabled({}), false);
-    assert.equal(isCaptureV2Enabled({ LUME_CAPTURE_V2: "0" }), false);
+  await check("V2 cannot be disabled by the old flag", () => {
+    assert.equal(isCaptureV2Enabled({}), true);
+    assert.equal(isCaptureV2Enabled({ LUME_CAPTURE_V2: "0" }), true);
     assert.equal(isCaptureV2Enabled({ LUME_CAPTURE_V2: "1" }), true);
     assert.equal(isCaptureV2Enabled({ LUME_CAPTURE_V2: "true" }), true);
   });

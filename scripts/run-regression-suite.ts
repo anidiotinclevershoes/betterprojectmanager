@@ -19,6 +19,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "ask-context-authority", script: "scripts/verify-ask-context-authority.ts" },
   { name: "ocean-knowledge-centre", script: "scripts/verify-ocean-knowledge-centre.ts" },
   { name: "ocean-capture", script: "scripts/verify-ocean-capture.ts" },
+  { name: "capture-experience", script: "scripts/verify-capture-experience.ts" },
   { name: "ocean-item-detail", script: "scripts/verify-ocean-item-detail.ts" },
   { name: "people-context-ui", script: "scripts/verify-people-context-ui.ts" },
   { name: "capture-trust-boundary", script: "scripts/verify-capture-trust-boundary.ts" },
@@ -31,14 +32,22 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "capture-v2-invariants", script: "scripts/verify-capture-v2-invariants.ts" },
   { name: "person-identity-safety", script: "scripts/verify-person-identity-safety.ts" },
   { name: "stacked-capture", script: "scripts/verify-stacked-capture.ts" },
+  { name: "stable-object-identity", script: "scripts/verify-stable-object-identity.ts" },
+  { name: "resurrection", script: "scripts/verify-resurrection.ts" },
+  // Harbourline frozen-envelope stress (`npm run verify:eval-stress`) is Gate 3
+  // observe-only. It exits 1 on adversarial envelopes that become Apply Ready.
+  // Do not heuristic-patch production to make it green. Live gpt-4o-mini is
+  // the freeze authority.
   { name: "test-dashboard", script: "scripts/verify-test-dashboard.ts" },
   { name: "new-project-v2", script: "scripts/verify-new-project-v2.ts" },
+  { name: "first-run-journey", script: "scripts/verify-first-run-journey.ts" },
   { name: "desert-theme", script: "scripts/verify-desert-theme.ts" },
   { name: "phase6-worlds", script: "scripts/verify-phase6-worlds.ts" },
   { name: "canonical-truth", script: "scripts/verify-canonical-truth.ts" },
   { name: "tell-me", script: "scripts/verify-tell-me.ts" },
   { name: "tell-me-server-truth", script: "scripts/verify-tell-me-server-truth.ts" },
   { name: "capture-server-truth", script: "scripts/verify-capture-server-truth.ts" },
+  { name: "catch-me-up", script: "scripts/verify-catch-me-up.ts" },
   { name: "capture-context", script: "scripts/verify-capture-context.ts" },
   { name: "capture-review", script: "scripts/verify-capture-review.ts" },
   { name: "capture-workspace", script: "scripts/verify-capture-workspace-refinement.ts" },

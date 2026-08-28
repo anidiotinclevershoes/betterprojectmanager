@@ -13,7 +13,12 @@ import { CAPTURE_V2_EVAL_CORPUS } from "./corpus";
 import { frozenEnvelopeFor, FROZEN_MODEL_OUTPUTS } from "./frozen-model-outputs";
 import type { EvalWorldId } from "./types";
 
-export type StackedReview = "no_change" | "apply" | "needs_you" | "apply_or_no_change";
+export type StackedReview =
+  | "no_change"
+  | "apply"
+  | "needs_you"
+  | "apply_or_no_change"
+  | "mixed";
 
 export type StackedBindTarget = {
   domain: "todo" | "person" | "risk" | "milestone";
@@ -32,7 +37,7 @@ export type StackedStep = {
 };
 
 export type StackedStory = {
-  id: "candyland" | "toyworld" | "gamingstudio5000";
+  id: string;
   title: string;
   world: EvalWorldId;
   projectId: string;

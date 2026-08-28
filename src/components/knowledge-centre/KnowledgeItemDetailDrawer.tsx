@@ -47,6 +47,7 @@ export function KnowledgeItemDetailDrawer({
     string | null
   >(null);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [moreDetails, setMoreDetails] = useState(false);
 
   const detail = useMemo(() => {
     if (!selected) return null;
@@ -60,6 +61,7 @@ export function KnowledgeItemDetailDrawer({
     setHandoverScope(null);
     setHandoverReplacePersonId(null);
     setLocalError(null);
+    setMoreDetails(false);
   }, [selected, detail?.body]);
 
   useEffect(() => {
@@ -144,14 +146,18 @@ export function KnowledgeItemDetailDrawer({
         aria-modal="true"
         aria-label="Knowledge item detail"
         data-testid="ocean-item-detail-drawer"
+        data-overlay="true"
         data-item-kind={selected?.kind}
         data-project-id={projectId}
       >
         <header className="ocean-item-detail-header">
-          <div>
+          <div className="min-w-0">
             <p className="ocean-item-detail-kicker">
-              {detail?.title ?? "Item"}
+              {detail?.domain ?? "Item"}
             </p>
+            <h2 className="ocean-item-detail-heading">
+              {detail?.title ?? "Item"}
+            </h2>
             {detail?.subtitle ? (
               <p className="ocean-item-detail-subtitle">{detail.subtitle}</p>
             ) : null}
@@ -193,50 +199,27 @@ export function KnowledgeItemDetailDrawer({
                 </p>
               ) : null}
 
-              {editing ? (
-                <label className="ocean-item-detail-edit">
-                  <span className="sr-only">Edit content</span>
-                  <textarea
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    rows={5}
-                    data-testid="ocean-item-detail-edit-input"
-                  />
-                </label>
-              ) : (
-                <p
-                  className="ocean-item-detail-content"
-                  data-testid="ocean-item-detail-body"
-                >
-                  {detail.body}
-                </p>
-              )}
-
-              {detail.previousValue ? (
-                <section
-                  className="ocean-item-detail-section"
-                  data-testid="ocean-item-detail-previous"
-                >
-                  <h4>{detail.previousLabel ?? "Previously"}</h4>
-                  <p className="ocean-item-detail-previous">
-                    {detail.previousValue}
+              <section className="ocean-item-detail-section">
+                <h4>Right now</h4>
+                {editing ? (
+                  <label className="ocean-item-detail-edit">
+                    <span className="sr-only">Edit content</span>
+                    <textarea
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      rows={5}
+                      data-testid="ocean-item-detail-edit-input"
+                    />
+                  </label>
+                ) : (
+                  <p
+                    className="ocean-item-detail-content"
+                    data-testid="ocean-item-detail-body"
+                  >
+                    {detail.body}
                   </p>
-                </section>
-              ) : null}
-
-              {detail.provenanceLines.length ? (
-                <section
-                  className="ocean-item-detail-section"
-                  data-testid="ocean-item-detail-provenance"
-                >
-                  <h4>Why Lume believes this</h4>
-                  <ul>
-                    {detail.provenanceLines.map((line, i) => (
-                      <li key={`${line}-${i}`}>{line}</li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
+                )}
+              </section>
 
               {detail.domain === "person" && detail.personBundle ? (
                 <section
@@ -354,7 +337,7 @@ export function KnowledgeItemDetailDrawer({
                   className="ocean-item-detail-section"
                   data-testid="ocean-item-detail-relations"
                 >
-                  <h4>Related</h4>
+                  <h4>Connected to</h4>
                   <ul>
                     {detail.relations.map((r) => (
                       <li key={`${r.kind}-${r.id}`}>{r.label}</li>
@@ -363,32 +346,62 @@ export function KnowledgeItemDetailDrawer({
                 </section>
               ) : null}
 
-              {detail.assumptions.length ? (
-                <section
-                  className="ocean-item-detail-section"
-                  data-testid="ocean-item-detail-assumptions"
-                >
-                  <h4>Assumptions / notes</h4>
-                  <ul>
-                    {detail.assumptions.map((a, i) => (
-                      <li key={`${a}-${i}`}>{a}</li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
+              {moreDetails ? (
+                <>
+                  {detail.previousValue ? (
+                    <section
+                      className="ocean-item-detail-section"
+                      data-testid="ocean-item-detail-previous"
+                    >
+                      <h4>{detail.previousLabel ?? "Previously"}</h4>
+                      <p className="ocean-item-detail-previous">
+                        {detail.previousValue}
+                      </p>
+                    </section>
+                  ) : null}
 
-              {detail.honestyNotes.length ? (
-                <section
-                  className="ocean-item-detail-section ocean-item-detail-honesty"
-                  data-testid="ocean-item-detail-honesty"
-                >
-                  <h4>Evidence limits</h4>
-                  <ul>
-                    {detail.honestyNotes.map((n, i) => (
-                      <li key={`${n}-${i}`}>{n}</li>
-                    ))}
-                  </ul>
-                </section>
+                  {detail.provenanceLines.length ? (
+                    <section
+                      className="ocean-item-detail-section"
+                      data-testid="ocean-item-detail-provenance"
+                    >
+                      <h4>Why Lume believes this</h4>
+                      <ul>
+                        {detail.provenanceLines.map((line, i) => (
+                          <li key={`${line}-${i}`}>{line}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+
+                  {detail.assumptions.length ? (
+                    <section
+                      className="ocean-item-detail-section"
+                      data-testid="ocean-item-detail-assumptions"
+                    >
+                      <h4>Assumptions / notes</h4>
+                      <ul>
+                        {detail.assumptions.map((a, i) => (
+                          <li key={`${a}-${i}`}>{a}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+
+                  {detail.honestyNotes.length ? (
+                    <section
+                      className="ocean-item-detail-section ocean-item-detail-honesty"
+                      data-testid="ocean-item-detail-honesty"
+                    >
+                      <h4>Evidence limits</h4>
+                      <ul>
+                        {detail.honestyNotes.map((n, i) => (
+                          <li key={`${n}-${i}`}>{n}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+                </>
               ) : null}
 
               {confirmOwnerOpen && detail.canConfirmOwner ? (
@@ -553,6 +566,20 @@ export function KnowledgeItemDetailDrawer({
                     {detail.canAssignResponsibility
                       ? "Assign ownership"
                       : "Confirm owner"}
+                  </button>
+                ) : null}
+                {detail.previousValue ||
+                detail.provenanceLines.length ||
+                detail.assumptions.length ||
+                detail.honestyNotes.length ? (
+                  <button
+                    type="button"
+                    className="ghost-btn ml-auto"
+                    onClick={() => setMoreDetails((open) => !open)}
+                    aria-expanded={moreDetails}
+                    data-testid="ocean-item-detail-more"
+                  >
+                    {moreDetails ? "Fewer details" : "More details"}
                   </button>
                 ) : null}
               </>

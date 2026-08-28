@@ -117,8 +117,9 @@ function testOceanCaptureAiAffordanceAndInputs() {
   assert.match(capture, /ocean-capture-record/);
   assert.match(capture, /Record/);
   assert.match(capture, /ocean-capture-review-boundary/);
-  assert.match(capture, /Nothing enters maintained project truth/);
-  assert.match(capture, /until you approve/);
+  assert.match(capture, /Nothing is saved until you approve/);
+  assert.match(capture, /Tell Lume what changed/);
+  assert.match(capture, /AnnotatedTranscript/);
 }
 
 function testAnalyseDoesNotWriteMaintainedTruth() {
@@ -200,7 +201,9 @@ function testImmediateMergeCapturePathDeleted() {
   assert.match(store, /analyzeCaptureWithAI/);
   const session = readSrc("src/components/capture/CaptureSessionContext.tsx");
   assert.match(session, /applyOne/);
-  assert.match(session, /planCaptureApply/);
+  assert.match(session, /\/api\/capture\/apply/);
+  assert.doesNotMatch(session, /planCaptureApply/);
+  assert.doesNotMatch(session, /executeCaptureApply/);
   assert.equal(existsSync(join(ROOT, "src/components/CaptureBar.tsx")), false);
   assert.equal(
     existsSync(join(ROOT, "src/components/RecommendationItem.tsx")),

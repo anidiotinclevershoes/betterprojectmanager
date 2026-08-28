@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CatchMeUpPanel } from "@/components/catch-me-up/CatchMeUpPanel";
 import { CaptureWorkspace } from "@/components/capture/CaptureWorkspace";
 import { DeleteProjectButton } from "@/components/knowledge-centre/DeleteProjectButton";
 import { KnowledgeSearchAskBar } from "@/components/knowledge-centre/KnowledgeSearchAskBar";
@@ -14,7 +15,7 @@ import type { Project } from "@/lib/types";
 
 /**
  * Ocean V1 selected-project workspace.
- * Capture and Knowledge Centre are modes of one shell — not separate apps.
+ * Capture, Knowledge Centre, and Catch Me Up are modes of one shell.
  */
 export function OceanProjectWorkspace({ project }: { project: Project }) {
   const [mode, setMode] = useState<OceanProjectMode>("knowledge");
@@ -38,8 +39,9 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
           </p>
           <DeleteProjectButton project={project} />
         </div>
-        <ProjectModeSelector mode={mode} onChange={setMode} />
       </header>
+
+      <ProjectModeSelector mode={mode} onChange={setMode} />
 
       {mode === "knowledge" ? (
         <div
@@ -61,6 +63,16 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
             defaultProjectId={project.id}
             variant="ocean"
           />
+        </div>
+      ) : null}
+
+      {mode === "catch-me-up" ? (
+        <div
+          className="ocean-catch-me-up-mode"
+          data-testid="ocean-catch-me-up-mode"
+          data-mode="catch-me-up"
+        >
+          <CatchMeUpPanel projectId={project.id} />
         </div>
       ) : null}
 
