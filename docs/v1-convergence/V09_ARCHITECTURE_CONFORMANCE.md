@@ -4,7 +4,7 @@
 
 **Exact SHA this pack was measured against:** `add3532` (`origin/main`, 2026-08-28).
 
-**Branch:** `cursor/v1-v09-architecture-conformance-610b`
+**Pack HEAD:** `fc5a393` on `cursor/v1-v09-architecture-conformance-610b`.
 
 **Command:** `npm run verify:v09-architecture`
 
