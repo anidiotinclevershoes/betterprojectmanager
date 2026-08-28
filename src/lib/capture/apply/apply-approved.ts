@@ -7,13 +7,15 @@
  */
 import type { LoadedWorkspace } from "@/lib/data/supabase/load-mission-state";
 import type { PendingSuggestion } from "@/lib/capture/suggestions";
-import type { MissionState } from "@/lib/types";
+import type { HistoryEvent, MissionState } from "@/lib/types";
+import { makeHistoryEvent, pushHistory } from "@/lib/workspace/history";
 import { planCaptureApply } from "./dispatch";
 import {
   executeCaptureApply,
   type CaptureApplyHooks,
   type CaptureExecuteResult,
 } from "./execute";
+import { historyInputFromCaptureOperation } from "./history-evidence";
 import type { CaptureApplyDecision } from "./types";
 import {
   staleExpectedTargetReason,
@@ -48,6 +50,13 @@ export async function applyApprovedCaptureSuggestion(args: {
   expectedTarget?: CaptureExpectedTarget | null;
   loadWorkspace?: () => Promise<LoadedWorkspace>;
   hooks?: CaptureApplyHooks;
+  /**
+   * Durable History evidence. Called only after the authoritative write
+   * succeeded. Failure here must not roll back that write.
+   */
+  recordHistory?: (
+    event: Omit<HistoryEvent, "id" | "createdAt">,
+  ) => Promise<void>;
   /** After a durable persist execute, reload the full workspace. */
   reloadWorkspace?: () => Promise<MissionState>;
 }): Promise<ApplyApprovedCaptureResult> {
@@ -91,6 +100,27 @@ export async function applyApprovedCaptureSuggestion(args: {
   const box = { state: structuredClone(loaded.workspaceState) };
   const hooks = args.hooks ?? memoryCaptureApplyHooks(box);
   const executed = await executeCaptureApply(decision, hooks);
+
+  if (executed.kind === "wrote" && decision.kind === "write") {
+    const historyInput = historyInputFromCaptureOperation({
+      operation: decision.operation,
+      evidence: args.text,
+    });
+    if (!args.hooks) {
+      box.state = pushHistory(box.state, makeHistoryEvent(historyInput));
+    }
+    if (args.recordHistory) {
+      try {
+        await args.recordHistory(historyInput);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          "[applyApprovedCaptureSuggestion] history evidence skipped",
+          message,
+        );
+      }
+    }
+  }
 
   let state = args.hooks ? loaded.workspaceState : box.state;
   if (executed.kind === "wrote" && args.reloadWorkspace) {

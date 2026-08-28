@@ -48,6 +48,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "tell-me", script: "scripts/verify-tell-me.ts" },
   { name: "tell-me-server-truth", script: "scripts/verify-tell-me-server-truth.ts" },
   { name: "capture-server-truth", script: "scripts/verify-capture-server-truth.ts" },
+  { name: "capture-apply-history", script: "scripts/verify-capture-apply-history.ts" },
   { name: "catch-me-up", script: "scripts/verify-catch-me-up.ts" },
   { name: "capture-context", script: "scripts/verify-capture-context.ts" },
   { name: "capture-review", script: "scripts/verify-capture-review.ts" },
