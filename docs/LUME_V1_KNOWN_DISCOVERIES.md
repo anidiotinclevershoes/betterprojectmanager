@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 26 August 2026 (Thor Slice 1D: model-supplied Person UUID is not identity proof)  
+**Last housekeeping:** 28 August 2026 (D-036 session-switch isolation CLOSED; LUME v0.9 CLOSED)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
@@ -587,26 +587,22 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
-### D-036 — Same-browser SPA logout → login displays previous user's in-memory workspace
-
-| Field | Value |
-| --- | --- |
-| **Status** | open — code repair in this slice; **CLOSED only after live two-account retest on deployed production** |
-| **Severity** | high (display / shared-device; not RLS/IDOR) |
-| **Domain** | Auth / hydrate / tenant display |
-| **Found in** | v0.9 live two-account isolation (28 August 2026) |
-| **Failure class** | After Sign out → SPA login as a different user without remounting `MissionProvider`, the UI can paint the previous user's project while chrome shows the new user. Authenticated APIs fail-closed. |
-| **Proposed fix direction** | Auth-boundary full document navigation on login/logout/signup; reset MissionState when authenticated `user.id` changes; do not paint supabase cache unless it matches the hydrated user. |
-| **Regression test to add** | `scripts/verify-d036-session-switch.ts` |
-| **Target resolution / validation point** | v0.9 closure — live B→A / A→B session switch |
-| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md` (when present on main) |
-| **Notes** | Server isolation already proven. Do not unfreeze Capture. Do not treat this as an RLS bug. |
-
----
-
 ## Resolved discoveries (reference)
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
+
+### D-R36 — Same-browser SPA logout → login displayed previous user's in-memory workspace (D-036)
+
+| Field | Value |
+| --- | --- |
+| **Status** | CLOSED |
+| **Fixed in** | PR #100 / production `0e68384a2271b2b27e0ac75b871ee26331a26db7` (28 August 2026) |
+| **Failure class** | After Sign out → SPA login as a different user without remounting `MissionProvider`, the UI could paint the previous user's project while chrome showed the new user. Authenticated APIs failed-closed. Not RLS/IDOR. |
+| **Fix summary** | Option C: `missionAuthTransition` resets MissionState on `SIGNED_OUT` and on authenticated `user.id` change, then rehydrates; login/logout/signup use `window.location.assign`; durable cache is not painted unless it matches the hydrated user. |
+| **Evidence** | Regression `scripts/verify-d036-session-switch.ts`; CI green on PR #100; live production B→A and A→B same-browser session-switch (no previous-user project truth; `/api/workspace/state` tenant-only; Ask/Catch Me Up foreign project 404; foreign DELETE 404). Loading/reset during the switch is correct. |
+| **Related docs** | `docs/LUME_V09_TO_V1_HANDOFF.md` |
+
+---
 
 ### D-R01 — Knowledge Centre corrections not durable (Slice 1A)
 
