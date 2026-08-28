@@ -264,6 +264,18 @@ check("AI routes import requireAiCaller", () => {
   }
 });
 
+check("New Project Talk/Paste uses shared Capture observation extraction", () => {
+  const src = fs.readFileSync(
+    path.join(root, "src/app/api/new-project/route.ts"),
+    "utf8",
+  );
+  assert.match(src, /extractObservationsWithOpenAI/);
+  assert.match(src, /from "@\/lib\/capture-v2\/extract"/);
+  assert.doesNotMatch(src, /assembleNarrativeWithOpenAI/);
+  assert.doesNotMatch(src, /assembleFromNarrative/);
+  assert.doesNotMatch(src, /extractNewProjectV2WithOpenAI/);
+});
+
 check("ai-gate enforces entitlement for supabase callers", () => {
   const gate = fs.readFileSync(path.join(root, "src/lib/ai-gate.ts"), "utf8");
   assert.match(gate, /getWorkspaceEntitlement/);

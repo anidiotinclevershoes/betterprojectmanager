@@ -1,3 +1,7 @@
+/**
+ * UNREACHABLE from Talk/Paste. Live New Project uses
+ * `buildObservationExtractionPrompt` in `src/lib/capture-v2/prompt.ts`.
+ */
 export const NEW_PROJECT_V2_SCHEMA = `{
   "project": {
     "name": "short project name evidenced in the notes",

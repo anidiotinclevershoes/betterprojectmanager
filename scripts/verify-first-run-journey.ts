@@ -2,6 +2,10 @@
  * Hawkeye v0.9 — first-user journey + New Project Ocean presentation.
  * Deterministic. No OpenAI. No persistence architecture change.
  *
+ * CLASS B / C: Ocean copy and create-from-draft are useful. Treating
+ * “Showing a local draft instead” as success is not Talk composition proof.
+ * See scripts/verify-v09-architecture-conformance.ts journeys 1–2.
+ *
  * Run: npx tsx scripts/verify-first-run-journey.ts
  */
 import assert from "node:assert/strict";
@@ -79,13 +83,16 @@ function main() {
     assert.doesNotMatch(experience, /np-tell-me-nudge/);
   });
 
-  check("AI build failure stays on review and does not create", () => {
-    assert.match(experience, /Showing a local draft instead/);
-    assert.match(experience, /setPath\("review"\)/);
+  check("AI build failure stays on Talk and does not create", () => {
+    assert.match(experience, /Nothing was created/);
+    assert.doesNotMatch(experience, /Showing a local draft instead/);
     const analyse = experience.slice(experience.indexOf("async function analyseNarrative"));
     const analyseBody = analyse.slice(0, analyse.indexOf("function cancelBuild"));
     assert.doesNotMatch(analyseBody, /createProject\(/);
     assert.doesNotMatch(analyseBody, /setSuccess\(/);
+    assert.doesNotMatch(analyseBody, /assembleFromNarrative/);
+    assert.doesNotMatch(analyseBody, /setPath\("review"\)/);
+    assert.doesNotMatch(analyseBody, /setCreateUnlocked\(true\)/);
   });
 
   check("first-project state transitions into workspace after create", () => {

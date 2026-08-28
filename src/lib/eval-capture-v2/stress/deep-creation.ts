@@ -192,7 +192,9 @@ export function runDeepCreation(args?: { recategorise?: Array<[string, Provision
   const draft = draftFromProvisional({
     sourceNarrative: DEEP_CREATION_NARRATIVE,
     sourceMode: "talk",
-    project: parsed.project,
+    // Envelope `project` is ignored (shared Capture has no project object).
+    // Name is the categorisation-form step the user supplies; Objective stays empty.
+    project: { name: HARBOURLINE_NAME, summary: "", currentFocus: "" },
     items,
   });
   const bundle = buildNewProject(draft);

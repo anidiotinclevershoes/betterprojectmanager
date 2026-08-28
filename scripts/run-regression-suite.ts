@@ -18,6 +18,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "people-entities", script: "scripts/verify-people-entities.ts" },
   { name: "ask-context-authority", script: "scripts/verify-ask-context-authority.ts" },
   { name: "ocean-knowledge-centre", script: "scripts/verify-ocean-knowledge-centre.ts" },
+  { name: "search-authority", script: "scripts/verify-search-authority.ts" },
   { name: "ocean-capture", script: "scripts/verify-ocean-capture.ts" },
   { name: "capture-experience", script: "scripts/verify-capture-experience.ts" },
   { name: "ocean-item-detail", script: "scripts/verify-ocean-item-detail.ts" },
@@ -33,6 +34,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "person-identity-safety", script: "scripts/verify-person-identity-safety.ts" },
   { name: "stacked-capture", script: "scripts/verify-stacked-capture.ts" },
   { name: "stable-object-identity", script: "scripts/verify-stable-object-identity.ts" },
+  { name: "v09-architecture-conformance", script: "scripts/verify-v09-architecture-conformance.ts" },
   { name: "resurrection", script: "scripts/verify-resurrection.ts" },
   // Harbourline frozen-envelope stress (`npm run verify:eval-stress`) is Gate 3
   // observe-only. It exits 1 on adversarial envelopes that become Apply Ready.
@@ -47,6 +49,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "tell-me", script: "scripts/verify-tell-me.ts" },
   { name: "tell-me-server-truth", script: "scripts/verify-tell-me-server-truth.ts" },
   { name: "capture-server-truth", script: "scripts/verify-capture-server-truth.ts" },
+  { name: "capture-apply-history", script: "scripts/verify-capture-apply-history.ts" },
   { name: "catch-me-up", script: "scripts/verify-catch-me-up.ts" },
   { name: "capture-context", script: "scripts/verify-capture-context.ts" },
   { name: "capture-review", script: "scripts/verify-capture-review.ts" },

@@ -1,72 +1,53 @@
+import type { ObservationDisposition } from "@/lib/capture-v2/types";
 import {
-  isObservationDomain,
-  type ObservationDomain,
-} from "@/lib/capture-v2/types";
-import { parseObservationEnvelope } from "@/lib/capture-v2/validate";
+  parseObservationEnvelope,
+  validateObservations,
+} from "@/lib/capture-v2/validate";
 import {
   categoryFromDomain,
-  isProvisionalCategory,
-  type NewProjectV2Envelope,
   type ProvisionalCategory,
   type ProvisionalItem,
 } from "./types";
 
-function asObject(value: unknown): Record<string, unknown> | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  return value as Record<string, unknown>;
-}
-
-function asString(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed ? trimmed : null;
-}
-
+/**
+ * Adapt shared Capture observations into the New Project provisional map.
+ * This is not an extraction engine: envelope parse + validate come from Capture.
+ * Envelope `project` metadata is ignored — shared Capture output has no project
+ * object, and New Project must not invent Objective / summary / currentFocus.
+ */
 export function parseNewProjectV2Envelope(raw: unknown): {
   project: { name: string; summary: string; currentFocus: string };
   items: ProvisionalItem[];
+  envelopeMalformed: boolean;
 } {
-  const obj = asObject(raw) as NewProjectV2Envelope | null;
-  const projectRaw = asObject(obj?.project);
-  const parsed = parseObservationEnvelope(obj ?? { observations: [] });
-  const items: ProvisionalItem[] = [];
+  const parsed = parseObservationEnvelope(raw);
+  const envelopeMalformed = parsed.issues.some((issue) => issue.code === "malformed");
+  const validation = validateObservations(parsed.observations, [], null);
 
-  parsed.observations.forEach((rawItem, index) => {
-    const row = asObject(rawItem);
-    if (!row) return;
-    const statement = asString(row.statement);
-    const evidence = asString(row.evidence) ?? statement;
-    if (!statement || !evidence) return;
-    const domainRaw = asString(row.domain);
-    const domain: ObservationDomain =
-      domainRaw && isObservationDomain(domainRaw) ? domainRaw : "unknown";
-    const categoryOverride = row.category;
-    const category: ProvisionalCategory = isProvisionalCategory(categoryOverride)
-      ? categoryOverride
-      : categoryFromDomain(domain);
-    items.push({
-      id: asString(row.id) ?? `np-${index + 1}`,
-      statement,
-      evidence,
-      modelDomain: domain,
-      category,
-      proposedValues:
-        row.proposedValues &&
-        typeof row.proposedValues === "object" &&
-        !Array.isArray(row.proposedValues)
-          ? (row.proposedValues as Record<string, unknown>)
-          : null,
-    });
-  });
+  const items: ProvisionalItem[] = validation.observations.map((obs, index) => ({
+    id: obs.id || `np-${index + 1}`,
+    statement: obs.statement,
+    evidence: obs.evidence,
+    modelDomain: obs.domain,
+    category: categoryFromDisposition(obs.domain, obs.disposition),
+    proposedValues: obs.proposedValues,
+    disposition: obs.disposition,
+  }));
 
   return {
-    project: {
-      name: asString(projectRaw?.name) ?? "",
-      summary: asString(projectRaw?.summary) ?? "",
-      currentFocus: asString(projectRaw?.currentFocus) ?? "",
-    },
+    project: { name: "", summary: "", currentFocus: "" },
     items,
+    envelopeMalformed,
   };
+}
+
+function categoryFromDisposition(
+  domain: ProvisionalItem["modelDomain"],
+  disposition: ObservationDisposition,
+): ProvisionalCategory {
+  if (disposition === "ignore") return "ignored";
+  if (disposition === "commentary") return "commentary";
+  return categoryFromDomain(domain);
 }
 
 export function recategoriseItem(

@@ -1,5 +1,5 @@
 /**
- * Pure Ocean Knowledge frame row builders — used by UI and verify scripts.
+ * Pure Ocean Knowledge frame row builders — used by UI, Search, and verify scripts.
  *
  * D-030 display precedence (presentation only — no mutate, no fuzzy match):
  *
@@ -22,6 +22,7 @@ import {
   formatMilestoneLabel,
   type PriorityDot,
 } from "@/lib/knowledge-centre/format-date-label";
+import { isKnowledgeUuid } from "@/lib/knowledge-identity";
 import { getPersonBundle } from "@/lib/people/identity";
 import {
   isClosedRiskStatus,
@@ -293,4 +294,78 @@ export function buildDateRows(state: MissionState, projectId: string) {
       id: t.id,
       title: formatMilestoneLabel(t.label, t.startAt) ?? t.label,
     }));
+}
+
+export function buildDecisionRows(state: MissionState, projectId: string) {
+  const knowledge =
+    state.knowledge.find((k) => k.projectId === projectId) ??
+    emptyKnowledge(projectId);
+  const ids = knowledge.sectionItemIds?.decisions;
+  return (knowledge.sections.decisions ?? []).map((title, i) => {
+    const itemId =
+      Array.isArray(ids) && typeof ids[i] === "string" ? ids[i] : null;
+    return {
+      id: itemId && isKnowledgeUuid(itemId) ? itemId : `dec-body:${title}`,
+      title,
+      itemId,
+    };
+  });
+}
+
+export function buildDependencyRows(state: MissionState, projectId: string) {
+  const knowledge =
+    state.knowledge.find((k) => k.projectId === projectId) ??
+    emptyKnowledge(projectId);
+  return (knowledge.structured ?? [])
+    .filter((i) => i.kind === "dependency" && i.lifecycle === "current")
+    .map((i) => ({
+      id: i.id,
+      title: i.body,
+    }));
+}
+
+export type OceanWaitingRow = {
+  id: string;
+  title: string;
+  meta: string | null;
+  origin: "todo" | "loop";
+  itemId: string | null;
+};
+
+export function buildWaitingRows(
+  state: MissionState,
+  projectId: string,
+): OceanWaitingRow[] {
+  const knowledge =
+    state.knowledge.find((k) => k.projectId === projectId) ??
+    emptyKnowledge(projectId);
+  const fromTodos: OceanWaitingRow[] = (state.todos ?? [])
+    .filter(
+      (t) =>
+        t.projectId === projectId &&
+        !t.done &&
+        (t.kind === "WAITING" || t.kind === "CHASE" || Boolean(t.waitingOn)),
+    )
+    .map((t) => ({
+      id: t.id,
+      title: t.title,
+      meta: t.waitingOn ? `Waiting on ${t.waitingOn}` : null,
+      origin: "todo" as const,
+      itemId: t.id,
+    }));
+  const ids = knowledge.sectionItemIds?.openLoops;
+  const fromLoops: OceanWaitingRow[] = (knowledge.sections.openLoops ?? []).map(
+    (title, i) => {
+      const itemId =
+        Array.isArray(ids) && typeof ids[i] === "string" ? ids[i] : null;
+      return {
+        id: itemId && isKnowledgeUuid(itemId) ? itemId : `loop-body:${title}`,
+        title,
+        meta: null,
+        origin: "loop" as const,
+        itemId,
+      };
+    },
+  );
+  return [...fromTodos, ...fromLoops];
 }

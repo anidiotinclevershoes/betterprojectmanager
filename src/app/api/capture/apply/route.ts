@@ -12,6 +12,7 @@ import {
   DurableWorkspaceError,
   loadAuthenticatedWorkspace,
 } from "@/lib/data/durable-workspace";
+import { persistHistoryEvent } from "@/lib/data/supabase/persist-mutations";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { serverLog } from "@/lib/server-log";
 
@@ -67,6 +68,13 @@ export async function POST(request: Request) {
         userId: gate.userId,
         state: loaded.workspaceState,
       }),
+      recordHistory: (event) =>
+        persistHistoryEvent(
+          supabase,
+          loaded.workspaceId,
+          gate.userId,
+          event,
+        ),
       reloadWorkspace: async () => (await loadAuthenticatedWorkspace()).state,
     });
 

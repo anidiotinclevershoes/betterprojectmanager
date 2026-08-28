@@ -14,7 +14,6 @@ import { ProjectSetupReview } from "@/components/onboarding/ProjectSetupReview";
 import { NewProjectCategorisation } from "@/components/onboarding/NewProjectCategorisation";
 import "./new-project-ocean.css";
 import {
-  assembleFromNarrative,
   suggestCode,
   TALK_EXAMPLE,
   TALK_GUIDANCE_TOPICS,
@@ -97,10 +96,9 @@ export function NewProjectExperience({
     const controller = new AbortController();
     buildAbortRef.current = controller;
     try {
-        const local = assembleFromNarrative(content, "delivery", sourceMode);
-        setSourceNarrative(content);
-        setSourceMode(sourceMode);
-        const res = await fetch("/api/new-project", {
+      setSourceNarrative(content);
+      setSourceMode(sourceMode);
+      const res = await fetch("/api/new-project", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
@@ -112,41 +110,28 @@ export function NewProjectExperience({
           error?: string;
           code?: string;
         } | null;
-        setDraft(local);
-        setCreateUnlocked(true);
-        setPath("review");
         setError(
           fail?.error ||
-            "Could not use AI for this build. Showing a local draft instead — review carefully before creating.",
+            "Could not organise this into a project map. Nothing was created.",
         );
         return;
       }
-        const data = (await res.json()) as {
-          draft?: CreateProjectInput;
-          note?: string;
-          provider?: string;
-          pipeline?: "v2" | "legacy";
-          provisionalItems?: ProvisionalItem[];
-          projectSeed?: { name?: string; summary?: string; currentFocus?: string };
-        };
-        if (data.pipeline === "v2") {
-          setProvisionalItems(data.provisionalItems ?? []);
-          setProjectSeed({
-            name: data.projectSeed?.name || data.draft?.name || "",
-            summary: data.projectSeed?.summary || data.draft?.summary || "",
-            currentFocus:
-              data.projectSeed?.currentFocus || data.draft?.currentFocus || "",
-          });
-          setCategorisationApproved(false);
-          setCreateUnlocked(false);
-          setDraft(data.draft ?? local);
-          setPath("categorise");
-        } else {
-          setDraft(data.draft ?? local);
-          setCategorisationApproved(true);
-          setCreateUnlocked(true);
-          setPath("review");
-        }
+      const data = (await res.json()) as {
+        draft?: CreateProjectInput;
+        note?: string;
+        provisionalItems?: ProvisionalItem[];
+        projectSeed?: { name?: string; summary?: string; currentFocus?: string };
+      };
+      setProvisionalItems(data.provisionalItems ?? []);
+      setProjectSeed({
+        name: data.projectSeed?.name || "",
+        summary: data.projectSeed?.summary || "",
+        currentFocus: data.projectSeed?.currentFocus || "",
+      });
+      setCategorisationApproved(false);
+      setCreateUnlocked(false);
+      setDraft(data.draft ?? null);
+      setPath("categorise");
       if (data.note) {
         setError(data.note);
       }
@@ -155,11 +140,8 @@ export function NewProjectExperience({
         setError(null);
         return;
       }
-      setDraft(assembleFromNarrative(content, "delivery", sourceMode));
-      setCreateUnlocked(true);
-      setPath("review");
       setError(
-        "Build request failed. Showing a local draft instead — review carefully before creating.",
+        "Could not organise this into a project map. Nothing was created.",
       );
     } finally {
       if (buildAbortRef.current === controller) {
@@ -192,6 +174,7 @@ export function NewProjectExperience({
       {path === "talk" ? (
         <TalkPath
           busy={busy}
+          error={error}
           openaiConfigured={openaiConfigured}
           onBack={() => setPath("choose")}
           onBuild={(transcript) => void analyseNarrative(transcript, "talk")}
@@ -331,12 +314,14 @@ function ChoosePaths({
 
 function TalkPath({
   busy,
+  error,
   openaiConfigured,
   onBack,
   onBuild,
   onCancelBuild,
 }: {
   busy: boolean;
+  error: string | null;
   openaiConfigured: boolean | null;
   onBack: () => void;
   onBuild: (transcript: string) => void;
@@ -575,9 +560,14 @@ function TalkPath({
           <div className="np-talk-footer">
             <p className="meta">
               {openaiConfigured === false
-                ? "Local extraction — OpenAI key not configured."
+                ? "Lume needs AI configured to organise this. Nothing was created."
                 : "Lume will organise what you shared into a reviewable project."}
             </p>
+            {error ? (
+              <p className="error-copy np-create-failed" role="alert" data-testid="np-create-error">
+                {error}
+              </p>
+            ) : null}
             {busy ? (
               <button
                 type="button"

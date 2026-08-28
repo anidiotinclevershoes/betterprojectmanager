@@ -185,12 +185,10 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     id: projectId,
     name,
     code,
-    summary: input.summary.trim() || `${name} — newly added to Lume.`,
+    summary: input.summary.trim(),
     status: input.status ?? "watch",
     kind: input.kind ?? "delivery",
-    currentFocus:
-      input.currentFocus.trim() ||
-      "Establish baseline: owners, next milestone, and open risks",
+    currentFocus: input.currentFocus.trim(),
     nextMilestone:
       input.nextMilestone?.trim() ||
       primaryDate?.label ||
