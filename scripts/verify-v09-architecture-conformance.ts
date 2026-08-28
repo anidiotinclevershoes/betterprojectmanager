@@ -10,9 +10,8 @@
  * Capture extractor. This pack starts from raw narrative and intercepts
  * the AI fetch seam.
  *
- * Intended architecture (independent of parallel Hawkeye / Iron Man / Thor
- * branches). EXPECTED RED against current HEAD is a recorded v0.9
- * violation, not a reason to patch production from this workstream.
+ * Integration candidate: journeys 1, 2, 7, and 9 are now required green.
+ * Remaining expected-red encoding would hide a regression.
  *
  * Run: npx tsx scripts/verify-v09-architecture-conformance.ts
  *  or: npm run verify:v09-architecture
@@ -28,8 +27,8 @@ import { CAPTURE_V2_OBSERVATION_SCHEMA } from "../src/lib/capture-v2/prompt";
 import { worldFromCaptureState, runCaptureV2FromModelJson } from "../src/lib/capture-v2";
 import type { CreateProjectInput } from "../src/lib/create-project";
 import { loadMissionStateFromSupabase } from "../src/lib/data/supabase/load-mission-state";
-import { persistNewProject } from "../src/lib/data/supabase/persist-mutations";
-import { searchProjectKnowledge } from "../src/lib/tell-me/knowledge-search";
+import { persistHistoryEvent, persistNewProject } from "../src/lib/data/supabase/persist-mutations";
+import { searchAuthoritativeProject } from "../src/lib/knowledge-centre/search-authority";
 import type { MissionState } from "../src/lib/types";
 import { FakeWorkspaceClient } from "./lib/fake-supabase-workspace";
 
@@ -217,7 +216,7 @@ async function main() {
   try {
     await journey(
       "1. New Project Talk uses the shared Capture observation extractor",
-      "red",
+      "green",
       async () => {
         const route = readSrc("src/app/api/new-project/route.ts");
         assert.match(
@@ -287,7 +286,7 @@ async function main() {
 
     await journey(
       "2. New Project extraction failure does not silently succeed via regex/legacy",
-      "red",
+      "green",
       async () => {
         const mock = withMockedOpenAI(() => ({ throw: "injected extractor failure" }));
         try {
@@ -540,7 +539,7 @@ async function main() {
 
     await journey(
       "7. Search finds maintained todo, risk, milestone, person, and knowledge",
-      "red",
+      "green",
       async () => {
         const fake = new FakeWorkspaceClient();
         await persistNewProject(asClient(fake), fake.workspaceId, fake.userId, {
@@ -557,25 +556,21 @@ async function main() {
           knowledgeRemember: [{ text: "Never store originals off-site", remember: true }],
         });
         const state = await load(fake);
-        const knowledge = state.knowledge.find((k) => k.projectId === PROJECT_A);
-        assert.ok(knowledge);
 
         const bar = readSrc("src/components/knowledge-centre/KnowledgeSearchAskBar.tsx");
-        // Intended: KC Search is project-truth retrieval. Today's production
-        // entry is searchProjectKnowledge over knowledge sections only.
-        // If Iron Man replaces the helper, this journey must call THAT entry.
-        assert.match(bar, /searchProjectKnowledge/);
+        assert.match(bar, /searchAuthoritativeProject/);
+        assert.doesNotMatch(bar, /searchProjectKnowledge/);
 
-        const probes: Array<{ label: string; query: string; where: string }> = [
-          { label: "todo", query: "File the parade permit", where: "todos" },
-          { label: "risk", query: "Vendor SLA slip", where: "risks" },
-          { label: "milestone", query: "Go-live", where: "timeline" },
-          { label: "person", query: "Maya Chen", where: "stakeholders" },
-          { label: "knowledge", query: "Never store originals off-site", where: "knowledge" },
+        const probes: Array<{ label: string; query: string }> = [
+          { label: "todo", query: "File the parade permit" },
+          { label: "risk", query: "Vendor SLA slip" },
+          { label: "milestone", query: "Go-live" },
+          { label: "person", query: "Maya Chen" },
+          { label: "knowledge", query: "Never store originals off-site" },
         ];
         const missing: string[] = [];
         for (const probe of probes) {
-          const hits = searchProjectKnowledge(knowledge, probe.query);
+          const hits = searchAuthoritativeProject(state, PROJECT_A, probe.query);
           if (!hits.length) missing.push(`${probe.label} (${probe.query}) via production Search`);
         }
         assert.equal(
@@ -604,13 +599,16 @@ async function main() {
 
     await journey(
       "9. Approved Capture write leaves durable History evidence after reload",
-      "red",
+      "green",
       async () => {
-        const persistExecute = readSrc("src/lib/capture/apply/persist-execute.ts");
+        const apply = readSrc("src/lib/capture/apply/apply-approved.ts");
+        const route = readSrc("src/app/api/capture/apply/route.ts");
+        assert.match(apply, /recordHistory/);
+        assert.match(apply, /executed\.kind === "wrote"/);
         assert.match(
-          persistExecute,
+          route,
           /persistHistoryEvent/,
-          "Capture persist Apply must write durable History evidence",
+          "production Apply route must persist History after a successful write",
         );
         const fake = new FakeWorkspaceClient();
         fake.seedProject({
@@ -655,6 +653,8 @@ async function main() {
             userId: fake.userId,
             state,
           }),
+          recordHistory: (event) =>
+            persistHistoryEvent(asClient(fake), fake.workspaceId, fake.userId, event),
           reloadWorkspace: async () => load(fake),
         });
         assert.equal(applied.executed.kind, "wrote");
@@ -699,6 +699,8 @@ async function main() {
             userId: fake.userId,
             state,
           }),
+          recordHistory: (event) =>
+            persistHistoryEvent(asClient(fake), fake.workspaceId, fake.userId, event),
           reloadWorkspace: async () => load(fake),
         });
         assert.equal(applied.executed.kind, "needs_you");
@@ -719,11 +721,18 @@ async function main() {
 
   console.log("\n── v0.9 architecture conformance ──");
   console.log(`green ${passed.length}  expected-red ${expectedRed.length}  unexpected-fail ${unexpected.length}  flipped-green ${flipped.length}`);
-  if (
-    !/persistHistoryEvent/.test(readSrc("src/lib/capture/apply/persist-execute.ts"))
-  ) {
+  const historyWired =
+    /recordHistory/.test(readSrc("src/lib/capture/apply/apply-approved.ts")) &&
+    /persistHistoryEvent/.test(readSrc("src/app/api/capture/apply/route.ts"));
+  const journey9 = outcomes.find((o) => o.name.startsWith("9."));
+  const journey10 = outcomes.find((o) => o.name.startsWith("10."));
+  if (historyWired && journey9?.status === "pass" && journey10?.status === "pass") {
     console.log(
-      "NOTE: journey 10 is VACUOUS until Capture persist writes History (journey 9). Needs-you writes no History because nothing writes History yet.",
+      "Journey 10 is NON-VACUOUS: History writes on successful Apply (journey 9) and is absent on Needs-you.",
+    );
+  } else {
+    console.log(
+      "NOTE: journey 10 is VACUOUS until Capture persist writes History (journey 9).",
     );
   }
   if (expectedRed.length) {
@@ -734,7 +743,7 @@ async function main() {
     console.log("Flipped to green (architecture now matches):");
     for (const row of flipped) console.log(`  - ${row.name}`);
   }
-  if (unexpected.length) {
+  if (unexpected.length || expectedRed.length) {
     process.exit(1);
   }
 }
