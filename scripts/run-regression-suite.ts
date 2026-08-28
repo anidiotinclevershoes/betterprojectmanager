@@ -34,6 +34,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "person-identity-safety", script: "scripts/verify-person-identity-safety.ts" },
   { name: "stacked-capture", script: "scripts/verify-stacked-capture.ts" },
   { name: "stable-object-identity", script: "scripts/verify-stable-object-identity.ts" },
+  { name: "v09-architecture-conformance", script: "scripts/verify-v09-architecture-conformance.ts" },
   { name: "resurrection", script: "scripts/verify-resurrection.ts" },
   // Harbourline frozen-envelope stress (`npm run verify:eval-stress`) is Gate 3
   // observe-only. It exits 1 on adversarial envelopes that become Apply Ready.

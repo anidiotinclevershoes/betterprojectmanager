@@ -4,6 +4,11 @@
  * Live Talk/Paste uses shared Capture extractObservationsWithOpenAI;
  * this file only checks the New Project adapter + lifecycle gates.
  *
+ * CLASS C if treated as Talk composition proof.
+ * This suite starts from already-split observations. That does NOT prove
+ * messy New Project input uses the shared Capture extractor. See
+ * scripts/verify-v09-architecture-conformance.ts journey 1.
+ *
  * Run: npx tsx scripts/verify-new-project-v2.ts
  */
 import assert from "node:assert/strict";
