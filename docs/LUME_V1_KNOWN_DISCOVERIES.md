@@ -2,12 +2,14 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 26 August 2026 (Thor Slice 1D: model-supplied Person UUID is not identity proof)  
+**Last housekeeping:** 28 August 2026 (pointer to Lume-only audit extract; no D-xxx status change)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
+
+Related extract (not authority until triaged into this file): `docs/LUME_PRODUCT_ITEMS_FROM_AUDIT.md` — Lume-only items surfaced by later platform/privacy/UX audits. Do not treat that file as open/resolved status.
 
 Use it so future slices do not re-discover the same failure class, do not greenwash known gaps as tests, and have enough context to fix safely.
 
