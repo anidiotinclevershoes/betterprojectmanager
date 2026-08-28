@@ -2,6 +2,11 @@
  * New Project V2 — provisional categorisation map.
  * Fixture model output only. persistNewProject is not called.
  *
+ * CLASS C if treated as Talk composition proof.
+ * This suite starts from already-split observations. That does NOT prove
+ * messy New Project input uses the shared Capture extractor. See
+ * scripts/verify-v09-architecture-conformance.ts journey 1.
+ *
  * Run: npx tsx scripts/verify-new-project-v2.ts
  */
 import assert from "node:assert/strict";

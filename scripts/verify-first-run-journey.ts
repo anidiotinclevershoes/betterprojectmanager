@@ -2,6 +2,10 @@
  * Hawkeye v0.9 — first-user journey + New Project Ocean presentation.
  * Deterministic. No OpenAI. No persistence architecture change.
  *
+ * CLASS B / C: Ocean copy and create-from-draft are useful. Treating
+ * “Showing a local draft instead” as success is not Talk composition proof.
+ * See scripts/verify-v09-architecture-conformance.ts journeys 1–2.
+ *
  * Run: npx tsx scripts/verify-first-run-journey.ts
  */
 import assert from "node:assert/strict";
