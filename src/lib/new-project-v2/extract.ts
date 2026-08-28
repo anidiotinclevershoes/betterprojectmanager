@@ -1,4 +1,8 @@
-import { getOpenAIKey } from "@/lib/openai";
+/**
+ * UNREACHABLE from Talk/Paste. Live New Project uses
+ * `extractObservationsWithOpenAI` in `src/lib/capture-v2/extract.ts`.
+ */
+import { getOpenAIKey, withOpenAiChatPrivacy } from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { buildNewProjectV2Prompt } from "./prompt";
 
@@ -35,19 +39,21 @@ export async function extractNewProjectV2WithOpenAI(content: string): Promise<{
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "You organise messy project notes into a provisional JSON map. You do not persist anything.",
-        },
-        { role: "user", content: buildNewProjectV2Prompt(content) },
-      ],
-    }),
+    body: JSON.stringify(
+      withOpenAiChatPrivacy({
+        model,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              "You organise messy project notes into a provisional JSON map. You do not persist anything.",
+          },
+          { role: "user", content: buildNewProjectV2Prompt(content) },
+        ],
+      }),
+    ),
   });
   if (!response.ok) {
     const detail = await response.text();
