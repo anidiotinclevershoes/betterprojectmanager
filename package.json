@@ -34,6 +34,7 @@
     "verify:capture-server-truth": "npx --yes tsx scripts/verify-capture-server-truth.ts",
     "verify:catch-me-up": "npx --yes tsx scripts/verify-catch-me-up.ts",
     "verify:hydrate-session": "npx --yes tsx scripts/verify-hydrate-session.ts",
+    "verify:d036-session-switch": "npx --yes tsx scripts/verify-d036-session-switch.ts",
     "verify:evals": "npx --yes tsx scripts/verify-evals.ts",
     "verify:eval-calibration": "npx --yes tsx scripts/verify-eval-calibration.ts",
     "verify:trust-intelligence": "npx --yes tsx scripts/verify-trust-intelligence.ts",

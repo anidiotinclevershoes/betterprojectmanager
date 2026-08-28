@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/app-shell/Sidebar";
 import { TopHeader } from "@/components/app-shell/TopHeader";
 import { CaptureSessionProvider } from "@/components/capture/CaptureSessionContext";
 import { CoachSessionProvider } from "@/components/coach/CoachSessionContext";
 import { TellMeSessionProvider } from "@/components/tell-me/TellMeSessionContext";
 import { EntitlementGate } from "@/components/billing/EntitlementGate";
+import { navigateAuthBoundary } from "@/lib/auth-mission-ownership";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import { useMission } from "@/lib/store";
 import { MISSION_MESSAGE } from "@/lib/mission";
@@ -63,7 +64,6 @@ function AppShellWithTellMe({ children }: { children: ReactNode }) {
 
 function AppShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
   const { state, saveStatus, saveError } = useMission();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -110,8 +110,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
     await fetch("/api/auth/logout", { method: "POST" });
     clearAuthenticatedBrowserState();
     setUser(null);
-    router.replace("/login");
-    router.refresh();
+    navigateAuthBoundary("/login");
   }
 
   const toggleCollapse = () => {

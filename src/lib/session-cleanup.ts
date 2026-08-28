@@ -4,6 +4,7 @@ export function clearAuthenticatedBrowserState() {
   const keys = [
     "mission-control-state-v5",
     "lume-mission-supabase-cache-v1",
+    "lume-hydrated-auth-user-id",
     "lume-capture-sessions-v1",
     "lume-coaching-sessions-v1",
     "lume-capture-session-v1",

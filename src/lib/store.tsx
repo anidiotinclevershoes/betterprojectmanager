@@ -12,6 +12,11 @@ import {
   type ReactNode,
 } from "react";
 import {
+  cachePaintAllowedForUser,
+  missionAuthTransition,
+  writeHydratedAuthUserId,
+} from "@/lib/auth-mission-ownership";
+import {
   readMissionSupabaseCache,
   shouldWriteDurableMissionCache,
   writeMissionSupabaseCache,
@@ -402,6 +407,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         workspaceId: payload.workspaceId,
         userId: payload.userId,
       };
+      writeHydratedAuthUserId(payload.userId);
       setPersistenceMode("supabase");
       const normalised = normaliseState(payload.state);
       setState(normalised);
@@ -468,6 +474,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     cachePaintedRef.current = true;
     const cached = readMissionSupabaseCache();
     if (!cached || cached.state.projects.length === 0) return;
+    if (!cachePaintAllowedForUser(cached.userId)) return;
     persistMetaRef.current = {
       mode: "supabase",
       workspaceId: cached.workspaceId,
@@ -569,20 +576,34 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         const {
           data: { subscription },
         } = client.auth.onAuthStateChange((event, session) => {
-          if (cancelled || hydrateSucceeded || !session?.user) return;
-          if (
-            event !== "INITIAL_SESSION" &&
-            event !== "SIGNED_IN" &&
-            event !== "TOKEN_REFRESHED"
-          ) {
+          if (cancelled) return;
+          const action = missionAuthTransition({
+            event,
+            sessionUserId: session?.user?.id ?? null,
+            ownerUserId: persistMetaRef.current.userId,
+          });
+          if (action === "keep") return;
+          persistMetaRef.current = {
+            mode: "supabase",
+            workspaceId: null,
+            userId: null,
+          };
+          writeHydratedAuthUserId(null);
+          setState(emptyMissionState());
+          hydrateSucceeded = false;
+          if (action === "reset") {
+            setHydrated(true);
             return;
           }
-          void hydrateFromSupabase().catch((err) => {
-            console.error(
-              "[MissionProvider] supabase hydrate recovery failed",
-              err,
-            );
-          });
+          if (action === "reset-and-hydrate") {
+            setHydrated(false);
+            void hydrateFromSupabase().catch((err) => {
+              console.error(
+                "[MissionProvider] supabase hydrate recovery failed",
+                err,
+              );
+            });
+          }
         });
         authUnsub = () => subscription.unsubscribe();
       } catch {
