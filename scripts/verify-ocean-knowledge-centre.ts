@@ -118,7 +118,8 @@ function testSearchAskContract() {
   );
   assert.match(bar, /data-ai="false"/);
   assert.match(bar, /data-ai="true"/);
-  assert.match(bar, /searchProjectKnowledge/);
+  assert.match(bar, /searchAuthoritativeProject/);
+  assert.doesNotMatch(bar, /searchProjectKnowledge/);
   assert.match(bar, /ocean-ai-glyph/);
   assert.match(bar, /ocean-suggestion-link/);
   assert.doesNotMatch(bar, /primary-btn/);

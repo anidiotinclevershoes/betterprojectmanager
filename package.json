@@ -47,6 +47,7 @@
     "verify:people-entities": "npx --yes tsx scripts/verify-people-entities.ts",
     "verify:ask-context-authority": "npx --yes tsx scripts/verify-ask-context-authority.ts",
     "verify:ocean-knowledge-centre": "npx --yes tsx scripts/verify-ocean-knowledge-centre.ts",
+    "verify:search-authority": "npx --yes tsx scripts/verify-search-authority.ts",
     "verify:ocean-capture": "npx --yes tsx scripts/verify-ocean-capture.ts",
     "verify:capture-experience": "npx --yes tsx scripts/verify-capture-experience.ts",
     "verify:ocean-item-detail": "npx --yes tsx scripts/verify-ocean-item-detail.ts",

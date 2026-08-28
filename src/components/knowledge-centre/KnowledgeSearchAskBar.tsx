@@ -2,11 +2,8 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { useMission } from "@/lib/store";
-import { emptyKnowledge } from "@/lib/knowledge";
-import {
-  highlightMatches,
-  searchProjectKnowledge,
-} from "@/lib/tell-me/knowledge-search";
+import { searchAuthoritativeProject } from "@/lib/knowledge-centre/search-authority";
+import { highlightMatches } from "@/lib/tell-me/knowledge-search";
 import { useTellMeSession } from "@/components/tell-me/TellMeSessionContext";
 
 /**
@@ -29,13 +26,9 @@ export function KnowledgeSearchAskBar({ projectId }: { projectId: string }) {
   const [search, setSearch] = useState("");
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
 
-  const knowledge =
-    state.knowledge.find((k) => k.projectId === projectId) ??
-    emptyKnowledge(projectId);
-
   const hits = useMemo(
-    () => searchProjectKnowledge(knowledge, search),
-    [knowledge, search],
+    () => searchAuthoritativeProject(state, projectId, search),
+    [state, projectId, search],
   );
 
   const visibleSuggestions = showAllSuggestions
@@ -111,7 +104,7 @@ export function KnowledgeSearchAskBar({ projectId }: { projectId: string }) {
           ) : (
             <ul>
               {hits.slice(0, 12).map((hit) => (
-                <li key={`${hit.sectionId}-${hit.bulletIndex}`}>
+                <li key={hit.id}>
                   <span className="ocean-search-section">{hit.sectionLabel}</span>
                   <span className="ocean-search-bullet">
                     {highlightMatches(hit.bullet, hit.matchRanges).map(
