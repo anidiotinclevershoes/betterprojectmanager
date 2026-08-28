@@ -350,11 +350,16 @@ check("product OpenAI chat calls opt out of store", () => {
     "src/lib/tell-me/answer.ts",
     "src/lib/pm-coach.ts",
     "src/lib/capture-v2/extract.ts",
-    "src/app/api/new-project/route.ts",
   ]) {
     const src = fs.readFileSync(path.join(root, rel), "utf8");
     assert.match(src, /withOpenAiChatPrivacy/, rel);
   }
+  const newProjectRoute = fs.readFileSync(
+    path.join(root, "src/app/api/new-project/route.ts"),
+    "utf8",
+  );
+  assert.match(newProjectRoute, /extractObservationsWithOpenAI/);
+  assert.match(newProjectRoute, /from "@\/lib\/capture-v2\/extract"/);
 });
 
 check("product AI routes do not return raw provider error text", () => {

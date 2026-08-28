@@ -3,6 +3,8 @@
  * Local extraction only — no AI calls.
  */
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   assembleFromNarrative,
   buildNewProject,
@@ -65,6 +67,10 @@ check("buildNewProject does not invent when blank", () => {
     sourceMode: "blank",
   });
   assert.equal(bundle.project.name, "Phoenix");
+  assert.equal(bundle.project.summary, "");
+  assert.equal(bundle.project.currentFocus, "");
+  assert.doesNotMatch(bundle.project.summary, /newly added to Lume/);
+  assert.doesNotMatch(bundle.project.currentFocus, /Establish baseline/);
   assert.equal(bundle.todos.length, 0);
   assert.equal(bundle.knowledge.sections.risks.length, 0);
 });
@@ -82,6 +88,20 @@ check("nothing auto-created without createProject call", () => {
   // assemble is pure — bundle only when buildNewProject is invoked explicitly
   assert.ok(draft.sourceNarrative);
   assert.ok(!("id" in draft));
+});
+
+check("live Talk/Paste path does not call regex assembleFromNarrative", () => {
+  const route = readFileSync(
+    join(process.cwd(), "src/app/api/new-project/route.ts"),
+    "utf8",
+  );
+  const exp = readFileSync(
+    join(process.cwd(), "src/components/onboarding/NewProjectExperience.tsx"),
+    "utf8",
+  );
+  assert.doesNotMatch(route, /assembleFromNarrative/);
+  assert.doesNotMatch(exp, /assembleFromNarrative/);
+  assert.match(route, /extractObservationsWithOpenAI/);
 });
 
 console.log(`\n${passed} onboarding checks passed.`);

@@ -1,3 +1,7 @@
+/**
+ * UNREACHABLE from Talk/Paste. Live New Project uses
+ * `extractObservationsWithOpenAI` in `src/lib/capture-v2/extract.ts`.
+ */
 import { getOpenAIKey, withOpenAiChatPrivacy } from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { buildNewProjectV2Prompt } from "./prompt";

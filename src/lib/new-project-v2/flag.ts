@@ -1,6 +1,6 @@
 /**
- * New Project V2 — experimental path.
- * Unset / "0" = legacy Talk assemble. "1" = observation map + categorisation approval.
+ * Historical flag. Talk/Paste no longer consults this — the live path always
+ * uses shared Capture observation extraction, then the New Project adapter.
  */
 
 export function isNewProjectV2Enabled(

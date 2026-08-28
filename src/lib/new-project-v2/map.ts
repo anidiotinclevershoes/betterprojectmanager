@@ -29,7 +29,7 @@ export function draftFromProvisional(args: {
         clientKey: newSetupClientKey(),
         name: name || item.statement,
         role: asString(item.proposedValues?.role) || asString(item.proposedValues?.scope),
-        needsReview: !name,
+        needsReview: item.disposition === "ambiguous" || !name,
       };
     });
 
@@ -38,7 +38,7 @@ export function draftFromProvisional(args: {
     .map((item) => ({
       clientKey: newSetupClientKey(),
       title: asString(item.proposedValues?.title) || item.statement,
-      needsReview: false,
+      needsReview: item.disposition === "ambiguous",
     }));
 
   const todos = args.items
@@ -47,7 +47,7 @@ export function draftFromProvisional(args: {
       clientKey: newSetupClientKey(),
       title: asString(item.proposedValues?.title) || item.statement,
       dueAt: asString(item.proposedValues?.date) || asString(item.proposedValues?.dueAt),
-      needsReview: false,
+      needsReview: item.disposition === "ambiguous",
     }));
 
   const importantDates = args.items
@@ -56,7 +56,7 @@ export function draftFromProvisional(args: {
       clientKey: newSetupClientKey(),
       label: asString(item.proposedValues?.label) || item.statement,
       date: asString(item.proposedValues?.date) || asString(item.proposedValues?.startAt),
-      needsReview: false,
+      needsReview: item.disposition === "ambiguous",
     }));
 
   const knowledgeRemember = args.items
