@@ -165,6 +165,12 @@ test.describe("Harbourline deep stress slices", () => {
     await page.getByRole("button", { name: "Build My Project" }).click();
     await expect(page.getByTestId("np-v2-categorise")).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText("Miriam Cole is programme sponsor")).toBeVisible();
+    // Shared Capture extract does not invent name/Objective. The user types the
+    // evidenced name; Approve stays disabled until that field is filled.
+    await expect(page.getByLabel("Objective")).toHaveValue("");
+    await expect(page.getByTestId("np-v2-approve-categorisation")).toBeDisabled();
+    await page.getByLabel("Project name").fill("Harbourline Civic Archive Refresh");
+    await expect(page.getByTestId("np-v2-approve-categorisation")).toBeEnabled();
     await page.getByTestId("np-v2-approve-categorisation").click();
     await page.getByRole("button", { name: "Create Project" }).click();
     await expect(page.getByRole("heading", { name: /Harbourline Civic Archive Refresh/i })).toBeVisible({
