@@ -55,6 +55,8 @@ Governs:
 - known defects/debt;
 - target resolution / validation points.
 
+A later extract of Lume-only items from platform/privacy/UX audits lives at `docs/LUME_PRODUCT_ITEMS_FROM_AUDIT.md`. It is triage, not this backlog. Open vs resolved status is only this file.
+
 ### 4. Relevant current operational / test documents
 
 Use only when the task needs them (for example test safety-net, Supabase setup, Vercel production, Intelligence Contract, or the Lume Test Dashboard).

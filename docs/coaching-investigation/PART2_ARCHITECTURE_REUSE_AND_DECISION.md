@@ -12,6 +12,7 @@
 | **`main` / `origin/main`** | `e5cd9ba8e183f7a42f8f5c74aef73c3c7d73d54f` |
 | **Repository changes since Part 1** | **None.** `git log e5cd9ba..origin/main` is empty. The only commits on this branch are the five Part 1 documentation commits. Every Part 1 code finding still holds. |
 | **Production changes made** | **None.** No code, no schema, no migrations, no refactors, no abstractions. |
+| **Lume-only follow-up** | Defects that belong to Lume (not coaching) are extracted to [`docs/LUME_PRODUCT_ITEMS_FROM_AUDIT.md`](../LUME_PRODUCT_ITEMS_FROM_AUDIT.md). That list is not a coaching recommendation. |
 
 ---
 
