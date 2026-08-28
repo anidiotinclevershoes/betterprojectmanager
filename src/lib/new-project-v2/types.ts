@@ -1,4 +1,7 @@
-import type { ObservationDomain } from "@/lib/capture-v2/types";
+import type {
+  ObservationDisposition,
+  ObservationDomain,
+} from "@/lib/capture-v2/types";
 
 export const PROVISIONAL_CATEGORIES = [
   "person",
@@ -19,6 +22,10 @@ export type ProvisionalItem = {
   modelDomain: ObservationDomain;
   category: ProvisionalCategory;
   proposedValues?: Record<string, unknown> | null;
+  /** Copied from the shared Capture observation when present. */
+  disposition?: ObservationDisposition;
+  /** Ambiguous Capture observations map onto existing setup review, not new UI. */
+  needsReview?: boolean;
 };
 
 export type NewProjectV2Envelope = {

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import {
   assembleFromInterview,
-  assembleFromNarrative,
   suggestCode,
   type CreateProjectInput,
   type InterviewAnswers,
@@ -9,13 +8,13 @@ import {
 import { getOpenAIKey, isOpenAIConfigured } from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
 import { requireAiCaller } from "@/lib/ai-gate";
-import { isProductionRuntime } from "@/lib/runtime-config";
+import { extractObservationsWithOpenAI } from "@/lib/capture-v2/extract";
+import { parseObservationEnvelope } from "@/lib/capture-v2/validate";
 import {
   draftFromProvisional,
-  isNewProjectV2Enabled,
   parseNewProjectV2Envelope,
 } from "@/lib/new-project-v2";
-import { extractNewProjectV2WithOpenAI } from "@/lib/new-project-v2/extract";
+import { NEW_PROJECT_UNSCOPED_PROJECT_BLOCK } from "@/lib/new-project-v2/extract";
 
 export const runtime = "nodejs";
 
@@ -38,79 +37,50 @@ export async function POST(request: Request) {
 
     if (typeof body.content === "string" && body.content.trim()) {
       const sourceMode = body.sourceMode === "talk" ? "talk" : "paste";
-      const local = assembleFromNarrative(body.content, kind, sourceMode);
 
       if (!isOpenAIConfigured()) {
-        if (isProductionRuntime()) {
-          return NextResponse.json(
-            { error: "AI is not configured for this environment." },
-            { status: 503 },
-          );
-        }
-        return NextResponse.json({
-          draft: local,
-          provider: "local" as const,
-          openaiConfigured: false,
-        });
-      }
-
-      if (isNewProjectV2Enabled()) {
-        try {
-          const extracted = await extractNewProjectV2WithOpenAI(body.content);
-          const parsed = parseNewProjectV2Envelope(extracted.rawModelJson);
-          const draft = draftFromProvisional({
-            sourceNarrative: body.content,
-            sourceMode,
-            project: parsed.project,
-            items: parsed.items,
-          });
-          return NextResponse.json({
-            draft,
-            provisionalItems: parsed.items,
-            projectSeed: parsed.project,
-            provider: "openai" as const,
-            openaiConfigured: true,
-            pipeline: "v2" as const,
-          });
-        } catch {
-          const parsed = parseNewProjectV2Envelope({ observations: [] });
-          const draft = draftFromProvisional({
-            sourceNarrative: body.content,
-            sourceMode,
-            project: { name: "New project", summary: "", currentFocus: "" },
-            items: parsed.items,
-          });
-          return NextResponse.json({
-            draft,
-            provisionalItems: parsed.items,
-            projectSeed: parsed.project,
-            provider: "openai" as const,
-            openaiConfigured: true,
-            pipeline: "v2" as const,
-            note: "Lume could not organise this into a map. Nothing was created — you can recategorise or go back.",
-          });
-        }
+        return NextResponse.json(
+          { error: "AI is not configured for this environment." },
+          { status: 503 },
+        );
       }
 
       try {
-        const draft = await assembleNarrativeWithOpenAI(
-          body.content,
-          kind,
+        const extraction = await extractObservationsWithOpenAI({
+          transcript: body.content,
+          projectBlock: NEW_PROJECT_UNSCOPED_PROJECT_BLOCK,
+        });
+        const envelope = parseObservationEnvelope(extraction.rawModelJson);
+        if (envelope.issues.some((issue) => issue.code === "malformed")) {
+          return NextResponse.json(
+            {
+              error:
+                "Lume could not organise this into a map. Nothing was created.",
+            },
+            { status: 502 },
+          );
+        }
+        const parsed = parseNewProjectV2Envelope(extraction.rawModelJson);
+        const draft = draftFromProvisional({
+          sourceNarrative: body.content,
           sourceMode,
-          local,
-        );
+          project: parsed.project,
+          items: parsed.items,
+        });
         return NextResponse.json({
           draft,
+          provisionalItems: parsed.items,
+          projectSeed: parsed.project,
           provider: "openai" as const,
           openaiConfigured: true,
+          pipeline: "v2" as const,
         });
-      } catch {
-        return NextResponse.json({
-          draft: local,
-          provider: "local" as const,
-          openaiConfigured: true,
-          note: "OpenAI assemble failed — used local parse.",
-        });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Lume could not organise this into a map. Nothing was created.";
+        return NextResponse.json({ error: message }, { status: 502 });
       }
     }
 
@@ -151,89 +121,6 @@ export async function POST(request: Request) {
       error instanceof Error ? error.message : "Could not assemble project";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
-
-async function assembleNarrativeWithOpenAI(
-  content: string,
-  kind: "delivery" | "release_ops",
-  sourceMode: "talk" | "paste",
-  fallback: CreateProjectInput,
-): Promise<CreateProjectInput> {
-  const key = getOpenAIKey();
-  const prompt = `You extract a Lume project setup draft from free-form PM notes or speech.
-
-Return ONLY valid JSON with this shape:
-{
-  "name": string,
-  "code": string (2-8 chars, uppercase),
-  "summary": string,
-  "kind": "delivery" | "release_ops",
-  "currentFocus": string,
-  "nextMilestone": string | null,
-  "nextMilestoneAt": "YYYY-MM-DD" | null,
-  "stakeholders": [{"name": string, "role": string, "concerns": string[], "needsReview": boolean}],
-  "todos": [{"title": string, "dueAt": "YYYY-MM-DD"|null, "kind": "ACTION"|"WAITING"|"CHASE"|"REMINDER", "waitingOn": string|null, "needsReview": boolean}],
-  "risks": [{"title": string, "needsReview": boolean}],
-  "importantDates": [{"label": string, "date": "YYYY-MM-DD"|null, "needsReview": boolean}],
-  "knowledgeRemember": [{"text": string, "remember": true}],
-  "knowledgeNow": string[],
-  "knowledgeRisks": string[],
-  "knowledgePeople": string[],
-  "knowledgeOpenLoops": string[],
-  "knowledgeDecisions": string[],
-  "notMentioned": string[]
-}
-
-Rules:
-- Do NOT invent people, dates, risks, tasks or knowledge not evidenced in the source.
-- Knowledge = durable project context (rules, preferences, constraints) — not transient events.
-- Prefer short concrete bullets.
-- Mark needsReview when role/date/risk is uncertain.
-- kind defaults to "${kind}".
-
-SOURCE (${sourceMode}):
-"""
-${content.slice(0, 12000)}
-"""
-
-LOCAL FALLBACK (improve; keep real facts):
-${JSON.stringify(fallback, null, 2)}`;
-
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: resolveOpenAIChatModel(),
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "You extract structured project setup data for a PM coaching app. Never invent facts. Preserve useful Knowledge overlap.",
-        },
-        { role: "user", content: prompt },
-      ],
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`OpenAI assemble failed (${response.status})`);
-  }
-
-  const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const raw = data.choices?.[0]?.message?.content?.trim();
-  if (!raw) throw new Error("Empty assemble response");
-  return normalizeDraft(JSON.parse(raw) as Partial<CreateProjectInput>, {
-    ...fallback,
-    sourceMode,
-    sourceNarrative: content,
-  });
 }
 
 async function assembleWithOpenAI(

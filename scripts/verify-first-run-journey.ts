@@ -79,11 +79,13 @@ function main() {
     assert.doesNotMatch(experience, /np-tell-me-nudge/);
   });
 
-  check("AI build failure stays on review and does not create", () => {
-    assert.match(experience, /Showing a local draft instead/);
-    assert.match(experience, /setPath\("review"\)/);
+  check("AI build failure stays on talk and does not create", () => {
+    assert.match(experience, /Nothing was created/);
+    assert.doesNotMatch(experience, /Showing a local draft instead/);
     const analyse = experience.slice(experience.indexOf("async function analyseNarrative"));
     const analyseBody = analyse.slice(0, analyse.indexOf("function cancelBuild"));
+    assert.doesNotMatch(analyseBody, /assembleFromNarrative/);
+    assert.doesNotMatch(analyseBody, /setPath\("review"\)/);
     assert.doesNotMatch(analyseBody, /createProject\(/);
     assert.doesNotMatch(analyseBody, /setSuccess\(/);
   });

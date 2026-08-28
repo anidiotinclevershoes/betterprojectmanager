@@ -1,5 +1,7 @@
 import {
+  isObservationDisposition,
   isObservationDomain,
+  type ObservationDisposition,
   type ObservationDomain,
 } from "@/lib/capture-v2/types";
 import { parseObservationEnvelope } from "@/lib/capture-v2/validate";
@@ -22,6 +24,11 @@ function asString(value: unknown): string | null {
   return trimmed ? trimmed : null;
 }
 
+/**
+ * Adapt a Capture observation envelope into New Project provisional items.
+ * Does not invent Objective / summary / currentFocus. Empty metadata is valid.
+ * Ambiguous dispositions become needsReview on the mapped item.
+ */
 export function parseNewProjectV2Envelope(raw: unknown): {
   project: { name: string; summary: string; currentFocus: string };
   items: ProvisionalItem[];
@@ -40,16 +47,26 @@ export function parseNewProjectV2Envelope(raw: unknown): {
     const domainRaw = asString(row.domain);
     const domain: ObservationDomain =
       domainRaw && isObservationDomain(domainRaw) ? domainRaw : "unknown";
+    const dispositionRaw = asString(row.disposition);
+    const disposition: ObservationDisposition | undefined =
+      dispositionRaw && isObservationDisposition(dispositionRaw)
+        ? dispositionRaw
+        : undefined;
     const categoryOverride = row.category;
-    const category: ProvisionalCategory = isProvisionalCategory(categoryOverride)
+    let category: ProvisionalCategory = isProvisionalCategory(categoryOverride)
       ? categoryOverride
       : categoryFromDomain(domain);
+    if (disposition === "ignore" && !isProvisionalCategory(categoryOverride)) {
+      category = "ignored";
+    }
     items.push({
       id: asString(row.id) ?? `np-${index + 1}`,
       statement,
       evidence,
       modelDomain: domain,
       category,
+      disposition,
+      needsReview: disposition === "ambiguous",
       proposedValues:
         row.proposedValues &&
         typeof row.proposedValues === "object" &&
