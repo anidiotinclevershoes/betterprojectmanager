@@ -8,6 +8,7 @@ This folder is the Capture V2 **test / evaluation** workstream. Architecture (PR
 - Stacked Capture regression: `STACKED_CAPTURE.md`
 - v0.9 Capture qualification: `V09_QUALIFICATION.md`
 - v0.9 architecture conformance (thin production-wiring pack): `V09_ARCHITECTURE_CONFORMANCE.md`
+- v0.9 adversarial release qualification: `V09_ADVERSARIAL_QUALIFICATION.md`
 - Deep stress (Harbourline): `DEEP_STRESS.md`
 - Test-debt inventory: `TEST_DEBT.md`
 - Vercel AI SDK spike: `VERCEL_AI_SDK_SPIKE.md`

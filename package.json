@@ -69,6 +69,8 @@
     "verify:stacked-capture": "npx --yes tsx scripts/verify-stacked-capture.ts",
     "verify:stable-object-identity": "npx --yes tsx scripts/verify-stable-object-identity.ts",
     "verify:v09-architecture": "npx --yes tsx scripts/verify-v09-architecture-conformance.ts",
+    "verify:v09-adversarial": "npx --yes tsx scripts/verify-v09-adversarial-qualification.ts",
+    "test:v09-adversarial-ui": "playwright test e2e/v09-adversarial-ui.spec.ts",
     "verify:resurrection": "npx --yes tsx scripts/verify-resurrection.ts",
     "verify:eval-stress": "npx --yes tsx scripts/verify-eval-stress.ts",
     "test:eval-stress": "playwright test e2e/stress-journeys.spec.ts",
