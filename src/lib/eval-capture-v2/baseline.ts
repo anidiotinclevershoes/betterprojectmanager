@@ -69,6 +69,7 @@ export const FROZEN_PROMPT_RULES = `Rules:
 - candidateTargetId MUST be copied from the supplied current records. Never invent IDs.
 - If a person/risk/date/todo already exists, prefer update_existing or no_change over create_new.
 - If share vs replace (or two plausible targets) cannot be decided from the transcript, disposition=ambiguous.
+- truthIntent=current only when the user is asserting this as current authoritative project truth (including explicit corrections, agreed dates/ownership, and agreed future milestones). truthIntent=non_current for historical, quoted, superseded, considered-but-not-agreed, or rejected alternatives. truthIntent=uncertain when it is unclear whether current truth should change.
 - Project-irrelevant chatter is domain=commentary and disposition=commentary.
 - Duplicate restatements: keep one observation and mark others disposition=merge.
 - Do not output operations, SQL, or Apply Ready. Confidence is informational only.`;
