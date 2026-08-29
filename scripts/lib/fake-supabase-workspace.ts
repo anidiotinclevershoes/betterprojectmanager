@@ -44,7 +44,7 @@ export class FakeWorkspaceClient {
   readonly tables: Record<string, FakeRow[]>;
   insertCount = 0;
   private readonly failAfterInserts?: number;
-  private readonly failOnTable?: string;
+  private failOnTable?: string;
   private readonly failOnDeleteTable?: string;
 
   constructor(options: FakeWorkspaceOptions = {}) {
@@ -91,6 +91,11 @@ export class FakeWorkspaceClient {
   }
 
   /** Used by the query builder — keep failure flags private to this class. */
+  /** Test-only: fail the next insert() into this table. Does not change production. */
+  armFailOnTable(table: string | undefined) {
+    this.failOnTable = table;
+  }
+
   nextInsertFailure(table: string): string | null {
     if (this.failOnTable === table) return `injected failure on ${table}`;
     if (
