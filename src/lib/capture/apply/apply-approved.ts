@@ -99,6 +99,33 @@ export async function applyApprovedCaptureSuggestion(args: {
 
   const box = { state: structuredClone(loaded.workspaceState) };
   const hooks = args.hooks ?? memoryCaptureApplyHooks(box);
+
+  const replayId =
+    decision.kind === "write" && "applyOperationId" in decision.operation
+      ? decision.operation.applyOperationId
+      : undefined;
+  if (replayId && hooks.findApplyReceipt && decision.kind === "write") {
+    const existing = await hooks.findApplyReceipt({
+      projectId: decision.operation.projectId,
+      operationId: replayId,
+    });
+    if (existing) {
+      return {
+        decision: {
+          kind: "no_change",
+          domain: decision.domain,
+          reason: "This approved create was already applied.",
+        },
+        executed: {
+          kind: "no_change",
+          domain: decision.domain,
+          reason: "This approved create was already applied.",
+        },
+        state: loaded.workspaceState,
+      };
+    }
+  }
+
   const executed = await executeCaptureApply(decision, hooks);
 
   if (executed.kind === "wrote" && decision.kind === "write") {

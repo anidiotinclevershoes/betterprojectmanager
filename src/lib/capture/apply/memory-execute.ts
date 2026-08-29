@@ -247,5 +247,13 @@ export function memoryCaptureApplyHooks(box: {
     writeAvailability: apply,
     writeKnowledge: apply,
     writeMemory: apply,
+    findApplyReceipt: ({ operationId }) => {
+      const todo = (box.state.todos ?? []).find(
+        (t) => t.sourceRecommendationId === operationId,
+      );
+      return todo
+        ? { entityType: "todo", entityId: todo.id }
+        : null;
+    },
   };
 }

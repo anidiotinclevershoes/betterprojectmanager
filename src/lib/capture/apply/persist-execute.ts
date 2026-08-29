@@ -295,6 +295,17 @@ export function supabaseCaptureApplyHooks(args: {
         userId,
       );
     },
+    findApplyReceipt: async ({ projectId, operationId }) => {
+      const existing = await persistFindCaptureApplyReceipt(
+        client,
+        workspaceId,
+        projectId,
+        operationId,
+      );
+      return existing
+        ? { entityType: existing.entityType, entityId: existing.entityId }
+        : null;
+    },
     writeMemory: async (op) => {
       const now = new Date().toISOString();
       await persistMemory(client, workspaceId, userId, {
