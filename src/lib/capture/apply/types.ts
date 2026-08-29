@@ -54,6 +54,8 @@ export type CaptureLegalOperation =
       dueAt?: string;
       todoKind?: TodoKind;
       waitingOn?: string;
+      /** Approved Review/Apply operation identity. Retry-safe; not a title. */
+      applyOperationId?: string;
     }
   | {
       type: "update_todo";
@@ -77,6 +79,7 @@ export type CaptureLegalOperation =
       type: "create_risk";
       projectId: string;
       title: string;
+      applyOperationId?: string;
     }
   | {
       type: "update_risk_status";
@@ -91,6 +94,7 @@ export type CaptureLegalOperation =
       startAt?: string;
       endAt?: string;
       notes?: string;
+      applyOperationId?: string;
     }
   | {
       type: "update_milestone";

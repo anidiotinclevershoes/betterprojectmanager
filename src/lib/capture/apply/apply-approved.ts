@@ -124,7 +124,15 @@ export async function applyApprovedCaptureSuggestion(args: {
 
   let state = args.hooks ? loaded.workspaceState : box.state;
   if (executed.kind === "wrote" && args.reloadWorkspace) {
-    state = await args.reloadWorkspace();
+    try {
+      state = await args.reloadWorkspace();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(
+        "[applyApprovedCaptureSuggestion] reload after write skipped",
+        message,
+      );
+    }
   }
 
   return {

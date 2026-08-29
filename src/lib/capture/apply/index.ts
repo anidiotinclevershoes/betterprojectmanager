@@ -18,6 +18,7 @@ export {
 export { classifyCaptureLegalDomain } from "./classify";
 export { resolveCaptureProjectScope } from "./project-scope";
 export { planCaptureApply } from "./dispatch";
+export { reviewedCreateIdentity } from "./reviewed-identity";
 export { captureApplyWorldFromState } from "./world";
 export {
   executeCaptureApply,

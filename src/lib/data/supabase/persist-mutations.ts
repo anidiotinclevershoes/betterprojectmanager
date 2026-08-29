@@ -785,6 +785,10 @@ export async function persistKnowledgeBullet(
   if (meta?.meta != null) row.meta = meta.meta;
   if (meta?.provenance != null) row.provenance = meta.provenance;
 
+  const knowledgeId =
+    meta?.id && UUID_RE.test(meta.id) ? meta.id : crypto.randomUUID();
+  row.id = knowledgeId;
+
   const { error } = await client.from("knowledge_items").insert(row);
   if (error) throw new Error(`[supabase] create knowledge: ${error.message}`);
 
@@ -806,6 +810,17 @@ export async function persistKnowledgeBullet(
       created_by: userId,
     });
     if (riskError) {
+      const { error: compensateError } = await client
+        .from("knowledge_items")
+        .delete()
+        .eq("id", knowledgeId)
+        .eq("workspace_id", workspaceId)
+        .eq("project_id", projectId);
+      if (compensateError) {
+        throw new Error(
+          `[supabase] create risk: ${riskError.message}; knowledge compensation failed: ${compensateError.message}`,
+        );
+      }
       throw new Error(`[supabase] create risk: ${riskError.message}`);
     }
     return { riskId };
@@ -895,6 +910,85 @@ export async function persistEnsureStakeholder(
     throw new Error(`[supabase] create stakeholder: ${insertError.message}`);
   }
   return { id: stakeholder.id, created: true };
+}
+
+/**
+ * Compensation only — delete a stakeholder row this mutation just created.
+ * Scoped to workspace + project + id. Never used as a user-facing Apply op.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistDeleteStakeholder(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  stakeholderId: string,
+): Promise<void> {
+  const { error } = await client
+    .from("stakeholders")
+    .delete()
+    .eq("id", stakeholderId)
+    .eq("workspace_id", workspaceId)
+    .eq("project_id", projectId);
+  if (error) {
+    throw new Error(`[supabase] delete stakeholder: ${error.message}`);
+  }
+}
+
+export type CaptureApplyReceipt = {
+  operationId: string;
+  entityType: string;
+  entityId: string;
+};
+
+/**
+ * Approved Capture create receipt. Same Review/Apply operation identity
+ * replays to the same authoritative row. Not title uniqueness.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistFindCaptureApplyReceipt(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  operationId: string,
+): Promise<CaptureApplyReceipt | null> {
+  const key = operationId.trim();
+  if (!key) return null;
+  const { data, error } = await client
+    .from("capture_apply_receipts")
+    .select("operation_id, entity_type, entity_id")
+    .eq("workspace_id", workspaceId)
+    .eq("project_id", projectId)
+    .eq("operation_id", key)
+    .maybeSingle();
+  if (error) {
+    throw new Error(`[supabase] lookup capture apply receipt: ${error.message}`);
+  }
+  if (!data?.entity_id) return null;
+  return {
+    operationId: String(data.operation_id),
+    entityType: String(data.entity_type),
+    entityId: String(data.entity_id),
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistPutCaptureApplyReceipt(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  receipt: CaptureApplyReceipt,
+): Promise<void> {
+  const { error } = await client.from("capture_apply_receipts").insert({
+    workspace_id: workspaceId,
+    project_id: projectId,
+    operation_id: receipt.operationId,
+    entity_type: receipt.entityType,
+    entity_id: receipt.entityId,
+  });
+  if (error) {
+    if (isUniqueViolation(error)) return;
+    throw new Error(`[supabase] create capture apply receipt: ${error.message}`);
+  }
 }
 
 /**

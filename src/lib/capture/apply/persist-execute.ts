@@ -5,10 +5,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { confirmResponsibilityOwner } from "@/lib/people/identity";
 import {
+  persistDeleteStakeholder,
   persistEnsureStakeholder,
+  persistFindCaptureApplyReceipt,
   persistKnowledgeBullet,
   persistKnowledgeLifecycle,
   persistMemory,
+  persistPutCaptureApplyReceipt,
   persistRiskStatus,
   persistTimelineItem,
   persistTimelineUpdate,
@@ -37,7 +40,16 @@ export function supabaseCaptureApplyHooks(args: {
 
   return {
     createTodo: async (op) => {
-      await persistTodoCreate(client, workspaceId, userId, {
+      if (op.applyOperationId) {
+        const existing = await persistFindCaptureApplyReceipt(
+          client,
+          workspaceId,
+          op.projectId,
+          op.applyOperationId,
+        );
+        if (existing) return;
+      }
+      const created = await persistTodoCreate(client, workspaceId, userId, {
         projectId: op.projectId,
         title: op.title,
         detail: op.detail,
@@ -46,6 +58,13 @@ export function supabaseCaptureApplyHooks(args: {
         kind: op.todoKind,
         waitingOn: op.waitingOn,
       });
+      if (op.applyOperationId) {
+        await persistPutCaptureApplyReceipt(client, workspaceId, op.projectId, {
+          operationId: op.applyOperationId,
+          entityType: "todo",
+          entityId: created.id,
+        });
+      }
     },
     updateTodo: async (op) => {
       await persistTodoUpdate(client, workspaceId, op.projectId, op.todoId, {
@@ -63,15 +82,32 @@ export function supabaseCaptureApplyHooks(args: {
       await persistTodoDelete(client, workspaceId, op.projectId, op.todoId);
     },
     createRisk: async (op) => {
-      await persistKnowledgeBullet(
+      if (op.applyOperationId) {
+        const existing = await persistFindCaptureApplyReceipt(
+          client,
+          workspaceId,
+          op.projectId,
+          op.applyOperationId,
+        );
+        if (existing) return;
+      }
+      const riskId = newId();
+      const written = await persistKnowledgeBullet(
         client,
         workspaceId,
         op.projectId,
         "risks",
         op.title,
         userId,
-        { riskId: newId() },
+        { riskId },
       );
+      if (op.applyOperationId) {
+        await persistPutCaptureApplyReceipt(client, workspaceId, op.projectId, {
+          operationId: op.applyOperationId,
+          entityType: "risk",
+          entityId: written.riskId ?? riskId,
+        });
+      }
     },
     updateRiskStatus: async (op) => {
       await persistRiskStatus(
@@ -83,14 +119,33 @@ export function supabaseCaptureApplyHooks(args: {
       );
     },
     createMilestone: async (op) => {
-      await persistTimelineItem(client, workspaceId, op.projectId, {
+      if (!op.startAt) {
+        throw new Error("This date cannot be saved — the date is missing.");
+      }
+      if (op.applyOperationId) {
+        const existing = await persistFindCaptureApplyReceipt(
+          client,
+          workspaceId,
+          op.projectId,
+          op.applyOperationId,
+        );
+        if (existing) return;
+      }
+      const created = await persistTimelineItem(client, workspaceId, op.projectId, {
         label: op.label,
         type: "milestone",
-        startAt: op.startAt ?? new Date().toISOString(),
+        startAt: op.startAt,
         endAt: op.endAt,
         notes: op.notes,
         source: "capture",
       });
+      if (op.applyOperationId) {
+        await persistPutCaptureApplyReceipt(client, workspaceId, op.projectId, {
+          operationId: op.applyOperationId,
+          entityType: "milestone",
+          entityId: created.id,
+        });
+      }
     },
     updateMilestone: async (op) => {
       await persistTimelineUpdate(
@@ -123,39 +178,77 @@ export function supabaseCaptureApplyHooks(args: {
         replacePersonId: op.replacePersonId,
       });
       box.state = result.state;
-      await persistEnsureStakeholder(client, workspaceId, op.projectId, {
-        id: result.person.id,
-        name: result.person.name,
-        role: result.person.role,
-      });
+      let personPersistCreated = false;
       const uuidIds = result.supersededIds.filter((id) => UUID_RE.test(id));
-      if (uuidIds.length) {
-        await persistKnowledgeLifecycle(
+      let supersededPersisted = false;
+      try {
+        const ensured = await persistEnsureStakeholder(
           client,
           workspaceId,
           op.projectId,
-          uuidIds,
-          "superseded",
-        );
-      }
-      if (result.responsibilityCreated && result.peopleBullet) {
-        await persistKnowledgeBullet(
-          client,
-          workspaceId,
-          op.projectId,
-          "people",
-          result.peopleBullet,
-          userId,
           {
-            id: result.item.id,
-            kind: result.item.kind,
-            epistemic: result.item.epistemic,
-            lifecycle: result.item.lifecycle,
-            supersedesId: result.item.supersedesId,
-            meta: (result.item.meta as Record<string, unknown>) ?? {},
-            provenance: result.item.provenance,
+            id: result.person.id,
+            name: result.person.name,
+            role: result.person.role,
           },
         );
+        personPersistCreated = ensured.created;
+        if (uuidIds.length) {
+          await persistKnowledgeLifecycle(
+            client,
+            workspaceId,
+            op.projectId,
+            uuidIds,
+            "superseded",
+          );
+          supersededPersisted = true;
+        }
+        if (result.responsibilityCreated && result.peopleBullet) {
+          await persistKnowledgeBullet(
+            client,
+            workspaceId,
+            op.projectId,
+            "people",
+            result.peopleBullet,
+            userId,
+            {
+              id: result.item.id,
+              kind: result.item.kind,
+              epistemic: result.item.epistemic,
+              lifecycle: result.item.lifecycle,
+              supersedesId: result.item.supersedesId,
+              meta: (result.item.meta as Record<string, unknown>) ?? {},
+              provenance: result.item.provenance,
+            },
+          );
+        }
+      } catch (err) {
+        if (supersededPersisted && uuidIds.length) {
+          try {
+            await persistKnowledgeLifecycle(
+              client,
+              workspaceId,
+              op.projectId,
+              uuidIds,
+              "current",
+            );
+          } catch {
+            // Keep the original persist failure as the Apply result.
+          }
+        }
+        if (personPersistCreated) {
+          try {
+            await persistDeleteStakeholder(
+              client,
+              workspaceId,
+              op.projectId,
+              result.person.id,
+            );
+          } catch {
+            // Keep the original persist failure as the Apply result.
+          }
+        }
+        throw err;
       }
     },
     writeAvailability: async (op) => {

@@ -24,6 +24,7 @@ import {
   type OwnershipSemantics,
   type PlanCaptureApplyInput,
 } from "./types";
+import { reviewedCreateIdentity } from "./reviewed-identity";
 
 function needsYou(
   domain: CaptureLegalDomain,
@@ -147,7 +148,8 @@ function planTodo(
   if (item.op !== "create") {
     return needsYou("todo", "This To Do operation is not supported.");
   }
-  if (!text) {
+  const title = reviewedCreateIdentity(item);
+  if (!title) {
     return needsYou("todo", "This To Do has no title.");
   }
   if (todoId) {
@@ -162,11 +164,12 @@ function planTodo(
   return write("todo", {
     type: "create_todo",
     projectId,
-    title: text,
+    title,
     detail: item.recommendation?.action,
     dueAt: item.date,
     todoKind: item.todoKind ?? (item.kind === "nudge" ? "CHASE" : "ACTION"),
     waitingOn: item.waitingOn,
+    applyOperationId: item.id.trim() || undefined,
   });
 }
 
@@ -230,10 +233,11 @@ function planRisk(
       "This Risk target is not on this project. Lume will not create another Risk.",
     );
   }
-  if (!text) {
+  const title = reviewedCreateIdentity(item);
+  if (!title) {
     return needsYou("risk", "This Risk has no title.");
   }
-  const needle = text.trim().toLowerCase();
+  const needle = title.toLowerCase();
   const exactTitle = projectRisks.filter(
     (r) => r.title.trim().toLowerCase() === needle,
   );
@@ -246,7 +250,12 @@ function planRisk(
       "More than one existing Risk matches this title. Lume will not create another.",
     );
   }
-  return write("risk", { type: "create_risk", projectId, title: text });
+  return write("risk", {
+    type: "create_risk",
+    projectId,
+    title,
+    applyOperationId: item.id.trim() || undefined,
+  });
 }
 
 function planMilestone(
@@ -313,19 +322,27 @@ function planMilestone(
     }
     return noChange("milestone", "This date is already on the project.");
   }
-  if (!text) {
+  const label = reviewedCreateIdentity(item);
+  if (!label) {
     return needsYou("milestone", "This date has no label.");
   }
   const startAt =
     parseIsoDate(item.date) ||
     parseIsoDate(asString(proposedValues(item).startAt)) ||
-    new Date().toISOString();
+    parseIsoDate(asString(proposedValues(item).date));
+  if (!startAt) {
+    return needsYou(
+      "milestone",
+      "This date cannot be saved — the date is missing.",
+    );
+  }
   return write("milestone", {
     type: "create_milestone",
     projectId,
-    label: text,
+    label,
     startAt,
     notes: item.timelineItem?.notes,
+    applyOperationId: item.id.trim() || undefined,
   });
 }
 
@@ -709,7 +726,8 @@ function planKnowledge(
   if (item.op !== "create" && item.op !== "update") {
     return needsYou("knowledge", "This knowledge operation is not supported.");
   }
-  if (!text) {
+  const body = reviewedCreateIdentity(item);
+  if (!body) {
     return needsYou("knowledge", "This knowledge item has no text.");
   }
   const section =
@@ -726,7 +744,7 @@ function planKnowledge(
     type: "write_knowledge",
     projectId,
     section,
-    text,
+    text: body,
   });
 }
 
@@ -734,10 +752,11 @@ function planMemory(item: PendingSuggestion, text: string, projectId: string): C
   if (item.op !== "create" && item.op !== "update") {
     return needsYou("memory", "This memory operation is not supported.");
   }
-  if (!text) {
+  const title = reviewedCreateIdentity(item);
+  if (!title) {
     return needsYou("memory", "This memory has no text.");
   }
-  return write("memory", { type: "write_memory", projectId, title: text });
+  return write("memory", { type: "write_memory", projectId, title });
 }
 
 /**
@@ -764,7 +783,8 @@ export function planCaptureApply(input: PlanCaptureApplyInput): CaptureApplyDeci
   }
   const projectId = scope.projectId;
 
-  if (!text && domain !== "todo") {
+  const hasReviewedIdentity = Boolean(reviewedCreateIdentity(item));
+  if (!text && !hasReviewedIdentity && domain !== "todo") {
     // todo handler has its own empty-title check; other domains need payload.
     if (domain !== "risk" && item.op !== "complete") {
       return needsYou(domain, "This finding has no text to apply.");
