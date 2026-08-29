@@ -767,6 +767,8 @@ export async function persistKnowledgeBullet(
     provenance?: unknown[] | null;
     /** Stable risks.id when dual-writing a genuine Risk (Slice 1B). */
     riskId?: string | null;
+    /** Optional Apply receipt written in the same transaction as the risk. */
+    receipt?: CaptureApplyReceipt | null;
   },
 ): Promise<{ riskId?: string }> {
   const row: Record<string, unknown> = {
@@ -789,9 +791,6 @@ export async function persistKnowledgeBullet(
     meta?.id && UUID_RE.test(meta.id) ? meta.id : crypto.randomUUID();
   row.id = knowledgeId;
 
-  const { error } = await client.from("knowledge_items").insert(row);
-  if (error) throw new Error(`[supabase] create knowledge: ${error.message}`);
-
   if (section === "risks") {
     const riskId =
       meta?.riskId &&
@@ -800,31 +799,35 @@ export async function persistKnowledgeBullet(
       )
         ? meta.riskId
         : crypto.randomUUID();
-    const { error: riskError } = await client.from("risks").insert({
-      id: riskId,
-      workspace_id: workspaceId,
-      project_id: projectId,
-      title: body,
-      status: "open",
-      source: "capture",
-      created_by: userId,
+    const { data, error } = await client.rpc("persist_risk_with_knowledge", {
+      p_workspace_id: workspaceId,
+      p_project_id: projectId,
+      p_knowledge: row,
+      p_risk: {
+        id: riskId,
+        title: body,
+        status: "open",
+        source: "capture",
+        created_by: userId,
+      },
+      p_receipt: meta?.receipt
+        ? {
+            operation_id: meta.receipt.operationId,
+            entity_type: meta.receipt.entityType,
+            entity_id: meta.receipt.entityId,
+          }
+        : null,
     });
-    if (riskError) {
-      const { error: compensateError } = await client
-        .from("knowledge_items")
-        .delete()
-        .eq("id", knowledgeId)
-        .eq("workspace_id", workspaceId)
-        .eq("project_id", projectId);
-      if (compensateError) {
-        throw new Error(
-          `[supabase] create risk: ${riskError.message}; knowledge compensation failed: ${compensateError.message}`,
-        );
-      }
-      throw new Error(`[supabase] create risk: ${riskError.message}`);
-    }
-    return { riskId };
+    if (error) throw new Error(`[supabase] create risk: ${error.message}`);
+    const returnedId =
+      data && typeof data === "object" && data !== null && "risk_id" in data
+        ? String((data as { risk_id: string }).risk_id)
+        : riskId;
+    return { riskId: returnedId };
   }
+
+  const { error } = await client.from("knowledge_items").insert(row);
+  if (error) throw new Error(`[supabase] create knowledge: ${error.message}`);
 
   return {};
 }
@@ -989,6 +992,172 @@ export async function persistPutCaptureApplyReceipt(
     if (isUniqueViolation(error)) return;
     throw new Error(`[supabase] create capture apply receipt: ${error.message}`);
   }
+}
+
+function receiptPayload(receipt: CaptureApplyReceipt) {
+  return {
+    operation_id: receipt.operationId,
+    entity_type: receipt.entityType,
+    entity_id: receipt.entityId,
+  };
+}
+
+/**
+ * Authoritative Todo create + Apply receipt in one transaction.
+ * Order inside the transaction: truth row, then receipt.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistTodoCreateWithReceipt(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  todo: Omit<TodoItem, "id" | "createdAt"> & { createdAt?: string },
+  receipt: CaptureApplyReceipt,
+): Promise<TodoItem> {
+  const { data, error } = await client.rpc("persist_todo_create_with_receipt", {
+    p_workspace_id: workspaceId,
+    p_project_id: todo.projectId ?? null,
+    p_todo: {
+      title: todo.title,
+      detail: todo.detail ?? null,
+      done: todo.done ?? false,
+      due_on: isoToDateOnly(todo.dueAt),
+      kind: todo.kind ?? "ACTION",
+      waiting_on: todo.waitingOn ?? null,
+      created_by: userId,
+    },
+    p_receipt: receiptPayload(receipt),
+  });
+  const row = requireData(data as Record<string, unknown> | null, error, "create todo");
+  return {
+    id: String(row.id),
+    projectId: (row.project_id as string | null) ?? undefined,
+    title: String(row.title),
+    detail: (row.detail as string | null) ?? undefined,
+    done: Boolean(row.done),
+    createdAt: String(row.created_at ?? new Date().toISOString()),
+    dueAt: row.due_on ? `${row.due_on}T12:00:00.000Z` : undefined,
+    kind: row.kind as TodoItem["kind"],
+    waitingOn: (row.waiting_on as string | null) ?? undefined,
+  };
+}
+
+/**
+ * Authoritative milestone create + Apply receipt in one transaction.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistTimelineItemWithReceipt(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  item: {
+    label: string;
+    type: string;
+    startAt: string;
+    endAt?: string;
+    notes?: string;
+    source?: string;
+  },
+  receipt: CaptureApplyReceipt,
+): Promise<TimelineItem> {
+  const { data, error } = await client.rpc(
+    "persist_milestone_create_with_receipt",
+    {
+      p_workspace_id: workspaceId,
+      p_project_id: projectId,
+      p_milestone: {
+        label: item.label,
+        type: item.type,
+        start_on: isoToDateOnly(item.startAt),
+        end_on: isoToDateOnly(item.endAt),
+        notes: item.notes ?? null,
+        source: item.source ?? "manual",
+      },
+      p_receipt: receiptPayload(receipt),
+    },
+  );
+  const row = requireData(
+    data as Record<string, unknown> | null,
+    error,
+    "create milestone",
+  );
+  return {
+    id: String(row.id),
+    projectId: String(row.project_id),
+    label: String(row.label),
+    type: String(row.type),
+    startAt: row.start_on ? `${row.start_on}T12:00:00.000Z` : String(row.created_at),
+    endAt: row.end_on ? `${row.end_on}T12:00:00.000Z` : undefined,
+    notes: (row.notes as string | null) ?? undefined,
+    source: (row.source as string | null) || "manual",
+  };
+}
+
+export type PersonResponsibilityBundle = {
+  stakeholder: {
+    id: string;
+    name: string;
+    role?: string;
+  };
+  supersedeIds?: string[];
+  knowledge?: {
+    id?: string | null;
+    section?: string;
+    body: string;
+    createdBy?: string | null;
+    kind?: string | null;
+    epistemic?: string | null;
+    lifecycle?: string | null;
+    supersedesId?: string | null;
+    meta?: Record<string, unknown> | null;
+    provenance?: unknown[] | null;
+  } | null;
+};
+
+/**
+ * Person + optional responsibility knowledge in one transaction.
+ * Lookup/insert of the stakeholder, optional lifecycle supersede, optional bullet.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistPersonResponsibilityBundle(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  bundle: PersonResponsibilityBundle,
+): Promise<{ personId: string; created: boolean }> {
+  const { data, error } = await client.rpc("persist_person_responsibility", {
+    p_workspace_id: workspaceId,
+    p_project_id: projectId,
+    p_stakeholder: {
+      id: bundle.stakeholder.id,
+      name: bundle.stakeholder.name,
+      role: bundle.stakeholder.role,
+    },
+    p_supersede_ids: bundle.supersedeIds ?? [],
+    p_knowledge: bundle.knowledge
+      ? {
+          id: bundle.knowledge.id ?? null,
+          section: bundle.knowledge.section ?? "people",
+          body: bundle.knowledge.body,
+          created_by: bundle.knowledge.createdBy ?? null,
+          kind: bundle.knowledge.kind ?? null,
+          epistemic: bundle.knowledge.epistemic ?? null,
+          lifecycle: bundle.knowledge.lifecycle ?? null,
+          supersedes_id: bundle.knowledge.supersedesId ?? null,
+          meta: bundle.knowledge.meta ?? {},
+          provenance: bundle.knowledge.provenance ?? [],
+        }
+      : null,
+  });
+  const row = requireData(
+    data as Record<string, unknown> | null,
+    error,
+    "persist person responsibility",
+  );
+  return {
+    personId: String(row.person_id),
+    created: Boolean(row.created),
+  };
 }
 
 /**

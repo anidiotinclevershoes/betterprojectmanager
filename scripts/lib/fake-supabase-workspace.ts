@@ -116,11 +116,179 @@ export class FakeWorkspaceClient {
     return null;
   }
 
-  async rpc(fn: string) {
+  async rpc(fn: string, args: Record<string, unknown> = {}) {
     if (fn === "ensure_personal_workspace") {
       return { data: this.workspaceId, error: null };
     }
+    if (fn === "persist_risk_with_knowledge") {
+      return this.runAtomic(async () => {
+        const knowledge = asRow(args.p_knowledge);
+        const risk = asRow(args.p_risk);
+        const receipt = args.p_receipt ? asRow(args.p_receipt) : null;
+        const k = await this.from("knowledge_items").insert({
+          workspace_id: args.p_workspace_id,
+          project_id: args.p_project_id,
+          ...knowledge,
+        });
+        if (k.error) throw new FakeRpcError(k.error.message, k.error.code);
+        const r = await this.from("risks").insert({
+          workspace_id: args.p_workspace_id,
+          project_id: args.p_project_id,
+          ...risk,
+        });
+        if (r.error) throw new FakeRpcError(r.error.message, r.error.code);
+        const riskId = String(
+          (Array.isArray(r.data) ? r.data[0]?.id : (r.data as FakeRow | null)?.id) ??
+            risk.id,
+        );
+        if (receipt) {
+          const rec = await this.from("capture_apply_receipts").insert({
+            workspace_id: args.p_workspace_id,
+            project_id: args.p_project_id,
+            operation_id: receipt.operation_id,
+            entity_type: receipt.entity_type ?? "risk",
+            entity_id: receipt.entity_id || riskId,
+          });
+          if (rec.error) throw new FakeRpcError(rec.error.message, rec.error.code);
+        }
+        return { knowledge_id: knowledge.id, risk_id: riskId };
+      });
+    }
+    if (fn === "persist_todo_create_with_receipt") {
+      return this.runAtomic(async () => {
+        const todo = asRow(args.p_todo);
+        const receipt = asRow(args.p_receipt);
+        const inserted = await this.from("todos").insert({
+          workspace_id: args.p_workspace_id,
+          project_id: args.p_project_id,
+          ...todo,
+        }).select("*").single();
+        if (inserted.error) {
+          throw new FakeRpcError(inserted.error.message, inserted.error.code);
+        }
+        const row = inserted.data as FakeRow;
+        const rec = await this.from("capture_apply_receipts").insert({
+          workspace_id: args.p_workspace_id,
+          project_id: args.p_project_id,
+          operation_id: receipt.operation_id,
+          entity_type: receipt.entity_type ?? "todo",
+          entity_id: receipt.entity_id || row.id,
+        });
+        if (rec.error) throw new FakeRpcError(rec.error.message, rec.error.code);
+        return row;
+      });
+    }
+    if (fn === "persist_milestone_create_with_receipt") {
+      return this.runAtomic(async () => {
+        const milestone = asRow(args.p_milestone);
+        const receipt = asRow(args.p_receipt);
+        const inserted = await this.from("milestones").insert({
+          workspace_id: args.p_workspace_id,
+          project_id: args.p_project_id,
+          ...milestone,
+        }).select("*").single();
+        if (inserted.error) {
+          throw new FakeRpcError(inserted.error.message, inserted.error.code);
+        }
+        const row = inserted.data as FakeRow;
+        const rec = await this.from("capture_apply_receipts").insert({
+          workspace_id: args.p_workspace_id,
+          project_id: args.p_project_id,
+          operation_id: receipt.operation_id,
+          entity_type: receipt.entity_type ?? "milestone",
+          entity_id: receipt.entity_id || row.id,
+        });
+        if (rec.error) throw new FakeRpcError(rec.error.message, rec.error.code);
+        return row;
+      });
+    }
+    if (fn === "persist_person_responsibility") {
+      return this.runAtomic(async () => {
+        const stakeholder = asRow(args.p_stakeholder);
+        const knowledge = args.p_knowledge ? asRow(args.p_knowledge) : null;
+        const supersedeIds = Array.isArray(args.p_supersede_ids)
+          ? args.p_supersede_ids.map(String)
+          : [];
+        const name = String(stakeholder.name ?? "").trim();
+        const wantedId = String(stakeholder.id ?? "");
+        const people = this.tables.stakeholders.filter(
+          (row) =>
+            row.workspace_id === args.p_workspace_id &&
+            row.project_id === args.p_project_id,
+        );
+        const byId = people.find((row) => row.id === wantedId);
+        const byName = people.find(
+          (row) => String(row.name).trim().toLowerCase() === name.toLowerCase(),
+        );
+        let personId = String(byId?.id ?? byName?.id ?? wantedId);
+        let created = false;
+        if (!byId && !byName) {
+          const inserted = await this.from("stakeholders").insert({
+            id: wantedId,
+            workspace_id: args.p_workspace_id,
+            project_id: args.p_project_id,
+            name,
+            role: String(stakeholder.role ?? "").trim() || "Stakeholder",
+          });
+          if (inserted.error) {
+            throw new FakeRpcError(inserted.error.message, inserted.error.code);
+          }
+          created = true;
+          personId = wantedId;
+        }
+        if (supersedeIds.length) {
+          const updated = await this.from("knowledge_items")
+            .update({ lifecycle: "superseded" })
+            .in("id", supersedeIds)
+            .eq("workspace_id", args.p_workspace_id)
+            .eq("project_id", args.p_project_id);
+          if (updated.error) {
+            throw new FakeRpcError(updated.error.message, updated.error.code);
+          }
+        }
+        let knowledgeId: string | undefined;
+        if (knowledge) {
+          const inserted = await this.from("knowledge_items").insert({
+            workspace_id: args.p_workspace_id,
+            project_id: args.p_project_id,
+            ...knowledge,
+          });
+          if (inserted.error) {
+            throw new FakeRpcError(inserted.error.message, inserted.error.code);
+          }
+          knowledgeId = String(knowledge.id ?? "");
+        }
+        return { person_id: personId, created, knowledge_id: knowledgeId };
+      });
+    }
     return { data: null, error: { message: `unknown rpc ${fn}` } };
+  }
+
+  private async runAtomic<T>(
+    work: () => Promise<T>,
+  ): Promise<{ data: T | null; error: FakeError | null }> {
+    const snapshot = structuredClone(this.tables);
+    try {
+      const data = await work();
+      return { data, error: null };
+    } catch (err) {
+      this.replaceTables(snapshot);
+      const message = err instanceof Error ? err.message : String(err);
+      const code = err instanceof FakeRpcError ? err.code : "PGRST";
+      return { data: null, error: { message, code } };
+    }
+  }
+
+  private replaceTables(snapshot: Record<string, FakeRow[]>) {
+    for (const key of Object.keys(this.tables)) {
+      const next = snapshot[key] ?? [];
+      this.tables[key].splice(0, this.tables[key].length, ...structuredClone(next));
+    }
+    for (const key of Object.keys(snapshot)) {
+      if (!this.tables[key]) {
+        this.tables[key] = structuredClone(snapshot[key] ?? []);
+      }
+    }
   }
 
   seedProject(row: FakeRow) {
@@ -278,6 +446,24 @@ class FakeQuery {
             },
           };
         }
+        if (this.table === "capture_apply_receipts") {
+          const duplicate = tableRows.some(
+            (row) =>
+              row.workspace_id === raw.workspace_id &&
+              row.project_id === raw.project_id &&
+              row.operation_id === raw.operation_id,
+          );
+          if (duplicate) {
+            return {
+              data: null,
+              error: {
+                message:
+                  "duplicate key value violates unique constraint on capture_apply_receipts (workspace_id, project_id, operation_id)",
+                code: "23505",
+              },
+            };
+          }
+        }
         const row: FakeRow = {
           created_at: now(),
           updated_at: now(),
@@ -364,6 +550,21 @@ class FakeQuery {
 }
 
 type FakeError = { message: string; code?: string };
+
+class FakeRpcError extends Error {
+  constructor(
+    message: string,
+    readonly code?: string,
+  ) {
+    super(message);
+    this.name = "FakeRpcError";
+  }
+}
+
+function asRow(value: unknown): FakeRow {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return value as FakeRow;
+}
 
 function now() {
   return new Date().toISOString();

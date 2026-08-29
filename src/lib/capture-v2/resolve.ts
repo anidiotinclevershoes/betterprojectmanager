@@ -11,7 +11,11 @@ import {
   peopleEvidencedByRecordedNameInText,
   recordedPersonNameAppearsInText,
 } from "@/lib/people/identity";
-import type { CaptureObservationV2, ObservationDomain } from "./types";
+import {
+  isTruthIntent,
+  type CaptureObservationV2,
+  type ObservationDomain,
+} from "./types";
 
 const PERSON_LINKED_DOMAINS = new Set<ObservationDomain>([
   "person",
@@ -88,6 +92,45 @@ function resolveOne(
         kind: "no_change",
         domain: "unsupported",
         reason: "Treated as commentary / non-project.",
+      },
+    };
+  }
+
+  if (!isTruthIntent(observation.truthIntent)) {
+    return {
+      observation,
+      suggestion: null,
+      decision: {
+        kind: "needs_you",
+        domain: DOMAIN_TO_LEGAL[observation.domain],
+        reason:
+          "It is unclear whether this should change current project truth.",
+      },
+    };
+  }
+
+  if (observation.truthIntent === "non_current") {
+    return {
+      observation,
+      suggestion: null,
+      decision: {
+        kind: "no_change",
+        domain: DOMAIN_TO_LEGAL[observation.domain],
+        reason: "Not asserting current project truth — no mutation.",
+      },
+    };
+  }
+
+  if (observation.truthIntent === "uncertain") {
+    return {
+      observation,
+      suggestion: null,
+      decision: {
+        kind: "needs_you",
+        domain: DOMAIN_TO_LEGAL[observation.domain],
+        reason:
+          observation.commentary?.trim() ||
+          "It is unclear whether this should change current project truth.",
       },
     };
   }
@@ -259,6 +302,7 @@ function suggestionFromObservation(
       ...values,
       evidence: observation.evidence,
     },
+    truthIntent: observation.truthIntent,
   };
 }
 

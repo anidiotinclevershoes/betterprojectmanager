@@ -773,6 +773,19 @@ export function planCaptureApply(input: PlanCaptureApplyInput): CaptureApplyDeci
     );
   }
 
+  if (item.truthIntent === "non_current") {
+    return noChange(
+      domain,
+      "Not asserting current project truth — no mutation.",
+    );
+  }
+  if (item.truthIntent === "uncertain") {
+    return needsYou(
+      domain,
+      "It is unclear whether this should change current project truth.",
+    );
+  }
+
   const scope = resolveCaptureProjectScope({
     item,
     captureEntryProjectId,

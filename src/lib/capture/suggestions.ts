@@ -70,6 +70,12 @@ export type PendingSuggestion = {
    * against fresh server truth. Not a MissionState snapshot.
    */
   expectedTarget?: import("./apply/expected-target").CaptureExpectedTarget | null;
+  /**
+   * Copied from the Capture V2 observation when present.
+   * Missing is allowed on legacy / Phase 3B-constructed suggestions.
+   * When present, Apply must honour it — non_current and uncertain must not write.
+   */
+  truthIntent?: import("@/lib/capture-v2/types").TruthIntent;
 };
 
 export const KIND_LABEL: Record<SuggestionKind, string> = {

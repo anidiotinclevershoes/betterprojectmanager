@@ -1093,6 +1093,7 @@ function suggestionIdFor(opId: string, index = 0) {
             findingId: "find-exist",
             fact: "Packaging delay is getting worse",
             disposition: "unmatched",
+            truthIntent: "current",
             reason: "Could not confidently identify which existing risk this refers to.",
           },
         ],

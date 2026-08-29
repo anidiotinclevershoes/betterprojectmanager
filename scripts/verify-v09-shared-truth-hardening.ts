@@ -20,8 +20,9 @@ import { resolveCaptureProjectScope } from "../src/lib/capture/apply/project-sco
 import { reviewedCreateIdentity } from "../src/lib/capture/apply/reviewed-identity";
 import type { CaptureApplyWorld } from "../src/lib/capture/apply/types";
 import { resolveObservations } from "../src/lib/capture-v2/resolve";
-import { OBSERVATION_DISPOSITIONS } from "../src/lib/capture-v2/types";
+import { OBSERVATION_DISPOSITIONS, TRUTH_INTENTS } from "../src/lib/capture-v2/types";
 import type { CaptureObservationV2 } from "../src/lib/capture-v2/types";
+import { validateObservations } from "../src/lib/capture-v2/validate";
 import { loadMissionStateFromSupabase } from "../src/lib/data/supabase/load-mission-state";
 import type { PendingSuggestion } from "../src/lib/capture/suggestions";
 import type { MissionState } from "../src/lib/types";
@@ -31,6 +32,7 @@ const ROOT = join(import.meta.dirname, "..");
 const PROJECT_A = "11111111-1111-4111-8111-111111111111";
 const PROJECT_B = "22222222-2222-4222-8222-222222222222";
 const PERSON_EXISTING = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const CAB_ID = "33333333-3333-4333-8333-333333333333";
 
 let passed = 0;
 
@@ -136,6 +138,7 @@ async function main() {
           evidence: "Please book the civic hall for Saturday.",
           domain: "todo",
           disposition: "create_new",
+          truthIntent: "current",
         },
         {
           id: "obs-risk",
@@ -143,6 +146,7 @@ async function main() {
           evidence: "Gumdrop Bridge icing is now a live risk.",
           domain: "risk",
           disposition: "create_new",
+          truthIntent: "current",
         },
         {
           id: "obs-ms",
@@ -150,6 +154,7 @@ async function main() {
           evidence: "CAB has moved to 22 October 2026.",
           domain: "milestone",
           disposition: "create_new",
+          truthIntent: "current",
           proposedValues: { date: "2026-10-22" },
         },
       ];
@@ -451,6 +456,64 @@ async function main() {
     },
   );
 
+  await check(
+    "H2.compensation-failure A: person+responsibility second write and delete both fail — no half-state",
+    async () => {
+      const fake = new FakeWorkspaceClient({
+        failOnTable: "knowledge_items",
+        failOnDeleteTable: "stakeholders",
+      });
+      seedProject(fake);
+      const applied = await applyPersist(
+        fake,
+        suggestion({
+          id: "v2-obs-nadia-comp-fail",
+          kind: "stakeholder",
+          op: "create",
+          content: "Nadia Qureshi owns UAT",
+          legalDomain: "responsibility",
+          personName: "Nadia Qureshi",
+          responsibilityScope: "UAT",
+          ownershipSemantics: "share",
+          proposedValues: {
+            personName: "Nadia Qureshi",
+            scope: "UAT",
+            ownershipSemantics: "share",
+          },
+        }),
+        "Nadia Qureshi will own UAT for this project.",
+      );
+      assert.equal(applied.executed.kind, "failed");
+      assert.equal(fake.tables.stakeholders.length, 0, "no leftover person");
+      assert.equal(fake.tables.knowledge_items.length, 0, "no leftover responsibility");
+    },
+  );
+
+  await check(
+    "H2.compensation-failure B: risk knowledge+domain and knowledge delete both fail — no split-brain",
+    async () => {
+      const fake = new FakeWorkspaceClient({
+        failOnTable: "risks",
+        failOnDeleteTable: "knowledge_items",
+      });
+      seedProject(fake);
+      const applied = await applyPersist(
+        fake,
+        suggestion({
+          id: "v2-obs-risk-comp-fail",
+          kind: "risk",
+          op: "create",
+          content: "ALPHA-RISK-COMP-FAIL",
+          legalDomain: "risk",
+        }),
+        "ALPHA-RISK-COMP-FAIL is now open.",
+      );
+      assert.equal(applied.executed.kind, "failed");
+      assert.equal(fake.tables.knowledge_items.length, 0);
+      assert.equal(fake.tables.risks.length, 0);
+    },
+  );
+
   await check("H2 success paths still persist person/responsibility and risk", async () => {
     const people = new FakeWorkspaceClient();
     seedProject(people);
@@ -578,60 +641,404 @@ async function main() {
   );
 
   await check(
-    "Temporal.12 contract cannot distinguish stale quoted evidence from current change",
-    () => {
-      const types = readSrc("src/lib/capture-v2/types.ts");
-      const dispatch = readSrc("src/lib/capture/apply/dispatch.ts");
-      const apply = readSrc("src/lib/capture/apply/apply-approved.ts");
-      assert.ok(OBSERVATION_DISPOSITIONS.includes("update_existing"));
-      assert.ok(OBSERVATION_DISPOSITIONS.includes("no_change"));
-      assert.ok(OBSERVATION_DISPOSITIONS.includes("commentary"));
-      assert.ok(OBSERVATION_DISPOSITIONS.includes("ambiguous"));
-      assert.ok(
-        !OBSERVATION_DISPOSITIONS.includes(
-          "historical" as (typeof OBSERVATION_DISPOSITIONS)[number],
-        ),
-      );
-      assert.doesNotMatch(types, /temporalIntent|evidenceKind|staleQuoted|quotedEvidence/);
-      assert.doesNotMatch(
-        dispatch,
-        /contains\(["']old["']\)|\/\\bold\\b\/|used to be|previous date|quoted date/,
+    "H3.receipt-failure: truth+receipt are atomic (order B inside C) so retry writes once",
+    async () => {
+      const persist = readSrc("src/lib/capture/apply/persist-execute.ts");
+      assert.match(
+        persist,
+        /persistTodoCreateWithReceipt/,
+        "Todo create and receipt must share one persist helper",
       );
       assert.doesNotMatch(
-        apply,
-        /\\bold\\b|used to be|quoted date|previous date/,
+        persist,
+        /persistTodoCreate[\s\S]{0,180}persistPutCaptureApplyReceipt/,
+        "receipt must not be a second non-atomic insert after Todo truth",
       );
-      const world: CaptureApplyWorld = {
-        ...emptyWorld(),
-        timeline: [
-          {
-            id: "ms-cab",
-            projectId: PROJECT_A,
-            label: "CAB",
-            startAt: "2026-10-20T12:00:00.000Z",
-          },
-        ],
-      };
-      const staleQuoted = planCaptureApply({
-        item: suggestion({
-          id: "v2-obs-stale-quote",
-          kind: "milestone",
-          op: "update",
-          content: "It used to be the 18th",
-          legalDomain: "milestone",
-          targetEntityId: "ms-cab",
-          date: "2026-10-18",
+      const fake = new FakeWorkspaceClient();
+      seedProject(fake);
+      const item = suggestion({
+        id: "v2-obs-receipt-window",
+        kind: "action",
+        op: "create",
+        content: "Book the civic hall",
+        legalDomain: "todo",
+      });
+      fake.armFailOnTable("capture_apply_receipts");
+      const first = await applyPersist(fake, item, MULTI_FACT_TRANSCRIPT);
+      assert.equal(first.executed.kind, "failed");
+      assert.equal(fake.tables.todos.length, 0, "truth must roll back with the receipt");
+      assert.equal(fake.tables.capture_apply_receipts.length, 0);
+      fake.armFailOnTable(undefined);
+      const second = await applyPersist(fake, item, MULTI_FACT_TRANSCRIPT);
+      assert.equal(second.executed.kind, "wrote");
+      assert.equal(fake.tables.todos.length, 1);
+      assert.equal(fake.tables.todos[0]!.title, "Book the civic hall");
+      assert.equal(fake.tables.capture_apply_receipts.length, 1);
+      assert.equal(
+        fake.tables.capture_apply_receipts[0]!.operation_id,
+        "v2-obs-receipt-window",
+      );
+      const third = await applyPersist(fake, item, MULTI_FACT_TRANSCRIPT);
+      assert.ok(third.executed.kind === "wrote" || third.executed.kind === "no_change");
+      assert.equal(fake.tables.todos.length, 1);
+    },
+  );
+
+  await check("H3.receipt is workspace/project scoped and not loaded as truth", async () => {
+    const migration = readSrc("supabase/migrations/20260829120000_capture_apply_receipts.sql");
+    assert.match(migration, /unique \(workspace_id, project_id, operation_id\)/);
+    assert.match(migration, /project_id uuid not null references public.projects/);
+    const load = readSrc("src/lib/data/supabase/load-mission-state.ts");
+    assert.doesNotMatch(load, /capture_apply_receipts/);
+    const fake = new FakeWorkspaceClient();
+    seedProject(fake);
+    const item = suggestion({
+      id: "v2-obs-receipt-scope",
+      kind: "action",
+      op: "create",
+      content: "Send the pack",
+      legalDomain: "todo",
+    });
+    const applied = await applyPersist(fake, item, "Send the pack");
+    assert.equal(applied.executed.kind, "wrote");
+    assert.equal(fake.tables.capture_apply_receipts[0]!.workspace_id, fake.workspaceId);
+    assert.equal(fake.tables.capture_apply_receipts[0]!.project_id, PROJECT_A);
+    const duplicate = await fake
+      .from("capture_apply_receipts")
+      .insert({
+        workspace_id: fake.workspaceId,
+        project_id: PROJECT_A,
+        operation_id: "v2-obs-receipt-scope",
+        entity_type: "todo",
+        entity_id: "other",
+      });
+    assert.equal(duplicate.error?.code, "23505");
+    fake.applyProjectDelete([PROJECT_A]);
+    assert.equal(fake.tables.capture_apply_receipts.length, 0);
+    assert.equal(fake.tables.todos[0]!.project_id, null);
+  });
+
+  function cabWorld(): CaptureApplyWorld {
+    return {
+      ...emptyWorld(),
+      timeline: [
+        {
+          id: CAB_ID,
+          projectId: PROJECT_A,
+          label: "CAB",
+          startAt: "2026-10-20T12:00:00.000Z",
+        },
+      ],
+    };
+  }
+
+  function cabObservation(
+    partial: Partial<CaptureObservationV2> &
+      Pick<CaptureObservationV2, "id" | "statement" | "truthIntent">,
+  ): CaptureObservationV2 {
+    return {
+      evidence: partial.evidence ?? partial.statement,
+      domain: "milestone",
+      disposition: "update_existing",
+      truthIntent: "current",
+      projectId: PROJECT_A,
+      candidateTargetId: CAB_ID,
+      candidateTargetTitle: "CAB",
+      mergeWithObservationId: null,
+      commentary: null,
+      modelConfidence: null,
+      proposedValues: partial.proposedValues ?? { date: "2026-10-18" },
+      ...partial,
+    };
+  }
+
+  function seedCab(fake: FakeWorkspaceClient) {
+    seedProject(fake);
+    fake.tables.milestones.push({
+      id: CAB_ID,
+      workspace_id: fake.workspaceId,
+      project_id: PROJECT_A,
+      label: "CAB",
+      start_on: "2026-10-20",
+      type: "milestone",
+      source: "manual",
+    });
+  }
+
+  await check("Temporal.12 missing truthIntent is rejected and is not assumed current", () => {
+    const validated = validateObservations(
+      [
+        {
+          id: "obs-missing-intent",
+          statement: "CAB is the 18th",
+          evidence: "CAB is the 18th",
+          domain: "milestone",
+          disposition: "update_existing",
+          candidateTargetId: CAB_ID,
           proposedValues: { date: "2026-10-18" },
-        }),
-        text: "Someone quoted that CAB used to be the 18th.",
+        },
+      ],
+      [
+        {
+          id: CAB_ID,
+          projectId: PROJECT_A,
+          entityType: "milestone",
+          title: "CAB",
+        },
+      ],
+      PROJECT_A,
+    );
+    assert.equal(validated.observations.length, 0);
+    assert.ok(validated.issues.some((issue) => issue.code === "missing_truth_intent"));
+    assert.ok(TRUTH_INTENTS.includes("current"));
+    assert.ok(TRUTH_INTENTS.includes("non_current"));
+    assert.ok(TRUTH_INTENTS.includes("uncertain"));
+    const types = readSrc("src/lib/capture-v2/types.ts");
+    const dispatch = readSrc("src/lib/capture/apply/dispatch.ts");
+    const apply = readSrc("src/lib/capture/apply/apply-approved.ts");
+    assert.ok(OBSERVATION_DISPOSITIONS.includes("update_existing"));
+    assert.doesNotMatch(types, /temporalIntent|evidenceKind|staleQuoted|quotedEvidence/);
+    assert.doesNotMatch(
+      dispatch,
+      /contains\(["']old["']\)|\/\\bold\\b\/|used to be|previous date|quoted date/,
+    );
+    assert.doesNotMatch(apply, /\\bold\\b|used to be|quoted date|previous date/);
+  });
+
+  await check(
+    "Temporal.12a historical 18 with update_existing does not mutate current CAB 20",
+    async () => {
+      const world = cabWorld();
+      const observation = cabObservation({
+        id: "obs-used-to-be",
+        statement: "CAB used to be the 18th",
+        truthIntent: "non_current",
+        disposition: "update_existing",
+        proposedValues: { date: "2026-10-18" },
+      });
+      const resolved = resolveObservations({
+        observations: [observation],
         world,
+        transcript: "It used to be the 18th.",
         captureEntryProjectId: PROJECT_A,
       });
-      assert.equal(
-        staleQuoted.kind,
-        "write",
-        "STOPPED: update_existing + date is treated as a current change. The contract has no current-vs-stale field, so Apply cannot reject this deterministically without new semantics or keyword parsing.",
+      assert.equal(resolved[0]?.decision.kind, "no_change");
+      assert.equal(resolved[0]?.suggestion, null);
+      const fake = new FakeWorkspaceClient();
+      seedCab(fake);
+      const forced = suggestion({
+        id: "v2-obs-used-to-be",
+        kind: "milestone",
+        op: "update",
+        content: "CAB used to be the 18th",
+        legalDomain: "milestone",
+        targetEntityId: CAB_ID,
+        date: "2026-10-18",
+        proposedValues: { date: "2026-10-18" },
+        truthIntent: "non_current",
+      });
+      const applied = await applyPersist(fake, forced, "It used to be the 18th.");
+      assert.notEqual(applied.executed.kind, "wrote");
+      assert.equal(fake.tables.milestones[0]!.start_on, "2026-10-20");
+      assert.equal(fake.tables.history_events.length, 0);
+    },
+  );
+
+  await check("Temporal.12b quoted old notes 18 do not mutate current CAB 20", async () => {
+    const observation = cabObservation({
+      id: "obs-old-notes",
+      statement: "Old meeting notes say CAB was the 18th",
+      truthIntent: "non_current",
+      proposedValues: { date: "2026-10-18" },
+    });
+    const resolved = resolveObservations({
+      observations: [observation],
+      world: cabWorld(),
+      transcript: "Old meeting notes say 18.",
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(resolved[0]?.decision.kind, "no_change");
+    const fake = new FakeWorkspaceClient();
+    seedCab(fake);
+    const applied = await applyPersist(
+      fake,
+      suggestion({
+        id: "v2-obs-old-notes",
+        kind: "milestone",
+        op: "update",
+        content: "Old meeting notes say CAB was the 18th",
+        legalDomain: "milestone",
+        targetEntityId: CAB_ID,
+        date: "2026-10-18",
+        proposedValues: { date: "2026-10-18" },
+        truthIntent: "non_current",
+      }),
+      "Old meeting notes say 18.",
+    );
+    assert.notEqual(applied.executed.kind, "wrote");
+    assert.equal(fake.tables.milestones[0]!.start_on, "2026-10-20");
+  });
+
+  await check("Temporal.12c considered-but-not-agreed 22 does not mutate", async () => {
+    const observation = cabObservation({
+      id: "obs-discussed",
+      statement: "We discussed CAB on the 22nd but did not agree it",
+      truthIntent: "non_current",
+      proposedValues: { date: "2026-10-22" },
+    });
+    const resolved = resolveObservations({
+      observations: [observation],
+      world: cabWorld(),
+      transcript: "We discussed 22 but didn't agree it.",
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(resolved[0]?.decision.kind, "no_change");
+    const fake = new FakeWorkspaceClient();
+    seedCab(fake);
+    const applied = await applyPersist(
+      fake,
+      suggestion({
+        id: "v2-obs-discussed",
+        kind: "milestone",
+        op: "update",
+        content: "We discussed CAB on the 22nd but did not agree it",
+        legalDomain: "milestone",
+        targetEntityId: CAB_ID,
+        date: "2026-10-22",
+        proposedValues: { date: "2026-10-22" },
+        truthIntent: "non_current",
+      }),
+      "We discussed 22 but didn't agree it.",
+    );
+    assert.notEqual(applied.executed.kind, "wrote");
+    assert.equal(fake.tables.milestones[0]!.start_on, "2026-10-20");
+  });
+
+  await check("Temporal.12d uncertain CAB move is Needs You and does not write", async () => {
+    const observation = cabObservation({
+      id: "obs-might",
+      statement: "CAB might move to the 22nd",
+      truthIntent: "uncertain",
+      proposedValues: { date: "2026-10-22" },
+    });
+    const resolved = resolveObservations({
+      observations: [observation],
+      world: cabWorld(),
+      transcript: "CAB might move to 22.",
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(resolved[0]?.decision.kind, "needs_you");
+    assert.equal(resolved[0]?.suggestion, null);
+    const fake = new FakeWorkspaceClient();
+    seedCab(fake);
+    const applied = await applyPersist(
+      fake,
+      suggestion({
+        id: "v2-obs-might",
+        kind: "milestone",
+        op: "update",
+        content: "CAB might move to the 22nd",
+        legalDomain: "milestone",
+        targetEntityId: CAB_ID,
+        date: "2026-10-22",
+        proposedValues: { date: "2026-10-22" },
+        truthIntent: "uncertain",
+      }),
+      "CAB might move to 22.",
+    );
+    assert.equal(applied.executed.kind, "needs_you");
+    assert.equal(fake.tables.milestones[0]!.start_on, "2026-10-20");
+    assert.equal(fake.tables.history_events.length, 0);
+  });
+
+  await check("Temporal.12e current move to 22 updates CAB", async () => {
+    const observation = cabObservation({
+      id: "obs-moved",
+      statement: "CAB has moved to the 22nd",
+      truthIntent: "current",
+      proposedValues: { date: "2026-10-22" },
+    });
+    const resolved = resolveObservations({
+      observations: [observation],
+      world: cabWorld(),
+      transcript: "CAB has moved to 22.",
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(resolved[0]?.decision.kind, "write");
+    const fake = new FakeWorkspaceClient();
+    seedCab(fake);
+    const applied = await applyPersist(fake, resolved[0]!.suggestion!, "CAB has moved to 22.");
+    assert.equal(applied.executed.kind, "wrote");
+    assert.equal(fake.tables.milestones[0]!.start_on, "2026-10-22");
+  });
+
+  await check("Temporal.12f explicit correction to 22 updates CAB", async () => {
+    const observation = cabObservation({
+      id: "obs-correction",
+      statement: "No, CAB is the 22nd, not the 20th",
+      truthIntent: "current",
+      proposedValues: { date: "2026-10-22" },
+    });
+    const resolved = resolveObservations({
+      observations: [observation],
+      world: cabWorld(),
+      transcript: "No, CAB is 22, not 20.",
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(resolved[0]?.decision.kind, "write");
+    const fake = new FakeWorkspaceClient();
+    seedCab(fake);
+    const applied = await applyPersist(
+      fake,
+      resolved[0]!.suggestion!,
+      "No, CAB is 22, not 20.",
+    );
+    assert.equal(applied.executed.kind, "wrote");
+    assert.equal(fake.tables.milestones[0]!.start_on, "2026-10-22");
+  });
+
+  await check(
+    "Temporal.12g one Capture with historical 18 and current 22 writes only 22",
+    async () => {
+      const resolved = resolveObservations({
+        observations: [
+          cabObservation({
+            id: "obs-hist-18",
+            statement: "CAB used to be the 18th",
+            truthIntent: "non_current",
+            proposedValues: { date: "2026-10-18" },
+          }),
+          cabObservation({
+            id: "obs-now-22",
+            statement: "CAB is now the 22nd",
+            truthIntent: "current",
+            proposedValues: { date: "2026-10-22" },
+          }),
+        ],
+        world: cabWorld(),
+        transcript: "It used to be the 18th. CAB is now the 22nd.",
+        captureEntryProjectId: PROJECT_A,
+      });
+      assert.equal(resolved[0]?.decision.kind, "no_change");
+      assert.equal(resolved[1]?.decision.kind, "write");
+      const fake = new FakeWorkspaceClient();
+      seedCab(fake);
+      if (resolved[0]?.suggestion) {
+        const skipped = await applyPersist(
+          fake,
+          resolved[0].suggestion,
+          "It used to be the 18th. CAB is now the 22nd.",
+        );
+        assert.notEqual(skipped.executed.kind, "wrote");
+      }
+      const applied = await applyPersist(
+        fake,
+        resolved[1]!.suggestion!,
+        "It used to be the 18th. CAB is now the 22nd.",
       );
+      assert.equal(applied.executed.kind, "wrote");
+      assert.equal(fake.tables.milestones.length, 1);
+      assert.equal(fake.tables.milestones[0]!.start_on, "2026-10-22");
     },
   );
 
@@ -640,7 +1047,7 @@ async function main() {
       ...emptyWorld(),
       timeline: [
         {
-          id: "ms-cab",
+          id: CAB_ID,
           projectId: PROJECT_A,
           label: "CAB",
           startAt: "2026-10-20T12:00:00.000Z",
@@ -654,9 +1061,10 @@ async function main() {
         op: "update",
         content: "No, CAB is the 22nd, not the 20th.",
         legalDomain: "milestone",
-        targetEntityId: "ms-cab",
+        targetEntityId: CAB_ID,
         date: "2026-10-22",
         proposedValues: { date: "2026-10-22" },
+        truthIntent: "current",
       }),
       text: "No, CAB is the 22nd, not the 20th.",
       world,
@@ -667,7 +1075,7 @@ async function main() {
       throw new Error("expected update_milestone");
     }
     assert.ok(decision.operation.startAt?.startsWith("2026-10-22"));
-    assert.equal(decision.operation.milestoneId, "ms-cab");
+    assert.equal(decision.operation.milestoneId, CAB_ID);
   });
 
   await check("Preserve.14 stale Review / project-switch writes nowhere", async () => {

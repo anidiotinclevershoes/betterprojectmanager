@@ -1,10 +1,12 @@
 import {
   isObservationDisposition,
   isObservationDomain,
+  isTruthIntent,
   type CaptureObservationV2,
   type ObservationContextRecord,
   type ObservationValidationIssue,
   type ObservationValidationResult,
+  type TruthIntent,
 } from "./types";
 
 function asString(value: unknown): string | null {
@@ -71,6 +73,7 @@ export function validateObservations(
     const evidence = asString(obj.evidence);
     const domainRaw = asString(obj.domain);
     const dispositionRaw = asString(obj.disposition);
+    const truthIntentRaw = obj.truthIntent;
 
     if (!statement) {
       issues.push({
@@ -108,6 +111,24 @@ export function validateObservations(
       rejected.push(minimalRejected(id, obj, statement, evidence));
       return;
     }
+    if (truthIntentRaw == null || truthIntentRaw === "") {
+      issues.push({
+        observationId: id,
+        code: "missing_truth_intent",
+        message: "Observation has no truthIntent — current truth is not assumed.",
+      });
+      rejected.push(minimalRejected(id, obj, statement, evidence));
+      return;
+    }
+    if (!isTruthIntent(truthIntentRaw)) {
+      issues.push({
+        observationId: id,
+        code: "unknown_truth_intent",
+        message: `Unknown truthIntent ${JSON.stringify(obj.truthIntent)}.`,
+      });
+      rejected.push(minimalRejected(id, obj, statement, evidence));
+      return;
+    }
 
     const projectId = asString(obj.projectId);
     const candidateTargetId = asString(obj.candidateTargetId);
@@ -129,6 +150,7 @@ export function validateObservations(
           evidence,
           domain: domainRaw,
           disposition: "ambiguous",
+          truthIntent: truthIntentRaw,
           projectId: scopedProjectId,
           candidateTargetId: null,
           candidateTargetTitle: asString(obj.candidateTargetTitle),
@@ -153,6 +175,7 @@ export function validateObservations(
             evidence,
             domain: domainRaw,
             disposition: "ambiguous",
+            truthIntent: truthIntentRaw,
             projectId,
             candidateTargetId: null,
             candidateTargetTitle: asString(obj.candidateTargetTitle),
@@ -174,6 +197,7 @@ export function validateObservations(
             evidence,
             domain: domainRaw,
             disposition: "ambiguous",
+            truthIntent: truthIntentRaw,
             projectId: scopedProjectId,
             candidateTargetId: null,
             candidateTargetTitle: hit.title,
@@ -191,6 +215,7 @@ export function validateObservations(
         evidence,
         domain: domainRaw,
         disposition: dispositionRaw,
+        truthIntent: truthIntentRaw,
         projectId: projectId ?? scopedProjectId ?? null,
         candidateTargetId,
         candidateTargetTitle: asString(obj.candidateTargetTitle),
@@ -213,6 +238,7 @@ function buildObservation(args: {
   evidence: string;
   domain: CaptureObservationV2["domain"];
   disposition: CaptureObservationV2["disposition"];
+  truthIntent: TruthIntent;
   projectId?: string | null;
   candidateTargetId?: string | null;
   candidateTargetTitle?: string | null;
@@ -228,6 +254,7 @@ function buildObservation(args: {
     evidence: args.evidence,
     domain: args.domain,
     disposition: args.disposition,
+    truthIntent: args.truthIntent,
     projectId: args.projectId ?? null,
     candidateTargetId: args.candidateTargetId ?? null,
     candidateTargetTitle: args.candidateTargetTitle ?? null,
@@ -254,6 +281,7 @@ function minimalRejected(
     evidence: evidence ?? "",
     domain: "unknown",
     disposition: "ignore",
+    truthIntent: isTruthIntent(obj.truthIntent) ? obj.truthIntent : "uncertain",
     projectId: null,
     candidateTargetId: null,
     candidateTargetTitle: null,

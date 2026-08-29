@@ -5,17 +5,17 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { confirmResponsibilityOwner } from "@/lib/people/identity";
 import {
-  persistDeleteStakeholder,
   persistEnsureStakeholder,
   persistFindCaptureApplyReceipt,
   persistKnowledgeBullet,
-  persistKnowledgeLifecycle,
   persistMemory,
-  persistPutCaptureApplyReceipt,
+  persistPersonResponsibilityBundle,
   persistRiskStatus,
   persistTimelineItem,
+  persistTimelineItemWithReceipt,
   persistTimelineUpdate,
   persistTodoCreate,
+  persistTodoCreateWithReceipt,
   persistTodoDelete,
   persistTodoUpdate,
 } from "@/lib/data/supabase/persist-mutations";
@@ -48,8 +48,28 @@ export function supabaseCaptureApplyHooks(args: {
           op.applyOperationId,
         );
         if (existing) return;
+        await persistTodoCreateWithReceipt(
+          client,
+          workspaceId,
+          userId,
+          {
+            projectId: op.projectId,
+            title: op.title,
+            detail: op.detail,
+            done: false,
+            dueAt: op.dueAt,
+            kind: op.todoKind,
+            waitingOn: op.waitingOn,
+          },
+          {
+            operationId: op.applyOperationId,
+            entityType: "todo",
+            entityId: "",
+          },
+        );
+        return;
       }
-      const created = await persistTodoCreate(client, workspaceId, userId, {
+      await persistTodoCreate(client, workspaceId, userId, {
         projectId: op.projectId,
         title: op.title,
         detail: op.detail,
@@ -58,13 +78,6 @@ export function supabaseCaptureApplyHooks(args: {
         kind: op.todoKind,
         waitingOn: op.waitingOn,
       });
-      if (op.applyOperationId) {
-        await persistPutCaptureApplyReceipt(client, workspaceId, op.projectId, {
-          operationId: op.applyOperationId,
-          entityType: "todo",
-          entityId: created.id,
-        });
-      }
     },
     updateTodo: async (op) => {
       await persistTodoUpdate(client, workspaceId, op.projectId, op.todoId, {
@@ -92,22 +105,24 @@ export function supabaseCaptureApplyHooks(args: {
         if (existing) return;
       }
       const riskId = newId();
-      const written = await persistKnowledgeBullet(
+      await persistKnowledgeBullet(
         client,
         workspaceId,
         op.projectId,
         "risks",
         op.title,
         userId,
-        { riskId },
+        {
+          riskId,
+          receipt: op.applyOperationId
+            ? {
+                operationId: op.applyOperationId,
+                entityType: "risk",
+                entityId: riskId,
+              }
+            : null,
+        },
       );
-      if (op.applyOperationId) {
-        await persistPutCaptureApplyReceipt(client, workspaceId, op.projectId, {
-          operationId: op.applyOperationId,
-          entityType: "risk",
-          entityId: written.riskId ?? riskId,
-        });
-      }
     },
     updateRiskStatus: async (op) => {
       await persistRiskStatus(
@@ -130,8 +145,27 @@ export function supabaseCaptureApplyHooks(args: {
           op.applyOperationId,
         );
         if (existing) return;
+        await persistTimelineItemWithReceipt(
+          client,
+          workspaceId,
+          op.projectId,
+          {
+            label: op.label,
+            type: "milestone",
+            startAt: op.startAt,
+            endAt: op.endAt,
+            notes: op.notes,
+            source: "capture",
+          },
+          {
+            operationId: op.applyOperationId,
+            entityType: "milestone",
+            entityId: "",
+          },
+        );
+        return;
       }
-      const created = await persistTimelineItem(client, workspaceId, op.projectId, {
+      await persistTimelineItem(client, workspaceId, op.projectId, {
         label: op.label,
         type: "milestone",
         startAt: op.startAt,
@@ -139,13 +173,6 @@ export function supabaseCaptureApplyHooks(args: {
         notes: op.notes,
         source: "capture",
       });
-      if (op.applyOperationId) {
-        await persistPutCaptureApplyReceipt(client, workspaceId, op.projectId, {
-          operationId: op.applyOperationId,
-          entityType: "milestone",
-          entityId: created.id,
-        });
-      }
     },
     updateMilestone: async (op) => {
       await persistTimelineUpdate(
@@ -178,78 +205,30 @@ export function supabaseCaptureApplyHooks(args: {
         replacePersonId: op.replacePersonId,
       });
       box.state = result.state;
-      let personPersistCreated = false;
       const uuidIds = result.supersededIds.filter((id) => UUID_RE.test(id));
-      let supersededPersisted = false;
-      try {
-        const ensured = await persistEnsureStakeholder(
-          client,
-          workspaceId,
-          op.projectId,
-          {
-            id: result.person.id,
-            name: result.person.name,
-            role: result.person.role,
-          },
-        );
-        personPersistCreated = ensured.created;
-        if (uuidIds.length) {
-          await persistKnowledgeLifecycle(
-            client,
-            workspaceId,
-            op.projectId,
-            uuidIds,
-            "superseded",
-          );
-          supersededPersisted = true;
-        }
-        if (result.responsibilityCreated && result.peopleBullet) {
-          await persistKnowledgeBullet(
-            client,
-            workspaceId,
-            op.projectId,
-            "people",
-            result.peopleBullet,
-            userId,
-            {
-              id: result.item.id,
-              kind: result.item.kind,
-              epistemic: result.item.epistemic,
-              lifecycle: result.item.lifecycle,
-              supersedesId: result.item.supersedesId,
-              meta: (result.item.meta as Record<string, unknown>) ?? {},
-              provenance: result.item.provenance,
-            },
-          );
-        }
-      } catch (err) {
-        if (supersededPersisted && uuidIds.length) {
-          try {
-            await persistKnowledgeLifecycle(
-              client,
-              workspaceId,
-              op.projectId,
-              uuidIds,
-              "current",
-            );
-          } catch {
-            // Keep the original persist failure as the Apply result.
-          }
-        }
-        if (personPersistCreated) {
-          try {
-            await persistDeleteStakeholder(
-              client,
-              workspaceId,
-              op.projectId,
-              result.person.id,
-            );
-          } catch {
-            // Keep the original persist failure as the Apply result.
-          }
-        }
-        throw err;
-      }
+      await persistPersonResponsibilityBundle(client, workspaceId, op.projectId, {
+        stakeholder: {
+          id: result.person.id,
+          name: result.person.name,
+          role: result.person.role,
+        },
+        supersedeIds: uuidIds,
+        knowledge:
+          result.responsibilityCreated && result.peopleBullet
+            ? {
+                id: result.item.id,
+                section: "people",
+                body: result.peopleBullet,
+                createdBy: userId,
+                kind: result.item.kind,
+                epistemic: result.item.epistemic,
+                lifecycle: result.item.lifecycle,
+                supersedesId: result.item.supersedesId,
+                meta: (result.item.meta as Record<string, unknown>) ?? {},
+                provenance: result.item.provenance,
+              }
+            : null,
+      });
     },
     writeAvailability: async (op) => {
       const fromDay = op.awayFromIso.slice(0, 10);

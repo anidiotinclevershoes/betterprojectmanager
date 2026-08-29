@@ -91,6 +91,7 @@ function resolveObs(
     evidence: observation.evidence ?? observation.statement,
     domain: observation.domain,
     disposition: observation.disposition,
+    truthIntent: observation.truthIntent ?? "current",
     projectId: ALPHA,
     candidateTargetId: observation.candidateTargetId ?? null,
     candidateTargetTitle: observation.candidateTargetTitle ?? null,
@@ -138,6 +139,7 @@ function main() {
     const { row } = resolveObs(haleWorld(), transcript, {
       domain: "availability",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: HALE,
       candidateTargetTitle: "Jordan Hale",
@@ -147,6 +149,7 @@ function main() {
     const person = resolveObs(haleWorld(), transcript, {
       domain: "person",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: HALE,
       candidateTargetTitle: "Jordan Hale",
@@ -159,6 +162,7 @@ function main() {
     const { row } = resolveObs(haleWorld(), transcript, {
       domain: "availability",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: HALE,
       candidateTargetTitle: "Jordan Hale",
@@ -178,6 +182,7 @@ function main() {
     const { row } = resolveObs(haleWorld(), transcript, {
       domain: "availability",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: PATEL,
       candidateTargetTitle: "Sam Patel",
@@ -192,6 +197,7 @@ function main() {
     const { row } = resolveObs(haleWorld(), transcript, {
       domain: "person",
       disposition: "create_new",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetTitle: "Jordan Quinn",
       proposedValues: { name: "Jordan Quinn", role: "deployment lead" },
@@ -210,6 +216,7 @@ function main() {
     const { row } = resolveObs(twoJordans(), transcript, {
       domain: "availability",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: HALE,
       candidateTargetTitle: "Jordan Hale",
@@ -227,6 +234,7 @@ function main() {
     const { row } = resolveObs(world, transcript, {
       domain: "availability",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: HALE,
       candidateTargetTitle: "Jordan Hale",
@@ -240,6 +248,7 @@ function main() {
     const { row } = resolveObs(haleWorld(), transcript, {
       domain: "availability",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: HALE,
       proposedValues: { awayFromIso: "2026-10-06" },
@@ -252,6 +261,7 @@ function main() {
     const { row } = resolveObs(haleWorld(), transcript, {
       domain: "availability",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: HALE,
       candidateTargetTitle: "Jordan Hale",
@@ -265,6 +275,7 @@ function main() {
     const { row } = resolveObs(haleWorld(), transcript, {
       domain: "responsibility",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: HALE,
       candidateTargetTitle: "Jordan Hale",
@@ -282,6 +293,7 @@ function main() {
     const { row } = resolveObs(haleWorld(), transcript, {
       domain: "responsibility",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: HALE,
       candidateTargetTitle: "Jordan Hale",
@@ -303,6 +315,7 @@ function main() {
     const { validated, resolved } = resolveObs(haleWorld(), transcript, {
       domain: "availability",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: "person-foreign",
       candidateTargetTitle: "Morgan Vale",
@@ -322,6 +335,7 @@ function main() {
     const risk = resolveObs(world, "Supply delay is resolved.", {
       domain: "risk",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: "Supply delay is resolved.",
       candidateTargetId: RISK,
       candidateTargetTitle: "Supply delay",
@@ -335,6 +349,7 @@ function main() {
     const todo = resolveObs(world, "Pack crates is done.", {
       domain: "todo",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: "Pack crates is done.",
       candidateTargetId: TODO,
       proposedValues: { status: "complete" },
@@ -347,6 +362,7 @@ function main() {
     const milestone = resolveObs(world, "Ship day moved to 2026-11-08.", {
       domain: "milestone",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: "Ship day moved to 2026-11-08.",
       candidateTargetId: MS,
       proposedValues: { date: "2026-11-08" },
@@ -362,6 +378,7 @@ function main() {
     const { row } = resolveObs(haleWorld(), transcript, {
       domain: "person",
       disposition: "create_new",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetTitle: "Jordan Loading",
       proposedValues: { name: "Jordan Loading" },
@@ -432,6 +449,7 @@ function main() {
               "Brick from the warehouse called; he wants to help with assembly.",
             domain: "person",
             disposition: "update_existing",
+            truthIntent: "current",
             projectId: TOYWORLD_ID,
             candidateTargetId: "person-brick",
             candidateTargetTitle: "Brick Oakley",
@@ -450,6 +468,7 @@ function main() {
     const { row } = resolveObs(haleWorld(), transcript, {
       domain: "person",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: "Jordan Hale from the loading bay called.",
       evidence: transcript,
       candidateTargetId: HALE,
@@ -507,6 +526,7 @@ function main() {
     const withoutId = resolveObs(world, transcript, {
       domain: "availability",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: null,
       proposedValues: { awayFromIso: "2026-10-06" },
@@ -514,6 +534,7 @@ function main() {
     const withId = resolveObs(world, transcript, {
       domain: "availability",
       disposition: "update_existing",
+      truthIntent: "current",
       statement: transcript,
       candidateTargetId: "person-riley-ash",
       candidateTargetTitle: "Riley Ash",

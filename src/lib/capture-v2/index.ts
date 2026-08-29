@@ -2,8 +2,10 @@ export { isCaptureV2Enabled } from "./flag";
 export {
   OBSERVATION_DOMAINS,
   OBSERVATION_DISPOSITIONS,
+  TRUTH_INTENTS,
   isObservationDomain,
   isObservationDisposition,
+  isTruthIntent,
   type CaptureObservationV2,
   type ObservationContextRecord,
   type ObservationDisposition,
