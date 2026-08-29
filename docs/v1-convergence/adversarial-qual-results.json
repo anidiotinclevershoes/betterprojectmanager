@@ -1,0 +1,161 @@
+{
+  "generatedAt": "2026-08-29T19:51:29.933Z",
+  "mainSha": "09d85c07dec44a7a68be02cb98e0deffd96a4c1a",
+  "journeys": 16,
+  "PASS": 10,
+  "EXPECTED_RED": 6,
+  "UNEXPECTED_RED": 0,
+  "BLOCKED": 0,
+  "results": [
+    {
+      "id": "semantic-contract-atomic-titles",
+      "category": "1 semantic contract",
+      "failureClass": "TRANSCRIPT ≠ authoritative row",
+      "entry": "runCaptureV2FromModelJson → applyApprovedCaptureSuggestion (text=item.content)",
+      "invariant": "Concise proposedValues.title becomes the durable row, not the verbose statement",
+      "result": "EXPECTED_RED",
+      "severity": "P0",
+      "detail": "planner uses Apply text (statement), ignores proposedValues.title. rows: Confirm project baseline with key stakeholders | Please add a to-do for UAT script as discussed in standup notes this week. // log API timeout as a risk // put CAB on 18 October 2026"
+    },
+    {
+      "id": "semantic-contract-transcript-as-apply-text",
+      "category": "1 semantic contract",
+      "failureClass": "Apply text footgun (title: text)",
+      "entry": "applyApprovedCaptureSuggestion({ text: transcript })",
+      "invariant": "Passing the Capture transcript as Apply text must not become the row identity",
+      "result": "EXPECTED_RED",
+      "severity": "P0",
+      "detail": "Apply text=transcript becomes the durable title (planTodo title: text)"
+    },
+    {
+      "id": "sibling-multifact-one-envelope",
+      "category": "2 sibling / multi-fact",
+      "failureClass": "Sibling disappearance / cross-mutation",
+      "entry": "one envelope, five creates, sequential production Apply",
+      "invariant": "All reviewed writes persist as distinct IDs; no sibling mutates another",
+      "result": "PASS",
+      "detail": "applied=5 writes=5 todos=Confirm project baseline with key stakeholders,Export CSV,Rollback plan risks=Vendor delay dates=UAT start"
+    },
+    {
+      "id": "review-edit-integrity",
+      "category": "3 review edit",
+      "failureClass": "User Review edit discarded",
+      "entry": "CaptureSessionContext text = slice.editing ?? item.content",
+      "invariant": "Durable title equals the user-reviewed string, not the model statement",
+      "result": "PASS",
+      "detail": "user-reviewed title persisted"
+    },
+    {
+      "id": "stale-temporal-cab",
+      "category": "4 stale / temporal",
+      "failureClass": "Old quote / discussed-not-agreed overwrites current date",
+      "entry": "create CAB 18 → update 20 → quote 18 → discussed 22 no_change",
+      "invariant": "Authoritative CAB stays 20 Oct; 22nd is not written",
+      "result": "EXPECTED_RED",
+      "severity": "P0",
+      "detail": "Quoted stale meeting note (18th) overwrote the later agreed 20th"
+    },
+    {
+      "id": "correction-recovery",
+      "category": "5 correction / recovery",
+      "failureClass": "Wrong truth persists after explicit correction",
+      "entry": "seed wrong date+owner → Capture correction → Search/Ask/History/reload",
+      "invariant": "Current truth, Search, Ask, History, reload all show the correction; old value does not resurrect",
+      "result": "PASS",
+      "detail": "release 27th durable; Search/Ask see it; History events=2; applied=1"
+    },
+    {
+      "id": "retry-double-apply",
+      "category": "7 retry / double apply",
+      "failureClass": "Replay of a successful Apply",
+      "entry": "applyApprovedCaptureSuggestion twice with the same approved create",
+      "invariant": "Record actual contract: safe no-op vs duplicate row vs double History",
+      "result": "EXPECTED_RED",
+      "severity": "P1",
+      "detail": "duplicate durable todos. firstApplied=1 secondApplied=1 rows=2 history 2→3"
+    },
+    {
+      "id": "model-failure-shapes",
+      "category": "10 model failure shapes",
+      "failureClass": "Parse / validate / resolve fail-closed vs undetectable miss",
+      "entry": "parseObservationEnvelope + validateObservations + runCaptureV2FromModelJson",
+      "invariant": "Malformed/empty/missing-evidence fail closed; missing facts are undetectable quality loss",
+      "result": "PASS",
+      "detail": "{\"A_invalidJson\":\"FAIL_CLOSED\",\"B_emptyEnvelope\":\"FAIL_CLOSED\",\"C_missingEvidence\":\"FAIL_CLOSED\",\"D_duplicateMerge\":\"FAIL_CLOSED\",\"E_contradiction\":\"SAFE_NEEDS_YOU\",\"F_ambiguousConfident\":\"SAFE_NEEDS_YOU\",\"G_inappropriateFields\":\"UNDETECTABLE_QUALITY_LOSS\",\"H_partialFacts\":\"UNDETECTABLE_QUALITY_LOSS\"}"
+    },
+    {
+      "id": "prompt-injection-data",
+      "category": "11 prompt-injection data",
+      "failureClass": "Stored text treated as instructions",
+      "entry": "buildObservationExtractionPrompt + buildTellMeContext + buildCatchMeUpTruthView",
+      "invariant": "Injection string is data inside labelled project/transcript sections; no live model run",
+      "result": "PASS",
+      "detail": "Deterministic only: injection appears as data (extract=true ask=true cmu=true). Cannot prove model obedience without live AI."
+    },
+    {
+      "id": "date-boundaries",
+      "category": "12 date boundaries",
+      "failureClass": "Date normalize / invent / hydrate",
+      "entry": "isValidDateInput + persistTimeline* + planMilestone create without ISO",
+      "invariant": "Legal calendar dates hydrate; ambiguous/relative dates do not invent a day",
+      "result": "EXPECTED_RED",
+      "severity": "P1",
+      "detail": "legal dates hydrate (2024-02-29, 2025-12-31) but milestone create without ISO invents today"
+    },
+    {
+      "id": "large-single-capture",
+      "category": "13 large single capture",
+      "failureClass": "Ordering / sibling loss at ~30 observations",
+      "entry": "30 deterministic creates, sequential Apply, reload",
+      "invariant": "Proposed / reviewed / persisted counts match; IDs distinct",
+      "result": "PASS",
+      "detail": "proposed=30 reviewed=30 persisted=30 applied=30"
+    },
+    {
+      "id": "string-name-resilience",
+      "category": "16 string / name",
+      "failureClass": "Unicode / punctuation identity corruption",
+      "entry": "persistEnsureStakeholder + searchAuthoritativeProject + Ask",
+      "invariant": "Names persist and Search/Ask recall them without corruption",
+      "result": "PASS",
+      "detail": "stored 5 names; Search/Ask recall; smart quotes kept"
+    },
+    {
+      "id": "empty-and-finished-project",
+      "category": "17 empty / finished",
+      "failureClass": "Crash or invented filler on empty/complete projects",
+      "entry": "Search + Ask + Catch Me Up + Capture context",
+      "invariant": "Honest empty / no-open-work behaviour; no invented people or dates",
+      "result": "EXPECTED_RED",
+      "severity": "P2",
+      "detail": "thin=false search=0 invented=false"
+    },
+    {
+      "id": "history-vs-current-truth-cost",
+      "category": "19 history saturation vs current truth",
+      "failureClass": "History-driven prompt inflation",
+      "entry": "formatAuthoritativeStateForPrompt + buildTellMeContext + buildCaptureContext + Catch Me Up",
+      "invariant": "Current-state Capture/Ask track current objects, not History count",
+      "result": "PASS",
+      "detail": "extract/current-Ask track objects (B larger). captureCtx A=4906 B=8978 (legacy History bucket). A(20obj/800hist)={\"extractChars\":2851,\"extractTokens\":742,\"projectBlockChars\":1003,\"currentAskChars\":1243,\"histAskChars\":1837,\"captureCtxChars\":4906,\"cmuChars\":1284,\"cmuHistory\":false,\"objects\":20,\"history\":800} B(200obj/20hist)={\"extractChars\":10825,\"extractTokens\":3532,\"projectBlockChars\":8977,\"currentAskChars\":8893,\"histAskChars\":9475,\"captureCtxChars\":8978,\"cmuChars\":8934,\"cmuHistory\":false,\"objects\":200,\"history\":20}"
+    },
+    {
+      "id": "legacy-hydrate-compat",
+      "category": "20 old data / migration",
+      "failureClass": "Hydrate crash or silent drop on partial rows",
+      "entry": "FakeWorkspace rows → loadMissionStateFromSupabase",
+      "invariant": "Missing optional fields / older history type / legacy knowledge still hydrate",
+      "result": "PASS",
+      "detail": "partial rows hydrated; nothing silently dropped"
+    },
+    {
+      "id": "apply-http-failure-contract",
+      "category": "15 auth / request failure",
+      "failureClass": "Silent save / weaker fallback on Apply 401/500",
+      "entry": "source contract of apply route + CaptureSessionContext",
+      "invariant": "Non-OK Apply is announced as not saved; no client-truth fallback in the route",
+      "result": "PASS",
+      "detail": "CODE-PROVEN: Apply 401/500 → not saved; gate has 429. OpenAI timeout path not HTTP-exercised (BLOCKED live)."
+    }
+  ]
+}

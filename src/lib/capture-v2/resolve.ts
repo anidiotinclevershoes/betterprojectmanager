@@ -220,7 +220,11 @@ function suggestionFromObservation(
     id: `v2-${observation.id}`,
     kind: args.kind,
     op: args.op,
-    content: observation.statement,
+    content:
+      asString(values.title) ||
+      asString(values.label) ||
+      asString(values.name) ||
+      observation.statement,
     destination: "project",
     projectId: args.projectId,
     date: date ?? undefined,
