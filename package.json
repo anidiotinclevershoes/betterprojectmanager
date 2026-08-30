@@ -71,6 +71,7 @@
     "verify:v09-architecture": "npx --yes tsx scripts/verify-v09-architecture-conformance.ts",
     "verify:v09-shared-truth": "npx --yes tsx scripts/verify-v09-shared-truth-hardening.ts",
     "verify:v09-seams": "npx --yes tsx scripts/verify-v09-seams.ts",
+    "soak:live-500": "npx --yes tsx scripts/soak-live-500.ts",
     "verify:resurrection": "npx --yes tsx scripts/verify-resurrection.ts",
     "verify:eval-stress": "npx --yes tsx scripts/verify-eval-stress.ts",
     "test:eval-stress": "playwright test e2e/stress-journeys.spec.ts",
