@@ -1,0 +1,2232 @@
+[
+  {
+    "capture": 1,
+    "domain": "person",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Priya Shah"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 1,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 2,
+    "domain": "person",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Liam Brooks"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 2,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Liam Brooks",
+      "scope": "portal renewal",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 3,
+    "domain": "person",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Sarah Okonkwo"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 4,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Marcus Chen",
+      "scope": "React front-end",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 5,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Elena Voss",
+      "scope": "legacy back-end session service",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 6,
+    "domain": "person",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Jordan Hale"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 6,
+    "domain": "responsibility",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Jordan Hale",
+      "scope": "UAT coordination",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 7,
+    "domain": "person",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Dev Patel"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 7,
+    "domain": "knowledge",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "NimbusPay is supplying the wallet widget."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 7,
+    "domain": "knowledge",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "We are not swapping processors on this release."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 8,
+    "domain": "person",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Amira Rahman"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 8,
+    "domain": "knowledge",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "CAB packs must be ready 24 hours before the CAB slot."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 8,
+    "domain": "knowledge",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "There are no exceptions to the CAB packs rule."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 9,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add to-do for login error handling"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 10,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add to-do for analytics event changes"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 11,
+    "domain": "milestone",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "UAT Start",
+      "date": "2026-10-14"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 11,
+    "domain": "milestone",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "CAB Date",
+      "date": "2026-10-18"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 11,
+    "domain": "milestone",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "Target Release",
+      "date": "2026-10-27"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 11,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 12,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "UAT script"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 12,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Jordan Hale",
+      "scope": "UAT",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 13,
+    "domain": "risk",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "API timeout on legacy session call"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 13,
+    "domain": "risk",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Possible vendor delay on wallet sandbox"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 14,
+    "domain": "risk",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Possible vendor delay on wallet sandbox",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 14,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 15,
+    "domain": "decision",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "We will cut over behind feature flags, not a big-bang DNS flip."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 16,
+    "domain": "person",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Tomiko Sato"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 17,
+    "domain": "availability",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Elena Voss",
+      "awayFromIso": "2023-10-08",
+      "awayToIso": "2023-10-09"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 17,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 18,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "CAB pack",
+      "personName": "Amira Rahman"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 18,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Amira Rahman",
+      "scope": "CAB pack",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 19,
+    "domain": "risk",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "legacy session mapping"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 20,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 20,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "uncertain",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 21,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Performance budget to-do",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 21,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "SSO migration to-do",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 22,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add to-do for accessibility pass before UAT"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 23,
+    "domain": "person",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Chris Bell"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 23,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add cutover runbook"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 24,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Rollback plan",
+      "scope": "Rollback plan",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 24,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 25,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "We never store PII in application logs on Northstar."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 25,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add member comms"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 25,
+    "domain": "milestone",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "date": "2023-11-14",
+      "label": "UAT Start"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 26,
+    "domain": "milestone",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "UAT Start",
+      "date": "2026-10-16"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 27,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Marcus",
+      "scope": "analytics events",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 27,
+    "domain": "responsibility",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Tomiko Sato",
+      "scope": "dashboards",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 28,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Possible vendor delay on wallet sandbox",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 28,
+    "domain": "risk",
+    "disposition": "create_new",
+    "truthIntent": "uncertain",
+    "proposedValues": {
+      "title": "NimbusPay sandbox delay",
+      "text": "NimbusPay indicates a potential delay in the sandbox availability."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 28,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Possible vendor delay on wallet sandbox",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 29,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 29,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 30,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "API timeout on legacy session call"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 31,
+    "domain": "knowledge",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "NimbusPay does NOT supply the member CSV export."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 31,
+    "domain": "knowledge",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "We build the export ourselves."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 31,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "uncertain",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 32,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "UAT script",
+      "date": "2023-10-15"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 33,
+    "domain": "person",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Sarah Kim"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 33,
+    "domain": "risk",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Close pen-test findings"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 33,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add to-do for pen-test findings"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 34,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Rate limit on session API"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 35,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add to-do for login error handling",
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 35,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 36,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add session timeout",
+      "name": "session timeout"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 37,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 37,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "non_current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 37,
+    "domain": "responsibility",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Dev Patel",
+      "scope": "vendor delay",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 38,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Amira Rahman",
+      "scope": "CAB pack",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 38,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 39,
+    "domain": "milestone",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "Release Date",
+      "date": "2023-10-27"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 40,
+    "domain": "decision",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "Feature flags stay on for 48 hours after cutover."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 41,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add to-do for analytics event changes"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 41,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Rate limit on session API"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 42,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Sarah Kim",
+      "scope": "CAB pack",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 43,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "The threat model is the product's job."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 43,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add to-do for threat model"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 43,
+    "domain": "responsibility",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "scope": "threat model",
+      "ownershipSemantics": "replace",
+      "personName": "Sarah Okonkwo"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 44,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Marcus Chen",
+      "scope": "accessibility pass",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 44,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "non_current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 45,
+    "domain": "risk",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "SSO IdP MFA SLO timing risk",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 45,
+    "domain": "risk",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "IdP regression impact on CAB",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 45,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 46,
+    "domain": "availability",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Priya",
+      "awayFromIso": "2023-10-24"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 46,
+    "domain": "availability",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Marcus",
+      "awayFromIso": "2023-10-24"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 46,
+    "domain": "availability",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Jordan",
+      "awayFromIso": "2023-10-24"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 46,
+    "domain": "responsibility",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Chris Bell",
+      "scope": "runbook",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 47,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Rollback plan",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 47,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Chris Bell",
+      "scope": "rollback plan",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 47,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "uncertain",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 48,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "session timeout still open",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 48,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "member comms still open",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 48,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "perf budget still open",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 48,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "accessibility still open",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 48,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "vendor contract check",
+      "personName": "Liam"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 48,
+    "domain": "availability",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Jordan Hale",
+      "awayFromIso": "2023-10-01",
+      "awayToIso": "2023-10-31"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 49,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add to-do for analytics event changes"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 49,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 49,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "non_current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 50,
+    "domain": "responsibility",
+    "disposition": "create_new",
+    "truthIntent": "uncertain",
+    "proposedValues": {
+      "scope": "hypercare",
+      "ownershipSemantics": "ambiguous"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 50,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "uncertain",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 50,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "uncertain",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 51,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add member comms",
+      "status": "open"
+    },
+    "missingReadySemantics": "This To Do update is not specific enough to apply automatically."
+  },
+  {
+    "capture": 52,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add member comms",
+      "date": "2023-10-26"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 53,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Jordan Hale",
+      "scope": "UAT",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 53,
+    "domain": "responsibility",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 53,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 54,
+    "domain": "person",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Elena"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 55,
+    "domain": "person",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Priya Shah"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 55,
+    "domain": "person",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Marcus Chen"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 55,
+    "domain": "person",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Elena Voss"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 55,
+    "domain": "person",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Jordan Hale"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 55,
+    "domain": "responsibility",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Marcus Chen",
+      "scope": "Accessibility pass",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 56,
+    "domain": "risk",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "login loop on password reset"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 56,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "login loop on password reset"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 57,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "login loop on password reset",
+      "date": "2023-10-17"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 58,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "login loop on password reset",
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 59,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Regression-test password reset on staging"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 60,
+    "domain": "risk",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "CAB rejection",
+      "text": "CAB rejection if the threat model is thin."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 61,
+    "domain": "risk",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "CAB rejection risk",
+      "status": "watch"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 61,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 62,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "Threat model landed."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 62,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 62,
+    "domain": "risk",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Resolve CAB rejection risk"
+    },
+    "missingReadySemantics": "This Risk update is not specific enough to apply automatically."
+  },
+  {
+    "capture": 63,
+    "domain": "milestone",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "UAT Start",
+      "date": "2026-10-20"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 63,
+    "domain": "person",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 64,
+    "domain": "milestone",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "UAT Start",
+      "date": "2023-10-18"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 65,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Priya Shah",
+      "scope": "UAT",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 65,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Jordan Hale",
+      "scope": "defect triage",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 66,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Jordan Hale",
+      "scope": "UAT",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 66,
+    "domain": "responsibility",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Priya",
+      "scope": "steering",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 66,
+    "domain": "responsibility",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 67,
+    "domain": "availability",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Tomiko Sato",
+      "personName": "Tomiko Sato",
+      "awayFromIso": "2023-10-21"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 68,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 68,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": "This To Do update is not specific enough to apply automatically."
+  },
+  {
+    "capture": 69,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "UAT checklist",
+      "status": "open"
+    },
+    "missingReadySemantics": "This To Do update is not specific enough to apply automatically."
+  },
+  {
+    "capture": 69,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "date": "2023-10-15"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 70,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "UAT script",
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 70,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "UAT evidence pack"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 71,
+    "domain": "milestone",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "CAB Date",
+      "date": "2023-11-18"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 71,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "non_current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 72,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Jordan Hale",
+      "scope": "UAT",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 72,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "non_current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 73,
+    "domain": "milestone",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "Release Date",
+      "date": "2023-10-27"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 73,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "uncertain",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 74,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "non_current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 75,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 75,
+    "domain": "decision",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 76,
+    "domain": "decision",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 76,
+    "domain": "milestone",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 77,
+    "domain": "milestone",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "Target Release",
+      "date": "2026-10-27"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 78,
+    "domain": "milestone",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "UAT Start",
+      "date": "2023-10-18"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 78,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "non_current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 78,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 78,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 79,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "resolved"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 80,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "non_current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 81,
+    "domain": "person",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Sarah Kim"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 81,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "non_current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 81,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "pen-test findings"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 82,
+    "domain": "milestone",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "CAB Date",
+      "date": "2023-11-18"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 82,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "non_current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 83,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "non_current",
+    "proposedValues": {},
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 83,
+    "domain": "risk",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Vendor delay resolved"
+    },
+    "missingReadySemantics": "This Risk update is not specific enough to apply automatically."
+  },
+  {
+    "capture": 84,
+    "domain": "availability",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Tomiko Sato",
+      "awayFromIso": "2023-10-27"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 84,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "non_current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 84,
+    "domain": "knowledge",
+    "disposition": "no_change",
+    "truthIntent": "non_current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 84,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "non_current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 85,
+    "domain": "person",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Nadia Qureshi"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 85,
+    "domain": "availability",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Nadia Qureshi",
+      "awayFromIso": "2023-10-30"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 86,
+    "domain": "person",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Jordan Hale"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 86,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "export encoding defect"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 87,
+    "domain": "risk",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "login loop on Safari",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 87,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Safari login loop"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 88,
+    "domain": "milestone",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "UAT Start",
+      "date": "2023-10-10"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 88,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Jordan Hale",
+      "scope": "UAT",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 88,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 89,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Amira Rahman",
+      "scope": "CAB pack",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 89,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Mark CAB pack done.",
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 90,
+    "domain": "availability",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "name": "Elena Voss",
+      "personName": "Elena Voss",
+      "awayFromIso": "2023-10-22",
+      "awayToIso": "2023-10-23"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 90,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Chris Bell",
+      "scope": "cutover questions",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 91,
+    "domain": "responsibility",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Chris Bell",
+      "scope": "cutover execution",
+      "ownershipSemantics": "replace"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 91,
+    "domain": "responsibility",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 92,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Rollback plan",
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 92,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add cutover runbook",
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 93,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add to-do for pen-test findings",
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 93,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add to-do for accessibility pass before UAT",
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 93,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Performance budget to-do",
+      "status": "accepted"
+    },
+    "missingReadySemantics": "This To Do update is not specific enough to apply automatically."
+  },
+  {
+    "capture": 94,
+    "domain": "decision",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "text": "Deployment decision is set for 27 October."
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 94,
+    "domain": "decision",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 94,
+    "domain": "decision",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 95,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 95,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 95,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "export encoding defect",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 95,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "resolved"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 95,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 95,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "uncertain",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 95,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 95,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "uncertain",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 95,
+    "domain": "commentary",
+    "disposition": "commentary",
+    "truthIntent": "uncertain",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 96,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 96,
+    "domain": "availability",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Elena",
+      "awayFromIso": "2023-10-23"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 96,
+    "domain": "person",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 96,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 96,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "uncertain",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 96,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "uncertain",
+    "proposedValues": {
+      "title": "Feature-flag cleanup",
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 97,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 97,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 97,
+    "domain": "todo",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "complete"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 98,
+    "domain": "risk",
+    "disposition": "update_existing",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "legacy session mapping",
+      "status": "accepted"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 98,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "open"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 98,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "status": "resolved"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 99,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Add hypercare rota",
+      "personName": "Priya"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 99,
+    "domain": "todo",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 100,
+    "domain": "milestone",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "label": "Release Date",
+      "date": "2023-10-27"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 100,
+    "domain": "unknown",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 100,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Feature-flag cleanup"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 100,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Hypercare rota"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 100,
+    "domain": "todo",
+    "disposition": "create_new",
+    "truthIntent": "current",
+    "proposedValues": {
+      "title": "Session timeout parity"
+    },
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 100,
+    "domain": "risk",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": null,
+    "missingReadySemantics": null
+  },
+  {
+    "capture": 100,
+    "domain": "responsibility",
+    "disposition": "no_change",
+    "truthIntent": "current",
+    "proposedValues": {
+      "personName": "Jordan Hale",
+      "scope": "UAT wrap-up",
+      "ownershipSemantics": "continue"
+    },
+    "missingReadySemantics": null
+  }
+]

@@ -1,0 +1,313 @@
+{
+  "productionCandidate": "PR #116 cursor/v09-shared-seam-hardening-9524 @ d5f5d63",
+  "harnessSha": "e027f66a9064037b2b26ddd16c168abcfbb697db",
+  "mode": "live",
+  "liveBlocked": null,
+  "persist": "disposable-supabase",
+  "fakeWorkspaceClient": false,
+  "oracleEnvelopes": false,
+  "model": "gpt-4o-mini-2024-07-18",
+  "capturesAttempted": 100,
+  "capturesCompleted": 100,
+  "askCalls": 30,
+  "liveExtractCalls": 100,
+  "totalAiCalls": 130,
+  "elapsedMs": 409771,
+  "firstDivergence": {
+    "n": 1,
+    "detail": "people.person:priya-shah: expected Priya Shah actual (missing)"
+  },
+  "divergenceCount": 100,
+  "taxonomy": {
+    "A": 3,
+    "B": 0,
+    "C": 22,
+    "D": 0,
+    "E": 4,
+    "F": 1,
+    "G": 8,
+    "correct": 69
+  },
+  "readyApply": {
+    "readyItems": 73,
+    "wrote": 73,
+    "nonEffects": 0,
+    "nonEffectKinds": {},
+    "legitimateNoChange": 0,
+    "receiptReplayNoChange": 0
+  },
+  "stoppedAt": null,
+  "captureRequestChars": {
+    "n": 100,
+    "min": 4216,
+    "median": 6783,
+    "p90": 7277,
+    "p95": 7402,
+    "max": 7621,
+    "mean": 6359
+  },
+  "captureEstimatedInputTokens": {
+    "n": 100,
+    "min": 909,
+    "median": 1999,
+    "p90": 2207,
+    "p95": 2245,
+    "max": 2313,
+    "mean": 1815
+  },
+  "askContextChars": {
+    "n": 30,
+    "min": 879,
+    "median": 4462,
+    "p90": 5930,
+    "p95": 6202,
+    "max": 6206,
+    "mean": 3559
+  },
+  "askEstimatedInputTokens": {
+    "n": 30,
+    "min": 251,
+    "median": 1834,
+    "p90": 2358,
+    "p95": 2490,
+    "max": 2520,
+    "mean": 1405
+  },
+  "historyCount": {
+    "n": 100,
+    "min": 1,
+    "median": 42,
+    "p90": 58,
+    "p95": 64,
+    "max": 71,
+    "mean": 39
+  },
+  "currentTruthObjects": {
+    "n": 100,
+    "min": 3,
+    "median": 44,
+    "p90": 49,
+    "p95": 51,
+    "max": 52,
+    "mean": 37
+  },
+  "earlyVsLateRequestChars": {
+    "captures1to20": 4730,
+    "captures81to100": 7276,
+    "ratio": 1.538
+  },
+  "tokenGrowth": {
+    "captureExtract": {
+      "requestChars": {
+        "n": 100,
+        "min": 4216,
+        "median": 6783,
+        "p90": 7277,
+        "p95": 7402,
+        "max": 7621,
+        "mean": 6359
+      },
+      "estimatedInputTokens": {
+        "n": 100,
+        "min": 909,
+        "median": 1999,
+        "p90": 2207,
+        "p95": 2245,
+        "max": 2313,
+        "mean": 1815
+      },
+      "projectBlockChars": {
+        "n": 100,
+        "min": 275,
+        "median": 2803,
+        "p90": 3321,
+        "p95": 3406,
+        "max": 3487,
+        "mean": 2376
+      },
+      "captureContextChars": {
+        "n": 100,
+        "min": 1700,
+        "median": 14565,
+        "p90": 15933,
+        "p95": 16104,
+        "max": 16331,
+        "mean": 12654
+      },
+      "captureContextHistoryChars": {
+        "n": 100,
+        "min": 34,
+        "median": 1931,
+        "p90": 2121,
+        "p95": 2155,
+        "max": 2234,
+        "mean": 1755
+      },
+      "historyCount": {
+        "n": 100,
+        "min": 1,
+        "median": 42,
+        "p90": 58,
+        "p95": 64,
+        "max": 71,
+        "mean": 39
+      },
+      "currentTruthObjects": {
+        "n": 100,
+        "min": 3,
+        "median": 44,
+        "p90": 49,
+        "p95": 51,
+        "max": 52,
+        "mean": 37
+      },
+      "earlyVsLate": {
+        "requestChars": {
+          "captures1to20": 4730,
+          "captures81to100": 7276,
+          "ratio": 1.538
+        },
+        "estimatedInputTokens": {
+          "captures1to20": 1124,
+          "captures81to100": 2196,
+          "ratio": 1.953
+        },
+        "projectBlockChars": {
+          "captures1to20": 757,
+          "captures81to100": 3273,
+          "ratio": 4.324
+        },
+        "currentTruthObjects": {
+          "captures1to20": 12.3,
+          "captures81to100": 48.5,
+          "ratio": 3.943
+        },
+        "historyCount": {
+          "captures1to20": 9.85,
+          "captures81to100": 59.5,
+          "ratio": 6.041
+        }
+      }
+    },
+    "askContext": {
+      "requestChars": {
+        "n": 30,
+        "min": 879,
+        "median": 4462,
+        "p90": 5930,
+        "p95": 6202,
+        "max": 6206,
+        "mean": 3559
+      },
+      "estimatedInputTokens": {
+        "n": 30,
+        "min": 251,
+        "median": 1834,
+        "p90": 2358,
+        "p95": 2490,
+        "max": 2520,
+        "mean": 1405
+      },
+      "currentState": {
+        "requestChars": {
+          "n": 24,
+          "min": 879,
+          "median": 4446,
+          "p90": 4736,
+          "p95": 4737,
+          "max": 4738,
+          "mean": 3307
+        },
+        "estimatedInputTokens": {
+          "n": 24,
+          "min": 251,
+          "median": 1832,
+          "p90": 1952,
+          "p95": 1952,
+          "max": 1953,
+          "mean": 1318
+        }
+      },
+      "historical": {
+        "requestChars": {
+          "n": 6,
+          "min": 1055,
+          "median": 5930,
+          "p90": 6206,
+          "p95": 6206,
+          "max": 6206,
+          "mean": 4571
+        },
+        "estimatedInputTokens": {
+          "n": 6,
+          "min": 302,
+          "median": 2358,
+          "p90": 2520,
+          "p95": 2520,
+          "max": 2520,
+          "mean": 1753
+        }
+      },
+      "earlyVsLate": {
+        "captures1to25MeanChars": 2202,
+        "captures75to100MeanChars": 4999,
+        "ratio": 2.27
+      }
+    },
+    "analyseProbes": {
+      "n": 12,
+      "requestChars": {
+        "n": 12,
+        "min": 4225,
+        "median": 7028,
+        "p90": 7690,
+        "p95": 7717,
+        "max": 7717,
+        "mean": 6547
+      },
+      "estimatedInputTokens": {
+        "n": 12,
+        "min": 909,
+        "median": 2098,
+        "p90": 2376,
+        "p95": 2376,
+        "max": 2376,
+        "mean": 1896
+      }
+    },
+    "providerInputTokens": {
+      "n": 100,
+      "min": 944,
+      "median": 2031,
+      "p90": 2240,
+      "p95": 2279,
+      "max": 2344,
+      "mean": 1849
+    },
+    "providerOutputTokens": {
+      "n": 100,
+      "min": 116,
+      "median": 296,
+      "p90": 488,
+      "p95": 800,
+      "max": 1189,
+      "mean": 323
+    },
+    "providerTotalTokens": {
+      "n": 100,
+      "min": 1105,
+      "median": 2292,
+      "p90": 2677,
+      "p95": 2838,
+      "max": 3515,
+      "mean": 2171
+    },
+    "note": "Provider tokens are OpenAI chat.completions usage. estimatedInputTokens remain js-tiktoken cl100k_base."
+  },
+  "proof": {
+    "persistenceApply": "LIVE-PROVEN disposable Supabase",
+    "extractQuality": "LIVE-PROVEN OpenAI extractObservationsWithOpenAI",
+    "askAnswers": "LIVE-PROVEN answerTellMeQuestion",
+    "tokenApiUsage": "LIVE-PROVEN"
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "people": [
+    {
+      "id": "c87f27ff-ed4d-4835-8c23-e3860e6ea5ce",
+      "name": "Jordan Hale",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "31311061-a185-43c8-acb3-2037bbf6014f",
+      "name": "Dev Patel",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "499c300b-b5a7-4a8b-8c95-57c0739d71a7",
+      "name": "Amira Rahman",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "e756c218-a173-4e5b-bab3-2d8dcd63dc87",
+      "name": "Tomiko Sato",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "4c242bab-89bc-4581-ad61-7d682cb683de",
+      "name": "Chris Bell",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "117622f8-2805-478e-ae30-f131b51ccbd8",
+      "name": "Sarah Kim",
+      "role": "Stakeholder"
+    },
+    {
+      "id": "d57c6071-57db-4b2d-a30b-18b9f5fcbd03",
+      "name": "Nadia Qureshi",
+      "role": "Stakeholder"
+    }
+  ],
+  "todos": [
+    {
+      "id": "2c71820c-3052-4dc3-a4bd-da7092509f40",
+      "title": "Confirm project baseline with key stakeholders",
+      "done": false
+    },
+    {
+      "id": "4ec4d828-e384-4b98-9b3e-bfd55ca3bee7",
+      "title": "Add to-do for analytics event changes",
+      "done": false
+    },
+    {
+      "id": "2d6c0793-40cf-4e30-9a6e-1f5d3c74e1e0",
+      "title": "UAT script",
+      "done": false,
+      "dueAt": "2023-10-15T12:00:00.000Z"
+    },
+    {
+      "id": "c4df1139-2a20-4023-a72a-46ad1af12250",
+      "title": "Performance budget to-do",
+      "done": false
+    },
+    {
+      "id": "843f234e-6268-4c9a-9df7-98ea623b4b1e",
+      "title": "SSO migration to-do",
+      "done": false
+    },
+    {
+      "id": "c51be5a8-34d9-48ac-a3ec-8d6576e5ff4c",
+      "title": "Rate limit on session API",
+      "done": false
+    },
+    {
+      "id": "30685ce5-b133-4d2e-a78e-0a398b8015a7",
+      "title": "Add to-do for login error handling",
+      "done": true
+    },
+    {
+      "id": "792e90c8-14b9-4b3a-8eb9-da73313cdb05",
+      "title": "Add session timeout",
+      "done": false
+    },
+    {
+      "id": "b2a91ce2-71f9-4569-a102-737fb7b91862",
+      "title": "Add to-do for threat model",
+      "done": false
+    },
+    {
+      "id": "3ba44d54-7011-42c9-b2b3-243675306226",
+      "title": "vendor contract check",
+      "done": false
+    },
+    {
+      "id": "a5ed2205-34be-48c9-84ca-e1059f046752",
+      "title": "login loop on password reset",
+      "done": true,
+      "dueAt": "2023-10-17T12:00:00.000Z"
+    },
+    {
+      "id": "878fe73f-ed9f-4102-a8fe-ddfc2ea05aa5",
+      "title": "export encoding defect",
+      "done": false
+    },
+    {
+      "id": "40ebd30b-1e61-46c6-a7a0-8b60df3a18a4",
+      "title": "CAB pack",
+      "done": true
+    },
+    {
+      "id": "a12a63cb-7369-4725-bb74-f7bd4eba007d",
+      "title": "Rollback plan",
+      "done": true
+    },
+    {
+      "id": "bfb7a738-9489-4ece-b6e7-cfb4684b435f",
+      "title": "Add cutover runbook",
+      "done": true
+    },
+    {
+      "id": "92f59594-047c-4562-b6c6-f1a2172801d9",
+      "title": "Add to-do for pen-test findings",
+      "done": true
+    },
+    {
+      "id": "dd82bc7b-acf1-4f32-aa98-cef25dc8b3a8",
+      "title": "Add to-do for accessibility pass before UAT",
+      "done": true
+    },
+    {
+      "id": "648e319e-525d-4c3e-8029-1e84ab2e525f",
+      "title": "Safari login loop",
+      "done": true
+    },
+    {
+      "id": "cb0eced8-9dfb-4587-a275-c4fe4ab45526",
+      "title": "Regression-test password reset on staging",
+      "done": true
+    },
+    {
+      "id": "5403849f-593d-4885-97cd-90317adf1cf1",
+      "title": "export encoding defect",
+      "done": true
+    },
+    {
+      "id": "962b1642-e7bf-4946-94e9-acc18081f885",
+      "title": "Add member comms",
+      "done": true,
+      "dueAt": "2023-10-26T12:00:00.000Z"
+    },
+    {
+      "id": "65b880b7-9637-4a33-9aac-abed3c7b0098",
+      "title": "UAT evidence pack",
+      "done": true
+    },
+    {
+      "id": "f5373732-7402-4f45-a8aa-85b19a360087",
+      "title": "Add hypercare rota",
+      "done": false
+    },
+    {
+      "id": "fbac5643-a63c-4b7a-8b02-4516da77ee16",
+      "title": "Feature-flag cleanup",
+      "done": false
+    },
+    {
+      "id": "afaed5a5-4fac-4204-897b-ce0b09edb84d",
+      "title": "Hypercare rota",
+      "done": false
+    },
+    {
+      "id": "b49763df-f899-449b-a625-31fcec7082d3",
+      "title": "Session timeout parity",
+      "done": false
+    }
+  ],
+  "risks": [
+    {
+      "id": "f9a03210-6771-43e0-9dfd-63c22e857e2b",
+      "title": "API timeout on legacy session call",
+      "status": "open"
+    },
+    {
+      "id": "a82c0837-4c0c-470c-a30f-b341b3ecda3f",
+      "title": "Possible vendor delay on wallet sandbox",
+      "status": "open"
+    },
+    {
+      "id": "acaec42a-8df3-4c99-82a7-6347721bd0af",
+      "title": "SSO IdP MFA SLO timing risk",
+      "status": "open"
+    },
+    {
+      "id": "da00d92f-ec9e-4032-80f7-f973ad6b3daa",
+      "title": "IdP regression impact on CAB",
+      "status": "open"
+    },
+    {
+      "id": "c38c0892-4f9e-4211-801b-f0fca1b77cd9",
+      "title": "Close pen-test findings",
+      "status": "watch"
+    },
+    {
+      "id": "95014e27-9242-47b9-a8f3-b9ad373cfc24",
+      "title": "legacy session mapping",
+      "status": "accepted"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "146ab668-f538-4690-a9fb-4d1bd4d40e0c",
+      "label": "Target Release",
+      "startAt": "2026-10-27T12:00:00.000Z"
+    },
+    {
+      "id": "ded93af3-b3c7-4563-ae5d-427aec472c9c",
+      "label": "UAT Start",
+      "startAt": "2023-10-18T12:00:00.000Z"
+    },
+    {
+      "id": "e95b69f6-ff8e-4ea0-9eac-fad464edf014",
+      "label": "CAB Date",
+      "startAt": "2023-11-18T12:00:00.000Z"
+    }
+  ],
+  "historyCount": 74
+}
