@@ -1,0 +1,12 @@
+{
+  "projectMs": 784,
+  "historyMs": 1598,
+  "overflow": {
+    "scrollWidth": 1280,
+    "clientWidth": 1280,
+    "overflow": false
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ]
+}
