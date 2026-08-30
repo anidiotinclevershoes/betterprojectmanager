@@ -272,6 +272,9 @@ async function main() {
           assert.match(prompt, /You extract atomic project observations/);
           assert.ok(prompt.includes(RAW_NARRATIVE.trim().slice(0, 40)));
           assert.ok(prompt.includes(CAPTURE_V2_OBSERVATION_SCHEMA.slice(0, 40)));
+          assert.match(prompt, /"name": "person create/);
+          assert.match(prompt, /awayFromIso/);
+          assert.match(prompt, /ownershipSemantics/);
           assert.doesNotMatch(prompt, /You organise messy project start notes/);
           assert.doesNotMatch(prompt, /You extract a Lume project setup draft/);
           const body = (await res.json()) as {

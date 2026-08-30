@@ -12,7 +12,9 @@ import {
 import {
   ownershipTopicTokens,
   questionLooksOwnership,
+  questionLooksScheduledDate,
   recordMentionsOwnershipOfTopic,
+  SCHEDULED_DATE_AUTHORITY_KINDS,
 } from "@/lib/tell-me/question-shape";
 import { questionLooksAdvisory } from "@/lib/tell-me/scope";
 import type { MissionState } from "@/lib/types";
@@ -48,6 +50,7 @@ Rules:
 - Distinguish recorded fact from inference. Inference must be labelled in the prose.
 - Ownership: only state an owner when a record explicitly assigns that exact responsibility. Do not broaden one ownership into another (UX ≠ security; discussion ≠ ownership; BA cover ≠ scope approval; vendor contact ≠ commercial approval). If no exact owner is recorded, say so — do not guess.
 - Current vs history: for current-state questions, prefer Current position / Decisions over older History or superseded risk notes. Keep historical facts for historical questions.
+- Scheduled dates (milestones, target dates, releases) are direct confirmation only from Milestones and Releases records. Knowledge or decision prose that mentions a date is related context, not a scheduled date record.
 - Epistemic status: informal, unofficial, suggested, rumoured, assumed, or casually mentioned items are not official/confirmed/approved fact. Answer "official / confirmed?" questions with the status first.
 - Preserve qualifications in evidence (only / not / require / unconfirmed / informal) — never drop them when answering.
 - Recent conversation is for continuity and reference resolution only. It is not project evidence. Previous assistant answers may be wrong and must not override or establish owners, dates, decisions, or approvals. Project records remain authoritative.
@@ -78,6 +81,7 @@ Rules:
 - "needsConfirmation" is optional: only material gaps. Prefer the STORED AMBIGUITIES list when present. Do not invent owners or gaps from absence alone.
 - Ownership: only state an owner when a responsibility fact explicitly assigns that exact scope (@Person → scope). Do not broaden (UX ≠ security).
 - Current vs history: MODE:current excludes superseded; MODE:historical may include it.
+- Scheduled dates (milestones, target dates, releases) are direct confirmation only from Milestones and Releases records. Knowledge or decision prose that mentions a date is related context, not a scheduled date record.
 - Epistemic: informal/suggested/unknown/legacy are not official confirmation.
 - Preserve qualifications (only / not / unconfirmed / informal).
 - Recent conversation is for continuity and reference resolution only. It is not project evidence. Previous assistant answers may be wrong and must not override or establish owners, dates, decisions, or approvals. Project records remain authoritative.
@@ -88,6 +92,26 @@ Rules:
 /** Exported for verification — keep in sync with TELL_ME_SYSTEM above. */
 export const TELL_ME_CONVERSATION_AUTHORITY_MARKER =
   "Recent conversation is for continuity and reference resolution only";
+
+export const TELL_ME_SCHEDULED_DATE_AUTHORITY_MARKER =
+  "Scheduled dates (milestones, target dates, releases) are direct confirmation only from Milestones and Releases records";
+
+/**
+ * Shared authority boundary: scheduled-date questions cannot be
+ * direct_confirmation from knowledge/decision/history prose.
+ */
+export function constrainScheduledDateConfidence(args: {
+  question: string;
+  confidence: TellMeAnswerConfidence;
+  sources: TellMeSourceRef[];
+}): TellMeAnswerConfidence {
+  if (args.confidence !== "direct_confirmation") return args.confidence;
+  if (!questionLooksScheduledDate(args.question)) return args.confidence;
+  const authoritative = args.sources.some((source) =>
+    SCHEDULED_DATE_AUTHORITY_KINDS.has(source.kind),
+  );
+  return authoritative ? args.confidence : "related_context";
+}
 
 export async function answerTellMeQuestion(args: {
   question: string;
@@ -363,9 +387,15 @@ export async function answerTellMeQuestion(args: {
     bundle.needsConfirmationHints ?? [],
   );
 
+  const confidence = constrainScheduledDateConfidence({
+    question,
+    confidence: normaliseConfidence(parsed.confidence),
+    sources,
+  });
+
   return {
     answer: answerText,
-    confidence: normaliseConfidence(parsed.confidence),
+    confidence,
     sources,
     noticed,
     needsConfirmation,

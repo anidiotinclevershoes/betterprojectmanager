@@ -118,6 +118,7 @@ export const DEEP_CREATION_ENVELOPE = {
   observations: OBS.map((row) => ({
     ...row,
     disposition: row.disposition ?? "create_new",
+    truthIntent: row.id === "np-done-inventory" ? "non_current" : "current",
     projectId: null,
   })),
 };

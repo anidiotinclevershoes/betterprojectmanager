@@ -38,6 +38,25 @@ export function questionLooksHistorical(question: string): boolean {
   return false;
 }
 
+/**
+ * Current-state questions about a scheduled date.
+ * Grounded only in timeline / release records — not knowledge prose.
+ * Not a special-case for any one label.
+ */
+export function questionLooksScheduledDate(question: string): boolean {
+  if (questionLooksHistorical(question)) return false;
+  return (
+    /\b(what|when|which)\b.{0,40}\b(date|when|schedule|milestone)\b/i.test(
+      question,
+    ) || /\b(target|current).{0,24}\bdate\b/i.test(question)
+  );
+}
+
+export const SCHEDULED_DATE_AUTHORITY_KINDS = new Set([
+  "timeline",
+  "release",
+]);
+
 /** Current-state / status questions — prefer Current position over older history. */
 export function questionLooksCurrentState(question: string): boolean {
   if (questionLooksHistorical(question)) return false;

@@ -17,6 +17,10 @@ export {
   validateObservations,
 } from "./validate";
 export {
+  missingReadySemantics,
+  isUsableIsoDate,
+} from "./contract";
+export {
   contextRecordsFromWorld,
   formatAuthoritativeStateForPrompt,
 } from "./context";

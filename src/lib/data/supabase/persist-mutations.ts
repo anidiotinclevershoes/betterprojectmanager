@@ -1085,11 +1085,11 @@ export async function persistTimelineItemWithReceipt(
     id: String(row.id),
     projectId: String(row.project_id),
     label: String(row.label),
-    type: String(row.type),
+    type: (row.type as TimelineItem["type"]) || "milestone",
     startAt: row.start_on ? `${row.start_on}T12:00:00.000Z` : String(row.created_at),
     endAt: row.end_on ? `${row.end_on}T12:00:00.000Z` : undefined,
     notes: (row.notes as string | null) ?? undefined,
-    source: (row.source as string | null) || "manual",
+    source: (row.source as TimelineItem["source"]) || "manual",
   };
 }
 

@@ -14,8 +14,15 @@ import {
   findUnknownOwnerHints,
   serializeCanonicalTruth,
 } from "../src/lib/canonical-truth/serialize";
-import { answerTellMeQuestion } from "../src/lib/tell-me/answer";
+import {
+  answerTellMeQuestion,
+  constrainScheduledDateConfidence,
+  TELL_ME_SCHEDULED_DATE_AUTHORITY_MARKER,
+  TELL_ME_SYSTEM,
+  TELL_ME_SYSTEM_CANONICAL,
+} from "../src/lib/tell-me/answer";
 import { buildTellMeContext } from "../src/lib/tell-me/context";
+import { questionLooksScheduledDate } from "../src/lib/tell-me/question-shape";
 import type { MissionState, Project } from "../src/lib/types";
 
 const PROJECT_A = "11111111-1111-4111-8111-111111111111";
@@ -362,6 +369,51 @@ function testPersonCentredAndDomainCoverage() {
   });
 }
 
+function testScheduledDateAuthorityBoundary() {
+  assert.equal(
+    questionLooksScheduledDate("What is the current target release date?"),
+    true,
+  );
+  assert.ok(TELL_ME_SYSTEM.includes(TELL_ME_SCHEDULED_DATE_AUTHORITY_MARKER));
+  assert.ok(
+    TELL_ME_SYSTEM_CANONICAL.includes(TELL_ME_SCHEDULED_DATE_AUTHORITY_MARKER),
+  );
+  assert.equal(
+    constrainScheduledDateConfidence({
+      question: "What is the current target release date?",
+      confidence: "direct_confirmation",
+      sources: [
+        {
+          id: "dec-1",
+          kind: "knowledge",
+          label: "go on 27 October",
+          projectId: PROJECT_A,
+          projectCode: "ALP",
+        },
+      ],
+    }),
+    "related_context",
+    "knowledge/decision prose is not a scheduled date record",
+  );
+  assert.equal(
+    constrainScheduledDateConfidence({
+      question: "What is the current target release date?",
+      confidence: "direct_confirmation",
+      sources: [
+        {
+          id: "ms-release",
+          kind: "timeline",
+          label: "Release",
+          projectId: PROJECT_A,
+          projectCode: "ALP",
+          detail: "2026-10-27",
+        },
+      ],
+    }),
+    "direct_confirmation",
+  );
+}
+
 function testProjectIsolationAndRollback() {
   return withCanonicalEnv(async () => {
     const state = emptyState();
@@ -409,6 +461,8 @@ async function main() {
   console.log("✓ current-state omits History dump; historical includes evidence");
   await testPersonCentredAndDomainCoverage();
   console.log("✓ person-centred + cross-domain coverage");
+  testScheduledDateAuthorityBoundary();
+  console.log("✓ scheduled-date Ask authority is timeline/releases, not knowledge prose");
   await testProjectIsolationAndRollback();
   console.log("✓ project isolation + legacy rollback");
   console.log("verify-ask-context-authority: OK");

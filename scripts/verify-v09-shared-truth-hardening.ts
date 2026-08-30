@@ -288,7 +288,17 @@ async function main() {
   await check("H1.5 later normal update preserves stable milestone id", async () => {
     const box = {
       state: {
-        projects: [{ id: PROJECT_A, name: "A", code: "A", stakeholders: [] }],
+        projects: [
+          {
+            id: PROJECT_A,
+            name: "A",
+            code: "A",
+            summary: "A",
+            status: "healthy",
+            currentFocus: "A",
+            stakeholders: [],
+          },
+        ],
         memories: [],
         recommendations: [],
         meetings: [],
@@ -801,7 +811,6 @@ async function main() {
       evidence: partial.evidence ?? partial.statement,
       domain: "milestone",
       disposition: "update_existing",
-      truthIntent: "current",
       projectId: PROJECT_A,
       candidateTargetId: CAB_ID,
       candidateTargetTitle: "CAB",
@@ -1257,6 +1266,398 @@ async function main() {
       fake.tables.todos.filter((row) => String(row.title).startsWith("Unique sibling todo")).length,
       30,
     );
+  });
+
+  await check("Ready.1 person create missing name is Needs You, never Ready", () => {
+    const [row] = resolveObservations({
+      observations: [
+        {
+          id: "obs-nameless",
+          statement: "Please add the security lead",
+          evidence: "Please add the security lead.",
+          domain: "person",
+          disposition: "create_new",
+          truthIntent: "current",
+        },
+      ],
+      world: emptyWorld(),
+      transcript: "Please add the security lead.",
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(row?.decision.kind, "needs_you");
+    assert.equal(row?.suggestion, null);
+  });
+
+  await check("Ready.2 explicit person name is Ready and Apply succeeds", async () => {
+    const fake = new FakeWorkspaceClient();
+    seedProject(fake);
+    const [row] = resolveObservations({
+      observations: [
+        {
+          id: "obs-named",
+          statement: "Jordan Hale",
+          evidence: "Please add Jordan Hale.",
+          domain: "person",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { name: "Jordan Hale", role: "Delivery" },
+        },
+      ],
+      world: emptyWorld(),
+      transcript: "Please add Jordan Hale on delivery.",
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(row?.decision.kind, "write");
+    assert.ok(row?.suggestion);
+    const applied = await applyPersist(
+      fake,
+      row!.suggestion!,
+      "Please add Jordan Hale on delivery. CAB chatter is unrelated.",
+    );
+    assert.equal(applied.executed.kind, "wrote");
+    assert.equal(fake.tables.stakeholders[0]?.name, "Jordan Hale");
+  });
+
+  await check("Ready.3 ambiguous person is Needs You", () => {
+    const world: CaptureApplyWorld = {
+      ...emptyWorld(),
+      projects: [
+        {
+          id: PROJECT_A,
+          name: "Project A",
+          code: "PA",
+          stakeholders: [
+            { id: "p-a", name: "Sarah Kim" },
+            { id: "p-b", name: "Sarah Okonkwo" },
+          ],
+        },
+        { id: PROJECT_B, name: "Project B", code: "PB", stakeholders: [] },
+      ],
+    };
+    const [row] = resolveObservations({
+      observations: [
+        {
+          id: "obs-sarah",
+          statement: "Sarah owns UAT",
+          evidence: "Sarah owns UAT.",
+          domain: "responsibility",
+          disposition: "update_existing",
+          truthIntent: "current",
+          proposedValues: {
+            personName: "Sarah",
+            scope: "UAT",
+            ownershipSemantics: "share",
+          },
+        },
+      ],
+      world,
+      transcript: "Sarah owns UAT.",
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(row?.decision.kind, "needs_you");
+  });
+
+  await check("Ready.4 todo Ready Apply succeeds against unchanged state", async () => {
+    const fake = new FakeWorkspaceClient();
+    seedProject(fake);
+    const [row] = resolveObservations({
+      observations: [
+        {
+          id: "obs-todo",
+          statement: "Book the civic hall for Saturday",
+          evidence: "Please book the civic hall for Saturday.",
+          domain: "todo",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { title: "Book the civic hall for Saturday" },
+        },
+      ],
+      world: emptyWorld(),
+      transcript: MULTI_FACT_TRANSCRIPT,
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(row?.decision.kind, "write");
+    const applied = await applyPersist(fake, row!.suggestion!, MULTI_FACT_TRANSCRIPT);
+    assert.equal(applied.executed.kind, "wrote");
+    assert.equal(fake.tables.todos[0]?.title, "Book the civic hall for Saturday");
+  });
+
+  await check("Ready.5 risk Ready Apply succeeds", async () => {
+    const fake = new FakeWorkspaceClient();
+    seedProject(fake);
+    const [row] = resolveObservations({
+      observations: [
+        {
+          id: "obs-risk",
+          statement: "Gumdrop Bridge icing",
+          evidence: "Gumdrop Bridge icing is now a live risk.",
+          domain: "risk",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { title: "Gumdrop Bridge icing" },
+        },
+      ],
+      world: emptyWorld(),
+      transcript: MULTI_FACT_TRANSCRIPT,
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(row?.decision.kind, "write");
+    const applied = await applyPersist(fake, row!.suggestion!, MULTI_FACT_TRANSCRIPT);
+    assert.equal(applied.executed.kind, "wrote");
+    assert.equal(fake.tables.risks[0]?.title, "Gumdrop Bridge icing");
+  });
+
+  await check("Ready.6 milestone Ready requires label and valid date", () => {
+    const missingDate = resolveObservations({
+      observations: [
+        {
+          id: "obs-ms-nodate",
+          statement: "CAB",
+          evidence: "CAB is soon.",
+          domain: "milestone",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { label: "CAB" },
+        },
+      ],
+      world: emptyWorld(),
+      transcript: MULTI_FACT_TRANSCRIPT,
+      captureEntryProjectId: PROJECT_A,
+    })[0];
+    assert.equal(missingDate?.decision.kind, "needs_you");
+    const ready = resolveObservations({
+      observations: [
+        {
+          id: "obs-ms-ok",
+          statement: "CAB",
+          evidence: "CAB has moved to 22 October 2026.",
+          domain: "milestone",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { label: "CAB", date: "2026-10-22" },
+        },
+      ],
+      world: emptyWorld(),
+      transcript: MULTI_FACT_TRANSCRIPT,
+      captureEntryProjectId: PROJECT_A,
+    })[0];
+    assert.equal(ready?.decision.kind, "write");
+    if (ready?.decision.kind === "write") {
+      assert.equal(ready.decision.operation.type, "create_milestone");
+    }
+  });
+
+  await check("Ready.7 availability Ready contains the fields Apply requires", () => {
+    const world: CaptureApplyWorld = {
+      ...emptyWorld(),
+      projects: [
+        {
+          id: PROJECT_A,
+          name: "Project A",
+          code: "PA",
+          stakeholders: [{ id: PERSON_EXISTING, name: "Priya Shah" }],
+        },
+        { id: PROJECT_B, name: "Project B", code: "PB", stakeholders: [] },
+      ],
+    };
+    const missing = resolveObservations({
+      observations: [
+        {
+          id: "obs-avail-label",
+          statement: "Priya is away next week",
+          evidence: "Priya Shah is away next week.",
+          domain: "availability",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { label: "away next week", personName: "Priya Shah" },
+        },
+      ],
+      world,
+      transcript: "Priya Shah is away next week.",
+      captureEntryProjectId: PROJECT_A,
+    })[0];
+    assert.equal(missing?.decision.kind, "needs_you");
+    const ready = resolveObservations({
+      observations: [
+        {
+          id: "obs-avail-ok",
+          statement: "Priya Shah is away 6 October",
+          evidence: "Priya Shah is away 6 October 2026.",
+          domain: "availability",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: {
+            personName: "Priya Shah",
+            awayFromIso: "2026-10-06",
+          },
+        },
+      ],
+      world,
+      transcript: "Priya Shah is away 6 October 2026.",
+      captureEntryProjectId: PROJECT_A,
+    })[0];
+    assert.equal(ready?.decision.kind, "write");
+    if (ready?.decision.kind === "write") {
+      assert.equal(ready.decision.operation.type, "write_availability");
+      if (ready.decision.operation.type === "write_availability") {
+        assert.equal(ready.decision.operation.personId, PERSON_EXISTING);
+        assert.ok(ready.decision.operation.awayFromIso.startsWith("2026-10-06"));
+      }
+    }
+  });
+
+  await check("Ready.8 responsibility Ready has identity and meaning", () => {
+    const world: CaptureApplyWorld = {
+      ...emptyWorld(),
+      projects: [
+        {
+          id: PROJECT_A,
+          name: "Project A",
+          code: "PA",
+          stakeholders: [{ id: PERSON_EXISTING, name: "Priya Shah" }],
+        },
+        { id: PROJECT_B, name: "Project B", code: "PB", stakeholders: [] },
+      ],
+    };
+    const missing = resolveObservations({
+      observations: [
+        {
+          id: "obs-resp-gap",
+          statement: "owns UAT",
+          evidence: "someone owns UAT",
+          domain: "responsibility",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { scope: "UAT", ownershipSemantics: "share" },
+        },
+      ],
+      world,
+      transcript: "someone owns UAT",
+      captureEntryProjectId: PROJECT_A,
+    })[0];
+    assert.equal(missing?.decision.kind, "needs_you");
+    const ready = resolveObservations({
+      observations: [
+        {
+          id: "obs-resp-ok",
+          statement: "Priya Shah owns UAT",
+          evidence: "Priya Shah owns UAT.",
+          domain: "responsibility",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: {
+            personName: "Priya Shah",
+            scope: "UAT",
+            ownershipSemantics: "share",
+          },
+        },
+      ],
+      world,
+      transcript: "Priya Shah owns UAT.",
+      captureEntryProjectId: PROJECT_A,
+    })[0];
+    assert.equal(ready?.decision.kind, "write");
+  });
+
+  await check("Ready.9 missing required semantic field is Needs You", () => {
+    const [row] = resolveObservations({
+      observations: [
+        {
+          id: "obs-ms",
+          statement: "Release",
+          evidence: "Release sometime.",
+          domain: "milestone",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { label: "Release" },
+        },
+      ],
+      world: emptyWorld(),
+      transcript: "Release sometime.",
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(row?.decision.kind, "needs_you");
+  });
+
+  await check("Ready.10 Ready item plus unchanged world is executable", async () => {
+    const fake = new FakeWorkspaceClient();
+    seedProject(fake);
+    const [row] = resolveObservations({
+      observations: [
+        {
+          id: "obs-exec",
+          statement: "File the parade permit",
+          evidence: "File the parade permit.",
+          domain: "todo",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { title: "File the parade permit" },
+        },
+      ],
+      world: emptyWorld(),
+      transcript: "File the parade permit.",
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(row?.decision.kind, "write");
+    const planned = planCaptureApply({
+      item: row!.suggestion!,
+      text: "Unrelated names Sarah Okonkwo and CAB 18 October live in this transcript. File the parade permit.",
+      world: emptyWorld(),
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(planned.kind, "write");
+    const applied = await applyPersist(
+      fake,
+      row!.suggestion!,
+      "Unrelated names Sarah Okonkwo and CAB 18 October live in this transcript. File the parade permit.",
+    );
+    assert.equal(applied.executed.kind, "wrote");
+  });
+
+  await check("Ready.11 Apply does not reinterpret unrelated transcript entities", async () => {
+    const fake = new FakeWorkspaceClient();
+    seedProject(fake);
+    fake.tables.stakeholders.push({
+      id: PERSON_EXISTING,
+      workspace_id: fake.workspaceId,
+      project_id: PROJECT_A,
+      name: "Sarah Okonkwo",
+    });
+    const world: CaptureApplyWorld = {
+      ...emptyWorld(),
+      projects: [
+        {
+          id: PROJECT_A,
+          name: "Project A",
+          code: "PA",
+          stakeholders: [{ id: PERSON_EXISTING, name: "Sarah Okonkwo" }],
+        },
+        { id: PROJECT_B, name: "Project B", code: "PB", stakeholders: [] },
+      ],
+    };
+    const transcript =
+      "Sarah Kim is security — different Sarah from Sarah Okonkwo on product. Please add Sarah Kim.";
+    const [row] = resolveObservations({
+      observations: [
+        {
+          id: "obs-kim",
+          statement: "Sarah Kim",
+          evidence: "Please add Sarah Kim.",
+          domain: "person",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { name: "Sarah Kim", role: "Security" },
+        },
+      ],
+      world,
+      transcript,
+      captureEntryProjectId: PROJECT_A,
+    });
+    assert.equal(row?.decision.kind, "write");
+    const applied = await applyPersist(fake, row!.suggestion!, transcript);
+    assert.equal(applied.executed.kind, "wrote");
+    const names = fake.tables.stakeholders.map((row) => row.name).sort();
+    assert.deepEqual(names, ["Sarah Kim", "Sarah Okonkwo"]);
   });
 
   await check("H1 reviewed identity helper never reads Apply text", () => {
