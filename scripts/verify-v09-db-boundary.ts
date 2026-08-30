@@ -17,7 +17,6 @@ import { join } from "node:path";
 const ROOT = join(import.meta.dirname, "..");
 const RECEIPTS = "supabase/migrations/20260829120000_capture_apply_receipts.sql";
 const TX = "supabase/migrations/20260829200000_authoritative_apply_tx.sql";
-const BASE_SCHEMA = "supabase/migrations/20260812002748_workspace_schema.sql";
 const PROJ = "aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000p1";
 
 type Check = {
