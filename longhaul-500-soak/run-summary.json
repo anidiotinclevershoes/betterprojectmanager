@@ -1,0 +1,143 @@
+{
+  "productionCandidate": "main @ b448d51ad870ed0ce267a12bfaa7654da20c58c0",
+  "harnessSha": "cb4a274e1d367ac080bdfb12c28bc23c3f332650",
+  "mode": "live",
+  "persist": "disposable-supabase",
+  "productionUnchanged": true,
+  "fakeWorkspaceClient": false,
+  "oracleEnvelopes": false,
+  "model": "gpt-4o-mini-2024-07-18",
+  "capturesAttempted": 500,
+  "capturesCompleted": 500,
+  "toyworldCaptures": 400,
+  "toycityCaptures": 100,
+  "liveExtracts": 500,
+  "elapsedMs": 2017677,
+  "stoppedAt": null,
+  "counters": {
+    "toyworld": {
+      "ready": 80,
+      "wrote": 80,
+      "legitimateNoChange": 0,
+      "needsYou": 209,
+      "receiptReplay": 0
+    },
+    "toycity": {
+      "ready": 16,
+      "wrote": 16,
+      "legitimateNoChange": 0,
+      "needsYou": 96,
+      "receiptReplay": 0
+    }
+  },
+  "silentFailures": 6,
+  "bleedEvents": 500,
+  "reloadMismatches": 0,
+  "needsYouCaptures": 260,
+  "ledgerWrote": 96,
+  "uniqueOperationIds": 96,
+  "receiptReplay": 0,
+  "final": {
+    "toyworld": {
+      "counts": {
+        "people": 6,
+        "todos": 24,
+        "risks": 5,
+        "milestones": 9,
+        "knowledge": 30
+      },
+      "people": [
+        {
+          "id": "c8cd7e71-9140-41c6-af61-ca1bd0e6f207",
+          "name": "Dev Patel"
+        },
+        {
+          "id": "f8eccdd2-0df1-4188-ab71-f07cd6aede83",
+          "name": "Amira Rahman"
+        },
+        {
+          "id": "ea550ac8-68cb-42a8-b122-4a4f540a026a",
+          "name": "Nadia Qureshi"
+        },
+        {
+          "id": "416980f4-79d1-4245-8964-3133bd0bfd28",
+          "name": "Tomiko Sato"
+        },
+        {
+          "id": "b04c1ba6-460c-4f2d-a48c-700e186614d9",
+          "name": "Chris Bell"
+        },
+        {
+          "id": "7a226285-db75-406e-9373-0b044c53db68",
+          "name": "Sarah Kim"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "39950bf5-ba3b-46c3-b4f6-99c5d5b3322d",
+          "label": "CAB Date",
+          "startAt": "2026-10-18T12:00:00.000Z"
+        },
+        {
+          "id": "e61d601c-df82-4220-9356-f80412623561",
+          "label": "Target Launch",
+          "startAt": "2026-10-27T12:00:00.000Z"
+        },
+        {
+          "id": "d414c7eb-a1a8-46dd-bb4e-35c2e2aa9c27",
+          "label": "27 October",
+          "startAt": "2023-10-27T12:00:00.000Z"
+        },
+        {
+          "id": "cfd3bfa0-2bca-4f16-bc19-74def63eacab",
+          "label": "National DC interface drop",
+          "startAt": "2023-09-12T12:00:00.000Z"
+        },
+        {
+          "id": "d55e6847-aa72-43dd-bc6d-12252134f001",
+          "label": "12 September",
+          "startAt": "2023-09-12T12:00:00.000Z"
+        },
+        {
+          "id": "37033f1f-a17c-42d9-b569-b5cebad3a106",
+          "label": "UAT Start",
+          "startAt": "2023-10-14T12:00:00.000Z"
+        },
+        {
+          "id": "bd7bd5c3-4b1e-4a48-998a-92bd91836fb6",
+          "label": "UAT Start",
+          "startAt": "2023-10-23T12:00:00.000Z"
+        },
+        {
+          "id": "76962aa7-1ed6-48db-a387-ec5fc916becd",
+          "label": "UAT Start",
+          "startAt": "2026-10-14T12:00:00.000Z"
+        },
+        {
+          "id": "79fd7f53-70d9-4798-9f7b-3fc4b45bf803",
+          "label": "CAB Date",
+          "startAt": "2026-10-18T12:00:00.000Z"
+        }
+      ],
+      "history": 81
+    },
+    "toycity": {
+      "counts": {
+        "people": 0,
+        "todos": 3,
+        "risks": 1,
+        "milestones": 1,
+        "knowledge": 11
+      },
+      "people": [],
+      "milestones": [
+        {
+          "id": "7c0049a2-5e86-4104-8bad-45943a8883e6",
+          "label": "Store Pilot",
+          "startAt": "2023-09-21T12:00:00.000Z"
+        }
+      ],
+      "history": 17
+    }
+  }
+}

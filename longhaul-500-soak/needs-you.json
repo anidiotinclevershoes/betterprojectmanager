@@ -1,0 +1,1867 @@
+[
+  {
+    "n": 1,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write."
+    ]
+  },
+  {
+    "n": 2,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write."
+    ]
+  },
+  {
+    "n": 5,
+    "project": "toycity",
+    "reasons": [
+      "This person is not on this project. Lume will not write."
+    ]
+  },
+  {
+    "n": 6,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 9,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 10,
+    "project": "toycity",
+    "reasons": [
+      "This person is not on this project. Lume will not write."
+    ]
+  },
+  {
+    "n": 13,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 14,
+    "project": "toyworld",
+    "reasons": [
+      "This Risk update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 15,
+    "project": "toycity",
+    "reasons": [
+      "This availability cannot be saved — the dates are not clear."
+    ]
+  },
+  {
+    "n": 20,
+    "project": "toycity",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 22,
+    "project": "toyworld",
+    "reasons": [
+      "This Risk update is not specific enough to apply automatically.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 23,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 24,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 26,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 28,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 30,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 31,
+    "project": "toyworld",
+    "reasons": [
+      "This Risk update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 35,
+    "project": "toycity",
+    "reasons": [
+      "This person is not on this project. Lume will not write."
+    ]
+  },
+  {
+    "n": 36,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 37,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 45,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 47,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 48,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 50,
+    "project": "toycity",
+    "reasons": [
+      "This person is not on this project. Lume will not write."
+    ]
+  },
+  {
+    "n": 51,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 53,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 55,
+    "project": "toycity",
+    "reasons": [
+      "This person is not on this project. Lume will not write."
+    ]
+  },
+  {
+    "n": 59,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 61,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 62,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 64,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 65,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 68,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 70,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 73,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 74,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 75,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 77,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 80,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 82,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 85,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 86,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 87,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 89,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 90,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 91,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 95,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 97,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 98,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 100,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 103,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 105,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 110,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 111,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 112,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 114,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 115,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 116,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 122,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 123,
+    "project": "toyworld",
+    "reasons": [
+      "This availability cannot be saved — the dates are not clear."
+    ]
+  },
+  {
+    "n": 124,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 125,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 128,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 130,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 131,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 132,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 134,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 135,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 136,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 137,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 139,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 140,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 141,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 144,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically.",
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 145,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 147,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 148,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 149,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 150,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 152,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 155,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 157,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically.",
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 159,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 160,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 161,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 164,
+    "project": "toyworld",
+    "reasons": [
+      "This ownership change is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 165,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 166,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 169,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically.",
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 170,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 173,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 174,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 175,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 178,
+    "project": "toyworld",
+    "reasons": [
+      "This Risk update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 180,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder.",
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 182,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 184,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 185,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 187,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 190,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 191,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 194,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "No release-blocking issues identified."
+    ]
+  },
+  {
+    "n": 195,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 197,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 198,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 199,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 200,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 205,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 207,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 210,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 211,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 212,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 215,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 216,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 220,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 222,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 225,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 228,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 230,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 234,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 235,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 237,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 240,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 241,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 244,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 245,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 247,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 248,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 250,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 253,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 255,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 259,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 260,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 261,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 262,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 265,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 266,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 269,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 270,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 272,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 273,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 274,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 275,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 278,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 282,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 284,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 285,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 287,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 289,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 290,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 291,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 295,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 300,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 302,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 303,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 305,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 307,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 310,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 311,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 312,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 314,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth.",
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 315,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 322,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 324,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 325,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 327,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 330,
+    "project": "toycity",
+    "reasons": [
+      "This person is not on this project. Lume will not write."
+    ]
+  },
+  {
+    "n": 332,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 334,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 335,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 336,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 339,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 340,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 344,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 345,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 347,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 348,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 349,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 350,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 352,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 353,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 355,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 359,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 361,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 362,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 365,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 366,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 369,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 370,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 372,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 373,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 375,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 378,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 380,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 382,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 384,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 385,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 386,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 387,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 390,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 391,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 395,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 397,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 398,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 399,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 400,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 402,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 403,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 404,
+    "project": "toyworld",
+    "reasons": [
+      "Replacement needs a confirmed current owner. Confirm before Lume changes ownership."
+    ]
+  },
+  {
+    "n": 405,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 407,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 409,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 410,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 412,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 414,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 415,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 416,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 419,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 420,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 422,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 423,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 424,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 425,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder.",
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder.",
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 427,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 428,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 430,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 432,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 434,
+    "project": "toyworld",
+    "reasons": [
+      "This Risk cannot be updated — the existing Risk could not be identified."
+    ]
+  },
+  {
+    "n": 435,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 437,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 441,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 444,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 445,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 449,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 450,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 452,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 453,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 455,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 459,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 460,
+    "project": "toycity",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 462,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 465,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 469,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 472,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 474,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 475,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 477,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 480,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 482,
+    "project": "toyworld",
+    "reasons": [
+      "This To Do update is not specific enough to apply automatically."
+    ]
+  },
+  {
+    "n": 484,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 485,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 486,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 487,
+    "project": "toyworld",
+    "reasons": [
+      "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder."
+    ]
+  },
+  {
+    "n": 489,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 490,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 491,
+    "project": "toyworld",
+    "reasons": [
+      "This person is not on this project. Lume will not write.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 494,
+    "project": "toyworld",
+    "reasons": [
+      "Lume cannot safely apply this finding to a maintained record.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  },
+  {
+    "n": 495,
+    "project": "toycity",
+    "reasons": [
+      "Lume cannot tell which person this refers to, so it will not create a new stakeholder."
+    ]
+  },
+  {
+    "n": 497,
+    "project": "toyworld",
+    "reasons": [
+      "It is unclear whether this should change current project truth."
+    ]
+  },
+  {
+    "n": 498,
+    "project": "toyworld",
+    "reasons": [
+      "This Person identity is not established in the Capture. A supplied record id is not enough."
+    ]
+  }
+]

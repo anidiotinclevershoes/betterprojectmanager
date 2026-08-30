@@ -1,0 +1,71 @@
+{
+  "harnessCounters": {
+    "silentFailures": 6,
+    "bleedEvents": 500,
+    "reloadMismatches": 0,
+    "receiptReplay": 0,
+    "ledgerMissingAtCheckpoints": 0
+  },
+  "classified": {
+    "A_silentDurableState": 0,
+    "B_crossProjectBleed": 0,
+    "C_identityCollision": 0,
+    "D_reloadMismatch": 0,
+    "E_needsYou": 260,
+    "F_extractMiss": true,
+    "G_reviewVisibleModelError": true,
+    "H_wording": true
+  },
+  "silentFailureClassification": [
+    {
+      "n": 254,
+      "harness": "Ready wrote risk “Vendor delay on wallet sandbox” but no matching durable row",
+      "class": "matcher_false_positive",
+      "evidence": "Same Worldpay risk id 353b0d82 stayed on the board; status open→watch between C250 and C275. Apply updated status; matcher looked for a new title."
+    },
+    {
+      "n": 320,
+      "harness": "Ready wrote risk “Wifi risk is reducing.” but no matching durable row",
+      "class": "matcher_false_positive",
+      "evidence": "Same Meadowhall wifi risk id fc08f929 stayed; status open→watch by C325."
+    },
+    {
+      "n": 329,
+      "harness": "Ready wrote risk “Search performance is acceptable on the tuned index.” but no matching durable row",
+      "class": "matcher_false_positive",
+      "evidence": "Same search risk id b77c8169 stayed; status open→resolved by C350. Knowledge “Homepage is under a second…” also wrote."
+    },
+    {
+      "n": 400,
+      "harness": "Ready wrote todo “Colleague briefing is out.” but no matching durable row",
+      "class": "matcher_false_positive",
+      "evidence": "Existing todo fa44581b “Add a to-do for colleague briefing notes.” is done=true at C400+."
+    },
+    {
+      "n": 404,
+      "harness": "Ready wrote risk “Pen-test findings are closed.” but no matching durable row",
+      "class": "matcher_false_positive",
+      "evidence": "Same pen-test risk id ef6b3208 stayed; status open→resolved by C425."
+    },
+    {
+      "n": 470,
+      "harness": "Ready wrote risk “Hanna is happy to close the wifi risk.” but no matching durable row",
+      "class": "matcher_false_positive",
+      "evidence": "Same wifi risk id fc08f929 stayed; status watch→resolved by C475."
+    }
+  ],
+  "bleedClassification": {
+    "harnessEvents": 500,
+    "realBleed": 0,
+    "cause": "foreignRows() flags every todo whose projectId is the other project. That is the other board’s own rows, not wrong ownership. All 500 details are “todo <id> owned by other project”.",
+    "realIsolationChecks": {
+      "crossProjectWriteTarget": 0,
+      "sharedPersonOnBothBoards": 0,
+      "foreignSentinelInCaptureContext": 0,
+      "askSourceBleed": 0,
+      "askAnswerBleed": 0,
+      "toyworldSentinelsOnToycityBoard": 0,
+      "toycitySentinelsOnToyworldBoard": 0
+    }
+  }
+}

@@ -7,6 +7,7 @@ This folder is the Capture V2 **test / evaluation** workstream. Architecture (PR
 - Completion report: `TEST_FOUNDATION.md`
 - Stacked Capture regression: `STACKED_CAPTURE.md`
 - v0.9 Capture qualification: `V09_QUALIFICATION.md`
+- v0.9 live 500 two-project durability soak: `V09_LIVE_500_SOAK.md` (evidence: `longhaul-500-soak/`)
 - v0.9 architecture conformance (thin production-wiring pack): `V09_ARCHITECTURE_CONFORMANCE.md`
 - Deep stress (Harbourline): `DEEP_STRESS.md`
 - Test-debt inventory: `TEST_DEBT.md`

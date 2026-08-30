@@ -1,0 +1,201 @@
+{
+  "n": 150,
+  "reloadOk": true,
+  "toyworld": {
+    "counts": {
+      "people": 6,
+      "todos": 11,
+      "risks": 5,
+      "milestones": 6,
+      "knowledge": 16
+    },
+    "history": 41,
+    "people": [
+      "Dev Patel",
+      "Amira Rahman",
+      "Nadia Qureshi",
+      "Tomiko Sato",
+      "Chris Bell",
+      "Sarah Kim"
+    ],
+    "milestones": [
+      {
+        "id": "39950bf5-ba3b-46c3-b4f6-99c5d5b3322d",
+        "label": "CAB Date",
+        "startAt": "2026-10-18T12:00:00.000Z"
+      },
+      {
+        "id": "e61d601c-df82-4220-9356-f80412623561",
+        "label": "Target Launch",
+        "startAt": "2026-10-27T12:00:00.000Z"
+      },
+      {
+        "id": "d414c7eb-a1a8-46dd-bb4e-35c2e2aa9c27",
+        "label": "27 October",
+        "startAt": "2023-10-27T12:00:00.000Z"
+      },
+      {
+        "id": "37033f1f-a17c-42d9-b569-b5cebad3a106",
+        "label": "UAT Start",
+        "startAt": "2023-10-16T12:00:00.000Z"
+      },
+      {
+        "id": "cfd3bfa0-2bca-4f16-bc19-74def63eacab",
+        "label": "National DC interface drop",
+        "startAt": "2023-09-12T12:00:00.000Z"
+      },
+      {
+        "id": "d55e6847-aa72-43dd-bc6d-12252134f001",
+        "label": "12 September",
+        "startAt": "2023-09-12T12:00:00.000Z"
+      }
+    ],
+    "risks": [
+      {
+        "id": "353b0d82-705c-4229-84f4-28191c6c6f61",
+        "title": "Sandbox access with Worldpay",
+        "status": "open"
+      },
+      {
+        "id": "5dfe9daa-3d35-4253-a932-19bbb953d26d",
+        "title": "Login error handling affecting prototype",
+        "status": "open"
+      },
+      {
+        "id": "ef6b3208-10c7-490c-b54a-28afdc372d33",
+        "title": "Pen-test findings closure before CAB",
+        "status": "open"
+      },
+      {
+        "id": "b77c8169-44b7-4c68-943d-cb56eed674c4",
+        "title": "Search performance risk",
+        "status": "open"
+      },
+      {
+        "id": "f6dc9b22-ad31-4c7a-8f23-37e2d47b347b",
+        "title": "API timeout on the legacy session call",
+        "status": "open"
+      }
+    ],
+    "todos": [
+      {
+        "id": "26afa33b-2340-49ab-bd20-4b8328aafc4b",
+        "title": "Confirm project baseline with key stakeholders",
+        "done": false
+      },
+      {
+        "id": "5656bee5-54ff-4544-b955-311e6b842ec7",
+        "title": "Login error handling for new customer accounts",
+        "done": false
+      },
+      {
+        "id": "0148463d-1a0d-47e9-b41e-f6193f811fcc",
+        "title": "Analytics event changes",
+        "done": false
+      },
+      {
+        "id": "6e943cab-7b5b-498b-88e5-6302ae0eacaf",
+        "title": "Add search performance to RAID",
+        "done": false
+      },
+      {
+        "id": "3e4989e6-e626-4f0e-8a18-1db786274e4e",
+        "title": "Accessibility pass before UAT",
+        "done": false
+      },
+      {
+        "id": "6f77d4a7-0f88-40bc-80bb-4ac67a0a19e6",
+        "title": "Cleaner RAID",
+        "done": false
+      },
+      {
+        "id": "2ae8c302-b6d1-4f2b-994e-cfe1caa0f42e",
+        "title": "Reminder about CAB pack",
+        "done": false
+      },
+      {
+        "id": "8267e151-c8bf-4c4c-b039-efde0ec5de41",
+        "title": "Cutover runbook draft",
+        "done": true
+      },
+      {
+        "id": "f36c7204-24a8-4c1a-97af-047eba1aaeee",
+        "title": "Notify Amira about the rollback page",
+        "done": false
+      },
+      {
+        "id": "b66ecae5-5f6b-465e-b40f-3d9eb98edac6",
+        "title": "Remove chase from the board.",
+        "done": false
+      },
+      {
+        "id": "2a627033-0487-43d8-83bf-8038043d893f",
+        "title": "Member communications preparation",
+        "done": false
+      }
+    ],
+    "titleDupes": []
+  },
+  "toycity": {
+    "counts": {
+      "people": 0,
+      "todos": 3,
+      "risks": 1,
+      "milestones": 1,
+      "knowledge": 7
+    },
+    "history": 9,
+    "people": [],
+    "milestones": [
+      {
+        "id": "7c0049a2-5e86-4104-8bad-45943a8883e6",
+        "label": "Store Pilot",
+        "startAt": "2026-09-14T12:00:00.000Z"
+      }
+    ],
+    "risks": [
+      {
+        "id": "fc08f929-4cdd-47c4-ada1-9bf30077ea43",
+        "title": "Store wifi at Meadowhall is a live risk.",
+        "status": "open"
+      }
+    ],
+    "todos": [
+      {
+        "id": "2b1ecb7c-2012-4973-a060-9bbadb0bfaa5",
+        "title": "Confirm project baseline with key stakeholders",
+        "done": false
+      },
+      {
+        "id": "6b426fe1-1139-478f-93d1-09e99d2f0138",
+        "title": "Add to-do for Meadowhall till overlay",
+        "done": false
+      },
+      {
+        "id": "fa44581b-b43d-4b2e-9ef3-3857a0159de9",
+        "title": "Add a to-do for colleague briefing notes.",
+        "done": false
+      }
+    ],
+    "titleDupes": []
+  },
+  "isolationHits": [
+    "toyworld: todo 2b1ecb7c-2012-4973-a060-9bbadb0bfaa5 owned by other project",
+    "toyworld: todo 6b426fe1-1139-478f-93d1-09e99d2f0138 owned by other project",
+    "toyworld: todo fa44581b-b43d-4b2e-9ef3-3857a0159de9 owned by other project",
+    "toycity: todo 26afa33b-2340-49ab-bd20-4b8328aafc4b owned by other project",
+    "toycity: todo 5656bee5-54ff-4544-b955-311e6b842ec7 owned by other project",
+    "toycity: todo 0148463d-1a0d-47e9-b41e-f6193f811fcc owned by other project",
+    "toycity: todo 6e943cab-7b5b-498b-88e5-6302ae0eacaf owned by other project",
+    "toycity: todo 3e4989e6-e626-4f0e-8a18-1db786274e4e owned by other project",
+    "toycity: todo 6f77d4a7-0f88-40bc-80bb-4ac67a0a19e6 owned by other project",
+    "toycity: todo 2ae8c302-b6d1-4f2b-994e-cfe1caa0f42e owned by other project",
+    "toycity: todo 8267e151-c8bf-4c4c-b039-efde0ec5de41 owned by other project",
+    "toycity: todo f36c7204-24a8-4c1a-97af-047eba1aaeee owned by other project",
+    "toycity: todo b66ecae5-5f6b-465e-b40f-3d9eb98edac6 owned by other project",
+    "toycity: todo 2a627033-0487-43d8-83bf-8038043d893f owned by other project"
+  ],
+  "ledgerMissing": 0,
+  "requestChars": 4657,
+  "deep": false
+}

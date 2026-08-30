@@ -1,0 +1,135 @@
+[
+  {
+    "n": 1,
+    "project": "toyworld",
+    "projectN": 1,
+    "kind": "kickoff",
+    "requestChars": 4330,
+    "projectBlockChars": 269,
+    "captureContextChars": 1643,
+    "estimatedInputTokens": 931,
+    "providerInput": 967,
+    "providerOutput": 421,
+    "objects": {
+      "people": 0,
+      "todos": 1,
+      "risks": 0,
+      "milestones": 0,
+      "knowledge": 2
+    }
+  },
+  {
+    "n": 50,
+    "project": "toycity",
+    "projectN": 10,
+    "kind": "standup",
+    "requestChars": 4450,
+    "projectBlockChars": 446,
+    "captureContextChars": 2680,
+    "estimatedInputTokens": 1002,
+    "providerInput": 1035,
+    "providerOutput": 395,
+    "objects": {
+      "people": 0,
+      "todos": 2,
+      "risks": 0,
+      "milestones": 1,
+      "knowledge": 2
+    }
+  },
+  {
+    "n": 100,
+    "project": "toycity",
+    "projectN": 20,
+    "kind": "standup",
+    "requestChars": 4553,
+    "projectBlockChars": 549,
+    "captureContextChars": 5288,
+    "estimatedInputTokens": 1042,
+    "providerInput": 1075,
+    "providerOutput": 331,
+    "objects": {
+      "people": 0,
+      "todos": 2,
+      "risks": 1,
+      "milestones": 1,
+      "knowledge": 6
+    }
+  },
+  {
+    "n": 200,
+    "project": "toycity",
+    "projectN": 40,
+    "kind": "standup",
+    "requestChars": 4657,
+    "projectBlockChars": 653,
+    "captureContextChars": 6971,
+    "estimatedInputTokens": 1083,
+    "providerInput": 1116,
+    "providerOutput": 371,
+    "objects": {
+      "people": 0,
+      "todos": 3,
+      "risks": 1,
+      "milestones": 1,
+      "knowledge": 7
+    }
+  },
+  {
+    "n": 300,
+    "project": "toycity",
+    "projectN": 60,
+    "kind": "standup",
+    "requestChars": 4657,
+    "projectBlockChars": 653,
+    "captureContextChars": 7195,
+    "estimatedInputTokens": 1083,
+    "providerInput": 1116,
+    "providerOutput": 348,
+    "objects": {
+      "people": 0,
+      "todos": 3,
+      "risks": 1,
+      "milestones": 1,
+      "knowledge": 8
+    }
+  },
+  {
+    "n": 400,
+    "project": "toycity",
+    "projectN": 80,
+    "kind": "progress",
+    "requestChars": 4624,
+    "projectBlockChars": 653,
+    "captureContextChars": 7888,
+    "estimatedInputTokens": 1071,
+    "providerInput": 1106,
+    "providerOutput": 392,
+    "objects": {
+      "people": 0,
+      "todos": 3,
+      "risks": 1,
+      "milestones": 1,
+      "knowledge": 10
+    }
+  },
+  {
+    "n": 500,
+    "project": "toycity",
+    "projectN": 100,
+    "kind": "close",
+    "requestChars": 4695,
+    "projectBlockChars": 653,
+    "captureContextChars": 8141,
+    "estimatedInputTokens": 1085,
+    "providerInput": 1119,
+    "providerOutput": 298,
+    "objects": {
+      "people": 0,
+      "todos": 3,
+      "risks": 1,
+      "milestones": 1,
+      "knowledge": 11
+    }
+  }
+]
