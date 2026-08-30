@@ -16,8 +16,10 @@ import {
 } from "../src/lib/canonical-truth/serialize";
 import {
   answerTellMeQuestion,
+  constrainAskConfidence,
   constrainScheduledDateConfidence,
   TELL_ME_SCHEDULED_DATE_AUTHORITY_MARKER,
+  TELL_ME_SOURCE_AUTHORITY_MARKER,
   TELL_ME_SYSTEM,
   TELL_ME_SYSTEM_CANONICAL,
 } from "../src/lib/tell-me/answer";
@@ -377,6 +379,24 @@ function testScheduledDateAuthorityBoundary() {
   assert.ok(TELL_ME_SYSTEM.includes(TELL_ME_SCHEDULED_DATE_AUTHORITY_MARKER));
   assert.ok(
     TELL_ME_SYSTEM_CANONICAL.includes(TELL_ME_SCHEDULED_DATE_AUTHORITY_MARKER),
+  );
+  assert.ok(TELL_ME_SYSTEM.includes(TELL_ME_SOURCE_AUTHORITY_MARKER));
+  assert.ok(TELL_ME_SYSTEM_CANONICAL.includes(TELL_ME_SOURCE_AUTHORITY_MARKER));
+  assert.equal(
+    constrainAskConfidence({
+      question: "Who owns UAT?",
+      confidence: "direct_confirmation",
+      sources: [
+        {
+          id: "k-old",
+          kind: "knowledge",
+          label: "Priya owns UAT according to an old email",
+          projectId: PROJECT_A,
+          projectCode: "ALP",
+        },
+      ],
+    }),
+    "related_context",
   );
   assert.equal(
     constrainScheduledDateConfidence({

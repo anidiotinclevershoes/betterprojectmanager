@@ -11,7 +11,7 @@ import {
   peopleEvidencedByRecordedNameInText,
   recordedPersonNameAppearsInText,
 } from "@/lib/people/identity";
-import { missingReadySemantics } from "./contract";
+import { missingReadySemantics, newReviewOperationId } from "./contract";
 import {
   isTruthIntent,
   type CaptureObservationV2,
@@ -281,7 +281,8 @@ function suggestionFromObservation(
         : undefined;
 
   return {
-    id: `v2-${observation.id}`,
+    id: newReviewOperationId(),
+    modelObservationId: observation.id,
     kind: args.kind,
     op: args.op,
     content:
@@ -325,6 +326,7 @@ function suggestionFromObservation(
     proposedValues: {
       ...values,
       evidence: observation.evidence,
+      modelObservationId: observation.id,
     },
     truthIntent: observation.truthIntent,
   };

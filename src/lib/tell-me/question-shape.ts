@@ -57,6 +57,39 @@ export const SCHEDULED_DATE_AUTHORITY_KINDS = new Set([
   "release",
 ]);
 
+export const RISK_AUTHORITY_KINDS = new Set(["risk"]);
+
+export const TODO_AUTHORITY_KINDS = new Set(["todo"]);
+
+/** Current open-risk questions — domain Risk records, not knowledge prose. */
+export function questionLooksCurrentRisk(question: string): boolean {
+  if (questionLooksHistorical(question)) return false;
+  return /\b(open\s+)?risks?\b/i.test(question);
+}
+
+/** Current todo / waiting / chase / action-status questions. */
+export function questionLooksTodoStatus(question: string): boolean {
+  if (questionLooksHistorical(question)) return false;
+  return (
+    /\b(to-?dos?|action items?|waiting(?:\s+on)?|chase|still open)\b/i.test(
+      question,
+    ) || /\bwhat(?:'s| is) (?:still )?(?:open|outstanding)\b/i.test(question)
+  );
+}
+
+/**
+ * First-class current responsibility: structured confirmed owner,
+ * or a current stakeholder / person-role record.
+ * Generic knowledge prose is not this.
+ */
+export function isFirstClassResponsibilitySource(source: {
+  kind: string;
+  detail?: string | null;
+}): boolean {
+  if (source.detail === "confirmed responsibility") return true;
+  return source.kind === "stakeholder";
+}
+
 /** Current-state / status questions — prefer Current position over older history. */
 export function questionLooksCurrentState(question: string): boolean {
   if (questionLooksHistorical(question)) return false;

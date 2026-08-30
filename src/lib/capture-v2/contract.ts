@@ -5,7 +5,18 @@
  * Ready means Apply already has the reviewed values it will execute.
  * Missing values are Needs You — never invented, never guessed later.
  */
+import { newPeopleUuid } from "@/lib/people/identity";
 import type { CaptureObservationV2, ObservationDisposition } from "./types";
+
+/**
+ * System-generated Review / Apply operation identity.
+ *
+ * Model `observation.id` is local metadata only — never durable identity.
+ * Generate once when the Review item is created, then reuse for retries.
+ */
+export function newReviewOperationId(): string {
+  return newPeopleUuid();
+}
 
 export function asUsableString(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -39,15 +50,12 @@ const SKIP_DISPOSITIONS = new Set<ObservationDisposition>([
 ]);
 
 /**
- * Deterministic Ready gate: fields Apply actually consumes.
- * Returns a Needs You reason, or null when the observation may proceed.
+ * Domain-required semantic fields — no truthIntent / disposition skip.
+ * Shared by Capture Ready and New Project Review safety.
  */
-export function missingReadySemantics(
+export function missingSemanticFields(
   observation: CaptureObservationV2,
 ): string | null {
-  if (SKIP_DISPOSITIONS.has(observation.disposition)) return null;
-  if (observation.truthIntent !== "current") return null;
-
   const values = observation.proposedValues ?? {};
   const named =
     asUsableString(values.name) ||
@@ -165,4 +173,44 @@ export function missingReadySemantics(
     default:
       return null;
   }
+}
+
+/**
+ * Deterministic Ready gate: fields Apply actually consumes.
+ * Returns a Needs You reason, or null when the observation may proceed.
+ */
+export function missingReadySemantics(
+  observation: CaptureObservationV2,
+): string | null {
+  if (SKIP_DISPOSITIONS.has(observation.disposition)) return null;
+  if (observation.truthIntent !== "current") return null;
+  return missingSemanticFields(observation);
+}
+
+/**
+ * Shared “do we understand enough for the user to safely approve?”
+ * Capture Ready and New Project Review must agree on this.
+ *
+ * Uncertain / incomplete stay visible as Needs Review — never discarded
+ * and never silently marked ready.
+ */
+export function reviewSafetyGap(
+  observation: CaptureObservationV2,
+): string | null {
+  if (
+    observation.disposition === "commentary" ||
+    observation.disposition === "ignore"
+  ) {
+    return null;
+  }
+  if (observation.truthIntent === "uncertain") {
+    return "It is unclear whether this should change current project truth.";
+  }
+  if (observation.truthIntent === "non_current") {
+    return "This is not asserting current project truth.";
+  }
+  if (observation.disposition === "ambiguous") {
+    return "This identity is not certain enough to approve without review.";
+  }
+  return missingSemanticFields(observation);
 }

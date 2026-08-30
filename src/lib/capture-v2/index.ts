@@ -18,6 +18,9 @@ export {
 } from "./validate";
 export {
   missingReadySemantics,
+  missingSemanticFields,
+  reviewSafetyGap,
+  newReviewOperationId,
   isUsableIsoDate,
 } from "./contract";
 export {

@@ -206,8 +206,12 @@ function main() {
   });
 
   check("recategorise then draft mapping", () => {
-    const moved = recategoriseItem(parsed.items, "t1", "knowledge");
-    assert.equal(moved.find((i) => i.id === "t1")?.category, "knowledge");
+    const sprinkle = parsed.items.find(
+      (i) => i.modelObservationId === "t1" || /sprinkles/i.test(i.statement),
+    );
+    assert.ok(sprinkle, "sprinkles todo row");
+    const moved = recategoriseItem(parsed.items, sprinkle!.id, "knowledge");
+    assert.equal(moved.find((i) => i.id === sprinkle!.id)?.category, "knowledge");
     const draft = draftFromProvisional({
       sourceNarrative: NEW_PROJECT_MESSY_INPUT,
       sourceMode: "talk",

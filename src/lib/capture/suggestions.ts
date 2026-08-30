@@ -76,6 +76,11 @@ export type PendingSuggestion = {
    * When present, Apply must honour it — non_current and uncertain must not write.
    */
   truthIntent?: import("@/lib/capture-v2/types").TruthIntent;
+  /**
+   * Model-local observation id. Trace / evidence only — never durable
+   * Review or Apply identity.
+   */
+  modelObservationId?: string;
 };
 
 export const KIND_LABEL: Record<SuggestionKind, string> = {

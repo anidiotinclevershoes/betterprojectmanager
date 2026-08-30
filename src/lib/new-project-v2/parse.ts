@@ -1,3 +1,7 @@
+import {
+  newReviewOperationId,
+  reviewSafetyGap,
+} from "@/lib/capture-v2/contract";
 import type { ObservationDisposition } from "@/lib/capture-v2/types";
 import {
   parseObservationEnvelope,
@@ -14,6 +18,8 @@ import {
  * This is not an extraction engine: envelope parse + validate come from Capture.
  * Envelope `project` metadata is ignored — shared Capture output has no project
  * object, and New Project must not invent Objective / summary / currentFocus.
+ *
+ * Row identity is system-generated. Model observation.id is trace only.
  */
 export function parseNewProjectV2Envelope(raw: unknown): {
   project: { name: string; summary: string; currentFocus: string };
@@ -24,15 +30,22 @@ export function parseNewProjectV2Envelope(raw: unknown): {
   const envelopeMalformed = parsed.issues.some((issue) => issue.code === "malformed");
   const validation = validateObservations(parsed.observations, [], null);
 
-  const items: ProvisionalItem[] = validation.observations.map((obs, index) => ({
-    id: obs.id || `np-${index + 1}`,
-    statement: obs.statement,
-    evidence: obs.evidence,
-    modelDomain: obs.domain,
-    category: categoryFromDisposition(obs.domain, obs.disposition),
-    proposedValues: obs.proposedValues,
-    disposition: obs.disposition,
-  }));
+  const items: ProvisionalItem[] = validation.observations.map((obs) => {
+    const reason = reviewSafetyGap(obs);
+    return {
+      id: newReviewOperationId(),
+      modelObservationId: obs.id,
+      statement: obs.statement,
+      evidence: obs.evidence,
+      modelDomain: obs.domain,
+      category: categoryFromDisposition(obs.domain, obs.disposition),
+      proposedValues: obs.proposedValues,
+      disposition: obs.disposition,
+      truthIntent: obs.truthIntent,
+      needsReview: Boolean(reason),
+      reviewReason: reason,
+    };
+  });
 
   return {
     project: { name: "", summary: "", currentFocus: "" },

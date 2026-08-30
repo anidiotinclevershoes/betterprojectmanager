@@ -188,7 +188,10 @@ export function runDeepCreation(args?: { recategorise?: Array<[string, Provision
   const parsed = parseNewProjectV2Envelope(DEEP_CREATION_ENVELOPE);
   let items = parsed.items;
   for (const [id, category] of args?.recategorise ?? []) {
-    items = recategoriseItem(items, id, category);
+    const target = items.find(
+      (item) => item.id === id || item.modelObservationId === id,
+    );
+    if (target) items = recategoriseItem(items, target.id, category);
   }
   const draft = draftFromProvisional({
     sourceNarrative: DEEP_CREATION_NARRATIVE,

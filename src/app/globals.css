@@ -6385,6 +6385,17 @@ body {
   padding: 0.85rem 1rem;
 }
 
+.np-categorise-item.is-needs-review {
+  border-color: var(--warning-border, #c4a574);
+}
+
+.np-categorise-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
 .np-categorise-statement {
   margin: 0 0 0.35rem;
   font-weight: 600;
