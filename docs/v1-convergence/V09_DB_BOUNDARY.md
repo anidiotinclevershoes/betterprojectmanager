@@ -14,62 +14,37 @@ GitHub Actions (disposable local Supabase, no customer/prod credentials):
 
 `.github/workflows/v09-db-boundary.yml`
 
+Live run: https://github.com/anidiotinclevershoes/betterprojectmanager/actions/runs/33305388717  
+HEAD: `092dfc8b15afa0be806be6fc22548472271621cc`  
+Job `db-boundary`: **SUCCESS**. Verdict **PASS**. 20 PASS / 0 RED / 0 BLOCKED.  
+`FakeWorkspaceClient`: not used.
+
 The Cursor VM remains BLOCKED (no Docker). CI is the live path.
 
 ---
 
 ## Real DB qualification
 
-**BLOCKED**
+**PASS** — disposable local Supabase on `ubuntu-latest`. Official #110 SQL files applied. Real `persist_*` RPCs called via `psql`.
 
-This repository already supports local Supabase (`supabase/config.toml`, `supabase start`) and optional live tenant tests (`.env.local` URL + service role). This environment has **none** of:
-
-| Missing | Why it matters |
+| Check | Result |
 | --- | --- |
-| Docker | Required for repo-supported `supabase start` |
-| `supabase` CLI on PATH | Local stack driver |
-| `psql` | Direct SQL against a disposable Postgres |
-| `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` or `DATABASE_URL` | Existing live-test pack (`verify:tenant-isolation`) |
+| Environment | PASS — `postgresql://postgres:***@127.0.0.1:54322/postgres` |
+| Migration | PASS — official files applied; seed checksum unchanged (`45318789549c70382c9453bd6f866cb1`) |
+| Person | PASS — stakeholder + knowledge commit; injected knowledge-insert failure rolls both back |
+| Risk | PASS — knowledge + risk commit; injected risks-insert failure rolls both back |
+| Receipt | PASS — todo + receipt commit; receipt-insert failure rolls todo; same `operation_id` → `unique_violation`; distinct ops / same title → 2 todos / 2 receipts |
+| Cascade | PASS — project delete removes receipts (`0/0`) |
+| Rollback | PASS — SCHEMA FIRST → OLD APP direct `todos` insert; NEW APP → OLD SCHEMA unsupported (RPC absent after rewind); history `0 → 0` |
+| CI workflow | PASS — `v0.9 DB boundary qualification` / `db-boundary` SUCCESS |
+| Workspace scoping | PASS — user B JWT cannot write workspace A (`not a workspace member`) |
+| History | PASS — `persist_*` bodies do not mention `history_events` |
 
-Did **not** invent a production instrumentation seam. Did **not** install an ad-hoc Postgres and pretend it is the Lume boundary. Did **not** touch customer/prod data.
+### Compatibility
 
-Application-level fake RPCs (`FakeWorkspaceClient.runAtomic`) already PASS H2/H3 on PR #110. That is **not** the database boundary.
-
-### Migration evidence (schema text only)
-
-`20260829120000_capture_apply_receipts.sql` and `20260829200000_authoritative_apply_tx.sql`:
-
-- `CREATE TABLE capture_apply_receipts` + RLS + grants
-- `CREATE OR REPLACE FUNCTION` for `persist_person_responsibility`, `persist_risk_with_knowledge`, `persist_todo_create_with_receipt`, `persist_milestone_create_with_receipt`
-- No `ALTER` / `DROP` / `UPDATE` of existing `todos`, `risks`, `stakeholders`, `knowledge_items`, `milestones`, `projects`, `workspaces`
-
-Live “migrations apply from current main schema” and “representative rows survive unchanged” are **unexecuted**.
-
-### Transaction evidence (SQL contract, not live)
-
-Each RPC is a single `plpgsql` function. Postgres runs the body in one transaction: a later `INSERT` failure aborts the function and rolls back earlier inserts in that call. History is not inside these functions.
-
-| Check | Live | Schema/app |
-| --- | --- | --- |
-| 3/5 success commits both | BLOCKED | function body inserts both |
-| 4/6 second-step failure rolls back both | BLOCKED | implicit function transaction |
-| 7/8 create + receipt atomic | BLOCKED | truth then receipt in one function |
-| 9 duplicate `operation_id` | BLOCKED live | `UNIQUE (workspace_id, project_id, operation_id)` |
-| 10 project delete cascades receipts | BLOCKED live | `REFERENCES projects(id) ON DELETE CASCADE` |
-| 11 workspace/project scoping | BLOCKED live | RLS `is_workspace_member`; receipt insert checks `projects.workspace_id` |
-
----
-
-## Rollback / deployment compatibility
-
-**Safe** for: **schema deployed, then application rolled back to pre-#110.**
-
-- New objects are unused by the old application.
-- `loadMissionStateFromSupabase` does not select `capture_apply_receipts` (receipts are not project truth).
-- Old create paths still insert `todos` / `risks` / `stakeholders` / `knowledge_items` directly.
-- Residual: rolled-back app is again non-atomic (the #110 defect). That is not a crash.
-
-**Concern** for the opposite order: **new application + old schema** (RPCs missing) — create Apply would fail. Deploy schema before the new app.
+- **SCHEMA FIRST → OLD APP**: compatible. Additive unused objects. Load still ignores `capture_apply_receipts`. Residual: old app is non-atomic.
+- **SCHEMA FIRST → NEW APP**: compatible after official SQL apply.
+- **NEW APP → OLD SCHEMA**: unsupported. Deploy schema before the new app.
 
 ---
 
@@ -84,21 +59,18 @@ Against PR #110 production, test wiring only:
 | `test:v09-adversarial-ui` (2) | **2** | **0** | **0** |
 | **Total** | **20** | **1** | **0** |
 
-Wiring fixes (assertions unchanged):
-
-1. `semantic-contract-atomic-titles` — assert created Todo `UAT script`, Risk `API timeout`, Milestone `CAB`. Ignore New Project seed Todo.
-2. `review-edit-integrity` — user edit via production Review `item.content` (`reviewEdit` + Apply `text` = transcript). Durable title remains `UAT evidence pack`.
-
 ---
 
 ## Production changes
 
 **NONE.**
 
+Regression / e2e / Vercel reds on PR #111 are #110 production/test types and the Harbourline e2e suite. Out of scope here.
+
 ---
 
 ## Recommendation
 
-**DATABASE BOUNDARY BLOCKED**
+**DB BOUNDARY QUALIFIED**
 
-Harness is clean on #110. Do not treat fake `runAtomic` as Postgres proof. Re-run `npm run verify:v09-db-boundary` on a disposable `supabase start` (or a dedicated TEST project) before LIVE 100. Do not merge.
+Do not merge this qualification PR.
