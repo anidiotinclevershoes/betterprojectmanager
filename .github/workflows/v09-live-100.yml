@@ -1,0 +1,77 @@
+# Release qualification only against PR #113.
+# Real OpenAI extract + disposable local Supabase.
+# Does not use customer/prod data. Does not run on npm test.
+
+name: v0.9 live 100-capture qualification
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/v09-live-100.yml"
+      - "scripts/longhaul/**"
+      - "scripts/stress-project-longhaul.ts"
+  workflow_dispatch:
+    inputs:
+      captures:
+        description: "Capture count"
+        type: string
+        default: "100"
+
+permissions:
+  contents: read
+
+jobs:
+  live-100:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start disposable local Supabase
+        run: |
+          set -euo pipefail
+          supabase start
+          supabase status -o env > "$GITHUB_WORKSPACE/.supabase-status.env"
+          # shellcheck disable=SC1091
+          set -a
+          # supabase status -o env prints KEY="value"
+          . "$GITHUB_WORKSPACE/.supabase-status.env"
+          set +a
+          echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}" >> "$GITHUB_ENV"
+          echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}" >> "$GITHUB_ENV"
+          echo "SUPABASE_DB_URL=${DB_URL}" >> "$GITHUB_ENV"
+
+      - name: Live 100-capture qualification
+        run: |
+          set -euo pipefail
+          if [ -z "${OPENAI_API_KEY:-}" ]; then
+            echo "LIVE RUN BLOCKED — CREDENTIALS REQUIRED (OPENAI_API_KEY secret missing)"
+            exit 2
+          fi
+          npm run stress:project-longhaul -- --captures="${{ github.event.inputs.captures || '100' }}" --mode=live --out=longhaul-100-live
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ env.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ env.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Upload live-100 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v09-live-100-evidence
+          path: longhaul-100-live
+          if-no-files-found: ignore
