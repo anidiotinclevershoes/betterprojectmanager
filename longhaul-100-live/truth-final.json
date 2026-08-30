@@ -1,0 +1,47 @@
+{
+  "people": [],
+  "todos": [
+    {
+      "id": "a6250415-8ba7-4074-9c06-58a7968ade55",
+      "title": "Confirm project baseline with key stakeholders",
+      "done": false,
+      "dueAt": "2026-10-26T12:00:00.000Z"
+    },
+    {
+      "id": "41023874-524e-430c-8fee-5e133a77d08a",
+      "title": "A to-do for login error handling needs to be added.",
+      "done": false,
+      "dueAt": "2026-10-17T12:00:00.000Z"
+    },
+    {
+      "id": "0a0466d1-b521-4f3e-b5e1-fe0afd5460df",
+      "title": "A new to-do for vendor contract check needs to be added for Liam.",
+      "done": false
+    },
+    {
+      "id": "a8a28fda-e4ad-43f2-9cc4-a5a54c7cd53f",
+      "title": "Member communications are still due on 26 Oct.",
+      "done": false
+    },
+    {
+      "id": "d57aee28-c660-452d-81a8-001197d79eee",
+      "title": "Password-reset regression is done.",
+      "done": false
+    }
+  ],
+  "risks": [
+    {
+      "id": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+      "title": "There are no exceptions to the rule about CAB packs.",
+      "status": "watch"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+      "label": "CAB is scheduled for 18 October 2026.",
+      "startAt": "2026-10-18T12:00:00.000Z"
+    }
+  ],
+  "historyCount": 26
+}

@@ -1,0 +1,208 @@
+{
+  "captureExtract": {
+    "requestChars": {
+      "n": 100,
+      "min": 2612,
+      "median": 3063,
+      "p90": 3140,
+      "p95": 3335,
+      "max": 3473,
+      "mean": 3033
+    },
+    "estimatedInputTokens": {
+      "n": 100,
+      "min": 566,
+      "median": 734,
+      "p90": 755,
+      "p95": 822,
+      "max": 856,
+      "mean": 717
+    },
+    "projectBlockChars": {
+      "n": 100,
+      "min": 275,
+      "median": 737,
+      "p90": 737,
+      "p95": 846,
+      "max": 943,
+      "mean": 654
+    },
+    "captureContextChars": {
+      "n": 100,
+      "min": 1701,
+      "median": 8108,
+      "p90": 9043,
+      "p95": 9459,
+      "max": 9736,
+      "mean": 7043
+    },
+    "captureContextHistoryChars": {
+      "n": 100,
+      "min": 34,
+      "median": 1982,
+      "p90": 2104,
+      "p95": 2112,
+      "max": 2212,
+      "mean": 1624
+    },
+    "historyCount": {
+      "n": 100,
+      "min": 1,
+      "median": 14,
+      "p90": 23,
+      "p95": 25,
+      "max": 26,
+      "mean": 14
+    },
+    "currentTruthObjects": {
+      "n": 100,
+      "min": 3,
+      "median": 14,
+      "p90": 18,
+      "p95": 20,
+      "max": 21,
+      "mean": 13
+    },
+    "earlyVsLate": {
+      "requestChars": {
+        "captures1to20": 2823,
+        "captures81to100": 3182,
+        "ratio": 1.127
+      },
+      "estimatedInputTokens": {
+        "captures1to20": 639,
+        "captures81to100": 769,
+        "ratio": 1.202
+      },
+      "projectBlockChars": {
+        "captures1to20": 454,
+        "captures81to100": 784,
+        "ratio": 1.726
+      },
+      "currentTruthObjects": {
+        "captures1to20": 6.1,
+        "captures81to100": 18.75,
+        "ratio": 3.074
+      },
+      "historyCount": {
+        "captures1to20": 3.5,
+        "captures81to100": 23.75,
+        "ratio": 6.786
+      }
+    }
+  },
+  "askContext": {
+    "requestChars": {
+      "n": 30,
+      "min": 879,
+      "median": 2012,
+      "p90": 3480,
+      "p95": 3572,
+      "max": 4100,
+      "mean": 1970
+    },
+    "estimatedInputTokens": {
+      "n": 30,
+      "min": 257,
+      "median": 703,
+      "p90": 1174,
+      "p95": 1267,
+      "max": 1434,
+      "mean": 672
+    },
+    "currentState": {
+      "requestChars": {
+        "n": 24,
+        "min": 879,
+        "median": 1996,
+        "p90": 2702,
+        "p95": 2703,
+        "max": 2704,
+        "mean": 1772
+      },
+      "estimatedInputTokens": {
+        "n": 24,
+        "min": 257,
+        "median": 701,
+        "p90": 975,
+        "p95": 975,
+        "max": 976,
+        "mean": 608
+      }
+    },
+    "historical": {
+      "requestChars": {
+        "n": 6,
+        "min": 1055,
+        "median": 3480,
+        "p90": 4100,
+        "p95": 4100,
+        "max": 4100,
+        "mean": 2762
+      },
+      "estimatedInputTokens": {
+        "n": 6,
+        "min": 313,
+        "median": 1174,
+        "p90": 1434,
+        "p95": 1434,
+        "max": 1434,
+        "mean": 928
+      }
+    },
+    "earlyVsLate": {
+      "captures1to25MeanChars": 1354,
+      "captures75to100MeanChars": 2727,
+      "ratio": 2.014
+    }
+  },
+  "analyseProbes": {
+    "n": 12,
+    "requestChars": {
+      "n": 12,
+      "min": 2621,
+      "median": 3091,
+      "p90": 3297,
+      "p95": 3324,
+      "max": 3324,
+      "mean": 3064
+    },
+    "estimatedInputTokens": {
+      "n": 12,
+      "min": 566,
+      "median": 744,
+      "p90": 820,
+      "p95": 820,
+      "max": 820,
+      "mean": 731
+    }
+  },
+  "providerInputTokens": {
+    "n": 100,
+    "min": 600,
+    "median": 768,
+    "p90": 788,
+    "p95": 856,
+    "max": 888,
+    "mean": 750
+  },
+  "providerOutputTokens": {
+    "n": 100,
+    "min": 119,
+    "median": 270,
+    "p90": 399,
+    "p95": 532,
+    "max": 837,
+    "mean": 287
+  },
+  "providerTotalTokens": {
+    "n": 100,
+    "min": 772,
+    "median": 1022,
+    "p90": 1188,
+    "p95": 1349,
+    "max": 1697,
+    "mean": 1037
+  },
+  "note": "Provider tokens are OpenAI chat.completions usage. estimatedInputTokens remain js-tiktoken cl100k_base."
+}

@@ -1,0 +1,1695 @@
+{
+  "source": "PR #108 northstar-scenario.ts — inputs and expected truth unchanged",
+  "captures": [
+    {
+      "n": 1,
+      "input": "Kickoff. Priya Shah is the delivery PM for Northstar Member Portal Renewal. We'll take it week by week.",
+      "expectedWrites": [
+        {
+          "key": "person:priya-shah",
+          "op": "create",
+          "domain": "person",
+          "title": "Priya Shah",
+          "values": {
+            "role": "Delivery PM"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 2,
+      "input": "Liam Brooks is the business sponsor. He's the one who asked for the portal renewal.",
+      "expectedWrites": [
+        {
+          "key": "person:liam-brooks",
+          "op": "create",
+          "domain": "person",
+          "title": "Liam Brooks",
+          "values": {
+            "role": "Sponsor"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 3,
+      "input": "Sarah Okonkwo is the product owner. Please add Sarah Okonkwo to the project.",
+      "expectedWrites": [
+        {
+          "key": "person:sarah-okonkwo",
+          "op": "create",
+          "domain": "person",
+          "title": "Sarah Okonkwo",
+          "values": {
+            "role": "Product owner"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 4,
+      "input": "Marcus Chen is leading the React front-end. That's Marcus Chen, front-end lead.",
+      "expectedWrites": [
+        {
+          "key": "person:marcus-chen",
+          "op": "create",
+          "domain": "person",
+          "title": "Marcus Chen",
+          "values": {
+            "role": "Front-end lead"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 5,
+      "input": "Elena Voss owns the legacy back-end session service. Add Elena Voss.",
+      "expectedWrites": [
+        {
+          "key": "person:elena-voss",
+          "op": "create",
+          "domain": "person",
+          "title": "Elena Voss",
+          "values": {
+            "role": "Legacy back-end"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 6,
+      "input": "Jordan Hale is test lead and the starting UAT coordinator. Please add Jordan Hale.",
+      "expectedWrites": [
+        {
+          "key": "person:jordan-hale",
+          "op": "create",
+          "domain": "person",
+          "title": "Jordan Hale",
+          "values": {
+            "role": "QA lead"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 7,
+      "input": "Dev Patel at NimbusPay is our payments integration contact. They're supplying the wallet widget; we're not swapping processors on this release.",
+      "expectedWrites": [
+        {
+          "key": "person:dev-patel",
+          "op": "create",
+          "domain": "person",
+          "title": "Dev Patel",
+          "values": {
+            "role": "NimbusPay vendor"
+          }
+        },
+        {
+          "key": "knowledge:nimbus-wallet",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "NimbusPay supplies the wallet widget; processor stays"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 8,
+      "input": "Amira Rahman chairs CAB. Working rule: CAB packs must be ready 24 hours before the CAB slot. No exceptions because the last renewal got bounced.",
+      "expectedWrites": [
+        {
+          "key": "person:amira-rahman",
+          "op": "create",
+          "domain": "person",
+          "title": "Amira Rahman",
+          "values": {
+            "role": "CAB chair"
+          }
+        },
+        {
+          "key": "knowledge:cab-24h",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "CAB packs must be ready 24 hours before CAB"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 9,
+      "input": "Please add a to-do for login error handling.",
+      "expectedWrites": [
+        {
+          "key": "todo:login-error-handling",
+          "op": "create",
+          "domain": "todo",
+          "title": "Login error handling"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 10,
+      "input": "Please add a to-do for analytics event changes.",
+      "expectedWrites": [
+        {
+          "key": "todo:analytics-events",
+          "op": "create",
+          "domain": "todo",
+          "title": "Analytics event changes"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 11,
+      "input": "Dates, finally. UAT starts 14 October 2026, CAB is 18 October, and the target release is 27 October 2026. That's the working plan, not a wish.",
+      "expectedWrites": [
+        {
+          "key": "milestone:uat-start",
+          "op": "create",
+          "domain": "milestone",
+          "title": "UAT start",
+          "values": {
+            "date": "2026-10-14"
+          }
+        },
+        {
+          "key": "milestone:cab",
+          "op": "create",
+          "domain": "milestone",
+          "title": "CAB",
+          "values": {
+            "date": "2026-10-18"
+          }
+        },
+        {
+          "key": "milestone:release",
+          "op": "create",
+          "domain": "milestone",
+          "title": "Release",
+          "values": {
+            "date": "2026-10-27"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 12,
+      "input": "Jordan Hale needs a proper UAT script. Please add that as a to-do — UAT script — and Jordan Hale owns UAT.",
+      "expectedWrites": [
+        {
+          "key": "todo:uat-script",
+          "op": "create",
+          "domain": "todo",
+          "title": "UAT script"
+        },
+        {
+          "key": "person:jordan-hale",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Jordan Hale",
+          "values": {
+            "ownershipSemantics": "replace"
+          },
+          "scope": "UAT"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 13,
+      "input": "Two risks I want on the board. The API timeout on the legacy session call is a real risk, and NimbusPay have already flagged a possible vendor delay on the wallet sandbox.",
+      "expectedWrites": [
+        {
+          "key": "risk:api-timeout",
+          "op": "create",
+          "domain": "risk",
+          "title": "API timeout on legacy session"
+        },
+        {
+          "key": "risk:vendor-delay",
+          "op": "create",
+          "domain": "risk",
+          "title": "NimbusPay wallet sandbox delay"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 14,
+      "input": "Dev Patel pinged — NimbusPay sandbox is slipping about a week. Update the vendor delay risk, still open, just worse.",
+      "expectedWrites": [
+        {
+          "key": "risk:vendor-delay",
+          "op": "update",
+          "domain": "risk",
+          "title": "NimbusPay wallet sandbox delay",
+          "values": {
+            "status": "open"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 15,
+      "input": "Decision from Sarah Okonkwo: we will cut over behind feature flags, not a big-bang DNS flip. Please remember that.",
+      "expectedWrites": [
+        {
+          "key": "knowledge:feature-flags",
+          "op": "create",
+          "domain": "decision",
+          "title": "Cut over behind feature flags, not a DNS flip"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 16,
+      "input": "Tomiko Sato is joining for analytics. Please add Tomiko Sato.",
+      "expectedWrites": [
+        {
+          "key": "person:tomiko-sato",
+          "op": "create",
+          "domain": "person",
+          "title": "Tomiko Sato",
+          "values": {
+            "role": "Analytics"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 17,
+      "input": "Elena Voss is away 8 to 9 October — school thing. Not leaving the project, just those two days.",
+      "expectedWrites": [
+        {
+          "key": "person:elena-voss",
+          "op": "update",
+          "domain": "availability",
+          "title": "Elena Voss",
+          "values": {
+            "label": "away 2026-10-08 to 2026-10-09"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 18,
+      "input": "Amira wants a CAB pack to-do. Please add CAB pack as an action for her.",
+      "expectedWrites": [
+        {
+          "key": "todo:cab-pack",
+          "op": "create",
+          "domain": "todo",
+          "title": "CAB pack"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 19,
+      "input": "New risk: legacy session cookies might not map cleanly onto the React app. Call it legacy session mapping.",
+      "expectedWrites": [
+        {
+          "key": "risk:legacy-session",
+          "op": "create",
+          "domain": "risk",
+          "title": "Legacy session mapping"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 20,
+      "input": "Export: NimbusPay currently supplies the member CSV export. That's the current arrangement — I'll write it down even if it might change later.",
+      "expectedWrites": [
+        {
+          "key": "todo:export-csv",
+          "op": "create",
+          "domain": "todo",
+          "title": "Member CSV export"
+        },
+        {
+          "key": "knowledge:nimbus-export",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "NimbusPay supplies the member CSV export"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 21,
+      "input": "Marcus wants a performance budget to-do — keep the member home under 2 seconds on mid-range Android. Also Elena has started SSO migration — add a to-do for SSO migration.",
+      "expectedWrites": [
+        {
+          "key": "todo:perf-budget",
+          "op": "create",
+          "domain": "todo",
+          "title": "Performance budget for member home"
+        },
+        {
+          "key": "todo:sso-migration",
+          "op": "create",
+          "domain": "todo",
+          "title": "SSO migration"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 22,
+      "input": "Sarah Okonkwo asked for an accessibility pass before UAT. Add that as a to-do.",
+      "expectedWrites": [
+        {
+          "key": "todo:accessibility-pass",
+          "op": "create",
+          "domain": "todo",
+          "title": "Accessibility pass"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 23,
+      "input": "Chris Bell is DevOps for cutover. Please add Chris Bell, and add cutover runbook as an action.",
+      "expectedWrites": [
+        {
+          "key": "person:chris-bell",
+          "op": "create",
+          "domain": "person",
+          "title": "Chris Bell",
+          "values": {
+            "role": "DevOps"
+          }
+        },
+        {
+          "key": "todo:cutover-runbook",
+          "op": "create",
+          "domain": "todo",
+          "title": "Cutover runbook"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 24,
+      "input": "We also need a rollback plan. Separate to-do from the runbook — rollback plan.",
+      "expectedWrites": [
+        {
+          "key": "todo:rollback-plan",
+          "op": "create",
+          "domain": "todo",
+          "title": "Rollback plan"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 25,
+      "input": "We never store PII in application logs on Northstar. Please remember that. Also add member comms as a to-do for Sarah Okonkwo. UAT is still the 14th — no change there.",
+      "expectedWrites": [
+        {
+          "key": "knowledge:no-pii-logs",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "Never store PII in application logs"
+        },
+        {
+          "key": "todo:member-comms",
+          "op": "create",
+          "domain": "todo",
+          "title": "Member comms"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:uat-start",
+          "note": "UAT still 14 October"
+        }
+      ]
+    },
+    {
+      "n": 26,
+      "input": "UAT can't start on the 14th anymore — SSO is tight. Move UAT start to 16 October 2026.",
+      "expectedWrites": [
+        {
+          "key": "milestone:uat-start",
+          "op": "update",
+          "domain": "milestone",
+          "title": "UAT start",
+          "values": {
+            "date": "2026-10-16"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 27,
+      "input": "Owner change: Marcus is taking analytics events from Tomiko. Tomiko stays on the project for dashboards, but Marcus owns the event work now.",
+      "expectedWrites": [
+        {
+          "key": "person:marcus-chen",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Marcus Chen",
+          "values": {
+            "ownershipSemantics": "replace"
+          },
+          "scope": "analytics-events"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 28,
+      "input": "Vendor delay is still the main worry. NimbusPay now say the sandbox might slip into the week of the 13th. Keep the risk open.",
+      "expectedWrites": [
+        {
+          "key": "risk:vendor-delay",
+          "op": "update",
+          "domain": "risk",
+          "title": "NimbusPay wallet sandbox delay",
+          "values": {
+            "status": "open"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 29,
+      "input": "Scope clarification from Liam: SSO is in. Marketing widgets are out of this release. Please remember that — we keep getting asked.",
+      "expectedWrites": [
+        {
+          "key": "knowledge:scope-sso-in",
+          "op": "create",
+          "domain": "decision",
+          "title": "SSO is in; marketing widgets are out of this release"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 30,
+      "input": "API timeout is still open. I'm not changing it. Just mentioning it so nobody thinks it went away.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "risk:api-timeout",
+          "note": "API timeout still open, no change"
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "input": "Correction: NimbusPay does NOT supply the member CSV export. That's old. We build the export ourselves. Please replace that fact.",
+      "expectedWrites": [
+        {
+          "key": "knowledge:nimbus-export",
+          "op": "resolve",
+          "domain": "knowledge",
+          "title": "NimbusPay supplies the member CSV export"
+        },
+        {
+          "key": "knowledge:we-build-export",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "We build the member CSV export ourselves"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 32,
+      "input": "Jordan's UAT script should be ready by 15 October. Update that to-do due date.",
+      "expectedWrites": [
+        {
+          "key": "todo:uat-script",
+          "op": "update",
+          "domain": "todo",
+          "title": "UAT script",
+          "values": {
+            "date": "2026-10-15"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 33,
+      "input": "Sarah Kim is security — different Sarah from Sarah Okonkwo on product. Please add Sarah Kim. She raised pen-test findings we need to close before CAB; add a to-do for pen-test findings.",
+      "expectedWrites": [
+        {
+          "key": "person:sarah-kim",
+          "op": "create",
+          "domain": "person",
+          "title": "Sarah Kim",
+          "values": {
+            "role": "Security"
+          }
+        },
+        {
+          "key": "todo:pen-test-findings",
+          "op": "create",
+          "domain": "todo",
+          "title": "Pen-test findings"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 34,
+      "input": "Elena wants a rate-limit to-do on the session service. Please add rate limit on session API.",
+      "expectedWrites": [
+        {
+          "key": "todo:rate-limit",
+          "op": "create",
+          "domain": "todo",
+          "title": "Rate limit on session API"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 35,
+      "input": "Marcus finished the login error handling. Mark login error handling done.",
+      "expectedWrites": [
+        {
+          "key": "todo:login-error-handling",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Login error handling"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 36,
+      "input": "Add session timeout as a to-do — members get dumped after 20 minutes on legacy and we should match that.",
+      "expectedWrites": [
+        {
+          "key": "todo:session-timeout",
+          "op": "create",
+          "domain": "todo",
+          "title": "Session timeout parity"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 37,
+      "input": "Vendor delay still open. No status change. Dev is chasing internally.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "risk:vendor-delay",
+          "note": "Vendor delay still open"
+        }
+      ]
+    },
+    {
+      "n": 38,
+      "input": "Amira has started the CAB pack — it's in progress, not done. Don't complete it yet.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:cab-pack",
+          "note": "CAB pack in progress, not complete"
+        }
+      ]
+    },
+    {
+      "n": 39,
+      "input": "Liam confirmed release is still 27 October. Don't move it.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Release still 27 October"
+        }
+      ]
+    },
+    {
+      "n": 40,
+      "input": "Decision update: feature flags stay on for 48 hours after cutover, not 24. That supersedes the informal 24-hour chatter.",
+      "expectedWrites": [
+        {
+          "key": "knowledge:flags-48h",
+          "op": "create",
+          "domain": "decision",
+          "title": "Feature flags stay on 48 hours after cutover"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 41,
+      "input": "Marcus finished the analytics events and Elena finished the rate limit in the same breath at standup — both done.",
+      "expectedWrites": [
+        {
+          "key": "todo:analytics-events",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Analytics event changes"
+        },
+        {
+          "key": "todo:rate-limit",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Rate limit on session API"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 42,
+      "input": "Sarah said the CAB pack needs a threat model before she'll sign it. Can you update that?",
+      "expectedWrites": [],
+      "expectedNeedsYou": [
+        {
+          "about": "Sarah said the CAB pack needs a threat model",
+          "note": "Two Sarahs — product vs security"
+        }
+      ],
+      "expectedNoChange": []
+    },
+    {
+      "n": 43,
+      "input": "Sorry — Sarah Okonkwo meant the threat model is product's job, not Sarah Kim's. Add a to-do for threat model, owned as product work.",
+      "expectedWrites": [
+        {
+          "key": "todo:threat-model",
+          "op": "create",
+          "domain": "todo",
+          "title": "Threat model"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 44,
+      "input": "Markus Chen will pick up the accessibility pass. Wait — that's Marcus Chen, spelling was wrong. Accessibility pass still open, Marcus taking it.",
+      "expectedWrites": [
+        {
+          "key": "person:marcus-chen",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Marcus Chen",
+          "values": {
+            "ownershipSemantics": "continue"
+          },
+          "scope": "accessibility-pass"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "person:marcus-chen",
+          "note": "Do not create Markus Chen"
+        }
+      ]
+    },
+    {
+      "n": 45,
+      "input": "SSO IdP MFA SLO needs to land before UAT or the IdP regression will blow up CAB. That's the same SSO migration to-do — just acronym soup.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:sso-migration",
+          "note": "Same SSO migration work, acronym restatement"
+        }
+      ]
+    },
+    {
+      "n": 46,
+      "input": "Priya, Marcus and Jordan are all in the 11am working session tomorrow — no project change, just heads up. Chris is still on the runbook.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:cutover-runbook",
+          "note": "Chris still on runbook; meeting chatter"
+        }
+      ]
+    },
+    {
+      "n": 47,
+      "input": "yeah so basically after the stand I think we should just get the rollback plan drafted this week because if CAB bounce us we have nothing and Chris said he'd do it but I didn't hear a date so just keep it open ok thanks",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:rollback-plan",
+          "note": "Rollback plan still open, speech-like restatement"
+        }
+      ]
+    },
+    {
+      "n": 48,
+      "input": "Catch-up dump: session timeout still open, member comms still open, perf budget still open, accessibility still open, and please add vendor contract check as a new to-do for Liam. Also Jordan is still UAT.",
+      "expectedWrites": [
+        {
+          "key": "todo:vendor-contract-check",
+          "op": "create",
+          "domain": "todo",
+          "title": "Vendor contract check"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:session-timeout",
+          "note": "session timeout still open"
+        },
+        {
+          "key": "todo:member-comms",
+          "note": "member comms still open"
+        },
+        {
+          "key": "todo:perf-budget",
+          "note": "perf budget still open"
+        },
+        {
+          "key": "todo:accessibility-pass",
+          "note": "accessibility still open"
+        }
+      ]
+    },
+    {
+      "n": 49,
+      "input": "Analytics due Friday — sorry, Monday the 14th. That's already on the analytics to-do which Marcus finished, so this is leftover chatter. Don't resurrect it.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:analytics-events",
+          "note": "Analytics already complete; leftover due-date chatter"
+        }
+      ]
+    },
+    {
+      "n": 50,
+      "input": "Someone should own hypercare. Not sure who. Can we flag that?",
+      "expectedWrites": [],
+      "expectedNeedsYou": [
+        {
+          "about": "Someone should own hypercare",
+          "note": "Unclear ownership"
+        }
+      ],
+      "expectedNoChange": []
+    },
+    {
+      "n": 51,
+      "input": "Sarah said the member comms can go out the day before release. That's it.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [
+        {
+          "about": "Sarah said the member comms can go out the day before release",
+          "note": "Two Sarahs still on the project"
+        }
+      ],
+      "expectedNoChange": []
+    },
+    {
+      "n": 52,
+      "input": "Clarifying capture 51: Sarah Okonkwo on product — member comms the day before release. Update that to-do note/due to 26 October.",
+      "expectedWrites": [
+        {
+          "key": "todo:member-comms",
+          "op": "update",
+          "domain": "todo",
+          "title": "Member comms",
+          "values": {
+            "date": "2026-10-26"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 53,
+      "input": "Marcus is NOT doing UAT. Jordan is. If anyone's notes say Marcus owns UAT, that's wrong.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "person:jordan-hale",
+          "note": "Jordan still owns UAT; Marcus is not UAT"
+        }
+      ]
+    },
+    {
+      "n": 54,
+      "input": "Side chat about biscuits and the printer jam, and also Elena finished SSO migration. That's the useful bit.",
+      "expectedWrites": [
+        {
+          "key": "todo:sso-migration",
+          "op": "complete",
+          "domain": "todo",
+          "title": "SSO migration"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 55,
+      "input": "Priya Shah, Marcus Chen, Elena Voss and Jordan Hale were all on the call — no new owners. Accessibility pass still with Marcus.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:accessibility-pass",
+          "note": "Accessibility still with Marcus"
+        }
+      ]
+    },
+    {
+      "n": 56,
+      "input": "New defect from Jordan: login loop on password reset. Please add that to-do — login loop on password reset.",
+      "expectedWrites": [
+        {
+          "key": "todo:defect-login-loop",
+          "op": "create",
+          "domain": "todo",
+          "title": "Login loop on password reset"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 57,
+      "input": "That login loop defect needs to be done by 17 October. Same item, just a date.",
+      "expectedWrites": [
+        {
+          "key": "todo:defect-login-loop",
+          "op": "update",
+          "domain": "todo",
+          "title": "Login loop on password reset",
+          "values": {
+            "date": "2026-10-17"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 58,
+      "input": "Marcus fixed the login loop. Mark it done.",
+      "expectedWrites": [
+        {
+          "key": "todo:defect-login-loop",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Login loop on password reset"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 59,
+      "input": "Follow-up: add a to-do to regression-test password reset on staging.",
+      "expectedWrites": [
+        {
+          "key": "todo:password-reset-regression",
+          "op": "create",
+          "domain": "todo",
+          "title": "Regression-test password reset on staging"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 60,
+      "input": "New risk: CAB rejection if the threat model is thin. Call it CAB rejection.",
+      "expectedWrites": [
+        {
+          "key": "risk:cab-rejection",
+          "op": "create",
+          "domain": "risk",
+          "title": "CAB rejection"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 61,
+      "input": "CAB rejection risk is watch, not panic. Update status to watch.",
+      "expectedWrites": [
+        {
+          "key": "risk:cab-rejection",
+          "op": "update",
+          "domain": "risk",
+          "title": "CAB rejection",
+          "values": {
+            "status": "watch"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 62,
+      "input": "Threat model landed and Amira is happier. Resolve the CAB rejection risk.",
+      "expectedWrites": [
+        {
+          "key": "todo:threat-model",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Threat model"
+        },
+        {
+          "key": "risk:cab-rejection",
+          "op": "resolve",
+          "domain": "risk",
+          "title": "CAB rejection"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 63,
+      "input": "UAT start moves again — 20 October 2026. Jordan asked for two more days after SSO.",
+      "expectedWrites": [
+        {
+          "key": "milestone:uat-start",
+          "op": "update",
+          "domain": "milestone",
+          "title": "UAT start",
+          "values": {
+            "date": "2026-10-20"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 64,
+      "input": "Actually CAB is the 18th and UAT sitting after CAB is backwards. Move UAT start to 18 October so it runs into CAB week, not after.",
+      "expectedWrites": [
+        {
+          "key": "milestone:uat-start",
+          "op": "update",
+          "domain": "milestone",
+          "title": "UAT start",
+          "values": {
+            "date": "2026-10-18"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 65,
+      "input": "UAT ownership: Priya Shah is taking UAT from Jordan Hale this week so Jordan can stay in defect triage.",
+      "expectedWrites": [
+        {
+          "key": "person:priya-shah",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Priya Shah",
+          "values": {
+            "ownershipSemantics": "replace"
+          },
+          "scope": "UAT"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 66,
+      "input": "Change of plan: Jordan Hale takes UAT back. Priya is covering steering. Jordan owns UAT again.",
+      "expectedWrites": [
+        {
+          "key": "person:jordan-hale",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Jordan Hale",
+          "values": {
+            "ownershipSemantics": "replace"
+          },
+          "scope": "UAT"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 67,
+      "input": "Tomiko Sato is away 21 October for a conference. One day.",
+      "expectedWrites": [
+        {
+          "key": "person:tomiko-sato",
+          "op": "update",
+          "domain": "availability",
+          "title": "Tomiko Sato",
+          "values": {
+            "label": "away 2026-10-21"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 68,
+      "input": "Working rule update: CAB packs still 24 hours before, but they now also need the rollback plan attached. Don't drop the 24-hour rule.",
+      "expectedWrites": [
+        {
+          "key": "knowledge:cab-rollback-attached",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "CAB packs must include the rollback plan"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "knowledge:cab-24h",
+          "note": "24-hour CAB rule remains"
+        }
+      ]
+    },
+    {
+      "n": 69,
+      "input": "Please update the UAT checklist — that's the UAT script to-do, we're just calling it the checklist now. Due date still 15 October.",
+      "expectedWrites": [
+        {
+          "key": "todo:uat-script",
+          "op": "update",
+          "domain": "todo",
+          "title": "UAT script",
+          "values": {
+            "date": "2026-10-15"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 70,
+      "input": "UAT script is done. Add a follow-up: UAT evidence pack.",
+      "expectedWrites": [
+        {
+          "key": "todo:uat-script",
+          "op": "complete",
+          "domain": "todo",
+          "title": "UAT script"
+        },
+        {
+          "key": "todo:uat-evidence-pack",
+          "op": "create",
+          "domain": "todo",
+          "title": "UAT evidence pack"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 71,
+      "input": "Ignore the date in yesterday's steering notes — CAB is still the 18th. Someone typed the 22nd in the pack by mistake.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:cab",
+          "note": "CAB still 18 October; ignore 22nd"
+        }
+      ]
+    },
+    {
+      "n": 72,
+      "input": "The handover says Marcus owns UAT but that's old. Jordan Hale still owns UAT. Don't switch it.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "person:jordan-hale",
+          "note": "Jordan still owns UAT; handover is stale"
+        }
+      ]
+    },
+    {
+      "n": 73,
+      "input": "We discussed moving release to the 30th but didn't agree it. It's still the 27th.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Release still 27 October; 30th was discussed not agreed"
+        }
+      ]
+    },
+    {
+      "n": 74,
+      "input": "Don't reopen the API timeout risk — I'm just mentioning that it was the reason we delayed testing last week.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "risk:api-timeout",
+          "note": "API timeout remains as-is; historical mention"
+        }
+      ]
+    },
+    {
+      "n": 75,
+      "input": "Old notes say NimbusPay supplies the export but that's no longer true. We already corrected this. Don't put the vendor back on export.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "knowledge:we-build-export",
+          "note": "We still build the export; old vendor note is stale"
+        }
+      ]
+    },
+    {
+      "n": 76,
+      "input": "We considered a weekend cutover but decided against it. Stay on the Tuesday 27th release.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Weekend cutover rejected; release 27th"
+        }
+      ]
+    },
+    {
+      "n": 77,
+      "input": "No change on release. Still 27 October 2026.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Explicit no change — release 27th"
+        }
+      ]
+    },
+    {
+      "n": 78,
+      "input": "Quoted from last month's RAID: 'UAT 14 October'. That's outdated. Current UAT start is the 18th. Don't roll the date back.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:uat-start",
+          "note": "UAT remains 18 October; 14th is quoted stale"
+        }
+      ]
+    },
+    {
+      "n": 79,
+      "input": "The CAB rejection risk we closed after the threat model — just mentioning it in the weekly. It stays resolved.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "risk:cab-rejection",
+          "note": "CAB rejection stays resolved"
+        }
+      ]
+    },
+    {
+      "n": 80,
+      "input": "Don't touch Atlas Billing Cutover. Someone pasted their ledger to-do into our chat by mistake. Close the billing ledger is not a Northstar action.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "note": "Atlas Billing reference — do not mutate the other project"
+        }
+      ]
+    },
+    {
+      "n": 81,
+      "input": "Marcus is NOT covering security. Sarah Kim is. Don't reassign pen-test findings.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:pen-test-findings",
+          "note": "Pen-test stays with security / Sarah Kim"
+        }
+      ]
+    },
+    {
+      "n": 82,
+      "input": "Steering PDF still shows CAB on the 12th in the header. That's a copied template. CAB is the 18th.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:cab",
+          "note": "CAB still 18th; 12th is template cruft"
+        }
+      ]
+    },
+    {
+      "n": 83,
+      "input": "NimbusPay sandbox arrived. Vendor delay is not a risk anymore — resolve it.",
+      "expectedWrites": [
+        {
+          "key": "risk:vendor-delay",
+          "op": "resolve",
+          "domain": "risk",
+          "title": "NimbusPay wallet sandbox delay"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 84,
+      "input": "Tomiko Sato's last day on Northstar is Friday. She's leaving the project after the conference. Dashboards go with her handover notes. Record that Tomiko Sato has left — do not invent a replacement yet.",
+      "expectedWrites": [
+        {
+          "key": "knowledge:tomiko-left",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "Tomiko Sato has left the project"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 85,
+      "input": "Nadia Qureshi is joining as analytics replacement from next week. Please add her.",
+      "expectedWrites": [
+        {
+          "key": "person:nadia-qureshi",
+          "op": "create",
+          "domain": "person",
+          "title": "Nadia Qureshi",
+          "values": {
+            "role": "Analytics"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 86,
+      "input": "Jordan found a defect: export encoding is mangling names. Add export encoding defect.",
+      "expectedWrites": [
+        {
+          "key": "todo:defect-export-encoding",
+          "op": "create",
+          "domain": "todo",
+          "title": "Export encoding defect"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 87,
+      "input": "Another defect: login loop is back on Safari 16. New to-do, not the old completed one — Safari login loop.",
+      "expectedWrites": [
+        {
+          "key": "todo:defect-safari-login-loop",
+          "op": "create",
+          "domain": "todo",
+          "title": "Safari login loop"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 88,
+      "input": "UAT is in progress as of today. Jordan still owns it. Evidence pack still open.",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "person:jordan-hale",
+          "note": "Jordan still owns UAT"
+        },
+        {
+          "key": "todo:uat-evidence-pack",
+          "note": "Evidence pack still open"
+        }
+      ]
+    },
+    {
+      "n": 89,
+      "input": "Amira submitted the CAB pack. Mark CAB pack done.",
+      "expectedWrites": [
+        {
+          "key": "todo:cab-pack",
+          "op": "complete",
+          "domain": "todo",
+          "title": "CAB pack"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 90,
+      "input": "Elena Voss is out sick 22 to 23 October. Temporary. Chris Bell covers cutover questions while she's out.",
+      "expectedWrites": [
+        {
+          "key": "person:elena-voss",
+          "op": "update",
+          "domain": "availability",
+          "title": "Elena Voss",
+          "values": {
+            "label": "away 2026-10-22 to 2026-10-23"
+          }
+        },
+        {
+          "key": "person:chris-bell",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Chris Bell",
+          "values": {
+            "ownershipSemantics": "continue"
+          },
+          "scope": "cutover"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 91,
+      "input": "Late change: Chris Bell owns cutover execution, not Elena. Elena stays on the session service.",
+      "expectedWrites": [
+        {
+          "key": "person:chris-bell",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Chris Bell",
+          "values": {
+            "ownershipSemantics": "replace"
+          },
+          "scope": "cutover"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 92,
+      "input": "Rollback plan and cutover runbook are both done. Mark them complete.",
+      "expectedWrites": [
+        {
+          "key": "todo:rollback-plan",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Rollback plan"
+        },
+        {
+          "key": "todo:cutover-runbook",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Cutover runbook"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 93,
+      "input": "Pen-test findings closed. Accessibility pass done. Perf budget accepted. Mark those three complete.",
+      "expectedWrites": [
+        {
+          "key": "todo:pen-test-findings",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Pen-test findings"
+        },
+        {
+          "key": "todo:accessibility-pass",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Accessibility pass"
+        },
+        {
+          "key": "todo:perf-budget",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Performance budget for member home"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 94,
+      "input": "Deployment decision: we go on 27 October. CAB approved. Release date does not move.",
+      "expectedWrites": [
+        {
+          "key": "knowledge:go-27",
+          "op": "create",
+          "domain": "decision",
+          "title": "CAB approved go-live on 27 October"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Release remains 27 October"
+        }
+      ]
+    },
+    {
+      "n": 95,
+      "input": "Steering notes 24 Oct. Attendees Priya Shah, Liam Brooks, Sarah Okonkwo, Amira Rahman.\nUAT evidence pack still outstanding. Safari login loop still open. Export encoding still open.\nVendor delay is closed. API timeout remains open until after hypercare.\nChris Bell confirmed cutover window 06:00–08:00. Member comms still due 26 Oct.\nDo not reopen CAB rejection. Do not move CAB off the 18th (it's already happened / on track).",
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:uat-evidence-pack",
+          "note": "still outstanding"
+        },
+        {
+          "key": "todo:defect-safari-login-loop",
+          "note": "still open"
+        },
+        {
+          "key": "todo:defect-export-encoding",
+          "note": "still open"
+        },
+        {
+          "key": "risk:api-timeout",
+          "note": "still open until hypercare"
+        },
+        {
+          "key": "risk:cab-rejection",
+          "note": "do not reopen"
+        }
+      ]
+    },
+    {
+      "n": 96,
+      "input": "Standup dump. Marcus fixed Safari login loop — mark it done. Elena is back, sick leave over.\nNadia Qureshi is shadowing dashboards. Password-reset regression is done.\nSession timeout parity still open. Feature-flag cleanup should be added as a post-release to-do.",
+      "expectedWrites": [
+        {
+          "key": "todo:defect-safari-login-loop",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Safari login loop"
+        },
+        {
+          "key": "todo:password-reset-regression",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Regression-test password reset on staging"
+        },
+        {
+          "key": "todo:feature-flag-cleanup",
+          "op": "create",
+          "domain": "todo",
+          "title": "Feature-flag cleanup"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 97,
+      "input": "Export encoding is fixed. Member comms went out. UAT evidence pack filed. Mark those complete.",
+      "expectedWrites": [
+        {
+          "key": "todo:defect-export-encoding",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Export encoding defect"
+        },
+        {
+          "key": "todo:member-comms",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Member comms"
+        },
+        {
+          "key": "todo:uat-evidence-pack",
+          "op": "complete",
+          "domain": "todo",
+          "title": "UAT evidence pack"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    {
+      "n": 98,
+      "input": "Legacy session mapping we can live with — accept that risk. API timeout stays open for hypercare. Vendor delay stays resolved.",
+      "expectedWrites": [
+        {
+          "key": "risk:legacy-session",
+          "op": "update",
+          "domain": "risk",
+          "title": "Legacy session mapping",
+          "values": {
+            "status": "accepted"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "risk:api-timeout",
+          "note": "API timeout stays open"
+        },
+        {
+          "key": "risk:vendor-delay",
+          "note": "vendor delay stays resolved"
+        }
+      ]
+    },
+    {
+      "n": 99,
+      "input": "Post-release: add hypercare rota as a to-do for Priya. Session timeout parity can wait until after go-live — leave it open.",
+      "expectedWrites": [
+        {
+          "key": "todo:hypercare-rota",
+          "op": "create",
+          "domain": "todo",
+          "title": "Hypercare rota"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:session-timeout",
+          "note": "Session timeout remains open"
+        }
+      ]
+    },
+    {
+      "n": 100,
+      "input": "We're live. Release happened 27 October. Project status is hypercare, not closed. Open work is feature-flag cleanup, hypercare rota, and session timeout parity. API timeout still the residual risk. Jordan still owns UAT wrap-up. Don't invent a new release date.",
+      "expectedWrites": [
+        {
+          "key": "knowledge:live-hypercare",
+          "op": "create",
+          "domain": "decision",
+          "title": "Live; project in hypercare after 27 October release"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Release remains 27 October"
+        },
+        {
+          "key": "todo:feature-flag-cleanup",
+          "note": "still open"
+        },
+        {
+          "key": "todo:hypercare-rota",
+          "note": "still open"
+        },
+        {
+          "key": "todo:session-timeout",
+          "note": "still open"
+        },
+        {
+          "key": "risk:api-timeout",
+          "note": "residual open risk"
+        }
+      ]
+    }
+  ]
+}

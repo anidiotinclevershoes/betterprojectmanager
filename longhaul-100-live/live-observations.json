@@ -1,0 +1,6439 @@
+[
+  {
+    "capture": 1,
+    "rawInput": "Kickoff. Priya Shah is the delivery PM for Northstar Member Portal Renewal. We'll take it week by week.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Priya Shah is the delivery PM for Northstar Member Portal Renewal.",
+          "domain": "person",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Priya Shah is the delivery PM for Northstar Member Portal Renewal.",
+          "candidateTargetId": "a6250415-8ba7-4074-9c06-58a7968ade55",
+          "candidateTargetTitle": "Confirm project baseline with key stakeholders",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The project will be taken week by week.",
+          "domain": "milestone",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "We'll take it week by week.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:priya-shah",
+          "op": "create",
+          "domain": "person",
+          "title": "Priya Shah",
+          "values": {
+            "role": "Delivery PM"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 2,
+    "rawInput": "Liam Brooks is the business sponsor. He's the one who asked for the portal renewal.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Liam Brooks is the business sponsor.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Liam Brooks is the business sponsor.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "Liam Brooks asked for the portal renewal.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "He's the one who asked for the portal renewal.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:liam-brooks",
+          "op": "create",
+          "domain": "person",
+          "title": "Liam Brooks",
+          "values": {
+            "role": "Sponsor"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 3,
+    "rawInput": "Sarah Okonkwo is the product owner. Please add Sarah Okonkwo to the project.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Sarah Okonkwo is the product owner.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Sarah Okonkwo is the product owner.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "Sarah Okonkwo should be added to the project.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Please add Sarah Okonkwo to the project.",
+          "candidateTargetId": "a6250415-8ba7-4074-9c06-58a7968ade55",
+          "candidateTargetTitle": "Confirm project baseline with key stakeholders",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:sarah-okonkwo",
+          "op": "create",
+          "domain": "person",
+          "title": "Sarah Okonkwo",
+          "values": {
+            "role": "Product owner"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 4,
+    "rawInput": "Marcus Chen is leading the React front-end. That's Marcus Chen, front-end lead.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Marcus Chen is leading the React front-end.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Marcus Chen is leading the React front-end.",
+          "candidateTargetId": "a6250415-8ba7-4074-9c06-58a7968ade55",
+          "candidateTargetTitle": "Confirm project baseline with key stakeholders",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Marcus Chen is the front-end lead.",
+          "domain": "person",
+          "disposition": "merge",
+          "truthIntent": "current",
+          "evidence": "That's Marcus Chen, front-end lead.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:marcus-chen",
+          "op": "create",
+          "domain": "person",
+          "title": "Marcus Chen",
+          "values": {
+            "role": "Front-end lead"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 5,
+    "rawInput": "Elena Voss owns the legacy back-end session service. Add Elena Voss.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Elena Voss owns the legacy back-end session service.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Elena Voss owns the legacy back-end session service.",
+          "candidateTargetId": "omit",
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Add Elena Voss.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Add Elena Voss.",
+          "candidateTargetId": "a6250415-8ba7-4074-9c06-58a7968ade55",
+          "candidateTargetTitle": "Confirm project baseline with key stakeholders",
+          "proposedValues": {
+            "status": "pending"
+          }
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:elena-voss",
+          "op": "create",
+          "domain": "person",
+          "title": "Elena Voss",
+          "values": {
+            "role": "Legacy back-end"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected create person “Elena Voss”"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 6,
+    "rawInput": "Jordan Hale is test lead and the starting UAT coordinator. Please add Jordan Hale.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Jordan Hale is the test lead.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Jordan Hale is test lead and the starting UAT coordinator.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "Jordan Hale is the starting UAT coordinator.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Jordan Hale is test lead and the starting UAT coordinator.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:jordan-hale",
+          "op": "create",
+          "domain": "person",
+          "title": "Jordan Hale",
+          "values": {
+            "role": "QA lead"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 7,
+    "rawInput": "Dev Patel at NimbusPay is our payments integration contact. They're supplying the wallet widget; we're not swapping processors on this release.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Dev Patel is the payments integration contact at NimbusPay.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Dev Patel at NimbusPay is our payments integration contact.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "NimbusPay is supplying the wallet widget.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "They're supplying the wallet widget;",
+          "candidateTargetId": "",
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-3",
+          "statement": "The project is not swapping processors on this release.",
+          "domain": "decision",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "we're not swapping processors on this release.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "mixed",
+    "apply": "mixed",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:dev-patel",
+          "op": "create",
+          "domain": "person",
+          "title": "Dev Patel",
+          "values": {
+            "role": "NimbusPay vendor"
+          }
+        },
+        {
+          "key": "knowledge:nimbus-wallet",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "NimbusPay supplies the wallet widget; processor stays"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 8,
+    "rawInput": "Amira Rahman chairs CAB. Working rule: CAB packs must be ready 24 hours before the CAB slot. No exceptions because the last renewal got bounced.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Amira Rahman chairs the CAB.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Amira Rahman chairs CAB.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "CAB packs must be ready 24 hours before the CAB slot.",
+          "domain": "milestone",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Working rule: CAB packs must be ready 24 hours before the CAB slot.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-3",
+          "statement": "There are no exceptions to the rule about CAB packs.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "No exceptions because the last renewal got bounced.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "mixed",
+    "apply": "mixed",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:amira-rahman",
+          "op": "create",
+          "domain": "person",
+          "title": "Amira Rahman",
+          "values": {
+            "role": "CAB chair"
+          }
+        },
+        {
+          "key": "knowledge:cab-24h",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "CAB packs must be ready 24 hours before CAB"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected create knowledge “CAB packs must be ready 24 hours before CAB”"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 9,
+    "rawInput": "Please add a to-do for login error handling.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "A to-do for login error handling needs to be added.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Please add a to-do for login error handling.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:login-error-handling",
+          "op": "create",
+          "domain": "todo",
+          "title": "Login error handling"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 10,
+    "rawInput": "Please add a to-do for analytics event changes.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "A to-do for analytics event changes needs to be added.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Please add a to-do for analytics event changes.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:analytics-events",
+          "op": "create",
+          "domain": "todo",
+          "title": "Analytics event changes"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 11,
+    "rawInput": "Dates, finally. UAT starts 14 October 2026, CAB is 18 October, and the target release is 27 October 2026. That's the working plan, not a wish.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "UAT starts on 14 October 2026.",
+          "domain": "milestone",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "UAT starts 14 October 2026",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "date": "2026-10-14"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "CAB is scheduled for 18 October 2026.",
+          "domain": "milestone",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "CAB is 18 October",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "date": "2026-10-18"
+          }
+        },
+        {
+          "id": "obs-3",
+          "statement": "The target release is on 27 October 2026.",
+          "domain": "milestone",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "the target release is 27 October 2026",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "date": "2026-10-27"
+          }
+        },
+        {
+          "id": "obs-4",
+          "statement": "The working plan is not a wish.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "That's the working plan, not a wish.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 4
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "milestone:uat-start",
+          "op": "create",
+          "domain": "milestone",
+          "title": "UAT start",
+          "values": {
+            "date": "2026-10-14"
+          }
+        },
+        {
+          "key": "milestone:cab",
+          "op": "create",
+          "domain": "milestone",
+          "title": "CAB",
+          "values": {
+            "date": "2026-10-18"
+          }
+        },
+        {
+          "key": "milestone:release",
+          "op": "create",
+          "domain": "milestone",
+          "title": "Release",
+          "values": {
+            "date": "2026-10-27"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 12,
+    "rawInput": "Jordan Hale needs a proper UAT script. Please add that as a to-do — UAT script — and Jordan Hale owns UAT.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Jordan Hale needs a proper UAT script.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Jordan Hale needs a proper UAT script.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "pending"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Jordan Hale owns UAT.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Jordan Hale owns UAT.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "mixed",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:uat-script",
+          "op": "create",
+          "domain": "todo",
+          "title": "UAT script"
+        },
+        {
+          "key": "person:jordan-hale",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Jordan Hale",
+          "values": {
+            "ownershipSemantics": "replace"
+          },
+          "scope": "UAT"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 13,
+    "rawInput": "Two risks I want on the board. The API timeout on the legacy session call is a real risk, and NimbusPay have already flagged a possible vendor delay on the wallet sandbox.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The API timeout on the legacy session call is a real risk.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "The API timeout on the legacy session call is a real risk.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "NimbusPay have already flagged a possible vendor delay on the wallet sandbox.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "NimbusPay have already flagged a possible vendor delay on the wallet sandbox.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "risk:api-timeout",
+          "op": "create",
+          "domain": "risk",
+          "title": "API timeout on legacy session"
+        },
+        {
+          "key": "risk:vendor-delay",
+          "op": "create",
+          "domain": "risk",
+          "title": "NimbusPay wallet sandbox delay"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 14,
+    "rawInput": "Dev Patel pinged — NimbusPay sandbox is slipping about a week. Update the vendor delay risk, still open, just worse.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "NimbusPay sandbox is slipping about a week.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "NimbusPay sandbox is slipping about a week.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "status": "worse"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Update the vendor delay risk.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Update the vendor delay risk, still open, just worse.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "risk:vendor-delay",
+          "op": "update",
+          "domain": "risk",
+          "title": "NimbusPay wallet sandbox delay",
+          "values": {
+            "status": "open"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 15,
+    "rawInput": "Decision from Sarah Okonkwo: we will cut over behind feature flags, not a big-bang DNS flip. Please remember that.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The decision is to cut over behind feature flags.",
+          "domain": "decision",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Decision from Sarah Okonkwo: we will cut over behind feature flags, not a big-bang DNS flip.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "The cutover will not be a big-bang DNS flip.",
+          "domain": "decision",
+          "disposition": "merge",
+          "truthIntent": "current",
+          "evidence": "Decision from Sarah Okonkwo: we will cut over behind feature flags, not a big-bang DNS flip.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "knowledge:feature-flags",
+          "op": "create",
+          "domain": "decision",
+          "title": "Cut over behind feature flags, not a DNS flip"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 16,
+    "rawInput": "Tomiko Sato is joining for analytics. Please add Tomiko Sato.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Tomiko Sato is joining for analytics.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Tomiko Sato is joining for analytics.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:tomiko-sato",
+          "op": "create",
+          "domain": "person",
+          "title": "Tomiko Sato",
+          "values": {
+            "role": "Analytics"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 17,
+    "rawInput": "Elena Voss is away 8 to 9 October — school thing. Not leaving the project, just those two days.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Elena Voss is away 8 to 9 October.",
+          "domain": "availability",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Elena Voss is away 8 to 9 October — school thing.",
+          "candidateTargetId": "omit",
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "date": "2023-10-08T00:00:00Z"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "empty",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:elena-voss",
+          "op": "update",
+          "domain": "availability",
+          "title": "Elena Voss",
+          "values": {
+            "label": "away 2026-10-08 to 2026-10-09"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 18,
+    "rawInput": "Amira wants a CAB pack to-do. Please add CAB pack as an action for her.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Amira wants a CAB pack to-do.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Amira wants a CAB pack to-do.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "pending"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "CAB pack needs to be added as an action for Amira.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Please add CAB pack as an action for her.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:cab-pack",
+          "op": "create",
+          "domain": "todo",
+          "title": "CAB pack"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 19,
+    "rawInput": "New risk: legacy session cookies might not map cleanly onto the React app. Call it legacy session mapping.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "New risk identified regarding legacy session cookies.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "New risk: legacy session cookies might not map cleanly onto the React app.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "risk:legacy-session",
+          "op": "create",
+          "domain": "risk",
+          "title": "Legacy session mapping"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 20,
+    "rawInput": "Export: NimbusPay currently supplies the member CSV export. That's the current arrangement — I'll write it down even if it might change later.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "NimbusPay currently supplies the member CSV export.",
+          "domain": "availability",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "NimbusPay currently supplies the member CSV export.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "The current arrangement might change later.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "That's the current arrangement — I'll write it down even if it might change later.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:export-csv",
+          "op": "create",
+          "domain": "todo",
+          "title": "Member CSV export"
+        },
+        {
+          "key": "knowledge:nimbus-export",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "NimbusPay supplies the member CSV export"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected create todo “Member CSV export”"
+      },
+      {
+        "letter": "D",
+        "detail": "Missed expected create knowledge “NimbusPay supplies the member CSV export”"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 21,
+    "rawInput": "Marcus wants a performance budget to-do — keep the member home under 2 seconds on mid-range Android. Also Elena has started SSO migration — add a to-do for SSO migration.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Marcus wants a performance budget to-do.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Marcus wants a performance budget to-do — keep the member home under 2 seconds on mid-range Android.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "open"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Elena has started SSO migration.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Also Elena has started SSO migration — add a to-do for SSO migration.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "open"
+          }
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:perf-budget",
+          "op": "create",
+          "domain": "todo",
+          "title": "Performance budget for member home"
+        },
+        {
+          "key": "todo:sso-migration",
+          "op": "create",
+          "domain": "todo",
+          "title": "SSO migration"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 22,
+    "rawInput": "Sarah Okonkwo asked for an accessibility pass before UAT. Add that as a to-do.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Sarah Okonkwo asked for an accessibility pass before UAT.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Sarah Okonkwo asked for an accessibility pass before UAT.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "pending"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:accessibility-pass",
+          "op": "create",
+          "domain": "todo",
+          "title": "Accessibility pass"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 23,
+    "rawInput": "Chris Bell is DevOps for cutover. Please add Chris Bell, and add cutover runbook as an action.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Chris Bell is DevOps for cutover.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Chris Bell is DevOps for cutover.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Add cutover runbook as an action.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Please add Chris Bell, and add cutover runbook as an action.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "mixed",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:chris-bell",
+          "op": "create",
+          "domain": "person",
+          "title": "Chris Bell",
+          "values": {
+            "role": "DevOps"
+          }
+        },
+        {
+          "key": "todo:cutover-runbook",
+          "op": "create",
+          "domain": "todo",
+          "title": "Cutover runbook"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 24,
+    "rawInput": "We also need a rollback plan. Separate to-do from the runbook — rollback plan.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "A rollback plan is needed.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "We also need a rollback plan.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "The rollback plan should be separate from the runbook.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Separate to-do from the runbook — rollback plan.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:rollback-plan",
+          "op": "create",
+          "domain": "todo",
+          "title": "Rollback plan"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 25,
+    "rawInput": "We never store PII in application logs on Northstar. Please remember that. Also add member comms as a to-do for Sarah Okonkwo. UAT is still the 14th — no change there.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "We never store PII in application logs on Northstar.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "We never store PII in application logs on Northstar.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Add member comms as a to-do for Sarah Okonkwo.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Also add member comms as a to-do for Sarah Okonkwo.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "UAT is still the 14th.",
+          "domain": "milestone",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "UAT is still the 14th — no change there.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "knowledge:no-pii-logs",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "Never store PII in application logs"
+        },
+        {
+          "key": "todo:member-comms",
+          "op": "create",
+          "domain": "todo",
+          "title": "Member comms"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:uat-start",
+          "note": "UAT still 14 October"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected create knowledge “Never store PII in application logs”"
+      },
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 26,
+    "rawInput": "UAT can't start on the 14th anymore — SSO is tight. Move UAT start to 16 October 2026.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "UAT start date has been moved to 16 October 2026.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Move UAT start to 16 October 2026.",
+          "candidateTargetId": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+          "candidateTargetTitle": "CAB is scheduled for 18 October 2026.",
+          "proposedValues": {
+            "date": "2026-10-16"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "milestone:uat-start",
+          "op": "update",
+          "domain": "milestone",
+          "title": "UAT start",
+          "values": {
+            "date": "2026-10-16"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 27,
+    "rawInput": "Owner change: Marcus is taking analytics events from Tomiko. Tomiko stays on the project for dashboards, but Marcus owns the event work now.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Marcus is taking analytics events from Tomiko.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Marcus is taking analytics events from Tomiko.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Tomiko stays on the project for dashboards.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Tomiko stays on the project for dashboards.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "ownershipSemantics": "continue"
+          }
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:marcus-chen",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Marcus Chen",
+          "values": {
+            "ownershipSemantics": "replace"
+          },
+          "scope": "analytics-events"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 28,
+    "rawInput": "Vendor delay is still the main worry. NimbusPay now say the sandbox might slip into the week of the 13th. Keep the risk open.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Vendor delay is still the main worry.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Vendor delay is still the main worry.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "NimbusPay now say the sandbox might slip into the week of the 13th.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "uncertain",
+          "evidence": "NimbusPay now say the sandbox might slip into the week of the 13th.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "Keep the risk open.",
+          "domain": "decision",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Keep the risk open.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "risk:vendor-delay",
+          "op": "update",
+          "domain": "risk",
+          "title": "NimbusPay wallet sandbox delay",
+          "values": {
+            "status": "open"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "uncertain",
+      "current"
+    ]
+  },
+  {
+    "capture": 29,
+    "rawInput": "Scope clarification from Liam: SSO is in. Marketing widgets are out of this release. Please remember that — we keep getting asked.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "SSO is included in the project scope.",
+          "domain": "decision",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "SSO is in.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Marketing widgets are excluded from this release.",
+          "domain": "decision",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Marketing widgets are out of this release.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "There is a recurring inquiry about the project scope.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "we keep getting asked.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 2,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "knowledge:scope-sso-in",
+          "op": "create",
+          "domain": "decision",
+          "title": "SSO is in; marketing widgets are out of this release"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "F",
+        "detail": "Extra create observation(s): SSO is included in the project scope."
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 30,
+    "rawInput": "API timeout is still open. I'm not changing it. Just mentioning it so nobody thinks it went away.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "API timeout is still open.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "API timeout is still open.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "status": "open"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The API timeout is not changing.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "I'm not changing it.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "The speaker mentions the API timeout to clarify its status.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "Just mentioning it so nobody thinks it went away.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "risk:api-timeout",
+          "note": "API timeout still open, no change"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "A",
+        "detail": "Silent/no-change capture wrote current truth"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "uncertain",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 31,
+    "rawInput": "Correction: NimbusPay does NOT supply the member CSV export. That's old. We build the export ourselves. Please replace that fact.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "NimbusPay does NOT supply the member CSV export.",
+          "domain": "knowledge",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "NimbusPay does NOT supply the member CSV export.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "We build the export ourselves.",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "We build the export ourselves.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "mixed",
+    "apply": "mixed",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "knowledge:nimbus-export",
+          "op": "resolve",
+          "domain": "knowledge",
+          "title": "NimbusPay supplies the member CSV export"
+        },
+        {
+          "key": "knowledge:we-build-export",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "We build the member CSV export ourselves"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 32,
+    "rawInput": "Jordan's UAT script should be ready by 15 October. Update that to-do due date.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Jordan's UAT script should be ready by 15 October.",
+          "domain": "todo",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Jordan's UAT script should be ready by 15 October.",
+          "candidateTargetId": "a6250415-8ba7-4074-9c06-58a7968ade55",
+          "candidateTargetTitle": "Confirm project baseline with key stakeholders",
+          "proposedValues": {
+            "date": "2026-10-15"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:uat-script",
+          "op": "update",
+          "domain": "todo",
+          "title": "UAT script",
+          "values": {
+            "date": "2026-10-15"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 33,
+    "rawInput": "Sarah Kim is security — different Sarah from Sarah Okonkwo on product. Please add Sarah Kim. She raised pen-test findings we need to close before CAB; add a to-do for pen-test findings.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Sarah Kim is a person involved in the project.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Sarah Kim is security — different Sarah from Sarah Okonkwo on product.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "Pen-test findings need to be closed before CAB.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "She raised pen-test findings we need to close before CAB.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-3",
+          "statement": "A to-do for pen-test findings needs to be added.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Please add a to-do for pen-test findings.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "mixed",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:sarah-kim",
+          "op": "create",
+          "domain": "person",
+          "title": "Sarah Kim",
+          "values": {
+            "role": "Security"
+          }
+        },
+        {
+          "key": "todo:pen-test-findings",
+          "op": "create",
+          "domain": "todo",
+          "title": "Pen-test findings"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 34,
+    "rawInput": "Elena wants a rate-limit to-do on the session service. Please add rate limit on session API.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Elena wants a rate-limit to-do on the session service.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Elena wants a rate-limit to-do on the session service.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "pending"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "A rate limit needs to be added on the session API.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Please add rate limit on session API.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "pending"
+          }
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:rate-limit",
+          "op": "create",
+          "domain": "todo",
+          "title": "Rate limit on session API"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 35,
+    "rawInput": "Marcus finished the login error handling. Mark login error handling done.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Marcus finished the login error handling.",
+          "domain": "person",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Marcus finished the login error handling.",
+          "candidateTargetId": "41023874-524e-430c-8fee-5e133a77d08a",
+          "candidateTargetTitle": "A to-do for login error handling needs to be added.",
+          "proposedValues": {
+            "status": "done"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Mark login error handling done.",
+          "domain": "todo",
+          "disposition": "merge",
+          "truthIntent": "current",
+          "evidence": "Mark login error handling done.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:login-error-handling",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Login error handling"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 36,
+    "rawInput": "Add session timeout as a to-do — members get dumped after 20 minutes on legacy and we should match that.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Add session timeout as a to-do.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Add session timeout as a to-do — members get dumped after 20 minutes on legacy and we should match that.",
+          "candidateTargetId": "omit",
+          "candidateTargetTitle": "omit",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "empty",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:session-timeout",
+          "op": "create",
+          "domain": "todo",
+          "title": "Session timeout parity"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 37,
+    "rawInput": "Vendor delay still open. No status change. Dev is chasing internally.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Vendor delay still open.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Vendor delay still open.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "status": "open"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "No status change.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "No status change.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "Dev is chasing internally.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Dev is chasing internally.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "risk:vendor-delay",
+          "note": "Vendor delay still open"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "uncertain",
+      "current"
+    ]
+  },
+  {
+    "capture": 38,
+    "rawInput": "Amira has started the CAB pack — it's in progress, not done. Don't complete it yet.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Amira has started the CAB pack.",
+          "domain": "person",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Amira has started the CAB pack — it's in progress, not done.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "status": "in progress"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The CAB pack is not done.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Amira has started the CAB pack — it's in progress, not done.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "not done"
+          }
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:cab-pack",
+          "note": "CAB pack in progress, not complete"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 39,
+    "rawInput": "Liam confirmed release is still 27 October. Don't move it.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Liam confirmed the release date is still 27 October.",
+          "domain": "milestone",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Liam confirmed release is still 27 October.",
+          "candidateTargetId": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+          "candidateTargetTitle": "CAB is scheduled for 18 October 2026.",
+          "proposedValues": {
+            "date": "2026-10-18"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Release still 27 October"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 40,
+    "rawInput": "Decision update: feature flags stay on for 48 hours after cutover, not 24. That supersedes the informal 24-hour chatter.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Feature flags stay on for 48 hours after cutover.",
+          "domain": "decision",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "feature flags stay on for 48 hours after cutover, not 24.",
+          "candidateTargetId": "ignore",
+          "candidateTargetTitle": "ignore",
+          "proposedValues": {
+            "status": "updated"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The previous informal decision about feature flags was for 24 hours.",
+          "domain": "decision",
+          "disposition": "non_current",
+          "truthIntent": "non_current",
+          "evidence": "That supersedes the informal 24-hour chatter.",
+          "candidateTargetId": "ignore",
+          "candidateTargetTitle": "ignore",
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "empty",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "knowledge:flags-48h",
+          "op": "create",
+          "domain": "decision",
+          "title": "Feature flags stay on 48 hours after cutover"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "non_current"
+    ]
+  },
+  {
+    "capture": 41,
+    "rawInput": "Marcus finished the analytics events and Elena finished the rate limit in the same breath at standup — both done.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Marcus finished the analytics events.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Marcus finished the analytics events",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Elena finished the rate limit.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Elena finished the rate limit",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:analytics-events",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Analytics event changes"
+        },
+        {
+          "key": "todo:rate-limit",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Rate limit on session API"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected complete todo “Analytics event changes”"
+      },
+      {
+        "letter": "D",
+        "detail": "Missed expected complete todo “Rate limit on session API”"
+      },
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 42,
+    "rawInput": "Sarah said the CAB pack needs a threat model before she'll sign it. Can you update that?",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The CAB pack needs a threat model before Sarah will sign it.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Sarah said the CAB pack needs a threat model before she'll sign it.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "status": "needs threat model"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [
+        {
+          "about": "Sarah said the CAB pack needs a threat model",
+          "note": "Two Sarahs — product vs security"
+        }
+      ],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Correct conservative Needs You"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 43,
+    "rawInput": "Sorry — Sarah Okonkwo meant the threat model is product's job, not Sarah Kim's. Add a to-do for threat model, owned as product work.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The threat model is the product's job.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Sorry — Sarah Okonkwo meant the threat model is product's job, not Sarah Kim's.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "A to-do for the threat model needs to be added.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Add a to-do for threat model, owned as product work.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:threat-model",
+          "op": "create",
+          "domain": "todo",
+          "title": "Threat model"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 44,
+    "rawInput": "Markus Chen will pick up the accessibility pass. Wait — that's Marcus Chen, spelling was wrong. Accessibility pass still open, Marcus taking it.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Marcus Chen will pick up the accessibility pass.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Markus Chen will pick up the accessibility pass.",
+          "candidateTargetId": "41023874-524e-430c-8fee-5e133a77d08a",
+          "candidateTargetTitle": "A to-do for login error handling needs to be added.",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The accessibility pass is still open.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Accessibility pass still open, Marcus taking it.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "mixed",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:marcus-chen",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Marcus Chen",
+          "values": {
+            "ownershipSemantics": "continue"
+          },
+          "scope": "accessibility-pass"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "person:marcus-chen",
+          "note": "Do not create Markus Chen"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 45,
+    "rawInput": "SSO IdP MFA SLO needs to land before UAT or the IdP regression will blow up CAB. That's the same SSO migration to-do — just acronym soup.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "SSO IdP MFA SLO needs to land before UAT.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "SSO IdP MFA SLO needs to land before UAT or the IdP regression will blow up CAB.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": "SSO IdP MFA SLO needs to land before UAT.",
+          "proposedValues": {
+            "status": "pending"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "IdP regression will blow up CAB.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "SSO IdP MFA SLO needs to land before UAT or the IdP regression will blow up CAB.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "The same SSO migration to-do is referenced.",
+          "domain": "todo",
+          "disposition": "merge",
+          "truthIntent": "current",
+          "evidence": "That's the same SSO migration to-do — just acronym soup.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:sso-migration",
+          "note": "Same SSO migration work, acronym restatement"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 46,
+    "rawInput": "Priya, Marcus and Jordan are all in the 11am working session tomorrow — no project change, just heads up. Chris is still on the runbook.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Priya, Marcus and Jordan are all in the 11am working session tomorrow.",
+          "domain": "availability",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Priya, Marcus and Jordan are all in the 11am working session tomorrow",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "There is no project change.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "current",
+          "evidence": "no project change, just heads up",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-3",
+          "statement": "Chris is still on the runbook.",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Chris is still on the runbook",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "mixed",
+    "apply": "mixed",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:cutover-runbook",
+          "note": "Chris still on runbook; meeting chatter"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "A",
+        "detail": "Silent/no-change capture wrote current truth"
+      },
+      {
+        "letter": "F",
+        "detail": "Extra create observation(s): Priya, Marcus and Jordan are all in the 11am working session tomorrow."
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 47,
+    "rawInput": "yeah so basically after the stand I think we should just get the rollback plan drafted this week because if CAB bounce us we have nothing and Chris said he'd do it but I didn't hear a date so just keep it open ok thanks",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The rollback plan should be drafted this week.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "I think we should just get the rollback plan drafted this week",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "If CAB bounces us, we have nothing.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "if CAB bounce us we have nothing",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-3",
+          "statement": "Chris said he'd draft the rollback plan.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Chris said he'd do it",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-4",
+          "statement": "A date for the rollback plan was not heard.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "but I didn't hear a date",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 4
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:rollback-plan",
+          "note": "Rollback plan still open, speech-like restatement"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 48,
+    "rawInput": "Catch-up dump: session timeout still open, member comms still open, perf budget still open, accessibility still open, and please add vendor contract check as a new to-do for Liam. Also Jordan is still UAT.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Session timeout is still open.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "session timeout still open",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Member communications are still open.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "member comms still open",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "Performance budget is still open.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "perf budget still open",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-4",
+          "statement": "Accessibility is still open.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "accessibility still open",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-5",
+          "statement": "A new to-do for vendor contract check needs to be added for Liam.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "please add vendor contract check as a new to-do for Liam",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-6",
+          "statement": "Jordan is still in UAT.",
+          "domain": "availability",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Jordan is still UAT",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 6
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:vendor-contract-check",
+          "op": "create",
+          "domain": "todo",
+          "title": "Vendor contract check"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:session-timeout",
+          "note": "session timeout still open"
+        },
+        {
+          "key": "todo:member-comms",
+          "note": "member comms still open"
+        },
+        {
+          "key": "todo:perf-budget",
+          "note": "perf budget still open"
+        },
+        {
+          "key": "todo:accessibility-pass",
+          "note": "accessibility still open"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current",
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 49,
+    "rawInput": "Analytics due Friday — sorry, Monday the 14th. That's already on the analytics to-do which Marcus finished, so this is leftover chatter. Don't resurrect it.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Analytics are due on Monday the 14th.",
+          "domain": "todo",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Analytics due Friday — sorry, Monday the 14th.",
+          "candidateTargetId": "a6250415-8ba7-4074-9c06-58a7968ade55",
+          "candidateTargetTitle": "Confirm project baseline with key stakeholders",
+          "proposedValues": {
+            "date": "2023-10-14"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Marcus finished the analytics to-do.",
+          "domain": "person",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "that's already on the analytics to-do which Marcus finished.",
+          "candidateTargetId": "a6250415-8ba7-4074-9c06-58a7968ade55",
+          "candidateTargetTitle": "Confirm project baseline with key stakeholders",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "The statement about analytics is considered leftover chatter.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "evidence": "so this is leftover chatter.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:analytics-events",
+          "note": "Analytics already complete; leftover due-date chatter"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "non_current"
+    ]
+  },
+  {
+    "capture": 50,
+    "rawInput": "Someone should own hypercare. Not sure who. Can we flag that?",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Someone should own hypercare.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "uncertain",
+          "evidence": "Someone should own hypercare.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {
+            "ownershipSemantics": "ambiguous"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Not sure who should own hypercare.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "Not sure who.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-3",
+          "statement": "Can we flag that?",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "Can we flag that?",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [
+        {
+          "about": "Someone should own hypercare",
+          "note": "Unclear ownership"
+        }
+      ],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Correct conservative Needs You"
+      }
+    ],
+    "truthIntents": [
+      "uncertain",
+      "uncertain",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 51,
+    "rawInput": "Sarah said the member comms can go out the day before release. That's it.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The member communications can go out the day before release.",
+          "domain": "decision",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Sarah said the member comms can go out the day before release.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [
+        {
+          "about": "Sarah said the member comms can go out the day before release",
+          "note": "Two Sarahs still on the project"
+        }
+      ],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "B",
+        "detail": "Unsafe Ready on ambiguous capture (1 write(s))"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 52,
+    "rawInput": "Clarifying capture 51: Sarah Okonkwo on product — member comms the day before release. Update that to-do note/due to 26 October.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The due date for the to-do note needs to be updated to 26 October.",
+          "domain": "todo",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Update that to-do note/due to 26 October.",
+          "candidateTargetId": "a6250415-8ba7-4074-9c06-58a7968ade55",
+          "candidateTargetTitle": "Confirm project baseline with key stakeholders",
+          "proposedValues": {
+            "date": "2026-10-26"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:member-comms",
+          "op": "update",
+          "domain": "todo",
+          "title": "Member comms",
+          "values": {
+            "date": "2026-10-26"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected update todo “Member comms”"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 53,
+    "rawInput": "Marcus is NOT doing UAT. Jordan is. If anyone's notes say Marcus owns UAT, that's wrong.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Jordan is doing UAT.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Jordan is.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Marcus is NOT doing UAT.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Marcus is NOT doing UAT.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "If anyone's notes say Marcus owns UAT, that's wrong.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "If anyone's notes say Marcus owns UAT, that's wrong.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "mixed",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "person:jordan-hale",
+          "note": "Jordan still owns UAT; Marcus is not UAT"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 54,
+    "rawInput": "Side chat about biscuits and the printer jam, and also Elena finished SSO migration. That's the useful bit.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Elena finished SSO migration.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Elena finished SSO migration.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:sso-migration",
+          "op": "complete",
+          "domain": "todo",
+          "title": "SSO migration"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected complete todo “SSO migration”"
+      },
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 55,
+    "rawInput": "Priya Shah, Marcus Chen, Elena Voss and Jordan Hale were all on the call — no new owners. Accessibility pass still with Marcus.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Priya Shah, Marcus Chen, Elena Voss and Jordan Hale were all on the call.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Priya Shah, Marcus Chen, Elena Voss and Jordan Hale were all on the call",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "There are no new owners.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "no new owners",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-3",
+          "statement": "Accessibility pass is still with Marcus.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Accessibility pass still with Marcus",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:accessibility-pass",
+          "note": "Accessibility still with Marcus"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 56,
+    "rawInput": "New defect from Jordan: login loop on password reset. Please add that to-do — login loop on password reset.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "A new to-do for login loop on password reset needs to be added.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Please add that to-do — login loop on password reset.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": "A to-do for login error handling needs to be added.",
+          "proposedValues": {
+            "status": "pending"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:defect-login-loop",
+          "op": "create",
+          "domain": "todo",
+          "title": "Login loop on password reset"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 57,
+    "rawInput": "That login loop defect needs to be done by 17 October. Same item, just a date.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The login loop defect needs to be done by 17 October.",
+          "domain": "todo",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "That login loop defect needs to be done by 17 October.",
+          "candidateTargetId": "41023874-524e-430c-8fee-5e133a77d08a",
+          "candidateTargetTitle": "A to-do for login error handling needs to be added.",
+          "proposedValues": {
+            "date": "2026-10-17"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:defect-login-loop",
+          "op": "update",
+          "domain": "todo",
+          "title": "Login loop on password reset",
+          "values": {
+            "date": "2026-10-17"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 58,
+    "rawInput": "Marcus fixed the login loop. Mark it done.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Marcus fixed the login loop.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Marcus fixed the login loop.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "The login loop task is marked done.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Mark it done.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "mixed",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:defect-login-loop",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Login loop on password reset"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 59,
+    "rawInput": "Follow-up: add a to-do to regression-test password reset on staging.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "A to-do needs to be added to regression-test password reset on staging.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "add a to-do to regression-test password reset on staging.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:password-reset-regression",
+          "op": "create",
+          "domain": "todo",
+          "title": "Regression-test password reset on staging"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 60,
+    "rawInput": "New risk: CAB rejection if the threat model is thin. Call it CAB rejection.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "CAB rejection if the threat model is thin.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "CAB rejection if the threat model is thin.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "risk:cab-rejection",
+          "op": "create",
+          "domain": "risk",
+          "title": "CAB rejection"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 61,
+    "rawInput": "CAB rejection risk is watch, not panic. Update status to watch.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "CAB rejection risk is watch.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "CAB rejection risk is watch, not panic.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "status": "watch"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Update status to watch.",
+          "domain": "unknown",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "Update status to watch.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "risk:cab-rejection",
+          "op": "update",
+          "domain": "risk",
+          "title": "CAB rejection",
+          "values": {
+            "status": "watch"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 62,
+    "rawInput": "Threat model landed and Amira is happier. Resolve the CAB rejection risk.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Threat model landed.",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Threat model landed and Amira is happier.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Amira is happier.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Threat model landed and Amira is happier.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "Resolve the CAB rejection risk.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Resolve the CAB rejection risk.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "mixed",
+    "apply": "failed",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:threat-model",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Threat model"
+        },
+        {
+          "key": "risk:cab-rejection",
+          "op": "resolve",
+          "domain": "risk",
+          "title": "CAB rejection"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "F",
+        "detail": "Extra create observation(s): Amira is happier."
+      },
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 63,
+    "rawInput": "UAT start moves again — 20 October 2026. Jordan asked for two more days after SSO.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "UAT start moves to 20 October 2026.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "UAT start moves again — 20 October 2026.",
+          "candidateTargetId": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+          "candidateTargetTitle": "CAB is scheduled for 18 October 2026.",
+          "proposedValues": {
+            "date": "2026-10-20"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Jordan asked for two more days after SSO.",
+          "domain": "person",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "Jordan asked for two more days after SSO.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "milestone:uat-start",
+          "op": "update",
+          "domain": "milestone",
+          "title": "UAT start",
+          "values": {
+            "date": "2026-10-20"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 64,
+    "rawInput": "Actually CAB is the 18th and UAT sitting after CAB is backwards. Move UAT start to 18 October so it runs into CAB week, not after.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "CAB is scheduled for 18 October 2026.",
+          "domain": "milestone",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Actually CAB is the 18th",
+          "candidateTargetId": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+          "candidateTargetTitle": "CAB is scheduled for 18 October 2026.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "UAT start needs to be moved to 18 October.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Move UAT start to 18 October so it runs into CAB week, not after.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "milestone:uat-start",
+          "op": "update",
+          "domain": "milestone",
+          "title": "UAT start",
+          "values": {
+            "date": "2026-10-18"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected update milestone “UAT start”"
+      },
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 65,
+    "rawInput": "UAT ownership: Priya Shah is taking UAT from Jordan Hale this week so Jordan can stay in defect triage.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Priya Shah is taking UAT from Jordan Hale.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Priya Shah is taking UAT from Jordan Hale this week so Jordan can stay in defect triage.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Jordan Hale is staying in defect triage this week.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Priya Shah is taking UAT from Jordan Hale this week so Jordan can stay in defect triage.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:priya-shah",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Priya Shah",
+          "values": {
+            "ownershipSemantics": "replace"
+          },
+          "scope": "UAT"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 66,
+    "rawInput": "Change of plan: Jordan Hale takes UAT back. Priya is covering steering. Jordan owns UAT again.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Jordan Hale takes UAT back.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Jordan Hale takes UAT back.",
+          "candidateTargetId": "41023874-524e-430c-8fee-5e133a77d08a",
+          "candidateTargetTitle": "A to-do for login error handling needs to be added.",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Priya is covering steering.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Priya is covering steering.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "Jordan owns UAT again.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Jordan owns UAT again.",
+          "candidateTargetId": "41023874-524e-430c-8fee-5e133a77d08a",
+          "candidateTargetTitle": "A to-do for login error handling needs to be added.",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:jordan-hale",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Jordan Hale",
+          "values": {
+            "ownershipSemantics": "replace"
+          },
+          "scope": "UAT"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 67,
+    "rawInput": "Tomiko Sato is away 21 October for a conference. One day.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Tomiko Sato is away on 21 October for a conference.",
+          "domain": "availability",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Tomiko Sato is away 21 October for a conference.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {
+            "date": "2026-10-21"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:tomiko-sato",
+          "op": "update",
+          "domain": "availability",
+          "title": "Tomiko Sato",
+          "values": {
+            "label": "away 2026-10-21"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 68,
+    "rawInput": "Working rule update: CAB packs still 24 hours before, but they now also need the rollback plan attached. Don't drop the 24-hour rule.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "CAB packs still need to be submitted 24 hours before.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "CAB packs still 24 hours before",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "CAB packs now need the rollback plan attached.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "they now also need the rollback plan attached",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "knowledge:cab-rollback-attached",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "CAB packs must include the rollback plan"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "knowledge:cab-24h",
+          "note": "24-hour CAB rule remains"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected create knowledge “CAB packs must include the rollback plan”"
+      },
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 69,
+    "rawInput": "Please update the UAT checklist — that's the UAT script to-do, we're just calling it the checklist now. Due date still 15 October.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The UAT checklist needs to be updated.",
+          "domain": "todo",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Please update the UAT checklist",
+          "candidateTargetId": "41023874-524e-430c-8fee-5e133a77d08a",
+          "candidateTargetTitle": "A to-do for login error handling needs to be added.",
+          "proposedValues": {
+            "status": "updated",
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The due date for the UAT checklist is still 15 October.",
+          "domain": "todo",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Due date still 15 October.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:uat-script",
+          "op": "update",
+          "domain": "todo",
+          "title": "UAT script",
+          "values": {
+            "date": "2026-10-15"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected update todo “UAT script”"
+      },
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 70,
+    "rawInput": "UAT script is done. Add a follow-up: UAT evidence pack.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "UAT script is done.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "UAT script is done.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "A follow-up for UAT evidence pack needs to be added.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Add a follow-up: UAT evidence pack.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:uat-script",
+          "op": "complete",
+          "domain": "todo",
+          "title": "UAT script"
+        },
+        {
+          "key": "todo:uat-evidence-pack",
+          "op": "create",
+          "domain": "todo",
+          "title": "UAT evidence pack"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 71,
+    "rawInput": "Ignore the date in yesterday's steering notes — CAB is still the 18th. Someone typed the 22nd in the pack by mistake.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The CAB is still scheduled for the 18th.",
+          "domain": "milestone",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "CAB is still the 18th.",
+          "candidateTargetId": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+          "candidateTargetTitle": "CAB is scheduled for 18 October 2026",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "There was a mistake in the CAB pack regarding the date.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "uncertain",
+          "evidence": "Someone typed the 22nd in the pack by mistake.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:cab",
+          "note": "CAB still 18 October; ignore 22nd"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "E",
+        "detail": "Steering notes 22nd is stale; CAB stays 18th — expected non_current, got current,uncertain"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 72,
+    "rawInput": "The handover says Marcus owns UAT but that's old. Jordan Hale still owns UAT. Don't switch it.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Jordan Hale owns UAT.",
+          "domain": "person",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Jordan Hale still owns UAT.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The handover says Marcus owns UAT but that's old.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "evidence": "The handover says Marcus owns UAT but that's old.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "Do not switch the ownership of UAT.",
+          "domain": "decision",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Don't switch it.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "person:jordan-hale",
+          "note": "Jordan still owns UAT; handover is stale"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "non_current",
+      "current"
+    ]
+  },
+  {
+    "capture": 73,
+    "rawInput": "We discussed moving release to the 30th but didn't agree it. It's still the 27th.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The release date is still the 27th.",
+          "domain": "milestone",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "It's still the 27th.",
+          "candidateTargetId": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+          "candidateTargetTitle": "CAB is scheduled for 18 October 2026",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "There was a discussion about moving the release to the 30th.",
+          "domain": "decision",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "We discussed moving release to the 30th but didn't agree it.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Release still 27 October; 30th was discussed not agreed"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "E",
+        "detail": "Discussed 30th, not agreed; release stays 27th — expected non_current, got current,uncertain"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 74,
+    "rawInput": "Don't reopen the API timeout risk — I'm just mentioning that it was the reason we delayed testing last week.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The API timeout risk should not be reopened.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Don't reopen the API timeout risk",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "The API timeout risk was the reason for delaying testing last week.",
+          "domain": "risk",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "evidence": "it was the reason we delayed testing last week",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "risk:api-timeout",
+          "note": "API timeout remains as-is; historical mention"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "non_current"
+    ]
+  },
+  {
+    "capture": 75,
+    "rawInput": "Old notes say NimbusPay supplies the export but that's no longer true. We already corrected this. Don't put the vendor back on export.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "NimbusPay no longer supplies the export.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Old notes say NimbusPay supplies the export but that's no longer true.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "status": "updated"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The vendor should not be put back on export.",
+          "domain": "decision",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Don't put the vendor back on export.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "knowledge:we-build-export",
+          "note": "We still build the export; old vendor note is stale"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 76,
+    "rawInput": "We considered a weekend cutover but decided against it. Stay on the Tuesday 27th release.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "A weekend cutover was considered but decided against.",
+          "domain": "decision",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "We considered a weekend cutover but decided against it.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "The release will stay on Tuesday 27th.",
+          "domain": "decision",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Stay on the Tuesday 27th release.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 2,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Weekend cutover rejected; release 27th"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "A",
+        "detail": "Silent/no-change capture wrote current truth"
+      },
+      {
+        "letter": "E",
+        "detail": "Weekend cutover considered and rejected — applied current write; truthIntents=current,current"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 77,
+    "rawInput": "No change on release. Still 27 October 2026.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The release date remains unchanged.",
+          "domain": "milestone",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "No change on release.",
+          "candidateTargetId": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+          "candidateTargetTitle": "CAB is scheduled for 18 October 2026.",
+          "proposedValues": {
+            "date": "2026-10-27"
+          }
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Explicit no change — release 27th"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "E",
+        "detail": "Explicit no change on release — expected non_current, got current"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 78,
+    "rawInput": "Quoted from last month's RAID: 'UAT 14 October'. That's outdated. Current UAT start is the 18th. Don't roll the date back.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Current UAT start is the 18th.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Current UAT start is the 18th.",
+          "candidateTargetId": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+          "candidateTargetTitle": "CAB is scheduled for 18 October 2026.",
+          "proposedValues": {
+            "date": "2026-10-18"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "UAT 14 October is outdated.",
+          "domain": "milestone",
+          "disposition": "non_current",
+          "truthIntent": "non_current",
+          "evidence": "UAT 14 October is outdated.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:uat-start",
+          "note": "UAT remains 18 October; 14th is quoted stale"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "A",
+        "detail": "Silent/no-change capture wrote current truth"
+      },
+      {
+        "letter": "E",
+        "detail": "Quoted RAID UAT 14th is stale — applied current write; truthIntents=current,non_current"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "non_current"
+    ]
+  },
+  {
+    "capture": 79,
+    "rawInput": "The CAB rejection risk we closed after the threat model — just mentioning it in the weekly. It stays resolved.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The CAB rejection risk is resolved.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "It stays resolved.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "risk:cab-rejection",
+          "note": "CAB rejection stays resolved"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 80,
+    "rawInput": "Don't touch Atlas Billing Cutover. Someone pasted their ledger to-do into our chat by mistake. Close the billing ledger is not a Northstar action.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Close the billing ledger is not a Northstar action.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "Close the billing ledger is not a Northstar action.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "note": "Atlas Billing reference — do not mutate the other project"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 81,
+    "rawInput": "Marcus is NOT covering security. Sarah Kim is. Don't reassign pen-test findings.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Marcus is NOT covering security.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Marcus is NOT covering security.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Sarah Kim is covering security.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Sarah Kim is.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "Don't reassign pen-test findings.",
+          "domain": "decision",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Don't reassign pen-test findings.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:pen-test-findings",
+          "note": "Pen-test stays with security / Sarah Kim"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 82,
+    "rawInput": "Steering PDF still shows CAB on the 12th in the header. That's a copied template. CAB is the 18th.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "CAB is scheduled for the 18th.",
+          "domain": "milestone",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "CAB is the 18th.",
+          "candidateTargetId": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+          "candidateTargetTitle": "CAB is scheduled for 18 October 2026.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "The Steering PDF shows CAB on the 12th.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "Steering PDF still shows CAB on the 12th in the header.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "The CAB date in the Steering PDF is a copied template.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "That's a copied template.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:cab",
+          "note": "CAB still 18th; 12th is template cruft"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "E",
+        "detail": "Steering PDF 12th is template cruft — expected non_current, got current,uncertain,uncertain"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "uncertain",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 83,
+    "rawInput": "NimbusPay sandbox arrived. Vendor delay is not a risk anymore — resolve it.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "NimbusPay sandbox arrived.",
+          "domain": "availability",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "NimbusPay sandbox arrived.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Vendor delay is not a risk anymore.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Vendor delay is not a risk anymore — resolve it.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "The vendor delay needs to be resolved.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Vendor delay is not a risk anymore — resolve it.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "mixed",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "risk:vendor-delay",
+          "op": "resolve",
+          "domain": "risk",
+          "title": "NimbusPay wallet sandbox delay"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 84,
+    "rawInput": "Tomiko Sato's last day on Northstar is Friday. She's leaving the project after the conference. Dashboards go with her handover notes. Record that Tomiko Sato has left — do not invent a replacement yet.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Tomiko Sato's last day on Northstar is Friday.",
+          "domain": "availability",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Tomiko Sato's last day on Northstar is Friday.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "status": "left",
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Tomiko Sato is leaving the project after the conference.",
+          "domain": "availability",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "She's leaving the project after the conference.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {
+            "status": "left",
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-3",
+          "statement": "Dashboards go with her handover notes.",
+          "domain": "knowledge",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Dashboards go with her handover notes.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-4",
+          "statement": "Record that Tomiko Sato has left.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Record that Tomiko Sato has left — do not invent a replacement yet.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 4
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "knowledge:tomiko-left",
+          "op": "create",
+          "domain": "knowledge",
+          "title": "Tomiko Sato has left the project"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected create knowledge “Tomiko Sato has left the project”"
+      },
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 85,
+    "rawInput": "Nadia Qureshi is joining as analytics replacement from next week. Please add her.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Nadia Qureshi is joining as analytics replacement from next week.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Nadia Qureshi is joining as analytics replacement from next week.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 1
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:nadia-qureshi",
+          "op": "create",
+          "domain": "person",
+          "title": "Nadia Qureshi",
+          "values": {
+            "role": "Analytics"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current"
+    ]
+  },
+  {
+    "capture": 86,
+    "rawInput": "Jordan found a defect: export encoding is mangling names. Add export encoding defect.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Jordan found a defect regarding export encoding.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Jordan found a defect: export encoding is mangling names.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "An export encoding defect needs to be added.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Add export encoding defect.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:defect-export-encoding",
+          "op": "create",
+          "domain": "todo",
+          "title": "Export encoding defect"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 87,
+    "rawInput": "Another defect: login loop is back on Safari 16. New to-do, not the old completed one — Safari login loop.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "There is a defect with the login loop on Safari 16.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Another defect: login loop is back on Safari 16.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "A new to-do for the Safari login loop needs to be added.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "New to-do, not the old completed one — Safari login loop.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:defect-safari-login-loop",
+          "op": "create",
+          "domain": "todo",
+          "title": "Safari login loop"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 88,
+    "rawInput": "UAT is in progress as of today. Jordan still owns it. Evidence pack still open.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "UAT is in progress.",
+          "domain": "status",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "UAT is in progress as of today.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "in progress"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Jordan still owns UAT.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Jordan still owns it.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "ownershipSemantics": "continue"
+          }
+        },
+        {
+          "id": "obs-3",
+          "statement": "Evidence pack is still open.",
+          "domain": "status",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Evidence pack still open.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "open"
+          }
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "no_change",
+    "apply": "no_change",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "person:jordan-hale",
+          "note": "Jordan still owns UAT"
+        },
+        {
+          "key": "todo:uat-evidence-pack",
+          "note": "Evidence pack still open"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 89,
+    "rawInput": "Amira submitted the CAB pack. Mark CAB pack done.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Amira submitted the CAB pack.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Amira submitted the CAB pack.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "Mark CAB pack done.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Mark CAB pack done.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:cab-pack",
+          "op": "complete",
+          "domain": "todo",
+          "title": "CAB pack"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected complete todo “CAB pack”"
+      },
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 90,
+    "rawInput": "Elena Voss is out sick 22 to 23 October. Temporary. Chris Bell covers cutover questions while she's out.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Elena Voss is out sick from 22 to 23 October.",
+          "domain": "availability",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Elena Voss is out sick 22 to 23 October.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {
+            "date": "2026-10-22"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Chris Bell covers cutover questions while Elena Voss is out.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Chris Bell covers cutover questions while she's out.",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:elena-voss",
+          "op": "update",
+          "domain": "availability",
+          "title": "Elena Voss",
+          "values": {
+            "label": "away 2026-10-22 to 2026-10-23"
+          }
+        },
+        {
+          "key": "person:chris-bell",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Chris Bell",
+          "values": {
+            "ownershipSemantics": "continue"
+          },
+          "scope": "cutover"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 91,
+    "rawInput": "Late change: Chris Bell owns cutover execution, not Elena. Elena stays on the session service.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Chris Bell owns cutover execution.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Chris Bell owns cutover execution, not Elena.",
+          "candidateTargetId": "0a0466d1-b521-4f3e-b5e1-fe0afd5460df",
+          "candidateTargetTitle": "A new to-do for vendor contract check needs to be added for Liam.",
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Elena stays on the session service.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Elena stays on the session service.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "person:chris-bell",
+          "op": "update",
+          "domain": "responsibility",
+          "title": "Chris Bell",
+          "values": {
+            "ownershipSemantics": "replace"
+          },
+          "scope": "cutover"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 92,
+    "rawInput": "Rollback plan and cutover runbook are both done. Mark them complete.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Rollback plan is done.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Rollback plan and cutover runbook are both done.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "complete"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Cutover runbook is done.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Rollback plan and cutover runbook are both done.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "complete"
+          }
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:rollback-plan",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Rollback plan"
+        },
+        {
+          "key": "todo:cutover-runbook",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Cutover runbook"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 93,
+    "rawInput": "Pen-test findings closed. Accessibility pass done. Perf budget accepted. Mark those three complete.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Pen-test findings closed.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Pen-test findings closed.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "complete"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Accessibility pass done.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Accessibility pass done.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "complete"
+          }
+        },
+        {
+          "id": "obs-3",
+          "statement": "Perf budget accepted.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Perf budget accepted.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "status": "complete"
+          }
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:pen-test-findings",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Pen-test findings"
+        },
+        {
+          "key": "todo:accessibility-pass",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Accessibility pass"
+        },
+        {
+          "key": "todo:perf-budget",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Performance budget for member home"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 94,
+    "rawInput": "Deployment decision: we go on 27 October. CAB approved. Release date does not move.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Deployment decision is to go on 27 October.",
+          "domain": "decision",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Deployment decision: we go on 27 October.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "CAB has approved the deployment.",
+          "domain": "milestone",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "CAB approved.",
+          "candidateTargetId": "7b79e435-063f-46c6-bd8b-36aead9f36cd",
+          "candidateTargetTitle": "CAB is scheduled for 18 October 2026.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "The release date does not move.",
+          "domain": "decision",
+          "disposition": "commentary",
+          "truthIntent": "current",
+          "evidence": "Release date does not move.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Ready",
+    "apply": "wrote",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "knowledge:go-27",
+          "op": "create",
+          "domain": "decision",
+          "title": "CAB approved go-live on 27 October"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Release remains 27 October"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "correct",
+        "detail": "No live-quality discrepancy recorded"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 95,
+    "rawInput": "Steering notes 24 Oct. Attendees Priya Shah, Liam Brooks, Sarah Okonkwo, Amira Rahman.\nUAT evidence pack still outstanding. Safari login loop still open. Export encoding still open.\nVendor delay is closed. API timeout remains open until after hypercare.\nChris Bell confirmed cutover window 06:00–08:00. Member comms still due 26 Oct.\nDo not reopen CAB rejection. Do not move CAB off the 18th (it's already happened / on track).",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "UAT evidence pack is still outstanding.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "UAT evidence pack still outstanding.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Safari login loop is still open.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Safari login loop still open.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "Export encoding is still open.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Export encoding still open.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-4",
+          "statement": "Vendor delay is closed.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Vendor delay is closed.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-5",
+          "statement": "API timeout remains open until after hypercare.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "API timeout remains open until after hypercare.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-6",
+          "statement": "Cutover window is confirmed for 06:00–08:00.",
+          "domain": "decision",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Chris Bell confirmed cutover window 06:00–08:00.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-7",
+          "statement": "Member communications are still due on 26 Oct.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Member comms still due 26 Oct.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-8",
+          "statement": "CAB rejection should not be reopened.",
+          "domain": "decision",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Do not reopen CAB rejection.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-9",
+          "statement": "CAB should not be moved off the 18th.",
+          "domain": "decision",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Do not move CAB off the 18th (it's already happened / on track).",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 9
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:uat-evidence-pack",
+          "note": "still outstanding"
+        },
+        {
+          "key": "todo:defect-safari-login-loop",
+          "note": "still open"
+        },
+        {
+          "key": "todo:defect-export-encoding",
+          "note": "still open"
+        },
+        {
+          "key": "risk:api-timeout",
+          "note": "still open until hypercare"
+        },
+        {
+          "key": "risk:cab-rejection",
+          "note": "do not reopen"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "A",
+        "detail": "Silent/no-change capture wrote current truth"
+      },
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current",
+      "current",
+      "current",
+      "current",
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 96,
+    "rawInput": "Standup dump. Marcus fixed Safari login loop — mark it done. Elena is back, sick leave over.\nNadia Qureshi is shadowing dashboards. Password-reset regression is done.\nSession timeout parity still open. Feature-flag cleanup should be added as a post-release to-do.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Marcus fixed Safari login loop.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Marcus fixed Safari login loop — mark it done.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Elena is back from sick leave.",
+          "domain": "availability",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Elena is back, sick leave over.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "Nadia Qureshi is shadowing dashboards.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Nadia Qureshi is shadowing dashboards.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-4",
+          "statement": "Password-reset regression is done.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Password-reset regression is done.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-5",
+          "statement": "Session timeout parity is still open.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "uncertain",
+          "evidence": "Session timeout parity still open.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-6",
+          "statement": "Feature-flag cleanup should be added as a post-release to-do.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "uncertain",
+          "evidence": "Feature-flag cleanup should be added as a post-release to-do.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 6
+    },
+    "resolution": "mixed",
+    "apply": "failed",
+    "appliedCount": 1,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:defect-safari-login-loop",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Safari login loop"
+        },
+        {
+          "key": "todo:password-reset-regression",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Regression-test password reset on staging"
+        },
+        {
+          "key": "todo:feature-flag-cleanup",
+          "op": "create",
+          "domain": "todo",
+          "title": "Feature-flag cleanup"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "F",
+        "detail": "Extra create observation(s): Nadia Qureshi is shadowing dashboards. | Session timeout parity is still open."
+      },
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current",
+      "current",
+      "uncertain",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 97,
+    "rawInput": "Export encoding is fixed. Member comms went out. UAT evidence pack filed. Mark those complete.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Export encoding is fixed.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "Export encoding is fixed.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "Member communications went out.",
+          "domain": "todo",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Member comms went out.",
+          "candidateTargetId": "a8a28fda-e4ad-43f2-9cc4-a5a54c7cd53f",
+          "candidateTargetTitle": "Member communications are still due on 26 Oct.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "UAT evidence pack was filed.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "UAT evidence pack filed.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-4",
+          "statement": "Mark those complete.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "evidence": "Mark those complete.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 4
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:defect-export-encoding",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Export encoding defect"
+        },
+        {
+          "key": "todo:member-comms",
+          "op": "complete",
+          "domain": "todo",
+          "title": "Member comms"
+        },
+        {
+          "key": "todo:uat-evidence-pack",
+          "op": "complete",
+          "domain": "todo",
+          "title": "UAT evidence pack"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": []
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected complete todo “Export encoding defect”"
+      },
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "uncertain",
+      "current",
+      "current",
+      "uncertain"
+    ]
+  },
+  {
+    "capture": 98,
+    "rawInput": "Legacy session mapping we can live with — accept that risk. API timeout stays open for hypercare. Vendor delay stays resolved.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Legacy session mapping is accepted as a risk.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Legacy session mapping we can live with — accept that risk.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-2",
+          "statement": "API timeout remains open for hypercare.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "API timeout stays open for hypercare.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        },
+        {
+          "id": "obs-3",
+          "statement": "Vendor delay is resolved.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Vendor delay stays resolved.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {}
+        }
+      ],
+      "observationCount": 3
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "risk:legacy-session",
+          "op": "update",
+          "domain": "risk",
+          "title": "Legacy session mapping",
+          "values": {
+            "status": "accepted"
+          }
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "risk:api-timeout",
+          "note": "API timeout stays open"
+        },
+        {
+          "key": "risk:vendor-delay",
+          "note": "vendor delay stays resolved"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 99,
+    "rawInput": "Post-release: add hypercare rota as a to-do for Priya. Session timeout parity can wait until after go-live — leave it open.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Add hypercare rota as a to-do for Priya.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Post-release: add hypercare rota as a to-do for Priya.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "ownershipSemantics": "replace"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Session timeout parity can wait until after go-live.",
+          "domain": "decision",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Session timeout parity can wait until after go-live — leave it open.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 2
+    },
+    "resolution": "Needs You",
+    "apply": "needs_you",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "todo:hypercare-rota",
+          "op": "create",
+          "domain": "todo",
+          "title": "Hypercare rota"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "todo:session-timeout",
+          "note": "Session timeout remains open"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "C",
+        "detail": "Expected apply; model stayed Needs You (truth safe)"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "current"
+    ]
+  },
+  {
+    "capture": 100,
+    "rawInput": "We're live. Release happened 27 October. Project status is hypercare, not closed. Open work is feature-flag cleanup, hypercare rota, and session timeout parity. API timeout still the residual risk. Jordan still owns UAT wrap-up. Don't invent a new release date.",
+    "model": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The project status is hypercare.",
+          "domain": "status",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Project status is hypercare, not closed.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-2",
+          "statement": "The release happened on 27 October.",
+          "domain": "milestone",
+          "disposition": "create_new",
+          "truthIntent": "non_current",
+          "evidence": "Release happened 27 October.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "Open work includes feature-flag cleanup.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Open work is feature-flag cleanup, hypercare rota, and session timeout parity.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-4",
+          "statement": "Open work includes hypercare rota.",
+          "domain": "todo",
+          "disposition": "merge",
+          "truthIntent": "current",
+          "evidence": "Open work is feature-flag cleanup, hypercare rota, and session timeout parity.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-5",
+          "statement": "Open work includes session timeout parity.",
+          "domain": "todo",
+          "disposition": "merge",
+          "truthIntent": "current",
+          "evidence": "Open work is feature-flag cleanup, hypercare rota, and session timeout parity.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-6",
+          "statement": "API timeout is a residual risk.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "API timeout still the residual risk.",
+          "candidateTargetId": "52485c43-113c-4efc-ae64-a647c2dc4f80",
+          "candidateTargetTitle": "There are no exceptions to the rule about CAB packs.",
+          "proposedValues": null
+        },
+        {
+          "id": "obs-7",
+          "statement": "Jordan still owns UAT wrap-up.",
+          "domain": "person",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Jordan still owns UAT wrap-up.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ],
+      "observationCount": 7
+    },
+    "resolution": "Ready",
+    "apply": "failed",
+    "appliedCount": 0,
+    "oracle": {
+      "expectedWrites": [
+        {
+          "key": "knowledge:live-hypercare",
+          "op": "create",
+          "domain": "decision",
+          "title": "Live; project in hypercare after 27 October release"
+        }
+      ],
+      "expectedNeedsYou": [],
+      "expectedNoChange": [
+        {
+          "key": "milestone:release",
+          "note": "Release remains 27 October"
+        },
+        {
+          "key": "todo:feature-flag-cleanup",
+          "note": "still open"
+        },
+        {
+          "key": "todo:hypercare-rota",
+          "note": "still open"
+        },
+        {
+          "key": "todo:session-timeout",
+          "note": "still open"
+        },
+        {
+          "key": "risk:api-timeout",
+          "note": "residual open risk"
+        }
+      ]
+    },
+    "classifications": [
+      {
+        "letter": "D",
+        "detail": "Missed expected create decision “Live; project in hypercare after 27 October release”"
+      },
+      {
+        "letter": "G",
+        "detail": "Apply failed after Ready"
+      }
+    ],
+    "truthIntents": [
+      "current",
+      "non_current",
+      "current",
+      "current",
+      "current",
+      "current",
+      "current"
+    ]
+  }
+]
