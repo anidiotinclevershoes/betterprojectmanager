@@ -1,0 +1,703 @@
+{
+  "readyItems": 77,
+  "wrote": 38,
+  "nonEffects": 39,
+  "nonEffectKinds": {
+    "no_change": 39
+  },
+  "attempts": [
+    {
+      "capture": 6,
+      "domain": "person",
+      "statement": "Jordan Hale is the test lead.",
+      "suggestionContent": "Jordan Hale",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 7,
+      "domain": "person",
+      "statement": "Dev Patel is the payments integration contact at NimbusPay.",
+      "suggestionContent": "Dev Patel",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 7,
+      "domain": "knowledge",
+      "statement": "NimbusPay is supplying the wallet widget.",
+      "suggestionContent": "NimbusPay is supplying the wallet widget.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 7,
+      "domain": "knowledge",
+      "statement": "The project is not swapping processors on this release.",
+      "suggestionContent": "The project is not swapping processors on this release.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 8,
+      "domain": "person",
+      "statement": "Amira Rahman chairs CAB.",
+      "suggestionContent": "Amira Rahman",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 8,
+      "domain": "knowledge",
+      "statement": "CAB packs must be ready 24 hours before the CAB slot.",
+      "suggestionContent": "CAB packs must be ready 24 hours before the CAB slot.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 8,
+      "domain": "risk",
+      "statement": "No exceptions because the last renewal got bounced.",
+      "suggestionContent": "Last renewal got bounced",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 9,
+      "domain": "todo",
+      "statement": "A to-do needs to be added for login error handling.",
+      "suggestionContent": "Login error handling",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 10,
+      "domain": "todo",
+      "statement": "A new to-do needs to be added for analytics event changes.",
+      "suggestionContent": "Add to-do for analytics event changes",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 11,
+      "domain": "milestone",
+      "statement": "UAT starts on 14 October 2026.",
+      "suggestionContent": "UAT Start",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 11,
+      "domain": "milestone",
+      "statement": "CAB is scheduled for 18 October 2026.",
+      "suggestionContent": "CAB Date",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 11,
+      "domain": "milestone",
+      "statement": "The target release is on 27 October 2026.",
+      "suggestionContent": "Target Release",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 12,
+      "domain": "todo",
+      "statement": "Jordan Hale needs a proper UAT script.",
+      "suggestionContent": "UAT script",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 13,
+      "domain": "risk",
+      "statement": "The API timeout on the legacy session call is a real risk.",
+      "suggestionContent": "API timeout on legacy session call",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 13,
+      "domain": "risk",
+      "statement": "NimbusPay have already flagged a possible vendor delay on the wallet sandbox.",
+      "suggestionContent": "Possible vendor delay on wallet sandbox",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 14,
+      "domain": "risk",
+      "statement": "NimbusPay sandbox is slipping about a week.",
+      "suggestionContent": "NimbusPay sandbox delay",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 16,
+      "domain": "person",
+      "statement": "Tomiko Sato is joining for analytics.",
+      "suggestionContent": "Tomiko Sato",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 18,
+      "domain": "todo",
+      "statement": "Amira wants a CAB pack to-do.",
+      "suggestionContent": "CAB pack",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 19,
+      "domain": "risk",
+      "statement": "New risk identified regarding legacy session cookies.",
+      "suggestionContent": "legacy session mapping",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 21,
+      "domain": "todo",
+      "statement": "Marcus wants a performance budget to-do.",
+      "suggestionContent": "Performance budget to keep member home under 2 seconds on mid-range Android",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 21,
+      "domain": "todo",
+      "statement": "Elena has started SSO migration.",
+      "suggestionContent": "SSO migration",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 22,
+      "domain": "todo",
+      "statement": "Sarah Okonkwo asked for an accessibility pass before UAT.",
+      "suggestionContent": "Accessibility pass request before UAT",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 23,
+      "domain": "person",
+      "statement": "Chris Bell is DevOps for cutover.",
+      "suggestionContent": "Chris Bell",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 23,
+      "domain": "todo",
+      "statement": "Add cutover runbook as an action.",
+      "suggestionContent": "Add cutover runbook",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 24,
+      "domain": "todo",
+      "statement": "A rollback plan is needed.",
+      "suggestionContent": "Rollback plan",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 25,
+      "domain": "todo",
+      "statement": "Add member comms as a to-do for Sarah Okonkwo.",
+      "suggestionContent": "Add member comms",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 26,
+      "domain": "milestone",
+      "statement": "UAT start date has been moved.",
+      "suggestionContent": "UAT Start Date",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 30,
+      "domain": "risk",
+      "statement": "API timeout is still open.",
+      "suggestionContent": "API timeout issue",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 32,
+      "domain": "todo",
+      "statement": "Jordan's UAT script should be ready by 15 October.",
+      "suggestionContent": "Update UAT script due date",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 33,
+      "domain": "person",
+      "statement": "Sarah Kim is a new person to be added.",
+      "suggestionContent": "Sarah Kim",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 33,
+      "domain": "risk",
+      "statement": "Sarah Kim raised pen-test findings that need to be closed before CAB.",
+      "suggestionContent": "Close pen-test findings before CAB",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 33,
+      "domain": "todo",
+      "statement": "A to-do needs to be added for pen-test findings.",
+      "suggestionContent": "Address pen-test findings",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 34,
+      "domain": "todo",
+      "statement": "Elena wants a rate-limit to-do on the session service.",
+      "suggestionContent": "Rate limit on session API",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 34,
+      "domain": "todo",
+      "statement": "A rate limit needs to be added on the session API.",
+      "suggestionContent": "Add rate limit on session API",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 35,
+      "domain": "todo",
+      "statement": "Mark login error handling done.",
+      "suggestionContent": "Mark login error handling done.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 36,
+      "domain": "todo",
+      "statement": "Add session timeout as a to-do.",
+      "suggestionContent": "Add session timeout",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 43,
+      "domain": "todo",
+      "statement": "A to-do for the threat model needs to be added.",
+      "suggestionContent": "Add a to-do for threat model",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 47,
+      "domain": "todo",
+      "statement": "The rollback plan should be drafted this week.",
+      "suggestionContent": "Draft rollback plan",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 48,
+      "domain": "todo",
+      "statement": "A new to-do for vendor contract check needs to be added for Liam.",
+      "suggestionContent": "Vendor contract check",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 52,
+      "domain": "todo",
+      "statement": "The due date for the to-do note has been updated to 26 October.",
+      "suggestionContent": "Confirm project baseline with key stakeholders",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 55,
+      "domain": "person",
+      "statement": "Priya Shah was on the call.",
+      "suggestionContent": "Priya Shah",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 55,
+      "domain": "person",
+      "statement": "Elena Voss was on the call.",
+      "suggestionContent": "Elena Voss",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 56,
+      "domain": "todo",
+      "statement": "A new to-do item has been created to address the login loop issue.",
+      "suggestionContent": "Login loop on password reset",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 57,
+      "domain": "todo",
+      "statement": "The login loop defect needs to be done by 17 October.",
+      "suggestionContent": "Login loop defect resolution",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 58,
+      "domain": "todo",
+      "statement": "Mark it done.",
+      "suggestionContent": "Mark it done.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 59,
+      "domain": "todo",
+      "statement": "A new to-do needs to be added to regression-test password reset on staging.",
+      "suggestionContent": "Regression-test password reset on staging",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 60,
+      "domain": "risk",
+      "statement": "New risk identified regarding CAB rejection.",
+      "suggestionContent": "CAB rejection",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 61,
+      "domain": "risk",
+      "statement": "CAB rejection risk status is updated to watch.",
+      "suggestionContent": "CAB rejection risk status is updated to watch.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 63,
+      "domain": "milestone",
+      "statement": "UAT start moves to 20 October 2026.",
+      "suggestionContent": "UAT Start",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 64,
+      "domain": "milestone",
+      "statement": "UAT start is moved to 18 October.",
+      "suggestionContent": "UAT Start",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 67,
+      "domain": "availability",
+      "statement": "Tomiko Sato is away on 21 October for a conference.",
+      "suggestionContent": "Tomiko Sato is away on 21 October for a conference.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 68,
+      "domain": "knowledge",
+      "statement": "CAB packs now also need the rollback plan attached.",
+      "suggestionContent": "CAB packs now also need the rollback plan attached.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 69,
+      "domain": "todo",
+      "statement": "The UAT checklist needs to be updated.",
+      "suggestionContent": "UAT checklist update",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 69,
+      "domain": "todo",
+      "statement": "The due date for the UAT checklist update is 15 October.",
+      "suggestionContent": "The due date for the UAT checklist update is 15 October.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 70,
+      "domain": "todo",
+      "statement": "A follow-up todo is needed for UAT evidence pack.",
+      "suggestionContent": "UAT evidence pack",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 71,
+      "domain": "milestone",
+      "statement": "CAB date is still the 18th.",
+      "suggestionContent": "CAB Date",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 75,
+      "domain": "knowledge",
+      "statement": "NimbusPay no longer supplies the export.",
+      "suggestionContent": "NimbusPay no longer supplies the export.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 76,
+      "domain": "milestone",
+      "statement": "The release date is set for Tuesday 27th.",
+      "suggestionContent": "Release Date",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 81,
+      "domain": "person",
+      "statement": "Sarah Kim is covering security.",
+      "suggestionContent": "Sarah Kim",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 82,
+      "domain": "milestone",
+      "statement": "CAB is scheduled for the 18th.",
+      "suggestionContent": "CAB Date",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 83,
+      "domain": "risk",
+      "statement": "Vendor delay is not a risk anymore.",
+      "suggestionContent": "Vendor delay is not a risk anymore.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 84,
+      "domain": "availability",
+      "statement": "Tomiko Sato's last day on Northstar is Friday.",
+      "suggestionContent": "Tomiko Sato's last day on Northstar is Friday.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 85,
+      "domain": "person",
+      "statement": "Nadia Qureshi is joining as analytics replacement.",
+      "suggestionContent": "Nadia Qureshi",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 87,
+      "domain": "risk",
+      "statement": "A new defect has been identified: login loop is back on Safari 16.",
+      "suggestionContent": "Safari login loop",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 87,
+      "domain": "todo",
+      "statement": "A new to-do has been created regarding the login loop issue on Safari.",
+      "suggestionContent": "Safari login loop",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 89,
+      "domain": "todo",
+      "statement": "Mark CAB pack done.",
+      "suggestionContent": "Mark CAB pack done",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 90,
+      "domain": "availability",
+      "statement": "Elena Voss is out sick from 22 to 23 October.",
+      "suggestionContent": "Elena Voss is out sick from 22 to 23 October.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 93,
+      "domain": "todo",
+      "statement": "Mark pen-test findings, accessibility pass, and perf budget as complete.",
+      "suggestionContent": "Mark pen-test findings, accessibility pass, and perf budget as complete.",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 95,
+      "domain": "todo",
+      "statement": "Safari login loop is still open.",
+      "suggestionContent": "Safari login loop open",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 95,
+      "domain": "todo",
+      "statement": "Export encoding is still open.",
+      "suggestionContent": "Export encoding open",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 95,
+      "domain": "todo",
+      "statement": "API timeout remains open until after hypercare.",
+      "suggestionContent": "API timeout open",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 96,
+      "domain": "todo",
+      "statement": "Password-reset regression is done.",
+      "suggestionContent": "Password-reset regression",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 96,
+      "domain": "risk",
+      "statement": "Session timeout parity is still open.",
+      "suggestionContent": "Session timeout parity",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 96,
+      "domain": "todo",
+      "statement": "Feature-flag cleanup should be added as a post-release to-do.",
+      "suggestionContent": "Feature-flag cleanup",
+      "executedKind": "wrote",
+      "executedReason": null,
+      "decisionKind": "write"
+    },
+    {
+      "capture": 99,
+      "domain": "todo",
+      "statement": "Add hypercare rota as a to-do for Priya.",
+      "suggestionContent": "Add hypercare rota",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 100,
+      "domain": "milestone",
+      "statement": "The release happened on 27 October.",
+      "suggestionContent": "Release Date",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    },
+    {
+      "capture": 100,
+      "domain": "todo",
+      "statement": "Open work includes feature-flag cleanup.",
+      "suggestionContent": "Feature-flag cleanup",
+      "executedKind": "no_change",
+      "executedReason": "This approved create was already applied.",
+      "decisionKind": "no_change"
+    }
+  ]
+}

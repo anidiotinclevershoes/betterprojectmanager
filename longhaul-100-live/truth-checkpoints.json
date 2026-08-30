@@ -1,0 +1,2678 @@
+[
+  {
+    "afterCapture": 1,
+    "expected": {
+      "peopleCount": 1,
+      "people": [
+        {
+          "key": "person:priya-shah",
+          "name": "Priya Shah",
+          "role": "Delivery PM"
+        }
+      ],
+      "openTodoCount": 0,
+      "completedTodoCount": 0,
+      "openTodos": [],
+      "completedTodos": [],
+      "openRiskCount": 0,
+      "resolvedRiskCount": 0,
+      "openRisks": [],
+      "resolvedRisks": [],
+      "milestones": [],
+      "knowledgeCurrent": [],
+      "responsibilities": [],
+      "availability": []
+    },
+    "actual": {
+      "people": [],
+      "todos": [
+        {
+          "id": "05d5c8e7-1bda-4f76-ac5b-5c34cbad4573",
+          "title": "Confirm project baseline with key stakeholders",
+          "done": false
+        }
+      ],
+      "risks": [],
+      "milestones": [],
+      "historyCount": 1
+    },
+    "duplicates": {
+      "people": [],
+      "todos": [],
+      "risks": [],
+      "milestones": []
+    },
+    "searchProbes": [
+      {
+        "query": "UAT",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "API timeout",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "CAB",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "Priya Shah",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "feature flags",
+        "hits": 0,
+        "sample": []
+      }
+    ],
+    "ask": [
+      {
+        "id": "release-date",
+        "question": "What is the current target release date?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "not_found",
+        "answer": "The current target release date is not recorded in the project state.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 896,
+        "usage": {
+          "prompt_tokens": 735,
+          "completion_tokens": 55,
+          "total_tokens": 790,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-risks",
+        "question": "What are the main open risks right now?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "none",
+        "answer": "There are no recorded open risks for the NSTAR project at this time.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 895,
+        "usage": {
+          "prompt_tokens": 736,
+          "completion_tokens": 57,
+          "total_tokens": 793,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "uat-owner",
+        "question": "Who currently owns UAT?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "not_found",
+        "answer": "UAT ownership is not recorded in the current project state.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 879,
+        "usage": {
+          "prompt_tokens": 733,
+          "completion_tokens": 54,
+          "total_tokens": 787,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-actions",
+        "question": "What are the most important open actions?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "",
+        "answer": "The most important open action is to confirm the project baseline with key stakeholders.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 897,
+        "usage": {
+          "prompt_tokens": 735,
+          "completion_tokens": 86,
+          "total_tokens": 821,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "why-dates-moved",
+        "question": "Why did the CAB or release date move?",
+        "kind": "historical",
+        "live": true,
+        "expectedGrounding": "historical",
+        "answer": "There is no recorded evidence regarding changes to the CAB or release date for the NSTAR project.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1055,
+        "usage": {
+          "prompt_tokens": 784,
+          "completion_tokens": 53,
+          "total_tokens": 837,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      }
+    ],
+    "analyse": [
+      {
+        "id": "reaffirm-priya",
+        "kind": "reaffirm",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 0,
+        "decisions": [],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      }
+    ],
+    "reloadOk": true,
+    "historyEvents": 1,
+    "currentTruthObjects": 3
+  },
+  {
+    "afterCapture": 10,
+    "expected": {
+      "peopleCount": 8,
+      "people": [
+        {
+          "key": "person:priya-shah",
+          "name": "Priya Shah",
+          "role": "Delivery PM"
+        },
+        {
+          "key": "person:liam-brooks",
+          "name": "Liam Brooks",
+          "role": "Sponsor"
+        },
+        {
+          "key": "person:sarah-okonkwo",
+          "name": "Sarah Okonkwo",
+          "role": "Product owner"
+        },
+        {
+          "key": "person:marcus-chen",
+          "name": "Marcus Chen",
+          "role": "Front-end lead"
+        },
+        {
+          "key": "person:elena-voss",
+          "name": "Elena Voss",
+          "role": "Legacy back-end"
+        },
+        {
+          "key": "person:jordan-hale",
+          "name": "Jordan Hale",
+          "role": "QA lead"
+        },
+        {
+          "key": "person:dev-patel",
+          "name": "Dev Patel",
+          "role": "NimbusPay vendor"
+        },
+        {
+          "key": "person:amira-rahman",
+          "name": "Amira Rahman",
+          "role": "CAB chair"
+        }
+      ],
+      "openTodoCount": 2,
+      "completedTodoCount": 0,
+      "openTodos": [
+        {
+          "key": "todo:login-error-handling",
+          "title": "Login error handling"
+        },
+        {
+          "key": "todo:analytics-events",
+          "title": "Analytics event changes"
+        }
+      ],
+      "completedTodos": [],
+      "openRiskCount": 0,
+      "resolvedRiskCount": 0,
+      "openRisks": [],
+      "resolvedRisks": [],
+      "milestones": [],
+      "knowledgeCurrent": [
+        {
+          "key": "knowledge:nimbus-wallet",
+          "text": "NimbusPay supplies the wallet widget; processor stays"
+        },
+        {
+          "key": "knowledge:cab-24h",
+          "text": "CAB packs must be ready 24 hours before CAB"
+        }
+      ],
+      "responsibilities": [],
+      "availability": []
+    },
+    "actual": {
+      "people": [
+        {
+          "id": "5db64484-aa3a-4927-9b04-c31920af395f",
+          "name": "Jordan Hale",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "e624b3f3-768e-40cb-953b-04f0dd5bffe7",
+          "name": "Dev Patel",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "c9511a58-1792-498d-98e4-0e9244749b19",
+          "name": "Amira Rahman",
+          "role": "Stakeholder"
+        }
+      ],
+      "todos": [
+        {
+          "id": "05d5c8e7-1bda-4f76-ac5b-5c34cbad4573",
+          "title": "Confirm project baseline with key stakeholders",
+          "done": false
+        },
+        {
+          "id": "4d40b065-2f65-42be-9efb-9f0604a56a93",
+          "title": "Login error handling",
+          "done": false
+        }
+      ],
+      "risks": [
+        {
+          "id": "5d7b5b0a-63e5-4271-9daf-a67a3601189f",
+          "title": "Last renewal got bounced",
+          "status": "open"
+        }
+      ],
+      "milestones": [],
+      "historyCount": 9
+    },
+    "duplicates": {
+      "people": [],
+      "todos": [],
+      "risks": [],
+      "milestones": []
+    },
+    "searchProbes": [
+      {
+        "query": "UAT",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "API timeout",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "CAB",
+        "hits": 1,
+        "sample": [
+          "CAB packs must be ready 24 hours before the CAB slot."
+        ]
+      },
+      {
+        "query": "Priya Shah",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "feature flags",
+        "hits": 0,
+        "sample": []
+      }
+    ],
+    "ask": [
+      {
+        "id": "release-date",
+        "question": "What is the current target release date?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "not_found",
+        "answer": "The current target release date is not specified in the authoritative project state.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1670,
+        "usage": {
+          "prompt_tokens": 1075,
+          "completion_tokens": 56,
+          "total_tokens": 1131,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-risks",
+        "question": "What are the main open risks right now?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "none",
+        "answer": "The main open risk right now is that the last renewal got bounced.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1669,
+        "usage": {
+          "prompt_tokens": 1076,
+          "completion_tokens": 84,
+          "total_tokens": 1160,
+          "prompt_tokens_details": {
+            "cached_tokens": 1024,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "uat-owner",
+        "question": "Who currently owns UAT?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "not_found",
+        "answer": "The current authoritative project state does not specify an owner for UAT.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1653,
+        "usage": {
+          "prompt_tokens": 1073,
+          "completion_tokens": 56,
+          "total_tokens": 1129,
+          "prompt_tokens_details": {
+            "cached_tokens": 1024,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-actions",
+        "question": "What are the most important open actions?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "Login error handling; Analytics event changes",
+        "answer": "The most important open actions are to confirm the project baseline with key stakeholders and to address login error handling.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1671,
+        "usage": {
+          "prompt_tokens": 1075,
+          "completion_tokens": 126,
+          "total_tokens": 1201,
+          "prompt_tokens_details": {
+            "cached_tokens": 1024,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "why-dates-moved",
+        "question": "Why did the CAB or release date move?",
+        "kind": "historical",
+        "live": true,
+        "expectedGrounding": "historical",
+        "answer": "The CAB or release date moved because the last renewal got bounced, which indicates a risk that may have affected scheduling.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 3130,
+        "usage": {
+          "prompt_tokens": 1485,
+          "completion_tokens": 162,
+          "total_tokens": 1647,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      }
+    ],
+    "analyse": [
+      {
+        "id": "reaffirm-priya",
+        "kind": "reaffirm",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 1,
+        "decisions": [
+          {
+            "kind": "no_change",
+            "domain": "responsibility",
+            "statement": "Priya Shah is still the delivery PM."
+          }
+        ],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      }
+    ],
+    "reloadOk": true,
+    "historyEvents": 9,
+    "currentTruthObjects": 12
+  },
+  {
+    "afterCapture": 25,
+    "expected": {
+      "peopleCount": 10,
+      "people": [
+        {
+          "key": "person:priya-shah",
+          "name": "Priya Shah",
+          "role": "Delivery PM"
+        },
+        {
+          "key": "person:liam-brooks",
+          "name": "Liam Brooks",
+          "role": "Sponsor"
+        },
+        {
+          "key": "person:sarah-okonkwo",
+          "name": "Sarah Okonkwo",
+          "role": "Product owner"
+        },
+        {
+          "key": "person:marcus-chen",
+          "name": "Marcus Chen",
+          "role": "Front-end lead"
+        },
+        {
+          "key": "person:elena-voss",
+          "name": "Elena Voss",
+          "role": "Legacy back-end"
+        },
+        {
+          "key": "person:jordan-hale",
+          "name": "Jordan Hale",
+          "role": "QA lead"
+        },
+        {
+          "key": "person:dev-patel",
+          "name": "Dev Patel",
+          "role": "NimbusPay vendor"
+        },
+        {
+          "key": "person:amira-rahman",
+          "name": "Amira Rahman",
+          "role": "CAB chair"
+        },
+        {
+          "key": "person:tomiko-sato",
+          "name": "Tomiko Sato",
+          "role": "Analytics"
+        },
+        {
+          "key": "person:chris-bell",
+          "name": "Chris Bell",
+          "role": "DevOps"
+        }
+      ],
+      "openTodoCount": 11,
+      "completedTodoCount": 0,
+      "openTodos": [
+        {
+          "key": "todo:login-error-handling",
+          "title": "Login error handling"
+        },
+        {
+          "key": "todo:analytics-events",
+          "title": "Analytics event changes"
+        },
+        {
+          "key": "todo:uat-script",
+          "title": "UAT script"
+        },
+        {
+          "key": "todo:cab-pack",
+          "title": "CAB pack"
+        },
+        {
+          "key": "todo:export-csv",
+          "title": "Member CSV export"
+        },
+        {
+          "key": "todo:perf-budget",
+          "title": "Performance budget for member home"
+        },
+        {
+          "key": "todo:sso-migration",
+          "title": "SSO migration"
+        },
+        {
+          "key": "todo:accessibility-pass",
+          "title": "Accessibility pass"
+        },
+        {
+          "key": "todo:cutover-runbook",
+          "title": "Cutover runbook"
+        },
+        {
+          "key": "todo:rollback-plan",
+          "title": "Rollback plan"
+        },
+        {
+          "key": "todo:member-comms",
+          "title": "Member comms"
+        }
+      ],
+      "completedTodos": [],
+      "openRiskCount": 3,
+      "resolvedRiskCount": 0,
+      "openRisks": [
+        {
+          "key": "risk:api-timeout",
+          "title": "API timeout on legacy session",
+          "status": "open"
+        },
+        {
+          "key": "risk:vendor-delay",
+          "title": "NimbusPay wallet sandbox delay",
+          "status": "open"
+        },
+        {
+          "key": "risk:legacy-session",
+          "title": "Legacy session mapping",
+          "status": "open"
+        }
+      ],
+      "resolvedRisks": [],
+      "milestones": [
+        {
+          "key": "milestone:uat-start",
+          "label": "UAT start",
+          "date": "2026-10-14"
+        },
+        {
+          "key": "milestone:cab",
+          "label": "CAB",
+          "date": "2026-10-18"
+        },
+        {
+          "key": "milestone:release",
+          "label": "Release",
+          "date": "2026-10-27"
+        }
+      ],
+      "knowledgeCurrent": [
+        {
+          "key": "knowledge:nimbus-wallet",
+          "text": "NimbusPay supplies the wallet widget; processor stays"
+        },
+        {
+          "key": "knowledge:cab-24h",
+          "text": "CAB packs must be ready 24 hours before CAB"
+        },
+        {
+          "key": "knowledge:feature-flags",
+          "text": "Cut over behind feature flags, not a DNS flip"
+        },
+        {
+          "key": "knowledge:nimbus-export",
+          "text": "NimbusPay supplies the member CSV export"
+        },
+        {
+          "key": "knowledge:no-pii-logs",
+          "text": "Never store PII in application logs"
+        }
+      ],
+      "responsibilities": [
+        {
+          "scope": "UAT",
+          "person": "person:jordan-hale"
+        }
+      ],
+      "availability": [
+        {
+          "person": "person:elena-voss",
+          "label": "away 2026-10-08 to 2026-10-09"
+        }
+      ]
+    },
+    "actual": {
+      "people": [
+        {
+          "id": "5db64484-aa3a-4927-9b04-c31920af395f",
+          "name": "Jordan Hale",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "e624b3f3-768e-40cb-953b-04f0dd5bffe7",
+          "name": "Dev Patel",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "c9511a58-1792-498d-98e4-0e9244749b19",
+          "name": "Amira Rahman",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "7c4ea0cf-b6ae-4bab-9adc-b3de29b80174",
+          "name": "Tomiko Sato",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "ccf5955e-7a57-4413-bb6e-b6fc6a60804f",
+          "name": "Chris Bell",
+          "role": "Stakeholder"
+        }
+      ],
+      "todos": [
+        {
+          "id": "05d5c8e7-1bda-4f76-ac5b-5c34cbad4573",
+          "title": "Confirm project baseline with key stakeholders",
+          "done": false
+        },
+        {
+          "id": "4d40b065-2f65-42be-9efb-9f0604a56a93",
+          "title": "Login error handling",
+          "done": false
+        }
+      ],
+      "risks": [
+        {
+          "id": "5d7b5b0a-63e5-4271-9daf-a67a3601189f",
+          "title": "Last renewal got bounced",
+          "status": "open"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "77474ff8-f7f4-4f92-95a6-8ab72dc00220",
+          "label": "CAB Date",
+          "startAt": "2026-10-18T12:00:00.000Z"
+        }
+      ],
+      "historyCount": 13
+    },
+    "duplicates": {
+      "people": [],
+      "todos": [],
+      "risks": [],
+      "milestones": []
+    },
+    "searchProbes": [
+      {
+        "query": "UAT",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "API timeout",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "CAB",
+        "hits": 2,
+        "sample": [
+          "CAB packs must be ready 24 hours before the CAB slot.",
+          "CAB Date · 18 Oct"
+        ]
+      },
+      {
+        "query": "Priya Shah",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "feature flags",
+        "hits": 0,
+        "sample": []
+      }
+    ],
+    "ask": [
+      {
+        "id": "release-date",
+        "question": "What is the current target release date?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "2026-10-27",
+        "answer": "The current target release date is not explicitly stated in the project records.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1902,
+        "usage": {
+          "prompt_tokens": 1189,
+          "completion_tokens": 56,
+          "total_tokens": 1245,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-risks",
+        "question": "What are the main open risks right now?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "API timeout on legacy session; NimbusPay wallet sandbox delay; Legacy session mapping",
+        "answer": "The main open risk right now is that the last renewal got bounced.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1901,
+        "usage": {
+          "prompt_tokens": 1190,
+          "completion_tokens": 84,
+          "total_tokens": 1274,
+          "prompt_tokens_details": {
+            "cached_tokens": 1024,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "uat-owner",
+        "question": "Who currently owns UAT?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "person:jordan-hale",
+        "answer": "The current authoritative project state does not specify an owner for UAT.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1885,
+        "usage": {
+          "prompt_tokens": 1187,
+          "completion_tokens": 56,
+          "total_tokens": 1243,
+          "prompt_tokens_details": {
+            "cached_tokens": 1024,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-actions",
+        "question": "What are the most important open actions?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "Login error handling; Analytics event changes; UAT script; CAB pack; Member CSV export; Performance budget for member home; SSO migration; Accessibility pass",
+        "answer": "The most important open actions are: 1) Confirm project baseline with key stakeholders, and 2) Login error handling.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1903,
+        "usage": {
+          "prompt_tokens": 1189,
+          "completion_tokens": 130,
+          "total_tokens": 1319,
+          "prompt_tokens_details": {
+            "cached_tokens": 1152,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "why-dates-moved",
+        "question": "Why did the CAB or release date move?",
+        "kind": "historical",
+        "live": true,
+        "expectedGrounding": "historical",
+        "answer": "The CAB date was set for October 18, 2026, as part of the project timeline, and there is no indication that it has moved. However, the last renewal was bounced, which may imply challenges that could affect future scheduling.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 3359,
+        "usage": {
+          "prompt_tokens": 1639,
+          "completion_tokens": 170,
+          "total_tokens": 1809,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      }
+    ],
+    "analyse": [
+      {
+        "id": "reaffirm-priya",
+        "kind": "reaffirm",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 2,
+        "decisions": [
+          {
+            "kind": "no_change",
+            "domain": "person",
+            "statement": "Priya Shah is still the delivery PM."
+          },
+          {
+            "kind": "no_change",
+            "domain": "responsibility",
+            "statement": "No change to ownership."
+          }
+        ],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      },
+      {
+        "id": "repeat-release",
+        "kind": "repeat-date",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 1,
+        "decisions": [
+          {
+            "kind": "no_change",
+            "domain": "milestone",
+            "statement": "The target release date is 27 October 2026."
+          }
+        ],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      }
+    ],
+    "reloadOk": true,
+    "historyEvents": 13,
+    "currentTruthObjects": 15
+  },
+  {
+    "afterCapture": 50,
+    "expected": {
+      "peopleCount": 11,
+      "people": [
+        {
+          "key": "person:priya-shah",
+          "name": "Priya Shah",
+          "role": "Delivery PM"
+        },
+        {
+          "key": "person:liam-brooks",
+          "name": "Liam Brooks",
+          "role": "Sponsor"
+        },
+        {
+          "key": "person:sarah-okonkwo",
+          "name": "Sarah Okonkwo",
+          "role": "Product owner"
+        },
+        {
+          "key": "person:marcus-chen",
+          "name": "Marcus Chen",
+          "role": "Front-end lead"
+        },
+        {
+          "key": "person:elena-voss",
+          "name": "Elena Voss",
+          "role": "Legacy back-end"
+        },
+        {
+          "key": "person:jordan-hale",
+          "name": "Jordan Hale",
+          "role": "QA lead"
+        },
+        {
+          "key": "person:dev-patel",
+          "name": "Dev Patel",
+          "role": "NimbusPay vendor"
+        },
+        {
+          "key": "person:amira-rahman",
+          "name": "Amira Rahman",
+          "role": "CAB chair"
+        },
+        {
+          "key": "person:tomiko-sato",
+          "name": "Tomiko Sato",
+          "role": "Analytics"
+        },
+        {
+          "key": "person:chris-bell",
+          "name": "Chris Bell",
+          "role": "DevOps"
+        },
+        {
+          "key": "person:sarah-kim",
+          "name": "Sarah Kim",
+          "role": "Security"
+        }
+      ],
+      "openTodoCount": 13,
+      "completedTodoCount": 3,
+      "openTodos": [
+        {
+          "key": "todo:uat-script",
+          "title": "UAT script",
+          "dueAt": "2026-10-15"
+        },
+        {
+          "key": "todo:cab-pack",
+          "title": "CAB pack"
+        },
+        {
+          "key": "todo:export-csv",
+          "title": "Member CSV export"
+        },
+        {
+          "key": "todo:perf-budget",
+          "title": "Performance budget for member home"
+        },
+        {
+          "key": "todo:sso-migration",
+          "title": "SSO migration"
+        },
+        {
+          "key": "todo:accessibility-pass",
+          "title": "Accessibility pass"
+        },
+        {
+          "key": "todo:cutover-runbook",
+          "title": "Cutover runbook"
+        },
+        {
+          "key": "todo:rollback-plan",
+          "title": "Rollback plan"
+        },
+        {
+          "key": "todo:member-comms",
+          "title": "Member comms"
+        },
+        {
+          "key": "todo:pen-test-findings",
+          "title": "Pen-test findings"
+        },
+        {
+          "key": "todo:session-timeout",
+          "title": "Session timeout parity"
+        },
+        {
+          "key": "todo:threat-model",
+          "title": "Threat model"
+        },
+        {
+          "key": "todo:vendor-contract-check",
+          "title": "Vendor contract check"
+        }
+      ],
+      "completedTodos": [
+        {
+          "key": "todo:login-error-handling",
+          "title": "Login error handling"
+        },
+        {
+          "key": "todo:analytics-events",
+          "title": "Analytics event changes"
+        },
+        {
+          "key": "todo:rate-limit",
+          "title": "Rate limit on session API"
+        }
+      ],
+      "openRiskCount": 3,
+      "resolvedRiskCount": 0,
+      "openRisks": [
+        {
+          "key": "risk:api-timeout",
+          "title": "API timeout on legacy session",
+          "status": "open"
+        },
+        {
+          "key": "risk:vendor-delay",
+          "title": "NimbusPay wallet sandbox delay",
+          "status": "open"
+        },
+        {
+          "key": "risk:legacy-session",
+          "title": "Legacy session mapping",
+          "status": "open"
+        }
+      ],
+      "resolvedRisks": [],
+      "milestones": [
+        {
+          "key": "milestone:uat-start",
+          "label": "UAT start",
+          "date": "2026-10-16"
+        },
+        {
+          "key": "milestone:cab",
+          "label": "CAB",
+          "date": "2026-10-18"
+        },
+        {
+          "key": "milestone:release",
+          "label": "Release",
+          "date": "2026-10-27"
+        }
+      ],
+      "knowledgeCurrent": [
+        {
+          "key": "knowledge:nimbus-wallet",
+          "text": "NimbusPay supplies the wallet widget; processor stays"
+        },
+        {
+          "key": "knowledge:cab-24h",
+          "text": "CAB packs must be ready 24 hours before CAB"
+        },
+        {
+          "key": "knowledge:feature-flags",
+          "text": "Cut over behind feature flags, not a DNS flip"
+        },
+        {
+          "key": "knowledge:no-pii-logs",
+          "text": "Never store PII in application logs"
+        },
+        {
+          "key": "knowledge:scope-sso-in",
+          "text": "SSO is in; marketing widgets are out of this release"
+        },
+        {
+          "key": "knowledge:we-build-export",
+          "text": "We build the member CSV export ourselves"
+        },
+        {
+          "key": "knowledge:flags-48h",
+          "text": "Feature flags stay on 48 hours after cutover"
+        }
+      ],
+      "responsibilities": [
+        {
+          "scope": "UAT",
+          "person": "person:jordan-hale"
+        },
+        {
+          "scope": "analytics-events",
+          "person": "person:marcus-chen"
+        },
+        {
+          "scope": "accessibility-pass",
+          "person": "person:marcus-chen"
+        }
+      ],
+      "availability": [
+        {
+          "person": "person:elena-voss",
+          "label": "away 2026-10-08 to 2026-10-09"
+        }
+      ]
+    },
+    "actual": {
+      "people": [
+        {
+          "id": "5db64484-aa3a-4927-9b04-c31920af395f",
+          "name": "Jordan Hale",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "e624b3f3-768e-40cb-953b-04f0dd5bffe7",
+          "name": "Dev Patel",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "c9511a58-1792-498d-98e4-0e9244749b19",
+          "name": "Amira Rahman",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "7c4ea0cf-b6ae-4bab-9adc-b3de29b80174",
+          "name": "Tomiko Sato",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "ccf5955e-7a57-4413-bb6e-b6fc6a60804f",
+          "name": "Chris Bell",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "453c6213-0a7a-4033-8f13-ae45fdb27262",
+          "name": "Sarah Kim",
+          "role": "Stakeholder"
+        }
+      ],
+      "todos": [
+        {
+          "id": "05d5c8e7-1bda-4f76-ac5b-5c34cbad4573",
+          "title": "Confirm project baseline with key stakeholders",
+          "done": false,
+          "dueAt": "2023-10-15T12:00:00.000Z"
+        },
+        {
+          "id": "4d40b065-2f65-42be-9efb-9f0604a56a93",
+          "title": "Login error handling",
+          "done": true
+        },
+        {
+          "id": "7603f191-6450-415e-aa0d-e4f09c0eeafc",
+          "title": "Vendor contract check",
+          "done": false
+        }
+      ],
+      "risks": [
+        {
+          "id": "5d7b5b0a-63e5-4271-9daf-a67a3601189f",
+          "title": "Last renewal got bounced",
+          "status": "open"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "77474ff8-f7f4-4f92-95a6-8ab72dc00220",
+          "label": "CAB Date",
+          "startAt": "2026-10-16T12:00:00.000Z"
+        }
+      ],
+      "historyCount": 19
+    },
+    "duplicates": {
+      "people": [],
+      "todos": [],
+      "risks": [],
+      "milestones": []
+    },
+    "searchProbes": [
+      {
+        "query": "UAT",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "API timeout",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "CAB",
+        "hits": 2,
+        "sample": [
+          "CAB packs must be ready 24 hours before the CAB slot.",
+          "CAB Date · 16 Oct"
+        ]
+      },
+      {
+        "query": "Priya Shah",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "feature flags",
+        "hits": 0,
+        "sample": []
+      }
+    ],
+    "ask": [
+      {
+        "id": "release-date",
+        "question": "What is the current target release date?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "2026-10-27",
+        "answer": "The current target release date is October 16, 2026, as indicated by the CAB Date milestone.",
+        "confidence": "related_context",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1982,
+        "usage": {
+          "prompt_tokens": 1222,
+          "completion_tokens": 90,
+          "total_tokens": 1312,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-risks",
+        "question": "What are the main open risks right now?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "API timeout on legacy session; NimbusPay wallet sandbox delay; Legacy session mapping",
+        "answer": "The main open risk right now is that the last renewal got bounced.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1981,
+        "usage": {
+          "prompt_tokens": 1223,
+          "completion_tokens": 84,
+          "total_tokens": 1307,
+          "prompt_tokens_details": {
+            "cached_tokens": 1152,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "uat-owner",
+        "question": "Who currently owns UAT?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "person:jordan-hale",
+        "answer": "The current authoritative project state does not specify an owner for UAT.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1965,
+        "usage": {
+          "prompt_tokens": 1220,
+          "completion_tokens": 56,
+          "total_tokens": 1276,
+          "prompt_tokens_details": {
+            "cached_tokens": 1152,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-actions",
+        "question": "What are the most important open actions?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "UAT script; CAB pack; Member CSV export; Performance budget for member home; SSO migration; Accessibility pass; Cutover runbook; Rollback plan",
+        "answer": "The most important open actions are to confirm the project baseline with key stakeholders and to check the vendor contract.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 1983,
+        "usage": {
+          "prompt_tokens": 1222,
+          "completion_tokens": 123,
+          "total_tokens": 1345,
+          "prompt_tokens_details": {
+            "cached_tokens": 1152,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "why-dates-moved",
+        "question": "Why did the CAB or release date move?",
+        "kind": "historical",
+        "live": true,
+        "expectedGrounding": "historical",
+        "answer": "The CAB date moved from October 18, 2026, to October 16, 2026, because UAT could not start on October 14, 2026, as initially planned due to tight SSO requirements. This necessitated the adjustment of the CAB date to accommodate the new UAT schedule.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 3449,
+        "usage": {
+          "prompt_tokens": 1689,
+          "completion_tokens": 231,
+          "total_tokens": 1920,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      }
+    ],
+    "analyse": [
+      {
+        "id": "reaffirm-priya",
+        "kind": "reaffirm",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 1,
+        "decisions": [
+          {
+            "kind": "no_change",
+            "domain": "responsibility",
+            "statement": "No change to ownership."
+          }
+        ],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      },
+      {
+        "id": "repeat-release",
+        "kind": "repeat-date",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 1,
+        "decisions": [
+          {
+            "kind": "no_change",
+            "domain": "milestone",
+            "statement": "The target release date is 27 October 2026."
+          }
+        ],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      }
+    ],
+    "reloadOk": true,
+    "historyEvents": 19,
+    "currentTruthObjects": 16
+  },
+  {
+    "afterCapture": 75,
+    "expected": {
+      "peopleCount": 11,
+      "people": [
+        {
+          "key": "person:priya-shah",
+          "name": "Priya Shah",
+          "role": "Delivery PM"
+        },
+        {
+          "key": "person:liam-brooks",
+          "name": "Liam Brooks",
+          "role": "Sponsor"
+        },
+        {
+          "key": "person:sarah-okonkwo",
+          "name": "Sarah Okonkwo",
+          "role": "Product owner"
+        },
+        {
+          "key": "person:marcus-chen",
+          "name": "Marcus Chen",
+          "role": "Front-end lead"
+        },
+        {
+          "key": "person:elena-voss",
+          "name": "Elena Voss",
+          "role": "Legacy back-end"
+        },
+        {
+          "key": "person:jordan-hale",
+          "name": "Jordan Hale",
+          "role": "QA lead"
+        },
+        {
+          "key": "person:dev-patel",
+          "name": "Dev Patel",
+          "role": "NimbusPay vendor"
+        },
+        {
+          "key": "person:amira-rahman",
+          "name": "Amira Rahman",
+          "role": "CAB chair"
+        },
+        {
+          "key": "person:tomiko-sato",
+          "name": "Tomiko Sato",
+          "role": "Analytics"
+        },
+        {
+          "key": "person:chris-bell",
+          "name": "Chris Bell",
+          "role": "DevOps"
+        },
+        {
+          "key": "person:sarah-kim",
+          "name": "Sarah Kim",
+          "role": "Security"
+        }
+      ],
+      "openTodoCount": 12,
+      "completedTodoCount": 7,
+      "openTodos": [
+        {
+          "key": "todo:cab-pack",
+          "title": "CAB pack"
+        },
+        {
+          "key": "todo:export-csv",
+          "title": "Member CSV export"
+        },
+        {
+          "key": "todo:perf-budget",
+          "title": "Performance budget for member home"
+        },
+        {
+          "key": "todo:accessibility-pass",
+          "title": "Accessibility pass"
+        },
+        {
+          "key": "todo:cutover-runbook",
+          "title": "Cutover runbook"
+        },
+        {
+          "key": "todo:rollback-plan",
+          "title": "Rollback plan"
+        },
+        {
+          "key": "todo:member-comms",
+          "title": "Member comms",
+          "dueAt": "2026-10-26"
+        },
+        {
+          "key": "todo:pen-test-findings",
+          "title": "Pen-test findings"
+        },
+        {
+          "key": "todo:session-timeout",
+          "title": "Session timeout parity"
+        },
+        {
+          "key": "todo:vendor-contract-check",
+          "title": "Vendor contract check"
+        },
+        {
+          "key": "todo:password-reset-regression",
+          "title": "Regression-test password reset on staging"
+        },
+        {
+          "key": "todo:uat-evidence-pack",
+          "title": "UAT evidence pack"
+        }
+      ],
+      "completedTodos": [
+        {
+          "key": "todo:login-error-handling",
+          "title": "Login error handling"
+        },
+        {
+          "key": "todo:analytics-events",
+          "title": "Analytics event changes"
+        },
+        {
+          "key": "todo:uat-script",
+          "title": "UAT script"
+        },
+        {
+          "key": "todo:sso-migration",
+          "title": "SSO migration"
+        },
+        {
+          "key": "todo:rate-limit",
+          "title": "Rate limit on session API"
+        },
+        {
+          "key": "todo:threat-model",
+          "title": "Threat model"
+        },
+        {
+          "key": "todo:defect-login-loop",
+          "title": "Login loop on password reset"
+        }
+      ],
+      "openRiskCount": 3,
+      "resolvedRiskCount": 1,
+      "openRisks": [
+        {
+          "key": "risk:api-timeout",
+          "title": "API timeout on legacy session",
+          "status": "open"
+        },
+        {
+          "key": "risk:vendor-delay",
+          "title": "NimbusPay wallet sandbox delay",
+          "status": "open"
+        },
+        {
+          "key": "risk:legacy-session",
+          "title": "Legacy session mapping",
+          "status": "open"
+        }
+      ],
+      "resolvedRisks": [
+        {
+          "key": "risk:cab-rejection",
+          "title": "CAB rejection",
+          "status": "resolved"
+        }
+      ],
+      "milestones": [
+        {
+          "key": "milestone:uat-start",
+          "label": "UAT start",
+          "date": "2026-10-18"
+        },
+        {
+          "key": "milestone:cab",
+          "label": "CAB",
+          "date": "2026-10-18"
+        },
+        {
+          "key": "milestone:release",
+          "label": "Release",
+          "date": "2026-10-27"
+        }
+      ],
+      "knowledgeCurrent": [
+        {
+          "key": "knowledge:nimbus-wallet",
+          "text": "NimbusPay supplies the wallet widget; processor stays"
+        },
+        {
+          "key": "knowledge:cab-24h",
+          "text": "CAB packs must be ready 24 hours before CAB"
+        },
+        {
+          "key": "knowledge:feature-flags",
+          "text": "Cut over behind feature flags, not a DNS flip"
+        },
+        {
+          "key": "knowledge:no-pii-logs",
+          "text": "Never store PII in application logs"
+        },
+        {
+          "key": "knowledge:scope-sso-in",
+          "text": "SSO is in; marketing widgets are out of this release"
+        },
+        {
+          "key": "knowledge:we-build-export",
+          "text": "We build the member CSV export ourselves"
+        },
+        {
+          "key": "knowledge:flags-48h",
+          "text": "Feature flags stay on 48 hours after cutover"
+        },
+        {
+          "key": "knowledge:cab-rollback-attached",
+          "text": "CAB packs must include the rollback plan"
+        }
+      ],
+      "responsibilities": [
+        {
+          "scope": "UAT",
+          "person": "person:jordan-hale"
+        },
+        {
+          "scope": "analytics-events",
+          "person": "person:marcus-chen"
+        },
+        {
+          "scope": "accessibility-pass",
+          "person": "person:marcus-chen"
+        }
+      ],
+      "availability": [
+        {
+          "person": "person:elena-voss",
+          "label": "away 2026-10-08 to 2026-10-09"
+        },
+        {
+          "person": "person:tomiko-sato",
+          "label": "away 2026-10-21"
+        }
+      ]
+    },
+    "actual": {
+      "people": [
+        {
+          "id": "5db64484-aa3a-4927-9b04-c31920af395f",
+          "name": "Jordan Hale",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "e624b3f3-768e-40cb-953b-04f0dd5bffe7",
+          "name": "Dev Patel",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "c9511a58-1792-498d-98e4-0e9244749b19",
+          "name": "Amira Rahman",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "7c4ea0cf-b6ae-4bab-9adc-b3de29b80174",
+          "name": "Tomiko Sato",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "ccf5955e-7a57-4413-bb6e-b6fc6a60804f",
+          "name": "Chris Bell",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "453c6213-0a7a-4033-8f13-ae45fdb27262",
+          "name": "Sarah Kim",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "1b5d4964-0582-4a25-8741-6e2193002024",
+          "name": "Priya Shah",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "dbf812dc-d6c4-4ffe-928a-4e0802c75b17",
+          "name": "Elena Voss",
+          "role": "Stakeholder"
+        }
+      ],
+      "todos": [
+        {
+          "id": "05d5c8e7-1bda-4f76-ac5b-5c34cbad4573",
+          "title": "Confirm project baseline with key stakeholders",
+          "done": false,
+          "dueAt": "2023-10-26T12:00:00.000Z"
+        },
+        {
+          "id": "4d40b065-2f65-42be-9efb-9f0604a56a93",
+          "title": "Login error handling",
+          "done": true,
+          "dueAt": "2023-10-15T12:00:00.000Z"
+        },
+        {
+          "id": "7603f191-6450-415e-aa0d-e4f09c0eeafc",
+          "title": "Vendor contract check",
+          "done": false
+        }
+      ],
+      "risks": [
+        {
+          "id": "5d7b5b0a-63e5-4271-9daf-a67a3601189f",
+          "title": "Last renewal got bounced",
+          "status": "watch"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "77474ff8-f7f4-4f92-95a6-8ab72dc00220",
+          "label": "CAB Date",
+          "startAt": "2023-10-18T12:00:00.000Z"
+        }
+      ],
+      "historyCount": 31
+    },
+    "duplicates": {
+      "people": [],
+      "todos": [],
+      "risks": [],
+      "milestones": []
+    },
+    "searchProbes": [
+      {
+        "query": "UAT",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "API timeout",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "CAB",
+        "hits": 3,
+        "sample": [
+          "CAB packs now also need the rollback plan attached.",
+          "CAB packs must be ready 24 hours before the CAB slot.",
+          "CAB Date · 18 Oct"
+        ]
+      },
+      {
+        "query": "Priya Shah",
+        "hits": 1,
+        "sample": [
+          "@Priya Shah · Stakeholder"
+        ]
+      },
+      {
+        "query": "feature flags",
+        "hits": 0,
+        "sample": []
+      }
+    ],
+    "ask": [
+      {
+        "id": "release-date",
+        "question": "What is the current target release date?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "2026-10-27",
+        "answer": "The current target release date is not explicitly stated in the project records.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 2439,
+        "usage": {
+          "prompt_tokens": 1417,
+          "completion_tokens": 56,
+          "total_tokens": 1473,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-risks",
+        "question": "What are the main open risks right now?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "API timeout on legacy session; NimbusPay wallet sandbox delay; Legacy session mapping",
+        "answer": "The main open risk right now is that the last renewal got bounced.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 2438,
+        "usage": {
+          "prompt_tokens": 1418,
+          "completion_tokens": 84,
+          "total_tokens": 1502,
+          "prompt_tokens_details": {
+            "cached_tokens": 1280,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "uat-owner",
+        "question": "Who currently owns UAT?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "person:jordan-hale",
+        "answer": "The current authoritative project state does not specify who owns UAT.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 2422,
+        "usage": {
+          "prompt_tokens": 1415,
+          "completion_tokens": 97,
+          "total_tokens": 1512,
+          "prompt_tokens_details": {
+            "cached_tokens": 1280,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-actions",
+        "question": "What are the most important open actions?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "CAB pack; Member CSV export; Performance budget for member home; Accessibility pass; Cutover runbook; Rollback plan; Member comms; Pen-test findings",
+        "answer": "The most important open actions are to confirm the project baseline with key stakeholders and to check the vendor contract.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 2440,
+        "usage": {
+          "prompt_tokens": 1417,
+          "completion_tokens": 123,
+          "total_tokens": 1540,
+          "prompt_tokens_details": {
+            "cached_tokens": 1280,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "why-dates-moved",
+        "question": "Why did the CAB or release date move?",
+        "kind": "historical",
+        "live": true,
+        "expectedGrounding": "historical",
+        "answer": "The CAB date moved due to a clarification in the steering notes, which indicated that the previously mentioned date was incorrect. The confirmed CAB date is now 2023-10-18, as stated in the historical updates.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 3861,
+        "usage": {
+          "prompt_tokens": 1951,
+          "completion_tokens": 143,
+          "total_tokens": 2094,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      }
+    ],
+    "analyse": [
+      {
+        "id": "reaffirm-priya",
+        "kind": "reaffirm",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 0,
+        "decisions": [],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      },
+      {
+        "id": "repeat-release",
+        "kind": "repeat-date",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 1,
+        "decisions": [
+          {
+            "kind": "no_change",
+            "domain": "milestone",
+            "statement": "The target release date is 27 October 2026."
+          }
+        ],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      },
+      {
+        "id": "resolved-cab-historical",
+        "kind": "resolved-historical",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 1,
+        "decisions": [
+          {
+            "kind": "no_change",
+            "domain": "risk",
+            "statement": "The risk of CAB rejection is resolved."
+          }
+        ],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      }
+    ],
+    "reloadOk": true,
+    "historyEvents": 31,
+    "currentTruthObjects": 21
+  },
+  {
+    "afterCapture": 100,
+    "expected": {
+      "peopleCount": 12,
+      "people": [
+        {
+          "key": "person:priya-shah",
+          "name": "Priya Shah",
+          "role": "Delivery PM"
+        },
+        {
+          "key": "person:liam-brooks",
+          "name": "Liam Brooks",
+          "role": "Sponsor"
+        },
+        {
+          "key": "person:sarah-okonkwo",
+          "name": "Sarah Okonkwo",
+          "role": "Product owner"
+        },
+        {
+          "key": "person:marcus-chen",
+          "name": "Marcus Chen",
+          "role": "Front-end lead"
+        },
+        {
+          "key": "person:elena-voss",
+          "name": "Elena Voss",
+          "role": "Legacy back-end"
+        },
+        {
+          "key": "person:jordan-hale",
+          "name": "Jordan Hale",
+          "role": "QA lead"
+        },
+        {
+          "key": "person:dev-patel",
+          "name": "Dev Patel",
+          "role": "NimbusPay vendor"
+        },
+        {
+          "key": "person:amira-rahman",
+          "name": "Amira Rahman",
+          "role": "CAB chair"
+        },
+        {
+          "key": "person:tomiko-sato",
+          "name": "Tomiko Sato",
+          "role": "Analytics"
+        },
+        {
+          "key": "person:chris-bell",
+          "name": "Chris Bell",
+          "role": "DevOps"
+        },
+        {
+          "key": "person:sarah-kim",
+          "name": "Sarah Kim",
+          "role": "Security"
+        },
+        {
+          "key": "person:nadia-qureshi",
+          "name": "Nadia Qureshi",
+          "role": "Analytics"
+        }
+      ],
+      "openTodoCount": 5,
+      "completedTodoCount": 18,
+      "openTodos": [
+        {
+          "key": "todo:export-csv",
+          "title": "Member CSV export"
+        },
+        {
+          "key": "todo:session-timeout",
+          "title": "Session timeout parity"
+        },
+        {
+          "key": "todo:vendor-contract-check",
+          "title": "Vendor contract check"
+        },
+        {
+          "key": "todo:feature-flag-cleanup",
+          "title": "Feature-flag cleanup"
+        },
+        {
+          "key": "todo:hypercare-rota",
+          "title": "Hypercare rota"
+        }
+      ],
+      "completedTodos": [
+        {
+          "key": "todo:login-error-handling",
+          "title": "Login error handling"
+        },
+        {
+          "key": "todo:analytics-events",
+          "title": "Analytics event changes"
+        },
+        {
+          "key": "todo:uat-script",
+          "title": "UAT script"
+        },
+        {
+          "key": "todo:cab-pack",
+          "title": "CAB pack"
+        },
+        {
+          "key": "todo:perf-budget",
+          "title": "Performance budget for member home"
+        },
+        {
+          "key": "todo:sso-migration",
+          "title": "SSO migration"
+        },
+        {
+          "key": "todo:accessibility-pass",
+          "title": "Accessibility pass"
+        },
+        {
+          "key": "todo:cutover-runbook",
+          "title": "Cutover runbook"
+        },
+        {
+          "key": "todo:rollback-plan",
+          "title": "Rollback plan"
+        },
+        {
+          "key": "todo:member-comms",
+          "title": "Member comms"
+        },
+        {
+          "key": "todo:pen-test-findings",
+          "title": "Pen-test findings"
+        },
+        {
+          "key": "todo:rate-limit",
+          "title": "Rate limit on session API"
+        },
+        {
+          "key": "todo:threat-model",
+          "title": "Threat model"
+        },
+        {
+          "key": "todo:defect-login-loop",
+          "title": "Login loop on password reset"
+        },
+        {
+          "key": "todo:password-reset-regression",
+          "title": "Regression-test password reset on staging"
+        },
+        {
+          "key": "todo:uat-evidence-pack",
+          "title": "UAT evidence pack"
+        },
+        {
+          "key": "todo:defect-export-encoding",
+          "title": "Export encoding defect"
+        },
+        {
+          "key": "todo:defect-safari-login-loop",
+          "title": "Safari login loop"
+        }
+      ],
+      "openRiskCount": 1,
+      "resolvedRiskCount": 3,
+      "openRisks": [
+        {
+          "key": "risk:api-timeout",
+          "title": "API timeout on legacy session",
+          "status": "open"
+        }
+      ],
+      "resolvedRisks": [
+        {
+          "key": "risk:vendor-delay",
+          "title": "NimbusPay wallet sandbox delay",
+          "status": "resolved"
+        },
+        {
+          "key": "risk:legacy-session",
+          "title": "Legacy session mapping",
+          "status": "accepted"
+        },
+        {
+          "key": "risk:cab-rejection",
+          "title": "CAB rejection",
+          "status": "resolved"
+        }
+      ],
+      "milestones": [
+        {
+          "key": "milestone:uat-start",
+          "label": "UAT start",
+          "date": "2026-10-18"
+        },
+        {
+          "key": "milestone:cab",
+          "label": "CAB",
+          "date": "2026-10-18"
+        },
+        {
+          "key": "milestone:release",
+          "label": "Release",
+          "date": "2026-10-27"
+        }
+      ],
+      "knowledgeCurrent": [
+        {
+          "key": "knowledge:nimbus-wallet",
+          "text": "NimbusPay supplies the wallet widget; processor stays"
+        },
+        {
+          "key": "knowledge:cab-24h",
+          "text": "CAB packs must be ready 24 hours before CAB"
+        },
+        {
+          "key": "knowledge:feature-flags",
+          "text": "Cut over behind feature flags, not a DNS flip"
+        },
+        {
+          "key": "knowledge:no-pii-logs",
+          "text": "Never store PII in application logs"
+        },
+        {
+          "key": "knowledge:scope-sso-in",
+          "text": "SSO is in; marketing widgets are out of this release"
+        },
+        {
+          "key": "knowledge:we-build-export",
+          "text": "We build the member CSV export ourselves"
+        },
+        {
+          "key": "knowledge:flags-48h",
+          "text": "Feature flags stay on 48 hours after cutover"
+        },
+        {
+          "key": "knowledge:cab-rollback-attached",
+          "text": "CAB packs must include the rollback plan"
+        },
+        {
+          "key": "knowledge:tomiko-left",
+          "text": "Tomiko Sato has left the project"
+        },
+        {
+          "key": "knowledge:go-27",
+          "text": "CAB approved go-live on 27 October"
+        },
+        {
+          "key": "knowledge:live-hypercare",
+          "text": "Live; project in hypercare after 27 October release"
+        }
+      ],
+      "responsibilities": [
+        {
+          "scope": "UAT",
+          "person": "person:jordan-hale"
+        },
+        {
+          "scope": "analytics-events",
+          "person": "person:marcus-chen"
+        },
+        {
+          "scope": "accessibility-pass",
+          "person": "person:marcus-chen"
+        },
+        {
+          "scope": "cutover",
+          "person": "person:chris-bell"
+        }
+      ],
+      "availability": [
+        {
+          "person": "person:elena-voss",
+          "label": "away 2026-10-22 to 2026-10-23"
+        },
+        {
+          "person": "person:tomiko-sato",
+          "label": "away 2026-10-21"
+        }
+      ]
+    },
+    "actual": {
+      "people": [
+        {
+          "id": "5db64484-aa3a-4927-9b04-c31920af395f",
+          "name": "Jordan Hale",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "e624b3f3-768e-40cb-953b-04f0dd5bffe7",
+          "name": "Dev Patel",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "c9511a58-1792-498d-98e4-0e9244749b19",
+          "name": "Amira Rahman",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "7c4ea0cf-b6ae-4bab-9adc-b3de29b80174",
+          "name": "Tomiko Sato",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "ccf5955e-7a57-4413-bb6e-b6fc6a60804f",
+          "name": "Chris Bell",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "453c6213-0a7a-4033-8f13-ae45fdb27262",
+          "name": "Sarah Kim",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "1b5d4964-0582-4a25-8741-6e2193002024",
+          "name": "Priya Shah",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "dbf812dc-d6c4-4ffe-928a-4e0802c75b17",
+          "name": "Elena Voss",
+          "role": "Stakeholder"
+        },
+        {
+          "id": "007fc6da-2c94-4c54-a278-44ebb73b4054",
+          "name": "Nadia Qureshi",
+          "role": "Stakeholder"
+        }
+      ],
+      "todos": [
+        {
+          "id": "05d5c8e7-1bda-4f76-ac5b-5c34cbad4573",
+          "title": "Confirm project baseline with key stakeholders",
+          "done": false,
+          "dueAt": "2023-10-26T12:00:00.000Z"
+        },
+        {
+          "id": "4d40b065-2f65-42be-9efb-9f0604a56a93",
+          "title": "Login error handling",
+          "done": true,
+          "dueAt": "2023-10-15T12:00:00.000Z"
+        },
+        {
+          "id": "7603f191-6450-415e-aa0d-e4f09c0eeafc",
+          "title": "Vendor contract check",
+          "done": false
+        },
+        {
+          "id": "6a552954-92c4-4ba5-ac1d-2a764edced7b",
+          "title": "Mark pen-test findings, accessibility pass, and perf budget as complete.",
+          "done": false
+        },
+        {
+          "id": "7fdbd3f1-5575-4538-8a77-ce8f607f9075",
+          "title": "Feature-flag cleanup",
+          "done": false
+        }
+      ],
+      "risks": [
+        {
+          "id": "5d7b5b0a-63e5-4271-9daf-a67a3601189f",
+          "title": "Last renewal got bounced",
+          "status": "resolved"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "77474ff8-f7f4-4f92-95a6-8ab72dc00220",
+          "label": "CAB Date",
+          "startAt": "2023-11-18T12:00:00.000Z"
+        }
+      ],
+      "historyCount": 39
+    },
+    "duplicates": {
+      "people": [],
+      "todos": [],
+      "risks": [],
+      "milestones": []
+    },
+    "searchProbes": [
+      {
+        "query": "UAT",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "API timeout",
+        "hits": 0,
+        "sample": []
+      },
+      {
+        "query": "CAB",
+        "hits": 3,
+        "sample": [
+          "CAB packs must be ready 24 hours before the CAB slot.",
+          "CAB packs now also need the rollback plan attached.",
+          "CAB Date · 18 Nov"
+        ]
+      },
+      {
+        "query": "Priya Shah",
+        "hits": 1,
+        "sample": [
+          "@Priya Shah · Stakeholder"
+        ]
+      },
+      {
+        "query": "feature flags",
+        "hits": 0,
+        "sample": []
+      }
+    ],
+    "ask": [
+      {
+        "id": "release-date",
+        "question": "What is the current target release date?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "2026-10-27",
+        "answer": "The current target release date is November 18, 2023, as indicated by the CAB Date milestone.",
+        "confidence": "related_context",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 2861,
+        "usage": {
+          "prompt_tokens": 1596,
+          "completion_tokens": 90,
+          "total_tokens": 1686,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-risks",
+        "question": "What are the main open risks right now?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "API timeout on legacy session",
+        "answer": "There are no current open risks listed for the project. The only risk mentioned, 'Last renewal got bounced,' has been resolved.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 2860,
+        "usage": {
+          "prompt_tokens": 1597,
+          "completion_tokens": 96,
+          "total_tokens": 1693,
+          "prompt_tokens_details": {
+            "cached_tokens": 1536,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "uat-owner",
+        "question": "Who currently owns UAT?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "person:jordan-hale",
+        "answer": "The current authoritative project state does not specify an owner for UAT.",
+        "confidence": "not_found",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 2844,
+        "usage": {
+          "prompt_tokens": 1594,
+          "completion_tokens": 56,
+          "total_tokens": 1650,
+          "prompt_tokens_details": {
+            "cached_tokens": 1536,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "open-actions",
+        "question": "What are the most important open actions?",
+        "kind": "current",
+        "live": true,
+        "expectedGrounding": "Member CSV export; Session timeout parity; Vendor contract check; Feature-flag cleanup; Hypercare rota",
+        "answer": "The most important open actions are: 1) Confirm project baseline with key stakeholders, 2) Vendor contract check, 3) Mark pen-test findings, accessibility pass, and perf budget as complete, and 4) Feature-flag cleanup.",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 2862,
+        "usage": {
+          "prompt_tokens": 1596,
+          "completion_tokens": 209,
+          "total_tokens": 1805,
+          "prompt_tokens_details": {
+            "cached_tokens": 1536,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      },
+      {
+        "id": "why-dates-moved",
+        "question": "Why did the CAB or release date move?",
+        "kind": "historical",
+        "live": true,
+        "expectedGrounding": "historical",
+        "answer": "The CAB date moved to 2023-11-18 due to updates in the project timeline and clarifications regarding the scheduling, as evidenced by the historical updates indicating confusion over previous dates mentioned in steering notes [hist-c5b64805-f215-43cd-9ebd-5be39c55d1a4] and [hist-296e9028-0da9-4c02-99fe-24bf3ec2366e].",
+        "confidence": "direct_confirmation",
+        "sources": [],
+        "provider": "openai",
+        "usedCanonical": true,
+        "contextChars": 4366,
+        "usage": {
+          "prompt_tokens": 2169,
+          "completion_tokens": 254,
+          "total_tokens": 2423,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        }
+      }
+    ],
+    "analyse": [
+      {
+        "id": "reaffirm-priya",
+        "kind": "reaffirm",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 1,
+        "decisions": [
+          {
+            "kind": "no_change",
+            "domain": "responsibility",
+            "statement": "Priya Shah is still the delivery PM."
+          }
+        ],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      },
+      {
+        "id": "repeat-release",
+        "kind": "repeat-date",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 1,
+        "decisions": [
+          {
+            "kind": "no_change",
+            "domain": "milestone",
+            "statement": "The target release date is 27 October 2026."
+          }
+        ],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      },
+      {
+        "id": "resolved-cab-historical",
+        "kind": "resolved-historical",
+        "applied": false,
+        "writeCount": 0,
+        "needsYouCount": 0,
+        "noChangeCount": 1,
+        "decisions": [
+          {
+            "kind": "no_change",
+            "domain": "risk",
+            "statement": "The risk of CAB rejection is resolved."
+          }
+        ],
+        "wouldMutate": false,
+        "expected": "no_change or needs_you; never apply"
+      }
+    ],
+    "reloadOk": true,
+    "historyEvents": 39,
+    "currentTruthObjects": 25
+  }
+]
