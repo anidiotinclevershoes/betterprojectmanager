@@ -1,0 +1,357 @@
+{
+  "sourceRun": "33323265425",
+  "envelopes": [
+    {
+      "source": "PR #114 live run 33323265425 \u2014 uncleaned",
+      "capture": 1,
+      "rawInput": "Kickoff. Priya Shah is the delivery PM for Northstar Member Portal Renewal. We'll take it week by week.",
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Priya Shah is the delivery PM for Northstar Member Portal Renewal.",
+          "domain": "person",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Priya Shah is the delivery PM for Northstar Member Portal Renewal.",
+          "candidateTargetId": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+          "candidateTargetTitle": "Northstar Member Portal Renewal",
+          "proposedValues": {
+            "name": "Priya Shah"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The project will be taken week by week.",
+          "domain": "knowledge",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "We'll take it week by week.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ]
+    },
+    {
+      "source": "PR #114 live run 33323265425 \u2014 uncleaned",
+      "capture": 8,
+      "rawInput": "Amira Rahman chairs CAB. Working rule: CAB packs must be ready 24 hours before the CAB slot. No exceptions because the last renewal got bounced.",
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Amira Rahman chairs CAB.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Amira Rahman chairs CAB.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "name": "Amira Rahman"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "CAB packs must be ready 24 hours before the CAB slot.",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Working rule: CAB packs must be ready 24 hours before the CAB slot.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "text": "CAB packs must be ready 24 hours before the CAB slot."
+          }
+        },
+        {
+          "id": "obs-3",
+          "statement": "No exceptions because the last renewal got bounced.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "No exceptions because the last renewal got bounced.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "title": "Last renewal got bounced"
+          }
+        }
+      ]
+    },
+    {
+      "source": "PR #114 live run 33323265425 \u2014 uncleaned",
+      "capture": 9,
+      "rawInput": "Please add a to-do for login error handling.",
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "A to-do needs to be added for login error handling.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Please add a to-do for login error handling.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "title": "Login error handling"
+          }
+        }
+      ]
+    },
+    {
+      "source": "PR #114 live run 33323265425 \u2014 uncleaned",
+      "capture": 11,
+      "rawInput": "Dates, finally. UAT starts 14 October 2026, CAB is 18 October, and the target release is 27 October 2026. That's the working plan, not a wish.",
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "UAT starts on 14 October 2026.",
+          "domain": "milestone",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "UAT starts 14 October 2026",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "label": "UAT Start",
+            "date": "2026-10-14"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "CAB is scheduled for 18 October 2026.",
+          "domain": "milestone",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "CAB is 18 October",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "label": "CAB Date",
+            "date": "2026-10-18"
+          }
+        },
+        {
+          "id": "obs-3",
+          "statement": "The target release is on 27 October 2026.",
+          "domain": "milestone",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "the target release is 27 October 2026",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "label": "Target Release",
+            "date": "2026-10-27"
+          }
+        },
+        {
+          "id": "obs-4",
+          "statement": "The working plan is not a wish.",
+          "domain": "knowledge",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "That's the working plan, not a wish.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ]
+    },
+    {
+      "source": "PR #114 live run 33323265425 \u2014 uncleaned",
+      "capture": 30,
+      "rawInput": "API timeout is still open. I'm not changing it. Just mentioning it so nobody thinks it went away.",
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "API timeout is still open.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "API timeout is still open.",
+          "candidateTargetId": "5d7b5b0a-63e5-4271-9daf-a67a3601189f",
+          "candidateTargetTitle": "Last renewal got bounced",
+          "proposedValues": {
+            "title": "API timeout issue",
+            "status": "open"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The API timeout is not changing.",
+          "domain": "knowledge",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "I'm not changing it.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        },
+        {
+          "id": "obs-3",
+          "statement": "The API timeout is mentioned to avoid confusion.",
+          "domain": "knowledge",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Just mentioning it so nobody thinks it went away.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ]
+    },
+    {
+      "source": "PR #114 live run 33323265425 \u2014 uncleaned",
+      "capture": 33,
+      "rawInput": "Sarah Kim is security \u2014 different Sarah from Sarah Okonkwo on product. Please add Sarah Kim. She raised pen-test findings we need to close before CAB; add a to-do for pen-test findings.",
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Sarah Kim is a new person to be added.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "Please add Sarah Kim.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "name": "Sarah Kim"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Sarah Kim raised pen-test findings that need to be closed before CAB.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "She raised pen-test findings we need to close before CAB;",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "title": "Close pen-test findings before CAB"
+          }
+        },
+        {
+          "id": "obs-3",
+          "statement": "A to-do needs to be added for pen-test findings.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "evidence": "add a to-do for pen-test findings.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "title": "Address pen-test findings"
+          }
+        }
+      ]
+    },
+    {
+      "source": "PR #114 live run 33323265425 \u2014 uncleaned",
+      "capture": 42,
+      "rawInput": "Sarah said the CAB pack needs a threat model before she'll sign it. Can you update that?",
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The CAB pack needs a threat model before it can be signed.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "Sarah said the CAB pack needs a threat model before she'll sign it.",
+          "candidateTargetId": "77474ff8-f7f4-4f92-95a6-8ab72dc00220",
+          "candidateTargetTitle": "CAB Date",
+          "proposedValues": {
+            "scope": "CAB pack",
+            "ownershipSemantics": "replace",
+            "personName": "Sarah Kim"
+          }
+        }
+      ]
+    },
+    {
+      "source": "PR #114 live run 33323265425 \u2014 uncleaned",
+      "capture": 51,
+      "rawInput": "Sarah said the member comms can go out the day before release. That's it.",
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The member communications can go out the day before release.",
+          "domain": "knowledge",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "evidence": "Sarah said the member comms can go out the day before release.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {
+            "text": "The member communications can go out the day before release."
+          }
+        }
+      ]
+    },
+    {
+      "source": "PR #114 live run 33323265425 \u2014 uncleaned",
+      "capture": 71,
+      "rawInput": "Ignore the date in yesterday's steering notes \u2014 CAB is still the 18th. Someone typed the 22nd in the pack by mistake.",
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "CAB date is still the 18th.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "CAB is still the 18th.",
+          "candidateTargetId": "77474ff8-f7f4-4f92-95a6-8ab72dc00220",
+          "candidateTargetTitle": "CAB Date",
+          "proposedValues": {
+            "label": "CAB Date",
+            "date": "2023-10-18"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The 22nd was typed by mistake.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "evidence": "Someone typed the 22nd in the pack by mistake.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ]
+    },
+    {
+      "source": "PR #114 live run 33323265425 \u2014 uncleaned",
+      "capture": 82,
+      "rawInput": "Steering PDF still shows CAB on the 12th in the header. That's a copied template. CAB is the 18th.",
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "CAB is scheduled for the 18th.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "evidence": "CAB is the 18th.",
+          "candidateTargetId": "77474ff8-f7f4-4f92-95a6-8ab72dc00220",
+          "candidateTargetTitle": "CAB Date",
+          "proposedValues": {
+            "label": "CAB Date",
+            "date": "2023-11-18"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The steering PDF still shows CAB on the 12th.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "evidence": "Steering PDF still shows CAB on the 12th in the header.",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": null
+        }
+      ]
+    }
+  ]
+}
