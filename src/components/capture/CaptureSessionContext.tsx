@@ -546,7 +546,12 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       item: PendingSuggestion,
       scopedProjectId?: string,
     ): Promise<CaptureApplyDecision> => {
-      const text = (slice.editing[item.id] ?? item.content).trim();
+      const reviewed = (slice.editing[item.id] ?? item.content).trim();
+      const approvedItem: PendingSuggestion = {
+        ...item,
+        content: reviewed,
+      };
+      const text = (slice.content.trim() || reviewed);
       const projectId = scopedProjectId || slice.projectId || item.projectId || "";
 
       const finishApplied = (message: string) => {
@@ -576,9 +581,9 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             projectId,
-            item,
+            item: approvedItem,
             text,
-            expectedTarget: item.expectedTarget ?? null,
+            expectedTarget: approvedItem.expectedTarget ?? null,
           }),
         });
         const data = (await response.json()) as {
@@ -648,6 +653,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     [
       adoptAppliedState,
       announce,
+      slice.content,
       slice.editing,
       slice.projectId,
     ],

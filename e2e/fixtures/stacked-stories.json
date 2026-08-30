@@ -17,6 +17,7 @@
               "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
               "domain": "person",
               "disposition": "no_change",
+              "truthIntent": "current",
               "projectId": "proj-candy",
               "candidateTargetId": "person-gumdrop",
               "candidateTargetTitle": "Pippa Gumdrop"
@@ -38,6 +39,7 @@
               "evidence": "The icing on Gumdrop Bridge has melted; that risk is closed.",
               "domain": "risk",
               "disposition": "update_existing",
+              "truthIntent": "current",
               "candidateTargetId": "risk-bridge",
               "candidateTargetTitle": "Gumdrop Bridge icing",
               "proposedValues": {
@@ -61,6 +63,7 @@
               "evidence": "Parade day is now 29 October 2026.",
               "domain": "milestone",
               "disposition": "update_existing",
+              "truthIntent": "current",
               "candidateTargetId": "ms-parade",
               "candidateTargetTitle": "Parade day",
               "proposedValues": {
@@ -84,6 +87,7 @@
               "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
               "domain": "availability",
               "disposition": "update_existing",
+              "truthIntent": "current",
               "candidateTargetId": "person-fizz",
               "candidateTargetTitle": "Fizz Caramel",
               "proposedValues": {
@@ -108,6 +112,7 @@
               "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
               "domain": "responsibility",
               "disposition": "ambiguous",
+              "truthIntent": "current",
               "proposedValues": {
                 "ownershipSemantics": "ambiguous",
                 "scope": "UAT lead"
@@ -131,6 +136,7 @@
               "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
               "domain": "todo",
               "disposition": "create_new",
+              "truthIntent": "current",
               "proposedValues": {
                 "title": "Polish the candy-cane banners"
               }
@@ -152,6 +158,7 @@
               "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
               "domain": "person",
               "disposition": "no_change",
+              "truthIntent": "current",
               "projectId": "proj-candy",
               "candidateTargetId": "person-gumdrop",
               "candidateTargetTitle": "Pippa Gumdrop"
@@ -173,6 +180,7 @@
               "evidence": "The candy-cane banners to-do is finished.",
               "domain": "todo",
               "disposition": "update_existing",
+              "truthIntent": "current",
               "projectId": "proj-candy",
               "candidateTargetTitle": "Polish the candy-cane banners",
               "proposedValues": {
@@ -208,6 +216,7 @@
               "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
               "domain": "person",
               "disposition": "create_new",
+              "truthIntent": "current",
               "projectId": "proj-toy",
               "candidateTargetTitle": "Velvet Sprocket",
               "proposedValues": {
@@ -232,6 +241,7 @@
               "evidence": "Velvet Sprocket is still the paint lead on the wooden-track refresh.",
               "domain": "person",
               "disposition": "create_new",
+              "truthIntent": "current",
               "projectId": "proj-toy",
               "candidateTargetTitle": "Velvet Sprocket",
               "proposedValues": {
@@ -255,6 +265,7 @@
               "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
               "domain": "risk",
               "disposition": "update_existing",
+              "truthIntent": "current",
               "projectId": "proj-toy",
               "candidateTargetId": "risk-packaging",
               "candidateTargetTitle": "Packaging delay",
@@ -279,6 +290,7 @@
               "evidence": "Nothing has changed on Toyworld this week. Leave the records as they are.",
               "domain": "commentary",
               "disposition": "commentary",
+              "truthIntent": "current",
               "projectId": "proj-toy"
             }
           ]
@@ -306,6 +318,7 @@
               "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there.",
               "domain": "person",
               "disposition": "no_change",
+              "truthIntent": "current",
               "projectId": "proj-game",
               "candidateTargetId": "person-pixel",
               "candidateTargetTitle": "Pixel Ramos"
@@ -327,6 +340,7 @@
               "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
               "domain": "responsibility",
               "disposition": "ambiguous",
+              "truthIntent": "current",
               "projectId": "proj-game",
               "proposedValues": {
                 "ownershipSemantics": "replace",
@@ -351,6 +365,7 @@
               "evidence": "Wait — I meant the audio bus mixer, not the shader.",
               "domain": "risk",
               "disposition": "create_new",
+              "truthIntent": "current",
               "projectId": "proj-game",
               "proposedValues": {
                 "title": "Audio bus mixer stall"
@@ -373,6 +388,7 @@
               "evidence": "She said she will own the boss balancing pass from now on.",
               "domain": "responsibility",
               "disposition": "ambiguous",
+              "truthIntent": "current",
               "projectId": "proj-game",
               "commentary": "The speaker did not name who she is."
             }
@@ -393,6 +409,7 @@
               "evidence": "The shader compile is stalling the cert build and could miss the nightlies.",
               "domain": "risk",
               "disposition": "create_new",
+              "truthIntent": "current",
               "projectId": "proj-game",
               "proposedValues": {
                 "title": "Shader compile stall"
@@ -415,6 +432,7 @@
               "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
               "domain": "commentary",
               "disposition": "commentary",
+              "truthIntent": "current",
               "projectId": "proj-game"
             }
           ]

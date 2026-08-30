@@ -42,6 +42,7 @@ const ALFRESCO_PVS_OBSERVATIONS = [
     evidence: "Olga and Andris are on Legacy",
     domain: "person",
     disposition: "ambiguous",
+    truthIntent: "current",
     proposedValues: { name: "Olga", role: "Legacy" },
   },
   {
@@ -50,6 +51,7 @@ const ALFRESCO_PVS_OBSERVATIONS = [
     evidence: "Olga and Andris are on Legacy",
     domain: "person",
     disposition: "ambiguous",
+    truthIntent: "current",
     proposedValues: { name: "Andris", role: "Legacy" },
   },
   {
@@ -58,6 +60,7 @@ const ALFRESCO_PVS_OBSERVATIONS = [
     evidence: "Martins and Elman are on React",
     domain: "person",
     disposition: "ambiguous",
+    truthIntent: "current",
     proposedValues: { name: "Martins", role: "React" },
   },
   {
@@ -66,6 +69,7 @@ const ALFRESCO_PVS_OBSERVATIONS = [
     evidence: "Martins and Elman are on React",
     domain: "person",
     disposition: "ambiguous",
+    truthIntent: "current",
     proposedValues: { name: "Elman", role: "React" },
   },
   {
@@ -74,6 +78,7 @@ const ALFRESCO_PVS_OBSERVATIONS = [
     evidence: "Alfresco is a Legacy-only rule",
     domain: "knowledge",
     disposition: "create_new",
+    truthIntent: "current",
   },
   {
     id: "obs-pvs",
@@ -81,6 +86,7 @@ const ALFRESCO_PVS_OBSERVATIONS = [
     evidence: "PVS testing and registration is a separate rule",
     domain: "knowledge",
     disposition: "create_new",
+    truthIntent: "current",
   },
   {
     id: "obs-bau",
@@ -88,6 +94,7 @@ const ALFRESCO_PVS_OBSERVATIONS = [
     evidence: "this is BAU",
     domain: "knowledge",
     disposition: "create_new",
+    truthIntent: "current",
   },
 ];
 
@@ -113,6 +120,7 @@ function main() {
         evidence: "Pippa Gumdrop is UAT lead.",
         domain: "person",
         disposition: "create_new",
+        truthIntent: "current",
         proposedValues: { name: "Pippa Gumdrop", role: "UAT lead" },
       },
       {
@@ -121,6 +129,7 @@ function main() {
         evidence: "Fizz Caramel is doing the float design.",
         domain: "person",
         disposition: "create_new",
+        truthIntent: "current",
         proposedValues: { name: "Fizz Caramel", role: "Designer" },
       },
       {
@@ -129,6 +138,7 @@ function main() {
         evidence: "We're worried the Gumdrop Bridge icing will slip.",
         domain: "risk",
         disposition: "create_new",
+        truthIntent: "current",
         proposedValues: { title: "Gumdrop Bridge icing" },
       },
       {
@@ -137,6 +147,7 @@ function main() {
         evidence: "Parade day is 15 October 2026.",
         domain: "milestone",
         disposition: "create_new",
+        truthIntent: "current",
         proposedValues: { label: "Parade day", date: "2026-10-15" },
       },
       {
@@ -145,6 +156,7 @@ function main() {
         evidence: "Need to order extra sprinkles.",
         domain: "todo",
         disposition: "create_new",
+        truthIntent: "current",
       },
       {
         id: "k1",
@@ -152,6 +164,7 @@ function main() {
         evidence: "CAB pack must be ready 24 hours before the parade.",
         domain: "knowledge",
         disposition: "create_new",
+        truthIntent: "current",
       },
       {
         id: "c1",
@@ -159,6 +172,7 @@ function main() {
         evidence: "Pixel Ramos is not on this project — she's on GamingStudio5000.",
         domain: "commentary",
         disposition: "commentary",
+        truthIntent: "current",
       },
     ],
   });
@@ -192,8 +206,12 @@ function main() {
   });
 
   check("recategorise then draft mapping", () => {
-    const moved = recategoriseItem(parsed.items, "t1", "knowledge");
-    assert.equal(moved.find((i) => i.id === "t1")?.category, "knowledge");
+    const sprinkle = parsed.items.find(
+      (i) => i.modelObservationId === "t1" || /sprinkles/i.test(i.statement),
+    );
+    assert.ok(sprinkle, "sprinkles todo row");
+    const moved = recategoriseItem(parsed.items, sprinkle!.id, "knowledge");
+    assert.equal(moved.find((i) => i.id === sprinkle!.id)?.category, "knowledge");
     const draft = draftFromProvisional({
       sourceNarrative: NEW_PROJECT_MESSY_INPUT,
       sourceMode: "talk",
@@ -273,6 +291,7 @@ function main() {
           evidence: "Olga maybe on Legacy",
           domain: "person",
           disposition: "ambiguous",
+          truthIntent: "current",
         },
         {
           id: "r-amb",
@@ -280,6 +299,7 @@ function main() {
           evidence: "Alfresco maybe Legacy only",
           domain: "risk",
           disposition: "ambiguous",
+          truthIntent: "current",
         },
       ],
     });

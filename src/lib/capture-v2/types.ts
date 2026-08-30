@@ -31,12 +31,21 @@ export const OBSERVATION_DISPOSITIONS = [
 
 export type ObservationDisposition = (typeof OBSERVATION_DISPOSITIONS)[number];
 
+export const TRUTH_INTENTS = ["current", "non_current", "uncertain"] as const;
+
+export type TruthIntent = (typeof TRUTH_INTENTS)[number];
+
 export type CaptureObservationV2 = {
   id: string;
   statement: string;
   evidence: string;
   domain: ObservationDomain;
   disposition: ObservationDisposition;
+  /**
+   * Whether the user is asserting this as current authoritative project truth.
+   * Required on accepted observations. Missing must not be treated as current.
+   */
+  truthIntent: TruthIntent;
   projectId?: string | null;
   candidateTargetId?: string | null;
   candidateTargetTitle?: string | null;
@@ -63,7 +72,9 @@ export type ObservationValidationIssue = {
     | "foreign_id"
     | "missing_evidence"
     | "missing_statement"
-    | "cross_project_id";
+    | "cross_project_id"
+    | "missing_truth_intent"
+    | "unknown_truth_intent";
   message: string;
 };
 
@@ -87,5 +98,12 @@ export function isObservationDisposition(
   return (
     typeof value === "string" &&
     (OBSERVATION_DISPOSITIONS as readonly string[]).includes(value)
+  );
+}
+
+export function isTruthIntent(value: unknown): value is TruthIntent {
+  return (
+    typeof value === "string" &&
+    (TRUTH_INTENTS as readonly string[]).includes(value)
   );
 }

@@ -10,9 +10,18 @@ import {
   questionImpliesLatest,
 } from "@/lib/tell-me/freshness";
 import {
+  isFirstClassResponsibilitySource,
   ownershipTopicTokens,
+  questionLooksCurrentRisk,
+  questionLooksCurrentState,
+  questionLooksHistorical,
   questionLooksOwnership,
+  questionLooksScheduledDate,
+  questionLooksTodoStatus,
   recordMentionsOwnershipOfTopic,
+  RISK_AUTHORITY_KINDS,
+  SCHEDULED_DATE_AUTHORITY_KINDS,
+  TODO_AUTHORITY_KINDS,
 } from "@/lib/tell-me/question-shape";
 import { questionLooksAdvisory } from "@/lib/tell-me/scope";
 import type { MissionState } from "@/lib/types";
@@ -48,6 +57,8 @@ Rules:
 - Distinguish recorded fact from inference. Inference must be labelled in the prose.
 - Ownership: only state an owner when a record explicitly assigns that exact responsibility. Do not broaden one ownership into another (UX ≠ security; discussion ≠ ownership; BA cover ≠ scope approval; vendor contact ≠ commercial approval). If no exact owner is recorded, say so — do not guess.
 - Current vs history: for current-state questions, prefer Current position / Decisions over older History or superseded risk notes. Keep historical facts for historical questions.
+- Scheduled dates (milestones, target dates, releases) are direct confirmation only from Milestones and Releases records. Knowledge or decision prose that mentions a date is related context, not a scheduled date record.
+- Source authority: direct_confirmation requires first-class current domain records for that question (milestones/releases for scheduled dates; risk records for current risks; todos for todo/status; confirmed current responsibility for owners). Knowledge prose, history, and evidence may be related_context — they must not masquerade as first-class confirmed current truth.
 - Epistemic status: informal, unofficial, suggested, rumoured, assumed, or casually mentioned items are not official/confirmed/approved fact. Answer "official / confirmed?" questions with the status first.
 - Preserve qualifications in evidence (only / not / require / unconfirmed / informal) — never drop them when answering.
 - Recent conversation is for continuity and reference resolution only. It is not project evidence. Previous assistant answers may be wrong and must not override or establish owners, dates, decisions, or approvals. Project records remain authoritative.
@@ -78,6 +89,8 @@ Rules:
 - "needsConfirmation" is optional: only material gaps. Prefer the STORED AMBIGUITIES list when present. Do not invent owners or gaps from absence alone.
 - Ownership: only state an owner when a responsibility fact explicitly assigns that exact scope (@Person → scope). Do not broaden (UX ≠ security).
 - Current vs history: MODE:current excludes superseded; MODE:historical may include it.
+- Scheduled dates (milestones, target dates, releases) are direct confirmation only from Milestones and Releases records. Knowledge or decision prose that mentions a date is related context, not a scheduled date record.
+- Source authority: direct_confirmation requires first-class current domain records for that question (milestones/releases for scheduled dates; risk records for current risks; todos for todo/status; confirmed current responsibility for owners). Knowledge prose, history, and evidence may be related_context — they must not masquerade as first-class confirmed current truth.
 - Epistemic: informal/suggested/unknown/legacy are not official confirmation.
 - Preserve qualifications (only / not / unconfirmed / informal).
 - Recent conversation is for continuity and reference resolution only. It is not project evidence. Previous assistant answers may be wrong and must not override or establish owners, dates, decisions, or approvals. Project records remain authoritative.
@@ -88,6 +101,91 @@ Rules:
 /** Exported for verification — keep in sync with TELL_ME_SYSTEM above. */
 export const TELL_ME_CONVERSATION_AUTHORITY_MARKER =
   "Recent conversation is for continuity and reference resolution only";
+
+export const TELL_ME_SCHEDULED_DATE_AUTHORITY_MARKER =
+  "Scheduled dates (milestones, target dates, releases) are direct confirmation only from Milestones and Releases records";
+
+export const TELL_ME_SOURCE_AUTHORITY_MARKER =
+  "Source authority: direct_confirmation requires first-class current domain records";
+
+const SECONDARY_CONTEXT_KINDS = new Set([
+  "knowledge",
+  "history",
+  "meeting",
+  "capture",
+  "snapshot",
+]);
+
+/**
+ * Shared Ask source-authority boundary.
+ *
+ * First-class CURRENT domain authority may support direct_confirmation.
+ * Secondary prose / history / evidence may support related_context
+ * but must not masquerade as confirmed current truth.
+ */
+export function constrainAskConfidence(args: {
+  question: string;
+  confidence: TellMeAnswerConfidence;
+  sources: TellMeSourceRef[];
+}): TellMeAnswerConfidence {
+  if (args.confidence !== "direct_confirmation") return args.confidence;
+
+  const has = (kinds: Set<string>) =>
+    args.sources.some((source) => kinds.has(source.kind));
+  const onlySecondary =
+    args.sources.length > 0 &&
+    args.sources.every((source) => SECONDARY_CONTEXT_KINDS.has(source.kind));
+  const onlyHistory =
+    args.sources.length > 0 &&
+    args.sources.every(
+      (source) =>
+        source.kind === "history" ||
+        source.kind === "meeting" ||
+        source.kind === "capture",
+    );
+
+  if (onlyHistory && !questionLooksHistorical(args.question)) {
+    return "related_context";
+  }
+
+  if (questionLooksScheduledDate(args.question)) {
+    return has(SCHEDULED_DATE_AUTHORITY_KINDS)
+      ? args.confidence
+      : "related_context";
+  }
+
+  if (questionLooksCurrentRisk(args.question)) {
+    return has(RISK_AUTHORITY_KINDS) ? args.confidence : "related_context";
+  }
+
+  if (questionLooksOwnership(args.question)) {
+    return args.sources.some(isFirstClassResponsibilitySource)
+      ? args.confidence
+      : "related_context";
+  }
+
+  if (questionLooksTodoStatus(args.question)) {
+    return has(TODO_AUTHORITY_KINDS) ? args.confidence : "related_context";
+  }
+
+  if (onlySecondary && questionLooksCurrentState(args.question)) {
+    return "related_context";
+  }
+
+  return args.confidence;
+}
+
+/**
+ * Compatibility wrapper — scheduled-date questions use the shared
+ * source-authority boundary.
+ */
+export function constrainScheduledDateConfidence(args: {
+  question: string;
+  confidence: TellMeAnswerConfidence;
+  sources: TellMeSourceRef[];
+}): TellMeAnswerConfidence {
+  return constrainAskConfidence(args);
+}
 
 export async function answerTellMeQuestion(args: {
   question: string;
@@ -186,17 +284,22 @@ export async function answerTellMeQuestion(args: {
           names.length === 1
             ? `${names[0]} owns ${scopeLabel}.`
             : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]} own ${scopeLabel}.`;
+        const ownerSources = hits.map((hit) => ({
+          id: hit.item.id,
+          kind: "knowledge" as const,
+          label: hit.item.body,
+          projectId: bundle.scope.projectId,
+          projectCode: bundle.scope.projectCode,
+          detail: "confirmed responsibility",
+        }));
         return {
           answer: answerText,
-          confidence: "direct_confirmation",
-          sources: hits.map((hit) => ({
-            id: hit.item.id,
-            kind: "knowledge" as const,
-            label: hit.item.body,
-            projectId: bundle.scope.projectId,
-            projectCode: bundle.scope.projectCode,
-            detail: "confirmed responsibility",
-          })),
+          confidence: constrainAskConfidence({
+            question,
+            confidence: "direct_confirmation",
+            sources: ownerSources,
+          }),
+          sources: ownerSources,
           noticed: [],
           needsConfirmation: [],
           scope: {
@@ -363,9 +466,15 @@ export async function answerTellMeQuestion(args: {
     bundle.needsConfirmationHints ?? [],
   );
 
+  const confidence = constrainAskConfidence({
+    question,
+    confidence: normaliseConfidence(parsed.confidence),
+    sources,
+  });
+
   return {
     answer: answerText,
-    confidence: normaliseConfidence(parsed.confidence),
+    confidence,
     sources,
     noticed,
     needsConfirmation,
@@ -540,14 +649,16 @@ function localGroundedAnswer(args: {
     );
     if (hit) {
       answer = hit.summary ? `${hit.title}. ${hit.summary}` : hit.title;
-      confidence = "direct_confirmation";
+      const kind = hit.type.startsWith("knowledge") ? "knowledge" : "todo";
       sources.push({
         id: hit.id,
-        kind: hit.type.startsWith("knowledge") ? "knowledge" : "todo",
+        kind,
         label: hit.title,
         projectId: args.bundle.scope.projectId,
         projectCode: args.bundle.scope.projectCode,
       });
+      // Knowledge/todo prose is related context, not confirmed current ownership.
+      confidence = "related_context";
     } else {
       answer =
         "I don't have a confirmed owner for that in the project records.";
@@ -568,18 +679,31 @@ function localGroundedAnswer(args: {
           r.projectId === args.bundle.scope.projectId) &&
         isOpenRiskStatus(r.status),
     );
-    if (
-      !domainOpen.length &&
-      !risks.length &&
-      !knowledge.some((k) => /risk/i.test(k.title))
-    ) {
-      answer = "I can’t find open risks recorded for this scope.";
-      confidence = "not_found";
+    if (!domainOpen.length && !risks.length) {
+      const knowledgeRisks = knowledge.filter((k) => /risk/i.test(k.title));
+      if (!knowledgeRisks.length) {
+        answer = "I can’t find open risks recorded for this scope.";
+        confidence = "not_found";
+      } else {
+        answer = `Related risk wording I can see:\n${knowledgeRisks
+          .slice(0, 8)
+          .map((k) => `• ${k.title}`)
+          .join("\n")}`;
+        confidence = "related_context";
+        for (const k of knowledgeRisks.slice(0, 4)) {
+          sources.push({
+            id: k.id,
+            kind: "knowledge",
+            label: k.title,
+            projectId: args.bundle.scope.projectId,
+            projectCode: args.bundle.scope.projectCode,
+          });
+        }
+      }
     } else {
       const lines = [
         ...domainOpen.map((r) => r.title),
         ...risks.map((r) => r.title),
-        ...knowledge.filter((k) => /risk/i.test(k.title)).map((k) => k.title),
       ].slice(0, 8);
       answer = `Open risks I can see:\n${lines.map((l) => `• ${l}`).join("\n")}`;
       confidence = "direct_confirmation";
@@ -636,6 +760,15 @@ function localGroundedAnswer(args: {
         )
         .join("\n");
       confidence = "direct_confirmation";
+      for (const t of list.slice(0, 4)) {
+        sources.push({
+          id: t.id,
+          kind: "todo",
+          label: t.title,
+          projectId: args.bundle.scope.projectId,
+          projectCode: args.bundle.scope.projectCode,
+        });
+      }
     }
   }
 
@@ -666,13 +799,20 @@ function localGroundedAnswer(args: {
     confidence = "not_found";
   }
 
+  const cited =
+    confidence === "not_found"
+      ? []
+      : filterRelevantSources(sources, args.question).slice(0, 6);
+  const bounded = constrainAskConfidence({
+    question: args.question,
+    confidence,
+    sources: cited,
+  });
+
   return {
     answer,
-    confidence,
-    sources:
-      confidence === "not_found"
-        ? []
-        : filterRelevantSources(sources, args.question).slice(0, 6),
+    confidence: bounded,
+    sources: bounded === "not_found" ? [] : cited,
     noticed: [],
     needsConfirmation,
     scope: {

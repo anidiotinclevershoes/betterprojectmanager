@@ -13,6 +13,7 @@ import {
 } from "@/lib/capture/findings";
 import type { CaptureResult } from "@/lib/types";
 import { accountObservations } from "./account";
+import { newReviewOperationId } from "./contract";
 import type { ResolvedObservation } from "./resolve";
 import type { CaptureObservationV2, ObservationDomain } from "./types";
 
@@ -62,7 +63,8 @@ export function captureResultFromResolved(args: {
   for (const row of rows) {
     const observation = row.observation;
     const decision = row.resolved?.decision;
-    const findingId = `find-${observation.id}`;
+    const systemId = row.resolved?.suggestion?.id ?? newReviewOperationId();
+    const findingId = `find-${systemId}`;
     const entityType = DOMAIN_ENTITY[observation.domain];
     const title =
       observation.candidateTargetTitle ||
@@ -126,7 +128,7 @@ export function captureResultFromResolved(args: {
 
     const op = operationCode(observation, decision?.kind, row.rejected);
     operations.push({
-      id: `v2op-${observation.id}`,
+      id: `op-${systemId}`,
       sourceFindingId: findingId,
       operation: op,
       entityType,

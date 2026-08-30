@@ -1,19 +1,20 @@
 import {
-  newSetupClientKey,
+  asUsableString,
+  firstUsableIsoDate,
+} from "@/lib/capture-v2/contract";
+import {
   suggestCode,
   type CreateProjectInput,
 } from "@/lib/create-project";
 import type { ProvisionalItem } from "./types";
 
-function asString(value: unknown): string | undefined {
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  return trimmed ? trimmed : undefined;
-}
-
 /**
  * Map a user-approved categorisation into the existing CreateProjectInput.
  * This mapper does not write to the database.
+ *
+ * Semantic completeness matches Capture reviewSafetyGap: missing / uncertain
+ * / non_current items stay visible as Needs Review. Statement is never
+ * invented as a person name or milestone date merely to look ready.
  */
 export function draftFromProvisional(args: {
   sourceNarrative: string;
@@ -24,47 +25,68 @@ export function draftFromProvisional(args: {
   const stakeholders = args.items
     .filter((item) => item.category === "person")
     .map((item) => {
-      const name = asString(item.proposedValues?.name);
+      const name =
+        asUsableString(item.proposedValues?.name) ||
+        asUsableString(item.proposedValues?.personName);
       return {
-        clientKey: newSetupClientKey(),
-        name: name || item.statement,
-        role: asString(item.proposedValues?.role) || asString(item.proposedValues?.scope),
-        needsReview: item.disposition === "ambiguous" || !name,
+        clientKey: item.id,
+        name: name ?? "",
+        role: asUsableString(item.proposedValues?.role) || asUsableString(item.proposedValues?.scope),
+        needsReview: Boolean(item.needsReview) || !name,
       };
     });
 
   const risks = args.items
     .filter((item) => item.category === "risk")
     .map((item) => ({
-      clientKey: newSetupClientKey(),
-      title: asString(item.proposedValues?.title) || item.statement,
-      needsReview: item.disposition === "ambiguous",
+      clientKey: item.id,
+      title:
+        asUsableString(item.proposedValues?.title) ||
+        asUsableString(item.proposedValues?.label) ||
+        item.statement,
+      needsReview: Boolean(item.needsReview),
     }));
 
   const todos = args.items
     .filter((item) => item.category === "todo")
     .map((item) => ({
-      clientKey: newSetupClientKey(),
-      title: asString(item.proposedValues?.title) || item.statement,
-      dueAt: asString(item.proposedValues?.date) || asString(item.proposedValues?.dueAt),
-      needsReview: item.disposition === "ambiguous",
+      clientKey: item.id,
+      title:
+        asUsableString(item.proposedValues?.title) ||
+        asUsableString(item.proposedValues?.label) ||
+        item.statement,
+      dueAt:
+        firstUsableIsoDate(
+          item.proposedValues?.date,
+          item.proposedValues?.dueAt,
+        ),
+      needsReview: Boolean(item.needsReview),
     }));
 
   const importantDates = args.items
     .filter((item) => item.category === "milestone")
-    .map((item) => ({
-      clientKey: newSetupClientKey(),
-      label: asString(item.proposedValues?.label) || item.statement,
-      date: asString(item.proposedValues?.date) || asString(item.proposedValues?.startAt),
-      needsReview: item.disposition === "ambiguous",
-    }));
+    .map((item) => {
+      const date = firstUsableIsoDate(
+        item.proposedValues?.date,
+        item.proposedValues?.startAt,
+      );
+      return {
+        clientKey: item.id,
+        label:
+          asUsableString(item.proposedValues?.label) ||
+          asUsableString(item.proposedValues?.title) ||
+          item.statement,
+        date,
+        needsReview: Boolean(item.needsReview) || !date,
+      };
+    });
 
   const knowledgeRemember = args.items
     .filter((item) => item.category === "knowledge")
     .map((item) => ({
-      clientKey: newSetupClientKey(),
+      clientKey: item.id,
       text: item.statement,
-      remember: true as const,
+      remember: item.truthIntent !== "non_current" && !item.needsReview,
     }));
 
   const notMentioned = args.items
@@ -72,7 +94,7 @@ export function draftFromProvisional(args: {
     .map((item) => item.statement);
 
   const name = args.project.name.trim() || "New project";
-  const nextDate = importantDates.find((d) => d.date);
+  const nextDate = importantDates.find((d) => d.date && !d.needsReview);
 
   return {
     name,
@@ -87,10 +109,10 @@ export function draftFromProvisional(args: {
     todos,
     importantDates,
     knowledgeRemember,
-    knowledgeRisks: risks.map((r) => r.title),
-    knowledgePeople: stakeholders.map((s) =>
-      s.role ? `${s.name} — ${s.role}` : s.name,
-    ),
+    knowledgeRisks: risks.filter((r) => !r.needsReview).map((r) => r.title),
+    knowledgePeople: stakeholders
+      .filter((s) => s.name.trim() && !s.needsReview)
+      .map((s) => (s.role ? `${s.name} — ${s.role}` : s.name)),
     notMentioned,
     sourceNarrative: args.sourceNarrative,
     sourceMode: args.sourceMode,

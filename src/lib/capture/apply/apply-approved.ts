@@ -99,6 +99,33 @@ export async function applyApprovedCaptureSuggestion(args: {
 
   const box = { state: structuredClone(loaded.workspaceState) };
   const hooks = args.hooks ?? memoryCaptureApplyHooks(box);
+
+  const replayId =
+    decision.kind === "write" && "applyOperationId" in decision.operation
+      ? decision.operation.applyOperationId
+      : undefined;
+  if (replayId && hooks.findApplyReceipt && decision.kind === "write") {
+    const existing = await hooks.findApplyReceipt({
+      projectId: decision.operation.projectId,
+      operationId: replayId,
+    });
+    if (existing) {
+      return {
+        decision: {
+          kind: "no_change",
+          domain: decision.domain,
+          reason: "This approved create was already applied.",
+        },
+        executed: {
+          kind: "no_change",
+          domain: decision.domain,
+          reason: "This approved create was already applied.",
+        },
+        state: loaded.workspaceState,
+      };
+    }
+  }
+
   const executed = await executeCaptureApply(decision, hooks);
 
   if (executed.kind === "wrote" && decision.kind === "write") {
@@ -124,7 +151,15 @@ export async function applyApprovedCaptureSuggestion(args: {
 
   let state = args.hooks ? loaded.workspaceState : box.state;
   if (executed.kind === "wrote" && args.reloadWorkspace) {
-    state = await args.reloadWorkspace();
+    try {
+      state = await args.reloadWorkspace();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(
+        "[applyApprovedCaptureSuggestion] reload after write skipped",
+        message,
+      );
+    }
   }
 
   return {

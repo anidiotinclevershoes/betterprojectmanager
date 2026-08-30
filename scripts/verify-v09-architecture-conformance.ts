@@ -51,6 +51,7 @@ const CONTROLLED_EXTRACTOR_JSON = {
       evidence: "Maya Chen is the sponsor and Priya Shah is doing the digitisation work.",
       domain: "person",
       disposition: "create_new",
+      truthIntent: "current",
       proposedValues: { name: "Maya Chen", role: "sponsor" },
     },
     {
@@ -59,6 +60,7 @@ const CONTROLLED_EXTRACTOR_JSON = {
       evidence: "Maya Chen is the sponsor and Priya Shah is doing the digitisation work.",
       domain: "person",
       disposition: "create_new",
+      truthIntent: "current",
       proposedValues: { name: "Priya Shah", role: "digitisation" },
     },
     {
@@ -67,6 +69,7 @@ const CONTROLLED_EXTRACTOR_JSON = {
       evidence: "We never store originals off-site.",
       domain: "knowledge",
       disposition: "create_new",
+      truthIntent: "current",
     },
     {
       id: "obs-cab",
@@ -74,6 +77,7 @@ const CONTROLLED_EXTRACTOR_JSON = {
       evidence: "CAB packs must be ready 24 hours before go-live.",
       domain: "knowledge",
       disposition: "create_new",
+      truthIntent: "current",
     },
     {
       id: "obs-vendor",
@@ -81,6 +85,7 @@ const CONTROLLED_EXTRACTOR_JSON = {
       evidence: "Apparently the vendor may already have the scan specification.",
       domain: "knowledge",
       disposition: "ambiguous",
+      truthIntent: "current",
       commentary: "Apparently / may already — not decided.",
     },
   ],
@@ -267,6 +272,9 @@ async function main() {
           assert.match(prompt, /You extract atomic project observations/);
           assert.ok(prompt.includes(RAW_NARRATIVE.trim().slice(0, 40)));
           assert.ok(prompt.includes(CAPTURE_V2_OBSERVATION_SCHEMA.slice(0, 40)));
+          assert.match(prompt, /"name": "person create/);
+          assert.match(prompt, /awayFromIso/);
+          assert.match(prompt, /ownershipSemantics/);
           assert.doesNotMatch(prompt, /You organise messy project start notes/);
           assert.doesNotMatch(prompt, /You extract a Lume project setup draft/);
           const body = (await res.json()) as {
@@ -347,6 +355,7 @@ async function main() {
                 evidence: transcript,
                 domain: "todo",
                 disposition: "update_existing",
+                truthIntent: "current",
                 projectId: PROJECT_A,
                 candidateTargetId: TODO_A,
                 candidateTargetTitle: "Prepare the jelly pack",
@@ -447,6 +456,7 @@ async function main() {
                 evidence: "Vendor SLA slip is resolved",
                 domain: "risk",
                 disposition: "update_existing",
+                truthIntent: "current",
                 projectId: PROJECT_A,
                 candidateTargetId: risk!.id,
                 candidateTargetTitle: risk!.title,

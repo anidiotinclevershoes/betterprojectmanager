@@ -2,8 +2,10 @@ export { isCaptureV2Enabled } from "./flag";
 export {
   OBSERVATION_DOMAINS,
   OBSERVATION_DISPOSITIONS,
+  TRUTH_INTENTS,
   isObservationDomain,
   isObservationDisposition,
+  isTruthIntent,
   type CaptureObservationV2,
   type ObservationContextRecord,
   type ObservationDisposition,
@@ -14,6 +16,13 @@ export {
   parseObservationEnvelope,
   validateObservations,
 } from "./validate";
+export {
+  missingReadySemantics,
+  missingSemanticFields,
+  reviewSafetyGap,
+  newReviewOperationId,
+  isUsableIsoDate,
+} from "./contract";
 export {
   contextRecordsFromWorld,
   formatAuthoritativeStateForPrompt,

@@ -123,6 +123,7 @@ function obs(
     proposedValues: null,
     commentary: null,
     modelConfidence: null,
+    truthIntent: "current",
     ...partial,
   };
 }
@@ -232,6 +233,7 @@ async function main() {
         evidence: "The shader compile is stalling the cert build.",
         domain: "risk",
         disposition: "create_new",
+        truthIntent: "current",
       }),
     ]);
     assert.ok(writeTypes(evaluated).includes("create_risk"));
@@ -251,6 +253,7 @@ async function main() {
         evidence: "Wait — I meant the audio bus mixer, not the shader.",
         domain: "risk",
         disposition: "create_new",
+        truthIntent: "current",
       }),
     ]);
     assert.ok(writeTypes(evaluated).includes("create_risk"));
@@ -281,6 +284,7 @@ async function main() {
           evidence: row.retracted,
           domain: "risk",
           disposition: "create_new",
+          truthIntent: "current",
         }),
       ]);
       const good = evaluate(testCase, [
@@ -290,6 +294,7 @@ async function main() {
           evidence: `I meant the other system, not the ${row.prohibited}.`,
           domain: "risk",
           disposition: "create_new",
+          truthIntent: "current",
         }),
       ]);
       assert.equal(classOf(bad, "obs-bad"), "lume_failure", row.prohibited);
@@ -325,6 +330,7 @@ async function main() {
         evidence: "Jordan Hale might take QA from Sam Patel, or they might share it",
         domain: "responsibility",
         disposition: "ambiguous",
+        truthIntent: "current",
         candidateTargetId: "person-jordan",
         candidateTargetTitle: "Jordan Hale",
       }),
@@ -334,6 +340,7 @@ async function main() {
         evidence: "the steering group was unclear",
         domain: "decision",
         disposition: "create_new",
+        truthIntent: "current",
       }),
     ]);
     assert.equal(classOf(evaluated, "obs-decision"), "correct_write");
@@ -363,6 +370,7 @@ async function main() {
         evidence: "Morgan Quinn is joining as paint lead for the riverside path resurfacing.",
         domain: "person",
         disposition: "create_new",
+        truthIntent: "current",
         proposedValues: { name: "Morgan Quinn" },
         candidateTargetTitle: "Morgan Quinn",
       }),
@@ -372,6 +380,7 @@ async function main() {
         evidence: "Morgan Quinn is joining as paint lead for the riverside path resurfacing.",
         domain: "knowledge",
         disposition: "create_new",
+        truthIntent: "current",
       }),
     ]);
     assert.equal(classOf(evaluated, "obs-knowledge"), "correct_write");
@@ -403,6 +412,7 @@ async function main() {
         evidence: "Jordan Hale might take QA from Sam Patel, or they might share it",
         domain: "responsibility",
         disposition: "ambiguous",
+        truthIntent: "current",
         candidateTargetId: "person-jordan",
         candidateTargetTitle: "Jordan Hale",
       }),
@@ -412,6 +422,7 @@ async function main() {
         evidence: "the steering group was unclear",
         domain: "knowledge",
         disposition: "create_new",
+        truthIntent: "current",
       }),
     ]);
     assert.equal(classOf(evaluated, "obs-invented"), "lume_failure");
@@ -446,6 +457,7 @@ async function main() {
         statement: "Jordan Hale is off next Thursday.",
         domain: "availability",
         disposition: "update_existing",
+        truthIntent: "current",
         candidateTargetId: "person-jordan",
         candidateTargetTitle: "Jordan Hale",
         proposedValues: {
@@ -489,6 +501,7 @@ async function main() {
         statement: "Jordan Hale remains lead.",
         domain: "person",
         disposition: "no_change",
+        truthIntent: "current",
         candidateTargetId: "person-jordan",
         candidateTargetTitle: "Jordan Hale",
       }),
@@ -497,6 +510,7 @@ async function main() {
         statement: "Vendor escrow gap on the payment path.",
         domain: "risk",
         disposition: "create_new",
+        truthIntent: "current",
       }),
     ]);
     assert.equal(evaluated.lumeSafety.totals.unresolvedTargetConvertedToCreate, 0);
@@ -525,6 +539,7 @@ async function main() {
       evidence: "Jordan from the warehouse called; he wants to help with assembly.",
       domain: "person",
       disposition: "update_existing",
+      truthIntent: "current",
       candidateTargetId: "person-jordan",
       candidateTargetTitle: "Jordan Hale",
     });
@@ -572,6 +587,7 @@ async function main() {
       evidence: "The widget mill is stalling the night build.",
       domain: "risk",
       disposition: "create_new",
+      truthIntent: "current",
     });
     const corrected = obs({
       id: "obs-corrected",
@@ -579,12 +595,14 @@ async function main() {
       evidence: "Wait — I meant the gadget mill, not the widget.",
       domain: "risk",
       disposition: "create_new",
+      truthIntent: "current",
     });
     const commentary = obs({
       id: "obs-note",
       statement: "The speaker corrected themselves.",
       domain: "commentary",
       disposition: "commentary",
+      truthIntent: "current",
     });
     const orders = [
       [retracted, corrected],
@@ -614,6 +632,7 @@ async function main() {
             statement: `The ${bad} is stalling the run.`,
             domain: "risk",
             disposition: "create_new",
+            truthIntent: "current",
           }),
         ]);
         const denied = evaluate(testCase, [
@@ -622,6 +641,7 @@ async function main() {
             statement: `The ${good} is stalling the run, not the ${bad}.`,
             domain: "risk",
             disposition: "create_new",
+            truthIntent: "current",
           }),
         ]);
         assert.equal(classOf(asserted, "obs-assert"), "lume_failure");
@@ -654,6 +674,7 @@ async function main() {
       evidence: "The steering group was unclear about the quay timetable.",
       domain: "decision",
       disposition: "create_new",
+      truthIntent: "current",
     });
     const siblings: CaptureObservationV2[] = [
       obs({
@@ -661,6 +682,7 @@ async function main() {
         statement: "Jordan Hale remains lead.",
         domain: "person",
         disposition: "no_change",
+        truthIntent: "current",
         candidateTargetId: "person-jordan",
         candidateTargetTitle: "Jordan Hale",
       }),
@@ -669,6 +691,7 @@ async function main() {
         statement: "Kickoff review is unchanged.",
         domain: "milestone",
         disposition: "no_change",
+        truthIntent: "current",
         candidateTargetId: "ms-kickoff",
         candidateTargetTitle: "Kickoff review",
       }),

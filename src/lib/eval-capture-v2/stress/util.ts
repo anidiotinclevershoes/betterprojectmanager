@@ -27,6 +27,7 @@ export function hcaObs(
     proposedValues: partial.proposedValues ?? null,
     commentary: partial.commentary ?? null,
     modelConfidence: null,
+    truthIntent: "current",
     ...partial,
   };
 }

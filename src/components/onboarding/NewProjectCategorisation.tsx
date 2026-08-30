@@ -97,8 +97,19 @@ export function NewProjectCategorisation({
 
       <ul className="np-categorise-list">
         {items.map((item) => (
-          <li key={item.id} className="np-categorise-item">
-            <p className="np-categorise-statement">{item.statement}</p>
+          <li
+            key={item.id}
+            className={`np-categorise-item ${item.needsReview ? "is-needs-review" : ""}`}
+            data-model-observation-id={item.modelObservationId ?? undefined}
+          >
+            <div className="np-categorise-item-head">
+              <p className="np-categorise-statement">{item.statement}</p>
+              {item.needsReview ? (
+                <span className="np-needs-review" data-testid="np-needs-review">
+                  Needs Review
+                </span>
+              ) : null}
+            </div>
             <p className="meta np-categorise-evidence">“{item.evidence}”</p>
             <label className="field">
               Category

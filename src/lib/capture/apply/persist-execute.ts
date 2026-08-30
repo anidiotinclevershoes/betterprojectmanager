@@ -6,13 +6,16 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { confirmResponsibilityOwner } from "@/lib/people/identity";
 import {
   persistEnsureStakeholder,
+  persistFindCaptureApplyReceipt,
   persistKnowledgeBullet,
-  persistKnowledgeLifecycle,
   persistMemory,
+  persistPersonResponsibilityBundle,
   persistRiskStatus,
   persistTimelineItem,
+  persistTimelineItemWithReceipt,
   persistTimelineUpdate,
   persistTodoCreate,
+  persistTodoCreateWithReceipt,
   persistTodoDelete,
   persistTodoUpdate,
 } from "@/lib/data/supabase/persist-mutations";
@@ -37,6 +40,35 @@ export function supabaseCaptureApplyHooks(args: {
 
   return {
     createTodo: async (op) => {
+      if (op.applyOperationId) {
+        const existing = await persistFindCaptureApplyReceipt(
+          client,
+          workspaceId,
+          op.projectId,
+          op.applyOperationId,
+        );
+        if (existing) return;
+        await persistTodoCreateWithReceipt(
+          client,
+          workspaceId,
+          userId,
+          {
+            projectId: op.projectId,
+            title: op.title,
+            detail: op.detail,
+            done: false,
+            dueAt: op.dueAt,
+            kind: op.todoKind,
+            waitingOn: op.waitingOn,
+          },
+          {
+            operationId: op.applyOperationId,
+            entityType: "todo",
+            entityId: "",
+          },
+        );
+        return;
+      }
       await persistTodoCreate(client, workspaceId, userId, {
         projectId: op.projectId,
         title: op.title,
@@ -63,6 +95,16 @@ export function supabaseCaptureApplyHooks(args: {
       await persistTodoDelete(client, workspaceId, op.projectId, op.todoId);
     },
     createRisk: async (op) => {
+      if (op.applyOperationId) {
+        const existing = await persistFindCaptureApplyReceipt(
+          client,
+          workspaceId,
+          op.projectId,
+          op.applyOperationId,
+        );
+        if (existing) return;
+      }
+      const riskId = newId();
       await persistKnowledgeBullet(
         client,
         workspaceId,
@@ -70,7 +112,16 @@ export function supabaseCaptureApplyHooks(args: {
         "risks",
         op.title,
         userId,
-        { riskId: newId() },
+        {
+          riskId,
+          receipt: op.applyOperationId
+            ? {
+                operationId: op.applyOperationId,
+                entityType: "risk",
+                entityId: riskId,
+              }
+            : null,
+        },
       );
     },
     updateRiskStatus: async (op) => {
@@ -83,10 +134,41 @@ export function supabaseCaptureApplyHooks(args: {
       );
     },
     createMilestone: async (op) => {
+      if (!op.startAt) {
+        throw new Error("This date cannot be saved — the date is missing.");
+      }
+      if (op.applyOperationId) {
+        const existing = await persistFindCaptureApplyReceipt(
+          client,
+          workspaceId,
+          op.projectId,
+          op.applyOperationId,
+        );
+        if (existing) return;
+        await persistTimelineItemWithReceipt(
+          client,
+          workspaceId,
+          op.projectId,
+          {
+            label: op.label,
+            type: "milestone",
+            startAt: op.startAt,
+            endAt: op.endAt,
+            notes: op.notes,
+            source: "capture",
+          },
+          {
+            operationId: op.applyOperationId,
+            entityType: "milestone",
+            entityId: "",
+          },
+        );
+        return;
+      }
       await persistTimelineItem(client, workspaceId, op.projectId, {
         label: op.label,
         type: "milestone",
-        startAt: op.startAt ?? new Date().toISOString(),
+        startAt: op.startAt,
         endAt: op.endAt,
         notes: op.notes,
         source: "capture",
@@ -123,40 +205,30 @@ export function supabaseCaptureApplyHooks(args: {
         replacePersonId: op.replacePersonId,
       });
       box.state = result.state;
-      await persistEnsureStakeholder(client, workspaceId, op.projectId, {
-        id: result.person.id,
-        name: result.person.name,
-        role: result.person.role,
-      });
       const uuidIds = result.supersededIds.filter((id) => UUID_RE.test(id));
-      if (uuidIds.length) {
-        await persistKnowledgeLifecycle(
-          client,
-          workspaceId,
-          op.projectId,
-          uuidIds,
-          "superseded",
-        );
-      }
-      if (result.responsibilityCreated && result.peopleBullet) {
-        await persistKnowledgeBullet(
-          client,
-          workspaceId,
-          op.projectId,
-          "people",
-          result.peopleBullet,
-          userId,
-          {
-            id: result.item.id,
-            kind: result.item.kind,
-            epistemic: result.item.epistemic,
-            lifecycle: result.item.lifecycle,
-            supersedesId: result.item.supersedesId,
-            meta: (result.item.meta as Record<string, unknown>) ?? {},
-            provenance: result.item.provenance,
-          },
-        );
-      }
+      await persistPersonResponsibilityBundle(client, workspaceId, op.projectId, {
+        stakeholder: {
+          id: result.person.id,
+          name: result.person.name,
+          role: result.person.role,
+        },
+        supersedeIds: uuidIds,
+        knowledge:
+          result.responsibilityCreated && result.peopleBullet
+            ? {
+                id: result.item.id,
+                section: "people",
+                body: result.peopleBullet,
+                createdBy: userId,
+                kind: result.item.kind,
+                epistemic: result.item.epistemic,
+                lifecycle: result.item.lifecycle,
+                supersedesId: result.item.supersedesId,
+                meta: (result.item.meta as Record<string, unknown>) ?? {},
+                provenance: result.item.provenance,
+              }
+            : null,
+      });
     },
     writeAvailability: async (op) => {
       const fromDay = op.awayFromIso.slice(0, 10);
@@ -201,6 +273,17 @@ export function supabaseCaptureApplyHooks(args: {
         op.text,
         userId,
       );
+    },
+    findApplyReceipt: async ({ projectId, operationId }) => {
+      const existing = await persistFindCaptureApplyReceipt(
+        client,
+        workspaceId,
+        projectId,
+        operationId,
+      );
+      return existing
+        ? { entityType: existing.entityType, entityId: existing.entityId }
+        : null;
     },
     writeMemory: async (op) => {
       const now = new Date().toISOString();

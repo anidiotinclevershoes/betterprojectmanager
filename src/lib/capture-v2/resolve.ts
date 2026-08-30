@@ -11,7 +11,12 @@ import {
   peopleEvidencedByRecordedNameInText,
   recordedPersonNameAppearsInText,
 } from "@/lib/people/identity";
-import type { CaptureObservationV2, ObservationDomain } from "./types";
+import { missingReadySemantics, newReviewOperationId } from "./contract";
+import {
+  isTruthIntent,
+  type CaptureObservationV2,
+  type ObservationDomain,
+} from "./types";
 
 const PERSON_LINKED_DOMAINS = new Set<ObservationDomain>([
   "person",
@@ -92,6 +97,45 @@ function resolveOne(
     };
   }
 
+  if (!isTruthIntent(observation.truthIntent)) {
+    return {
+      observation,
+      suggestion: null,
+      decision: {
+        kind: "needs_you",
+        domain: DOMAIN_TO_LEGAL[observation.domain],
+        reason:
+          "It is unclear whether this should change current project truth.",
+      },
+    };
+  }
+
+  if (observation.truthIntent === "non_current") {
+    return {
+      observation,
+      suggestion: null,
+      decision: {
+        kind: "no_change",
+        domain: DOMAIN_TO_LEGAL[observation.domain],
+        reason: "Not asserting current project truth — no mutation.",
+      },
+    };
+  }
+
+  if (observation.truthIntent === "uncertain") {
+    return {
+      observation,
+      suggestion: null,
+      decision: {
+        kind: "needs_you",
+        domain: DOMAIN_TO_LEGAL[observation.domain],
+        reason:
+          observation.commentary?.trim() ||
+          "It is unclear whether this should change current project truth.",
+      },
+    };
+  }
+
   if (observation.disposition === "merge") {
     return {
       observation,
@@ -157,14 +201,27 @@ function resolveOne(
     };
   }
 
+  const readyGap = missingReadySemantics(observation);
+  if (readyGap) {
+    return {
+      observation,
+      suggestion: null,
+      decision: {
+        kind: "needs_you",
+        domain: DOMAIN_TO_LEGAL[observation.domain],
+        reason: readyGap,
+      },
+    };
+  }
+
   const identityGate = personLinkedIdentityGate(
     observation,
     args.world,
     projectId,
     args.transcript,
   );
-  if (identityGate) {
-    return { observation, suggestion: null, decision: identityGate };
+  if (identityGate?.kind === "block") {
+    return { observation, suggestion: null, decision: identityGate.decision };
   }
 
   const op = operationFor(observation);
@@ -173,8 +230,15 @@ function resolveOne(
     op,
     projectId,
   });
+  if (identityGate?.kind === "bound") {
+    suggestion.personId = identityGate.person.id;
+    suggestion.personName = identityGate.person.name;
+    suggestion.targetEntityId = identityGate.person.id;
+  }
   suggestion.expectedTarget = fingerprintExpectedTarget(args.world, suggestion);
 
+  // Plan against the reviewed atomic statement, not the full transcript.
+  // Apply must consume the same reviewed fields — transcript is evidence only.
   const decision = planCaptureApply({
     item: suggestion,
     text: observation.statement,
@@ -217,10 +281,15 @@ function suggestionFromObservation(
         : undefined;
 
   return {
-    id: `v2-${observation.id}`,
+    id: newReviewOperationId(),
+    modelObservationId: observation.id,
     kind: args.kind,
     op: args.op,
-    content: observation.statement,
+    content:
+      asString(values.title) ||
+      asString(values.label) ||
+      asString(values.name) ||
+      observation.statement,
     destination: "project",
     projectId: args.projectId,
     date: date ?? undefined,
@@ -237,8 +306,11 @@ function suggestionFromObservation(
         ? observation.candidateTargetId ?? undefined
         : undefined,
     personName:
+      asString(values.personName) ||
       asString(values.name) ||
-      (observation.domain === "person" || observation.domain === "availability"
+      (observation.domain === "person" ||
+      observation.domain === "availability" ||
+      observation.domain === "responsibility"
         ? observation.candidateTargetTitle ?? undefined
         : undefined),
     ownershipSemantics:
@@ -254,7 +326,9 @@ function suggestionFromObservation(
     proposedValues: {
       ...values,
       evidence: observation.evidence,
+      modelObservationId: observation.id,
     },
+    truthIntent: observation.truthIntent,
   };
 }
 
@@ -297,12 +371,16 @@ function uncertainPersonIdentity(
  * name (existing exact-name authority). Incomplete / competing references
  * are Needs you. Not a first-name heuristic. Not a second identity engine.
  */
+type PersonIdentityGate =
+  | { kind: "block"; decision: CaptureApplyDecision }
+  | { kind: "bound"; person: { id: string; name: string } };
+
 function personLinkedIdentityGate(
   observation: CaptureObservationV2,
   world: CaptureApplyWorld,
   projectId: string | null,
   transcript: string,
-): CaptureApplyDecision | null {
+): PersonIdentityGate | null {
   if (!PERSON_LINKED_DOMAINS.has(observation.domain)) {
     return null;
   }
@@ -313,7 +391,10 @@ function personLinkedIdentityGate(
     : undefined;
   const people = project?.stakeholders ?? [];
   const text = identityEvidenceText(observation, transcript);
-  const uncertain = (reason: string) => uncertainPersonIdentity(legal, reason);
+  const uncertain = (reason: string): PersonIdentityGate => ({
+    kind: "block",
+    decision: uncertainPersonIdentity(legal, reason),
+  });
 
   if (observation.domain === "person" && observation.disposition === "create_new") {
     const name =
@@ -327,9 +408,12 @@ function personLinkedIdentityGate(
     }
     if (people.some((p) => namesMatchExact(p.name, name))) {
       return {
-        kind: "no_change",
-        domain: "person",
-        reason: `${name} is already on this project.`,
+        kind: "block",
+        decision: {
+          kind: "no_change",
+          domain: "person",
+          reason: `${name} is already on this project.`,
+        },
       };
     }
     const tokens = name.split(/\s+/).filter(Boolean);
@@ -367,7 +451,7 @@ function personLinkedIdentityGate(
         "This Person identity is not established in the Capture. A supplied record id is not enough.",
       );
     }
-    return null;
+    return { kind: "bound", person: { id: byId.id, name: byId.name } };
   }
 
   if (evidenced.length > 1) {
@@ -376,7 +460,10 @@ function personLinkedIdentityGate(
     );
   }
   if (evidenced.length === 1) {
-    return null;
+    return {
+      kind: "bound",
+      person: { id: evidenced[0]!.id, name: evidenced[0]!.name },
+    };
   }
 
   return uncertain(

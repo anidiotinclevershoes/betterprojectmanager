@@ -47,6 +47,12 @@ export function applyCaptureOperationInMemory(
   const now = new Date().toISOString();
   switch (op.type) {
     case "create_todo": {
+      if (op.applyOperationId) {
+        const existing = (state.todos ?? []).find(
+          (t) => t.sourceRecommendationId === op.applyOperationId,
+        );
+        if (existing) return state;
+      }
       const todo: TodoItem = {
         id: newId("todo"),
         projectId: op.projectId,
@@ -57,6 +63,7 @@ export function applyCaptureOperationInMemory(
         dueAt: op.dueAt,
         kind: op.todoKind,
         waitingOn: op.waitingOn,
+        sourceRecommendationId: op.applyOperationId,
       };
       return { ...state, todos: [todo, ...(state.todos ?? [])] };
     }
@@ -124,7 +131,10 @@ export function applyCaptureOperationInMemory(
             : r,
         ),
       };
-    case "create_milestone":
+    case "create_milestone": {
+      if (!op.startAt) {
+        throw new Error("This date cannot be saved — the date is missing.");
+      }
       return {
         ...state,
         timeline: [
@@ -134,13 +144,14 @@ export function applyCaptureOperationInMemory(
             projectId: op.projectId,
             label: op.label,
             type: "milestone",
-            startAt: op.startAt ?? now,
+            startAt: op.startAt,
             endAt: op.endAt,
             notes: op.notes,
             source: "capture",
           },
         ],
       };
+    }
     case "update_milestone":
       return {
         ...state,
@@ -236,5 +247,13 @@ export function memoryCaptureApplyHooks(box: {
     writeAvailability: apply,
     writeKnowledge: apply,
     writeMemory: apply,
+    findApplyReceipt: ({ operationId }) => {
+      const todo = (box.state.todos ?? []).find(
+        (t) => t.sourceRecommendationId === operationId,
+      );
+      return todo
+        ? { entityType: "todo", entityId: todo.id }
+        : null;
+    },
   };
 }

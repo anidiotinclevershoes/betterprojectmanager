@@ -1,6 +1,7 @@
 import type {
   ObservationDisposition,
   ObservationDomain,
+  TruthIntent,
 } from "@/lib/capture-v2/types";
 
 export const PROVISIONAL_CATEGORIES = [
@@ -16,6 +17,7 @@ export const PROVISIONAL_CATEGORIES = [
 export type ProvisionalCategory = (typeof PROVISIONAL_CATEGORIES)[number];
 
 export type ProvisionalItem = {
+  /** System-local row identity. Never the model observation.id. */
   id: string;
   statement: string;
   evidence: string;
@@ -24,6 +26,11 @@ export type ProvisionalItem = {
   proposedValues?: Record<string, unknown> | null;
   /** Shared Capture disposition — map `ambiguous` onto existing needsReview. */
   disposition?: ObservationDisposition;
+  truthIntent?: TruthIntent;
+  /** Model-local observation id. Trace only — not recategorise / draft identity. */
+  modelObservationId?: string;
+  needsReview?: boolean;
+  reviewReason?: string | null;
 };
 
 export type NewProjectV2Envelope = {

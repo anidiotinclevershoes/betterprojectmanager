@@ -31,6 +31,17 @@ export type CaptureApplyHooks = {
     op: Extract<CaptureLegalOperation, { type: "write_knowledge" }>,
   ) => Promise<void> | void;
   writeMemory: (op: Extract<CaptureLegalOperation, { type: "write_memory" }>) => Promise<void> | void;
+  /**
+   * Optional approved-create receipt lookup. Same Review/Apply operation
+   * identity must not mint a second authoritative row.
+   */
+  findApplyReceipt?: (args: {
+    projectId: string;
+    operationId: string;
+  }) => Promise<{ entityType: string; entityId: string } | null> | {
+    entityType: string;
+    entityId: string;
+  } | null;
 };
 
 export type CaptureExecuteResult =
