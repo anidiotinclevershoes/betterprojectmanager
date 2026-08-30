@@ -72,6 +72,29 @@ function runPsql(args: { file?: string; query?: string; tuplesOnly?: boolean }) 
   }).toString();
 }
 
+function lastTuple(raw: string) {
+  const lines = raw
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return lines[lines.length - 1] ?? "";
+}
+
+/** Catalog presence by name. Avoids to_regprocedure type-name mismatches. */
+function publicRpcCount(name: string) {
+  const raw = runPsql({
+    tuplesOnly: true,
+    query: `
+      SELECT count(*)::text
+      FROM pg_proc p
+      JOIN pg_namespace n ON n.oid = p.pronamespace
+      WHERE n.nspname = 'public'
+        AND p.proname = '${name.replace(/'/g, "")}';
+    `,
+  });
+  return Number.parseInt(lastTuple(raw), 10);
+}
+
 function snapshotSeed(): string {
   return runPsql({
     tuplesOnly: true,
@@ -113,7 +136,7 @@ function staticCompatibility() {
     !/\b(drop table|drop column|rename column)\b/i.test(`${receipts}\n${tx}`);
   const loadIgnoresReceipts = !load.includes("capture_apply_receipts");
   const oldInsertsRemain = persist.includes("persistTodoCreate");
-  return { additive, loadIgnoresReceipts, oldInsertsRemain, persist, receipts, tx };
+  return { additive, loadIgnoresReceipts, oldInsertsRemain };
 }
 
 function writeReport(extra: Record<string, unknown>) {
@@ -194,18 +217,14 @@ function runLive() {
 
   runPsql({ file: join(ROOT, "scripts/db-boundary/rewind-h110.sql") });
 
-  const missingRpc = runPsql({
-    tuplesOnly: true,
-    query:
-      "SELECT (to_regprocedure('public.persist_todo_create_with_receipt(uuid,uuid,jsonb,jsonb)') IS NULL)::text;",
-  }).trim();
+  const missingCount = publicRpcCount("persist_todo_create_with_receipt");
+  const missingRpc = missingCount === 0;
   record({
     id: "new-app-old-schema",
-    result: missingRpc === "t" ? "PASS" : "RED",
-    detail:
-      missingRpc === "t"
-        ? "NEW APP → OLD SCHEMA: persist_todo_create_with_receipt is absent. Unsupported; migrate first."
-        : "RPC still present after rewind.",
+    result: missingRpc ? "PASS" : "RED",
+    detail: missingRpc
+      ? "NEW APP → OLD SCHEMA: persist_todo_create_with_receipt is absent. Unsupported; migrate first."
+      : `RPC still present after rewind (pg_proc count=${missingCount}).`,
   });
 
   runPsql({ file: join(ROOT, "scripts/db-boundary/seed-v09.sql") });
@@ -254,18 +273,14 @@ function runLive() {
         : `direct insert count=${oldInsert}`,
   });
 
-  const rpcPresent = runPsql({
-    tuplesOnly: true,
-    query:
-      "SELECT (to_regprocedure('public.persist_todo_create_with_receipt(uuid,uuid,jsonb,jsonb)') IS NOT NULL)::text;",
-  }).trim();
+  const presentCount = publicRpcCount("persist_todo_create_with_receipt");
+  const rpcPresent = presentCount > 0;
   record({
     id: "schema-first-new-app",
-    result: rpcPresent === "t" ? "PASS" : "RED",
-    detail:
-      rpcPresent === "t"
-        ? "SCHEMA FIRST → NEW APP: persist_* RPCs exist after official files applied."
-        : "RPC missing after apply.",
+    result: rpcPresent ? "PASS" : "RED",
+    detail: rpcPresent
+      ? "SCHEMA FIRST → NEW APP: persist_* RPCs exist after official files applied."
+      : `RPC missing after apply (pg_proc count=${presentCount}).`,
   });
 
   const raw = runPsql({
@@ -305,7 +320,7 @@ function runLive() {
   });
   record({
     id: "rollback-new-app-old-schema",
-    result: missingRpc === "t" ? "PASS" : "RED",
+    result: missingRpc ? "PASS" : "RED",
     detail: "NEW APP → OLD SCHEMA unsupported; therefore migration must deploy first.",
   });
 
