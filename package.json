@@ -85,7 +85,7 @@
     "evals:pre-baseline": "npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
     "evals:model-tidy": "LUME_EVAL_RUN_LABEL='Model Tidy - Same Model Control' npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
     "evals:canonical-slice1": "LUME_CANONICAL_TRUTH=1 LUME_EVAL_RUN_LABEL='Canonical Truth Slice 1' npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
-    "stress:project-longhaul": "tsx scripts/stress-project-longhaul.ts"
+    "stress:project-longhaul": "npx --yes tsx scripts/stress-project-longhaul.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
