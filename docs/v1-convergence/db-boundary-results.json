@@ -1,0 +1,73 @@
+{
+  "verdict": "BLOCKED",
+  "productionCandidate": "PR #110 cursor/v09-shared-truth-hardening-9524",
+  "capability": {
+    "docker": false,
+    "supabaseCli": false,
+    "psql": false,
+    "hasRemote": false,
+    "hasLocalUrl": false,
+    "supabaseConfig": true,
+    "receiptsMigration": true,
+    "txMigration": true
+  },
+  "oldCreatePathStillExists": true,
+  "checks": [
+    {
+      "id": "disposable-db-capability",
+      "result": "BLOCKED",
+      "detail": "No safe disposable Postgres/Supabase is running in this environment. Repo supports `supabase start` (supabase/config.toml) but Docker is missing. Live tenant pack needs NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY or DATABASE_URL — none set. psql is not installed. CI regression does not start Postgres. Not inventing a production instrumentation seam."
+    },
+    {
+      "id": "1-migrations-additive-from-main-schema",
+      "result": "CODE_PROVEN",
+      "detail": "PR #110 migrations only CREATE capture_apply_receipts + four persist_* functions. No ALTER/DROP of existing v0.9 tables. Live apply from current main schema is BLOCKED (no disposable DB)."
+    },
+    {
+      "id": "2-existing-rows-survive-migration",
+      "result": "BLOCKED",
+      "detail": "Cannot seed a representative project and re-read it after migrate. Schema text has no UPDATE of existing rows. Live row-identity proof missing."
+    },
+    {
+      "id": "3-5-rpc-success-commits-both",
+      "result": "BLOCKED",
+      "detail": "SQL functions insert both rows in one plpgsql body (implicit transaction). Application fake runAtomic already PASSes. Live Postgres commit proof missing."
+    },
+    {
+      "id": "4-6-rpc-second-step-failure-rollback",
+      "result": "BLOCKED",
+      "detail": "Need a disposable Postgres to raise after the first INSERT inside persist_person_responsibility / persist_risk_with_knowledge and assert both rows absent. Fake snapshot rollback is not the database boundary."
+    },
+    {
+      "id": "7-8-create-plus-receipt-atomicity",
+      "result": "BLOCKED",
+      "detail": "persist_todo_create_with_receipt / persist_milestone_create_with_receipt insert truth then receipt in one function. Live receipt-failure rollback unproven on Postgres."
+    },
+    {
+      "id": "9-duplicate-operation-id",
+      "result": "CODE_PROVEN",
+      "detail": "UNIQUE (workspace_id, project_id, operation_id). App lookup short-circuits replay; unique violation on put is no-oped. Live reject/no-op unproven."
+    },
+    {
+      "id": "10-project-delete-cascades-receipts",
+      "result": "CODE_PROVEN",
+      "detail": "capture_apply_receipts.project_id REFERENCES projects(id) ON DELETE CASCADE. Live delete unproven."
+    },
+    {
+      "id": "11-workspace-project-scoping",
+      "result": "CODE_PROVEN",
+      "detail": "Receipts RLS + RPCs require is_workspace_member. Project id is an argument, not cross-checked beyond workspace membership inside the function body except receipt insert policy (project.workspace_id match). Live cross-tenant proof missing."
+    },
+    {
+      "id": "rollback-schema-plus-old-app",
+      "result": "CODE_PROVEN",
+      "detail": "MIGRATION APPLIED + OLD APPLICATION: new table/functions are unused additive objects. Current-truth load does not select capture_apply_receipts. Pre-#110 inserts into todos/risks/stakeholders/knowledge_items remain valid. Application rollback after schema deploy should not break existing v0.9 reads/writes. Residual: old app stays non-atomic (the defect #110 fixes)."
+    },
+    {
+      "id": "rollback-schema-plus-new-app",
+      "result": "CODE_PROVEN",
+      "detail": "MIGRATION APPLIED + NEW APPLICATION: new app requires the four RPCs and capture_apply_receipts. Deploy schema before the new app. Reverse (new app + old schema) would fail creates. After schema is live, rolling the app back to pre-#110 is the safe direction."
+    }
+  ],
+  "recommendation": "DATABASE BOUNDARY BLOCKED — need Docker for `supabase start` or a disposable TEST project URL/keys. Do not use customer/prod."
+}

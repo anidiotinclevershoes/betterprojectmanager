@@ -1,6 +1,6 @@
 {
   "personResponsibility": {
-    "kind": "EXPECTED_RED",
+    "kind": "PASS",
     "executed": "failed",
     "requestFailed": true,
     "decision": {
@@ -15,89 +15,29 @@
         "replacePersonId": null
       }
     },
-    "leftoverStakeholders": [
-      {
-        "id": "5a8d4144-be40-41ea-ae00-ab65ebdcaebf",
-        "project_id": "aaaaaaaa-aaaa-4aaa-8aaa-ad00000000c1",
-        "name": "Nadia Qureshi",
-        "title": null,
-        "section": null,
-        "body": null,
-        "kind": null,
-        "lifecycle": null,
-        "status": null
-      }
-    ],
+    "leftoverStakeholders": [],
     "leftoverKnowledge": [],
-    "peopleAfterReload": [
-      {
-        "id": "5a8d4144-be40-41ea-ae00-ab65ebdcaebf",
-        "name": "Nadia Qureshi",
-        "role": "UAT"
-      }
-    ],
-    "nadia": [
-      {
-        "id": "5a8d4144-be40-41ea-ae00-ab65ebdcaebf",
-        "name": "Nadia Qureshi",
-        "role": "UAT"
-      }
-    ],
+    "peopleAfterReload": [],
+    "nadia": [],
     "peopleSectionAfterReload": [],
     "nadiaPeopleBullets": [],
     "structuredResponsibility": [],
-    "detail": "Person/stakeholder write survived; responsibility knowledge write failed. Half-authoritative mutation."
+    "detail": "No person and no responsibility after failed request — atomic according to contract."
   },
   "riskDualWrite": {
-    "kind": "EXPECTED_RED",
+    "kind": "PASS",
     "executed": "failed",
     "requestFailed": true,
-    "splitBrain": true,
-    "leftoverKnowledge": [
-      {
-        "id": "1237806a-4875-4563-ab0b-ac3d32315e89",
-        "project_id": "aaaaaaaa-aaaa-4aaa-8aaa-ad00000000c1",
-        "name": null,
-        "title": null,
-        "section": "risks",
-        "body": "ALPHA-RISK-CANARY-split-brain",
-        "kind": null,
-        "lifecycle": null,
-        "status": null
-      }
-    ],
+    "splitBrain": false,
+    "leftoverKnowledge": [],
     "leftoverRisks": [],
     "domainRisksAfterReload": [],
-    "knowledgeRiskProse": [
-      "ALPHA-RISK-CANARY-split-brain"
-    ],
-    "structuredRisks": [
-      {
-        "id": "1237806a-4875-4563-ab0b-ac3d32315e89",
-        "body": "ALPHA-RISK-CANARY-split-brain",
-        "section": "risks",
-        "kind": "fact"
-      }
-    ],
-    "kcRiskCards": [
-      {
-        "id": "kr-0",
-        "title": "ALPHA-RISK-CANARY-split-brain",
-        "priority": "none"
-      }
-    ],
-    "searchHits": [
-      {
-        "section": "Risks & blockers",
-        "bullet": "ALPHA-RISK-CANARY-split-brain"
-      },
-      {
-        "section": "Current position",
-        "bullet": "ALPHA-RISK-CANARY-split-brain"
-      }
-    ],
-    "askMentionsCanary": true,
-    "detail": "Knowledge/current-position has the risk; domain risks table does not."
+    "knowledgeRiskProse": [],
+    "structuredRisks": [],
+    "kcRiskCards": [],
+    "searchHits": [],
+    "askMentionsCanary": false,
+    "detail": "knowledgeSaysYes=false domainSaysNo=true executed=failed"
   },
   "staleReviewProject": {
     "kind": "PASS",
@@ -121,13 +61,13 @@
     ],
     "alphaAfter": [
       {
-        "id": "caf15eae-ff60-4db6-8e29-ed41b00bbf89",
+        "id": "f2e2257f-82bc-406f-8153-a97804af2ac2",
         "title": "Confirm project baseline with key stakeholders"
       }
     ],
     "betaAfter": [
       {
-        "id": "7f13635c-1fe2-4588-bda0-3daf2b7cabae",
+        "id": "dfd9b6e9-af9b-4f62-99bb-5ee3df9d59f1",
         "title": "Confirm project baseline with key stakeholders"
       }
     ],
@@ -139,17 +79,6 @@
     "answer": "NO",
     "evidence": "Existing v0.9 pack persisted five mixed-domain siblings (distinct titles) and 30 uniquely titled todos through sequential production Apply. Long-haul sibling loss matches shared transcript-shaped durable identity + risk exact-title no_change / person identity-gate, not a generic Apply-sequencing drop."
   },
-  "blockers": [
-    {
-      "id": "person-responsibility-half-write",
-      "severity": "P0",
-      "note": "Person/stakeholder can persist while responsibility knowledge does not; request reports failure."
-    },
-    {
-      "id": "risk-knowledge-vs-domain-split-brain",
-      "severity": "P0",
-      "note": "knowledge_items risk prose can exist without a domain risks row."
-    }
-  ],
+  "blockers": [],
   "recommendation": "READY FOR BOUNDED HARDENING"
 }
