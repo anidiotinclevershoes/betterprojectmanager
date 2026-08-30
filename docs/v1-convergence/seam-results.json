@@ -1,0 +1,160 @@
+{
+  "sourceRun": "33323265425",
+  "counts": {
+    "PASS": 10,
+    "EXPECTED_RED": 3,
+    "UNEXPECTED_RED": 2
+  },
+  "journeys": [
+    {
+      "id": "S1-receipt-obs-1",
+      "seam": 1,
+      "title": "Live C9 obs-1 todo then C11 obs-1 UAT create",
+      "expectedBucket": "EXPECTED_RED",
+      "bucket": "EXPECTED_RED",
+      "fate": "UNSAFE_ASSUMPTION",
+      "severity": "P0",
+      "detail": "C9 applied=[{\"kind\":\"wrote\"}] C11 applied=[{\"kind\":\"no_change\",\"reason\":\"This approved create was already applied.\",\"domain\":\"milestone\"}] todos=1 milestones=(none)"
+    },
+    {
+      "id": "S1-dup-in-envelope",
+      "seam": 1,
+      "title": "Two different creates share obs-1 in one envelope",
+      "expectedBucket": "EXPECTED_RED",
+      "bucket": "EXPECTED_RED",
+      "fate": "UNSAFE_ASSUMPTION",
+      "severity": "P0",
+      "detail": "applied=[{\"kind\":\"wrote\"},{\"kind\":\"no_change\",\"reason\":\"This approved create was already applied.\",\"domain\":\"todo\"}] titles=Login error handling"
+    },
+    {
+      "id": "S1-missing-id",
+      "seam": 1,
+      "title": "Missing observation.id is defaulted, not rejected",
+      "expectedBucket": "PASS",
+      "bucket": "PASS",
+      "fate": "PASS",
+      "severity": "P2",
+      "detail": "defaultedId=obs-1 applied=[{\"kind\":\"wrote\"}]"
+    },
+    {
+      "id": "S1-live-c1-project-as-person-target",
+      "seam": 1,
+      "title": "Live C1 person update_existing targets the project UUID",
+      "expectedBucket": "PASS",
+      "bucket": "PASS",
+      "fate": "REJECTS",
+      "severity": "none",
+      "detail": "rejected=1 writes=0 issues=foreign_id people="
+    },
+    {
+      "id": "S2-required-fields",
+      "seam": 2,
+      "title": "Missing required semantics must not be Ready",
+      "expectedBucket": "PASS",
+      "bucket": "PASS",
+      "fate": "NEEDS_YOU",
+      "severity": "P2",
+      "detail": "gated=[person-no-name:needs_you; todo-no-title:rejected; todo-empty-statement:rejected; ms-no-date:needs_you; avail-no-person:needs_you; avail-label-only:needs_you; resp-no-person:needs_you; resp-no-scope:needs_you; knowledge-empty:rejected] statementFallback=[risk-no-title(writes=1,missing=null); ms-no-label(writes=1,missing=null)] readyAnyway=[none]"
+    },
+    {
+      "id": "S3-invalid-combos",
+      "seam": 3,
+      "title": "Structurally valid contradictory observations",
+      "expectedBucket": "PASS",
+      "bucket": "PASS",
+      "fate": "PASS",
+      "severity": "none",
+      "detail": "resolveWrites=0 appliedWrote=0 decisions=obs-1:no_change,obs-2:needs_you,obs-3:no_change,obs-4:no_change,obs-5:no_change,obs-6:needs_you"
+    },
+    {
+      "id": "S4-person-review-vs-transcript",
+      "seam": 4,
+      "title": "Reviewed Sarah Kim must not become Sarah Okonkwo from transcript",
+      "expectedBucket": "PASS",
+      "bucket": "PASS",
+      "fate": "PASS",
+      "severity": "none",
+      "detail": "executed=wrote people=Sarah Kim"
+    },
+    {
+      "id": "S4-date-review-vs-transcript",
+      "seam": 4,
+      "title": "Reviewed CAB 20 Oct 2026 must not become 2023 from transcript",
+      "expectedBucket": "PASS",
+      "bucket": "PASS",
+      "fate": "PASS",
+      "severity": "none",
+      "detail": "executed=wrote startAt=2026-10-20T12:00:00.000Z"
+    },
+    {
+      "id": "S5-order-independence",
+      "seam": 5,
+      "title": "Same semantics in original / reversed / commentary-first order",
+      "expectedBucket": "PASS",
+      "bucket": "PASS",
+      "fate": "PASS",
+      "severity": "none",
+      "detail": "orig:people=Jordan Hale|todos=UAT script || rev:people=Jordan Hale|todos=UAT script || chat-first:people=Jordan Hale|todos=UAT script"
+    },
+    {
+      "id": "S6-cross-domain-targets",
+      "seam": 6,
+      "title": "Valid IDs of the wrong domain must not execute",
+      "expectedBucket": "PASS",
+      "bucket": "PASS",
+      "fate": "REJECTS",
+      "severity": "none",
+      "detail": "acceptedWithTarget=person->bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb,todo->dddddddd-dddd-4ddd-8ddd-dddddddddddd,milestone->eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee,risk->cccccccc-cccc-4ccc-8ccc-cccccccccccc writes=0 wrote=0 issues="
+    },
+    {
+      "id": "S7-partial-extract",
+      "seam": 7,
+      "title": "Two valid observations must not invent the missing eight",
+      "expectedBucket": "PASS",
+      "bucket": "PASS",
+      "fate": "PASS",
+      "severity": "none",
+      "detail": "people= todos=Login error handling"
+    },
+    {
+      "id": "S8-new-project-adapter",
+      "seam": 8,
+      "title": "New Project must not assume stronger semantics than Capture",
+      "expectedBucket": "PASS",
+      "bucket": "UNEXPECTED_RED",
+      "fate": "UNSAFE_ASSUMPTION",
+      "severity": "P1",
+      "detail": "items=4 ids=obs-1,obs-1,obs-2,obs-3 stakeholders=[{\"clientKey\":\"setup-ll8acjsz\",\"name\":\"Someone important joined.\",\"needsReview\":true},{\"clientKey\":\"setup-byblerav\",\"name\":\"Priya Shah\",\"needsReview\":false},{\"clientKey\":\"setup-32k46cz9\",\"name\":\"Liam Brooks\",\"needsReview\":false}] dates=[{\"clientKey\":\"setup-1fmawu9o\",\"label\":\"CAB\",\"needsReview\":false}] duplicateObs1=2 nameless=1"
+    },
+    {
+      "id": "S9-ask-authority",
+      "seam": 9,
+      "title": "Confidence must not exceed cited source kind",
+      "expectedBucket": "PASS",
+      "bucket": "UNEXPECTED_RED",
+      "fate": "UNSAFE_ASSUMPTION",
+      "severity": "P1",
+      "detail": "gate date/knowledge=related_context date/timeline=direct_confirmation owner/knowledge=direct_confirmation (fnUngated=true) risk/history=direct_confirmation (fnUngated=true) | ask date=not_found/none owner=direct_confirmation/knowledge risk=direct_confirmation/none todo=not_found/none"
+    },
+    {
+      "id": "S10-durable-identity-scan",
+      "seam": 10,
+      "title": "Model-generated strings used as durable keys",
+      "expectedBucket": "EXPECTED_RED",
+      "bucket": "EXPECTED_RED",
+      "fate": "UNSAFE_ASSUMPTION",
+      "severity": "P0",
+      "detail": "src/lib/capture-v2/resolve.ts: suggestion id = v2-${observation.id} (durable applyOperationId) | src/lib/capture-v2/toResult.ts: finding id = find-${observation.id} (Review session key) | src/lib/capture-v2/toResult.ts: proposed op id = v2op-${observation.id} (Review session key) | src/lib/capture/apply/dispatch.ts: applyOperationId = item.id | src/lib/data/supabase/persist-mutations.ts: receipt lookup keyed by operation_id | src/lib/new-project-v2/parse.ts: New Project provisional item id = observation.id"
+    },
+    {
+      "id": "S3-live-c71-2023-iso",
+      "seam": 3,
+      "title": "Live C71 current+ISO 2023-10-18 against CAB",
+      "expectedBucket": "PASS",
+      "bucket": "PASS",
+      "fate": "PASS",
+      "severity": "P2",
+      "detail": "This is model-complete current ISO, not a seam. executed=[{\"kind\":\"wrote\"}] startAt=2023-10-18T12:00:00.000Z wrote2023=true"
+    }
+  ]
+}
