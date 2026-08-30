@@ -544,6 +544,114 @@ function main() {
     assert.equal(withId.row?.decision.kind, "needs_you");
   });
 
+  const OKONKWO = "person-okonkwo";
+  const KIM = "person-kim";
+  const sarahOkonkwoWorld = () =>
+    alphaWorld([{ id: OKONKWO, name: "Sarah Okonkwo" }]);
+  const bothSarahsWorld = () =>
+    alphaWorld([
+      { id: OKONKWO, name: "Sarah Okonkwo" },
+      { id: KIM, name: "Sarah Kim" },
+    ]);
+  const capture33 =
+    "Sarah Kim is security — different Sarah from Sarah Okonkwo on product. Please add Sarah Kim.";
+
+  check("explicit Sarah Kim create stays Apply-ready when Sarah Okonkwo already exists", () => {
+    const { row } = resolveObs(sarahOkonkwoWorld(), capture33, {
+      id: "obs-sarah-kim",
+      domain: "person",
+      disposition: "create_new",
+      truthIntent: "current",
+      statement: "Sarah Kim",
+      evidence: "Please add Sarah Kim.",
+      candidateTargetTitle: "Sarah Kim",
+      proposedValues: { name: "Sarah Kim", role: "Security" },
+    });
+    assert.equal(row?.decision.kind, "write", "resolve must keep the create Apply-ready");
+    assert.ok(row?.suggestion);
+    if (row?.decision.kind === "write") {
+      assert.equal(row.decision.operation.type, "ensure_person");
+      if (row.decision.operation.type === "ensure_person") {
+        assert.equal(row.decision.operation.name, "Sarah Kim");
+        assert.notEqual(row.decision.operation.personId, OKONKWO);
+      }
+    }
+  });
+
+  check("Apply of explicit Sarah Kim create is not bound to mentioned Sarah Okonkwo", () => {
+    const { row } = resolveObs(sarahOkonkwoWorld(), capture33, {
+      id: "obs-sarah-kim-apply",
+      domain: "person",
+      disposition: "create_new",
+      truthIntent: "current",
+      statement: "Sarah Kim",
+      evidence: "Please add Sarah Kim.",
+      candidateTargetTitle: "Sarah Kim",
+      proposedValues: { name: "Sarah Kim", role: "Security" },
+    });
+    assert.ok(row?.suggestion);
+    const applied = planCaptureApply({
+      item: row!.suggestion!,
+      text: capture33,
+      world: sarahOkonkwoWorld(),
+      captureEntryProjectId: ALPHA,
+    });
+    assert.equal(
+      applied.kind,
+      "write",
+      "full-transcript Apply must not collapse Sarah Kim onto Sarah Okonkwo",
+    );
+    if (applied.kind === "write") {
+      assert.equal(applied.operation.type, "ensure_person");
+      if (applied.operation.type === "ensure_person") {
+        assert.equal(applied.operation.name, "Sarah Kim");
+        assert.notEqual(applied.operation.personId, OKONKWO);
+      }
+    }
+  });
+
+  check("after both Sarahs exist, first-name ownership stays Needs you", () => {
+    const transcript = "Sarah owns UAT.";
+    const { row } = resolveObs(bothSarahsWorld(), transcript, {
+      domain: "responsibility",
+      disposition: "update_existing",
+      truthIntent: "current",
+      statement: transcript,
+      proposedValues: {
+        personName: "Sarah",
+        scope: "UAT",
+        ownershipSemantics: "share",
+      },
+    });
+    assertNeedsYou(row, "Sarah owns UAT must stay ambiguous");
+  });
+
+  check("after both Sarahs exist, Sarah Kim owns UAT resolves Sarah Kim", () => {
+    const transcript = "Sarah Kim owns UAT.";
+    const { row } = resolveObs(bothSarahsWorld(), transcript, {
+      domain: "responsibility",
+      disposition: "update_existing",
+      truthIntent: "current",
+      statement: transcript,
+      candidateTargetId: KIM,
+      candidateTargetTitle: "Sarah Kim",
+      proposedValues: {
+        personName: "Sarah Kim",
+        name: "Sarah Kim",
+        scope: "UAT",
+        ownershipSemantics: "share",
+      },
+    });
+    assert.equal(row?.decision.kind, "write");
+    if (row?.decision.kind === "write") {
+      assert.equal(row.decision.domain, "responsibility");
+      if (row.decision.operation.type === "confirm_responsibility") {
+        assert.equal(row.decision.operation.personName, "Sarah Kim");
+        assert.equal(row.decision.operation.personId, KIM);
+      }
+    }
+  });
+
   console.log(`\nverify-person-identity-safety: ${passed} passed`);
 }
 

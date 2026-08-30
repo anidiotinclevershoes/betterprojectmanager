@@ -386,6 +386,24 @@ function resolvePerson(
     return { status: "known" as const, person: byId };
   }
 
+  // Explicit full-name create: mentioning a different recorded person
+  // (contrast / disambiguation) must not bind this create to them.
+  // "Add Sarah Kim" while Sarah Okonkwo exists and is named in the
+  // Capture is a new identity. "Sarah owns UAT" stays unresolved.
+  if (item.op === "create" && named) {
+    const tokens = named.split(/\s+/).filter(Boolean);
+    const exact = project.stakeholders.filter((s) =>
+      namesMatchExact(s.name, named),
+    );
+    if (
+      exact.length === 0 &&
+      tokens.length >= 2 &&
+      recordedPersonNameAppearsInText(text, named)
+    ) {
+      return { status: "new_named" as const, name: named, personId };
+    }
+  }
+
   if (evidenced.length > 1) {
     return { status: "ambiguous" as const };
   }

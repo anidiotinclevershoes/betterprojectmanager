@@ -354,6 +354,67 @@ async function main() {
   });
 
   await check(
+    "Person.create: explicit Sarah Kim persists beside Sarah Okonkwo and does not merge",
+    async () => {
+      const okonkwoId = PERSON_EXISTING;
+      const fake = new FakeWorkspaceClient();
+      seedProject(fake);
+      fake.tables.stakeholders.push({
+        id: okonkwoId,
+        workspace_id: fake.workspaceId,
+        project_id: PROJECT_A,
+        name: "Sarah Okonkwo",
+        role: "Product",
+      });
+      const transcript =
+        "Sarah Kim is security — different Sarah from Sarah Okonkwo on product. Please add Sarah Kim.";
+      const world: CaptureApplyWorld = {
+        ...emptyWorld(),
+        projects: [
+          {
+            id: PROJECT_A,
+            name: "Project A",
+            code: "PA",
+            stakeholders: [{ id: okonkwoId, name: "Sarah Okonkwo", role: "Product" }],
+          },
+          { id: PROJECT_B, name: "Project B", code: "PB", stakeholders: [] },
+        ],
+      };
+      const resolved = resolveObservations({
+        observations: [
+          {
+            id: "obs-sarah-kim",
+            statement: "Sarah Kim",
+            evidence: "Please add Sarah Kim.",
+            domain: "person",
+            disposition: "create_new",
+            truthIntent: "current",
+            projectId: PROJECT_A,
+            candidateTargetTitle: "Sarah Kim",
+            proposedValues: { name: "Sarah Kim", role: "Security" },
+          },
+        ],
+        world,
+        transcript,
+        captureEntryProjectId: PROJECT_A,
+      });
+      assert.equal(resolved[0]?.decision.kind, "write");
+      assert.ok(resolved[0]?.suggestion);
+      const applied = await applyPersist(fake, resolved[0]!.suggestion!, transcript);
+      assert.equal(applied.executed.kind, "wrote");
+      const people = fake.tables.stakeholders.filter((row) => row.project_id === PROJECT_A);
+      const names = people.map((row) => String(row.name)).sort();
+      assert.deepEqual(names, ["Sarah Kim", "Sarah Okonkwo"]);
+      const kim = people.find((row) => row.name === "Sarah Kim");
+      const okonkwo = people.find((row) => row.name === "Sarah Okonkwo");
+      assert.ok(kim);
+      assert.ok(okonkwo);
+      assert.equal(okonkwo!.id, okonkwoId);
+      assert.notEqual(kim!.id, okonkwoId);
+    },
+  );
+
+  await check(
     "H2.6 new person + responsibility second-write failure leaves no mutation-created half-state",
     async () => {
       const fake = new FakeWorkspaceClient({ failOnTable: "knowledge_items" });
