@@ -8,10 +8,13 @@ This branch: `cursor/v1-v09-db-boundary-qual-610b`
 
 ```bash
 npm run verify:v09-db-boundary
-npm run verify:v09-adversarial
-npm run verify:v09-adversarial-addendum
-npm run test:v09-adversarial-ui
 ```
+
+GitHub Actions (disposable local Supabase, no customer/prod credentials):
+
+`.github/workflows/v09-db-boundary.yml`
+
+The Cursor VM remains BLOCKED (no Docker). CI is the live path.
 
 ---
 

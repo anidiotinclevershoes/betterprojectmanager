@@ -1,0 +1,56 @@
+# Release qualification only. Starts disposable local Supabase on the
+# GitHub-hosted runner (Docker). Does not use customer/prod credentials.
+# Does not run on npm test.
+
+name: v0.9 DB boundary qualification
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  db-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Start disposable local Supabase
+        run: |
+          set -euo pipefail
+          supabase start
+          supabase status
+          # Local stack default (supabase/config.toml db.port = 54322).
+          echo "SUPABASE_DB_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> "$GITHUB_ENV"
+
+      - name: Qualify real migrations and RPCs
+        run: npm run verify:v09-db-boundary
+        env:
+          SUPABASE_DB_URL: ${{ env.SUPABASE_DB_URL }}
+          DATABASE_URL: ${{ env.SUPABASE_DB_URL }}
+
+      - name: Upload DB-boundary evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v09-db-boundary-evidence
+          path: docs/v1-convergence/db-boundary-results.json
+          if-no-files-found: ignore
