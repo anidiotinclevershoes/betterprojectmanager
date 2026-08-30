@@ -41,9 +41,9 @@ $$;
 
 DO $$
 DECLARE
-  uid_a uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000a1';
-  uid_b uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000b2';
-  proj uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000p1';
+  uid_a uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-db00000000a1';
+  uid_b uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-db00000000b2';
+  proj uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-db00000000d1';
   ws_a uuid;
   ws_b uuid;
   hist_before int;
@@ -92,7 +92,7 @@ BEGIN
     ws_a,
     proj,
     jsonb_build_object(
-      'id', 'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000n1',
+      'id', 'aaaaaaaa-aaaa-4aaa-8aaa-db00000000f1',
       'name', 'Nadia Qureshi',
       'role', 'UAT'
     ),
@@ -129,7 +129,7 @@ BEGIN
       ws_a,
       proj,
       jsonb_build_object(
-        'id', 'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000n2',
+        'id', 'aaaaaaaa-aaaa-4aaa-8aaa-db00000000f2',
         'name', 'HULK-FAIL-PERSON-NAME',
         'role', 'UAT'
       ),

@@ -4,13 +4,36 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 DO $$
 DECLARE
-  uid_a uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000a1';
-  uid_b uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000b2';
+  uid_a uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-db00000000a1';
+  uid_b uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-db00000000b2';
   ws_a uuid;
   ws_b uuid;
-  proj uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000p1';
+  proj uuid := 'aaaaaaaa-aaaa-4aaa-8aaa-db00000000d1';
 BEGIN
   DELETE FROM public.projects WHERE id = proj;
+  -- Identities / sessions can block auth.users delete on local GoTrue.
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'auth' AND table_name = 'identities'
+  ) THEN
+    DELETE FROM auth.identities
+    WHERE user_id IN (uid_a, uid_b)
+       OR user_id IN (
+         SELECT id FROM auth.users
+         WHERE email IN ('hulk-dbq-a@example.test', 'hulk-dbq-b@example.test')
+       );
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'auth' AND table_name = 'sessions'
+  ) THEN
+    DELETE FROM auth.sessions
+    WHERE user_id IN (uid_a, uid_b)
+       OR user_id IN (
+         SELECT id FROM auth.users
+         WHERE email IN ('hulk-dbq-a@example.test', 'hulk-dbq-b@example.test')
+       );
+  END IF;
   DELETE FROM auth.users WHERE id IN (uid_a, uid_b) OR email IN (
     'hulk-dbq-a@example.test',
     'hulk-dbq-b@example.test'
@@ -28,7 +51,7 @@ BEGIN
     'authenticated',
     'authenticated',
     'hulk-dbq-a@example.test',
-    crypt('dbq-pass', gen_salt('bf')),
+    '$2a$06$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
     now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{}'::jsonb,
@@ -42,7 +65,7 @@ BEGIN
     'authenticated',
     'authenticated',
     'hulk-dbq-b@example.test',
-    crypt('dbq-pass', gen_salt('bf')),
+    '$2a$06$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
     now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{}'::jsonb,
@@ -57,7 +80,7 @@ BEGIN
   LIMIT 1;
   IF ws_a IS NULL THEN
     INSERT INTO public.workspaces (id, name)
-    VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000w1', 'Hulk A workspace')
+    VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-db00000000c1', 'Hulk A workspace')
     RETURNING id INTO ws_a;
     INSERT INTO public.workspace_members (workspace_id, user_id, role)
     VALUES (ws_a, uid_a, 'owner');
@@ -72,7 +95,7 @@ BEGIN
   LIMIT 1;
   IF ws_b IS NULL THEN
     INSERT INTO public.workspaces (id, name)
-    VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000w2', 'Hulk B workspace')
+    VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-db00000000c2', 'Hulk B workspace')
     RETURNING id INTO ws_b;
     INSERT INTO public.workspace_members (workspace_id, user_id, role)
     VALUES (ws_b, uid_b, 'owner');
@@ -86,7 +109,7 @@ BEGIN
 
   INSERT INTO public.todos (id, workspace_id, project_id, title, done, kind)
   VALUES (
-    'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000t1',
+    'aaaaaaaa-aaaa-4aaa-8aaa-db00000000e1',
     ws_a,
     proj,
     'HULK-DBQ-SEED-TODO',
@@ -96,7 +119,7 @@ BEGIN
 
   INSERT INTO public.risks (id, workspace_id, project_id, title, status, source)
   VALUES (
-    'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000r1',
+    'aaaaaaaa-aaaa-4aaa-8aaa-db00000000e2',
     ws_a,
     proj,
     'HULK-DBQ-SEED-RISK',
@@ -106,7 +129,7 @@ BEGIN
 
   INSERT INTO public.stakeholders (id, workspace_id, project_id, name, role)
   VALUES (
-    'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000s1',
+    'aaaaaaaa-aaaa-4aaa-8aaa-db00000000e3',
     ws_a,
     proj,
     'HULK-DBQ-SEED-PERSON',
@@ -115,7 +138,7 @@ BEGIN
 
   INSERT INTO public.knowledge_items (id, workspace_id, project_id, section, body, position)
   VALUES (
-    'aaaaaaaa-aaaa-4aaa-8aaa-dbq0000000k1',
+    'aaaaaaaa-aaaa-4aaa-8aaa-db00000000e4',
     ws_a,
     proj,
     'now',
