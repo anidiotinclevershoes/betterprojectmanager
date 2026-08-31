@@ -939,7 +939,9 @@ function ItemCard({
       {needsYou ? (
         <p className="np-needs-you-inline">
           <span className="np-needs-you-dot" aria-hidden />
-          Needs You — {needsYouText?.replace(/^Needs You — /i, "") ?? "Lume noticed what's missing."}
+          <span>
+            Needs You — {needsYouText?.replace(/^Needs You — /i, "") ?? "Lume noticed what's missing."}
+          </span>
         </p>
       ) : null}
       {tags ? <div className="np-item-tags">{tags}</div> : null}

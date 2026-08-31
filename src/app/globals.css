@@ -9028,12 +9028,19 @@ body {
 .np-needs-you-inline,
 .np-needs-you-summary {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.4rem;
   margin: 0;
   width: 100%;
   color: var(--warning);
   font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.np-needs-you-inline > span:last-child,
+.np-needs-you-summary > span:last-child {
+  min-width: 0;
+  flex: 1;
 }
 
 .np-needs-you-dot {
