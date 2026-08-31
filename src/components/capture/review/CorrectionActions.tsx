@@ -27,7 +27,6 @@ export type CorrectionHandlers = {
   }) => void;
   onCreateNew: () => void;
   onResolve: () => void;
-  onKeepOpen: () => void;
   onDismiss: () => void;
   onApprove: () => void;
   onChangeEntityKind: (kind: SuggestionKind) => void;
@@ -153,13 +152,6 @@ export function CorrectionActions({
           >
             {model.entityKind === "risk" ? "Resolve" : "Complete"}
           </button>
-          <button
-            type="button"
-            className="muted-btn"
-            onClick={handlers.onKeepOpen}
-          >
-            Keep Open
-          </button>
           <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
             Dismiss
           </button>
@@ -232,13 +224,6 @@ export function CorrectionActions({
             Approve
           </button>
         )}
-        <button
-          type="button"
-          className="muted-btn"
-          onClick={handlers.onKeepOpen}
-        >
-          Keep Open
-        </button>
         <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
           Dismiss
         </button>

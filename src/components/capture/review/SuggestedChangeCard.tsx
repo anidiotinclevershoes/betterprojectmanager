@@ -24,7 +24,6 @@ export function SuggestedChangeCard({
   targetOptions = [],
   onApprove,
   onDismiss,
-  onKeepOpen,
   onUseThis,
   onChooseTarget,
   onChooseProject,
@@ -39,7 +38,6 @@ export function SuggestedChangeCard({
   targetOptions?: TargetOption[];
   onApprove: () => void;
   onDismiss: () => void;
-  onKeepOpen?: () => void;
   onUseThis?: () => void;
   onChooseTarget?: (option: TargetOption) => void;
   onChooseProject?: (project: {
@@ -68,7 +66,6 @@ export function SuggestedChangeCard({
     onChooseProject: (project) => onChooseProject?.(project),
     onCreateNew: () => onCreateNew?.(),
     onResolve: () => onResolve?.() ?? onApprove(),
-    onKeepOpen: () => onKeepOpen?.() ?? onDismiss(),
     onDismiss,
     onApprove,
     onChangeEntityKind: (kind) => onChangeEntityKind?.(kind),

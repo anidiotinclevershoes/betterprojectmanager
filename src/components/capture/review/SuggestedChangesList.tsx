@@ -138,7 +138,6 @@ export function SuggestedChangesList({
                 highlighted={highlightedId === model.id}
                 onApprove={() => onApprove(model.id)}
                 onDismiss={() => onDismiss(model.id)}
-                onKeepOpen={() => onDismiss(model.id)}
                 onUseThis={() => onUseThis(model.id)}
                 onChooseTarget={(option) => onChooseTarget(model.id, option)}
                 onChooseProject={(project) =>
