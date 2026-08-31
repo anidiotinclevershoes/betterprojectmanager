@@ -22,6 +22,8 @@ import { persistNewProject } from "../src/lib/data/supabase/persist-mutations";
 import { FakeWorkspaceClient } from "./lib/fake-supabase-workspace";
 import { captureApplyWorldFromState } from "../src/lib/capture/apply/world";
 import type { MissionState } from "../src/lib/types";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 let passed = 0;
 function check(name: string, fn: () => void | Promise<void>) {
@@ -286,6 +288,18 @@ async function main() {
     const world = captureApplyWorldFromState(state);
     assert.equal("projectTags" in world, false);
     assert.equal("itemTags" in world, false);
+  });
+
+  await check("compose surface stays calm and does not use onboarding chrome", () => {
+    const ui = readFileSync(
+      join(process.cwd(), "src/components/onboarding/NewProjectExperience.tsx"),
+      "utf8",
+    );
+    assert.match(ui, /Add what you know now/);
+    assert.match(ui, /label="Add issue"/);
+    assert.match(ui, /Needs You \{needsYou\.length\}/);
+    assert.doesNotMatch(ui, /Getting Started|0 of 4 complete|Save Draft|Talk It Through/);
+    assert.doesNotMatch(ui, /accent-risks|accent-people|accent-todo|accent-knowledge/);
   });
 
   console.log(`\n${passed} four-frame New Project checks passed.`);

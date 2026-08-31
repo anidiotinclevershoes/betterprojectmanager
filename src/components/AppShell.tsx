@@ -188,10 +188,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
       return { title: "Meetings", subtitle: "Briefs and preparation" };
     }
     if (pathname === "/projects/new") {
-      return {
-        title: "New project",
-        subtitle: "Establish the first known picture — Capture keeps Lume current afterwards",
-      };
+      return { title: "", subtitle: undefined };
     }
     if (pathname.startsWith("/releases")) {
       return { title: "Release playbook", subtitle: "Release stages and risks" };

@@ -23,12 +23,29 @@ import {
   type SetupTodoDraft,
 } from "@/lib/create-project";
 import { mergeOrganisedDraft } from "@/lib/new-project/merge-organised";
-import { needsYouFromDraft } from "@/lib/new-project/needs-you";
+import {
+  needsYouFromDraft,
+  personResponsibilityQuestion,
+  uncertainRiskQuestion,
+  uncertainTodoQuestion,
+  undatedMilestoneQuestion,
+} from "@/lib/new-project/needs-you";
 import type { ProvisionalItem } from "@/lib/new-project-v2";
 import { useMission } from "@/lib/store";
 import { dedupeTagNames, tagSlug, type ProjectTag } from "@/lib/tags";
 
 type KnowledgeKind = NonNullable<SetupKnowledgeDraft["kind"]>;
+
+/** Same neutral domain icons as Review CompactChangeCard — not colour. */
+const FRAME_ICON = {
+  issues: "⚠",
+  people: "◎",
+  todo: "☑",
+  knowledge: "☰",
+  date: "◆",
+  decision: "◇",
+  fact: "☰",
+} as const;
 
 function emptyDraft(): CreateProjectInput {
   return {
@@ -82,7 +99,8 @@ export function NewProjectExperience({
   const clientProjectIdRef = useRef<string | null>(null);
 
   const codeTaken = isProjectCodeTaken(state.projects, draft.code);
-  const canCreate = Boolean(draft.name.trim()) && Boolean(draft.code.trim()) && !codeTaken;
+  const canCreate =
+    Boolean(draft.name.trim()) && Boolean(draft.code.trim()) && !codeTaken;
   const needsYou = useMemo(() => needsYouFromDraft(draft), [draft]);
   const projectTags = useMemo(() => draftProjectTags(draft), [draft]);
   const foundCount =
@@ -90,8 +108,9 @@ export function NewProjectExperience({
     (draft.stakeholders ?? []).filter((s) => s.name.trim()).length +
     (draft.todos ?? []).filter((t) => t.title.trim()).length +
     (draft.importantDates ?? []).filter((d) => d.label.trim()).length +
-    (draft.knowledgeRemember ?? []).filter((k) => k.text.trim() && k.remember !== false)
-      .length;
+    (draft.knowledgeRemember ?? []).filter(
+      (k) => k.text.trim() && k.remember !== false,
+    ).length;
 
   const setName = (name: string) => {
     setDraft((prev) => ({
@@ -204,55 +223,48 @@ export function NewProjectExperience({
       data-testid="np-four-frame"
     >
       <header className="np-compose-head">
-        <p className="np-kicker">New project</p>
-        <h1 className="np-compose-title">Establish the first known picture</h1>
+        <h1 className="np-compose-title">New Project</h1>
         <p className="np-compose-lead">
-          Name it, add what you already know, and create. Capture keeps Lume
-          current afterwards.
+          Add what you know now. Lume can build on it as the project moves.
         </p>
       </header>
 
-      <section className="np-identity ocean-knowledge-frame accent-position">
-        <header className="ocean-knowledge-frame-header">
-          <h3>Project identity</h3>
-        </header>
-        <div className="ocean-knowledge-frame-body np-identity-body">
-          <label className="field">
-            Project name
-            <input
-              required
-              value={draft.name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Member Claims Upload"
-              data-testid="np-project-name"
-            />
-          </label>
-          <label className="field">
-            Project code
-            <input
-              required
-              value={draft.code}
-              onChange={(e) => {
-                setCodeLocked(true);
-                setDraft((prev) => ({
-                  ...prev,
-                  code: normaliseProjectCode(e.target.value),
-                }));
-              }}
-              aria-invalid={codeTaken}
-              data-testid="np-project-code"
-            />
-          </label>
-          {codeTaken ? (
-            <p className="field-error" data-testid="np-code-taken">
-              {projectCodeTakenMessage(draft.code)}
-            </p>
-          ) : (
-            <p className="field-hint">
-              Generated from the name. Edit it if you prefer a different code.
-            </p>
-          )}
-        </div>
+      <section className="np-identity" data-testid="np-identity">
+        <label className="field">
+          Project name
+          <input
+            required
+            value={draft.name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Member Claims Upload"
+            data-testid="np-project-name"
+          />
+        </label>
+        <label className="field">
+          Project code
+          <input
+            required
+            value={draft.code}
+            onChange={(e) => {
+              setCodeLocked(true);
+              setDraft((prev) => ({
+                ...prev,
+                code: normaliseProjectCode(e.target.value),
+              }));
+            }}
+            aria-invalid={codeTaken}
+            data-testid="np-project-code"
+          />
+        </label>
+        {codeTaken ? (
+          <p className="field-error" data-testid="np-code-taken">
+            {projectCodeTakenMessage(draft.code)}
+          </p>
+        ) : draft.code.trim() ? (
+          <p className="field-hint" data-testid="np-code-available">
+            Available
+          </p>
+        ) : null}
       </section>
 
       <section className="np-organiser" data-testid="np-organiser">
@@ -262,14 +274,14 @@ export function NewProjectExperience({
           aria-expanded={notesOpen}
           onClick={() => setNotesOpen((v) => !v)}
         >
-          Have project notes already?
+          Have some notes already?
         </button>
         {notesOpen ? (
           <div className="np-organiser-body">
             <label className="field">
               Paste them here and Lume can organise what it recognises.
               <textarea
-                rows={5}
+                rows={4}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Meeting notes, a handover, or anything already written."
@@ -286,9 +298,8 @@ export function NewProjectExperience({
               {organising ? "Organising…" : "Organise notes"}
             </button>
             <p className="meta">
-              {openaiConfigured === false
-                ? "Local organisation — OpenAI is not configured."
-                : "Creates editable proposals only. Nothing is saved until you create the project."}
+              Creates editable proposals only. Nothing is saved until you create the project.
+              {openaiConfigured === false ? " Local organisation." : ""}
             </p>
           </div>
         ) : null}
@@ -296,24 +307,25 @@ export function NewProjectExperience({
           <div className="np-organise-found" data-testid="np-organise-found">
             <p>
               <strong>{organiseSummary}</strong>
-            </p>
-            {foundCount ? (
-              <ul>
-                <li>Issues · {(draft.risks ?? []).filter((r) => r.title.trim()).length}</li>
-                <li>
-                  People ·{" "}
+              {foundCount ? (
+                <span className="np-organise-found-meta">
+                  {" "}
+                  Issues {(draft.risks ?? []).filter((r) => r.title.trim()).length}
+                  {" · "}
+                  People{" "}
                   {(draft.stakeholders ?? []).filter((s) => s.name.trim()).length}
-                </li>
-                <li>To Do · {(draft.todos ?? []).filter((t) => t.title.trim()).length}</li>
-                <li>
-                  Knowledge ·{" "}
-                  {(draft.importantDates ?? []).filter((d) => d.label.trim()).length +
+                  {" · "}
+                  To Do {(draft.todos ?? []).filter((t) => t.title.trim()).length}
+                  {" · "}
+                  Knowledge{" "}
+                  {(draft.importantDates ?? []).filter((d) => d.label.trim())
+                    .length +
                     (draft.knowledgeRemember ?? []).filter(
                       (k) => k.text.trim() && k.remember !== false,
                     ).length}
-                </li>
-              </ul>
-            ) : null}
+                </span>
+              ) : null}
+            </p>
           </div>
         ) : null}
       </section>
@@ -322,7 +334,13 @@ export function NewProjectExperience({
         <IssueFrame
           items={draft.risks ?? []}
           projectTags={projectTags}
-          onChange={(risks) => setDraft((prev) => ({ ...prev, risks, knowledgeRisks: risks.map((r) => r.title) }))}
+          onChange={(risks) =>
+            setDraft((prev) => ({
+              ...prev,
+              risks,
+              knowledgeRisks: risks.map((r) => r.title),
+            }))
+          }
         />
         <PeopleFrame
           items={draft.stakeholders ?? []}
@@ -348,37 +366,73 @@ export function NewProjectExperience({
         }
       />
 
-      {needsYou.length ? (
-        <p className="np-needs-you-summary" data-testid="np-needs-you-summary">
-          <span className="np-needs-you-dot" aria-hidden />
-          Needs you · {needsYou.length} optional{" "}
-          {needsYou.length === 1 ? "question" : "questions"} — the project can
-          still be created.
-        </p>
-      ) : (
-        <p className="np-compose-reassure meta">
-          Sparse is fine. You can teach Lume the rest as the project moves.
-        </p>
-      )}
-
       {error ? (
         <p className="error-copy" role="alert">
           {error}
         </p>
       ) : null}
 
-      <div className="np-review-sticky">
-        <p className="meta">Only a name and unique code are required.</p>
-        <button
-          type="submit"
-          className="primary-btn np-create-btn"
-          disabled={busy || !canCreate}
-          data-testid="np-create-project"
-        >
-          {busy ? "Creating…" : "Create Project"}
-        </button>
+      <div className="np-create-bar">
+        <div className="np-create-copy">
+          {needsYou.length ? (
+            <p className="np-needs-you-summary" data-testid="np-needs-you-summary">
+              <span className="np-needs-you-dot" aria-hidden />
+              Needs You {needsYou.length}
+            </p>
+          ) : null}
+          <p className="meta">You can add more at any time.</p>
+          <p className="meta">After this, Capture keeps the project current.</p>
+        </div>
+        <div className="np-create-actions">
+          {variant === "page" && state.projects.length > 0 ? (
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </button>
+          ) : null}
+          <button
+            type="submit"
+            className="primary-btn np-create-btn"
+            disabled={busy || !canCreate}
+            data-testid="np-create-project"
+          >
+            {busy ? "Creating…" : "Create Project"}
+          </button>
+        </div>
       </div>
     </form>
+  );
+}
+
+function FrameShell({
+  icon,
+  title,
+  testId,
+  wide,
+  children,
+}: {
+  icon: string;
+  title: string;
+  testId: string;
+  wide?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      className={`np-frame ${wide ? "is-wide" : ""}`}
+      data-testid={testId}
+    >
+      <header className="np-frame-head">
+        <span className="compact-change-ico" aria-hidden>
+          {icon}
+        </span>
+        <h3>{title}</h3>
+      </header>
+      <div className="np-frame-body">{children}</div>
+    </section>
   );
 }
 
@@ -391,24 +445,21 @@ function IssueFrame({
   projectTags: ProjectTag[];
   onChange: (items: SetupRiskDraft[]) => void;
 }) {
-  const [adding, setAdding] = useState("");
   return (
-    <section className="ocean-knowledge-frame accent-risks" data-testid="np-frame-issues">
-      <header className="ocean-knowledge-frame-header">
-        <h3>Issues</h3>
-      </header>
-      <div className="ocean-knowledge-frame-body">
-        <p className="np-frame-hint meta">
-          Things affecting, threatening or obstructing the project.
-        </p>
-        {items.map((item, index) => (
-          <ComposerRow
-            key={item.clientKey ?? `issue-${index}`}
-            needsYou={item.needsReview}
-            needsYouText="Needs you — can you confirm this issue?"
-          >
+    <FrameShell icon={FRAME_ICON.issues} title="Issues" testId="np-frame-issues">
+      {items.map((item, index) => (
+        <ItemCard
+          key={item.clientKey ?? `issue-${index}`}
+          typeLabel="Risk"
+          needsYou={item.needsReview}
+          needsYouText={
+            item.title.trim()
+              ? uncertainRiskQuestion(item.title)
+              : "Needs You"
+          }
+          title={
             <input
-              className="np-compact-title"
+              className="np-item-title"
               value={item.title}
               aria-label="Issue"
               onChange={(e) => {
@@ -417,6 +468,8 @@ function IssueFrame({
                 onChange(next);
               }}
             />
+          }
+          tags={
             <TagEditor
               tags={item.tags ?? []}
               projectTags={projectTags}
@@ -426,25 +479,22 @@ function IssueFrame({
                 onChange(next);
               }}
             />
-            <RemoveButton onClick={() => onChange(items.filter((_, i) => i !== index))} />
-          </ComposerRow>
-        ))}
-        <InlineAdd
-          value={adding}
-          placeholder="Add an issue"
-          testId="np-add-issue"
-          onChange={setAdding}
-          onSubmit={() => {
-            if (!adding.trim()) return;
-            onChange([
-              ...items,
-              { clientKey: newSetupClientKey(), title: adding.trim() },
-            ]);
-            setAdding("");
-          }}
+          }
+          onRemove={() => onChange(items.filter((_, i) => i !== index))}
         />
-      </div>
-    </section>
+      ))}
+      <InlineAdd
+        label="Add issue"
+        placeholder="Supplier capacity may be limited"
+        testId="np-add-issue"
+        onSubmit={(title) =>
+          onChange([
+            ...items,
+            { clientKey: newSetupClientKey(), title },
+          ])
+        }
+      />
+    </FrameShell>
   );
 }
 
@@ -457,30 +507,24 @@ function PeopleFrame({
   projectTags: ProjectTag[];
   onChange: (items: SetupStakeholderDraft[]) => void;
 }) {
-  const [name, setName] = useState("");
   return (
-    <section className="ocean-knowledge-frame accent-people" data-testid="np-frame-people">
-      <header className="ocean-knowledge-frame-header">
-        <h3>People</h3>
-      </header>
-      <div className="ocean-knowledge-frame-body">
-        <p className="np-frame-hint meta">
-          People can hold several responsibilities. Responsibilities can be shared.
-        </p>
-        {items.map((item, index) => {
-          const scopes = item.responsibilities ?? (item.role ? [item.role] : []);
-          const missing = scopes.filter(Boolean).length === 0;
-          return (
-            <ComposerRow
-              key={item.clientKey ?? `person-${index}`}
-              needsYou={missing || item.needsReview}
-              needsYouText={
-                item.name.trim()
-                  ? `Needs you — What is ${item.name.trim()} responsible for?`
-                  : "Needs you — add a name"
-              }
-            >
+    <FrameShell icon={FRAME_ICON.people} title="People" testId="np-frame-people">
+      {items.map((item, index) => {
+        const scopes = item.responsibilities ?? (item.role ? [item.role] : []);
+        const missing = scopes.filter(Boolean).length === 0;
+        return (
+          <ItemCard
+            key={item.clientKey ?? `person-${index}`}
+            typeLabel="Person"
+            needsYou={missing || item.needsReview}
+            needsYouText={
+              item.name.trim()
+                ? personResponsibilityQuestion(item.name)
+                : "Needs You — add a name"
+            }
+            title={
               <input
+                className="np-item-title"
                 value={item.name}
                 aria-label="Person name"
                 placeholder="Name"
@@ -490,6 +534,8 @@ function PeopleFrame({
                   onChange(next);
                 }}
               />
+            }
+            supporting={
               <ResponsibilityEditor
                 scopes={scopes}
                 onChange={(responsibilities) => {
@@ -503,6 +549,8 @@ function PeopleFrame({
                   onChange(next);
                 }}
               />
+            }
+            tags={
               <TagEditor
                 tags={item.tags ?? []}
                 projectTags={projectTags}
@@ -512,31 +560,28 @@ function PeopleFrame({
                   onChange(next);
                 }}
               />
-              <RemoveButton onClick={() => onChange(items.filter((_, i) => i !== index))} />
-            </ComposerRow>
-          );
-        })}
-        <InlineAdd
-          value={name}
-          placeholder="Add a person"
-          testId="np-add-person"
-          onChange={setName}
-          onSubmit={() => {
-            if (!name.trim()) return;
-            onChange([
-              ...items,
-              {
-                clientKey: newSetupClientKey(),
-                name: name.trim(),
-                responsibilities: [],
-                needsReview: true,
-              },
-            ]);
-            setName("");
-          }}
-        />
-      </div>
-    </section>
+            }
+            onRemove={() => onChange(items.filter((_, i) => i !== index))}
+          />
+        );
+      })}
+      <InlineAdd
+        label="Add person"
+        placeholder="Sarah Murphy"
+        testId="np-add-person"
+        onSubmit={(name) =>
+          onChange([
+            ...items,
+            {
+              clientKey: newSetupClientKey(),
+              name,
+              responsibilities: [],
+              needsReview: true,
+            },
+          ])
+        }
+      />
+    </FrameShell>
   );
 }
 
@@ -549,18 +594,21 @@ function TodoFrame({
   projectTags: ProjectTag[];
   onChange: (items: SetupTodoDraft[]) => void;
 }) {
-  const [adding, setAdding] = useState("");
   return (
-    <section className="ocean-knowledge-frame accent-todo" data-testid="np-frame-todo">
-      <header className="ocean-knowledge-frame-header">
-        <h3>To Do</h3>
-      </header>
-      <div className="ocean-knowledge-frame-body">
-        <p className="np-frame-hint meta">Things that already need to be progressed.</p>
-        {items.map((item, index) => (
-          <ComposerRow key={item.clientKey ?? `todo-${index}`}>
+    <FrameShell icon={FRAME_ICON.todo} title="To Do" testId="np-frame-todo">
+      {items.map((item, index) => (
+        <ItemCard
+          key={item.clientKey ?? `todo-${index}`}
+          typeLabel="To Do"
+          needsYou={item.needsReview}
+          needsYouText={
+            item.title.trim()
+              ? uncertainTodoQuestion(item.title)
+              : "Needs You"
+          }
+          title={
             <input
-              className="np-compact-title"
+              className="np-item-title"
               value={item.title}
               aria-label="To Do"
               onChange={(e) => {
@@ -569,16 +617,23 @@ function TodoFrame({
                 onChange(next);
               }}
             />
-            <input
-              type="date"
-              aria-label="Due date"
-              value={item.dueAt?.slice(0, 10) ?? ""}
-              onChange={(e) => {
-                const next = [...items];
-                next[index] = { ...item, dueAt: e.target.value || undefined };
-                onChange(next);
-              }}
-            />
+          }
+          supporting={
+            <label className="np-item-date">
+              <span className="np-item-date-label">Due</span>
+              <input
+                type="date"
+                aria-label="Due date"
+                value={item.dueAt?.slice(0, 10) ?? ""}
+                onChange={(e) => {
+                  const next = [...items];
+                  next[index] = { ...item, dueAt: e.target.value || undefined };
+                  onChange(next);
+                }}
+              />
+            </label>
+          }
+          tags={
             <TagEditor
               tags={item.tags ?? []}
               projectTags={projectTags}
@@ -588,29 +643,26 @@ function TodoFrame({
                 onChange(next);
               }}
             />
-            <RemoveButton onClick={() => onChange(items.filter((_, i) => i !== index))} />
-          </ComposerRow>
-        ))}
-        <InlineAdd
-          value={adding}
-          placeholder="Add a to-do"
-          testId="np-add-todo"
-          onChange={setAdding}
-          onSubmit={() => {
-            if (!adding.trim()) return;
-            onChange([
-              ...items,
-              {
-                clientKey: newSetupClientKey(),
-                title: adding.trim(),
-                kind: "ACTION",
-              },
-            ]);
-            setAdding("");
-          }}
+          }
+          onRemove={() => onChange(items.filter((_, i) => i !== index))}
         />
-      </div>
-    </section>
+      ))}
+      <InlineAdd
+        label="Add To Do"
+        placeholder="Confirm file format with IT"
+        testId="np-add-todo"
+        onSubmit={(title) =>
+          onChange([
+            ...items,
+            {
+              clientKey: newSetupClientKey(),
+              title,
+              kind: "ACTION",
+            },
+          ])
+        }
+      />
+    </FrameShell>
   );
 }
 
@@ -627,7 +679,7 @@ function KnowledgeFrame({
   onChangeDates: (items: SetupDateDraft[]) => void;
   onChangeFacts: (items: SetupKnowledgeDraft[]) => void;
 }) {
-  const [mode, setMode] = useState<KnowledgeKind | null>(null);
+  const [mode, setMode] = useState<KnowledgeKind | "date" | null>(null);
   const [text, setText] = useState("");
   const [date, setDate] = useState("");
 
@@ -660,26 +712,22 @@ function KnowledgeFrame({
   };
 
   return (
-    <section
-      className="ocean-knowledge-frame accent-knowledge np-knowledge-frame"
-      data-testid="np-frame-knowledge"
+    <FrameShell
+      icon={FRAME_ICON.knowledge}
+      title="Knowledge"
+      testId="np-frame-knowledge"
+      wide
     >
-      <header className="ocean-knowledge-frame-header">
-        <h3>Knowledge</h3>
-      </header>
-      <div className="ocean-knowledge-frame-body">
-        <p className="np-frame-hint meta">
-          Things Lume should remember — milestones, decisions, and project context.
-        </p>
-        {dates.map((item, index) => (
-          <ComposerRow
-            key={item.clientKey ?? `date-${index}`}
-            needsYou={!item.date || item.needsReview}
-            needsYouText={`Needs you — When is the ${item.label.trim() || "milestone"}?`}
-          >
-            <span className="np-kind-pill">Milestone</span>
+      {dates.map((item, index) => (
+        <ItemCard
+          key={item.clientKey ?? `date-${index}`}
+          typeLabel="Milestone / Date"
+          icon={FRAME_ICON.date}
+          needsYou={!item.date || item.needsReview}
+          needsYouText={undatedMilestoneQuestion(item.label || "milestone")}
+          title={
             <input
-              className="np-compact-title"
+              className="np-item-title"
               value={item.label}
               aria-label="Milestone"
               onChange={(e) => {
@@ -688,20 +736,27 @@ function KnowledgeFrame({
                 onChangeDates(next);
               }}
             />
-            <input
-              type="date"
-              value={item.date?.slice(0, 10) ?? ""}
-              aria-label="Milestone date"
-              onChange={(e) => {
-                const next = [...dates];
-                next[index] = {
-                  ...item,
-                  date: e.target.value || undefined,
-                  needsReview: !e.target.value,
-                };
-                onChangeDates(next);
-              }}
-            />
+          }
+          supporting={
+            <label className="np-item-date">
+              <span className="np-item-date-label">Date</span>
+              <input
+                type="date"
+                value={item.date?.slice(0, 10) ?? ""}
+                aria-label="Milestone date"
+                onChange={(e) => {
+                  const next = [...dates];
+                  next[index] = {
+                    ...item,
+                    date: e.target.value || undefined,
+                    needsReview: !e.target.value,
+                  };
+                  onChangeDates(next);
+                }}
+              />
+            </label>
+          }
+          tags={
             <TagEditor
               tags={item.tags ?? []}
               projectTags={projectTags}
@@ -711,20 +766,20 @@ function KnowledgeFrame({
                 onChangeDates(next);
               }}
             />
-            <RemoveButton onClick={() => onChangeDates(dates.filter((_, i) => i !== index))} />
-          </ComposerRow>
-        ))}
-        {facts.map((item, index) => (
-          <ComposerRow
-            key={item.clientKey ?? `fact-${index}`}
-            needsYou={item.needsReview}
-            needsYouText={item.needsYouQuestion || "Needs you"}
-          >
-            <span className="np-kind-pill">
-              {item.kind === "decision" ? "Decision" : "Context"}
-            </span>
+          }
+          onRemove={() => onChangeDates(dates.filter((_, i) => i !== index))}
+        />
+      ))}
+      {facts.map((item, index) => (
+        <ItemCard
+          key={item.clientKey ?? `fact-${index}`}
+          typeLabel={item.kind === "decision" ? "Decision" : "Information"}
+          icon={item.kind === "decision" ? FRAME_ICON.decision : FRAME_ICON.fact}
+          needsYou={item.needsReview}
+          needsYouText={item.needsYouQuestion || "Needs You"}
+          title={
             <input
-              className="np-compact-title"
+              className="np-item-title"
               value={item.text}
               aria-label="Knowledge"
               onChange={(e) => {
@@ -733,6 +788,8 @@ function KnowledgeFrame({
                 onChangeFacts(next);
               }}
             />
+          }
+          tags={
             <TagEditor
               tags={item.tags ?? []}
               projectTags={projectTags}
@@ -742,123 +799,190 @@ function KnowledgeFrame({
                 onChangeFacts(next);
               }}
             />
-            <RemoveButton onClick={() => onChangeFacts(facts.filter((_, i) => i !== index))} />
-          </ComposerRow>
-        ))}
-        <div className="np-knowledge-add">
-          {mode ? (
-            <div className="np-inline-add is-open">
-              <input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder={
-                  mode === "date"
-                    ? "Milestone name"
-                    : mode === "decision"
-                      ? "Decision"
-                      : "Something Lume should remember"
+          }
+          onRemove={() => onChangeFacts(facts.filter((_, i) => i !== index))}
+        />
+      ))}
+      <div className="np-knowledge-add">
+        {mode ? (
+          <div className="np-inline-add is-open">
+            <input
+              value={text}
+              autoFocus
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addCurrent();
                 }
-                aria-label="New knowledge"
+                if (e.key === "Escape") setMode(null);
+              }}
+              placeholder={
+                mode === "date"
+                  ? "UAT target"
+                  : mode === "decision"
+                    ? "Claims will be uploaded through DocuFlow."
+                    : "Initial delivery is web only."
+              }
+              aria-label="New knowledge"
+            />
+            {mode === "date" ? (
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                aria-label="Milestone date"
               />
-              {mode === "date" ? (
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  aria-label="Milestone date"
-                />
-              ) : null}
-              <button type="button" className="primary-btn" onClick={addCurrent}>
-                Add
-              </button>
-              <button type="button" className="ghost-btn" onClick={() => setMode(null)}>
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <div className="np-knowledge-add-actions">
-              <button type="button" className="ghost-btn" onClick={() => setMode("date")}>
-                + Milestone
-              </button>
-              <button
-                type="button"
-                className="ghost-btn"
-                onClick={() => setMode("decision")}
-              >
-                + Decision
-              </button>
-              <button type="button" className="ghost-btn" onClick={() => setMode("fact")}>
-                + Context
-              </button>
-            </div>
-          )}
-        </div>
+            ) : null}
+            <button type="button" className="primary-btn" onClick={addCurrent}>
+              Add
+            </button>
+            <button type="button" className="ghost-btn" onClick={() => setMode(null)}>
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <div className="np-knowledge-add-actions">
+            <button type="button" className="np-add-btn" onClick={() => setMode("date")}>
+              + Milestone / Date
+            </button>
+            <button
+              type="button"
+              className="np-add-btn"
+              onClick={() => setMode("decision")}
+            >
+              + Decision
+            </button>
+            <button type="button" className="np-add-btn" onClick={() => setMode("fact")}>
+              + Information
+            </button>
+          </div>
+        )}
       </div>
-    </section>
+    </FrameShell>
   );
 }
 
-function ComposerRow({
-  children,
+function ItemCard({
+  typeLabel,
+  icon,
+  title,
+  supporting,
+  tags,
   needsYou,
   needsYouText,
+  onRemove,
 }: {
-  children: ReactNode;
+  typeLabel: string;
+  icon?: string;
+  title: ReactNode;
+  supporting?: ReactNode;
+  tags?: ReactNode;
   needsYou?: boolean;
   needsYouText?: string;
+  onRemove: () => void;
 }) {
   return (
-    <div className={`np-composer-row ${needsYou ? "is-needs-you" : ""}`}>
-      {children}
+    <article
+      className={`np-item compact-change-card ${needsYou ? "is-emphasized" : ""}`}
+    >
+      <header className="compact-change-head">
+        <div className="compact-change-entity">
+          {icon ? (
+            <span className="compact-change-ico" aria-hidden>
+              {icon}
+            </span>
+          ) : null}
+          <div className="compact-change-titles">
+            <p className="compact-change-type">{typeLabel}</p>
+            {title}
+          </div>
+        </div>
+        <button
+          type="button"
+          className="np-item-remove"
+          onClick={onRemove}
+          aria-label="Remove"
+        >
+          ×
+        </button>
+      </header>
+      {supporting ? <div className="np-item-support">{supporting}</div> : null}
       {needsYou ? (
         <p className="np-needs-you-inline">
           <span className="np-needs-you-dot" aria-hidden />
-          {needsYouText}
+          Needs You — {needsYouText?.replace(/^Needs You — /i, "") ?? "Lume noticed what's missing."}
         </p>
       ) : null}
-    </div>
+      {tags ? <div className="np-item-tags">{tags}</div> : null}
+    </article>
   );
 }
 
 function InlineAdd({
-  value,
+  label,
   placeholder,
-  onChange,
   onSubmit,
   testId,
 }: {
-  value: string;
+  label: string;
   placeholder: string;
-  onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (value: string) => void;
   testId?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const commit = () => {
+    if (!value.trim()) return;
+    onSubmit(value.trim());
+    setValue("");
+  };
+  if (!open) {
+    return (
+      <button
+        type="button"
+        className="np-add-btn"
+        onClick={() => setOpen(true)}
+        data-testid={testId}
+      >
+        + {label}
+      </button>
+    );
+  }
   return (
-    <div className="np-inline-add">
+    <div className="np-inline-add is-open">
       <input
         value={value}
+        autoFocus
         placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            onSubmit();
+            commit();
+          }
+          if (e.key === "Escape") {
+            setOpen(false);
+            setValue("");
           }
         }}
         data-testid={testId}
+        aria-label={label}
       />
-      <button type="button" className="ghost-btn" onClick={onSubmit}>
+      <button type="button" className="primary-btn" onClick={commit}>
         Add
       </button>
+      <button
+        type="button"
+        className="ghost-btn"
+        onClick={() => {
+          setOpen(false);
+          setValue("");
+        }}
+      >
+        Cancel
+      </button>
     </div>
-  );
-}
-
-function RemoveButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button type="button" className="ghost-btn np-row-remove" onClick={onClick}>
-      Remove
-    </button>
   );
 }
 
@@ -890,33 +1014,65 @@ function ResponsibilityEditor({
   scopes: string[];
   onChange: (scopes: string[]) => void;
 }) {
-  const [adding, setAdding] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [value, setValue] = useState("");
+  const listed = scopes.filter(Boolean);
+  const commit = () => {
+    if (!value.trim()) return;
+    onChange([...listed, value.trim()]);
+    setValue("");
+  };
   return (
-    <div className="np-scope-chips">
-      {scopes.filter(Boolean).map((scope) => (
+    <div className="np-scopes">
+      {listed.length ? (
+        <p className="np-scope-line">
+          {listed.map((scope, index) => (
+            <span key={`${scope}-${index}`}>
+              {index > 0 ? <span className="np-scope-sep"> · </span> : null}
+              <button
+                type="button"
+                className="np-scope"
+                onClick={() => onChange(listed.filter((s) => s !== scope))}
+                aria-label={`Remove ${scope}`}
+              >
+                {scope}
+              </button>
+            </span>
+          ))}
+        </p>
+      ) : null}
+      {adding ? (
+        <input
+          className="np-scope-input"
+          value={value}
+          autoFocus
+          placeholder="Product Owner"
+          aria-label="Add responsibility"
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && value.trim()) {
+              e.preventDefault();
+              commit();
+            }
+            if (e.key === "Escape") {
+              setAdding(false);
+              setValue("");
+            }
+          }}
+          onBlur={() => {
+            if (value.trim()) commit();
+            setAdding(false);
+          }}
+        />
+      ) : (
         <button
-          key={scope}
           type="button"
-          className="tag-chip"
-          onClick={() => onChange(scopes.filter((s) => s !== scope))}
+          className="np-add-btn"
+          onClick={() => setAdding(true)}
         >
-          {scope}
-          <span aria-hidden>×</span>
+          + Add responsibility
         </button>
-      ))}
-      <input
-        value={adding}
-        placeholder="Add responsibility"
-        aria-label="Add responsibility"
-        onChange={(e) => setAdding(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && adding.trim()) {
-            e.preventDefault();
-            onChange([...scopes.filter(Boolean), adding.trim()]);
-            setAdding("");
-          }
-        }}
-      />
+      )}
     </div>
   );
 }
