@@ -85,7 +85,11 @@ export function SuggestedChangeCard({
       : undefined;
   const detail =
     family === "needs_you"
-      ? needsYouSupporting(headline || "", model.needsReviewReason)
+      ? needsYouSupporting(
+          headline || "",
+          model.needsReviewReason,
+          model.recordName,
+        )
       : null;
 
   if (state !== "pending") {

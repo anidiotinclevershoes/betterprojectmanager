@@ -618,8 +618,17 @@ function model(
     needsYouSupporting(
       "Which record does this refer to?",
       "Lume thinks this refers to:\nChase the hosting ticket",
+      "Chase the hosting ticket",
     ),
-    "Lume thinks this refers to:\nChase the hosting ticket",
+    null,
+  );
+  assert.equal(
+    needsYouSupporting(
+      "Is this Risk resolved?",
+      "Lume isn't sure whether this Risk is resolved.",
+      "CDN deployment delayed",
+    ),
+    null,
   );
 }
 

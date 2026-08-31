@@ -103,21 +103,41 @@ export function whyDisclosureLabel(
   return "Why this";
 }
 
-/** Extra Needs You detail that is not just the headline restated. */
+/** Extra Needs You detail that is not just the headline or record restated. */
 export function needsYouSupporting(
   headline: string,
   reasonCopy: string | undefined,
+  recordName?: string,
 ): string | null {
   if (!reasonCopy?.trim()) return null;
-  const compact = reasonCopy.replace(/\s+/g, " ").trim();
-  if (!compact) return null;
+  const lines = reasonCopy
+    .trim()
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const noise = [
+    headline,
+    recordName,
+    /^lume thinks this refers to:?$/i,
+    /^lume isn'?t sure/i,
+    /^destructive action/i,
+  ];
+
+  const kept = lines.filter((line) => {
+    const lower = line.toLowerCase();
+    for (const rule of noise) {
+      if (typeof rule === "string") {
+        if (rule && lower === rule.toLowerCase()) return false;
+      } else if (rule.test(line)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  if (kept.length === 0) return null;
+  const compact = kept.join("\n");
   if (compact.toLowerCase() === headline.toLowerCase()) return null;
-  if (compact.toLowerCase().includes(headline.toLowerCase())) {
-    const remainder = compact
-      .replace(new RegExp(headline.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), "")
-      .replace(/^[\s:.\-—]+/, "")
-      .trim();
-    return remainder || null;
-  }
-  return reasonCopy.trim();
+  return compact;
 }
