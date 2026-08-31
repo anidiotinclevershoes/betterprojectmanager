@@ -209,7 +209,11 @@ async function main() {
     );
     assert.equal(bundle.timeline[0]?.startAt, dateBefore);
     assert.equal(bundle.timeline[0]?.label, "Go-live");
-    assert.ok(next.itemTags.some((r) => r.tagId === "uat-tag"));
+    const uatId = next.projectTags.find((t) => t.slug === "uat")?.id;
+    assert.ok(uatId);
+    assert.ok(
+      next.itemTags.some((r) => r.tagId === uatId && r.targetId === "know-1"),
+    );
   });
 
   await check("tag filtering is view-only", () => {
