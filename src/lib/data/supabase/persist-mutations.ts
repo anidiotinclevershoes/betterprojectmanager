@@ -12,7 +12,12 @@ import {
 import { persistTagBundle } from "@/lib/data/supabase/persist-tags";
 import { isoToDateOnly } from "@/lib/data/supabase/load-mission-state";
 import { structuredItemsFromSetup } from "@/lib/new-project/materialise-setup";
-import { personResponsibilityQuestion } from "@/lib/new-project/needs-you";
+import { intendedCreateTruth } from "@/lib/new-project/intended-create";
+import {
+  personResponsibilityQuestion,
+  uncertainRiskQuestion,
+  uncertainTodoQuestion,
+} from "@/lib/new-project/needs-you";
 import { tagsFromCreateDraft } from "@/lib/tags";
 import { requireUuid } from "@/lib/data/validate";
 import type {
@@ -34,6 +39,120 @@ export type LegalRiskSource = (typeof LEGAL_RISK_SOURCES)[number];
  * Map to the legal `manual` source rather than expanding the enum.
  */
 export const NEW_PROJECT_RISK_SOURCE: LegalRiskSource = "manual";
+
+export const NEW_PROJECT_PARTIAL_CREATE =
+  "New Project create did not complete. A partial project was not treated as success.";
+
+function namesMatch(a: string, b: string) {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+async function inspectExistingCreate(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  input: CreateProjectInput,
+): Promise<
+  | { status: "missing" }
+  | { status: "complete"; bundle: PersistedProjectBundle }
+  | { status: "partial"; reason: string }
+> {
+  const existing = await loadExistingProjectBundle(client, workspaceId, projectId);
+  if (!existing) return { status: "missing" };
+
+  const intended = intendedCreateTruth(input);
+  const missing: string[] = [];
+
+  for (const name of intended.stakeholderNames) {
+    if (!existing.project.stakeholders.some((s) => namesMatch(s.name, name))) {
+      missing.push(`person:${name}`);
+    }
+  }
+  for (const title of intended.todoTitles) {
+    if (!existing.todos.some((t) => namesMatch(t.title, title))) {
+      missing.push(`todo:${title}`);
+    }
+  }
+  for (const title of intended.riskTitles) {
+    if (!existing.risks.some((r) => namesMatch(r.title, title))) {
+      missing.push(`risk:${title}`);
+    }
+  }
+  for (const label of intended.milestoneLabels) {
+    if (!existing.timeline.some((t) => namesMatch(t.label, label))) {
+      missing.push(`milestone:${label}`);
+    }
+  }
+
+  const { data: knowledgeRows, error: knowledgeError } = await client
+    .from("knowledge_items")
+    .select("kind, body, lifecycle")
+    .eq("project_id", projectId)
+    .eq("workspace_id", workspaceId);
+  if (knowledgeError) {
+    return { status: "partial", reason: knowledgeError.message };
+  }
+  const currentKnowledge = (knowledgeRows ?? []).filter(
+    (row: { lifecycle?: string | null }) =>
+      String(row.lifecycle ?? "current") === "current",
+  );
+  const responsibilityCount = currentKnowledge.filter(
+    (row: { kind?: string | null }) => row.kind === "responsibility",
+  ).length;
+  if (responsibilityCount < intended.responsibilityMin) {
+    missing.push(
+      `responsibilities:${responsibilityCount}<${intended.responsibilityMin}`,
+    );
+  }
+  for (const body of intended.ambiguityBodies) {
+    const hit = currentKnowledge.some(
+      (row: { kind?: string | null; body?: string | null }) =>
+        row.kind === "ambiguity" && namesMatch(String(row.body ?? ""), body),
+    );
+    if (!hit) missing.push(`ambiguity:${body}`);
+  }
+  for (const label of intended.pendingDateLabels) {
+    const hit = currentKnowledge.some(
+      (row: { kind?: string | null; body?: string | null }) =>
+        row.kind === "date" && namesMatch(String(row.body ?? ""), label),
+    );
+    if (!hit) missing.push(`pending-date:${label}`);
+  }
+
+  const { data: tagRows, error: tagError } = await client
+    .from("project_tags")
+    .select("slug")
+    .eq("project_id", projectId)
+    .eq("workspace_id", workspaceId);
+  if (tagError) {
+    return { status: "partial", reason: tagError.message };
+  }
+  const slugs = new Set(
+    (tagRows ?? []).map((row: { slug?: string }) => String(row.slug ?? "")),
+  );
+  for (const slug of intended.tagSlugs) {
+    if (!slugs.has(slug)) missing.push(`tag:${slug}`);
+  }
+
+  const { data: itemTagRows, error: itemTagError } = await client
+    .from("item_tags")
+    .select("id")
+    .eq("project_id", projectId)
+    .eq("workspace_id", workspaceId);
+  if (itemTagError) {
+    return { status: "partial", reason: itemTagError.message };
+  }
+  const itemTagCount = (itemTagRows ?? []).length;
+  if (itemTagCount < intended.itemTagMin) {
+    missing.push(`item-tags:${itemTagCount}<${intended.itemTagMin}`);
+  }
+
+  if (missing.length) {
+    return { status: "partial", reason: missing.slice(0, 8).join("; ") };
+  }
+  return { status: "complete", bundle: existing };
+}
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -357,12 +476,18 @@ async function loadExistingProjectBundle(
   } as PersistedProjectBundle & { setupMemory?: MemoryEntry };
 }
 
+/**
+ * Sequential inserts + compensating cleanup. Not one SQL transaction.
+ * A project row alone is never success. Unique-id retry must prove the
+ * intended bundle is complete, or fail closed (`NEW_PROJECT_PARTIAL_CREATE`).
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function persistNewProject(
   client: SupabaseClient<any>,
   workspaceId: string,
   userId: string | null,
   input: CreateProjectInput,
+  opts?: { afterPartialCleanup?: boolean },
 ): Promise<PersistedProjectBundle> {
   // In-memory payload builder only — not browser/localStorage persistence.
   const local = buildNewProject(input);
@@ -413,15 +538,35 @@ export async function persistNewProject(
       .single();
 
     if (projectError && requestedId && isUniqueViolation(projectError)) {
-      const existing = await loadExistingProjectBundle(
+      const inspected = await inspectExistingCreate(
         client,
         workspaceId,
         requestedId,
+        input,
       );
-      if (existing) return existing;
-      throw new Error(
-        `[supabase] create project: duplicate id ${requestedId} is not in this workspace`,
-      );
+      if (inspected.status === "complete") return inspected.bundle;
+      if (inspected.status === "missing") {
+        throw new Error(
+          `[supabase] create project: duplicate id ${requestedId} is not in this workspace`,
+        );
+      }
+      try {
+        await cleanupFailedNewProjectBundle(client, workspaceId, requestedId);
+      } catch (cleanupErr) {
+        const cleanup =
+          cleanupErr instanceof Error ? cleanupErr.message : String(cleanupErr);
+        throw new Error(
+          `${NEW_PROJECT_PARTIAL_CREATE} (${inspected.reason}). Cleanup also failed: ${cleanup}`,
+        );
+      }
+      if (opts?.afterPartialCleanup) {
+        throw new Error(
+          `${NEW_PROJECT_PARTIAL_CREATE} (${inspected.reason}). Retry still collided after cleanup.`,
+        );
+      }
+      return persistNewProject(client, workspaceId, userId, input, {
+        afterPartialCleanup: true,
+      });
     }
     if (projectError && isUniqueViolation(projectError)) {
       throw new Error(projectCodeTakenMessage(local.project.code));
@@ -712,7 +857,7 @@ export async function persistNewProject(
         const cleanup =
           cleanupErr instanceof Error ? cleanupErr.message : String(cleanupErr);
         throw new Error(
-          `${origin} (also failed to clean up partial project: ${cleanup})`,
+          `${NEW_PROJECT_PARTIAL_CREATE} ${origin} (also failed to clean up partial project: ${cleanup})`,
         );
       }
     }
@@ -743,6 +888,16 @@ export async function persistTodoCreate(
     .select("*")
     .single();
   const row = requireData(data, error, "create todo");
+  if (row.project_id) {
+    await supersedeCurrentKnowledgeItems(
+      client,
+      workspaceId,
+      String(row.project_id),
+      "ambiguity",
+      (item) =>
+        String(item.body).trim() === uncertainTodoQuestion(String(row.title)),
+    );
+  }
   return {
     id: row.id,
     projectId: row.project_id,
@@ -909,6 +1064,13 @@ export async function persistKnowledgeBullet(
     if (riskError) {
       throw new Error(`[supabase] create risk: ${riskError.message}`);
     }
+    await supersedeCurrentKnowledgeItems(
+      client,
+      workspaceId,
+      projectId,
+      "ambiguity",
+      (item) => String(item.body).trim() === uncertainRiskQuestion(body),
+    );
     return { riskId };
   }
 

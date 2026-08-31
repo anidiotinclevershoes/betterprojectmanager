@@ -1,6 +1,33 @@
 -- Retrieval tags: metadata only. Deleting every tag must leave project truth unchanged.
 -- Tags never participate in identity, resolution, Capture apply, or Change Intelligence.
 -- Also adds workspace-scoped unique project codes (authoritative uniqueness).
+--
+-- Preflight: never delete or rename existing projects. If duplicate codes already
+-- exist in a workspace, fail clearly so a human can reconcile them.
+
+do $$
+declare
+  dup text;
+begin
+  select string_agg(
+    format('%s / %s ×%s', workspace_id::text, lower(code), cnt),
+    ', '
+  )
+  into dup
+  from (
+    select workspace_id, lower(code) as code, count(*) as cnt
+    from public.projects
+    group by 1, 2
+    having count(*) > 1
+  ) d;
+
+  if dup is not null then
+    raise exception
+      'Cannot create unique index projects_workspace_code_lower_idx; duplicate project codes already exist in a workspace: %. Reconcile codes before applying uniqueness. Existing projects were not renamed or deleted.',
+      dup;
+  end if;
+end
+$$;
 
 create unique index if not exists projects_workspace_code_lower_idx
   on public.projects (workspace_id, lower(code));
@@ -35,6 +62,17 @@ create table public.item_tags (
 create index item_tags_workspace_id_idx on public.item_tags (workspace_id);
 create index item_tags_project_id_idx on public.item_tags (project_id);
 create index item_tags_target_idx on public.item_tags (project_id, target_kind, target_id);
+
+-- A tag is project-scoped. Associations cannot point at another project's tag,
+-- even for service_role / table owners.
+alter table public.project_tags
+  add constraint project_tags_id_project_id_key unique (id, project_id);
+
+alter table public.item_tags
+  add constraint item_tags_tag_matches_project_fk
+  foreign key (tag_id, project_id)
+  references public.project_tags (id, project_id)
+  on delete cascade;
 
 alter table public.project_tags enable row level security;
 alter table public.project_tags force row level security;
@@ -84,7 +122,9 @@ create policy item_tags_insert_member
     )
     and exists (
       select 1 from public.project_tags t
-      where t.id = tag_id and t.workspace_id = item_tags.workspace_id
+      where t.id = tag_id
+        and t.workspace_id = item_tags.workspace_id
+        and t.project_id = item_tags.project_id
     )
   );
 

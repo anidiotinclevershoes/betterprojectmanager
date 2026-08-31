@@ -2,7 +2,12 @@ import { newPeopleUuid } from "@/lib/people/identity";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import type { CreateProjectInput } from "@/lib/create-project";
 import type { ProjectRisk, Stakeholder } from "@/lib/types";
-import { personResponsibilityQuestion } from "./needs-you";
+import {
+  personResponsibilityQuestion,
+  uncertainRiskQuestion,
+  uncertainTodoQuestion,
+  confirmedRiskDrafts,
+} from "./needs-you";
 
 function scopesOf(draft: {
   role?: string;
@@ -97,8 +102,7 @@ export function structuredItemsFromSetup(args: {
   });
 
   // Ambiguous organised notes that the user kept, with an explicit question.
-  // Undated dates already have kind=date rows. needsReview risks/todos persist
-  // as those domain objects — do not duplicate them as ambiguity overlays.
+  // Undated dates already have kind=date rows.
   for (const note of args.input.knowledgeRemember ?? []) {
     if (note.remember === false || !note.text.trim()) continue;
     const question = note.needsYouQuestion?.trim();
@@ -117,6 +121,39 @@ export function structuredItemsFromSetup(args: {
     });
   }
 
+  // Uncertain Organise Risks / To Dos: never become domain truth.
+  // Retain only a stored Needs You question.
+  for (const risk of args.input.risks ?? []) {
+    if (!risk.title.trim() || !risk.needsReview) continue;
+    items.push({
+      id: newPeopleUuid(),
+      projectId: args.projectId,
+      section: "now",
+      body: uncertainRiskQuestion(risk.title),
+      kind: "ambiguity",
+      epistemic: "pending",
+      lifecycle: "current",
+      provenance: [
+        { type: "import", at: now, note: "new-project-uncertain-risk" },
+      ],
+    });
+  }
+  for (const todo of args.input.todos ?? []) {
+    if (!todo.title.trim() || !todo.needsReview) continue;
+    items.push({
+      id: newPeopleUuid(),
+      projectId: args.projectId,
+      section: "now",
+      body: uncertainTodoQuestion(todo.title),
+      kind: "ambiguity",
+      epistemic: "pending",
+      lifecycle: "current",
+      provenance: [
+        { type: "import", at: now, note: "new-project-uncertain-todo" },
+      ],
+    });
+  }
+
   return items;
 }
 
@@ -125,8 +162,16 @@ export function risksFromSetup(
   input: CreateProjectInput,
 ): ProjectRisk[] {
   const titles = [
-    ...(input.risks ?? []).map((r) => r.title.trim()).filter(Boolean),
-    ...(input.knowledgeRisks ?? []).map((t) => t.trim()).filter(Boolean),
+    ...confirmedRiskDrafts(input).map((r) => r.title.trim()),
+    ...(input.knowledgeRisks ?? [])
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .filter((title) => {
+        const match = (input.risks ?? []).find(
+          (r) => r.title.trim().toLowerCase() === title.toLowerCase(),
+        );
+        return !match?.needsReview;
+      }),
   ];
   const seen = new Set<string>();
   const now = new Date().toISOString();

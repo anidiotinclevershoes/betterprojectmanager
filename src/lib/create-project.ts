@@ -261,7 +261,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
   };
 
   const rememberKept = (input.knowledgeRemember ?? []).filter(
-    (k) => k.remember !== false && k.text.trim(),
+    (k) => k.remember !== false && k.text.trim() && !k.needsReview,
   );
   const rememberFacts = rememberKept
     .filter((k) => k.kind !== "decision")
@@ -271,8 +271,15 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     .map((k) => k.text.trim());
 
   const riskTitles = [
-    ...(input.risks ?? []).map((r) => r.title.trim()).filter(Boolean),
-    ...(input.knowledgeRisks ?? []),
+    ...(input.risks ?? [])
+      .filter((r) => r.title.trim() && !r.needsReview)
+      .map((r) => r.title.trim()),
+    ...(input.knowledgeRisks ?? []).filter((title) => {
+      const match = (input.risks ?? []).find(
+        (r) => r.title.trim().toLowerCase() === title.trim().toLowerCase(),
+      );
+      return Boolean(title.trim()) && !match?.needsReview;
+    }),
   ];
 
   const knowledge = emptyKnowledge(projectId);
@@ -350,7 +357,9 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     });
   }
 
-  const draftTodos = (input.todos ?? []).filter((t) => t.title.trim());
+  const draftTodos = (input.todos ?? []).filter(
+    (t) => t.title.trim() && !t.needsReview,
+  );
   const todos: TodoItem[] =
     draftTodos.length > 0
       ? draftTodos.map((t) => ({

@@ -31,6 +31,26 @@ export function undatedMilestoneQuestion(label: string): string {
     : `When is the ${trimmed} milestone?`;
 }
 
+export function uncertainRiskQuestion(title: string): string {
+  return `Should “${title.trim()}” be treated as a project risk?`;
+}
+
+export function uncertainTodoQuestion(title: string): string {
+  return `Should “${title.trim()}” be tracked as a To Do?`;
+}
+
+export function confirmedRiskDrafts(
+  draft: CreateProjectInput,
+): NonNullable<CreateProjectInput["risks"]> {
+  return (draft.risks ?? []).filter((risk) => risk.title.trim() && !risk.needsReview);
+}
+
+export function confirmedTodoDrafts(
+  draft: CreateProjectInput,
+): NonNullable<CreateProjectInput["todos"]> {
+  return (draft.todos ?? []).filter((todo) => todo.title.trim() && !todo.needsReview);
+}
+
 /**
  * Incomplete setup that can legally persist, but must not become Ready truth.
  * These are questions — not invented field values.
@@ -82,7 +102,7 @@ export function needsYouFromDraft(draft: CreateProjectInput): SetupNeedsYou[] {
         id: risk.clientKey ?? `risk-${index}`,
         clientKey: risk.clientKey,
         frame: "issues",
-        question: `Can you confirm this issue: ${risk.title.trim()}?`,
+        question: uncertainRiskQuestion(risk.title),
       });
     }
   });
@@ -94,7 +114,7 @@ export function needsYouFromDraft(draft: CreateProjectInput): SetupNeedsYou[] {
         id: todo.clientKey ?? `todo-${index}`,
         clientKey: todo.clientKey,
         frame: "todo",
-        question: `Anything else Lume should know about “${todo.title.trim()}”?`,
+        question: uncertainTodoQuestion(todo.title),
       });
     }
   });

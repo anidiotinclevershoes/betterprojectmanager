@@ -34,6 +34,7 @@ import {
   normaliseProjectCode,
 } from "./create-project";
 import { risksFromSetup, structuredItemsFromSetup } from "@/lib/new-project/materialise-setup";
+import { retireIncompleteSetupInState } from "@/lib/new-project/retire-needs-you";
 import {
   attachTagToItem,
   detachTagFromItem,
@@ -1238,8 +1239,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               waitingOn: input.waitingOn?.trim() || undefined,
             },
           );
-          setState((prev) =>
-            pushHistory(
+          setState((prev) => {
+            const withTodo = pushHistory(
               { ...prev, todos: [created, ...(prev.todos ?? [])] },
               makeHistoryEvent({
                 type: "task_added",
@@ -1248,8 +1249,14 @@ export function MissionProvider({ children }: { children: ReactNode }) {
                 projectId: input.projectId ?? null,
                 source: "user",
               }),
-            ),
-          );
+            );
+            return input.projectId
+              ? retireIncompleteSetupInState(withTodo, input.projectId, {
+                  type: "todo",
+                  title,
+                })
+              : withTodo;
+          });
           await persistHistoryEvent(client, meta.workspaceId!, meta.userId, {
             type: "task_added",
             title: "You added a To Do",
@@ -1279,7 +1286,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         kind: input.kind,
         waitingOn: input.waitingOn?.trim() || undefined,
       };
-      return pushHistory(
+      const next = pushHistory(
         { ...prev, todos: [todo, ...(prev.todos ?? [])] },
         makeHistoryEvent({
           type: "task_added",
@@ -1289,6 +1296,12 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           source: "user",
         }),
       );
+      return input.projectId
+        ? retireIncompleteSetupInState(next, input.projectId, {
+            type: "todo",
+            title,
+          })
+        : next;
     });
   }, []);
 
@@ -2355,7 +2368,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         bag.personRole = result.person.role;
         bag.supersededIds = result.supersededIds;
         bag.responsibilityCreated = result.responsibilityCreated;
-        return result.state;
+        return retireIncompleteSetupInState(result.state, input.projectId, {
+          type: "person",
+          name: result.person.name,
+        });
       });
 
       const meta = persistMetaRef.current;
@@ -2440,10 +2456,16 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               source: item.source ?? "manual",
             },
           );
-          setState((prev) => ({
-            ...prev,
-            timeline: [...(prev.timeline ?? []), created],
-          }));
+          setState((prev) =>
+            retireIncompleteSetupInState(
+              {
+                ...prev,
+                timeline: [...(prev.timeline ?? []), created],
+              },
+              projectId,
+              { type: "date", label: created.label },
+            ),
+          );
           markPersistSaved();
           return { ok: true };
         } catch (err) {
@@ -2455,15 +2477,21 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           };
         }
       }
-      setState((prev) => ({
-        ...prev,
-        timeline: mergeTimelineItems(
-          prev.timeline ?? [],
+      setState((prev) =>
+        retireIncompleteSetupInState(
+          {
+            ...prev,
+            timeline: mergeTimelineItems(
+              prev.timeline ?? [],
+              projectId,
+              [item],
+              item.source ?? "manual",
+            ),
+          },
           projectId,
-          [item],
-          item.source ?? "manual",
+          { type: "date", label: item.label },
         ),
-      }));
+      );
       return { ok: true };
     },
     [],
@@ -2485,24 +2513,28 @@ export function MissionProvider({ children }: { children: ReactNode }) {
             (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
             emptyKnowledge(projectId);
           const merged = mergeKnowledge(current, projectId, { risks: [trimmed] });
-          return {
-            ...prev,
-            knowledge: [
-              ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
-              merged,
-            ],
-            risks: [
-              ...(prev.risks ?? []),
-              {
-                id: riskId,
-                projectId,
-                title: trimmed,
-                status: "open" as const,
-                source: "capture" as const,
-                createdAt: new Date().toISOString(),
-              },
-            ],
-          };
+          return retireIncompleteSetupInState(
+            {
+              ...prev,
+              knowledge: [
+                ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
+                merged,
+              ],
+              risks: [
+                ...(prev.risks ?? []),
+                {
+                  id: riskId,
+                  projectId,
+                  title: trimmed,
+                  status: "open" as const,
+                  source: "capture" as const,
+                  createdAt: new Date().toISOString(),
+                },
+              ],
+            },
+            projectId,
+            { type: "risk", title: trimmed },
+          );
         });
       };
 
