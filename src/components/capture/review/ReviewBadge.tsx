@@ -1,47 +1,65 @@
 "use client";
 
-import { DomainMark } from "./DomainMark";
+import { DomainMark, OperationMark } from "./DomainMark";
 import type { SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
 import {
+  reviewDomainLabel,
   reviewOpFamily,
-  reviewOpGlyph,
   reviewOpWord,
   type ReviewOpFamily,
 } from "@/lib/capture/review/reviewLanguage";
 
-export function OperationKicker({
+export function OperationBar({
   family,
   operation,
-  entityKind,
-  entityLabel,
 }: {
   family: ReviewOpFamily;
   operation: SuggestionOp;
-  entityKind: SuggestionKind;
-  entityLabel: string;
 }) {
-  const word = family === "needs_you" ? "Needs You" : reviewOpWord(operation);
-  const glyph = reviewOpGlyph(family, operation);
   return (
-    <p className="lume-review-kicker">
-      <DomainMark kind={entityKind} title={entityLabel} />
-      <span className="lume-review-kicker-op">
-        {glyph ? (
-          <span className="lume-review-kicker-glyph" aria-hidden>
-            {glyph}
-          </span>
-        ) : null}
-        {word}
-      </span>
-      <span className="lume-review-kicker-sep" aria-hidden>
-        ·
-      </span>
-      <span className="lume-review-kicker-domain">{entityLabel}</span>
+    <p className="lume-review-opbar">
+      <OperationMark family={family} size={20} />
+      <span className="lume-review-opbar-label">{reviewOpWord(family, operation)}</span>
     </p>
   );
 }
 
-/** @deprecated Prefer OperationKicker — kept so existing review exports stay stable. */
+export function DomainRow({
+  entityKind,
+  entityLabel,
+  projectLabel,
+}: {
+  entityKind: SuggestionKind;
+  entityLabel: string;
+  projectLabel?: string;
+}) {
+  return (
+    <div className="lume-review-domain">
+      <DomainMark kind={entityKind} title={entityLabel} size={22} />
+      <span className="lume-review-domain-label">
+        {reviewDomainLabel(entityKind)}
+      </span>
+      {projectLabel ? (
+        <span className="lume-review-project">{projectLabel}</span>
+      ) : null}
+    </div>
+  );
+}
+
+/** @deprecated Prefer OperationBar — kept so existing review exports stay stable. */
+export function OperationKicker({
+  family,
+  operation,
+}: {
+  family: ReviewOpFamily;
+  operation: SuggestionOp;
+  entityKind?: SuggestionKind;
+  entityLabel?: string;
+}) {
+  return <OperationBar family={family} operation={operation} />;
+}
+
+/** @deprecated Prefer OperationBar. */
 export function ReviewBadge({
   operation,
 }: {
@@ -49,28 +67,19 @@ export function ReviewBadge({
   tone?: "default" | "ready" | "review" | "muted";
 }) {
   return (
-    <OperationKicker
+    <OperationBar
       family={reviewOpFamily(operation)}
       operation={operation}
-      entityKind="action"
-      entityLabel="To Do"
     />
   );
 }
 
-/** @deprecated Needs You now lives in the kicker. */
+/** @deprecated Needs You now lives in the operation bar. */
 export function ReadinessBadge({
   readiness,
 }: {
   readiness: "ready" | "needs_review" | "unmatched";
 }) {
   if (readiness === "ready") return null;
-  return (
-    <OperationKicker
-      family="needs_you"
-      operation="update"
-      entityKind="action"
-      entityLabel="To Do"
-    />
-  );
+  return <OperationBar family="needs_you" operation="update" />;
 }

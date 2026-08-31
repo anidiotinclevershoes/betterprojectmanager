@@ -3,7 +3,7 @@
  * Does not change extraction, readiness, or apply semantics.
  */
 
-import type { SuggestionOp } from "@/lib/capture/suggestions";
+import type { SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
 import { OP_LABEL } from "@/lib/capture/suggestions";
 import type { ReviewReason } from "./reviewReason";
 
@@ -37,20 +37,62 @@ export function reviewOpFamily(
   return "update";
 }
 
-export function reviewOpWord(operation: SuggestionOp): string {
-  return OP_LABEL[operation];
+/** Header word. Complete is an Update of status — not a fifth state. */
+export function reviewOpWord(
+  family: ReviewOpFamily,
+  operation: SuggestionOp = "update",
+): string {
+  if (family === "needs_you") return "Needs You";
+  if (family === "create") return "Create";
+  if (family === "remove") return OP_LABEL[operation];
+  return "Update";
 }
 
-/** Decorative glyph. Empty when the word itself is the recogniser. */
-export function reviewOpGlyph(
-  family: ReviewOpFamily,
-  operation: SuggestionOp,
-): string {
-  if (family === "needs_you") return "";
-  if (family === "create") return "+";
-  if (family === "remove") return "×";
-  if (operation === "complete") return "✓";
-  return "";
+export type ReviewOpIcon =
+  | "circle-plus"
+  | "pencil"
+  | "circle-minus"
+  | "circle-help";
+
+export function reviewOpIcon(family: ReviewOpFamily): ReviewOpIcon {
+  if (family === "create") return "circle-plus";
+  if (family === "remove") return "circle-minus";
+  if (family === "needs_you") return "circle-help";
+  return "pencil";
+}
+
+/** Review-local domain label. Identity is icon + this word, not colour. */
+export function reviewDomainLabel(kind: SuggestionKind): string {
+  switch (kind) {
+    case "action":
+      return "To Do";
+    case "nudge":
+      return "Reminder";
+    case "meeting":
+      return "Date";
+    case "milestone":
+      return "Milestone";
+    case "decision":
+      return "Decision";
+    case "risk":
+      return "Risk";
+    case "stakeholder":
+      return "Stakeholder";
+    case "availability":
+      return "Availability";
+    case "knowledge":
+    case "memory":
+      return "Knowledge";
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+}
+
+export function reviewFamilyClass(family: ReviewOpFamily): string {
+  if (family === "needs_you") return "is-needs-you";
+  return `is-${family}`;
 }
 
 export function needsYouHeadline(

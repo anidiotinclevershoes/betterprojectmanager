@@ -1,15 +1,13 @@
-/* Capture review-card visual language. Review-local — not globals.css. */
+/* Capture review-card visual language. Review-local — not globals.css.
+   Colour = operation/state only. Domain identity = icon + label, not colour. */
 
 .lume-review-card {
   --lume-review-op: var(--info);
-  --lume-review-domain: var(--text-secondary);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px 12px 10px 11px;
+  padding: 0;
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
-  border-left: 3px solid var(--lume-review-op);
   background: var(--bg-surface-raised);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
   min-width: 0;
@@ -35,35 +33,6 @@
 
 .lume-review-card.is-needs-you {
   --lume-review-op: var(--warning);
-  background: color-mix(in srgb, var(--warning) 7%, var(--bg-surface-raised));
-}
-
-.lume-review-card.is-kind-action,
-.lume-review-card.is-kind-nudge {
-  --lume-review-domain: var(--accent-todo);
-}
-
-.lume-review-card.is-kind-milestone,
-.lume-review-card.is-kind-meeting {
-  --lume-review-domain: var(--accent-timeline);
-}
-
-.lume-review-card.is-kind-risk {
-  --lume-review-domain: var(--accent-release);
-}
-
-.lume-review-card.is-kind-stakeholder,
-.lume-review-card.is-kind-availability {
-  --lume-review-domain: var(--accent-meeting);
-}
-
-.lume-review-card.is-kind-knowledge,
-.lume-review-card.is-kind-memory {
-  --lume-review-domain: var(--accent-knowledge);
-}
-
-.lume-review-card.is-kind-decision {
-  --lume-review-domain: var(--accent-coach);
 }
 
 .lume-review-card.is-flash {
@@ -77,66 +46,79 @@
 }
 
 .lume-review-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
+  margin: 0;
   min-width: 0;
 }
 
-.lume-review-kicker {
+.lume-review-opbar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  min-width: 0;
-  flex-wrap: wrap;
+  gap: 8px;
   margin: 0;
-  font-size: 10.5px;
+  padding: 9px 12px;
+  min-width: 0;
+  background: color-mix(in srgb, var(--lume-review-op) 22%, var(--bg-surface-raised));
+  color: var(--lume-review-op);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  line-height: 1.3;
+  line-height: 1.2;
+}
+
+.lume-review-op-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  color: var(--lume-review-op);
+}
+
+.lume-review-opbar-label {
+  min-width: 0;
+}
+
+.lume-review-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  min-width: 0;
+}
+
+.lume-review-domain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--text-secondary);
 }
 
 .lume-review-domain-mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
-  color: var(--lume-review-domain);
+  width: 22px;
+  height: 22px;
+  color: var(--text-secondary);
   flex: 0 0 auto;
 }
 
-.lume-review-kicker-op {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--lume-review-op);
-}
-
-.lume-review-kicker-glyph {
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.lume-review-kicker-sep {
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.lume-review-kicker-domain {
-  color: var(--text-muted);
+.lume-review-domain-label {
+  font-size: 11px;
   font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 .lume-review-project {
+  margin-left: auto;
   flex: 0 0 auto;
   max-width: 40%;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
   overflow: hidden;
@@ -160,14 +142,18 @@
   overflow-wrap: anywhere;
 }
 
-.lume-review-card.is-needs-you .lume-review-hero {
-  font-size: 15px;
-  font-weight: 650;
+.lume-review-identity {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 1.28;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
 }
 
 .lume-review-subject {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.35;
   color: var(--text-secondary);
   overflow-wrap: anywhere;
@@ -187,11 +173,6 @@
   white-space: pre-line;
 }
 
-.lume-review-card.is-remove .lume-review-consequence {
-  color: var(--danger);
-  font-weight: 600;
-}
-
 .lume-review-field {
   margin: 0;
   font-size: 11px;
@@ -205,8 +186,8 @@
   flex-wrap: wrap;
   gap: 6px 8px;
   min-width: 0;
-  font-size: 15px;
-  line-height: 1.3;
+  font-size: 13.5px;
+  line-height: 1.35;
 }
 
 .lume-review-from {
@@ -224,7 +205,7 @@
 
 .lume-review-to {
   color: var(--text-primary);
-  font-weight: 700;
+  font-weight: 650;
   overflow-wrap: anywhere;
 }
 
@@ -295,20 +276,22 @@
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  padding: 7px 10px;
-  border-left-color: var(--success);
-  background: color-mix(in srgb, var(--success) 6%, var(--bg-surface-raised));
+  padding: 8px 12px;
+  background: var(--bg-surface-raised);
 }
 
 .lume-review-card.is-resolved.is-dismissed {
-  border-left-color: var(--text-muted);
   background: var(--bg-surface-raised);
 }
 
 .lume-review-resolved-mark {
   flex: 0 0 auto;
-  color: var(--success);
+  color: var(--text-secondary);
   font-weight: 700;
+}
+
+.lume-review-card.is-resolved:not(.is-dismissed) .lume-review-resolved-mark {
+  color: var(--success);
 }
 
 .lume-review-card.is-resolved.is-dismissed .lume-review-resolved-mark {
@@ -326,6 +309,10 @@
 .lume-review-resolved-copy strong {
   color: var(--text-primary);
   font-weight: 650;
+}
+
+.lume-review-card.is-resolved .lume-review-domain-mark {
+  color: var(--text-secondary);
 }
 
 @media (max-width: 699px) {

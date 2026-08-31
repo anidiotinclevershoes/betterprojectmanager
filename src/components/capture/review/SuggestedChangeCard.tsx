@@ -110,7 +110,6 @@ export function SuggestedChangeCard({
             "lume-review-card",
             "is-resolved",
             state === "dismissed" ? "is-dismissed" : "",
-            `is-kind-${model.entityKind}`,
           ]
             .filter(Boolean)
             .join(" ")}

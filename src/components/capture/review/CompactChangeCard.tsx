@@ -4,11 +4,19 @@ import type { ChangeDiff } from "@/lib/capture/review/viewModel";
 import type { SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
 import type { ReactNode } from "react";
 import "./review-cards.css";
-import { OperationKicker } from "./ReviewBadge";
+import { DomainRow, OperationBar } from "./ReviewBadge";
 import {
+  reviewFamilyClass,
   reviewOpFamily,
   type ReviewOpFamily,
 } from "@/lib/capture/review/reviewLanguage";
+
+function removeConsequence(diff: ChangeDiff): string {
+  const raw = (diff.to || "Remove from this project").trim();
+  if (/remove from project/i.test(raw)) return "Will be removed from project";
+  if (/archive from project/i.test(raw)) return "Will be archived from project";
+  return raw;
+}
 
 function ChangeCompare({ diff }: { diff: ChangeDiff }) {
   const layout = diff.layout ?? "from_to";
@@ -19,9 +27,7 @@ function ChangeCompare({ diff }: { diff: ChangeDiff }) {
 
   if (layout === "remove") {
     return (
-      <p className="lume-review-consequence">
-        {diff.to || "Remove from this project"}
-      </p>
+      <p className="lume-review-consequence">{removeConsequence(diff)}</p>
     );
   }
 
@@ -80,9 +86,7 @@ function ReviewTruth({
         {needsYouDetail ? (
           <p className="lume-review-support">{needsYouDetail}</p>
         ) : null}
-        {showCompare ? (
-          <ChangeCompare diff={diff} />
-        ) : null}
+        {showCompare ? <ChangeCompare diff={diff} /> : null}
       </div>
     );
   }
@@ -119,7 +123,7 @@ function ReviewTruth({
 
   return (
     <div className="lume-review-truth">
-      {recordName ? <p className="lume-review-subject">{recordName}</p> : null}
+      {recordName ? <h4 className="lume-review-hero">{recordName}</h4> : null}
       {diff ? <ChangeCompare diff={diff} /> : null}
     </div>
   );
@@ -181,8 +185,7 @@ export function CompactChangeCard({
     <article
       className={[
         "lume-review-card",
-        `is-${family}`,
-        `is-kind-${entityKind}`,
+        reviewFamilyClass(family),
         highlighted ? "is-flash" : "",
       ]
         .filter(Boolean)
@@ -192,30 +195,30 @@ export function CompactChangeCard({
       aria-label={articleLabel}
     >
       <header className="lume-review-head">
-        <OperationKicker
-          family={family}
-          operation={operation}
-          entityKind={entityKind}
-          entityLabel={entityLabel}
-        />
-        {projectLabel ? (
-          <span className="lume-review-project">{projectLabel}</span>
-        ) : null}
+        <OperationBar family={family} operation={operation} />
       </header>
 
-      <ReviewTruth
-        family={family}
-        recordName={recordName}
-        diff={diff}
-        needsYouHeadline={needsYouHeadline}
-        needsYouDetail={needsYouDetail}
-      />
+      <div className="lume-review-body">
+        <DomainRow
+          entityKind={entityKind}
+          entityLabel={entityLabel}
+          projectLabel={projectLabel}
+        />
 
-      {why ? <div className="lume-review-why">{why}</div> : null}
+        <ReviewTruth
+          family={family}
+          recordName={recordName}
+          diff={diff}
+          needsYouHeadline={needsYouHeadline}
+          needsYouDetail={needsYouDetail}
+        />
 
-      {state === "pending" || !state ? (
-        <div className="lume-review-actions">{actions}</div>
-      ) : null}
+        {why ? <div className="lume-review-why">{why}</div> : null}
+
+        {state === "pending" || !state ? (
+          <div className="lume-review-actions">{actions}</div>
+        ) : null}
+      </div>
     </article>
   );
 }

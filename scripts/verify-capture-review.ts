@@ -26,7 +26,11 @@ import {
   isGenericInterpretation,
   needsYouHeadline,
   needsYouSupporting,
+  reviewDomainLabel,
+  reviewFamilyClass,
   reviewOpFamily,
+  reviewOpIcon,
+  reviewOpWord,
   whyDisclosureLabel,
   whyHasUsefulContent,
 } from "../src/lib/capture/review/reviewLanguage";
@@ -589,6 +593,20 @@ function model(
     reviewOpFamily("update", "unmatched", "TARGET_UNCERTAIN"),
     "needs_you",
   );
+  assert.equal(reviewOpWord("update", "complete"), "Update");
+  assert.equal(reviewOpWord("create", "create"), "Create");
+  assert.equal(reviewOpWord("needs_you", "create"), "Needs You");
+  assert.equal(reviewOpWord("remove", "remove"), "Remove");
+  assert.equal(reviewOpIcon("create"), "circle-plus");
+  assert.equal(reviewOpIcon("update"), "pencil");
+  assert.equal(reviewOpIcon("remove"), "circle-minus");
+  assert.equal(reviewOpIcon("needs_you"), "circle-help");
+  assert.equal(reviewFamilyClass("needs_you"), "is-needs-you");
+  assert.equal(reviewDomainLabel("action"), "To Do");
+  assert.equal(reviewDomainLabel("nudge"), "Reminder");
+  assert.equal(reviewDomainLabel("meeting"), "Date");
+  assert.equal(reviewDomainLabel("risk"), "Risk");
+  assert.equal(reviewDomainLabel("stakeholder"), "Stakeholder");
   assert.equal(
     needsYouHeadline("STATE_UNCERTAIN", "Risk"),
     "Is this Risk resolved?",
