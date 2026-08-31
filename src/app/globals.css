@@ -8903,7 +8903,7 @@ body {
   border-radius: 10px;
   border: 1px solid var(--border-subtle);
   background: var(--bg-surface);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .np-knowledge-add {
@@ -8949,6 +8949,11 @@ body {
   gap: 4px;
 }
 
+.np-item .compact-change-titles {
+  flex: 1;
+  min-width: 0;
+}
+
 .np-item.compact-change-card.is-emphasized {
   border-left-color: var(--warning);
 }
@@ -8959,12 +8964,15 @@ body {
   margin: 1px 0 0;
   padding: 0;
   border: 0;
+  resize: none;
+  overflow: hidden;
   background: transparent;
   font-family: var(--font-sans), Inter, ui-sans-serif, system-ui, sans-serif;
   font-size: 13.5px;
   font-weight: 700;
   line-height: 1.25;
   color: var(--text-primary);
+  field-sizing: content;
 }
 
 .np-item-title:focus {
@@ -9193,7 +9201,7 @@ body {
 
 .tag-chip-suggest {
   position: absolute;
-  z-index: 5;
+  z-index: 20;
   margin: 0.2rem 0 0;
   padding: 0.25rem;
   list-style: none;
@@ -9201,6 +9209,7 @@ body {
   background: var(--bg-surface-raised);
   border: 1px solid var(--border-strong);
   border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 
 .tag-chip-suggest button {

@@ -462,13 +462,12 @@ function IssueFrame({
               : "Needs You"
           }
           title={
-            <input
-              className="np-item-title"
+            <TitleField
               value={item.title}
-              aria-label="Issue"
-              onChange={(e) => {
+              ariaLabel="Issue"
+              onChange={(title) => {
                 const next = [...items];
-                next[index] = { ...item, title: e.target.value };
+                next[index] = { ...item, title };
                 onChange(next);
               }}
             />
@@ -528,14 +527,13 @@ function PeopleFrame({
                 : "Needs You — add a name"
             }
             title={
-              <input
-                className="np-item-title"
+              <TitleField
                 value={item.name}
-                aria-label="Person name"
+                ariaLabel="Person name"
                 placeholder="Name"
-                onChange={(e) => {
+                onChange={(name) => {
                   const next = [...items];
-                  next[index] = { ...item, name: e.target.value };
+                  next[index] = { ...item, name };
                   onChange(next);
                 }}
               />
@@ -613,13 +611,12 @@ function TodoFrame({
               : "Needs You"
           }
           title={
-            <input
-              className="np-item-title"
+            <TitleField
               value={item.title}
-              aria-label="To Do"
-              onChange={(e) => {
+              ariaLabel="To Do"
+              onChange={(title) => {
                 const next = [...items];
-                next[index] = { ...item, title: e.target.value };
+                next[index] = { ...item, title };
                 onChange(next);
               }}
             />
@@ -785,13 +782,12 @@ function KnowledgeFrame({
           needsYou={!item.date || item.needsReview}
           needsYouText={undatedMilestoneQuestion(item.label || "milestone")}
           title={
-            <input
-              className="np-item-title"
+            <TitleField
               value={item.label}
-              aria-label="Milestone"
-              onChange={(e) => {
+              ariaLabel="Milestone"
+              onChange={(label) => {
                 const next = [...dates];
-                next[index] = { ...item, label: e.target.value };
+                next[index] = { ...item, label };
                 onChangeDates(next);
               }}
             />
@@ -837,13 +833,12 @@ function KnowledgeFrame({
           needsYou={item.needsReview}
           needsYouText={item.needsYouQuestion || "Needs You"}
           title={
-            <input
-              className="np-item-title"
+            <TitleField
               value={item.text}
-              aria-label="Knowledge"
-              onChange={(e) => {
+              ariaLabel="Knowledge"
+              onChange={(text) => {
                 const next = [...facts];
-                next[index] = { ...item, text: e.target.value };
+                next[index] = { ...item, text };
                 onChangeFacts(next);
               }}
             />
@@ -863,6 +858,36 @@ function KnowledgeFrame({
         />
       ))}
     </FrameShell>
+  );
+}
+
+function TitleField({
+  value,
+  onChange,
+  ariaLabel,
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  ariaLabel: string;
+  placeholder?: string;
+}) {
+  const size = (el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.max(el.scrollHeight, 18)}px`;
+  };
+  return (
+    <textarea
+      className="np-item-title"
+      rows={1}
+      value={value}
+      aria-label={ariaLabel}
+      placeholder={placeholder}
+      ref={size}
+      onChange={(e) => onChange(e.target.value)}
+      onInput={(e) => size(e.currentTarget)}
+    />
   );
 }
 
