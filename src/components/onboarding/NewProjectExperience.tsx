@@ -274,6 +274,9 @@ export function NewProjectExperience({
           aria-expanded={notesOpen}
           onClick={() => setNotesOpen((v) => !v)}
         >
+          <span className="np-organiser-chevron" aria-hidden>
+            ▸
+          </span>
           Have some notes already?
         </button>
         {notesOpen ? (
@@ -450,7 +453,8 @@ function IssueFrame({
       {items.map((item, index) => (
         <ItemCard
           key={item.clientKey ?? `issue-${index}`}
-          typeLabel="Risk"
+          typeLabel="Issue"
+          icon={FRAME_ICON.issues}
           needsYou={item.needsReview}
           needsYouText={
             item.title.trim()
@@ -516,6 +520,7 @@ function PeopleFrame({
           <ItemCard
             key={item.clientKey ?? `person-${index}`}
             typeLabel="Person"
+            icon={FRAME_ICON.people}
             needsYou={missing || item.needsReview}
             needsYouText={
               item.name.trim()
@@ -600,6 +605,7 @@ function TodoFrame({
         <ItemCard
           key={item.clientKey ?? `todo-${index}`}
           typeLabel="To Do"
+          icon={FRAME_ICON.todo}
           needsYou={item.needsReview}
           needsYouText={
             item.title.trim()
@@ -619,19 +625,16 @@ function TodoFrame({
             />
           }
           supporting={
-            <label className="np-item-date">
-              <span className="np-item-date-label">Due</span>
-              <input
-                type="date"
-                aria-label="Due date"
-                value={item.dueAt?.slice(0, 10) ?? ""}
-                onChange={(e) => {
-                  const next = [...items];
-                  next[index] = { ...item, dueAt: e.target.value || undefined };
-                  onChange(next);
-                }}
-              />
-            </label>
+            <OptionalDate
+              label="Due"
+              ariaLabel="Due date"
+              value={item.dueAt?.slice(0, 10)}
+              onChange={(dueAt) => {
+                const next = [...items];
+                next[index] = { ...item, dueAt };
+                onChange(next);
+              }}
+            />
           }
           tags={
             <TagEditor
@@ -718,6 +721,62 @@ function KnowledgeFrame({
       testId="np-frame-knowledge"
       wide
     >
+      <div className="np-knowledge-add">
+        {mode ? (
+          <div className="np-inline-add is-open">
+            <input
+              value={text}
+              autoFocus
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addCurrent();
+                }
+                if (e.key === "Escape") setMode(null);
+              }}
+              placeholder={
+                mode === "date"
+                  ? "UAT target"
+                  : mode === "decision"
+                    ? "Claims will be uploaded through DocuFlow."
+                    : "Initial delivery is web only."
+              }
+              aria-label="New knowledge"
+            />
+            {mode === "date" ? (
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                aria-label="Milestone date"
+              />
+            ) : null}
+            <button type="button" className="primary-btn" onClick={addCurrent}>
+              Add
+            </button>
+            <button type="button" className="ghost-btn" onClick={() => setMode(null)}>
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <div className="np-knowledge-add-actions">
+            <button type="button" className="np-add-btn" onClick={() => setMode("date")}>
+              + Milestone / Date
+            </button>
+            <button
+              type="button"
+              className="np-add-btn"
+              onClick={() => setMode("decision")}
+            >
+              + Decision
+            </button>
+            <button type="button" className="np-add-btn" onClick={() => setMode("fact")}>
+              + Information
+            </button>
+          </div>
+        )}
+      </div>
       {dates.map((item, index) => (
         <ItemCard
           key={item.clientKey ?? `date-${index}`}
@@ -803,62 +862,6 @@ function KnowledgeFrame({
           onRemove={() => onChangeFacts(facts.filter((_, i) => i !== index))}
         />
       ))}
-      <div className="np-knowledge-add">
-        {mode ? (
-          <div className="np-inline-add is-open">
-            <input
-              value={text}
-              autoFocus
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addCurrent();
-                }
-                if (e.key === "Escape") setMode(null);
-              }}
-              placeholder={
-                mode === "date"
-                  ? "UAT target"
-                  : mode === "decision"
-                    ? "Claims will be uploaded through DocuFlow."
-                    : "Initial delivery is web only."
-              }
-              aria-label="New knowledge"
-            />
-            {mode === "date" ? (
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                aria-label="Milestone date"
-              />
-            ) : null}
-            <button type="button" className="primary-btn" onClick={addCurrent}>
-              Add
-            </button>
-            <button type="button" className="ghost-btn" onClick={() => setMode(null)}>
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <div className="np-knowledge-add-actions">
-            <button type="button" className="np-add-btn" onClick={() => setMode("date")}>
-              + Milestone / Date
-            </button>
-            <button
-              type="button"
-              className="np-add-btn"
-              onClick={() => setMode("decision")}
-            >
-              + Decision
-            </button>
-            <button type="button" className="np-add-btn" onClick={() => setMode("fact")}>
-              + Information
-            </button>
-          </div>
-        )}
-      </div>
     </FrameShell>
   );
 }
@@ -936,6 +939,7 @@ function InlineAdd({
     if (!value.trim()) return;
     onSubmit(value.trim());
     setValue("");
+    setOpen(false);
   };
   if (!open) {
     return (
@@ -1004,6 +1008,38 @@ function TagEditor({
         onChange(tags.filter((t) => tagSlug(t) !== tagSlug(name)))
       }
     />
+  );
+}
+
+function OptionalDate({
+  label,
+  ariaLabel,
+  value,
+  onChange,
+}: {
+  label: string;
+  ariaLabel: string;
+  value?: string;
+  onChange: (value: string | undefined) => void;
+}) {
+  const [open, setOpen] = useState(Boolean(value));
+  if (!open && !value) {
+    return (
+      <button type="button" className="np-add-btn" onClick={() => setOpen(true)}>
+        + {label}
+      </button>
+    );
+  }
+  return (
+    <label className="np-item-date">
+      <span className="np-item-date-label">{label}</span>
+      <input
+        type="date"
+        aria-label={ariaLabel}
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value || undefined)}
+      />
+    </label>
   );
 }
 
