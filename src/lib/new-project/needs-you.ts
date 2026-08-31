@@ -42,11 +42,15 @@ export function needsYouFromDraft(draft: CreateProjectInput): SetupNeedsYou[] {
   (draft.importantDates ?? []).forEach((date, index) => {
     if (!date.label.trim()) return;
     if (!date.date || date.needsReview) {
+      const label = date.label.trim();
+      const question = /milestone/i.test(label)
+        ? `When is the ${label}?`
+        : `When is the ${label} milestone?`;
       out.push({
         id: date.clientKey ?? `date-${index}`,
         clientKey: date.clientKey,
         frame: "knowledge",
-        question: `When is the ${date.label.trim()} milestone?`,
+        question,
       });
     }
   });

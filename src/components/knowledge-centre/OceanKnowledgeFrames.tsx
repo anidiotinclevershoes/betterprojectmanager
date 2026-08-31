@@ -271,7 +271,9 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
               />
             ))
           ) : (
-            <p className="ocean-frame-empty">Nothing recorded yet.</p>
+            <p className="ocean-frame-empty">
+              {tagFilter.length ? "No items with this tag." : "Nothing recorded yet."}
+            </p>
           )}
         </FrameShell>
 
@@ -306,7 +308,9 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
               );
             })
           ) : (
-            <p className="ocean-frame-empty">No open risks.</p>
+            <p className="ocean-frame-empty">
+              {tagFilter.length ? "No items with this tag." : "No open risks."}
+            </p>
           )}
         </FrameShell>
 
@@ -328,7 +332,9 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
               );
             })
           ) : (
-            <p className="ocean-frame-empty">No open to-dos.</p>
+            <p className="ocean-frame-empty">
+              {tagFilter.length ? "No items with this tag." : "No open to-dos."}
+            </p>
           )}
         </FrameShell>
       </div>
@@ -370,7 +376,9 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
               ),
             )
           ) : (
-            <p className="ocean-frame-empty">No people recorded yet.</p>
+            <p className="ocean-frame-empty">
+              {tagFilter.length ? "No items with this tag." : "No people recorded yet."}
+            </p>
           )}
         </FrameShell>
 
@@ -414,7 +422,9 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
               />
             ))
           ) : (
-            <p className="ocean-frame-empty">No decisions recorded.</p>
+            <p className="ocean-frame-empty">
+              {tagFilter.length ? "No items with this tag." : "No decisions recorded."}
+            </p>
           )}
         </FrameShell>
 
@@ -436,7 +446,9 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
               />
             ))
           ) : (
-            <p className="ocean-frame-empty">No milestones recorded.</p>
+            <p className="ocean-frame-empty">
+              {tagFilter.length ? "No items with this tag." : "No milestones recorded."}
+            </p>
           )}
         </FrameShell>
 
@@ -457,7 +469,9 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
               />
             ))
           ) : (
-            <p className="ocean-frame-empty">No open loops.</p>
+            <p className="ocean-frame-empty">
+              {tagFilter.length ? "No items with this tag." : "No open loops."}
+            </p>
           )}
         </FrameShell>
 

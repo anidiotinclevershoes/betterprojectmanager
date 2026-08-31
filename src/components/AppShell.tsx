@@ -190,7 +190,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
     if (pathname === "/projects/new") {
       return {
         title: "New project",
-        subtitle: "Tell Lume what you know — then review before creating",
+        subtitle: "Establish the first known picture — Capture keeps Lume current afterwards",
       };
     }
     if (pathname.startsWith("/releases")) {

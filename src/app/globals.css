@@ -8959,6 +8959,9 @@ body {
 
 .tag-chip,
 .tag-chip-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   border: 1px solid var(--border-subtle);
   background: var(--bg-surface-raised);
   color: var(--text-secondary);
