@@ -140,7 +140,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | If the product rule becomes “codes unique per workspace”, assert unique-violation surfaces a code-already-used error |
 | **Target resolution / validation point** | New Project/product hardening — do not silently add the constraint in an integrity slice |
 | **Related docs** | Phase 3A PR; this file D-R11 |
-| **Notes** | Phase 3A implements retry idempotency via `clientProjectId` (same user action / same UUID). That is not a product rule that two projects cannot share a code. **Phase 3A.1 delete** is keyed by durable project UUID, not code or name. |
+| **Notes** | Phase 3A implements retry idempotency via `clientProjectId` (same user action / same UUID). That is not a product rule that two projects cannot share a code. **Phase 3A.1 delete** is keyed by durable project UUID, not code or name. **Four-frame closeout:** `20260831160000_project_retrieval_tags.sql` now creates `projects_workspace_code_lower_idx` on `(workspace_id, lower(code))`. A preflight `DO` block raises if duplicate codes already exist; it does **not** rename or delete projects. Apply strategy: inventory duplicates per workspace, have a human pick surviving codes, then re-run the migration. |
 
 ---
 
@@ -180,7 +180,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Keep the injected project-delete failure test: A remains in `projects` and UI must not claim success |
 | **Target resolution / validation point** | V1 product hardening (bundle RPC) — not Phase 3B Capture dispatcher |
 | **Related docs** | Phase 3A compensating cleanup; this file D-R12 |
-| **Notes** | SET NULL-first is required so a successful project delete cannot leave workspace orphans. The residual is failure-after-partial-cleanup, not silent cross-project damage. |
+| **Notes** | SET NULL-first is required so a successful project delete cannot leave workspace orphans. The residual is failure-after-partial-cleanup, not silent cross-project damage. **Four-frame closeout (create):** `persistNewProject` remains sequential inserts plus compensating `cleanupFailedNewProjectBundle`, not one SQL transaction. Unique-id retry now inspects the intended bundle and refuses to treat a project row alone as success (`NEW_PROJECT_PARTIAL_CREATE`). See D-036. |
 
 ---
 
@@ -200,7 +200,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Capture→promote path once specified |
 | **Target resolution / validation point** | Capture hardening (people promotion into durable stakeholder/person identity) |
 | **Related docs** | `docs/SLICE1C_PEOPLE_ENTITIES_HANDOVER.md`; `docs/SLICE2C_KNOWLEDGE_ITEM_DETAIL_HANDOVER.md`; `docs/SLICE2D_PEOPLE_CONTEXT_UI_HANDOVER.md` |
-| **Notes** | **Already delivered (do not re-open as missing UI):** Slice 1C durable stakeholder identity + `personId` on responsibilities; Slice 2C reusable person detail (`getPersonBundle` / Ocean drawer); Slice 2D People frame polish + Confirm Owner share-vs-replace (D-019 → D-R10). **Phase 3B (D-R13):** Capture apply reuses `ensurePersonOnProject` / existing Person UUIDs. An existing Person is not duplicated; continuing-responsibility statements no-op; ambiguous identity is Needs you. **Remaining open scope:** leftover Knowledge people *prose* that was never a Capture finding still may lack a stakeholder link. That is not permission to silently mint identities. |
+| **Notes** | **Already delivered (do not re-open as missing UI):** Slice 1C durable stakeholder identity + `personId` on responsibilities; Slice 2C reusable person detail (`getPersonBundle` / Ocean drawer); Slice 2D People frame polish + Confirm Owner share-vs-replace (D-019 → D-R10). **Phase 3B (D-R13):** Capture apply reuses `ensurePersonOnProject` / existing Person UUIDs. An existing Person is not duplicated; continuing-responsibility statements no-op; ambiguous identity is Needs you. **Remaining open scope:** leftover Knowledge people *prose* that was never a Capture finding still may lack a stakeholder link. That is not permission to silently mint identities. **Four-frame closeout (do not chase here):** New Project still dual-writes People as `knowledge.sections.people` bullets *and* structured `kind=responsibility` rows. That is pre-existing architecture, not a New Project truth invention. |
 
 ---
 
@@ -543,6 +543,46 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Target resolution / validation point** | before V1 launch (documented process); self-service post-V1 |
 | **Related docs** | `docs/LUME_V1_LEGAL_EAGLE_AUDIT.md` F-06 |
 | **Notes** | Legal Eagle did not build self-service deletion. |
+
+---
+
+### D-035 — persistEnsureStakeholder defaults empty role to "Stakeholder"
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | low |
+| **Domain** | People |
+| **Found in** | Four-frame New Project safety closeout (31 Aug 2026) |
+| **Failure class** | Later legal People writes through `persistEnsureStakeholder` coerce a blank role to `"Stakeholder"`. New Project create itself persists empty role as empty; unique-id retry must not fill it in. |
+| **Evidence / repro** | `persistEnsureStakeholder` `role: stakeholder.role?.trim() \|\| "Stakeholder"`; qualification `empty role survives unique-id retry` |
+| **Likely files** | `src/lib/data/supabase/persist-mutations.ts` (`persistEnsureStakeholder`) |
+| **Proposed fix direction** | Persist blank role as blank (or null) and keep Needs You for missing responsibility. Do not treat `"Stakeholder"` as an invented job. |
+| **Explicit non-goals** | Redesigning People identity in the New Project closeout |
+| **Regression test to add** | Confirm Owner / ensure-person path keeps empty role empty if that becomes the product rule |
+| **Target resolution / validation point** | People identity hardening — not four-frame UX polish |
+| **Related docs** | D-007 |
+| **Notes** | Recorded, not chased. New Project create/retry already keep empty role empty. |
+
+---
+
+### D-036 — New Project create is compensation / fail-closed, not one SQL transaction
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Infra / Projects |
+| **Found in** | Four-frame New Project safety closeout (31 Aug 2026) |
+| **Failure class** | `persistNewProject` inserts the project row then children sequentially. Existence of the project row is **not** success. If a later write fails, compensating cleanup runs. If cleanup also fails, retry of the same `clientProjectId` must inspect the intended bundle and throw `NEW_PROJECT_PARTIAL_CREATE` rather than return the partial as success. |
+| **Evidence / repro** | `inspectExistingCreate` + `cleanupFailedNewProjectBundle`; qualification fail-once tables and `failOnTable` + `failOnDeleteTable` |
+| **Likely files** | `src/lib/data/supabase/persist-mutations.ts`; `src/lib/new-project/intended-create.ts` |
+| **Proposed fix direction** | Optional later: a single Postgres RPC wrapping the intended bundle. Not required for four-frame UX polish now that retry is fail-closed. |
+| **Explicit non-goals** | Rewriting New Project persistence as a generic unit-of-work framework |
+| **Regression test to add** | Keep injected failures after project insert / during stakeholders, knowledge, tags, associations, later writes, and cleanup-fails |
+| **Target resolution / validation point** | V1 product hardening (bundle RPC) — same class as D-028 |
+| **Related docs** | D-028 |
+| **Notes** | Closeout chose fail-closed inspection over a new SQL transaction. A partial or uncertain bundle must never equal successful creation. |
 
 ---
 

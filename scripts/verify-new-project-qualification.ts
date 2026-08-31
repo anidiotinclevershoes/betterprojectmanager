@@ -16,6 +16,7 @@ import {
   persistNewProject,
   persistTimelineItem,
   persistTodoCreate,
+  NEW_PROJECT_PARTIAL_CREATE,
 } from "../src/lib/data/supabase/persist-mutations";
 import { loadMissionStateFromSupabase } from "../src/lib/data/supabase/load-mission-state";
 import { mergeOrganisedDraft } from "../src/lib/new-project/merge-organised";
@@ -23,6 +24,7 @@ import {
   structuredItemsFromSetup,
 } from "../src/lib/new-project/materialise-setup";
 import { needsYouFromDraft } from "../src/lib/new-project/needs-you";
+import { retireIncompleteSetupInState } from "../src/lib/new-project/retire-needs-you";
 import { buildDeterministicSnapshot } from "../src/lib/tell-me/snapshot-deterministic";
 import { computeProjectRevision } from "../src/lib/tell-me/revision";
 import type { CreateProjectInput } from "../src/lib/create-project";
@@ -97,6 +99,7 @@ function representativeVisionDraft(
     todos: [{ title: "Chase finance pack", kind: "ACTION", tags: tag(["UAT"]) }],
     importantDates: [
       { label: "Go-live", date: "2026-10-22", tags: tag(["Release"]) },
+      { label: "UAT lab" },
     ],
     knowledgeRemember: [
       {
@@ -286,6 +289,11 @@ async function persistLegalEquivalent(
     type: "deadline",
     startAt: "2026-10-22T12:00:00.000Z",
   });
+  await persistTimelineItem(client, fake.workspaceId, clientProjectId, {
+    label: "UAT lab",
+    type: "milestone",
+    startAt: "2026-10-01T12:00:00.000Z",
+  });
 }
 
 async function main() {
@@ -295,10 +303,12 @@ async function main() {
     assert.match(sql, /create table public\.item_tags/);
     assert.match(sql, /unique \(project_id, slug\)/);
     assert.match(sql, /unique \(tag_id, target_kind, target_id\)/);
+    assert.match(sql, /item_tags_tag_matches_project_fk/);
+    assert.match(sql, /t\.project_id = item_tags\.project_id/);
     assert.match(sql, /references public\.projects \(id\) on delete cascade/);
     assert.match(sql, /references public\.project_tags \(id\) on delete cascade/);
     assert.match(sql, /force row level security/);
-    assert.match(sql, /is_workspace_member\(workspace_id\)/);
+    assert.match(sql, /Cannot create unique index projects_workspace_code_lower_idx/);
     assert.match(
       sql,
       /target_kind in \('risk', 'todo', 'stakeholder', 'knowledge_item', 'milestone'\)/,
@@ -340,11 +350,17 @@ async function main() {
     assert.equal(structured.filter((i) => i.kind === "date").length, 1);
     assert.equal(
       structured.filter((i) => i.kind === "ambiguity").length,
-      1,
-      "only the person-without-scope question is stored as ambiguity",
+      3,
+      "person-without-scope plus uncertain risk and todo questions",
     );
     assert.ok(
       structured.some((i) => /What is Sam responsible for/i.test(i.body)),
+    );
+    assert.ok(
+      structured.some((i) => /treated as a project risk/i.test(i.body)),
+    );
+    assert.ok(
+      structured.some((i) => /tracked as a To Do/i.test(i.body)),
     );
     assert.equal(
       structured.some((i) => /When is the Beta/i.test(i.body) && i.kind === "ambiguity"),
@@ -379,11 +395,16 @@ async function main() {
       question: "What is the current focus?",
     });
 
+    const historyBefore = (before.state.history ?? []).map((h) => h.type);
     await client.from("project_tags").delete().eq("project_id", TAGGED_ID);
     assert.equal(fake.rowsForProject("project_tags", TAGGED_ID).length, 0);
     assert.equal(fake.rowsForProject("item_tags", TAGGED_ID).length, 0);
 
     const after = await loadMissionStateFromSupabase(client);
+    assert.deepEqual(
+      (after.state.history ?? []).map((h) => h.type),
+      historyBefore,
+    );
     assert.deepEqual(after.state.projectTags, []);
     assert.deepEqual(after.state.itemTags, []);
     assert.deepEqual(truthWithoutTags(after.state, TAGGED_ID), beforeTruth);
@@ -537,7 +558,7 @@ async function main() {
     assert.equal(day(beta?.startAt), "2026-11-01");
   });
 
-  await check("needsReview risks persist as risks, not durable Needs You questions", async () => {
+  await check("uncertain Organise risks and todos do not become truth", async () => {
     const fake = new FakeWorkspaceClient();
     const client = asClient(fake);
     await persistNewProject(
@@ -546,20 +567,135 @@ async function main() {
       fake.userId,
       composeDraft({
         clientProjectId: VISION_ID,
-        risks: [{ title: "Vendor delay", needsReview: true }],
+        risks: [
+          { title: "Supplier might not be ready", needsReview: true },
+          { title: "Identity provider may delay testing" },
+        ],
+        todos: [
+          { title: "Maybe chase the vendor", needsReview: true },
+          { title: "Book the UAT lab" },
+        ],
       }),
     );
     const loaded = await loadMissionStateFromSupabase(client);
-    assert.ok(
-      (loaded.state.risks ?? []).some((r) => r.title === "Vendor delay"),
+    const riskTitles = (loaded.state.risks ?? [])
+      .filter((r) => r.projectId === VISION_ID)
+      .map((r) => r.title);
+    assert.deepEqual(riskTitles, ["Identity provider may delay testing"]);
+    assert.equal(
+      riskTitles.some((t) => /Supplier might not be ready/i.test(t)),
+      false,
     );
+    const todoTitles = loaded.state.todos
+      .filter((t) => t.projectId === VISION_ID)
+      .map((t) => t.title);
+    assert.deepEqual(todoTitles, ["Book the UAT lab"]);
     const questions = currentStructured(loaded.state, VISION_ID).filter(
       (i) => i.kind === "ambiguity",
     );
+    assert.ok(
+      questions.some((i) =>
+        /Should “Supplier might not be ready” be treated as a project risk/i.test(
+          i.body,
+        ),
+      ),
+    );
+    assert.ok(
+      questions.some((i) =>
+        /Should “Maybe chase the vendor” be tracked as a To Do/i.test(i.body),
+      ),
+    );
+  });
+
+  await check("Needs You retires in current MissionState without waiting for reload", async () => {
+    const fake = new FakeWorkspaceClient();
+    const client = asClient(fake);
+    const draft = composeDraft({
+      clientProjectId: INCOMPLETE_ID,
+      stakeholders: [{ name: "Sam Rivera" }],
+      importantDates: [{ label: "Beta milestone" }],
+      risks: [{ title: "Supplier might not be ready", needsReview: true }],
+    });
+    await persistNewProject(client, fake.workspaceId, fake.userId, draft);
+    let state = (await loadMissionStateFromSupabase(client)).state;
+    const before = serializeCanonicalTruth({
+      state,
+      projectId: INCOMPLETE_ID,
+      question: "What still needs you?",
+    }).needsConfirmationHints.map((h) => h.summary);
+    assert.ok(before.some((s) => /Sam Rivera/i.test(s)));
+    assert.ok(before.some((s) => /Beta milestone/i.test(s)));
+    assert.ok(before.some((s) => /Supplier might not be ready/i.test(s)));
+
+    await persistTimelineItem(client, fake.workspaceId, INCOMPLETE_ID, {
+      label: "Beta milestone",
+      type: "milestone",
+      startAt: "2026-11-01T12:00:00.000Z",
+    });
+    state = retireIncompleteSetupInState(state, INCOMPLETE_ID, {
+      type: "date",
+      label: "Beta milestone",
+    });
+    const sam = fake.rowsForProject("stakeholders", INCOMPLETE_ID)[0]!;
+    await persistKnowledgeBullet(
+      client,
+      fake.workspaceId,
+      INCOMPLETE_ID,
+      "people",
+      "Sam Rivera — Product Owner",
+      fake.userId,
+      {
+        kind: "responsibility",
+        epistemic: "confirmed",
+        lifecycle: "current",
+        meta: {
+          responsibility: {
+            personId: String(sam.id),
+            personName: "Sam Rivera",
+            scope: "Product Owner",
+            ownerConfirmed: true,
+          },
+        },
+      },
+    );
+    state = retireIncompleteSetupInState(state, INCOMPLETE_ID, {
+      type: "person",
+      name: "Sam Rivera",
+    });
+    await persistKnowledgeBullet(
+      client,
+      fake.workspaceId,
+      INCOMPLETE_ID,
+      "risks",
+      "Supplier might not be ready",
+      fake.userId,
+    );
+    state = retireIncompleteSetupInState(state, INCOMPLETE_ID, {
+      type: "risk",
+      title: "Supplier might not be ready",
+    });
+
+    const sessionHints = serializeCanonicalTruth({
+      state,
+      projectId: INCOMPLETE_ID,
+      question: "What still needs you?",
+    }).needsConfirmationHints.map((h) => h.summary);
+    assert.equal(sessionHints.some((s) => /Sam Rivera/i.test(s)), false);
+    assert.equal(sessionHints.some((s) => /Beta milestone/i.test(s)), false);
     assert.equal(
-      questions.some((i) => /confirm this issue/i.test(i.body)),
+      sessionHints.some((s) => /Supplier might not be ready/i.test(s)),
       false,
     );
+
+    const reloaded = await loadMissionStateFromSupabase(client);
+    const reloadHints = serializeCanonicalTruth({
+      state: reloaded.state,
+      projectId: INCOMPLETE_ID,
+      question: "What still needs you?",
+    }).needsConfirmationHints.map((h) => h.summary);
+    assert.deepEqual(reloadHints.sort(), sessionHints.sort());
+    const store = readSrc("src/lib/store.tsx");
+    assert.match(store, /retireIncompleteSetupInState/);
   });
 
   await check("local buildNewProject is an in-memory payload builder, not localStorage", () => {
@@ -677,6 +813,65 @@ async function main() {
     assert.equal(retried.project.stakeholders[0]?.role, "");
   });
 
+  await check("partial create + failed cleanup never reports success on retry", async () => {
+    const rich = representativeVisionDraft(RETRY_ID, true);
+    const tables = [
+      "stakeholders",
+      "knowledge_items",
+      "project_tags",
+      "item_tags",
+      "todos",
+      "risks",
+    ] as const;
+    for (const table of tables) {
+      const fake = new FakeWorkspaceClient({
+        failOnceOnTable: table,
+      });
+      const client = asClient(fake);
+      let firstFailed = false;
+      try {
+        await persistNewProject(client, fake.workspaceId, fake.userId, rich);
+      } catch {
+        firstFailed = true;
+      }
+      assert.equal(firstFailed, true, `${table} first create must fail`);
+      await persistNewProject(client, fake.workspaceId, fake.userId, rich);
+      assert.equal(fake.tables.projects.length, 1, `${table} retry must create once`);
+      assert.equal(fake.rowsForProject("stakeholders", RETRY_ID).length, 2);
+      assert.equal(
+        fake
+          .rowsForProject("knowledge_items", RETRY_ID)
+          .filter((row) => row.kind === "responsibility").length,
+        5,
+      );
+    }
+
+    const stuck = new FakeWorkspaceClient({
+      failOnTable: "stakeholders",
+      failOnDeleteTable: "todos",
+    });
+    const stuckClient = asClient(stuck);
+    let firstMessage = "";
+    try {
+      await persistNewProject(stuckClient, stuck.workspaceId, stuck.userId, rich);
+    } catch (err) {
+      firstMessage = err instanceof Error ? err.message : String(err);
+    }
+    assert.match(firstMessage, /PARTIAL|partial|injected/i);
+    let retryMessage = "";
+    let retrySucceeded = false;
+    try {
+      await persistNewProject(stuckClient, stuck.workspaceId, stuck.userId, rich);
+      retrySucceeded = true;
+    } catch (err) {
+      retryMessage = err instanceof Error ? err.message : String(err);
+    }
+    assert.equal(retrySucceeded, false);
+    assert.match(retryMessage, new RegExp(NEW_PROJECT_PARTIAL_CREATE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.equal(stuck.tables.projects.length, 1);
+    assert.equal(stuck.rowsForProject("stakeholders", RETRY_ID).length, 0);
+  });
+
   await check("Vision compose and legal domain writes are semantically equivalent", async () => {
     const visionFake = new FakeWorkspaceClient({
       workspaceId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
@@ -692,6 +887,11 @@ async function main() {
       visionFake.userId,
       representativeVisionDraft(VISION_ID, true),
     );
+    await persistTimelineItem(asClient(visionFake), visionFake.workspaceId, VISION_ID, {
+      label: "UAT lab",
+      type: "milestone",
+      startAt: "2026-10-01T12:00:00.000Z",
+    });
     await persistLegalEquivalent(legalFake, LEGAL_ID);
 
     const vision = await loadMissionStateFromSupabase(asClient(visionFake));

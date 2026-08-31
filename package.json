@@ -23,6 +23,7 @@
     "verify:new-project": "npx --yes tsx scripts/verify-new-project-onboarding.ts",
     "verify:new-project-four-frame": "npx --yes tsx scripts/verify-new-project-four-frame.ts",
     "verify:new-project-qualification": "npx --yes tsx scripts/verify-new-project-qualification.ts",
+    "verify:new-project-live-db": "npx --yes tsx scripts/verify-new-project-live-db.ts",
     "verify:project-tags": "npx --yes tsx scripts/verify-project-tags.ts",
     "verify:phase3a-integrity": "npx --yes tsx scripts/verify-phase3a-integrity.ts",
     "verify:project-delete": "npx --yes tsx scripts/verify-project-delete.ts",

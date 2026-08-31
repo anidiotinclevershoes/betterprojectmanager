@@ -120,6 +120,8 @@ check("retrieval tags migration exists with RLS and workspace uniqueness", () =>
   assert.match(tags, /alter table public\.item_tags enable row level security/i);
   assert.match(tags, /policy project_tags_select_member/i);
   assert.match(tags, /policy item_tags_insert_member/i);
+  assert.match(tags, /item_tags_tag_matches_project_fk/i);
+  assert.match(tags, /t\.project_id = item_tags\.project_id/i);
   assert.match(tags, /target_kind in \('risk', 'todo', 'stakeholder', 'knowledge_item', 'milestone'\)/i);
 });
 
