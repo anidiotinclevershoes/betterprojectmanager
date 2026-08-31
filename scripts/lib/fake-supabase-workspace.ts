@@ -34,8 +34,10 @@ export type FakeWorkspaceOptions = {
   userId?: string;
   /** Succeed this many insert() operations, then fail the next insert. */
   failAfterInserts?: number;
-  /** Fail the first insert into this table. */
+  /** Fail every insert into this table. */
   failOnTable?: string;
+  /** Fail the first insert into this table, then succeed. */
+  failOnceOnTable?: string;
   /** Fail delete() operations against this table. */
   failOnDeleteTable?: string;
 };
@@ -47,13 +49,16 @@ export class FakeWorkspaceClient {
   insertCount = 0;
   private readonly failAfterInserts?: number;
   private readonly failOnTable?: string;
+  private readonly failOnceOnTable?: string;
   private readonly failOnDeleteTable?: string;
+  private failOnceConsumed = false;
 
   constructor(options: FakeWorkspaceOptions = {}) {
     this.workspaceId = options.workspaceId ?? "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
     this.userId = options.userId ?? "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
     this.failAfterInserts = options.failAfterInserts;
     this.failOnTable = options.failOnTable;
+    this.failOnceOnTable = options.failOnceOnTable;
     this.failOnDeleteTable = options.failOnDeleteTable;
     this.tables = {
       projects: [],
@@ -96,6 +101,10 @@ export class FakeWorkspaceClient {
 
   /** Used by the query builder — keep failure flags private to this class. */
   nextInsertFailure(table: string): string | null {
+    if (this.failOnceOnTable === table && !this.failOnceConsumed) {
+      this.failOnceConsumed = true;
+      return `injected one-shot failure on ${table}`;
+    }
     if (this.failOnTable === table) return `injected failure on ${table}`;
     if (
       this.failAfterInserts !== undefined &&
@@ -166,7 +175,9 @@ export class FakeWorkspaceClient {
 
 class FakeQuery {
   private filters: Array<{ column: string; value: unknown }> = [];
+  private inFilters: Array<{ column: string; values: unknown[] }> = [];
   private insertRows: FakeRow[] | null = null;
+  private updatePatch: FakeRow | null = null;
   private deleting = false;
   private selecting = false;
   private singleMode = false;
@@ -192,8 +203,18 @@ class FakeQuery {
     return this;
   }
 
+  update(patch: FakeRow) {
+    this.updatePatch = patch;
+    return this;
+  }
+
   eq(column: string, value: unknown) {
     this.filters.push({ column, value });
+    return this;
+  }
+
+  in(column: string, values: unknown[]) {
+    this.inFilters.push({ column, values });
     return this;
   }
 
@@ -219,7 +240,9 @@ class FakeQuery {
   }
 
   private matches(row: FakeRow) {
-    return this.filters.every((f) => row[f.column] === f.value);
+    const eqOk = this.filters.every((f) => row[f.column] === f.value);
+    const inOk = this.inFilters.every((f) => f.values.includes(row[f.column]));
+    return eqOk && inOk;
   }
 
   private async execute(): Promise<{ data: unknown; error: FakeError | null }> {
@@ -289,6 +312,31 @@ class FakeQuery {
             };
           }
         }
+        if (this.table === "item_tags") {
+          const tagId = raw.tag_id;
+          const targetKind = raw.target_kind;
+          const targetId = raw.target_id;
+          if (
+            tagId &&
+            targetKind &&
+            targetId &&
+            tableRows.some(
+              (row) =>
+                row.tag_id === tagId &&
+                row.target_kind === targetKind &&
+                row.target_id === targetId,
+            )
+          ) {
+            return {
+              data: null,
+              error: {
+                message:
+                  "duplicate key value violates unique constraint on item_tags.target",
+                code: "23505",
+              },
+            };
+          }
+        }
         const row: FakeRow = {
           created_at: now(),
           updated_at: now(),
@@ -317,9 +365,36 @@ class FakeQuery {
       if (this.table === "projects") {
         this.db.applyProjectDelete(removing.map((row) => String(row.id)));
       } else {
+        if (this.table === "project_tags") {
+          const removedIds = new Set(removing.map((row) => String(row.id)));
+          this.db.tables.item_tags = (this.db.tables.item_tags ?? []).filter(
+            (row) => !removedIds.has(String(row.tag_id)),
+          );
+        }
         this.db.tables[this.table] = tableRows.filter((row) => !this.matches(row));
       }
       return { data: null, error: null };
+    }
+
+    if (this.updatePatch) {
+      const updated: FakeRow[] = [];
+      for (const row of tableRows) {
+        if (!this.matches(row)) continue;
+        Object.assign(row, this.updatePatch, { updated_at: now() });
+        updated.push(row);
+      }
+      if (this.singleMode) {
+        if (updated.length !== 1) {
+          return {
+            data: null,
+            error: {
+              message: `single() expected 1 row, got ${updated.length}`,
+            },
+          };
+        }
+        return { data: updated[0], error: null };
+      }
+      return { data: this.selecting ? updated : updated, error: null };
     }
 
     const matched = tableRows.filter((row) => this.matches(row));

@@ -174,6 +174,40 @@ export function findUnknownOwnerHints(
 }
 
 /**
+ * Stored New Project incompleteness: pending date overlays and explicit
+ * ambiguity rows. Never derived from the mere absence of a field.
+ */
+export function findIncompleteSetupHints(
+  items: CanonicalTruthItem[],
+): NeedsConfirmationItem[] {
+  const hints: NeedsConfirmationItem[] = [];
+  for (const item of items) {
+    if (item.lifecycle !== "current") continue;
+    if (item.kind === "ambiguity") {
+      hints.push({
+        id: `nc-${item.id}`,
+        kind: "ambiguity",
+        summary: item.body,
+        truthItemId: item.id,
+      });
+      continue;
+    }
+    if (item.kind === "date" && !item.meta?.date?.dateIso) {
+      const label = item.meta?.date?.label?.trim() || item.body.trim();
+      hints.push({
+        id: `nc-${item.id}`,
+        kind: "ambiguity",
+        summary: /milestone/i.test(label)
+          ? `When is the ${label}?`
+          : `When is the ${label} milestone?`,
+        truthItemId: item.id,
+      });
+    }
+  }
+  return hints;
+}
+
+/**
  * One compact representation of relevant current project truth.
  * Assembles from authoritative MissionState domains (Slice 1D).
  */
@@ -246,7 +280,10 @@ export function serializeCanonicalTruth(args: {
     deduped.push(item);
   }
 
-  const needsConfirmationHints = findUnknownOwnerHints(deduped);
+  const needsConfirmationHints = [
+    ...findUnknownOwnerHints(deduped),
+    ...findIncompleteSetupHints(deduped),
+  ];
 
   const project = args.state.projects.find((p) => p.id === args.projectId);
   const header = [

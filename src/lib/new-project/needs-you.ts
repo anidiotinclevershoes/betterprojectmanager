@@ -20,9 +20,21 @@ function responsibilitiesOf(draft: {
   return [];
 }
 
+export function personResponsibilityQuestion(name: string): string {
+  return `What is ${name.trim()} responsible for?`;
+}
+
+export function undatedMilestoneQuestion(label: string): string {
+  const trimmed = label.trim();
+  return /milestone/i.test(trimmed)
+    ? `When is the ${trimmed}?`
+    : `When is the ${trimmed} milestone?`;
+}
+
 /**
  * Incomplete setup that can legally persist, but must not become Ready truth.
  * These are questions — not invented field values.
+ * Draft-time only until Create; durable rows are materialised separately.
  */
 export function needsYouFromDraft(draft: CreateProjectInput): SetupNeedsYou[] {
   const out: SetupNeedsYou[] = [];
@@ -34,7 +46,7 @@ export function needsYouFromDraft(draft: CreateProjectInput): SetupNeedsYou[] {
         id: person.clientKey ?? `person-${index}`,
         clientKey: person.clientKey,
         frame: "people",
-        question: `What is ${person.name.trim()} responsible for?`,
+        question: personResponsibilityQuestion(person.name),
       });
     }
   });
@@ -42,15 +54,11 @@ export function needsYouFromDraft(draft: CreateProjectInput): SetupNeedsYou[] {
   (draft.importantDates ?? []).forEach((date, index) => {
     if (!date.label.trim()) return;
     if (!date.date || date.needsReview) {
-      const label = date.label.trim();
-      const question = /milestone/i.test(label)
-        ? `When is the ${label}?`
-        : `When is the ${label} milestone?`;
       out.push({
         id: date.clientKey ?? `date-${index}`,
         clientKey: date.clientKey,
         frame: "knowledge",
-        question,
+        question: undatedMilestoneQuestion(date.label),
       });
     }
   });

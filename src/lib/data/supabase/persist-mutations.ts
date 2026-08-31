@@ -12,6 +12,7 @@ import {
 import { persistTagBundle } from "@/lib/data/supabase/persist-tags";
 import { isoToDateOnly } from "@/lib/data/supabase/load-mission-state";
 import { structuredItemsFromSetup } from "@/lib/new-project/materialise-setup";
+import { personResponsibilityQuestion } from "@/lib/new-project/needs-you";
 import { tagsFromCreateDraft } from "@/lib/tags";
 import { requireUuid } from "@/lib/data/validate";
 import type {
@@ -79,6 +80,13 @@ function requireLegalRiskSource(source: string): LegalRiskSource {
   throw new Error(
     `[supabase] invalid risk source "${source}" (allowed: ${LEGAL_RISK_SOURCES.join(", ")})`,
   );
+}
+
+function knowledgeKindForSection(section: string): string {
+  if (section === "decisions") return "decision";
+  if (section === "openLoops") return "open_loop";
+  if (section === "risks") return "risk";
+  return "fact";
 }
 
 /**
@@ -287,7 +295,7 @@ async function loadExistingProjectBundle(
     (row: Record<string, unknown>) => ({
       id: String(row.id),
       name: String(row.name),
-      role: String(row.role || "Stakeholder"),
+      role: String(row.role ?? "Stakeholder"),
       preferences: Array.isArray(row.preferences) ? row.preferences : [],
       concerns: Array.isArray(row.concerns) ? row.concerns : [],
     }),
@@ -356,6 +364,7 @@ export async function persistNewProject(
   userId: string | null,
   input: CreateProjectInput,
 ): Promise<PersistedProjectBundle> {
+  // In-memory payload builder only — not browser/localStorage persistence.
   const local = buildNewProject(input);
   const requestedId =
     input.clientProjectId && UUID_RE.test(input.clientProjectId)
@@ -499,6 +508,7 @@ export async function persistNewProject(
       body: string;
       position: number;
       created_by: string | null;
+      kind: string;
     }> = [];
     let position = 0;
     for (const [section, bullets] of Object.entries(local.knowledge.sections)) {
@@ -510,6 +520,7 @@ export async function persistNewProject(
           body,
           position: position++,
           created_by: userId,
+          kind: knowledgeKindForSection(section),
         });
       }
     }
@@ -783,6 +794,42 @@ export async function persistTodoDelete(
   if (error) throw new Error(`[supabase] delete todo: ${error.message}`);
 }
 
+async function supersedeCurrentKnowledgeItems(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  kind: string,
+  match: (row: Record<string, unknown>) => boolean,
+): Promise<void> {
+  const { data, error } = await client
+    .from("knowledge_items")
+    .select("id, body, kind, lifecycle, epistemic, meta")
+    .eq("workspace_id", workspaceId)
+    .eq("project_id", projectId)
+    .eq("kind", kind);
+  if (error) {
+    throw new Error(
+      `[supabase] lookup knowledge for supersede: ${error.message}`,
+    );
+  }
+  const ids = (data ?? [])
+    .filter((row: Record<string, unknown>) => {
+      const lifecycle = String(row.lifecycle ?? "current");
+      if (lifecycle !== "current") return false;
+      return match(row);
+    })
+    .map((row: Record<string, unknown>) => String(row.id))
+    .filter(Boolean);
+  await persistKnowledgeLifecycle(
+    client,
+    workspaceId,
+    projectId,
+    ids,
+    "superseded",
+  );
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function persistKnowledgeBullet(
   client: SupabaseClient<any>,
@@ -821,6 +868,26 @@ export async function persistKnowledgeBullet(
 
   const { error } = await client.from("knowledge_items").insert(row);
   if (error) throw new Error(`[supabase] create knowledge: ${error.message}`);
+
+  if (meta?.kind === "responsibility") {
+    const personName =
+      meta.meta &&
+      typeof meta.meta === "object" &&
+      "responsibility" in meta.meta
+        ? (meta.meta as { responsibility?: { personName?: string | null } })
+            .responsibility?.personName
+        : null;
+    if (personName?.trim()) {
+      await supersedeCurrentKnowledgeItems(
+        client,
+        workspaceId,
+        projectId,
+        "ambiguity",
+        (item) =>
+          String(item.body).trim() === personResponsibilityQuestion(personName),
+      );
+    }
+  }
 
   if (section === "risks") {
     const riskId =
@@ -983,6 +1050,23 @@ export async function persistTimelineItem(
     .select("*")
     .single();
   const row = requireData(data, error, "create milestone");
+  const milestoneLabel = item.label.trim().toLowerCase();
+  await supersedeCurrentKnowledgeItems(
+    client,
+    workspaceId,
+    projectId,
+    "date",
+    (knowledgeRow) => {
+      const meta = knowledgeRow.meta as
+        | { date?: { label?: string; dateIso?: string | null } }
+        | null
+        | undefined;
+      const label = (
+        meta?.date?.label ?? String(knowledgeRow.body ?? "")
+      ).trim();
+      return label.toLowerCase() === milestoneLabel && !meta?.date?.dateIso;
+    },
+  );
   return {
     id: row.id,
     projectId: row.project_id,

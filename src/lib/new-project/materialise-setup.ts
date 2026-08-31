@@ -2,7 +2,7 @@ import { newPeopleUuid } from "@/lib/people/identity";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import type { CreateProjectInput } from "@/lib/create-project";
 import type { ProjectRisk, Stakeholder } from "@/lib/types";
-import { needsYouFromDraft } from "./needs-you";
+import { personResponsibilityQuestion } from "./needs-you";
 
 function scopesOf(draft: {
   role?: string;
@@ -19,7 +19,8 @@ function scopesOf(draft: {
 
 /**
  * Structured overlay for New Project create — reuses CanonicalTruthItem.
- * Responsibilities, undated milestones, and Needs You ambiguities.
+ * Responsibilities, undated milestones, and stored Needs You only where no
+ * other incomplete legal object exists.
  * Does not invent dates, owners, or roles.
  */
 export function structuredItemsFromSetup(args: {
@@ -77,16 +78,42 @@ export function structuredItemsFromSetup(args: {
     });
   }
 
-  for (const prompt of needsYouFromDraft(args.input)) {
+  // Person with no scopes: do not invent unknown_owner from absence (D-009).
+  // Persist the question as stored ambiguity so Needs You survives reload.
+  (args.input.stakeholders ?? []).forEach((draft, index) => {
+    const person = args.stakeholders[index];
+    if (!person || !draft.name.trim()) return;
+    if (scopesOf(draft).length > 0) return;
     items.push({
       id: newPeopleUuid(),
       projectId: args.projectId,
-      section: prompt.frame === "people" ? "people" : "now",
-      body: prompt.question,
+      section: "people",
+      body: personResponsibilityQuestion(person.name),
       kind: "ambiguity",
       epistemic: "pending",
       lifecycle: "current",
       provenance: [{ type: "import", at: now, note: "new-project-needs-you" }],
+    });
+  });
+
+  // Ambiguous organised notes that the user kept, with an explicit question.
+  // Undated dates already have kind=date rows. needsReview risks/todos persist
+  // as those domain objects — do not duplicate them as ambiguity overlays.
+  for (const note of args.input.knowledgeRemember ?? []) {
+    if (note.remember === false || !note.text.trim()) continue;
+    const question = note.needsYouQuestion?.trim();
+    if (!note.needsReview || !question) continue;
+    items.push({
+      id: newPeopleUuid(),
+      projectId: args.projectId,
+      section: "now",
+      body: question,
+      kind: "ambiguity",
+      epistemic: "pending",
+      lifecycle: "current",
+      provenance: [
+        { type: "import", at: now, note: "new-project-ambiguous-note" },
+      ],
     });
   }
 

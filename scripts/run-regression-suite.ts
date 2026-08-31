@@ -42,6 +42,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "project-delete", script: "scripts/verify-project-delete.ts" },
   { name: "new-project", script: "scripts/verify-new-project-onboarding.ts" },
   { name: "new-project-four-frame", script: "scripts/verify-new-project-four-frame.ts" },
+  { name: "new-project-qualification", script: "scripts/verify-new-project-qualification.ts" },
   { name: "project-tags", script: "scripts/verify-project-tags.ts" },
   { name: "seed-reset", script: "scripts/verify-seed-reset.ts" },
   { name: "rls-policies", script: "scripts/verify-rls-policies.ts" },
