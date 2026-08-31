@@ -37,10 +37,13 @@ export function CorrectionActions({
   model,
   targetOptions,
   handlers,
+  hidePrompt = false,
 }: {
   model: ReviewChangeViewModel;
   targetOptions: TargetOption[];
   handlers: CorrectionHandlers;
+  /** Card already shows the Needs You question. */
+  hidePrompt?: boolean;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const reason: ReviewReason | undefined =
@@ -69,7 +72,6 @@ export function CorrectionActions({
       [];
     return (
       <div className="compact-change-correction">
-        <p className="compact-change-review-copy">Which project?</p>
         <div className="compact-change-action-row">
           {candidates.map((p) => (
             <button
@@ -92,7 +94,9 @@ export function CorrectionActions({
   if (reason === "TARGET_UNCERTAIN") {
     return (
       <div className="compact-change-correction">
-        {copy ? <p className="compact-change-review-copy">{copy}</p> : null}
+        {!hidePrompt && copy ? (
+          <p className="compact-change-review-copy">{copy}</p>
+        ) : null}
         <div className="compact-change-action-row">
           {model.finding?.target?.entityId || model.suggestion.targetTodoId ? (
             <button
@@ -138,7 +142,9 @@ export function CorrectionActions({
   if (reason === "STATE_UNCERTAIN") {
     return (
       <div className="compact-change-correction">
-        {copy ? <p className="compact-change-review-copy">{copy}</p> : null}
+        {!hidePrompt && copy ? (
+          <p className="compact-change-review-copy">{copy}</p>
+        ) : null}
         <div className="compact-change-action-row">
           <button
             type="button"
@@ -165,7 +171,9 @@ export function CorrectionActions({
   if (reason === "ENTITY_TYPE_UNCERTAIN") {
     return (
       <div className="compact-change-correction">
-        {copy ? <p className="compact-change-review-copy">{copy}</p> : null}
+        {!hidePrompt && copy ? (
+          <p className="compact-change-review-copy">{copy}</p>
+        ) : null}
         <div className="compact-change-action-row compact-change-entity-row">
           <label className="compact-change-entity-select-label">
             <span className="sr-only">Entity type</span>
@@ -202,7 +210,9 @@ export function CorrectionActions({
   // OPERATION_UNCERTAIN / VALUE_UNCERTAIN / fallback
   return (
     <div className="compact-change-correction">
-      {copy ? <p className="compact-change-review-copy">{copy}</p> : null}
+      {!hidePrompt && copy ? (
+        <p className="compact-change-review-copy">{copy}</p>
+      ) : null}
       <div className="compact-change-action-row">
         {model.entityKind === "risk" &&
         (model.operation === "complete" || model.operation === "update") ? (

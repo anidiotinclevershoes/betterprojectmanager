@@ -22,6 +22,14 @@ import {
   buildReviewChangeViewModels,
   type ReviewChangeViewModel,
 } from "../src/lib/capture/review/viewModel";
+import {
+  isGenericInterpretation,
+  needsYouHeadline,
+  needsYouSupporting,
+  reviewOpFamily,
+  whyDisclosureLabel,
+  whyHasUsefulContent,
+} from "../src/lib/capture/review/reviewLanguage";
 import type { CaptureFinding } from "../src/lib/capture/findings";
 import type { PendingSuggestion } from "../src/lib/capture/suggestions";
 import type { CaptureResult, Recommendation } from "../src/lib/types";
@@ -560,6 +568,59 @@ function model(
   assert.equal(createModels[1].diff?.layout, "remove");
   assert.match(createModels[1].diff!.to, /Remove from project/i);
   assert.equal(createModels[1].readiness, "needs_review");
+}
+
+// --- 8. Review visual language (presentation only) ---
+{
+  assert.equal(reviewOpFamily("create"), "create");
+  assert.equal(reviewOpFamily("update"), "update");
+  assert.equal(reviewOpFamily("complete"), "update");
+  assert.equal(reviewOpFamily("remove"), "remove");
+  assert.equal(reviewOpFamily("archive"), "remove");
+  assert.equal(
+    reviewOpFamily("remove", "needs_review", "OPERATION_UNCERTAIN"),
+    "remove",
+  );
+  assert.equal(
+    reviewOpFamily("complete", "needs_review", "STATE_UNCERTAIN"),
+    "needs_you",
+  );
+  assert.equal(
+    reviewOpFamily("update", "unmatched", "TARGET_UNCERTAIN"),
+    "needs_you",
+  );
+  assert.equal(
+    needsYouHeadline("STATE_UNCERTAIN", "Risk"),
+    "Is this Risk resolved?",
+  );
+  assert.equal(
+    needsYouHeadline("TARGET_UNCERTAIN", "To Do"),
+    "Which record does this refer to?",
+  );
+  assert.equal(
+    whyDisclosureLabel(["quoted evidence"], "Lume suggests to create this."),
+    "Evidence",
+  );
+  assert.equal(
+    whyHasUsefulContent(
+      [],
+      "Lume suggests to create this stakeholder based on the Capture.",
+    ),
+    false,
+  );
+  assert.equal(
+    isGenericInterpretation(
+      "Lume suggests to update this risk based on the Capture.",
+    ),
+    true,
+  );
+  assert.equal(
+    needsYouSupporting(
+      "Which record does this refer to?",
+      "Lume thinks this refers to:\nChase the hosting ticket",
+    ),
+    "Lume thinks this refers to:\nChase the hosting ticket",
+  );
 }
 
 console.log("verify-capture-review: all checks passed");

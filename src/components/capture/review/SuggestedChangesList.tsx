@@ -104,18 +104,8 @@ export function SuggestedChangesList({
               ·
             </span>
             <span className="capture-count-inline">
-              Needs Review <strong>{needsReviewCount}</strong>
+              Needs You <strong>{needsReviewCount + unmatchedCount}</strong>
             </span>
-            {unmatchedCount > 0 ? (
-              <>
-                <span className="capture-count-sep" aria-hidden>
-                  ·
-                </span>
-                <span className="capture-count-inline">
-                  Unmatched <strong>{unmatchedCount}</strong>
-                </span>
-              </>
-            ) : null}
             {readyCount > 0 ? (
               <button
                 type="button"

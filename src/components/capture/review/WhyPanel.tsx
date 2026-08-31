@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  isGenericInterpretation,
+  whyDisclosureLabel,
+  whyHasUsefulContent,
+} from "@/lib/capture/review/reviewLanguage";
+
 export function WhyPanel({
   open,
   onToggle,
@@ -15,30 +21,46 @@ export function WhyPanel({
   confidence: number | null;
   controlId: string;
 }) {
+  if (!whyHasUsefulContent(evidence, interpretation)) return null;
+
+  const label = whyDisclosureLabel(evidence, interpretation);
+  const excerpts = evidence.filter((e) => e.trim());
+
   return (
     <div className="why-panel">
       <button
         type="button"
-        className="why-panel-toggle"
+        className="lume-review-why-toggle"
         aria-expanded={open}
         aria-controls={controlId}
         onClick={onToggle}
       >
-        <span aria-hidden>{open ? "▲" : "▼"}</span> Why?
+        <span
+          className={`lume-review-why-chevron${open ? " is-open" : ""}`}
+          aria-hidden
+        />
+        {label}
       </button>
       {open ? (
-        <div id={controlId} className="why-panel-body" role="region" aria-label="Why this change">
-          {evidence.length > 0 ? (
+        <div
+          id={controlId}
+          className="why-panel-body"
+          role="region"
+          aria-label={label}
+        >
+          {excerpts.length > 0 ? (
             <div className="why-panel-block">
-              <p className="why-panel-label">Evidence</p>
-              {evidence.map((ex) => (
+              {label !== "Evidence" ? (
+                <p className="why-panel-label">Evidence</p>
+              ) : null}
+              {excerpts.map((ex) => (
                 <blockquote key={ex} className="why-panel-evidence">
                   “{ex}”
                 </blockquote>
               ))}
             </div>
           ) : null}
-          {interpretation ? (
+          {interpretation && !isGenericInterpretation(interpretation) ? (
             <div className="why-panel-block">
               <p className="why-panel-copy">{interpretation}</p>
             </div>

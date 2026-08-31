@@ -3,13 +3,20 @@
 import { useId, useState } from "react";
 import type { ReviewChangeViewModel } from "@/lib/capture/review/viewModel";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
+import {
+  needsYouHeadline,
+  needsYouSupporting,
+  reviewOpFamily,
+} from "@/lib/capture/review/reviewLanguage";
 import { CompactChangeCard } from "./CompactChangeCard";
+import { DomainMark } from "./DomainMark";
 import { WhyPanel } from "./WhyPanel";
 import {
   CorrectionActions,
   type CorrectionHandlers,
 } from "./CorrectionActions";
 import type { TargetOption } from "./TargetPicker";
+import "./review-cards.css";
 
 export function SuggestedChangeCard({
   model,
@@ -67,6 +74,57 @@ export function SuggestedChangeCard({
     onChangeEntityKind: (kind) => onChangeEntityKind?.(kind),
   };
 
+  const family = reviewOpFamily(
+    model.operation,
+    attentionReadiness,
+    model.reviewReason,
+  );
+  const headline =
+    family === "needs_you"
+      ? needsYouHeadline(model.reviewReason, model.entityLabel)
+      : undefined;
+  const detail =
+    family === "needs_you"
+      ? needsYouSupporting(headline || "", model.needsReviewReason)
+      : null;
+
+  if (state !== "pending") {
+    const resolvedLabel = state === "approved" ? "Approved" : "Dismissed";
+    return (
+      <li
+        className={[
+          "suggested-change-item",
+          highlighted ? "is-highlighted" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        data-review-card-id={model.id}
+        id={`review-card-${model.id}`}
+      >
+        <article
+          className={[
+            "lume-review-card",
+            "is-resolved",
+            state === "dismissed" ? "is-dismissed" : "",
+            `is-kind-${model.entityKind}`,
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-live="polite"
+          aria-label={`${resolvedLabel}: ${model.recordName}`}
+        >
+          <span className="lume-review-resolved-mark" aria-hidden>
+            {state === "approved" ? "✓" : "–"}
+          </span>
+          <DomainMark kind={model.entityKind} title={model.entityLabel} />
+          <p className="lume-review-resolved-copy">
+            {resolvedLabel} · <strong>{model.recordName}</strong>
+          </p>
+        </article>
+      </li>
+    );
+  }
+
   return (
     <li
       className={[
@@ -94,6 +152,9 @@ export function SuggestedChangeCard({
         readiness={attentionReadiness}
         state={state}
         highlighted={highlighted}
+        needsYouHeadline={headline}
+        needsYouDetail={detail}
+        reviewReason={model.reviewReason}
         why={
           <WhyPanel
             open={whyOpen}
@@ -105,35 +166,22 @@ export function SuggestedChangeCard({
           />
         }
         actions={
-          state === "pending" ? (
-            attentionReadiness ? (
-              <CorrectionActions
-                model={model}
-                targetOptions={targetOptions}
-                handlers={handlers}
-              />
-            ) : (
-              <div className="compact-change-action-row">
-                <button
-                  type="button"
-                  className="primary-btn"
-                  onClick={onApprove}
-                >
-                  Approve
-                </button>
-                <button
-                  type="button"
-                  className="ghost-btn"
-                  onClick={onDismiss}
-                >
-                  Dismiss
-                </button>
-              </div>
-            )
+          attentionReadiness ? (
+            <CorrectionActions
+              model={model}
+              targetOptions={targetOptions}
+              handlers={handlers}
+              hidePrompt
+            />
           ) : (
-            <p className="meta compact-change-status-label" aria-live="polite">
-              {state === "approved" ? "Approved" : "Dismissed"}
-            </p>
+            <div className="compact-change-action-row">
+              <button type="button" className="primary-btn" onClick={onApprove}>
+                Approve
+              </button>
+              <button type="button" className="ghost-btn" onClick={onDismiss}>
+                Dismiss
+              </button>
+            </div>
           )
         }
       />
