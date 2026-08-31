@@ -23,6 +23,10 @@ export function removeProjectFromMissionState(
     meetings: (state.meetings ?? []).filter((row) => row.projectId !== projectId),
     releases: (state.releases ?? []).filter((row) => row.projectId !== projectId),
     history: (state.history ?? []).filter(scoped),
+    projectTags: (state.projectTags ?? []).filter(
+      (row) => row.projectId !== projectId,
+    ),
+    itemTags: (state.itemTags ?? []).filter((row) => row.projectId !== projectId),
   };
 }
 

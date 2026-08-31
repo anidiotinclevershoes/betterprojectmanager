@@ -19,6 +19,7 @@ import type {
 } from "@/lib/types";
 import { emptyKnowledge } from "@/lib/knowledge";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
+import { isTagTargetKind, type ItemTag, type ProjectTag } from "@/lib/tags";
 
 export type LoadedWorkspace = {
   workspaceId: string;
@@ -38,6 +39,8 @@ function emptyMissionState(): MissionState {
     risks: [],
     timeline: [],
     history: [],
+    projectTags: [],
+    itemTags: [],
     analysesThisMonth: 0,
   };
 }
@@ -83,6 +86,8 @@ export async function loadMissionStateFromSupabase(
     meetingsRes,
     releasesRes,
     historyRes,
+    projectTagsRes,
+    itemTagsRes,
   ] = await Promise.all([
     client
       .from("projects")
@@ -107,6 +112,8 @@ export async function loadMissionStateFromSupabase(
       .select("*")
       .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false }),
+    client.from("project_tags").select("*").eq("workspace_id", workspaceId),
+    client.from("item_tags").select("*").eq("workspace_id", workspaceId),
   ]);
 
   for (const res of [
@@ -121,9 +128,16 @@ export async function loadMissionStateFromSupabase(
     meetingsRes,
     releasesRes,
     historyRes,
+    projectTagsRes,
+    itemTagsRes,
   ]) {
     if (res.error) {
-      throw new Error(`[supabase] load workspace: ${res.error.message}`);
+      const optionalTagTable =
+        (res === projectTagsRes || res === itemTagsRes) &&
+        /does not exist|schema cache|could not find/i.test(res.error.message);
+      if (!optionalTagTable) {
+        throw new Error(`[supabase] load workspace: ${res.error.message}`);
+      }
     }
   }
 
@@ -133,7 +147,7 @@ export async function loadMissionStateFromSupabase(
     list.push({
       id: row.id,
       name: row.name,
-      role: row.role || "Stakeholder",
+      role: row.role ?? "Stakeholder",
       preferences: Array.isArray(row.preferences) ? row.preferences : [],
       concerns: Array.isArray(row.concerns) ? row.concerns : [],
       lastContactAt: row.last_contact_at ?? undefined,
@@ -338,6 +352,24 @@ export async function loadMissionStateFromSupabase(
     source: row.source ?? undefined,
   }));
 
+  const projectTags: ProjectTag[] = (projectTagsRes.data ?? []).map((row) => ({
+    id: String(row.id),
+    projectId: String(row.project_id),
+    name: String(row.name),
+    slug: String(row.slug),
+    origin: row.origin === "predefined" ? "predefined" : "custom",
+  }));
+
+  const itemTags: ItemTag[] = (itemTagsRes.data ?? [])
+    .filter((row) => isTagTargetKind(row.target_kind))
+    .map((row) => ({
+      id: String(row.id),
+      projectId: String(row.project_id),
+      tagId: String(row.tag_id),
+      targetKind: row.target_kind,
+      targetId: String(row.target_id),
+    }));
+
   const state: MissionState = {
     ...emptyMissionState(),
     projects,
@@ -350,6 +382,8 @@ export async function loadMissionStateFromSupabase(
     meetings,
     releases,
     history,
+    projectTags,
+    itemTags,
   };
 
   return { workspaceId, userId: user.id, state };

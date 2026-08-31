@@ -17,6 +17,8 @@ export type SetupTodoDraft = {
   kind?: TodoKind;
   waitingOn?: string;
   needsReview?: boolean;
+  /** Retrieval tags only — never copied onto To Do truth fields. */
+  tags?: string[];
 };
 
 export type SetupDateDraft = {
@@ -24,21 +26,26 @@ export type SetupDateDraft = {
   label: string;
   date?: string;
   needsReview?: boolean;
+  tags?: string[];
 };
 
 export type SetupStakeholderDraft = {
   clientKey?: string;
   name: string;
   role?: string;
+  /** Multiple concurrent responsibilities. Not a single-role taxonomy. */
+  responsibilities?: string[];
   concerns?: string[];
   preferences?: string[];
   needsReview?: boolean;
+  tags?: string[];
 };
 
 export type SetupRiskDraft = {
   clientKey?: string;
   title: string;
   needsReview?: boolean;
+  tags?: string[];
 };
 
 export type SetupKnowledgeDraft = {
@@ -46,6 +53,10 @@ export type SetupKnowledgeDraft = {
   text: string;
   /** When false, excluded from create. Default true. */
   remember?: boolean;
+  kind?: "fact" | "decision" | "date" | "context";
+  needsReview?: boolean;
+  needsYouQuestion?: string;
+  tags?: string[];
 };
 
 export function newSetupClientKey() {
@@ -81,7 +92,7 @@ export type CreateProjectInput = {
   notMentioned?: string[];
   /** Original Talk/Paste source for history. */
   sourceNarrative?: string;
-  sourceMode?: "talk" | "paste" | "blank" | "interview";
+  sourceMode?: "talk" | "paste" | "blank" | "interview" | "compose";
   /**
    * Client-generated UUID for this create attempt (retry/idempotency only).
    * Not a product field — ignored by `buildNewProject`.
@@ -115,6 +126,30 @@ export function suggestCode(name: string) {
     .map((w) => w[0])
     .join("")
     .slice(0, 8);
+}
+
+export const PROJECT_CODE_TAKEN_PREFIX = "Project code already exists";
+
+export function normaliseProjectCode(code: string) {
+  return code.trim().toUpperCase().slice(0, 12);
+}
+
+/** Workspace-scoped uniqueness. Names are not required to be unique. */
+export function isProjectCodeTaken(
+  existingCodes: Array<{ id?: string; code: string }>,
+  code: string,
+  excludeId?: string,
+) {
+  const wanted = normaliseProjectCode(code).toLowerCase();
+  if (!wanted) return false;
+  return existingCodes.some((row) => {
+    if (excludeId && row.id && row.id === excludeId) return false;
+    return row.code.trim().toLowerCase() === wanted;
+  });
+}
+
+export function projectCodeTakenMessage(code: string) {
+  return `${PROJECT_CODE_TAKEN_PREFIX}: ${normaliseProjectCode(code)}. Choose a different code.`;
 }
 
 export function toIsoFromDateInput(value?: string) {
@@ -158,21 +193,43 @@ export function includedItemCount(draft: CreateProjectInput) {
   );
 }
 
+function personScopes(draft: SetupStakeholderDraft): string[] {
+  const listed = (draft.responsibilities ?? [])
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (listed.length) return listed;
+  const role = draft.role?.trim();
+  if (role) return [role];
+  return [];
+}
+
+function isSparseSetup(mode: CreateProjectInput["sourceMode"]) {
+  return mode === "blank" || mode === "compose";
+}
+
 export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
   const name = input.name.trim();
-  const code = (input.code.trim() || suggestCode(name)).toUpperCase();
+  const code = normaliseProjectCode(input.code.trim() || suggestCode(name));
   const projectId = id("proj");
   const now = new Date().toISOString();
+  const sparse = isSparseSetup(input.sourceMode);
 
-  const stakeholders: Stakeholder[] = (input.stakeholders ?? [])
-    .map((s) => ({
+  const stakeholderDrafts = (input.stakeholders ?? []).filter((s) =>
+    s.name.trim(),
+  );
+  const stakeholders: Stakeholder[] = stakeholderDrafts.map((s) => {
+    const scopes = personScopes(s);
+    const role = sparse
+      ? (scopes[0] ?? "")
+      : s.role?.trim() || scopes[0] || "Stakeholder";
+    return {
       id: id("st"),
       name: s.name.trim(),
-      role: (s.role ?? "Stakeholder").trim() || "Stakeholder",
+      role,
       concerns: s.concerns?.map((c) => c.trim()).filter(Boolean),
       preferences: s.preferences?.map((p) => p.trim()).filter(Boolean),
-    }))
-    .filter((s) => s.name);
+    };
+  });
 
   const dates = (input.importantDates ?? []).filter((d) => d.label.trim());
   const primaryDate =
@@ -185,12 +242,14 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     id: projectId,
     name,
     code,
-    summary: input.summary.trim() || `${name} — newly added to Lume.`,
+    summary: input.summary.trim() || (sparse ? "" : `${name} — newly added to Lume.`),
     status: input.status ?? "watch",
     kind: input.kind ?? "delivery",
-    currentFocus:
-      input.currentFocus.trim() ||
-      "Establish baseline: owners, next milestone, and open risks",
+    currentFocus: input.currentFocus.trim()
+      ? input.currentFocus.trim()
+      : sparse
+        ? ""
+        : "Establish baseline: owners, next milestone, and open risks",
     nextMilestone:
       input.nextMilestone?.trim() ||
       primaryDate?.label ||
@@ -201,8 +260,14 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     stakeholders,
   };
 
-  const rememberBullets = (input.knowledgeRemember ?? [])
-    .filter((k) => k.remember !== false && k.text.trim())
+  const rememberKept = (input.knowledgeRemember ?? []).filter(
+    (k) => k.remember !== false && k.text.trim(),
+  );
+  const rememberFacts = rememberKept
+    .filter((k) => k.kind !== "decision")
+    .map((k) => k.text.trim());
+  const rememberDecisions = rememberKept
+    .filter((k) => k.kind === "decision")
     .map((k) => k.text.trim());
 
   const riskTitles = [
@@ -214,20 +279,23 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
   knowledge.updatedAt = now;
   knowledge.sections.now = uniqueBullets([
     ...(input.knowledgeNow ?? []),
-    ...rememberBullets.slice(0, 4),
+    ...rememberFacts,
     input.currentFocus.trim() ? `Current focus: ${input.currentFocus.trim()}` : "",
     input.summary.trim() ? input.summary.trim() : "",
   ]);
   knowledge.sections.decisions = uniqueBullets([
     ...(input.knowledgeDecisions ?? []),
-    ...rememberBullets.slice(4),
+    ...rememberDecisions,
   ]);
   knowledge.sections.risks = uniqueBullets(riskTitles);
   knowledge.sections.people = uniqueBullets([
     ...(input.knowledgePeople ?? []),
-    ...stakeholders.map((s) => {
-      const concern = s.concerns?.[0] ? ` — ${s.concerns[0]}` : "";
-      return `${s.name} (${s.role})${concern}`;
+    ...stakeholderDrafts.flatMap((s, index) => {
+      const person = stakeholders[index];
+      if (!person) return [];
+      const scopes = personScopes(s);
+      if (!scopes.length) return [person.name];
+      return scopes.map((scope) => `${person.name} — ${scope}`);
     }),
   ]);
   knowledge.sections.openLoops = uniqueBullets(input.knowledgeOpenLoops ?? []);
@@ -245,7 +313,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     });
   };
 
-  if (!stakeholders.length && input.sourceMode !== "blank") {
+  if (!stakeholders.length && !sparse) {
     pushRec({
       kind: "stakeholder_update",
       urgency: "this_week",
@@ -258,7 +326,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     });
   }
 
-  if (!project.nextMilestone && input.sourceMode !== "blank") {
+  if (!project.nextMilestone && !sparse) {
     pushRec({
       kind: "decision",
       urgency: "today",
@@ -270,7 +338,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     });
   }
 
-  if (!knowledge.sections.risks.length && input.sourceMode !== "blank") {
+  if (!knowledge.sections.risks.length && !sparse) {
     pushRec({
       kind: "risk",
       urgency: "this_week",
@@ -295,7 +363,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
           kind: t.kind ?? "ACTION",
           waitingOn: t.waitingOn,
         }))
-      : input.sourceMode === "blank"
+      : sparse
         ? []
         : [
             {

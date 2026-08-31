@@ -11,6 +11,8 @@ import {
 } from "@/lib/knowledge-centre/knowledge-item-detail";
 import { emptyKnowledge } from "@/lib/knowledge";
 import { useMission } from "@/lib/store";
+import { TagChips } from "@/components/tags/TagChips";
+import { tagsForItem, type TagTargetKind } from "@/lib/tags";
 
 /**
  * Ocean-compatible Knowledge item detail drawer (Slice 2C).
@@ -32,6 +34,8 @@ export function KnowledgeItemDetailDrawer({
     toggleTodo,
     setRiskStatus,
     setKnowledgeOnlyRiskResolved,
+    attachItemTag,
+    detachItemTag,
     saveStatus,
     saveError,
   } = useMission();
@@ -52,6 +56,21 @@ export function KnowledgeItemDetailDrawer({
     if (!selected) return null;
     return resolveKnowledgeItemDetail(state, projectId, selected);
   }, [state, projectId, selected]);
+
+  const tagTarget = useMemo(
+    () => (selected ? tagTargetFromRef(selected) : null),
+    [selected],
+  );
+  const attachedTagNames = useMemo(() => {
+    if (!tagTarget) return [];
+    return tagsForItem({
+      projectTags: state.projectTags ?? [],
+      itemTags: state.itemTags ?? [],
+      projectId,
+      targetKind: tagTarget.kind,
+      targetId: tagTarget.id,
+    }).map((t) => t.name);
+  }, [tagTarget, state.projectTags, state.itemTags, projectId]);
 
   useEffect(() => {
     setEditing(false);
@@ -349,6 +368,46 @@ export function KnowledgeItemDetailDrawer({
                 </section>
               ) : null}
 
+              {tagTarget ? (
+                <section
+                  className="ocean-item-detail-section"
+                  data-testid="ocean-item-detail-tags"
+                >
+                  <h4>Tags</h4>
+                  <p className="meta">
+                    Retrieval only. Changing a tag does not change this item.
+                  </p>
+                  <TagChips
+                    tags={attachedTagNames}
+                    projectTags={(state.projectTags ?? []).filter(
+                      (t) => t.projectId === projectId,
+                    )}
+                    onAdd={(name) =>
+                      attachItemTag({
+                        projectId,
+                        targetKind: tagTarget.kind,
+                        targetId: tagTarget.id,
+                        name,
+                      })
+                    }
+                    onRemove={(name) => {
+                      const tag = (state.projectTags ?? []).find(
+                        (t) =>
+                          t.projectId === projectId &&
+                          t.name.toLowerCase() === name.toLowerCase(),
+                      );
+                      if (!tag) return;
+                      detachItemTag({
+                        projectId,
+                        targetKind: tagTarget.kind,
+                        targetId: tagTarget.id,
+                        tagId: tag.id,
+                      });
+                    }}
+                  />
+                </section>
+              ) : null}
+
               {detail.relations.length ? (
                 <section
                   className="ocean-item-detail-section"
@@ -562,6 +621,23 @@ export function KnowledgeItemDetailDrawer({
       </aside>
     </>
   );
+}
+
+function tagTargetFromRef(
+  ref: KnowledgeItemRef,
+): { kind: TagTargetKind; id: string } | null {
+  if (ref.kind === "risk") return { kind: "risk", id: ref.riskId };
+  if (ref.kind === "todo") return { kind: "todo", id: ref.todoId };
+  if (ref.kind === "person") return { kind: "stakeholder", id: ref.personId };
+  if (ref.kind === "timeline") return { kind: "milestone", id: ref.timelineId };
+  if (ref.kind === "structured") return { kind: "knowledge_item", id: ref.itemId };
+  if (ref.kind === "section" && ref.itemId) {
+    return { kind: "knowledge_item", id: ref.itemId };
+  }
+  if (ref.kind === "unconfirmed_owner") {
+    return { kind: "knowledge_item", id: ref.itemId };
+  }
+  return null;
 }
 
 /** Re-export for callers that compare selection. */

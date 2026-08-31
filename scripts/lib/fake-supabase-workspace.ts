@@ -16,6 +16,8 @@ const CASCADE_ON_PROJECT_DELETE = [
   "meetings",
   "releases",
   "project_intelligence_snapshots",
+  "project_tags",
+  "item_tags",
 ] as const;
 
 const SET_NULL_ON_PROJECT_DELETE = [
@@ -68,6 +70,8 @@ export class FakeWorkspaceClient {
       capture_sessions: [],
       coach_sessions: [],
       project_intelligence_snapshots: [],
+      project_tags: [],
+      item_tags: [],
       workspace_members: [
         {
           workspace_id: this.workspaceId,
@@ -244,6 +248,46 @@ class FakeQuery {
               code: "23505",
             },
           };
+        }
+        if (this.table === "projects") {
+          const code = String(raw.code ?? "").trim().toLowerCase();
+          const workspaceId = raw.workspace_id;
+          if (
+            code &&
+            tableRows.some(
+              (row) =>
+                row.workspace_id === workspaceId &&
+                String(row.code ?? "").trim().toLowerCase() === code,
+            )
+          ) {
+            return {
+              data: null,
+              error: {
+                message:
+                  "duplicate key value violates unique constraint on projects_workspace_code_lower_idx",
+                code: "23505",
+              },
+            };
+          }
+        }
+        if (this.table === "project_tags") {
+          const slug = String(raw.slug ?? "");
+          const projectId = raw.project_id;
+          if (
+            slug &&
+            tableRows.some(
+              (row) => row.project_id === projectId && row.slug === slug,
+            )
+          ) {
+            return {
+              data: null,
+              error: {
+                message:
+                  "duplicate key value violates unique constraint on project_tags.slug",
+                code: "23505",
+              },
+            };
+          }
         }
         const row: FakeRow = {
           created_at: now(),

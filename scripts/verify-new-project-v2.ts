@@ -146,16 +146,16 @@ function main() {
     assert.doesNotMatch(barrel, /extractNewProjectV2WithOpenAI/);
   });
 
-  check("approval cannot be skipped in the Talk V2 UI", () => {
+  check("four-frame Organise notes stays proposal-only until Create", () => {
     const ui = readFileSync(
       join(process.cwd(), "src/components/onboarding/NewProjectExperience.tsx"),
       "utf8",
     );
-    assert.match(ui, /categorisationApproved/);
-    assert.match(ui, /createUnlocked/);
-    assert.match(ui, /setCreateUnlocked\(false\)/);
-    assert.match(ui, /if \(!createUnlocked\)/);
-    assert.match(ui, /Approve the categorisation map before creating/);
+    assert.match(ui, /Organise notes/);
+    assert.match(ui, /editable proposals/);
+    assert.match(ui, /Create Project/);
+    assert.doesNotMatch(ui, /Start Recording|MediaRecorder|webkitSpeechRecognition/);
+    assert.doesNotMatch(ui, /createProject\(data\.draft/);
     const cat = readFileSync(
       join(
         process.cwd(),

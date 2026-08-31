@@ -27,6 +27,8 @@ function normaliseCachedState(raw: MissionState): MissionState {
     releases: raw.releases ?? [],
     analysesThisMonth: raw.analysesThisMonth ?? 0,
     analysesMonthKey: raw.analysesMonthKey,
+    projectTags: raw.projectTags ?? [],
+    itemTags: raw.itemTags ?? [],
   };
 }
 

@@ -383,6 +383,9 @@ export interface MissionState {
   risks?: ProjectRisk[];
   timeline: TimelineItem[];
   history?: HistoryEvent[];
+  /** Retrieval tags — not project truth. */
+  projectTags?: import("./tags").ProjectTag[];
+  itemTags?: import("./tags").ItemTag[];
   lastAnalyzedAt?: string;
   /** Analyses consumed in the current calendar month (local). */
   analysesThisMonth?: number;

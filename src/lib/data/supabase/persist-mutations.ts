@@ -5,7 +5,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BuiltProjectBundle } from "@/lib/create-project";
 import type { CreateProjectInput } from "@/lib/create-project";
 import { buildNewProject } from "@/lib/create-project";
+import {
+  isProjectCodeTaken,
+  projectCodeTakenMessage,
+} from "@/lib/create-project";
+import { persistTagBundle } from "@/lib/data/supabase/persist-tags";
 import { isoToDateOnly } from "@/lib/data/supabase/load-mission-state";
+import { structuredItemsFromSetup } from "@/lib/new-project/materialise-setup";
+import { tagsFromCreateDraft } from "@/lib/tags";
 import { requireUuid } from "@/lib/data/validate";
 import type {
   HistoryEvent,
@@ -75,9 +82,9 @@ function requireLegalRiskSource(source: string): LegalRiskSource {
 }
 
 /**
- * Schema evidence (`20260812002748_workspace_schema.sql` + snapshots migration):
+ * Schema evidence (`20260812002748_workspace_schema.sql` + snapshots + tags migrations):
  * - CASCADE: stakeholders, risks, knowledge_items, milestones, meetings, releases,
- *   project_intelligence_snapshots
+ *   project_intelligence_snapshots, project_tags, item_tags
  * - SET NULL: todos, memories, recommendations, history_events, capture_sessions,
  *   coach_sessions
  * - projects.cloned_from_id SET NULL (deleting a template must not delete clones)
@@ -359,6 +366,23 @@ export async function persistNewProject(
   let createdThisCall = false;
 
   try {
+    const { data: existingProjects, error: codeLookupError } = await client
+      .from("projects")
+      .select("id, code")
+      .eq("workspace_id", workspaceId);
+    if (codeLookupError) {
+      throw new Error(`[supabase] lookup project codes: ${codeLookupError.message}`);
+    }
+    if (
+      isProjectCodeTaken(
+        (existingProjects ?? []) as Array<{ id: string; code: string }>,
+        local.project.code,
+        requestedId,
+      )
+    ) {
+      throw new Error(projectCodeTakenMessage(local.project.code));
+    }
+
     const projectInsert: Record<string, unknown> = {
       workspace_id: workspaceId,
       name: local.project.name,
@@ -390,6 +414,9 @@ export async function persistNewProject(
         `[supabase] create project: duplicate id ${requestedId} is not in this workspace`,
       );
     }
+    if (projectError && isUniqueViolation(projectError)) {
+      throw new Error(projectCodeTakenMessage(local.project.code));
+    }
 
     projectId = requireData(
       projectRow as { id: string } | null,
@@ -402,7 +429,7 @@ export async function persistNewProject(
       workspace_id: workspaceId,
       project_id: projectId,
       name: s.name,
-      role: s.role || "Stakeholder",
+      role: s.role ?? "Stakeholder",
       preferences: s.preferences ?? [],
       concerns: s.concerns ?? [],
     }));
@@ -486,9 +513,52 @@ export async function persistNewProject(
         });
       }
     }
+    const knowledgeIdsByBody = new Map<string, string>();
     if (knowledgeInserts.length) {
-      const { error } = await client.from("knowledge_items").insert(knowledgeInserts);
+      const { data, error } = await client
+        .from("knowledge_items")
+        .insert(knowledgeInserts)
+        .select("id, body");
       if (error) throw new Error(`[supabase] create knowledge: ${error.message}`);
+      for (const row of data ?? []) {
+        knowledgeIdsByBody.set(String(row.body).trim().toLowerCase(), String(row.id));
+      }
+    }
+
+    const structured = structuredItemsFromSetup({
+      projectId,
+      input,
+      stakeholders,
+    });
+    if (structured.length) {
+      const { data, error } = await client
+        .from("knowledge_items")
+        .insert(
+          structured.map((item, index) => ({
+            id: item.id,
+            workspace_id: workspaceId,
+            project_id: projectId,
+            section: item.section ?? "now",
+            body: item.body,
+            position: position + index,
+            created_by: userId,
+            kind: item.kind,
+            epistemic: item.epistemic,
+            lifecycle: item.lifecycle,
+            meta: item.meta ?? {},
+            provenance: item.provenance ?? [],
+          })),
+        )
+        .select("id, body");
+      if (error) {
+        throw new Error(`[supabase] create structured knowledge: ${error.message}`);
+      }
+      for (const row of data ?? []) {
+        const key = String(row.body).trim().toLowerCase();
+        if (!knowledgeIdsByBody.has(key)) {
+          knowledgeIdsByBody.set(key, String(row.id));
+        }
+      }
     }
 
     let timeline: TimelineItem[] = [];
@@ -511,6 +581,23 @@ export async function persistNewProject(
       if (error) throw new Error(`[supabase] create milestones: ${error.message}`);
       timeline = mapMilestoneRows(data ?? []);
     }
+
+    const riskIdsByTitle = new Map(
+      risks.map((r) => [r.title.trim().toLowerCase(), r.id]),
+    );
+    const { projectTags, itemTags } = tagsFromCreateDraft({
+      projectId,
+      input,
+      bundle: {
+        ...local,
+        project: { ...local.project, id: projectId, stakeholders },
+        todos,
+        timeline,
+      },
+      riskIdsByTitle,
+      knowledgeIdsByBody,
+    });
+    await persistTagBundle(client, workspaceId, projectId, projectTags, itemTags);
 
     let recommendations: Recommendation[] = [];
     if (local.recommendations.length) {

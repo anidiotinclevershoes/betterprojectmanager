@@ -27,6 +27,22 @@ import { confirmResponsibilityOwner as applyConfirmResponsibilityOwner } from "@
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import { ensurePersonOnProject as applyEnsurePersonOnProject } from "@/lib/people/identity";
 import { buildNewProject, type CreateProjectInput } from "./create-project";
+import {
+  isProjectCodeTaken,
+  projectCodeTakenMessage,
+  suggestCode,
+  normaliseProjectCode,
+} from "./create-project";
+import { risksFromSetup, structuredItemsFromSetup } from "@/lib/new-project/materialise-setup";
+import {
+  attachTagToItem,
+  detachTagFromItem,
+  PREDEFINED_LUME_TAGS,
+  tagDisplayName,
+  tagSlug,
+  tagsFromCreateDraft,
+  type TagTargetKind,
+} from "@/lib/tags";
 import { pruneBrowserResidueForDeletedProject } from "@/lib/workspace/prune-deleted-project-residue";
 import {
   projectDeleteResult,
@@ -88,6 +104,11 @@ import {
   persistTodoDelete,
   persistTodoUpdate,
 } from "@/lib/data/supabase/persist-mutations";
+import {
+  persistAttachItemTag,
+  persistDetachItemTag,
+  persistEnsureProjectTag,
+} from "@/lib/data/supabase/persist-tags";
 import {
   persistKnowledgeReconcile,
   remapStructuredForSections,
@@ -211,6 +232,18 @@ type MissionContextValue = {
   ) => void;
   addSuggestion: (input: AddSuggestionInput) => string | null;
   createProject: (input: CreateProjectInput) => Promise<string>;
+  attachItemTag: (input: {
+    projectId: string;
+    targetKind: TagTargetKind;
+    targetId: string;
+    name: string;
+  }) => void;
+  detachItemTag: (input: {
+    projectId: string;
+    targetKind: TagTargetKind;
+    targetId: string;
+    tagId: string;
+  }) => void;
   deleteProject: (projectId: string) => Promise<ProjectDeleteResult>;
   cloneRelOps: (input: CloneRelOpsInput) => void;
   refreshSuggestions: (projectId: string) => void;
@@ -322,6 +355,8 @@ function normaliseState(raw: MissionState): MissionState {
     risks: raw.risks ?? [],
     timeline: raw.timeline ?? [],
     history: raw.history ?? [],
+    projectTags: raw.projectTags ?? [],
+    itemTags: raw.itemTags ?? [],
     analysesThisMonth: raw.analysesThisMonth ?? 0,
     analysesMonthKey: raw.analysesMonthKey,
   };
@@ -1555,6 +1590,21 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     const scopedInput: CreateProjectInput = { ...input, clientProjectId };
 
     try {
+      if (
+        isProjectCodeTaken(
+          stateRef.current.projects,
+          normaliseProjectCode(
+            scopedInput.code.trim() || suggestCode(scopedInput.name),
+          ),
+        )
+      ) {
+        throw new Error(
+          projectCodeTakenMessage(
+            scopedInput.code.trim() || suggestCode(scopedInput.name),
+          ),
+        );
+      }
+
       let meta = persistMetaRef.current;
 
       if (meta.mode === "supabase" && !meta.workspaceId) {
@@ -1636,17 +1686,56 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       }
 
       const bundle = buildNewProject(scopedInput);
+      const risks = risksFromSetup(bundle.project.id, scopedInput);
+      const structured = structuredItemsFromSetup({
+        projectId: bundle.project.id,
+        input: scopedInput,
+        stakeholders: bundle.project.stakeholders,
+      });
+      const knowledgeIdsByBody = new Map<string, string>();
+      const sectionItemIds: NonNullable<typeof bundle.knowledge.sectionItemIds> =
+        {};
+      for (const [section, bullets] of Object.entries(bundle.knowledge.sections)) {
+        const ids = bullets.map((body) => {
+          const id = newClientId();
+          knowledgeIdsByBody.set(body.trim().toLowerCase(), id);
+          return id;
+        });
+        sectionItemIds[section as keyof typeof bundle.knowledge.sections] = ids;
+      }
+      for (const item of structured) {
+        if (!knowledgeIdsByBody.has(item.body.trim().toLowerCase())) {
+          knowledgeIdsByBody.set(item.body.trim().toLowerCase(), item.id);
+        }
+      }
+      const { projectTags, itemTags } = tagsFromCreateDraft({
+        projectId: bundle.project.id,
+        input: scopedInput,
+        bundle,
+        riskIdsByTitle: new Map(
+          risks.map((r) => [r.title.trim().toLowerCase(), r.id]),
+        ),
+        knowledgeIdsByBody,
+      });
+      const knowledge = {
+        ...bundle.knowledge,
+        sectionItemIds,
+        structured: [...(bundle.knowledge.structured ?? []), ...structured],
+      };
       setState((prev) => {
         let next = {
           ...prev,
           projects: [...prev.projects, bundle.project],
-          knowledge: [...(prev.knowledge ?? []), bundle.knowledge],
+          knowledge: [...(prev.knowledge ?? []), knowledge],
           recommendations: [
             ...bundle.recommendations,
             ...prev.recommendations,
           ],
           todos: [...bundle.todos, ...(prev.todos ?? [])],
           timeline: [...(bundle.timeline ?? []), ...(prev.timeline ?? [])],
+          risks: [...risks, ...(prev.risks ?? [])],
+          projectTags: [...(prev.projectTags ?? []), ...projectTags],
+          itemTags: [...(prev.itemTags ?? []), ...itemTags],
           lastAnalyzedAt: new Date().toISOString(),
         };
         if (input.sourceNarrative?.trim()) {
@@ -1691,6 +1780,125 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       createProjectInFlightRef.current = false;
     }
   }, [applyDurableWorkspace]);
+
+  const attachItemTag = useCallback(
+    (input: {
+      projectId: string;
+      targetKind: TagTargetKind;
+      targetId: string;
+      name: string;
+    }) => {
+      const display = tagDisplayName(input.name);
+      const slug = tagSlug(display);
+      if (!slug || !input.targetId) return;
+      const existing = (stateRef.current.projectTags ?? []).find(
+        (t) => t.projectId === input.projectId && t.slug === slug,
+      );
+      const tag = existing ?? {
+        id: newClientId(),
+        projectId: input.projectId,
+        name: display,
+        slug,
+        origin: (PREDEFINED_LUME_TAGS as readonly string[]).some(
+          (n) => tagSlug(n) === slug,
+        )
+          ? ("predefined" as const)
+          : ("custom" as const),
+      };
+      const itemTagId = newClientId();
+      setState((prev) => {
+        const next = attachTagToItem({
+          projectTags: prev.projectTags ?? [],
+          itemTags: prev.itemTags ?? [],
+          projectId: input.projectId,
+          tag,
+          targetKind: input.targetKind,
+          targetId: input.targetId,
+          itemTagId,
+        });
+        return {
+          ...prev,
+          projectTags: next.projectTags,
+          itemTags: next.itemTags,
+        };
+      });
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        void (async () => {
+          try {
+            const client = createBrowserSupabaseClient();
+            const saved = await persistEnsureProjectTag(
+              client,
+              meta.workspaceId!,
+              tag,
+            );
+            if (saved.id !== tag.id) {
+              setState((prev) => ({
+                ...prev,
+                projectTags: (prev.projectTags ?? []).map((t) =>
+                  t.id === tag.id ? saved : t,
+                ),
+                itemTags: (prev.itemTags ?? []).map((row) =>
+                  row.tagId === tag.id ? { ...row, tagId: saved.id } : row,
+                ),
+              }));
+            }
+            await persistAttachItemTag(client, meta.workspaceId!, {
+              id: itemTagId,
+              projectId: input.projectId,
+              tagId: saved.id,
+              targetKind: input.targetKind,
+              targetId: input.targetId,
+            });
+            markPersistSaved();
+          } catch (err) {
+            console.error("[attachItemTag] persist failed", err);
+            reportPersistFailure(err, "Could not save tag");
+          }
+        })();
+      }
+    },
+    [],
+  );
+
+  const detachItemTag = useCallback(
+    (input: {
+      projectId: string;
+      targetKind: TagTargetKind;
+      targetId: string;
+      tagId: string;
+    }) => {
+      setState((prev) => ({
+        ...prev,
+        itemTags: detachTagFromItem({
+          itemTags: prev.itemTags ?? [],
+          tagId: input.tagId,
+          targetKind: input.targetKind,
+          targetId: input.targetId,
+        }),
+      }));
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        void (async () => {
+          try {
+            const client = createBrowserSupabaseClient();
+            await persistDetachItemTag(client, meta.workspaceId!, {
+              projectId: input.projectId,
+              tagId: input.tagId,
+              targetKind: input.targetKind,
+              targetId: input.targetId,
+            });
+            markPersistSaved();
+          } catch (err) {
+            console.error("[detachItemTag] persist failed", err);
+            reportPersistFailure(err, "Could not remove tag");
+          }
+        })();
+      }
+    },
+    [],
+  );
 
   const deleteProject = useCallback(async (projectId: string) => {
     if (deleteProjectInFlightRef.current) {
@@ -2812,6 +3020,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateMeeting,
       addSuggestion,
       createProject,
+      attachItemTag,
+      detachItemTag,
       deleteProject,
       cloneRelOps,
       refreshSuggestions,
@@ -2859,6 +3069,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       updateMeeting,
       addSuggestion,
       createProject,
+      attachItemTag,
+      detachItemTag,
       deleteProject,
       cloneRelOps,
       refreshSuggestions,

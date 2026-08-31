@@ -106,6 +106,23 @@ check("nested entities require workspace membership", () => {
   }
 });
 
+const tagsPath = path.join(
+  root,
+  "supabase/migrations/20260831160000_project_retrieval_tags.sql",
+);
+check("retrieval tags migration exists with RLS and workspace uniqueness", () => {
+  assert.equal(fs.existsSync(tagsPath), true);
+  const tags = fs.readFileSync(tagsPath, "utf8");
+  assert.match(tags, /create table public\.project_tags/i);
+  assert.match(tags, /create table public\.item_tags/i);
+  assert.match(tags, /projects_workspace_code_lower_idx/i);
+  assert.match(tags, /alter table public\.project_tags enable row level security/i);
+  assert.match(tags, /alter table public\.item_tags enable row level security/i);
+  assert.match(tags, /policy project_tags_select_member/i);
+  assert.match(tags, /policy item_tags_insert_member/i);
+  assert.match(tags, /target_kind in \('risk', 'todo', 'stakeholder', 'knowledge_item', 'milestone'\)/i);
+});
+
 check("policies use is_workspace_member / auth.uid", () => {
   assert.match(rls, /is_workspace_member\(workspace_id\)/i);
   assert.match(rls, /auth\.uid\(\)/i);

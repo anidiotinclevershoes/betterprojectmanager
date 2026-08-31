@@ -29,7 +29,10 @@ export function draftFromProvisional(args: {
         clientKey: newSetupClientKey(),
         name: name || item.statement,
         role: asString(item.proposedValues?.role) || asString(item.proposedValues?.scope),
-        needsReview: !name,
+        responsibilities: [
+          asString(item.proposedValues?.role) || asString(item.proposedValues?.scope),
+        ].filter((s): s is string => Boolean(s)),
+        needsReview: !name || !(asString(item.proposedValues?.role) || asString(item.proposedValues?.scope)),
       };
     });
 
@@ -56,7 +59,7 @@ export function draftFromProvisional(args: {
       clientKey: newSetupClientKey(),
       label: asString(item.proposedValues?.label) || item.statement,
       date: asString(item.proposedValues?.date) || asString(item.proposedValues?.startAt),
-      needsReview: false,
+      needsReview: !(asString(item.proposedValues?.date) || asString(item.proposedValues?.startAt)),
     }));
 
   const knowledgeRemember = args.items

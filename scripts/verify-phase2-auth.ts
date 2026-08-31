@@ -61,15 +61,19 @@ check("proxy treats auth pages as public", () => {
   assert.match(proxy, /updateSupabaseSession|getAuthMode/);
 });
 
-check("production New Project UI has Talk + Blank only", () => {
+check("production New Project UI is a single four-frame compose page", () => {
   const ui = fs.readFileSync(
     path.join(root, "src/components/onboarding/NewProjectExperience.tsx"),
     "utf8",
   );
-  assert.match(ui, /Talk It Through/);
-  assert.match(ui, /Start Blank/);
-  assert.doesNotMatch(ui, /Paste Project Information/);
-  assert.doesNotMatch(ui, /onPaste/);
+  assert.match(ui, /Create Project/);
+  assert.match(ui, /Organise notes/);
+  assert.match(ui, /np-frame-issues/);
+  assert.match(ui, /np-frame-people/);
+  assert.match(ui, /np-frame-todo/);
+  assert.match(ui, /np-frame-knowledge/);
+  assert.doesNotMatch(ui, /Talk It Through/);
+  assert.doesNotMatch(ui, /Start Recording/);
 });
 
 check("logout clears authenticated browser caches helper", () => {

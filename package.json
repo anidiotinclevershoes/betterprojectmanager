@@ -21,6 +21,8 @@
     "verify:capture-review": "npx --yes tsx scripts/verify-capture-review.ts",
     "verify:capture-workspace": "npx --yes tsx scripts/verify-capture-workspace-refinement.ts",
     "verify:new-project": "npx --yes tsx scripts/verify-new-project-onboarding.ts",
+    "verify:new-project-four-frame": "npx --yes tsx scripts/verify-new-project-four-frame.ts",
+    "verify:project-tags": "npx --yes tsx scripts/verify-project-tags.ts",
     "verify:phase3a-integrity": "npx --yes tsx scripts/verify-phase3a-integrity.ts",
     "verify:project-delete": "npx --yes tsx scripts/verify-project-delete.ts",
     "verify:rls-policies": "npx --yes tsx scripts/verify-rls-policies.ts",

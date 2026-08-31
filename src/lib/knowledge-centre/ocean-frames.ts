@@ -182,10 +182,22 @@ export function buildPeopleRows(state: MissionState, projectId: string) {
 }
 
 export function buildDateRows(state: MissionState, projectId: string) {
-  return (state.timeline ?? [])
+  const rows = (state.timeline ?? [])
     .filter((t) => t.projectId === projectId)
     .map((t) => ({
       id: t.id,
       title: formatMilestoneLabel(t.label, t.startAt) ?? t.label,
     }));
+  const seen = new Set(rows.map((r) => r.title.toLowerCase()));
+  const knowledge =
+    state.knowledge.find((k) => k.projectId === projectId) ??
+    emptyKnowledge(projectId);
+  for (const item of knowledge.structured ?? []) {
+    if (item.kind !== "date" || item.lifecycle !== "current") continue;
+    const label = item.meta?.date?.label || item.body;
+    if (seen.has(label.toLowerCase())) continue;
+    seen.add(label.toLowerCase());
+    rows.push({ id: item.id, title: label });
+  }
+  return rows;
 }

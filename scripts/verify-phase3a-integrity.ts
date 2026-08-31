@@ -475,7 +475,7 @@ async function main() {
     assert.match(store, /\/api\/workspace\/projects/);
     assert.doesNotMatch(store, /trying browser persist/);
     const createFn = store.slice(store.indexOf("const createProject = useCallback"));
-    const createFnEnd = createFn.indexOf("const cloneRelOps");
+    const createFnEnd = createFn.indexOf("const attachItemTag");
     const createBody = createFn.slice(0, createFnEnd);
     assert.ok(createBody.includes("/api/workspace/projects"));
     assert.doesNotMatch(createBody, /persistNewProject\(/);

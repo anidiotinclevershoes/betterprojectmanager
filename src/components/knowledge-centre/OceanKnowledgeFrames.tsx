@@ -24,6 +24,8 @@ import {
   buildPeopleRows,
   buildTodoRows,
 } from "@/lib/knowledge-centre/ocean-frames";
+import { KnowledgeTagFilter } from "@/components/knowledge-centre/KnowledgeTagFilter";
+import { itemVisibleForTagFilter } from "@/lib/tags";
 import { isKnowledgeUuid } from "@/lib/knowledge-identity";
 import { useMission } from "@/lib/store";
 import { MeetingPrepFrame } from "@/components/frames/MeetingPrepFrame";
@@ -74,6 +76,7 @@ function epistemicLabel(
 export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
   const { state } = useMission();
   const [selected, setSelected] = useState<KnowledgeItemRef | null>(null);
+  const [tagFilter, setTagFilter] = useState<string[]>([]);
 
   const project = state.projects.find((p) => p.id === projectId);
   const knowledge =
@@ -88,6 +91,28 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
 
   const isSelected = (ref: KnowledgeItemRef) =>
     knowledgeDetailEquals(selected, ref);
+
+  const itemTags = state.itemTags ?? [];
+  const projectTags = state.projectTags ?? [];
+  const usedTagIds = useMemo(() => {
+    return new Set(
+      itemTags
+        .filter((row) => row.projectId === projectId)
+        .map((row) => row.tagId),
+    );
+  }, [itemTags, projectId]);
+
+  const tagVisible = (
+    kind: "risk" | "todo" | "stakeholder" | "knowledge_item" | "milestone",
+    id: string | null | undefined,
+  ) =>
+    itemVisibleForTagFilter({
+      itemTags,
+      projectId,
+      targetKind: kind,
+      targetId: id ?? "",
+      selectedTagIds: tagFilter,
+    });
 
   const currentPosition = useMemo(() => {
     const structured = (knowledge.structured ?? []).filter(
@@ -214,6 +239,13 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
 
   return (
     <div className="ocean-knowledge-frames" data-testid="ocean-knowledge-frames">
+      <KnowledgeTagFilter
+        projectId={projectId}
+        projectTags={projectTags}
+        usedTagIds={usedTagIds}
+        selectedTagIds={tagFilter}
+        onChange={setTagFilter}
+      />
       <div
         className="ocean-knowledge-frames-primary"
         data-testid="ocean-frames-primary"
@@ -223,8 +255,10 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
           accent="position"
           testId="ocean-frame-current-position"
         >
-          {currentPosition.length ? (
-            currentPosition.map((item) => (
+          {currentPosition.filter((item) => tagVisible("knowledge_item", item.id)).length ? (
+            currentPosition
+              .filter((item) => tagVisible("knowledge_item", item.id))
+              .map((item) => (
               <KnowledgeItemCard
                 key={item.id}
                 title={item.title}
@@ -246,8 +280,17 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
           accent="risks"
           testId="ocean-frame-risks"
         >
-          {risks.length ? (
-            risks.map((item) => {
+          {risks.filter((item) =>
+            tagVisible(isKnowledgeUuid(item.id) ? "risk" : "knowledge_item", item.id),
+          ).length ? (
+            risks
+              .filter((item) =>
+                tagVisible(
+                  isKnowledgeUuid(item.id) ? "risk" : "knowledge_item",
+                  item.id,
+                ),
+              )
+              .map((item) => {
               const ref = isKnowledgeUuid(item.id)
                 ? refForRisk(item.id)
                 : refForKnowledgeRisk(item.id, item.title);
@@ -268,8 +311,10 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
         </FrameShell>
 
         <FrameShell title="To Do" accent="todo" testId="ocean-frame-todo">
-          {todos.length ? (
-            todos.map((item) => {
+          {todos.filter((item) => tagVisible("todo", item.id)).length ? (
+            todos
+              .filter((item) => tagVisible("todo", item.id))
+              .map((item) => {
               const ref = refForTodo(item.id);
               return (
                 <KnowledgeItemCard
@@ -297,8 +342,14 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
           accent="people"
           testId="ocean-frame-people"
         >
-          {peopleCards.length ? (
-            peopleCards.map((item) =>
+          {peopleCards.filter((item) =>
+            tagVisible("stakeholder", item.personId ?? item.id),
+          ).length ? (
+            peopleCards
+              .filter((item) =>
+                tagVisible("stakeholder", item.personId ?? item.id),
+              )
+              .map((item) =>
               item.ref ? (
                 <KnowledgeItemCard
                   key={item.id}
@@ -350,8 +401,10 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
           accent="decisions"
           testId="ocean-frame-decisions"
         >
-          {decisionLines.length ? (
-            decisionLines.map((item) => (
+          {decisionLines.filter((item) => tagVisible("knowledge_item", item.id)).length ? (
+            decisionLines
+              .filter((item) => tagVisible("knowledge_item", item.id))
+              .map((item) => (
               <KnowledgeItemCard
                 key={item.id}
                 title={item.title}
@@ -370,8 +423,10 @@ export function OceanKnowledgeFrames({ projectId }: { projectId: string }) {
           accent="dates"
           testId="ocean-frame-dates"
         >
-          {dates.length ? (
-            dates.map((item) => (
+          {dates.filter((item) => tagVisible("milestone", item.id)).length ? (
+            dates
+              .filter((item) => tagVisible("milestone", item.id))
+              .map((item) => (
               <KnowledgeItemCard
                 key={item.id}
                 title={item.title}

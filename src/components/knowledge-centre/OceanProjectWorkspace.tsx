@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CaptureWorkspace } from "@/components/capture/CaptureWorkspace";
 import { DeleteProjectButton } from "@/components/knowledge-centre/DeleteProjectButton";
 import { KnowledgeSearchAskBar } from "@/components/knowledge-centre/KnowledgeSearchAskBar";
@@ -18,6 +18,12 @@ import type { Project } from "@/lib/types";
  */
 export function OceanProjectWorkspace({ project }: { project: Project }) {
   const [mode, setMode] = useState<OceanProjectMode>("knowledge");
+  const [justCreated, setJustCreated] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setJustCreated(params.get("created") === "1");
+  }, []);
 
   return (
     <div
@@ -26,7 +32,11 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
       data-project-id={project.id}
       data-project-mode={mode}
     >
-      <ProjectIntelligenceStrip projectId={project.id} />
+      {justCreated ? (
+        <p className="np-created-cue" data-testid="np-created-cue" role="status">
+          Your starting picture is saved. Capture keeps Lume current from here.
+        </p>
+      ) : null}
 
       <header className="ocean-project-header">
         <div className="ocean-project-identity">
