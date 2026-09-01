@@ -3,7 +3,10 @@
 import { useMemo, useState } from "react";
 import { KnowledgeItemDetailDrawer } from "@/components/knowledge-centre/KnowledgeItemDetailDrawer";
 import { KnowledgeTagFilter } from "@/components/knowledge-centre/KnowledgeTagFilter";
-import { KcTimeline } from "@/components/knowledge-centre/KcTimeline";
+import {
+  KcTimeline,
+  KcTimelinePreview,
+} from "@/components/knowledge-centre/KcTimeline";
 import {
   MeetingCatchUpPanel,
   NextMeetingCue,
@@ -327,6 +330,9 @@ export function OceanKnowledgeFrames({
               >
                 {timelineOpen ? "Timeline ▾" : "View timeline"}
               </button>
+              {!timelineOpen && !timeline.sparse ? (
+                <KcTimelinePreview projectId={projectId} />
+              ) : null}
               {timelineOpen ? (
                 <KcTimeline
                   projectId={projectId}

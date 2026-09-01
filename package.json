@@ -48,6 +48,7 @@
     "verify:ocean-knowledge-centre": "npx --yes tsx scripts/verify-ocean-knowledge-centre.ts",
     "verify:knowledge-centre-four-bucket": "npx --yes tsx scripts/verify-knowledge-centre-four-bucket.ts",
     "verify:kc-timeline-meeting-prep": "npx --yes tsx scripts/verify-kc-timeline-meeting-prep.ts",
+    "verify:timeline-visual-polish": "npx --yes tsx scripts/verify-timeline-visual-polish.ts",
     "verify:ocean-capture": "npx --yes tsx scripts/verify-ocean-capture.ts",
     "verify:ocean-item-detail": "npx --yes tsx scripts/verify-ocean-item-detail.ts",
     "verify:people-context-ui": "npx --yes tsx scripts/verify-people-context-ui.ts",
