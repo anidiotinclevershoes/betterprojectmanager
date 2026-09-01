@@ -221,8 +221,10 @@ export function composeTimelineProjection(
     const earliest = Math.min(...times);
     const latest = Math.max(...times);
     if (sparse) {
-      startMs = Math.min(earliest, now) - 2 * DAY;
-      endMs = Math.max(latest, now) + 7 * DAY;
+      startMs = earliest - 3 * DAY;
+      endMs = latest + 4 * DAY;
+      if (now < startMs && startMs - now <= 10 * DAY) startMs = now - DAY;
+      if (now > endMs && now - endMs <= 10 * DAY) endMs = now + DAY;
     } else {
       startMs = Math.min(earliest - DAY, now - 2 * DAY);
       endMs = Math.max(latest + 2 * DAY, now + 14 * DAY);

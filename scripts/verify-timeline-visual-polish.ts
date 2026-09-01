@@ -138,6 +138,20 @@ check("sparse Timeline stays compact", () => {
   assert.equal(compactPreviewEvents(few).length, 0);
   const spanDays = (few.endMs - few.startMs) / 86400000;
   assert.ok(spanDays <= 12);
+
+  const far = clone(empty);
+  far.timeline = [
+    {
+      id: "far",
+      projectId: "proj-empty",
+      label: "UAT sign-off",
+      type: "milestone",
+      startAt: new Date(Date.now() + 45 * 86400000).toISOString(),
+    },
+  ];
+  const distant = composeTimelineProjection(far, "proj-empty");
+  assert.equal(distant.sparse, true);
+  assert.ok((distant.endMs - distant.startMs) / 86400000 <= 12);
 });
 
 check("known Away range displays as a range, not a point", () => {
