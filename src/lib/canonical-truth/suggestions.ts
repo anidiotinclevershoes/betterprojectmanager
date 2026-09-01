@@ -7,11 +7,13 @@ import { deriveLegacyStructured } from "@/lib/canonical-truth/serialize";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import type { TellMeSuggestedQuestion } from "@/lib/tell-me/types";
 import { emptyKnowledge } from "@/lib/knowledge";
+import { formatWhenQuestion } from "@/lib/tell-me/when-question";
 
 const TEMPLATES = {
   responsibility: (scope: string) => `Who owns ${scope}?`,
   unknownOwner: (scope: string) => `Who owns ${scope}?`,
-  milestone: (label: string) => `When is ${label}?`,
+  milestone: (label: string, dateIso?: string | null) =>
+    formatWhenQuestion(label, dateIso),
   waitingOn: (person: string) => `What am I waiting on from ${person}?`,
   blocking: (item: string) => `What is blocking ${item}?`,
   availability: (person: string) => `When does ${person} return?`,
@@ -143,7 +145,7 @@ export function buildCanonicalSuggestions(args: {
   }
 
   for (const t of args.state.timeline.filter((x) => x.projectId === projectId)) {
-    const question = TEMPLATES.milestone(t.label);
+    const question = TEMPLATES.milestone(t.label, t.startAt);
     if (matchesQuery(question) || matchesQuery(t.label)) {
       pushUnique(
         out,

@@ -3,8 +3,11 @@
 import { useMemo, useState } from "react";
 import { KnowledgeItemDetailDrawer } from "@/components/knowledge-centre/KnowledgeItemDetailDrawer";
 import { KnowledgeTagFilter } from "@/components/knowledge-centre/KnowledgeTagFilter";
-import { MeetingPrepFrame } from "@/components/frames/MeetingPrepFrame";
-import { TimelineFrame } from "@/components/frames/TimelineFrame";
+import { KcTimeline } from "@/components/knowledge-centre/KcTimeline";
+import {
+  MeetingCatchUpPanel,
+  NextMeetingCue,
+} from "@/components/knowledge-centre/MeetingCatchUp";
 import {
   knowledgeDetailEquals,
   refForRisk,
@@ -23,8 +26,8 @@ import {
   type KcComposedItem,
   type KcKnowledgeSubtype,
 } from "@/lib/knowledge-centre/four-bucket";
+import { composeTimelineProjection } from "@/lib/knowledge-centre/timeline-projection";
 import { useMission } from "@/lib/store";
-import { buildMeetingPrepItems } from "@/lib/workspace/frames-data";
 
 const ALL_PREVIEW = 6;
 
@@ -55,9 +58,7 @@ function KcItemCard({
               {item.icon}
             </span>
             <div className="compact-change-titles">
-              <p className="compact-change-type">
-                {bucketLabel(item.bucket)} · {item.typeLabel}
-              </p>
+              <p className="compact-change-type">{item.typeLabel}</p>
               <h4 className="compact-change-title">{item.title}</h4>
             </div>
           </div>
@@ -149,6 +150,7 @@ export function OceanKnowledgeFrames({
   const [bucket, setBucket] = useState<KcBucket>("all");
   const [subtype, setSubtype] = useState<KcKnowledgeSubtype>("all");
   const [timelineOpen, setTimelineOpen] = useState(false);
+  const [catchUpId, setCatchUpId] = useState<string | null>(null);
 
   // Keep these symbols in this module — item-detail / people UI contracts.
   void refForTodo;
@@ -184,11 +186,10 @@ export function OceanKnowledgeFrames({
     );
   }, [state.itemTags, projectId]);
 
-  const meetingItems = useMemo(
-    () => buildMeetingPrepItems(state, projectId),
+  const timeline = useMemo(
+    () => composeTimelineProjection(state, projectId),
     [state, projectId],
   );
-  const hasTimeline = (state.timeline ?? []).some((t) => t.projectId === projectId);
 
   const select = (ref: KnowledgeItemRef) => {
     setSelected((prev) => (knowledgeDetailEquals(prev, ref) ? null : ref));
@@ -310,32 +311,39 @@ export function OceanKnowledgeFrames({
       </div>
 
       {bucket === "knowledge" || bucket === "all" ? (
-        hasTimeline ? (
-          <div className="kc-feature" data-testid="ocean-frame-timeline">
-            <button
-              type="button"
-              className="kc-feature-toggle"
-              aria-expanded={timelineOpen}
-              onClick={() => setTimelineOpen((v) => !v)}
-            >
-              Timeline
-            </button>
-            {timelineOpen ? (
-              <div className="kc-feature-body ocean-embed-frame">
-                <TimelineFrame projectId={projectId} size="tall" />
-              </div>
-            ) : null}
-          </div>
-        ) : null
+        <>
+          <NextMeetingCue
+            projectId={projectId}
+            onOpen={(id) => setCatchUpId(id)}
+          />
+          {timeline.empty ? null : (
+            <div className="kc-feature" data-testid="ocean-frame-timeline">
+              <button
+                type="button"
+                className="kc-feature-toggle"
+                aria-expanded={timelineOpen}
+                data-testid="kc-timeline-toggle"
+                onClick={() => setTimelineOpen((v) => !v)}
+              >
+                {timelineOpen ? "Timeline ▾" : "View timeline"}
+              </button>
+              {timelineOpen ? (
+                <KcTimeline
+                  projectId={projectId}
+                  onMeetingPrep={(id) => setCatchUpId(id)}
+                />
+              ) : null}
+            </div>
+          )}
+        </>
       ) : null}
 
-      {bucket === "all" && meetingItems.length ? (
-        <div className="kc-feature" data-testid="ocean-frame-meeting-prep">
-          <p className="kc-feature-label">Meeting Prep</p>
-          <div className="kc-feature-body ocean-embed-frame">
-            <MeetingPrepFrame projectId={projectId} size="compact" />
-          </div>
-        </div>
+      {catchUpId ? (
+        <MeetingCatchUpPanel
+          projectId={projectId}
+          meetingId={catchUpId}
+          onClose={() => setCatchUpId(null)}
+        />
       ) : null}
 
       <KnowledgeItemDetailDrawer
