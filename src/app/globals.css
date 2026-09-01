@@ -8349,8 +8349,13 @@ body {
 .kc-cross-cue,
 .kc-zero {
   margin: 0;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 0.85rem;
+}
+
+.kc-cross-cue .kc-more-link {
+  color: var(--accent-primary);
+  text-decoration: none;
 }
 
 .kc-four-body {
