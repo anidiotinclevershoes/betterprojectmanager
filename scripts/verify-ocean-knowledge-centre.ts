@@ -18,8 +18,6 @@ import {
   oceanIntelligenceCounts,
 } from "../src/lib/knowledge-centre/ocean-counts";
 import {
-  OCEAN_PRIMARY_FRAMES,
-  OCEAN_SECONDARY_FRAMES,
   OCEAN_SIDEBAR_FORBIDDEN,
   buildOpenRiskRows,
   buildPeopleRows,
@@ -125,17 +123,16 @@ function testFramesLayoutContract() {
   );
   assert.match(workspace, /knowledge/);
   assert.match(workspace, /OceanKnowledgeFrames/);
+  assert.match(workspace, /kc-heading/);
   assert.doesNotMatch(frames, />More project knowledge</i);
   assert.doesNotMatch(workspace, />More project knowledge</i);
   assert.doesNotMatch(frames, /more-project-knowledge/i);
-  for (const title of OCEAN_PRIMARY_FRAMES) {
-    assert.match(frames, new RegExp(title));
-  }
-  for (const title of OCEAN_SECONDARY_FRAMES) {
-    assert.match(frames, new RegExp(title));
-  }
-  assert.match(frames, /ocean-frames-primary/);
-  assert.match(frames, /ocean-frames-secondary/);
+  assert.match(frames, /kc-bucket-\$\{id\}/);
+  assert.match(frames, /kc-bucket-nav/);
+  assert.match(frames, /data-testid="ocean-knowledge-frames"/);
+  assert.doesNotMatch(frames, /No items with this tag/);
+  assert.doesNotMatch(frames, /ocean-frames-primary/);
+  assert.doesNotMatch(frames, /accent-risks/);
 }
 
 function testNoProgressKpi() {
@@ -291,7 +288,7 @@ async function main() {
   testSearchAskContract();
   console.log("✓ Search non-AI; Ask AI; quiet suggestions");
   testFramesLayoutContract();
-  console.log("✓ three primary frames + secondary; no More control");
+  console.log("✓ four-bucket Knowledge Centre chrome; no More control");
   testNoProgressKpi();
   console.log("✓ no Progress KPI; Refresh + actions left present");
   testResolvedRisksExcluded();

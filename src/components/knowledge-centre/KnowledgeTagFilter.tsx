@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { uniqueProjectTagNames, type ProjectTag } from "@/lib/tags";
 
-const VISIBLE = 6;
+const VISIBLE = 4;
 
 export function KnowledgeTagFilter({
   projectId,
@@ -58,7 +58,7 @@ export function KnowledgeTagFilter({
             className="tag-chip-add-btn"
             onClick={() => setMore((v) => !v)}
           >
-            {more ? "Less" : "More"}
+            {more ? "Less" : "+ More"}
           </button>
         ) : null}
         {selectedTagIds.length ? (

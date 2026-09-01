@@ -13,7 +13,18 @@ import { useTellMeSession } from "@/components/tell-me/TellMeSessionContext";
  * Deterministic Search Knowledge + ✦ Ask Lume — clearly distinct.
  * Search never calls AI. Ask uses existing Tell Me session (flag-respecting).
  */
-export function KnowledgeSearchAskBar({ projectId }: { projectId: string }) {
+export function KnowledgeSearchAskBar({
+  projectId,
+  search: searchProp,
+  onSearchChange,
+  showInlineResults = false,
+}: {
+  projectId: string;
+  search?: string;
+  onSearchChange?: (value: string) => void;
+  /** When false, four-bucket view owns result presentation. */
+  showInlineResults?: boolean;
+}) {
   const { state } = useMission();
   const {
     question,
@@ -25,7 +36,9 @@ export function KnowledgeSearchAskBar({ projectId }: { projectId: string }) {
     suggestions,
     clearThread,
   } = useTellMeSession();
-  const [search, setSearch] = useState("");
+  const [internalSearch, setInternalSearch] = useState("");
+  const search = searchProp ?? internalSearch;
+  const setSearch = onSearchChange ?? setInternalSearch;
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
 
   const knowledge =
@@ -57,7 +70,7 @@ export function KnowledgeSearchAskBar({ projectId }: { projectId: string }) {
     <div className="ocean-search-ask" data-testid="ocean-search-ask">
       <div className="ocean-search-ask-row">
         <label className="ocean-search-field">
-          <span className="sr-only">Search knowledge</span>
+          <span className="sr-only">Search this project</span>
           <span className="ocean-search-ico" aria-hidden>
             ⌕
           </span>
@@ -65,7 +78,7 @@ export function KnowledgeSearchAskBar({ projectId }: { projectId: string }) {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search knowledge…"
+            placeholder="Search this project…"
             autoComplete="off"
             data-testid="ocean-search-input"
             data-ai="false"
@@ -99,7 +112,7 @@ export function KnowledgeSearchAskBar({ projectId }: { projectId: string }) {
         </form>
       </div>
 
-      {search.trim() ? (
+      {showInlineResults && search.trim() ? (
         <div
           className="ocean-search-results"
           data-testid="ocean-search-results"

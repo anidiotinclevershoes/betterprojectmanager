@@ -12,6 +12,13 @@ export type KnowledgeSearchHit = {
   matchRanges: Array<{ start: number; end: number }>;
 };
 
+/** Same matching used by Knowledge search — substring, case-insensitive. */
+export function queryMatchesText(haystack: string, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return haystack.toLowerCase().includes(q);
+}
+
 function rangesFor(haystack: string, needle: string): Array<{ start: number; end: number }> {
   const ranges: Array<{ start: number; end: number }> = [];
   if (!needle.trim()) return ranges;
