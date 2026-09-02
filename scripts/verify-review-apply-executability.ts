@@ -72,6 +72,10 @@ function stubResult(): CaptureResult {
   };
 }
 
+function preflight() {
+  return { world: world(), captureEntryProjectId: "proj-candy" };
+}
+
 function world(): CaptureApplyWorld {
   return {
     projectIds: new Set(["proj-candy"]),
@@ -197,7 +201,13 @@ await check("A. stakeholder remove is not Ready and does not mutate", async () =
   });
   assert.equal(isApplyExecutableSuggestion(item), false);
 
-  const models = buildReviewChangeViewModels([item], stubResult(), "");
+  const models = buildReviewChangeViewModels(
+    [item],
+    stubResult(),
+    "",
+    {},
+    preflight(),
+  );
   assert.equal(models[0]?.readiness, "needs_review");
   assert.equal(models[0]?.executableApply, false);
   assert.match(
@@ -210,9 +220,15 @@ await check("A. stakeholder remove is not Ready and does not mutate", async () =
   );
   assert.equal(pendingReadyModels(models, {}, {}).length, 0);
 
-  const forced = buildReviewChangeViewModels([item], stubResult(), "", {
-    "rm-vendor": { accepted: true, readiness: "ready" },
-  });
+  const forced = buildReviewChangeViewModels(
+    [item],
+    stubResult(),
+    "",
+    {
+      "rm-vendor": { accepted: true, readiness: "ready" },
+    },
+    preflight(),
+  );
   assert.equal(forced[0]?.readiness, "needs_review");
   assert.equal(forced[0]?.executableApply, false);
   assert.equal(pendingReadyModels(forced, {}, {}).length, 0);
@@ -236,9 +252,16 @@ await check("B. supported To Do create stays Ready and writes", async () => {
     content: "Draft the carnival seating plan",
   });
   assert.equal(isApplyExecutableSuggestion(item), true);
-  const models = buildReviewChangeViewModels([item], stubResult(), "");
+  const models = buildReviewChangeViewModels(
+    [item],
+    stubResult(),
+    item.content,
+    {},
+    preflight(),
+  );
   assert.equal(models[0]?.readiness, "ready");
   assert.equal(models[0]?.executableApply, true);
+  assert.equal(models[0]?.canApprove, true);
   assert.equal(pendingReadyModels(models, {}, {}).length, 1);
 
   const { decision, executed, state } = await applyItem(item);
@@ -258,7 +281,13 @@ await check("C. supported milestone update stays Ready and writes", async () => 
     proposedValues: { startAt: "2026-10-30T12:00:00.000Z" },
   });
   assert.equal(isApplyExecutableSuggestion(item), true);
-  const models = buildReviewChangeViewModels([item], stubResult(), "");
+  const models = buildReviewChangeViewModels(
+    [item],
+    stubResult(),
+    "Move launch to 30 October 2026.",
+    {},
+    preflight(),
+  );
   assert.equal(models[0]?.readiness, "ready");
   const { decision, executed } = await applyItem(item, "Move launch to 30 October 2026.");
   assert.equal(decision.kind, "write");
@@ -283,7 +312,13 @@ await check("D. supported To Do complete and Risk resolve stay executable", asyn
   });
   assert.equal(isApplyExecutableSuggestion(todo), true);
   assert.equal(isApplyExecutableSuggestion(risk), true);
-  const models = buildReviewChangeViewModels([todo, risk], stubResult(), "");
+  const models = buildReviewChangeViewModels(
+    [todo, risk],
+    stubResult(),
+    "CAB is done. Bridge icing is resolved.",
+    {},
+    preflight(),
+  );
   assert.equal(models[0]?.readiness, "ready");
   assert.equal(models[1]?.readiness, "ready");
 
@@ -354,7 +389,13 @@ await check("E. unsupported domain × operation combinations cannot be Ready", (
       false,
       `${row.domain} × ${row.op} should be unsupported`,
     );
-    const models = buildReviewChangeViewModels([item], stubResult(), "");
+    const models = buildReviewChangeViewModels(
+      [item],
+      stubResult(),
+      "",
+      {},
+      preflight(),
+    );
     assert.notEqual(
       models[0]?.readiness,
       "ready",
@@ -377,7 +418,13 @@ await check("F. meeting / unsupported domain cannot be Ready", () => {
     content: "Book a SteerCo slot",
     legalDomain: "unsupported",
   });
-  const models = buildReviewChangeViewModels([item], stubResult(), "");
+  const models = buildReviewChangeViewModels(
+    [item],
+    stubResult(),
+    "",
+    {},
+    preflight(),
+  );
   assert.notEqual(models[0]?.readiness, "ready");
   assert.equal(pendingReadyModels(models, {}, {}).length, 0);
 });
@@ -393,7 +440,13 @@ await check("G. dismiss / Needs You path stays intact for supported ambiguity", 
     personName: "Pippa Gumdrop",
     responsibilityScope: "UAT",
   });
-  const models = buildReviewChangeViewModels([item], stubResult(), "");
+  const models = buildReviewChangeViewModels(
+    [item],
+    stubResult(),
+    "",
+    {},
+    preflight(),
+  );
   assert.equal(models[0]?.readiness, "needs_review");
   assert.equal(isApplyExecutableSuggestion(item), true);
   assert.equal(models[0]?.executableApply, true);

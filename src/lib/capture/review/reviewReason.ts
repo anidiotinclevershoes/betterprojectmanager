@@ -83,6 +83,14 @@ export function deriveReviewReason(args: {
   if (readiness === "unmatched") return "TARGET_UNCERTAIN";
 
   if (
+    /changed since Review|Capture again before applying|no longer on this project/i.test(
+      blob,
+    )
+  ) {
+    return "OPERATION_UNCERTAIN";
+  }
+
+  if (
     finding?.invalidTarget ||
     /which existing|couldn'?t confidently identify|could not (identify|match)|unmatched|which record|target/i.test(
       blob,

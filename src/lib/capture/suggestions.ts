@@ -614,6 +614,9 @@ export type CaptureReviewOverride = {
   projectId?: string | null;
   projectName?: string | null;
   accepted?: boolean;
+  date?: string;
+  targetEntityId?: string;
+  blockedReason?: string;
 };
 
 export type CapturePersistSlice = {

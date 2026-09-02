@@ -68,6 +68,10 @@ export function CorrectionActions({
   const applyExecutable =
     model.executableApply !== false &&
     isApplyExecutableSuggestion(model.suggestion);
+  const canApprove =
+    applyExecutable &&
+    (model.canApprove === true ||
+      (model.canApprove === undefined && model.readiness === "ready"));
   const userCanRepair =
     reason === "ENTITY_TYPE_UNCERTAIN" ||
     reason === "PROJECT_UNCERTAIN" ||
@@ -91,7 +95,7 @@ export function CorrectionActions({
     );
   }
 
-  if (!reason && model.readiness === "ready" && applyExecutable) {
+  if (!reason && model.readiness === "ready" && canApprove) {
     return (
       <div className="compact-change-action-row">
         <button type="button" className="primary-btn" onClick={handlers.onApprove}>
@@ -381,7 +385,7 @@ export function CorrectionActions({
           >
             Resolve Risk
           </button>
-        ) : applyExecutable ? (
+        ) : canApprove ? (
           <button
             type="button"
             className="primary-btn"

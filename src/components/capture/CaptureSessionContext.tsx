@@ -622,6 +622,19 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           adoptAppliedState(data.state);
         }
         if (decision.kind === "needs_you") {
+          setSlice((prev) => ({
+            ...prev,
+            reviewOverrides: {
+              ...(prev.reviewOverrides ?? {}),
+              [item.id]: {
+                ...(prev.reviewOverrides?.[item.id] ?? {}),
+                accepted: false,
+                readiness: "needs_review",
+                reviewReason: "OPERATION_UNCERTAIN",
+                blockedReason: decision.reason,
+              },
+            },
+          }));
           announce(decision.reason);
           return decision;
         }
