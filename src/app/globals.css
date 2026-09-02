@@ -8597,13 +8597,13 @@ body {
 }
 
 .kc-tl-canvas {
-  min-width: 36rem;
+  min-width: 42rem;
 }
 
 .kc-tl-axis,
 .kc-tl-row {
   display: grid;
-  grid-template-columns: 8.5rem minmax(28rem, 1fr);
+  grid-template-columns: 8.5rem minmax(32rem, 1fr);
   gap: 0.45rem;
   align-items: center;
 }
@@ -8719,8 +8719,8 @@ body {
   position: absolute;
   z-index: 2;
   display: block;
-  min-width: 0;
-  max-width: 42%;
+  min-width: 5.1rem;
+  max-width: 12rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -8817,11 +8817,11 @@ body {
 @media (max-width: 720px) {
   .kc-tl-axis,
   .kc-tl-row {
-    grid-template-columns: 7.25rem minmax(26rem, 1fr);
+    grid-template-columns: 7.5rem minmax(34rem, 1fr);
     gap: 0.3rem;
   }
   .kc-tl-canvas {
-    min-width: 33.5rem;
+    min-width: 42rem;
   }
   .kc-tl-label.is-person {
     font-size: 0.7rem;

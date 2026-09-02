@@ -289,8 +289,9 @@ check("mobile layout scrolls inside Timeline and hides raw scrollbars", () => {
   assert.match(css, /\.kc-tl-scroll\s*\{[^}]*scrollbar-width:\s*none/);
   assert.match(css, /\.kc-tl-scroll::-webkit-scrollbar\s*\{[^}]*display:\s*none/);
   assert.match(css, /\.kc-tl-label\s*\{[^}]*position:\s*sticky/);
-  assert.match(css, /\.kc-tl-canvas\s*\{[^}]*min-width:\s*36rem/);
-  assert.match(css, /minmax\(26rem,\s*1fr\)/);
+  assert.match(css, /\.kc-tl-canvas\s*\{[^}]*min-width:\s*42rem/);
+  assert.match(css, /minmax\(34rem,\s*1fr\)/);
+  assert.match(css, /\.kc-tl-mark\s*\{[^}]*min-width:\s*5\.1rem/);
   assert.doesNotMatch(
     css,
     /@media \(max-width: 720px\) \{[\s\S]*\.kc-tl-sublane \{\s*grid-template-columns: 1fr;/,

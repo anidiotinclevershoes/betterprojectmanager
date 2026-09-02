@@ -226,7 +226,7 @@ export function KcTimeline({
                 </span>
               ) : null}
               {ticks.map((tick) =>
-                todayLeft != null && Math.abs(tick.left - todayLeft) < 6 ? null : (
+                todayLeft != null && Math.abs(tick.left - todayLeft) < 8 ? null : (
                   <span
                     key={tick.ms}
                     className="kc-tl-tick"
