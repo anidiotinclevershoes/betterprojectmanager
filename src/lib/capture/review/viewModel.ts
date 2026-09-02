@@ -19,6 +19,10 @@ import {
   type SuggestionOp,
 } from "@/lib/capture/suggestions";
 import {
+  isApplyExecutableSuggestion,
+  unsupportedApplyReason,
+} from "@/lib/capture/apply/executability";
+import {
   deriveReviewReason,
   friendlierNeedsYouCopy,
   missingDateCopy,
@@ -65,6 +69,12 @@ export type ReviewChangeViewModel = {
   operation: SuggestionOp;
   operationLabel: string;
   readiness: ReviewReadiness;
+  /**
+   * False when Apply has no legal mutation for this domain × operation.
+   * Ready + Approve require this to be true. Omitted on older fixtures;
+   * consumers re-derive from the suggestion when absent.
+   */
+  executableApply?: boolean;
   needsReviewReason?: string;
   reviewReason?: ReviewReason;
   diff?: ChangeDiff;
@@ -436,6 +446,12 @@ function assessReadiness(
       reason: "Lume cannot safely apply this finding to a maintained record.",
     };
   }
+  if (!isApplyExecutableSuggestion(item)) {
+    return {
+      readiness: "needs_review",
+      reason: unsupportedApplyReason(item, item.content),
+    };
+  }
   if (item.ownershipSemantics === "ambiguous") {
     return {
       readiness: "needs_review",
@@ -650,25 +666,27 @@ function buildCoverageGapViewModels(
     });
     const recordName = finding.target?.title || finding.fact.slice(0, 80);
     const rawReason = item.reason;
+    const executableApply = isApplyExecutableSuggestion(suggestion);
     const friendly = friendlierNeedsYouCopy(
       rawReason || finding.clarificationQuestion,
     );
-    const reasonText =
-      friendly ??
-      (reviewReason
-        ? reviewReasonCopy(reviewReason, {
-            recordName:
-              reviewReason === "TARGET_UNCERTAIN"
-                ? finding.target?.title
-                : recordName,
-            entityLabel: KIND_LABEL[kind],
-            projectCandidates: finding.projectCandidates,
-            incomingPersonName: suggestion.personName,
-            scope: suggestion.responsibilityScope,
-          })
-        : item.disposition === "unmatched"
-          ? `Lume understood: ${finding.fact}\n\nLume couldn't confidently identify the existing item this should update.`
-          : rawReason);
+    const reasonText = !executableApply
+      ? unsupportedApplyReason(suggestion, recordName)
+      : friendly ??
+        (reviewReason
+          ? reviewReasonCopy(reviewReason, {
+              recordName:
+                reviewReason === "TARGET_UNCERTAIN"
+                  ? finding.target?.title
+                  : recordName,
+              entityLabel: KIND_LABEL[kind],
+              projectCandidates: finding.projectCandidates,
+              incomingPersonName: suggestion.personName,
+              scope: suggestion.responsibilityScope,
+            })
+          : item.disposition === "unmatched"
+            ? `Lume understood: ${finding.fact}\n\nLume couldn't confidently identify the existing item this should update.`
+            : rawReason);
     gaps.push({
       id: suggestion.id,
       suggestion,
@@ -677,8 +695,9 @@ function buildCoverageGapViewModels(
       recordName,
       operation: op,
       operationLabel: OP_LABEL[op],
-      readiness,
-      reviewReason,
+      readiness: executableApply ? readiness : "needs_review",
+      executableApply,
+      reviewReason: executableApply ? reviewReason : "OPERATION_UNCERTAIN",
       needsReviewReason: reasonText,
       diff: {
         label: item.disposition === "unmatched" ? "Unmatched" : "Needs you",
@@ -733,11 +752,20 @@ function applyOverride(
     override.reviewReason === null
       ? undefined
       : (override.reviewReason ?? model.reviewReason);
-  if (override.accepted || override.readiness === "ready") {
+  const executableApply = isApplyExecutableSuggestion(suggestion);
+  if (!executableApply) {
+    readiness = "needs_review";
+    if (override.reviewReason !== null) {
+      reviewReason = reviewReason ?? "OPERATION_UNCERTAIN";
+    }
+  } else if (override.accepted || override.readiness === "ready") {
     readiness = "ready";
     reviewReason = undefined;
   }
   const entityLabel = KIND_LABEL[kind];
+  const unsupportedCopy = executableApply
+    ? undefined
+    : unsupportedApplyReason(suggestion, recordName);
   return {
     ...model,
     suggestion,
@@ -752,12 +780,15 @@ function applyOverride(
           ? "Resolve"
           : OP_LABEL[op],
     readiness,
+    executableApply,
     reviewReason,
-    needsReviewReason: reviewReason
-      ? friendlierNeedsYouCopy(
-          model.needsReviewReason || model.finding?.clarificationQuestion,
-        ) ??
-        reviewReasonCopy(reviewReason, {
+    needsReviewReason: unsupportedCopy
+      ? unsupportedCopy
+      : reviewReason
+        ? friendlierNeedsYouCopy(
+            model.needsReviewReason || model.finding?.clarificationQuestion,
+          ) ??
+          reviewReasonCopy(reviewReason, {
             recordName:
               reviewReason === "TARGET_UNCERTAIN"
                 ? namedTargetTitle(model.finding, suggestion)
@@ -767,7 +798,7 @@ function applyOverride(
             incomingPersonName: suggestion.personName,
             scope: suggestion.responsibilityScope,
           })
-      : undefined,
+        : undefined,
     diff:
       op === "create"
         ? {
@@ -836,25 +867,27 @@ export function buildReviewChangeViewModels(
       needsReviewReason: reason,
       capturePipeline: result.capturePipeline,
     });
+    const executableApply = isApplyExecutableSuggestion(item);
     const friendly = friendlierNeedsYouCopy(
       reason || finding?.clarificationQuestion,
     );
-    let reasonText =
-      friendly ??
-      (reviewReason
-        ? reviewReasonCopy(reviewReason, {
-            recordName:
-              reviewReason === "TARGET_UNCERTAIN"
-                ? namedTargetTitle(finding, item)
-                : recordName,
-            entityLabel: KIND_LABEL[item.kind],
-            projectCandidates:
-              item.projectCandidates ?? finding?.projectCandidates,
-            incomingPersonName: item.personName,
-            scope: item.responsibilityScope,
-          })
-        : reason);
-    if (missingRequiredField === "date") {
+    let reasonText = !executableApply
+      ? unsupportedApplyReason(item, recordName)
+      : friendly ??
+        (reviewReason
+          ? reviewReasonCopy(reviewReason, {
+              recordName:
+                reviewReason === "TARGET_UNCERTAIN"
+                  ? namedTargetTitle(finding, item)
+                  : recordName,
+              entityLabel: KIND_LABEL[item.kind],
+              projectCandidates:
+                item.projectCandidates ?? finding?.projectCandidates,
+              incomingPersonName: item.personName,
+              scope: item.responsibilityScope,
+            })
+          : reason);
+    if (executableApply && missingRequiredField === "date") {
       reasonText = missingDateCopy(recordName);
     }
 
@@ -872,6 +905,7 @@ export function buildReviewChangeViewModels(
             ? "Remember"
             : OP_LABEL[item.op],
       readiness,
+      executableApply,
       reviewReason,
       needsReviewReason: reasonText,
       diff: buildDiff(item, operationSource, finding),

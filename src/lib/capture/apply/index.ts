@@ -16,6 +16,11 @@ export {
   isOwnershipSemantics,
 } from "./types";
 export { classifyCaptureLegalDomain } from "./classify";
+export {
+  applySupportsOperation,
+  isApplyExecutableSuggestion,
+  unsupportedApplyReason,
+} from "./executability";
 export { resolveCaptureProjectScope } from "./project-scope";
 export { planCaptureApply } from "./dispatch";
 export { reviewedCreateIdentity } from "./reviewed-identity";
