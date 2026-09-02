@@ -797,9 +797,6 @@ async function main() {
     );
     assert.equal(applied.decision.kind, "needs_you");
     assert.notEqual(applied.executed.kind, "wrote");
-    if (applied.decision.kind === "write") {
-      assert.notEqual(applied.decision.operation.type, "confirm_responsibility");
-    }
     const owners = currentOwners(
       {
         ...applyWorld,
@@ -855,9 +852,6 @@ async function main() {
       captureEntryProjectId: "proj-candy",
     });
     assert.equal(planned.kind, "needs_you");
-    if (planned.kind === "write") {
-      assert.notEqual(planned.operation.type, "confirm_responsibility");
-    }
 
     const applied = await applyApprovedOn(item, text, world());
     assert.equal(applied.decision.kind, "needs_you");
@@ -890,9 +884,6 @@ async function main() {
       captureEntryProjectId: "proj-candy",
     });
     assert.equal(planned.kind, "needs_you");
-    if (planned.kind === "write") {
-      assert.notEqual(planned.operation.type, "write_availability");
-    }
   });
 
   await check("F7a. bulk Apply Ready continues after confirmOwner", async () => {
