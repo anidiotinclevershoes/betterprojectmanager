@@ -155,7 +155,11 @@ function emptyState(): MissionState {
     ],
     knowledge: [],
     history: [],
-  } as MissionState;
+    memories: [],
+    recommendations: [],
+    meetings: [],
+    releases: [],
+  } as unknown as MissionState;
 }
 
 async function applyItem(item: PendingSuggestion, text = item.content) {
@@ -174,15 +178,13 @@ async function applyItem(item: PendingSuggestion, text = item.content) {
 }
 
 let passed = 0;
-function check(name: string, fn: () => void | Promise<void>) {
-  return Promise.resolve()
-    .then(fn)
-    .then(() => {
-      passed += 1;
-      console.log(`✓ ${name}`);
-    });
+async function check(name: string, fn: () => void | Promise<void>) {
+  await fn();
+  passed += 1;
+  console.log(`✓ ${name}`);
 }
 
+async function main() {
 await check("A. stakeholder remove is not Ready and does not mutate", async () => {
   const item = suggestion({
     id: "rm-vendor",
@@ -294,7 +296,7 @@ await check("D. supported To Do complete and Risk resolve stay executable", asyn
   assert.equal(riskApply.decision.kind, "write");
   assert.equal(riskApply.executed.kind, "wrote");
   assert.equal(
-    riskApply.state.risks.find((r) => r.id === "risk-icing")?.status,
+    riskApply.state.risks?.find((r) => r.id === "risk-icing")?.status,
     "resolved",
   );
 });
@@ -398,3 +400,9 @@ await check("G. dismiss / Needs You path stays intact for supported ambiguity", 
 });
 
 console.log(`verify-review-apply-executability: ${passed} checks passed`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
