@@ -1,10 +1,13 @@
 /**
- * Shared Review ↔ Apply executability contract.
+ * Shared Review ↔ Apply executability contract — static half.
  *
- * A Review item may be Ready / approvable only when Apply has a legal
- * mutation for this exact domain × operation. World-dependent checks
- * (missing target, identity) stay in the planner. This predicate is the
- * static half of that contract — what Apply will never execute.
+ * A Review item may be Ready only when Apply has a legal mutation for
+ * this exact domain × operation AND the instance preflight in
+ * `readiness.ts` can construct a faithful write. This file is the verb
+ * matrix: what Apply will never execute, regardless of world.
+ *
+ * Person update is not in the matrix. `ensure_person` does not edit or
+ * end involvement, so an "update" would be a false success.
  *
  * Do not add person-removal or other new mutation semantics here.
  */
@@ -37,8 +40,10 @@ function supportedOps(domain: CaptureLegalDomain): ReadonlySet<SuggestionOp> | n
       return TODO_OPS;
     case "risk":
       return CREATE_UPDATE_COMPLETE;
-    case "milestone":
     case "person":
+      // Create is the only representable person write (ensure_person).
+      return new Set(["create"]);
+    case "milestone":
     case "responsibility":
     case "availability":
     case "knowledge":
@@ -47,6 +52,43 @@ function supportedOps(domain: CaptureLegalDomain): ReadonlySet<SuggestionOp> | n
     case "unsupported":
       return null;
   }
+}
+
+function asProposedString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+const STRUCTURED_CESSATION = new Set([
+  "removed",
+  "inactive",
+  "ended",
+  "departed",
+  "left",
+  "complete",
+  "completed",
+  "archived",
+  "gone",
+]);
+
+/**
+ * Structured involvement-ended payload only. Free-text phrases are not a gate.
+ */
+export function hasStructuredCessationSignal(item: PendingSuggestion): boolean {
+  const values = item.proposedValues ?? {};
+  if (
+    values.involved === false ||
+    values.active === false ||
+    values.current === false
+  ) {
+    return true;
+  }
+  const status = (
+    asProposedString(values.status) ??
+    asProposedString(values.involvement) ??
+    asProposedString(values.lifecycle) ??
+    ""
+  ).toLowerCase();
+  return STRUCTURED_CESSATION.has(status);
 }
 
 /** True when the planner has a legal mutation type for this domain × op. */
@@ -75,8 +117,17 @@ export function unsupportedApplyReason(
   const domain = classifyCaptureLegalDomain(item);
   const name = (recordName ?? item.content).trim() || "this record";
 
-  if (domain === "person" && (item.op === "remove" || item.op === "delete")) {
+  if (
+    domain === "person" &&
+    (item.op === "remove" || item.op === "delete")
+  ) {
     return `${name} is no longer involved.\n\nLume needs clarification about what that means for this stakeholder.`;
+  }
+  if (domain === "person" && item.op === "update") {
+    if (hasStructuredCessationSignal(item)) {
+      return `${name} is no longer involved.\n\nLume needs clarification about what that means for this stakeholder.`;
+    }
+    return `${name} is mentioned, but Lume cannot represent this as a stakeholder change.\n\nLume needs clarification about what that means for this stakeholder.`;
   }
   if (domain === "person" && (item.op === "archive" || item.op === "complete")) {
     return `Lume needs clarification about what that means for this stakeholder.`;

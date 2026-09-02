@@ -417,8 +417,8 @@ function planPerson(
   projectId: string,
   world: CaptureApplyWorld,
 ): CaptureApplyDecision {
-  if (item.op !== "create" && item.op !== "update") {
-    return needsYou("person", "This person operation is not supported.");
+  if (item.op !== "create") {
+    return needsYou("person", unsupportedApplyReason(item, item.content));
   }
   const values = proposedValues(item);
   const ownershipRaw = item.ownershipSemantics ?? values.ownershipSemantics;
@@ -440,19 +440,10 @@ function planPerson(
     return needsYou("person", "More than one existing person matches this Capture. Choose who it refers to.");
   }
   if (resolved.status === "known") {
-    if (item.op === "create") {
-      return noChange(
-        "person",
-        `${resolved.person.name} is already on this project.`,
-      );
-    }
-    return write("person", {
-      type: "ensure_person",
-      projectId,
-      name: resolved.person.name,
-      personId: resolved.person.id,
-      roleHint: resolved.person.role,
-    });
+    return noChange(
+      "person",
+      `${resolved.person.name} is already on this project.`,
+    );
   }
   if (resolved.status === "new_named") {
     return write("person", {

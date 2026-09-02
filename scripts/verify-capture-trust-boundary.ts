@@ -17,7 +17,18 @@ import type {
 } from "../src/lib/types";
 import { buildCaptureContext } from "../src/lib/capture/context";
 import { emptyKnowledge } from "../src/lib/knowledge";
-import { planCaptureApply } from "../src/lib/capture/apply";
+import { planCaptureApply, type CaptureApplyWorld } from "../src/lib/capture/apply";
+
+function stubWorld(projectId = "p1"): CaptureApplyWorld {
+  return {
+    projectIds: new Set([projectId]),
+    projects: [{ id: projectId, name: "P", stakeholders: [] }],
+    risks: [],
+    todos: [],
+    timeline: [],
+    knowledge: [],
+  };
+}
 
 let passed = 0;
 const skipped: string[] = [];
@@ -130,6 +141,8 @@ check("CREATE without a project destination is needs_review (not Apply Ready)", 
     [s],
     stubResult({ recommendations: [s.recommendation!] }),
     "notes",
+    {},
+    { world: stubWorld("p1"), captureEntryProjectId: null },
   );
   assert.equal(models[0]!.readiness, "needs_review");
   assert.equal(pendingReadyModels(models, {}, {}).length, 0);
@@ -158,6 +171,8 @@ check("Dismissed cards are excluded from Apply Ready", () => {
       recommendations: [s1.recommendation!],
     }),
     "notes",
+    {},
+    { world: stubWorld("p1"), captureEntryProjectId: "p1" },
   );
   const dismissed: Record<string, boolean> = {};
   for (const m of models) dismissed[m.id] = true;
@@ -186,6 +201,8 @@ check("pendingReadyModels never returns non-ready cards", () => {
       recommendations: [s1.recommendation!, orphan.recommendation!],
     }),
     "notes",
+    {},
+    { world: stubWorld("p1"), captureEntryProjectId: "p1" },
   );
   const ready = pendingReadyModels(models, {}, {});
   assert.ok(ready.every((m) => m.readiness === "ready"));

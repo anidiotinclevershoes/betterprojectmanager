@@ -43,6 +43,13 @@ import {
   experimentalApplyWorld,
 } from "../src/lib/experiments/worlds";
 
+function reviewPreflight(projectId = CANDYLAND_ID) {
+  return {
+    world: experimentalApplyWorld(),
+    captureEntryProjectId: projectId,
+  };
+}
+
 function stubResult(partial: Partial<CaptureResult> = {}): CaptureResult {
   return {
     memory: {
@@ -560,6 +567,7 @@ function model(
         op: "create",
         content: "Prepare CAB evidence pack",
         date: "2025-08-18",
+        projectId: CANDYLAND_ID,
       }),
       suggestion({
         id: "r1",
@@ -570,6 +578,8 @@ function model(
     ],
     stubResult(),
     "",
+    {},
+    reviewPreflight(),
   );
   assert.equal(createModels[0].diff?.layout, "create");
   assert.equal(createModels[0].diff?.to, "Prepare CAB evidence pack");
@@ -611,7 +621,7 @@ function suggestionIdFor(opId: string, index = 0) {
     const op = proposedOp({
       id: "v2op-risk",
       sourceFindingId: "find-risk",
-      operation: "UPDATE",
+      operation: "COMPLETE",
       entityType: "risk",
       targetId: "risk-bridge",
       targetTitle: "Gumdrop Bridge icing",
@@ -625,8 +635,8 @@ function suggestionIdFor(opId: string, index = 0) {
         suggestion({
           id: suggestionIdFor(op.id),
           kind: "risk",
-          op: "update",
-          content: "Gumdrop Bridge icing is worse",
+          op: "complete",
+          content: "Gumdrop Bridge icing is resolved",
           targetEntityId: "risk-bridge",
           projectId: "proj-candy",
         }),
@@ -637,7 +647,7 @@ function suggestionIdFor(opId: string, index = 0) {
           finding({
             id: "find-risk",
             fact: "Gumdrop Bridge icing is worse",
-            findingType: "ENTITY_UPDATED",
+            findingType: "ENTITY_COMPLETED",
             target: {
               entityType: "risk",
               entityId: "risk-bridge",
@@ -649,17 +659,69 @@ function suggestionIdFor(opId: string, index = 0) {
         ],
         proposedOperations: [op],
       }),
-      "The icing is worse.",
+      "The icing is resolved.",
+      {},
+      reviewPreflight(),
     );
     return models[0]!;
   };
 
-  assert.equal(v2Update(12).readiness, "ready", "low confidence V2 update stays Apply Ready");
-  assert.equal(v2Update(0).readiness, "ready", "zero confidence V2 update stays Apply Ready");
+  assert.equal(v2Update(12).readiness, "ready", "low confidence V2 complete stays Apply Ready");
+  assert.equal(v2Update(0).readiness, "ready", "zero confidence V2 complete stays Apply Ready");
   assert.equal(
     v2Update(undefined).readiness,
     "ready",
-    "missing/zero confidence V2 update stays Apply Ready",
+    "missing/zero confidence V2 complete stays Apply Ready",
+  );
+
+  const v2VagueUpdate = buildReviewChangeViewModels(
+    [
+      suggestion({
+        id: suggestionIdFor("v2op-vague"),
+        kind: "risk",
+        op: "update",
+        content: "Gumdrop Bridge icing is worse",
+        targetEntityId: "risk-bridge",
+        projectId: "proj-candy",
+      }),
+    ],
+    stubResult({
+      capturePipeline: "v2",
+      findings: [
+        finding({
+          id: "find-vague",
+          fact: "Gumdrop Bridge icing is worse",
+          findingType: "ENTITY_UPDATED",
+          target: {
+            entityType: "risk",
+            entityId: "risk-bridge",
+            title: "Gumdrop Bridge icing",
+          },
+          confidence: 12,
+          requiresClarification: false,
+        }),
+      ],
+      proposedOperations: [
+        proposedOp({
+          id: "v2op-vague",
+          sourceFindingId: "find-vague",
+          operation: "UPDATE",
+          entityType: "risk",
+          targetId: "risk-bridge",
+          targetTitle: "Gumdrop Bridge icing",
+          confidence: 12,
+          projectId: "proj-candy",
+        }),
+      ],
+    }),
+    "The icing is worse.",
+    {},
+    reviewPreflight(),
+  );
+  assert.equal(
+    v2VagueUpdate[0]!.readiness,
+    "needs_review",
+    "V2 risk update without a legal status is not Ready",
   );
 
   const v2Create = buildReviewChangeViewModels(
@@ -697,6 +759,8 @@ function suggestionIdFor(opId: string, index = 0) {
       ],
     }),
     "Please add a to-do to polish the candy-cane banners.",
+    {},
+    reviewPreflight(),
   );
   assert.equal(v2Create[0]!.readiness, "ready", "V2 CREATE still Apply Ready at low confidence");
 
@@ -1027,6 +1091,8 @@ function suggestionIdFor(opId: string, index = 0) {
       ],
     }),
     "Bridge is closed. Fizz may share or replace UAT.",
+    {},
+    reviewPreflight(),
   );
   const ready = siblingModels.find((m) => m.operation === "complete")!;
   const needsYou = siblingModels.find(
@@ -1204,9 +1270,11 @@ function suggestionIdFor(opId: string, index = 0) {
       ],
     }),
     "Add a float rehearsal date.",
+    {},
+    reviewPreflight(),
   );
-  assert.equal(createMile[0]!.readiness, "ready");
-  assert.equal(createMile[0]!.missingRequiredField, undefined);
+  assert.equal(createMile[0]!.readiness, "needs_review");
+  assert.equal(createMile[0]!.missingRequiredField, "date");
 }
 
 // --- 13. Identity-gate copy is human; no invented Person candidate list ---
@@ -1255,11 +1323,13 @@ function suggestionIdFor(opId: string, index = 0) {
       ],
     }),
     "Sam should join the parade.",
+    {},
+    reviewPreflight(),
   );
   assert.equal(identity[0]!.readiness, "needs_review");
-  assert.equal(
-    identity[0]!.needsReviewReason,
-    "I need a full name before adding someone new.",
+  assert.match(
+    identity[0]!.needsReviewReason ?? "",
+    /cannot represent this as a stakeholder change|full name before adding someone new|needs clarification/i,
   );
   assert.equal(identity[0]!.suggestion.proposedValues?.candidates, undefined);
 }
