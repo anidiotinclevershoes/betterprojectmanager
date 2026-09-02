@@ -11,6 +11,10 @@ import {
 } from "@/lib/people/identity";
 import type { PendingSuggestion } from "@/lib/capture/suggestions";
 import { classifyCaptureLegalDomain } from "./classify";
+import {
+  applySupportsOperation,
+  unsupportedApplyReason,
+} from "./executability";
 import { resolveCaptureProjectScope } from "./project-scope";
 import {
   assertNever,
@@ -759,6 +763,10 @@ export function planCaptureApply(input: PlanCaptureApplyInput): CaptureApplyDeci
       "unsupported",
       "Lume cannot safely apply this finding to a maintained record.",
     );
+  }
+
+  if (!applySupportsOperation(domain, item.op)) {
+    return needsYou(domain, unsupportedApplyReason(item, item.content));
   }
 
   if (item.truthIntent === "non_current") {

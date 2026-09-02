@@ -577,6 +577,13 @@ function model(
   assert.equal(createModels[1].diff?.layout, "remove");
   assert.match(createModels[1].diff!.to, /Remove from project/i);
   assert.equal(createModels[1].readiness, "needs_review");
+  assert.equal(createModels[1].executableApply, false);
+  assert.match(
+    createModels[1].needsReviewReason ?? "",
+    /needs clarification about what that means for this stakeholder/i,
+  );
+  assert.equal(createModels[0].readiness, "ready");
+  assert.equal(createModels[0].executableApply, true);
 }
 
 function proposedOp(
