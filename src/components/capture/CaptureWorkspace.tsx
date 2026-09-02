@@ -18,6 +18,7 @@ import {
   computeReviewCounts,
   pendingReadyModels,
 } from "@/lib/capture/review/viewModel";
+import { applyPendingReadyQueue } from "@/lib/capture/review/applyReadyQueue";
 import {
   CaptureSummary,
   SuggestedChangesList,
@@ -426,19 +427,12 @@ export function CaptureWorkspace({
   }
 
   async function approveReady() {
-    const ready = pendingReadyModels(reviewModels, added, dismissed);
-    for (const model of ready) {
-      if (model.canApprove === false || model.executableApply === false) {
-        continue;
-      }
-      const decision = await applyOne(model.suggestion, defaultProjectId);
-      if (decision.kind === "needs_you" && decision.confirmOwner) {
-        setConfirmOwner({
-          suggestionId: model.id,
-          ...decision.confirmOwner,
-        });
-        return;
-      }
+    const { confirmOwner } = await applyPendingReadyQueue({
+      models: pendingReadyModels(reviewModels, added, dismissed),
+      applyOne: (item) => applyOne(item, defaultProjectId),
+    });
+    if (confirmOwner) {
+      setConfirmOwner(confirmOwner);
     }
   }
 
