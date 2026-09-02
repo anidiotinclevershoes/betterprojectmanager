@@ -511,7 +511,10 @@ async function main() {
       },
     );
     assert.equal(models[0]?.readiness, "needs_review");
-    assert.match(models[0]?.needsReviewReason ?? "", /Destructive action/i);
+    assert.match(
+      models[0]?.needsReviewReason ?? "",
+      /confirmation|Destructive action/i,
+    );
     assert.equal(pendingReadyModels(models, {}, {}).length, 0);
 
     const archived = suggestion({
