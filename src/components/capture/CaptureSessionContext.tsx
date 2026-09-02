@@ -65,6 +65,7 @@ type CaptureSessionValue = {
         | "projectName"
         | "projectCode"
         | "projectUncertain"
+        | "expectedTarget"
       >
     >,
   ) => void;
@@ -335,6 +336,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           | "projectName"
           | "projectCode"
           | "projectUncertain"
+          | "expectedTarget"
         >
       >,
     ) => {
@@ -344,6 +346,15 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           if (s.id !== id) return s;
           const next = { ...s, ...patch };
           if (patch.kind) next.destination = destinationFor(patch.kind);
+          const targetChanged =
+            (patch.targetEntityId !== undefined &&
+              patch.targetEntityId !== s.targetEntityId) ||
+            (patch.targetTodoId !== undefined &&
+              patch.targetTodoId !== s.targetTodoId) ||
+            (patch.op !== undefined && patch.op !== s.op);
+          if (targetChanged && patch.expectedTarget === undefined) {
+            next.expectedTarget = null;
+          }
           return next;
         }),
       }));

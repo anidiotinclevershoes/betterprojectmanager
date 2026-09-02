@@ -587,7 +587,9 @@ function assessReadiness(
       canApprove: apply.canApprove,
     };
   }
-  if (!skipHumanGates && (isDestructiveOp(item.op) || op?.destructive)) {
+  // Destructive confirmation is its own safety gate. Answering project /
+  // target / type / create-new must not clear it via accepted:true.
+  if (isDestructiveOp(item.op) || op?.destructive) {
     return {
       readiness: "needs_review",
       reason: "Destructive action — confirm before applying.",
@@ -738,6 +740,7 @@ function buildCoverageGapViewModels(
         proposedValues: matchingOp?.proposedValues,
       },
       preflight?.world,
+      preflight?.captureEntryProjectId,
     );
 
     const assessed = assessReadiness(
@@ -853,6 +856,7 @@ function applyOverride(
         : model.suggestion.projectUncertain,
     },
     preflight?.world,
+    preflight?.captureEntryProjectId,
   );
   const demoted =
     override.readiness === "needs_review" || override.readiness === "unmatched"
@@ -947,7 +951,11 @@ export function buildReviewChangeViewModels(
   preflight?: ReviewPreflightContext | null,
 ): ReviewChangeViewModel[] {
   const fromSuggestions = suggestions.map((rawItem) => {
-    const item = attachReviewExpectedTarget(rawItem, preflight?.world);
+    const item = attachReviewExpectedTarget(
+      rawItem,
+      preflight?.world,
+      preflight?.captureEntryProjectId,
+    );
     const operationSource = findOperation(item, result);
     const finding =
       findFinding(operationSource, result) ??

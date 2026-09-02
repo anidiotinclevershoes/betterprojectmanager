@@ -13,6 +13,7 @@ import type { PendingSuggestion } from "@/lib/capture/suggestions";
 import { classifyCaptureLegalDomain } from "./classify";
 import {
   applySupportsOperation,
+  hasStructuredCessationSignal,
   unsupportedApplyReason,
 } from "./executability";
 import { resolveCaptureProjectScope } from "./project-scope";
@@ -459,7 +460,7 @@ function planPerson(
   );
 }
 
-function currentOwners(
+export function currentOwners(
   world: CaptureApplyWorld,
   projectId: string,
   scope: string,
@@ -477,6 +478,27 @@ function currentOwners(
   return hits;
 }
 
+/**
+ * Bind a replace write to the specific current owner Review saw.
+ * Apply must not call this against a later world — that would re-pick.
+ */
+export function bindResolvedReplacement(
+  item: PendingSuggestion,
+  world: CaptureApplyWorld,
+  projectId: string,
+): PendingSuggestion {
+  if (item.replacePersonId?.trim()) return item;
+  const values = proposedValues(item);
+  const semantics = item.ownershipSemantics ?? values.ownershipSemantics;
+  if (semantics !== "replace") return item;
+  const scope =
+    item.responsibilityScope?.trim() || asString(values.scope) || "";
+  if (!scope) return item;
+  const owners = currentOwners(world, projectId, scope);
+  if (owners.length !== 1 || !owners[0]?.personId) return item;
+  return { ...item, replacePersonId: owners[0].personId };
+}
+
 function planResponsibility(
   item: PendingSuggestion,
   text: string,
@@ -488,6 +510,9 @@ function planResponsibility(
       "responsibility",
       "This ownership operation is not supported.",
     );
+  }
+  if (hasStructuredCessationSignal(item)) {
+    return needsYou("responsibility", unsupportedApplyReason(item, item.content));
   }
   const values = proposedValues(item);
   const scope =
@@ -568,29 +593,18 @@ function planResponsibility(
     const replacePersonId =
       item.replacePersonId?.trim() || asString(values.replacePersonId) || null;
     if (!replacePersonId) {
-      const owners = currentOwners(world, projectId, scope);
-      if (owners.length !== 1 || !owners[0]?.personId) {
-        return needsYou(
-          "responsibility",
-          "Replacement needs a confirmed current owner. Confirm before Lume changes ownership.",
-          {
-            confirmOwner: {
-              projectId,
-              scope,
-              personName,
-              personId: personId ?? null,
-            },
+      return needsYou(
+        "responsibility",
+        "Replacement needs a confirmed current owner. Confirm before Lume changes ownership.",
+        {
+          confirmOwner: {
+            projectId,
+            scope,
+            personName,
+            personId: personId ?? null,
           },
-        );
-      }
-      return write("responsibility", {
-        type: "confirm_responsibility",
-        projectId,
-        scope,
-        personName,
-        personId: personId ?? null,
-        replacePersonId: owners[0].personId,
-      });
+        },
+      );
     }
     const owners = currentOwners(world, projectId, scope);
     if (!owners.some((o) => o.personId === replacePersonId)) {
@@ -639,6 +653,9 @@ function planAvailability(
       "availability",
       "This availability operation is not supported.",
     );
+  }
+  if (hasStructuredCessationSignal(item)) {
+    return needsYou("availability", unsupportedApplyReason(item, item.content));
   }
   const values = proposedValues(item);
   const person = resolvePerson(projectId, world, item, text);

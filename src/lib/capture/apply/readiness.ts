@@ -21,8 +21,10 @@ import {
   unsupportedApplyReason,
 } from "./executability";
 import { planCaptureApply } from "./dispatch";
+import { bindResolvedReplacement } from "./dispatch";
 import {
-  fingerprintExpectedTarget,
+  expectedTargetMismatchReason,
+  reconcileExpectedTarget,
   staleExpectedTargetReason,
 } from "./expected-target";
 import type {
@@ -93,6 +95,14 @@ export function isSemanticallyRepresentableSuggestion(
 ): boolean {
   const domain = classifyCaptureLegalDomain(item);
   if (domain === "person" && item.op !== "create") {
+    return false;
+  }
+  if (
+    hasStructuredCessationSignal(item) &&
+    (domain === "person" ||
+      domain === "responsibility" ||
+      domain === "availability")
+  ) {
     return false;
   }
   return true;
@@ -205,10 +215,23 @@ export function assessApplyReadiness(input: {
     };
   }
 
-  const expected =
-    item.expectedTarget ?? fingerprintExpectedTarget(preflight.world, item);
+  const prepared = attachReviewExpectedTarget(
+    item,
+    preflight.world,
+    preflight.captureEntryProjectId,
+  );
+  const mismatch = expectedTargetMismatchReason(prepared);
+  if (mismatch) {
+    return {
+      executableApply: true,
+      canApprove: false,
+      stale: true,
+      reason: mismatch,
+    };
+  }
+  const expected = prepared.expectedTarget ?? null;
   const projectId =
-    item.projectId?.trim() || preflight.captureEntryProjectId?.trim() || "";
+    prepared.projectId?.trim() || preflight.captureEntryProjectId?.trim() || "";
   if (expected && projectId) {
     const stale = staleExpectedTargetReason(
       preflight.world,
@@ -226,7 +249,7 @@ export function assessApplyReadiness(input: {
   }
 
   const decision = planCaptureApply({
-    item,
+    item: prepared,
     text,
     world: preflight.world,
     captureEntryProjectId: preflight.captureEntryProjectId,
@@ -259,12 +282,20 @@ export function assessApplyReadiness(input: {
   };
 }
 
+/**
+ * Review-time only. Rebind fingerprint to the current target and, for
+ * replace, pin the owner Review saw. Apply must not call this against a
+ * later world.
+ */
 export function attachReviewExpectedTarget(
   item: PendingSuggestion,
   world?: CaptureApplyWorld | null,
+  captureEntryProjectId?: string | null,
 ): PendingSuggestion {
-  if (item.expectedTarget || !world) return item;
-  const expected = fingerprintExpectedTarget(world, item);
-  if (!expected) return item;
-  return { ...item, expectedTarget: expected };
+  const reconciled = reconcileExpectedTarget(item, world);
+  if (!world) return reconciled;
+  const projectId =
+    reconciled.projectId?.trim() || captureEntryProjectId?.trim() || "";
+  if (!projectId) return reconciled;
+  return bindResolvedReplacement(reconciled, world, projectId);
 }

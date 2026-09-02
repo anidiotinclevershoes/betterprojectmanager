@@ -561,6 +561,7 @@ await check("19. explicit legal replacement updates responsibility authority", a
       ownershipSemantics: "replace",
       personName: "Brick Oakley",
       responsibilityScope: "UAT lead",
+      replacePersonId: "person-gumdrop",
     }),
   );
   assert.equal(writes[0]?.type, "confirm_responsibility");

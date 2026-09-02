@@ -132,6 +132,14 @@ export function unsupportedApplyReason(
   if (domain === "person" && (item.op === "archive" || item.op === "complete")) {
     return `Lume needs clarification about what that means for this stakeholder.`;
   }
+  if (
+    (domain === "responsibility" || domain === "availability") &&
+    hasStructuredCessationSignal(item)
+  ) {
+    return domain === "responsibility"
+      ? "Lume needs clarification about what that means for this responsibility."
+      : "Lume needs clarification about what that means for this availability.";
+  }
   if (domain === "milestone" && item.op === "complete") {
     return "Completing a date is not supported yet — Lume will not turn this into a To Do.";
   }

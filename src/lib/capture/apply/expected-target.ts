@@ -31,11 +31,61 @@ export function parseExpectedTarget(raw: unknown): CaptureExpectedTarget | null 
   };
 }
 
+/** Durable id the proposal currently names, if any. */
+export function proposalTargetId(item: PendingSuggestion): string | undefined {
+  if (item.targetEntityId?.trim()) return item.targetEntityId.trim();
+  if (item.targetTodoId?.trim()) return item.targetTodoId.trim();
+  return undefined;
+}
+
+/**
+ * Keep expectedTarget coherent with the current proposal.
+ * Analyse fingerprints the first target; a later correction must not keep
+ * describing that old record. Create explicitly declines an existing target.
+ */
+export function reconcileExpectedTarget(
+  item: PendingSuggestion,
+  world?: CaptureApplyWorld | null,
+): PendingSuggestion {
+  if (item.op === "create") {
+    return item.expectedTarget ? { ...item, expectedTarget: null } : item;
+  }
+
+  const currentId = proposalTargetId(item);
+  if (!currentId) {
+    return item.expectedTarget ? { ...item, expectedTarget: null } : item;
+  }
+  if (item.expectedTarget?.id === currentId) {
+    return item;
+  }
+  if (!world) {
+    return { ...item, expectedTarget: null };
+  }
+  const fingerprinted = { ...item, targetEntityId: currentId };
+  return {
+    ...item,
+    expectedTarget: fingerprintExpectedTarget(world, fingerprinted),
+  };
+}
+
+/** Same predicate Apply uses when Review target and fingerprint diverge. */
+export function expectedTargetMismatchReason(
+  item: PendingSuggestion,
+  expected?: CaptureExpectedTarget | null,
+): string | null {
+  const expectedId = (expected ?? item.expectedTarget)?.id?.trim();
+  const currentId = proposalTargetId(item);
+  if (expectedId && currentId && expectedId !== currentId) {
+    return "Review target does not match. Capture again before applying.";
+  }
+  return null;
+}
+
 export function fingerprintExpectedTarget(
   world: CaptureApplyWorld,
   item: PendingSuggestion,
 ): CaptureExpectedTarget | null {
-  const id = item.targetEntityId?.trim();
+  const id = proposalTargetId(item);
   if (!id) return null;
   const domain = item.legalDomain ?? "unsupported";
 
