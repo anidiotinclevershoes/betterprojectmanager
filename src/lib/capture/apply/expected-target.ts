@@ -39,6 +39,27 @@ export function proposalTargetId(item: PendingSuggestion): string | undefined {
 }
 
 /**
+ * Session correction patch. Clear the Analyse fingerprint only when the
+ * named target identity changes. An operation-only change must keep it.
+ * Create is cleared later by reconcileExpectedTarget.
+ */
+export function applySessionSuggestionPatch(
+  item: PendingSuggestion,
+  patch: Partial<PendingSuggestion>,
+): PendingSuggestion {
+  const next = { ...item, ...patch };
+  const targetIdentityChanged =
+    (patch.targetEntityId !== undefined &&
+      patch.targetEntityId !== item.targetEntityId) ||
+    (patch.targetTodoId !== undefined &&
+      patch.targetTodoId !== item.targetTodoId);
+  if (targetIdentityChanged && patch.expectedTarget === undefined) {
+    next.expectedTarget = null;
+  }
+  return next;
+}
+
+/**
  * Keep expectedTarget coherent with the current proposal.
  * Analyse fingerprints the first target; a later correction must not keep
  * describing that old record. Create explicitly declines an existing target.

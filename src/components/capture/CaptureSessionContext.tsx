@@ -11,7 +11,10 @@ import {
   type ReactNode,
 } from "react";
 import { useMission } from "@/lib/store";
-import { type CaptureApplyDecision } from "@/lib/capture/apply";
+import {
+  applySessionSuggestionPatch,
+  type CaptureApplyDecision,
+} from "@/lib/capture/apply";
 import {
   buildSuggestions,
   CAPTURE_SESSION_KEY,
@@ -344,17 +347,8 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         ...prev,
         suggestions: prev.suggestions.map((s) => {
           if (s.id !== id) return s;
-          const next = { ...s, ...patch };
+          const next = applySessionSuggestionPatch(s, patch);
           if (patch.kind) next.destination = destinationFor(patch.kind);
-          const targetChanged =
-            (patch.targetEntityId !== undefined &&
-              patch.targetEntityId !== s.targetEntityId) ||
-            (patch.targetTodoId !== undefined &&
-              patch.targetTodoId !== s.targetTodoId) ||
-            (patch.op !== undefined && patch.op !== s.op);
-          if (targetChanged && patch.expectedTarget === undefined) {
-            next.expectedTarget = null;
-          }
           return next;
         }),
       }));
