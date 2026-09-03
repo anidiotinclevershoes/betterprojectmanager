@@ -41,6 +41,7 @@ export {
   type CaptureExecuteResult,
 } from "./execute";
 export {
+  applySessionSuggestionPatch,
   expectedTargetMismatchReason,
   fingerprintExpectedTarget,
   parseExpectedTarget,

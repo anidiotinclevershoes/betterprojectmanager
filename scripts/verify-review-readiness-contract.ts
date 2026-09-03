@@ -7,6 +7,7 @@
 import assert from "node:assert/strict";
 import {
   applySupportsOperation,
+  applySessionSuggestionPatch,
   assessApplyReadiness,
   currentOwners,
   executeCaptureApply,
@@ -696,13 +697,13 @@ async function main() {
   await check("F1. correction to a different target rebinds expectedTarget; same-snapshot Apply writes", async () => {
     const alt = worldWithAltTodo();
     const text = "Book the hall is done.";
-    const stale = suggestion({
+    const analysed = suggestion({
       id: "f1-retarget",
       kind: "action",
       op: "complete",
-      content: "Book the hall",
-      targetTodoId: "todo-alt",
-      targetEntityId: "todo-alt",
+      content: "Obtain CAB approval",
+      targetTodoId: "todo-cab",
+      targetEntityId: "todo-cab",
       legalDomain: "todo",
       expectedTarget: {
         id: "todo-cab",
@@ -711,6 +712,12 @@ async function main() {
         done: false,
       },
     });
+    const stale = applySessionSuggestionPatch(analysed, {
+      content: "Book the hall",
+      targetTodoId: "todo-alt",
+      targetEntityId: "todo-alt",
+    });
+    assert.equal(stale.expectedTarget ?? null, null);
     const models = modelsFor([stale], text, {}, alt);
     assert.equal(models[0]?.readiness, "ready");
     assert.equal(models[0]?.canApprove, true);
@@ -727,13 +734,15 @@ async function main() {
     assert.equal(applied.state.todos.find((t) => t.id === "todo-cab")?.done, false);
   });
 
-  await check("F1. Create New clears a declined target fingerprint", async () => {
-    const text = "Add a new to-do to book the hall.";
-    const declined = suggestion({
-      id: "f1-create",
+  await check("F1. drift on the corrected target is still detected", () => {
+    const alt = worldWithAltTodo();
+    const stale = suggestion({
+      id: "f1-drift-b",
       kind: "action",
-      op: "create",
+      op: "complete",
       content: "Book the hall",
+      targetTodoId: "todo-alt",
+      targetEntityId: "todo-alt",
       legalDomain: "todo",
       expectedTarget: {
         id: "todo-cab",
@@ -741,6 +750,53 @@ async function main() {
         title: "Obtain CAB approval",
         done: false,
       },
+    });
+    const retargeted = applySessionSuggestionPatch(stale, {
+      targetTodoId: "todo-alt",
+      targetEntityId: "todo-alt",
+    });
+    const ready = modelsFor([retargeted], "Book the hall is done.", {}, alt);
+    assert.equal(ready[0]?.readiness, "ready");
+    assert.equal(ready[0]?.suggestion.expectedTarget?.id, "todo-alt");
+
+    const driftedB: CaptureApplyWorld = {
+      ...alt,
+      todos: alt.todos.map((t) =>
+        t.id === "todo-alt" ? { ...t, title: "Book the hall (rewritten)" } : t,
+      ),
+    };
+    const blocked = modelsFor(
+      [ready[0]!.suggestion],
+      "Book the hall is done.",
+      {},
+      driftedB,
+    );
+    assert.notEqual(blocked[0]?.readiness, "ready");
+    assert.equal(blocked[0]?.canApprove, false);
+    assert.equal(pendingReadyModels(blocked, {}, {}).length, 0);
+  });
+
+  await check("F1. Create New clears a declined target fingerprint", async () => {
+    const text = "Add a new to-do to book the hall.";
+    const analysed = suggestion({
+      id: "f1-create",
+      kind: "action",
+      op: "update",
+      content: "Book the hall",
+      targetTodoId: "todo-cab",
+      targetEntityId: "todo-cab",
+      legalDomain: "todo",
+      expectedTarget: {
+        id: "todo-cab",
+        domain: "todo",
+        title: "Obtain CAB approval",
+        done: false,
+      },
+    });
+    const declined = applySessionSuggestionPatch(analysed, {
+      op: "create",
+      targetTodoId: undefined,
+      targetEntityId: undefined,
     });
     const models = modelsFor([declined], text);
     assert.equal(models[0]?.readiness, "ready");
@@ -758,6 +814,137 @@ async function main() {
       applied.state.todos.some(
         (t) => t.id !== "todo-cab" && /book the hall/i.test(t.title),
       ),
+    );
+  });
+
+  await check("NEW-1. Risk op-only Resolve must not re-baseline a drifted fingerprint", async () => {
+    const text = "Gumdrop Bridge icing is resolved.";
+    const analysed = suggestion({
+      id: "new1-risk",
+      kind: "risk",
+      op: "update",
+      content: "Gumdrop Bridge icing",
+      targetEntityId: "risk-icing",
+      legalDomain: "risk",
+      proposedValues: { status: "watch" },
+      expectedTarget: {
+        id: "risk-icing",
+        domain: "risk",
+        title: "Gumdrop Bridge icing",
+        status: "open",
+      },
+    });
+    const drifted: CaptureApplyWorld = {
+      ...world(),
+      risks: world().risks.map((r) =>
+        r.id === "risk-icing" ? { ...r, status: "watch" } : r,
+      ),
+    };
+
+    const blocked = modelsFor([analysed], text, {}, drifted);
+    assert.notEqual(blocked[0]?.readiness, "ready");
+    assert.equal(blocked[0]?.canApprove, false);
+    assert.equal(pendingReadyModels(blocked, {}, {}).length, 0);
+
+    const afterResolve = applySessionSuggestionPatch(analysed, { op: "complete" });
+    assert.deepEqual(afterResolve.expectedTarget, analysed.expectedTarget);
+    assert.equal(afterResolve.targetEntityId, "risk-icing");
+
+    const resolved = modelsFor(
+      [afterResolve],
+      text,
+      {
+        "new1-risk": {
+          accepted: true,
+          readiness: "ready",
+          op: "complete",
+        },
+      },
+      drifted,
+    );
+    assert.notEqual(resolved[0]?.readiness, "ready");
+    assert.equal(resolved[0]?.canApprove, false);
+    assert.equal(pendingReadyModels(resolved, {}, {}).length, 0);
+    assert.equal(resolved[0]?.suggestion.expectedTarget?.status, "open");
+
+    const applied = await applyApprovedOn(
+      resolved[0]!.suggestion,
+      text,
+      drifted,
+    );
+    assert.equal(applied.decision.kind, "needs_you");
+    assert.notEqual(applied.executed.kind, "wrote");
+    assert.equal(
+      applied.state.risks.find((r) => r.id === "risk-icing")?.status,
+      "watch",
+    );
+  });
+
+  await check("NEW-1. To Do op-only complete must not re-baseline a drifted fingerprint", async () => {
+    const text = "Obtain CAB approval is done.";
+    const analysed = suggestion({
+      id: "new1-todo",
+      kind: "action",
+      op: "update",
+      content: "Obtain CAB approval",
+      targetTodoId: "todo-cab",
+      targetEntityId: "todo-cab",
+      legalDomain: "todo",
+      expectedTarget: {
+        id: "todo-cab",
+        domain: "todo",
+        title: "Obtain CAB approval",
+        done: false,
+      },
+    });
+    const drifted: CaptureApplyWorld = {
+      ...world(),
+      todos: world().todos.map((t) =>
+        t.id === "todo-cab"
+          ? { ...t, title: "Obtain CAB approval (rewritten)" }
+          : t,
+      ),
+    };
+
+    const blocked = modelsFor([analysed], text, {}, drifted);
+    assert.notEqual(blocked[0]?.readiness, "ready");
+    assert.equal(blocked[0]?.canApprove, false);
+
+    const afterComplete = applySessionSuggestionPatch(analysed, {
+      op: "complete",
+    });
+    assert.deepEqual(afterComplete.expectedTarget, analysed.expectedTarget);
+
+    const resolved = modelsFor(
+      [afterComplete],
+      text,
+      {
+        "new1-todo": {
+          accepted: true,
+          readiness: "ready",
+          op: "complete",
+        },
+      },
+      drifted,
+    );
+    assert.notEqual(resolved[0]?.readiness, "ready");
+    assert.equal(resolved[0]?.canApprove, false);
+    assert.equal(pendingReadyModels(resolved, {}, {}).length, 0);
+    assert.equal(
+      resolved[0]?.suggestion.expectedTarget?.title,
+      "Obtain CAB approval",
+    );
+
+    const applied = await applyApprovedOn(
+      resolved[0]!.suggestion,
+      text,
+      drifted,
+    );
+    assert.equal(applied.decision.kind, "needs_you");
+    assert.notEqual(applied.executed.kind, "wrote");
+    assert.equal(
+      applied.state.todos.find((t) => t.id === "todo-cab")?.done,
+      false,
     );
   });
 
