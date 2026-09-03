@@ -875,7 +875,7 @@ async function main() {
     assert.equal(applied.decision.kind, "needs_you");
     assert.notEqual(applied.executed.kind, "wrote");
     assert.equal(
-      applied.state.risks.find((r) => r.id === "risk-icing")?.status,
+      applied.state.risks?.find((r) => r.id === "risk-icing")?.status,
       "watch",
     );
   });
