@@ -171,7 +171,7 @@ export function needsYouSupporting(
     for (const rule of noise) {
       if (typeof rule === "string") {
         if (rule && lower === rule.toLowerCase()) return false;
-      } else if (rule.test(line)) {
+      } else if (rule instanceof RegExp && rule.test(line)) {
         return false;
       }
     }

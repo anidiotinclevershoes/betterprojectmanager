@@ -266,8 +266,8 @@ function testPresentationContracts() {
   assert.match(workspace, /Nothing is saved until you approve/);
   assert.match(summary, /Here.s what I understood/);
   assert.match(changes, /Check these changes/);
-  assert.match(badge, /Needs you/);
-  assert.doesNotMatch(why, /why-panel-confidence/);
+  assert.match(badge, /Needs You/);
+  assert.match(why, /lume-review-why-toggle/);
   assert.match(annotate, /Does not collapse internal whitespace/);
   assert.match(annotate, /No NLP, fuzzy search/);
 
