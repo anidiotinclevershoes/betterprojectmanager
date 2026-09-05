@@ -37,6 +37,18 @@ import {
   missingDateCopy,
   ownershipChoiceCopy,
 } from "../src/lib/capture/review/reviewReason";
+import {
+  isGenericInterpretation,
+  needsYouHeadline,
+  needsYouSupporting,
+  reviewDomainLabel,
+  reviewFamilyClass,
+  reviewOpFamily,
+  reviewOpIcon,
+  reviewOpWord,
+  whyDisclosureLabel,
+  whyHasUsefulContent,
+} from "../src/lib/capture/review/reviewLanguage";
 import { planCaptureApply } from "../src/lib/capture/apply";
 import {
   CANDYLAND_ID,
@@ -1332,6 +1344,82 @@ function suggestionIdFor(opId: string, index = 0) {
     /cannot represent this as a stakeholder change|full name before adding someone new|needs clarification/i,
   );
   assert.equal(identity[0]!.suggestion.proposedValues?.candidates, undefined);
+}
+
+// --- 14. Review visual language (presentation only) ---
+{
+  assert.equal(reviewOpFamily("create"), "create");
+  assert.equal(reviewOpFamily("update"), "update");
+  assert.equal(reviewOpFamily("complete"), "update");
+  assert.equal(reviewOpFamily("remove"), "remove");
+  assert.equal(reviewOpFamily("archive"), "remove");
+  assert.equal(
+    reviewOpFamily("remove", "needs_review", "OPERATION_UNCERTAIN"),
+    "remove",
+  );
+  assert.equal(
+    reviewOpFamily("complete", "needs_review", "STATE_UNCERTAIN"),
+    "needs_you",
+  );
+  assert.equal(
+    reviewOpFamily("update", "unmatched", "TARGET_UNCERTAIN"),
+    "needs_you",
+  );
+  assert.equal(reviewOpWord("update", "complete"), "Update");
+  assert.equal(reviewOpWord("create", "create"), "Create");
+  assert.equal(reviewOpWord("needs_you", "create"), "Needs You");
+  assert.equal(reviewOpWord("remove", "remove"), "Remove");
+  assert.equal(reviewOpIcon("create"), "circle-plus");
+  assert.equal(reviewOpIcon("update"), "pencil");
+  assert.equal(reviewOpIcon("remove"), "circle-minus");
+  assert.equal(reviewOpIcon("needs_you"), "circle-help");
+  assert.equal(reviewFamilyClass("needs_you"), "is-needs-you");
+  assert.equal(reviewDomainLabel("action"), "To Do");
+  assert.equal(reviewDomainLabel("nudge"), "Reminder");
+  assert.equal(reviewDomainLabel("meeting"), "Date");
+  assert.equal(reviewDomainLabel("risk"), "Risk");
+  assert.equal(reviewDomainLabel("stakeholder"), "Stakeholder");
+  assert.equal(
+    needsYouHeadline("STATE_UNCERTAIN", "Risk"),
+    "Is this Risk resolved?",
+  );
+  assert.equal(
+    needsYouHeadline("TARGET_UNCERTAIN", "To Do"),
+    "Which record does this refer to?",
+  );
+  assert.equal(
+    whyDisclosureLabel(["quoted evidence"], "Lume suggests to create this."),
+    "Evidence",
+  );
+  assert.equal(
+    whyHasUsefulContent(
+      [],
+      "Lume suggests to create this stakeholder based on the Capture.",
+    ),
+    false,
+  );
+  assert.equal(
+    isGenericInterpretation(
+      "Lume suggests to update this risk based on the Capture.",
+    ),
+    true,
+  );
+  assert.equal(
+    needsYouSupporting(
+      "Which record does this refer to?",
+      "Lume thinks this refers to:\nChase the hosting ticket",
+      "Chase the hosting ticket",
+    ),
+    null,
+  );
+  assert.equal(
+    needsYouSupporting(
+      "Is this Risk resolved?",
+      "Lume isn't sure whether this Risk is resolved.",
+      "CDN deployment delayed",
+    ),
+    null,
+  );
 }
 
 console.log("verify-capture-review: all checks passed");

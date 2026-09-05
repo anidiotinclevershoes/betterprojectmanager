@@ -115,18 +115,8 @@ export function SuggestedChangesList({
               ·
             </span>
             <span className="capture-count-inline">
-              Needs you <strong>{needsReviewCount}</strong>
+              Needs You <strong>{needsReviewCount + unmatchedCount}</strong>
             </span>
-            {unmatchedCount > 0 ? (
-              <>
-                <span className="capture-count-sep" aria-hidden>
-                  ·
-                </span>
-                <span className="capture-count-inline">
-                  Unmatched <strong>{unmatchedCount}</strong>
-                </span>
-              </>
-            ) : null}
             {readyCount > 0 ? (
               <button
                 type="button"
@@ -159,7 +149,6 @@ export function SuggestedChangesList({
                 highlighted={highlightedId === model.id}
                 onApprove={() => onApprove(model.id)}
                 onDismiss={() => onDismiss(model.id)}
-                onKeepOpen={() => onDismiss(model.id)}
                 onUseThis={() => onUseThis(model.id)}
                 onChooseTarget={(option) => onChooseTarget(model.id, option)}
                 onChooseProject={(project) =>
