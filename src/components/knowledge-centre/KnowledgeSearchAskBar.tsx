@@ -11,7 +11,15 @@ import { useTellMeSession } from "@/components/tell-me/TellMeSessionContext";
  * Search never calls AI. Ask uses existing Tell Me session (server-loaded
  * canonical truth on `/api/tell-me`; suggestions remain local MissionState cache).
  */
-export function KnowledgeSearchAskBar({ projectId }: { projectId: string }) {
+export function KnowledgeSearchAskBar({
+  projectId,
+  search: searchProp,
+  onSearchChange,
+}: {
+  projectId: string;
+  search?: string;
+  onSearchChange?: (value: string) => void;
+}) {
   const { state } = useMission();
   const {
     question,
@@ -23,8 +31,14 @@ export function KnowledgeSearchAskBar({ projectId }: { projectId: string }) {
     suggestions,
     clearThread,
   } = useTellMeSession();
-  const [search, setSearch] = useState("");
+  const [localSearch, setLocalSearch] = useState("");
+  const search = searchProp ?? localSearch;
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
+
+  function setSearch(value: string) {
+    if (searchProp === undefined) setLocalSearch(value);
+    onSearchChange?.(value);
+  }
 
   const hits = useMemo(
     () => searchAuthoritativeProject(state, projectId, search),
