@@ -13,6 +13,7 @@ const ROOT = process.cwd();
 /** Fast, credential-free, deterministic product regression. */
 const SUITE: Array<{ name: string; script: string }> = [
   { name: "git-preflight", script: "scripts/verify-git-preflight.ts" },
+  { name: "project-tags", script: "scripts/verify-project-tags.ts" },
   { name: "knowledge-reconcile", script: "scripts/verify-knowledge-reconcile.ts" },
   { name: "project-truth-safety", script: "scripts/verify-project-truth-safety.ts" },
   { name: "risk-lifecycle", script: "scripts/verify-risk-lifecycle.ts" },

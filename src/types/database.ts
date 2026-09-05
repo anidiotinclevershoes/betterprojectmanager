@@ -379,6 +379,48 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["workspace_usage"]["Insert"]>;
       };
+      project_tags: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          project_id: string;
+          name: string;
+          slug: string;
+          origin: "predefined" | "custom";
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          workspace_id: string;
+          project_id: string;
+          name: string;
+          slug: string;
+          origin?: "predefined" | "custom";
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["project_tags"]["Insert"]>;
+      };
+      item_tags: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          project_id: string;
+          tag_id: string;
+          target_kind: string;
+          target_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          workspace_id: string;
+          project_id: string;
+          tag_id: string;
+          target_kind: string;
+          target_id: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["item_tags"]["Insert"]>;
+      };
     };
     Functions: {
       is_workspace_member: {

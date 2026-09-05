@@ -17,6 +17,8 @@ const CASCADE_ON_PROJECT_DELETE = [
   "releases",
   "project_intelligence_snapshots",
   "capture_apply_receipts",
+  "project_tags",
+  "item_tags",
 ] as const;
 
 const SET_NULL_ON_PROJECT_DELETE = [
@@ -70,6 +72,8 @@ export class FakeWorkspaceClient {
       coach_sessions: [],
       project_intelligence_snapshots: [],
       capture_apply_receipts: [],
+      project_tags: [],
+      item_tags: [],
       workspace_members: [
         {
           workspace_id: this.workspaceId,

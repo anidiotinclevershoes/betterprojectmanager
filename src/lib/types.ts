@@ -387,4 +387,10 @@ export interface MissionState {
   /** Analyses consumed in the current calendar month (local). */
   analysesThisMonth?: number;
   analysesMonthKey?: string;
+  /**
+   * Retrieval tags. Metadata only — deleting every tag must leave
+   * risks, todos, knowledge, people, and dates unchanged.
+   */
+  projectTags?: import("./tags").ProjectTag[];
+  itemTags?: import("./tags").ItemTag[];
 }
