@@ -1,0 +1,35 @@
+name: Branch preflight
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch main
+        run: git fetch --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Branch preflight
+        run: npm run git:preflight
+        env:
+          LUME_PREFLIGHT_SKIP_FETCH: "1"
+      - name: Require PR base main
+        run: |
+          if [ "${{ github.base_ref }}" != "main" ]; then
+            echo "Product PRs must target main (base is ${{ github.base_ref }})."
+            echo "Stacked or experiment PRs are reference-only until ported from current main."
+            exit 1
+          fi

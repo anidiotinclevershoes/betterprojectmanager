@@ -1,8 +1,12 @@
 # Lume — Current Architecture Memory Handoff
 
-**Status:** Documentation of CURRENT implementation, plus the V1 Architectural Convergence delta (Part C)  
+> **HISTORICAL — 26 August 2026 desert-era snapshot. Not current implementation authority.**  
+> This file was written against `cursor/capture-v2-desert-new-project-56c9`. PR #66 **was** merged. Capture V2 is the sole live engine. Ready → Apply is on `main` (PR #126).  
+> **Do not start work from this document.** Start at `docs/README.md`. Use current `main` as the implementation map. Part C V1 *target* decisions may still inform later work; Part A/B “CURRENT” flag tables are stale.
+
+**Status:** HISTORICAL implementation snapshot + V1 Architectural Convergence delta (Part C)  
 **Date:** 26 August 2026 (Thor amendment: name ≠ identity; project-scoped mutation invariant; status categories)  
-**Code observed:** `cursor/capture-v2-desert-new-project-56c9` @ `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`  
+**Code observed (then):** `cursor/capture-v2-desert-new-project-56c9` @ `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`  
 **Ancestry verified:** Phase 3B / PR #64 HEAD `b52995c3b7eb80971d052e875c1d372ebb424ebe` is an ancestor. This SHA also contains Capture V2, New Project V2, and Desert. PR #66 is **not** merged and must not be merged from this review.  
 **Docs entry point:** `docs/README.md`  
 **Governing product authority:** `docs/v1-reference-pack/`  

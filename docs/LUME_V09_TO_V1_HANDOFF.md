@@ -1,10 +1,12 @@
 # Lume v0.9 → V1 handoff
 
 **Status:** Canonical operating picture for closed alpha and the path to public V1  
-**Date:** 28 August 2026  
-**Merged main:** `0e68384a2271b2b27e0ac75b871ee26331a26db7` (D-036 PR #100 on `2e024d0` / integration PR #95)  
-**Qualified Capture engine SHA:** `2131444c77c3b06b666df393362a50112d2de56f` (frozen; identical engine files on `main`)  
-**Production:** https://betterprojectmanager.vercel.app deployed SHA `0e68384a2271b2b27e0ac75b871ee26331a26db7`
+**Date:** 5 September 2026 (Ready → Apply closeout on `main`)  
+**Merged main (this update):** `64171cde93e837f1f755c79b0c4c43aca502bd03` (PR #126 Ready → Apply safety)  
+**Prior v0.9 closure SHA:** `0e68384a2271b2b27e0ac75b871ee26331a26db7` (D-036 PR #100)  
+**Qualified Capture engine SHA:** `2131444c77c3b06b666df393362a50112d2de56f` (frozen Analyse engine; Apply safety extended by #126)  
+**Production:** https://betterprojectmanager.vercel.app  
+**Docs entry:** `docs/README.md`. **Integration line:** `main` only. Desert-era branches are not a development base.
 
 # LUME v0.9 CLOSED
 
@@ -58,12 +60,14 @@ Top-level project modes:
 | Surface | v0.9 reality |
 | --- | --- |
 | **Capture** | Sole live Analyse → Review → Apply engine is **Capture V2**. Model: `gpt-4o-mini-2024-07-18` only. Engine frozen. `LUME_CAPTURE_V2` **cannot** restore legacy Capture (`isCaptureV2Enabled()` always returns true). |
-| **Review / Needs-you** | Nothing durable is written until approve. Needs-you is success for difficult/ambiguous cases. Apply is persist-first against server-loaded truth. |
+| **Review / Needs-you** | Nothing durable is written until approve. Needs-you is success for difficult/ambiguous cases. **Ready means the same production Apply path can execute that reviewed change** (PR #126). Apply still revalidates at write time. Client overrides cannot manufacture Ready. |
 | **Annotated transcript** | Uses existing Capture evidence. Matching is exact / case-normalised only. Unmatched evidence stays unhighlighted. No second model/parser. |
 | **Knowledge Centre** | v8 hierarchy: To Dos and Risks prominent; Current position below; secondary frames; inspector overlay; structured-domain precedence (D-030). |
 | **Ask Lume** | Authenticated server-loaded canonical truth. Client-posted MissionState is ignored. |
 | **Catch Me Up** | AI read-only briefing from authoritative server truth: where we are / attention / missed / noticed connections. Distinguishes known vs inferred. No mutation, no vector DB, no new memory store. |
-| **New Project** | Talk It Through (recommended) or Start Blank. Production runs New Project V2 when `LUME_NEW_PROJECT_V2` is on (it is, on current Production). Review before create. |
+| **New Project** | On `main` today: Talk It Through (recommended) or Start Blank, New Project V2 when `LUME_NEW_PROJECT_V2` is on. Four-frame compose + retrieval tags are being ported from #119 onto `main` — do not merge the desert branch. |
+| **Timeline** | Target: read-only projection of dated authoritative truth. Legacy writable Gantt may still exist until deprecated. Do not add a second schedule store. |
+| **Meeting Catch Me Up** | Target: meeting-scoped brief from stored project truth, not generic advice. Project Catch Me Up mode stays. Do not delete stored meeting-prep rows to simplify UI. |
 | **Coach** | Hidden. Not a mode. Drawer unmounted. `/coaching` leftover route only. |
 | **Advise** | Disabled / coming soon. |
 | **Persistence** | Durable authority is **Supabase**. Production does not use localStorage as truth. In-memory/cache is UI only. Appearance/sidebar prefs may be local. |
@@ -273,7 +277,7 @@ Ship to trusted testers. Watch the questions in §7.
 
 | Item | Why |
 | --- | --- |
-| Ready vs Apply responsibility mismatch | Fail-closed is correct; Ready signalling lies |
+| Ready vs Apply (D-037) | **Closed on `main` by PR #126.** Ready cannot claim a write Apply cannot plan. |
 | Todo delete leaves Knowledge fact | Not resurrection; Current position still shows the text |
 | `openaiConfigured` stale after login-page 401 | Hard refresh workaround |
 | Suggestion accept/dismiss memory-only (D-003) | If testers use suggestions |
@@ -350,7 +354,7 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | D-044 Terms/Privacy | Deferred for trusted alpha | V1 MUST | PR #88 not in #95 | Public/commercial launch |
 | D-043 Meeting Prep persist | `updateMeeting` memory-only | V1 MUST | `store.tsx` ~1249 | Persist **or** remove `/meetings` mutation |
 | Entitlement/Stripe | 90-day trial live; Stripe not required | V1 MUST when charging | Live Account A trial 11/26/2026 | D-024 local meter is not billing |
-| D-037 Ready vs Apply | Fail-closed correct; Ready can lie | TESTER EVIDENCE / V1 SHOULD | Owen smoke | Do not unfreeze Capture |
+| D-037 Ready vs Apply | Ready only when Apply can plan that write | **CLOSED** | PR #126 / `main` `64171cd` | Do not weaken the contract |
 | D-038 Todo delete Knowledge remnant | Todo stays deleted; fact can remain | V1 SHOULD | Production smoke | Retire linked fact by id |
 | D-039 `openaiConfigured` stale | 401 on `/login` can stick | V1 SHOULD | Smoke | Re-probe after SIGNED_IN |
 | D-003 suggestion persist | Accept/dismiss MissionState only | V1 SHOULD / TESTER EVIDENCE | `setRecommendationStatus` | Persist if testers use it |
