@@ -1,8 +1,11 @@
 # Lume Experimental Programme — decision record
 
-**Status:** Experimental (25 August 2026)  
-**Branch:** `cursor/capture-v2-desert-new-project-56c9`  
-**Does not replace:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` as the current-implementation map (Part C of that file is the 26 Aug V1 convergence *target* delta).
+> **HISTORICAL — 25 August 2026. Not current engine or integration guidance.**  
+> Capture V2 is the sole live Analyse → Review → Apply engine on `main`.  
+> `cursor/capture-v2-desert-new-project-56c9` is an **obsolete** branch. Do not use it as a development base. Start at `docs/README.md`.
+
+**Status:** HISTORICAL decision record (25 August 2026)  
+**Branch (then):** `cursor/capture-v2-desert-new-project-56c9`
 
 This file records the three independent workstreams from the Experimental Programme. Treat items marked **experimental** as flagged or newly added; do not describe them as the only production path until a workstream is **accepted**.
 
