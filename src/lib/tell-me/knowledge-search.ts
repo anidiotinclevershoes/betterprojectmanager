@@ -12,6 +12,13 @@ export type KnowledgeSearchHit = {
   matchRanges: Array<{ start: number; end: number }>;
 };
 
+/** Deterministic case-insensitive substring match. Shared with KC list filter. */
+export function queryMatchesText(haystack: string, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return haystack.toLowerCase().includes(q);
+}
+
 /** Deterministic case-insensitive substring ranges. Shared with KC Search. */
 export function matchRangesFor(
   haystack: string,

@@ -134,25 +134,25 @@ function testFramesLayoutContract() {
   );
   assert.match(workspace, /knowledge/);
   assert.match(workspace, /OceanKnowledgeFrames/);
+  assert.match(workspace, /ProjectIntelligenceStrip/);
   assert.doesNotMatch(frames, />More project knowledge</i);
   assert.doesNotMatch(workspace, />More project knowledge</i);
   assert.doesNotMatch(frames, /more-project-knowledge/i);
-  for (const title of OCEAN_PRIMARY_FRAMES) {
-    assert.match(frames, new RegExp(title));
+  assert.match(frames, /kc-bucket-nav/);
+  assert.match(frames, /kc-bucket-\$\{id\}/);
+  assert.match(frames, /bucketLabel/);
+  const buckets = readSrc("src/lib/knowledge-centre/four-bucket.ts");
+  for (const title of ["All", "Issues", "People", "To Do", "Knowledge"]) {
+    assert.match(buckets, new RegExp(title));
   }
-  for (const title of OCEAN_SECONDARY_FRAMES) {
-    assert.match(frames, new RegExp(title));
-  }
-  assert.match(frames, /ocean-frames-primary/);
-  assert.match(frames, /ocean-frames-secondary/);
-  const primaryBlock = frames.split("ocean-frames-primary")[1]!.split(
-    "ocean-frames-secondary",
-  )[0]!;
-  assert.match(primaryBlock, /To Do/);
-  assert.match(primaryBlock, /Risks & blockers/);
-  assert.doesNotMatch(primaryBlock, /Current position/);
-  const secondaryBlock = frames.split("ocean-frames-secondary")[1]!;
-  assert.match(secondaryBlock, /Current position/);
+  assert.match(frames, /TimelineFrame/);
+  assert.match(frames, /MeetingPrepFrame/);
+  assert.match(frames, /ocean-frame-timeline/);
+  assert.match(frames, /ocean-frame-meeting-prep/);
+  assert.doesNotMatch(frames, /ocean-frames-primary/);
+  assert.doesNotMatch(frames, /searchProjectKnowledge/);
+  void OCEAN_PRIMARY_FRAMES;
+  void OCEAN_SECONDARY_FRAMES;
 }
 
 function testNoProgressKpi() {
@@ -465,7 +465,7 @@ async function main() {
   testSearchAskContract();
   console.log("✓ Search non-AI; Ask AI; quiet suggestions");
   testFramesLayoutContract();
-  console.log("✓ operational To Do + Risks; Current position secondary");
+  console.log("✓ four-bucket All / Issues / People / To Do / Knowledge");
   testNoProgressKpi();
   console.log("✓ no Progress KPI; Refresh + actions left present");
   testResolvedRisksExcluded();

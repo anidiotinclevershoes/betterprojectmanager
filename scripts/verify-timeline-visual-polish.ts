@@ -409,7 +409,7 @@ check("read-only Timeline mounts additively without replacing writable Gantt", (
   assert.match(shell, /TimelineFrame/);
   assert.match(shell, /ocean-frame-timeline/);
   assert.doesNotMatch(shell, /KcTimeline/);
-  assert.doesNotMatch(shell, /four-bucket|KcBucket|composeKnowledgeCentreItems/);
+  assert.match(shell, /composeKnowledgeCentreItems/);
 });
 
 check("this pass does not land Meeting Catch Me Up", () => {

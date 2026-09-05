@@ -19,6 +19,7 @@ import type { Project } from "@/lib/types";
  */
 export function OceanProjectWorkspace({ project }: { project: Project }) {
   const [mode, setMode] = useState<OceanProjectMode>("knowledge");
+  const [kcQuery, setKcQuery] = useState("");
 
   return (
     <div
@@ -48,8 +49,16 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
           className="ocean-knowledge-centre"
           data-testid="ocean-knowledge-centre"
         >
-          <KnowledgeSearchAskBar projectId={project.id} />
-          <OceanKnowledgeFrames projectId={project.id} />
+          <h2 className="kc-heading">Knowledge Centre</h2>
+          <KnowledgeSearchAskBar
+            projectId={project.id}
+            search={kcQuery}
+            onSearchChange={setKcQuery}
+          />
+          <OceanKnowledgeFrames
+            projectId={project.id}
+            searchQuery={kcQuery}
+          />
         </div>
       ) : null}
 

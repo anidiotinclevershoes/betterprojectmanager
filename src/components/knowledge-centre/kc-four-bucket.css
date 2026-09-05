@@ -1,0 +1,246 @@
+/* Knowledge Centre four-bucket presentation. View-only — no persist. */
+
+.kc-heading {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+
+.ocean-knowledge-centre .ocean-search-field {
+  min-height: 2.85rem;
+  border-color: var(--border-strong, var(--border-subtle));
+}
+
+.ocean-tag-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ocean-knowledge-centre .ocean-tag-filter-label {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.ocean-tag-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.tag-chip,
+.tag-chip-add-btn {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tag-chip.is-selected {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  background: var(--accent-soft);
+}
+
+.ocean-knowledge-centre .ocean-tag-filter-chips .tag-chip {
+  opacity: 0.78;
+}
+
+.ocean-knowledge-centre .ocean-tag-filter-chips .tag-chip.is-selected {
+  opacity: 1;
+}
+
+.kc-four .compact-change-ico {
+  filter: grayscale(1);
+  opacity: 0.86;
+  margin-top: 0;
+}
+
+.kc-bucket-nav,
+.kc-subtype-nav {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 0.1rem;
+}
+
+.kc-bucket-nav::-webkit-scrollbar,
+.kc-subtype-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.kc-bucket-tab,
+.kc-subtype-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 999px;
+  padding: 0.32rem 0.75rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.kc-bucket-tab.is-selected,
+.kc-subtype-tab.is-selected {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  background: var(--accent-soft);
+}
+
+.kc-bucket-count {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.kc-bucket-tab.is-selected .kc-bucket-count {
+  color: var(--text-secondary);
+}
+
+.kc-cross-cue,
+.kc-zero {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.kc-four-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.kc-bucket-group-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.45rem;
+}
+
+.kc-bucket-group-head h3 {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 620;
+}
+
+.kc-bucket-group-body,
+.kc-bucket-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.kc-item.compact-change-card {
+  border-left-color: var(--border-subtle);
+  padding: 0;
+}
+
+.kc-item.compact-change-card.is-emphasized {
+  border-left-color: var(--warning);
+}
+
+.kc-item.compact-change-card.is-selected {
+  border-color: color-mix(in srgb, var(--accent-primary) 45%, var(--border-subtle));
+}
+
+.kc-item-hit {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.kc-item-hit:disabled {
+  cursor: default;
+}
+
+.kc-item-support,
+.kc-item-tags {
+  margin: 0 0 0 30px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.kc-item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  opacity: 0.8;
+  padding-bottom: 4px;
+}
+
+.kc-needs-you {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0 0 0 30px;
+  padding-bottom: 6px;
+  font-size: 0.78rem;
+  color: var(--warning);
+}
+
+.kc-needs-you-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-top: 0.35rem;
+  border-radius: 999px;
+  background: var(--warning);
+  flex: none;
+}
+
+.kc-more-link {
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0;
+  text-decoration: underline;
+}
+
+.kc-feature {
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  background: var(--bg-surface);
+}
+
+.kc-feature-label,
+.kc-feature-toggle {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 620;
+  color: var(--text-secondary);
+}
+
+.kc-feature-body {
+  margin-top: 0.45rem;
+}
+
+.ocean-knowledge-centre .ocean-search-ask-row {
+  grid-template-columns: minmax(0, 1.25fr) auto minmax(0, 0.9fr);
+}
