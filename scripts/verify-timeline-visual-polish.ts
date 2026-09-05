@@ -197,7 +197,7 @@ check("known Away range displays as a range, not a point", () => {
 });
 
 check("known unavailability is projected only from structured availability", () => {
-  const state = createSeedState();
+  const state = clone(createSeedState());
   const elena = state.projects
     .find((p) => p.id === ATLAS)!
     .stakeholders.find((s) => s.name === "Elena Rostova")!;
@@ -245,7 +245,7 @@ check("missing availability information does not generate false availability", (
 });
 
 check("Person without dated facts does not create a misleading lane", () => {
-  const state = createSeedState();
+  const state = clone(createSeedState());
   state.projects.find((p) => p.id === ATLAS)!.stakeholders.push({
     id: "st-ghost-visual",
     name: "Nobody Dated",
@@ -268,7 +268,7 @@ check("people remain the same durable People entities", () => {
 });
 
 check("meeting attendee relationship renders only where stored", () => {
-  const state = createSeedState();
+  const state = clone(createSeedState());
   const priyaOnly: Meeting = {
     id: "mtg-priya-only",
     projectId: ATLAS,
@@ -301,7 +301,7 @@ check("meeting attendee relationship renders only where stored", () => {
 });
 
 check("absence of a known meeting does not create one", () => {
-  const state = createSeedState();
+  const state = clone(createSeedState());
   state.meetings = [];
   const view = composeTimelineProjection(state, ATLAS);
   assert.ok(!view.events.some((e) => e.source === "meeting"));
