@@ -146,9 +146,9 @@ function testFramesLayoutContract() {
     assert.match(buckets, new RegExp(title));
   }
   assert.match(frames, /TimelineFrame/);
-  assert.match(frames, /MeetingPrepFrame/);
+  assert.doesNotMatch(frames, /MeetingPrepFrame/);
   assert.match(frames, /ocean-frame-timeline/);
-  assert.match(frames, /ocean-frame-meeting-prep/);
+  assert.doesNotMatch(frames, /ocean-frame-meeting-prep/);
   assert.match(frames, /ocean-frame-people/);
   assert.match(frames, /ocean-frame-todo/);
   assert.match(frames, /ocean-frame-risks/);

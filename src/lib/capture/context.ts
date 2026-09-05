@@ -429,7 +429,7 @@ export function buildCaptureContext(args: {
     meetings.filter((m) => m.projectId === projectId),
     limits.meetings,
     (m) =>
-      scoreText(`${m.title} ${m.prep.openingScript}`, keywords) * 2 +
+      scoreText(m.title, keywords) * 2 +
       Date.parse(m.startsAt || "") / 1e13,
     (m) =>
       rec({
@@ -438,7 +438,7 @@ export function buildCaptureContext(args: {
         title: m.title,
         status: m.phase,
         date: m.startsAt,
-        summary: m.prep.objectives.slice(0, 2).join("; ") || undefined,
+        summary: m.attendees.slice(0, 3).join(", ") || undefined,
       }),
     "Meetings",
   );

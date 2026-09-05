@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo } from "react";
 import { formatDayMonth } from "@/lib/selectors";
 import {
   projectTimeline,
@@ -8,6 +8,12 @@ import {
 } from "@/lib/timeline";
 import { useMission } from "@/lib/store";
 import type { TimelineItem, TimelineItemType } from "@/lib/types";
+
+/**
+ * Leftover writable-Gantt visual. Unmounted from production Timeline.
+ * Reads stored `timeline` rows only. Must not add or persist new items.
+ * Do not remount this as a competing schedule editor.
+ */
 
 const TYPE_CLASS: Record<TimelineItemType, string> = {
   phase: "tl-phase",
@@ -18,29 +24,10 @@ const TYPE_CLASS: Record<TimelineItemType, string> = {
 };
 
 export function ProjectTimelineGantt({ projectId }: { projectId: string }) {
-  const { state, addTimelineItem } = useMission();
+  const { state } = useMission();
   const items = projectTimeline(state.timeline ?? [], projectId);
   const { start, end } = useMemo(() => timelineBounds(items), [items]);
   const span = Math.max(end - start, 1);
-
-  const [label, setLabel] = useState("");
-  const [date, setDate] = useState("");
-  const [type, setType] = useState<TimelineItemType>("milestone");
-
-  function onAdd(e: FormEvent) {
-    e.preventDefault();
-    if (!label.trim() || !date) return;
-    const startAt = new Date(`${date}T09:00:00`).toISOString();
-    addTimelineItem(projectId, {
-      label: label.trim(),
-      type,
-      startAt,
-      source: "manual",
-    });
-    setLabel("");
-    setDate("");
-  }
-
   const ticks = buildTicks(start, end);
 
   return (
@@ -49,14 +36,14 @@ export function ProjectTimelineGantt({ projectId }: { projectId: string }) {
         <div>
           <h3>Timeline</h3>
           <p>
-            Simple Gantt — add dates yourself; captures can append milestones
-            without rebuilding the calendar.
+            Historical Gantt view of stored timeline rows. New dates are captured
+            through Review → Apply, not here.
           </p>
         </div>
       </header>
 
       {items.length === 0 ? (
-        <p className="empty">No timeline items yet. Add a date below.</p>
+        <p className="empty">No timeline items yet.</p>
       ) : (
         <div className="gantt">
           <div className="gantt-axis">
@@ -83,31 +70,6 @@ export function ProjectTimelineGantt({ projectId }: { projectId: string }) {
         </div>
       )}
 
-      <form className="timeline-add" onSubmit={onAdd}>
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value as TimelineItemType)}
-        >
-          <option value="milestone">Milestone</option>
-          <option value="phase">Phase</option>
-          <option value="meeting">Meeting</option>
-          <option value="deadline">Deadline</option>
-          <option value="submission">Submission</option>
-        </select>
-        <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="Label (e.g. CAB pack due)"
-        />
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-        <button type="submit" disabled={!label.trim() || !date}>
-          Add
-        </button>
-      </form>
     </section>
   );
 }
