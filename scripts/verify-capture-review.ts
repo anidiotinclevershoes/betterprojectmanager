@@ -1431,6 +1431,12 @@ function suggestionIdFor(opId: string, index = 0) {
   assert.match(actions, /const prompt = /);
   assert.match(actions, /prompt\(missingDateCopy/);
   assert.match(actions, /prompt\(namedTarget \? labels\.question : copy\)/);
+  const card = readFileSync(
+    join(import.meta.dirname, "../src/components/capture/review/SuggestedChangeCard.tsx"),
+    "utf8",
+  );
+  assert.match(card, /ownershipChoiceCopy/);
+  assert.match(card, /ownershipQuestion/);
   assert.equal(
     (actions.match(/compact-change-review-copy/g) || []).length,
     1,
