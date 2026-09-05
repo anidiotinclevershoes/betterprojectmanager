@@ -1,99 +1,130 @@
 "use client";
 
-import type { ReactNode } from "react";
-import type { SuggestionKind } from "@/lib/capture/suggestions";
-import { ReadinessBadge, ReviewBadge } from "./ReviewBadge";
 import type { ChangeDiff } from "@/lib/capture/review/viewModel";
+import type { SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
+import type { ReactNode } from "react";
+import "./review-cards.css";
+import { DomainRow, OperationBar } from "./ReviewBadge";
+import {
+  reviewFamilyClass,
+  reviewOpFamily,
+  type ReviewOpFamily,
+} from "@/lib/capture/review/reviewLanguage";
 
-const KIND_ICON: Record<SuggestionKind, string> = {
-  action: "☑",
-  milestone: "◆",
-  decision: "◇",
-  risk: "⚠",
-  stakeholder: "◎",
-  availability: "◎",
-  knowledge: "☰",
-  nudge: "→",
-  meeting: "○",
-  memory: "☰",
-};
+function removeConsequence(diff: ChangeDiff): string {
+  const raw = (diff.to || "Remove from this project").trim();
+  if (/remove from project/i.test(raw)) return "Will be removed from project";
+  if (/archive from project/i.test(raw)) return "Will be archived from project";
+  return raw;
+}
 
-function ChangeDiffBlock({
-  diff,
-  entityKind,
-}: {
-  diff: ChangeDiff;
-  entityKind: SuggestionKind;
-}) {
+function ChangeCompare({ diff }: { diff: ChangeDiff }) {
   const layout = diff.layout ?? "from_to";
 
   if (layout === "create") {
-    return (
-      <div
-        className={`compact-change-diff compact-change-diff-create is-kind-${entityKind}`}
-        aria-label={`${diff.label}: ${diff.to}`}
-      >
-        <p className="compact-change-diff-label">{diff.label}</p>
-        <p className="compact-change-to compact-change-create-title">{diff.to}</p>
-        {diff.meta ? <p className="compact-change-create-meta">{diff.meta}</p> : null}
-      </div>
-    );
-  }
-
-  if (layout === "suggested_only" || !diff.from || diff.from === "—") {
-    return (
-      <div
-        className={`compact-change-diff compact-change-diff-suggested is-kind-${entityKind}`}
-        aria-label={`${diff.label}: ${diff.to}`}
-      >
-        <p className="compact-change-diff-label">{diff.label}</p>
-        <p className="compact-change-to">{diff.to}</p>
-      </div>
-    );
+    return diff.meta ? <p className="lume-review-meta">{diff.meta}</p> : null;
   }
 
   if (layout === "remove") {
     return (
-      <div
-        className={`compact-change-diff compact-change-diff-remove is-kind-${entityKind}`}
-        aria-label={`Current ${diff.from}, suggested ${diff.to}`}
-      >
-        <div className="compact-change-diff-grid">
-          <div className="compact-change-diff-col">
-            <span className="compact-change-col-label">Current</span>
-            <span className="compact-change-from">{diff.from}</span>
-          </div>
-          <span className="compact-change-arrow" aria-hidden>
-            →
-          </span>
-          <div className="compact-change-diff-col">
-            <span className="compact-change-col-label">Suggested</span>
-            <span className="compact-change-to">{diff.to}</span>
-          </div>
-        </div>
+      <p className="lume-review-consequence">{removeConsequence(diff)}</p>
+    );
+  }
+
+  const hasFrom = Boolean(diff.from && diff.from !== "—");
+  if (layout === "suggested_only" || !hasFrom) {
+    return (
+      <div className="lume-review-mutation">
+        {diff.label ? <p className="lume-review-field">{diff.label}</p> : null}
+        <p className="lume-review-to">{diff.to}</p>
       </div>
     );
   }
 
   return (
     <div
-      className={`compact-change-diff is-kind-${entityKind}`}
-      aria-label={`${diff.label}: current ${diff.from}, suggested ${diff.to}`}
+      className="lume-review-mutation"
+      aria-label={`${diff.label}: ${diff.from} to ${diff.to}`}
     >
-      <p className="compact-change-diff-label">{diff.label}</p>
-      <div className="compact-change-diff-grid">
-        <div className="compact-change-diff-col">
-          <span className="compact-change-col-label">Current</span>
-          <span className="compact-change-from">{diff.from}</span>
-        </div>
-        <span className="compact-change-arrow" aria-hidden>
+      {diff.label ? <p className="lume-review-field">{diff.label}</p> : null}
+      <p className="lume-review-compare">
+        <span className="lume-review-from">{diff.from}</span>
+        <span className="lume-review-arrow" aria-hidden>
           →
         </span>
-        <div className="compact-change-diff-col">
-          <span className="compact-change-col-label">Suggested</span>
-          <span className="compact-change-to">{diff.to}</span>
-        </div>
+        <span className="lume-review-to">{diff.to}</span>
+      </p>
+    </div>
+  );
+}
+
+function ReviewTruth({
+  family,
+  recordName,
+  diff,
+  needsYouHeadline,
+  needsYouDetail,
+}: {
+  family: ReviewOpFamily;
+  recordName: string;
+  diff?: ChangeDiff;
+  needsYouHeadline?: string;
+  needsYouDetail?: string | null;
+}) {
+  if (family === "needs_you") {
+    const showCompare =
+      diff &&
+      (diff.layout === "from_to" || diff.layout === "suggested_only") &&
+      diff.to &&
+      diff.to !== recordName;
+    return (
+      <div className="lume-review-truth">
+        <h4 className="lume-review-hero">
+          {needsYouHeadline || "Lume needs a decision from you."}
+        </h4>
+        {recordName ? <p className="lume-review-subject">{recordName}</p> : null}
+        {needsYouDetail ? (
+          <p className="lume-review-support">{needsYouDetail}</p>
+        ) : null}
+        {showCompare ? <ChangeCompare diff={diff} /> : null}
       </div>
+    );
+  }
+
+  if (family === "create") {
+    const title = (diff?.to || recordName).trim() || recordName;
+    return (
+      <div className="lume-review-truth">
+        <h4 className="lume-review-hero">{title}</h4>
+        <ChangeCompare
+          diff={diff ?? { label: "", from: "", to: title, layout: "create" }}
+        />
+      </div>
+    );
+  }
+
+  if (family === "remove") {
+    return (
+      <div className="lume-review-truth">
+        <h4 className="lume-review-hero">{recordName}</h4>
+        <ChangeCompare
+          diff={
+            diff ?? {
+              label: "",
+              from: "",
+              to: "Remove from this project",
+              layout: "remove",
+            }
+          }
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="lume-review-truth">
+      {recordName ? <h4 className="lume-review-hero">{recordName}</h4> : null}
+      {diff ? <ChangeCompare diff={diff} /> : null}
     </div>
   );
 }
@@ -103,7 +134,7 @@ export function CompactChangeCard({
   entityLabel,
   recordName,
   operation,
-  operationLabel,
+  operationLabel: _operationLabel,
   projectLabel,
   diff,
   why,
@@ -112,15 +143,17 @@ export function CompactChangeCard({
   emphasized,
   state,
   highlighted,
+  needsYouHeadline,
+  needsYouDetail,
+  reviewReason,
 }: {
   entityKind: SuggestionKind;
   entityLabel: string;
   recordName: string;
-  operation: Parameters<typeof ReviewBadge>[0]["operation"];
+  operation: SuggestionOp;
   operationLabel?: string;
   projectLabel?: string;
   diff?: ChangeDiff;
-  /** Why panel — rendered above actions. */
   why?: ReactNode;
   actions: ReactNode;
   readiness?: "needs_review" | "unmatched";
@@ -128,47 +161,64 @@ export function CompactChangeCard({
   emphasized?: boolean;
   state?: "pending" | "approved" | "dismissed";
   highlighted?: boolean;
+  needsYouHeadline?: string;
+  needsYouDetail?: string | null;
+  reviewReason?: import("@/lib/capture/review/reviewReason").ReviewReason | null;
 }) {
   const attention = readiness ?? (emphasized ? "needs_review" : undefined);
+  const family = reviewOpFamily(operation, attention, reviewReason);
+
+  const articleLabel =
+    family === "needs_you"
+      ? `${needsYouHeadline || "Needs you"}, ${entityLabel}${
+          recordName ? `: ${recordName}` : ""
+        }`
+      : family === "create"
+        ? `Create ${entityLabel}: ${diff?.to || recordName}`
+        : family === "remove"
+          ? `Remove ${entityLabel}: ${recordName}`
+          : diff?.from && diff.to
+            ? `Update ${entityLabel} ${recordName}: ${diff.label} ${diff.from} to ${diff.to}`
+            : `Update ${entityLabel}: ${recordName}`;
+
   return (
     <article
       className={[
-        "compact-change-card",
-        `is-kind-${entityKind}`,
-        attention ? "is-emphasized" : "",
-        attention === "unmatched" ? "is-unmatched" : "",
-        state === "approved" ? "is-approved" : "",
-        state === "dismissed" ? "is-dismissed" : "",
+        "lume-review-card",
+        reviewFamilyClass(family),
         highlighted ? "is-flash" : "",
       ]
         .filter(Boolean)
         .join(" ")}
+      data-review-family={family}
+      data-review-kind={entityKind}
+      aria-label={articleLabel}
     >
-      <header className="compact-change-head">
-        <div className="compact-change-entity">
-          <span className="compact-change-ico" aria-hidden>
-            {KIND_ICON[entityKind]}
-          </span>
-          <div className="compact-change-titles">
-            <p className="compact-change-type">
-              {projectLabel ? `${projectLabel} · ` : ""}
-              {operationLabel || entityLabel}
-            </p>
-            <h4 className="compact-change-title">{recordName}</h4>
-          </div>
-        </div>
-        {attention ? (
-          <ReadinessBadge readiness={attention} />
-        ) : (
-          <ReviewBadge operation={operation} tone="default" />
-        )}
+      <header className="lume-review-head">
+        <OperationBar family={family} operation={operation} />
       </header>
 
-      {diff ? <ChangeDiffBlock diff={diff} entityKind={entityKind} /> : null}
+      <div className="lume-review-body">
+        <DomainRow
+          entityKind={entityKind}
+          entityLabel={entityLabel}
+          projectLabel={projectLabel}
+        />
 
-      {why ? <div className="compact-change-why">{why}</div> : null}
+        <ReviewTruth
+          family={family}
+          recordName={recordName}
+          diff={diff}
+          needsYouHeadline={needsYouHeadline}
+          needsYouDetail={needsYouDetail}
+        />
 
-      <div className="compact-change-actions">{actions}</div>
+        {why ? <div className="lume-review-why">{why}</div> : null}
+
+        {state === "pending" || !state ? (
+          <div className="lume-review-actions">{actions}</div>
+        ) : null}
+      </div>
     </article>
   );
 }

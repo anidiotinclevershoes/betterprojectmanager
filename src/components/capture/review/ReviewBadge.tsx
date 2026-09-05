@@ -1,65 +1,85 @@
 "use client";
 
-import type { SuggestionOp } from "@/lib/capture/suggestions";
-import { OP_LABEL } from "@/lib/capture/suggestions";
+import { DomainMark, OperationMark } from "./DomainMark";
+import type { SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
+import {
+  reviewDomainLabel,
+  reviewOpFamily,
+  reviewOpWord,
+  type ReviewOpFamily,
+} from "@/lib/capture/review/reviewLanguage";
 
-const OP_ICON: Record<SuggestionOp, string> = {
-  create: "+",
-  update: "↻",
-  complete: "✓",
-  archive: "▣",
-  delete: "×",
-  remove: "×",
-};
+export function OperationBar({
+  family,
+  operation,
+}: {
+  family: ReviewOpFamily;
+  operation: SuggestionOp;
+}) {
+  return (
+    <p className="lume-review-opbar">
+      <OperationMark family={family} size={20} />
+      <span className="lume-review-opbar-label">{reviewOpWord(family, operation)}</span>
+    </p>
+  );
+}
 
+export function DomainRow({
+  entityKind,
+  entityLabel,
+  projectLabel,
+}: {
+  entityKind: SuggestionKind;
+  entityLabel: string;
+  projectLabel?: string;
+}) {
+  return (
+    <div className="lume-review-domain">
+      <DomainMark kind={entityKind} title={entityLabel} size={22} />
+      <span className="lume-review-domain-label">
+        {reviewDomainLabel(entityKind)}
+      </span>
+      {projectLabel ? (
+        <span className="lume-review-project">{projectLabel}</span>
+      ) : null}
+    </div>
+  );
+}
+
+/** @deprecated Prefer OperationBar — kept so existing review exports stay stable. */
+export function OperationKicker({
+  family,
+  operation,
+}: {
+  family: ReviewOpFamily;
+  operation: SuggestionOp;
+  entityKind?: SuggestionKind;
+  entityLabel?: string;
+}) {
+  return <OperationBar family={family} operation={operation} />;
+}
+
+/** @deprecated Prefer OperationBar. */
 export function ReviewBadge({
   operation,
-  tone = "default",
 }: {
   operation: SuggestionOp;
   tone?: "default" | "ready" | "review" | "muted";
 }) {
   return (
-    <span className={`review-badge review-badge-${tone} review-badge-op-${operation}`}>
-      <span className="review-badge-ico" aria-hidden>
-        {OP_ICON[operation]}
-      </span>
-      <span>{OP_LABEL[operation]}</span>
-    </span>
+    <OperationBar
+      family={reviewOpFamily(operation)}
+      operation={operation}
+    />
   );
 }
 
+/** @deprecated Needs You now lives in the operation bar. */
 export function ReadinessBadge({
   readiness,
 }: {
   readiness: "ready" | "needs_review" | "unmatched";
 }) {
-  if (readiness === "unmatched") {
-    return (
-      <span className="review-badge review-badge-unmatched">
-        <span className="review-badge-ico" aria-hidden>
-          ?
-        </span>
-        <span>Unmatched</span>
-      </span>
-    );
-  }
-  if (readiness === "needs_review") {
-    return (
-      <span className="review-badge review-badge-review">
-        <span className="review-badge-ico" aria-hidden>
-          ⚠
-        </span>
-        <span>Needs you</span>
-      </span>
-    );
-  }
-  return (
-    <span className="review-badge review-badge-ready">
-      <span className="review-badge-ico" aria-hidden>
-        ✓
-      </span>
-      <span>Ready</span>
-    </span>
-  );
+  if (readiness === "ready") return null;
+  return <OperationBar family="needs_you" operation="update" />;
 }

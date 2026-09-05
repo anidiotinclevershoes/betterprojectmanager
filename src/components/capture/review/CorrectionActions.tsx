@@ -37,7 +37,8 @@ export type CorrectionHandlers = {
   }) => void;
   onCreateNew: () => void;
   onResolve: () => void;
-  onKeepOpen: () => void;
+  /** @deprecated Keep Open only dismissed — no longer rendered. */
+  onKeepOpen?: () => void;
   onDismiss: () => void;
   onApprove: () => void;
   onChangeEntityKind: (kind: SuggestionKind) => void;
@@ -53,11 +54,14 @@ export function CorrectionActions({
   targetOptions,
   handlers,
   currentOwners = [],
+  hidePrompt = false,
 }: {
   model: ReviewChangeViewModel;
   targetOptions: TargetOption[];
   handlers: CorrectionHandlers;
   currentOwners?: ReviewOwnerHit[];
+  /** Card already shows the Needs You question. */
+  hidePrompt?: boolean;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dateValue, setDateValue] = useState("");
@@ -224,7 +228,9 @@ export function CorrectionActions({
       [];
     return (
       <div className="compact-change-correction">
-        <p className="compact-change-review-copy">Which project?</p>
+        {!hidePrompt ? (
+          <p className="compact-change-review-copy">Which project?</p>
+        ) : null}
         <div className="compact-change-action-row">
           {candidates.map((p) => (
             <button
@@ -259,9 +265,11 @@ export function CorrectionActions({
         className="compact-change-correction"
         data-testid={namedTarget ? "review-existing-or-new" : undefined}
       >
-        <p className="compact-change-review-copy">
-          {namedTarget ? labels.question : copy}
-        </p>
+        {namedTarget ? (
+          <p className="compact-change-review-copy">{labels.question}</p>
+        ) : !hidePrompt && copy ? (
+          <p className="compact-change-review-copy">{copy}</p>
+        ) : null}
         <div className="compact-change-action-row">
           {namedTarget ? (
             <button
@@ -309,7 +317,9 @@ export function CorrectionActions({
   if (reason === "STATE_UNCERTAIN") {
     return (
       <div className="compact-change-correction">
-        {copy ? <p className="compact-change-review-copy">{copy}</p> : null}
+        {!hidePrompt && copy ? (
+          <p className="compact-change-review-copy">{copy}</p>
+        ) : null}
         <div className="compact-change-action-row">
           <button
             type="button"
@@ -317,13 +327,6 @@ export function CorrectionActions({
             onClick={handlers.onResolve}
           >
             {model.entityKind === "risk" ? "Resolve" : "Complete"}
-          </button>
-          <button
-            type="button"
-            className="muted-btn"
-            onClick={handlers.onKeepOpen}
-          >
-            Keep Open
           </button>
           <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
             Dismiss
@@ -336,7 +339,9 @@ export function CorrectionActions({
   if (reason === "ENTITY_TYPE_UNCERTAIN") {
     return (
       <div className="compact-change-correction">
-        {copy ? <p className="compact-change-review-copy">{copy}</p> : null}
+        {!hidePrompt && copy ? (
+          <p className="compact-change-review-copy">{copy}</p>
+        ) : null}
         <div className="compact-change-action-row compact-change-entity-row">
           <label className="compact-change-entity-select-label">
             <span className="sr-only">Entity type</span>
@@ -373,7 +378,9 @@ export function CorrectionActions({
   // OPERATION_UNCERTAIN / VALUE_UNCERTAIN / fallback
   return (
     <div className="compact-change-correction">
-      {copy ? <p className="compact-change-review-copy">{copy}</p> : null}
+      {!hidePrompt && copy ? (
+        <p className="compact-change-review-copy">{copy}</p>
+      ) : null}
       <div className="compact-change-action-row">
         {applyExecutable &&
         model.entityKind === "risk" &&
@@ -394,13 +401,6 @@ export function CorrectionActions({
             Approve
           </button>
         ) : null}
-        <button
-          type="button"
-          className="muted-btn"
-          onClick={handlers.onKeepOpen}
-        >
-          Keep Open
-        </button>
         <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
           Dismiss
         </button>

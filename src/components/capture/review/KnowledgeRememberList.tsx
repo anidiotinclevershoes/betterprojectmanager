@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ReviewChangeViewModel } from "@/lib/capture/review/viewModel";
+import "./review-cards.css";
 
 const REMEMBER_WHY =
   "This looks like durable project context that may be useful in future Captures, meeting preparation or Coach.";
@@ -78,7 +79,7 @@ export function KnowledgeRememberList({
                 ) : null}
                 <button
                   type="button"
-                  className="why-panel-toggle"
+                  className="lume-review-why-toggle"
                   aria-expanded={Boolean(whyOpen[model.id])}
                   onClick={() =>
                     setWhyOpen((prev) => ({
@@ -87,7 +88,13 @@ export function KnowledgeRememberList({
                     }))
                   }
                 >
-                  Why?
+                  <span
+                    className={`lume-review-why-chevron${
+                      whyOpen[model.id] ? " is-open" : ""
+                    }`}
+                    aria-hidden
+                  />
+                  Why this
                 </button>
                 {whyOpen[model.id] ? (
                   <p className="capture-remember-why meta">{REMEMBER_WHY}</p>
