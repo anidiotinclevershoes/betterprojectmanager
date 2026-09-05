@@ -11,7 +11,10 @@ import {
   type ReactNode,
 } from "react";
 import { useMission } from "@/lib/store";
-import { type CaptureApplyDecision } from "@/lib/capture/apply";
+import {
+  applySessionSuggestionPatch,
+  type CaptureApplyDecision,
+} from "@/lib/capture/apply";
 import {
   buildSuggestions,
   CAPTURE_SESSION_KEY,
@@ -65,6 +68,7 @@ type CaptureSessionValue = {
         | "projectName"
         | "projectCode"
         | "projectUncertain"
+        | "expectedTarget"
       >
     >,
   ) => void;
@@ -335,6 +339,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           | "projectName"
           | "projectCode"
           | "projectUncertain"
+          | "expectedTarget"
         >
       >,
     ) => {
@@ -342,7 +347,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         ...prev,
         suggestions: prev.suggestions.map((s) => {
           if (s.id !== id) return s;
-          const next = { ...s, ...patch };
+          const next = applySessionSuggestionPatch(s, patch);
           if (patch.kind) next.destination = destinationFor(patch.kind);
           return next;
         }),
@@ -622,6 +627,19 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           adoptAppliedState(data.state);
         }
         if (decision.kind === "needs_you") {
+          setSlice((prev) => ({
+            ...prev,
+            reviewOverrides: {
+              ...(prev.reviewOverrides ?? {}),
+              [item.id]: {
+                ...(prev.reviewOverrides?.[item.id] ?? {}),
+                accepted: false,
+                readiness: "needs_review",
+                reviewReason: "OPERATION_UNCERTAIN",
+                blockedReason: decision.reason,
+              },
+            },
+          }));
           announce(decision.reason);
           return decision;
         }

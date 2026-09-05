@@ -18,6 +18,7 @@ import {
 import { historyInputFromCaptureOperation } from "./history-evidence";
 import type { CaptureApplyDecision } from "./types";
 import {
+  expectedTargetMismatchReason,
   staleExpectedTargetReason,
   type CaptureExpectedTarget,
 } from "./expected-target";
@@ -68,15 +69,9 @@ export async function applyApprovedCaptureSuggestion(args: {
   const expected = args.expectedTarget ?? args.item.expectedTarget ?? null;
   const domain = args.item.legalDomain ?? "unsupported";
 
-  if (
-    expected?.id &&
-    args.item.targetEntityId &&
-    args.item.targetEntityId.trim() !== expected.id
-  ) {
-    const blocked = needsYouDecision(
-      domain,
-      "Review target does not match. Capture again before applying.",
-    );
+  const mismatch = expectedTargetMismatchReason(args.item, expected);
+  if (mismatch) {
+    const blocked = needsYouDecision(domain, mismatch);
     return { ...blocked, state: loaded.workspaceState };
   }
 

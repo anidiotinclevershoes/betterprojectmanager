@@ -145,7 +145,12 @@ export function computeReviewCounts(args: {
   const added = args.added ?? {};
   const dismissed = args.dismissed ?? {};
   const pending = args.models.filter((m) => !added[m.id] && !dismissed[m.id]);
-  const ready = pending.filter((m) => m.readiness === "ready").length;
+  const ready = pending.filter(
+    (m) =>
+      m.readiness === "ready" &&
+      m.executableApply !== false &&
+      m.canApprove !== false,
+  ).length;
   const needsReview = pending.filter((m) => m.readiness === "needs_review").length;
   const unmatched = pending.filter((m) => m.readiness === "unmatched").length;
   const reviewed = args.models.filter((m) => added[m.id] || dismissed[m.id]).length;
@@ -179,6 +184,8 @@ export function pendingReadyModels(
     (m) =>
       !added[m.id] &&
       !dismissed[m.id] &&
-      m.readiness === "ready",
+      m.readiness === "ready" &&
+      m.executableApply !== false &&
+      m.canApprove !== false,
   );
 }

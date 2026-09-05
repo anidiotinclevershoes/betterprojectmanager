@@ -11,6 +11,10 @@ import {
 } from "@/lib/capture/review/reviewReason";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
 import { KIND_LABEL } from "@/lib/capture/suggestions";
+import {
+  isApplyExecutableSuggestion,
+  unsupportedApplyReason,
+} from "@/lib/capture/apply/executability";
 import { TargetPicker, type TargetOption } from "./TargetPicker";
 
 const ENTITY_CHOICES: SuggestionKind[] = [
@@ -61,7 +65,37 @@ export function CorrectionActions({
     model.reviewReason ??
     (model.readiness === "unmatched" ? "TARGET_UNCERTAIN" : undefined);
 
-  if (!reason && model.readiness === "ready") {
+  const applyExecutable =
+    model.executableApply !== false &&
+    isApplyExecutableSuggestion(model.suggestion);
+  const canApprove =
+    applyExecutable &&
+    (model.canApprove === true ||
+      (model.canApprove === undefined && model.readiness === "ready"));
+  const userCanRepair =
+    reason === "ENTITY_TYPE_UNCERTAIN" ||
+    reason === "PROJECT_UNCERTAIN" ||
+    reason === "TARGET_UNCERTAIN" ||
+    reason === "OWNERSHIP_UNCERTAIN" ||
+    model.missingRequiredField === "date";
+
+  if (!applyExecutable && !userCanRepair) {
+    const copy =
+      model.needsReviewReason ||
+      unsupportedApplyReason(model.suggestion, model.recordName);
+    return (
+      <div className="compact-change-correction">
+        {copy ? <p className="compact-change-review-copy">{copy}</p> : null}
+        <div className="compact-change-action-row">
+          <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+            Dismiss
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!reason && model.readiness === "ready" && canApprove) {
     return (
       <div className="compact-change-action-row">
         <button type="button" className="primary-btn" onClick={handlers.onApprove}>
@@ -341,7 +375,8 @@ export function CorrectionActions({
     <div className="compact-change-correction">
       {copy ? <p className="compact-change-review-copy">{copy}</p> : null}
       <div className="compact-change-action-row">
-        {model.entityKind === "risk" &&
+        {applyExecutable &&
+        model.entityKind === "risk" &&
         (model.operation === "complete" || model.operation === "update") ? (
           <button
             type="button"
@@ -350,7 +385,7 @@ export function CorrectionActions({
           >
             Resolve Risk
           </button>
-        ) : (
+        ) : canApprove ? (
           <button
             type="button"
             className="primary-btn"
@@ -358,7 +393,7 @@ export function CorrectionActions({
           >
             Approve
           </button>
-        )}
+        ) : null}
         <button
           type="button"
           className="muted-btn"

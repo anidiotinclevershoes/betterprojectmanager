@@ -19,6 +19,8 @@
     "verify:seed-reset": "npx --yes tsx scripts/verify-seed-reset.ts",
     "verify:capture-reliability": "npx --yes tsx scripts/verify-capture-reliability.ts",
     "verify:capture-review": "npx --yes tsx scripts/verify-capture-review.ts",
+    "verify:review-apply-executability": "npx --yes tsx scripts/verify-review-apply-executability.ts",
+    "verify:review-readiness-contract": "npx --yes tsx scripts/verify-review-readiness-contract.ts",
     "verify:capture-workspace": "npx --yes tsx scripts/verify-capture-workspace-refinement.ts",
     "verify:new-project": "npx --yes tsx scripts/verify-new-project-onboarding.ts",
     "verify:phase3a-integrity": "npx --yes tsx scripts/verify-phase3a-integrity.ts",

@@ -58,11 +58,14 @@ export function SuggestedChangeCard({
 }) {
   const [whyOpen, setWhyOpen] = useState(initialWhyOpen);
   const whyId = useId();
-  const needsReview = model.readiness === "needs_review";
+  const applyBlocked = model.executableApply === false;
+  const needsReview = model.readiness === "needs_review" || applyBlocked;
   const unmatched = model.readiness === "unmatched";
   const attentionReadiness =
     state === "pending" && (needsReview || unmatched)
-      ? (model.readiness as "needs_review" | "unmatched")
+      ? applyBlocked
+        ? "needs_review"
+        : (model.readiness as "needs_review" | "unmatched")
       : undefined;
 
   const handlers: CorrectionHandlers = {

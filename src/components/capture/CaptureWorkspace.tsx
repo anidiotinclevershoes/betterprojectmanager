@@ -18,6 +18,7 @@ import {
   computeReviewCounts,
   pendingReadyModels,
 } from "@/lib/capture/review/viewModel";
+import { applyPendingReadyQueue } from "@/lib/capture/review/applyReadyQueue";
 import {
   CaptureSummary,
   SuggestedChangesList,
@@ -27,6 +28,7 @@ import { annotationSourcesFromResult } from "@/lib/capture/review/annotateTransc
 import type { TargetOption } from "@/components/capture/review/TargetPicker";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
 import { KIND_LABEL } from "@/lib/capture/suggestions";
+import { captureApplyWorldFromState } from "@/lib/capture/apply";
 import { ConfirmOwnerDialog } from "@/components/intelligence/ConfirmOwnerDialog";
 import type { OwnershipIntent } from "@/lib/people/confirm-owner-choice";
 import { findConfirmedOwners } from "@/lib/people/identity";
@@ -271,6 +273,11 @@ export function CaptureWorkspace({
   const isDev = process.env.NODE_ENV === "development";
   const showSessionActions = Boolean(result);
 
+  const applyWorld = useMemo(
+    () => captureApplyWorldFromState(state),
+    [state],
+  );
+
   const reviewModels = useMemo(
     () =>
       result
@@ -279,9 +286,21 @@ export function CaptureWorkspace({
             result,
             content,
             reviewOverrides,
+            {
+              world: applyWorld,
+              captureEntryProjectId: defaultProjectId || effectiveProjectId,
+            },
           )
         : [],
-    [result, suggestions, content, reviewOverrides],
+    [
+      result,
+      suggestions,
+      content,
+      reviewOverrides,
+      applyWorld,
+      defaultProjectId,
+      effectiveProjectId,
+    ],
   );
 
   const reviewCardIdsByFinding = useMemo(() => {
@@ -407,9 +426,13 @@ export function CaptureWorkspace({
     });
   }
 
-  function approveReady() {
-    for (const model of pendingReadyModels(reviewModels, added, dismissed)) {
-      void applyOne(model.suggestion, defaultProjectId);
+  async function approveReady() {
+    const { confirmOwner } = await applyPendingReadyQueue({
+      models: pendingReadyModels(reviewModels, added, dismissed),
+      applyOne: (item) => applyOne(item, defaultProjectId),
+    });
+    if (confirmOwner) {
+      setConfirmOwner(confirmOwner);
     }
   }
 
@@ -583,6 +606,7 @@ export function CaptureWorkspace({
       accepted: true,
       readiness: "ready",
       reviewReason: null,
+      date: isoDate,
     });
     void applyOne({ ...model.suggestion, date: isoDate }, defaultProjectId);
   }

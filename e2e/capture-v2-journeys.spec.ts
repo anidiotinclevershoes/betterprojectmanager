@@ -230,7 +230,11 @@ test.describe("Capture Review Needs-you interactions", () => {
       /Create a new risk/,
     );
     await page.getByTestId("review-existing-or-new-update").click();
-    await expect(page.getByRole("button", { name: "Approve" })).toBeVisible();
+    await expect(page.getByTestId("review-existing-or-new")).toHaveCount(0);
+    // Title-only Risk update is not a legal write. Confirming the named
+    // target must not force Ready / Approve.
+    await expect(page.getByRole("button", { name: "Approve" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Resolve Risk" })).toBeVisible();
   });
 });
 

@@ -18,6 +18,12 @@ import {
   type SuggestionKind,
   type SuggestionOp,
 } from "@/lib/capture/suggestions";
+import { unsupportedApplyReason } from "@/lib/capture/apply/executability";
+import {
+  assessApplyReadiness,
+  attachReviewExpectedTarget,
+  type ReviewPreflightContext,
+} from "@/lib/capture/apply/readiness";
 import {
   deriveReviewReason,
   friendlierNeedsYouCopy,
@@ -52,9 +58,15 @@ export type ReviewCorrectionOverride = {
   recordName?: string;
   projectId?: string | null;
   projectName?: string | null;
-  /** Accept proposed target / promote to ready. */
+  /** Accept proposed target — Ready only if the shared preflight can write. */
   accepted?: boolean;
+  date?: string;
+  targetEntityId?: string;
+  /** Apply-time demotion copy. Must not be overwritten by a stale client world. */
+  blockedReason?: string;
 };
+
+export type { ReviewPreflightContext };
 
 export type ReviewChangeViewModel = {
   id: string;
@@ -65,6 +77,18 @@ export type ReviewChangeViewModel = {
   operation: SuggestionOp;
   operationLabel: string;
   readiness: ReviewReadiness;
+  /**
+   * False when Apply has no legal, representable mutation for this
+   * domain × operation. Ready + Approve require this to be true.
+   * Omitted on older fixtures; consumers re-derive when absent.
+   */
+  executableApply?: boolean;
+  /**
+   * True when the shared planner preflight constructed a faithful write
+   * against the Review world snapshot. Ready requires this. Omitted on
+   * older fixtures — `undefined` does not block selector tests.
+   */
+  canApprove?: boolean;
   needsReviewReason?: string;
   reviewReason?: ReviewReason;
   diff?: ChangeDiff;
@@ -411,13 +435,55 @@ function milestoneUpdateMissingDate(
   return true;
 }
 
+type AssessedReadiness = {
+  readiness: ReviewReadiness;
+  reason?: string;
+  missingRequiredField?: "date";
+  executableApply: boolean;
+  canApprove: boolean;
+};
+
 function assessReadiness(
   item: PendingSuggestion,
   finding: CaptureFinding | undefined,
   op: ProposedOperation | undefined,
-  coverage?: FindingCoverageItem,
-  capturePipeline?: "legacy" | "v2",
-): { readiness: ReviewReadiness; reason?: string; missingRequiredField?: "date" } {
+  coverage: FindingCoverageItem | undefined,
+  capturePipeline: "legacy" | "v2" | undefined,
+  captureText: string,
+  preflight?: ReviewPreflightContext | null,
+  options?: {
+    userAccepted?: boolean;
+    demoted?: ReviewReadiness;
+    blockedReason?: string;
+  },
+): AssessedReadiness {
+  const apply = assessApplyReadiness({
+    item,
+    text: captureText,
+    preflight,
+  });
+
+  if (options?.demoted === "unmatched" || options?.demoted === "needs_review") {
+    return {
+      readiness: options.demoted,
+      reason: options.blockedReason || apply.reason,
+      missingRequiredField: apply.missingRequiredField,
+      executableApply: apply.executableApply,
+      canApprove: false,
+    };
+  }
+
+  if (!apply.executableApply) {
+    return {
+      readiness: "needs_review",
+      reason: apply.reason || unsupportedApplyReason(item, item.content),
+      executableApply: false,
+      canApprove: false,
+    };
+  }
+
+  const skipHumanGates = Boolean(options?.userAccepted);
+
   if (
     item.projectUncertain ||
     (finding?.projectCandidates &&
@@ -428,21 +494,26 @@ function assessReadiness(
     return {
       readiness: "needs_review",
       reason: "Which project does this refer to?",
+      executableApply: true,
+      canApprove: apply.canApprove,
     };
   }
   if (item.legalDomain === "unsupported") {
     return {
       readiness: "needs_review",
       reason: "Lume cannot safely apply this finding to a maintained record.",
+      executableApply: false,
+      canApprove: false,
     };
   }
   if (item.ownershipSemantics === "ambiguous") {
     return {
       readiness: "needs_review",
       reason: "Should this share or replace the current owner?",
+      executableApply: true,
+      canApprove: apply.canApprove,
     };
   }
-  // CREATE without a known project destination cannot be Apply Ready.
   if (
     (item.op === "create" || op?.operation === "CREATE") &&
     !item.projectId &&
@@ -452,99 +523,127 @@ function assessReadiness(
     return {
       readiness: "needs_review",
       reason: "Which project does this refer to?",
+      executableApply: true,
+      canApprove: false,
     };
   }
-  if (coverage?.disposition === "unmatched") {
+  if (!skipHumanGates && coverage?.disposition === "unmatched") {
     return {
       readiness: "unmatched",
       reason:
         coverage.reason ||
         "Lume couldn't confidently identify the existing item this should update.",
+      executableApply: true,
+      canApprove: apply.canApprove,
     };
   }
-  if (coverage?.disposition === "needs_review") {
+  if (!skipHumanGates && coverage?.disposition === "needs_review") {
     return {
       readiness: "needs_review",
       reason:
         coverage.reason ||
         finding?.clarificationQuestion ||
         "Lume needs clarification before this change is applied.",
+      executableApply: true,
+      canApprove: apply.canApprove,
     };
   }
-  if (finding?.requiresClarification || op?.requiresClarification) {
+  if (
+    !skipHumanGates &&
+    (finding?.requiresClarification || op?.requiresClarification)
+  ) {
     return {
       readiness: "needs_review",
       reason:
         finding?.clarificationQuestion ||
         "Lume needs clarification before this change is applied.",
+      executableApply: true,
+      canApprove: apply.canApprove,
     };
   }
-  if (finding?.invalidTarget) {
+  if (!skipHumanGates && finding?.invalidTarget) {
     return {
       readiness: "unmatched",
       reason:
         finding.validationWarning ||
         "Lume couldn't confidently identify the existing item this should update.",
+      executableApply: true,
+      canApprove: apply.canApprove,
     };
   }
-  if (finding?.findingType === "AMBIGUOUS") {
+  if (!skipHumanGates && finding?.findingType === "AMBIGUOUS") {
     return {
       readiness: "needs_review",
       reason: "The Capture contained ambiguous evidence for this change.",
+      executableApply: true,
+      canApprove: apply.canApprove,
     };
   }
-  if (opsDisagree(item, op)) {
+  if (!skipHumanGates && opsDisagree(item, op)) {
     return {
       readiness: "needs_review",
       reason: "Finding and proposed operation are inconsistent.",
+      executableApply: true,
+      canApprove: apply.canApprove,
     };
   }
+  // Destructive confirmation is its own safety gate. Answering project /
+  // target / type / create-new must not clear it via accepted:true.
   if (isDestructiveOp(item.op) || op?.destructive) {
     return {
       readiness: "needs_review",
       reason: "Destructive action — confirm before applying.",
+      executableApply: true,
+      canApprove: apply.canApprove,
     };
   }
-  // Explicit CREATE ops are ready — no existing target required.
-  if (op?.operation === "CREATE" || item.op === "create") {
-    const explicitCreate =
-      finding?.findingType === "NEW_INFORMATION" &&
-      Boolean(
-        (finding.target?.entityType && !finding.target.entityId) ||
-          finding.changes?.entityType?.proposed,
-      );
-    if (explicitCreate || op?.operation === "CREATE") {
-      return { readiness: "ready" };
-    }
-  }
-  if (milestoneUpdateMissingDate(item, op)) {
+  if (milestoneUpdateMissingDate(item, op) && !apply.canApprove) {
     return {
       readiness: "needs_review",
       reason: missingDateCopy(
         op?.targetTitle || item.content || finding?.target?.title,
       ),
       missingRequiredField: "date",
+      executableApply: true,
+      canApprove: false,
     };
   }
-  // Capture V2: modelConfidence is informational. Do not gate Apply Ready on it.
-  // Legacy findings still use the confidence threshold.
-  if (capturePipeline !== "v2") {
+  if (!skipHumanGates && capturePipeline !== "v2") {
     const confidence =
       op?.confidence ?? finding?.confidence ?? item.recommendation?.confidence;
     if (typeof confidence === "number" && confidence < 70) {
       return {
         readiness: "needs_review",
         reason: "Confidence is below the ready threshold.",
+        executableApply: true,
+        canApprove: apply.canApprove,
       };
     }
   }
-  if (!op && finding?.findingType === "NEW_INFORMATION") {
+  if (!skipHumanGates && !op && finding?.findingType === "NEW_INFORMATION") {
     return {
       readiness: "needs_review",
       reason: "Cannot safely produce a single operation from this finding.",
+      executableApply: true,
+      canApprove: apply.canApprove,
     };
   }
-  return { readiness: "ready" };
+
+  if (!apply.canApprove) {
+    return {
+      readiness: "needs_review",
+      reason: apply.reason,
+      missingRequiredField: apply.missingRequiredField,
+      executableApply: true,
+      canApprove: false,
+    };
+  }
+
+  return {
+    readiness: "ready",
+    executableApply: true,
+    canApprove: true,
+  };
 }
 
 function kindFromFinding(finding: CaptureFinding): SuggestionKind {
@@ -575,6 +674,7 @@ function buildCoverageGapViewModels(
   result: CaptureResult,
   captureText: string,
   coveredFindingIds: Set<string>,
+  preflight?: ReviewPreflightContext | null,
 ): ReviewChangeViewModel[] {
   const coverage = result.findingCoverage?.items ?? [];
   const findingsById = new Map((result.findings ?? []).map((f) => [f.id, f]));
@@ -616,59 +716,75 @@ function buildCoverageGapViewModels(
       typeof matchingOp?.proposedValues?.scope === "string"
         ? String(matchingOp.proposedValues.scope)
         : undefined;
-    const suggestion: PendingSuggestion = {
-      id: `coverage-${item.findingId}`,
-      kind,
-      op,
-      content: finding.fact,
-      destination: destinationFor(kind),
-      projectId: projectUncertain
-        ? null
-        : (finding.projectId ??
-          result.knowledgeProjectId ??
-          result.memory.projectId),
-      projectName: projectUncertain ? null : (finding.projectName ?? null),
-      projectUncertain,
-      projectCandidates: finding.projectCandidates,
-      legalDomain: ownershipSemantics || responsibilityScope
-        ? "responsibility"
-        : undefined,
-      personName,
-      ownershipSemantics,
-      responsibilityScope,
-      proposedValues: matchingOp?.proposedValues,
-    };
+    const suggestion: PendingSuggestion = attachReviewExpectedTarget(
+      {
+        id: `coverage-${item.findingId}`,
+        kind,
+        op,
+        content: finding.fact,
+        destination: destinationFor(kind),
+        projectId: projectUncertain
+          ? null
+          : (finding.projectId ??
+            result.knowledgeProjectId ??
+            result.memory.projectId),
+        projectName: projectUncertain ? null : (finding.projectName ?? null),
+        projectUncertain,
+        projectCandidates: finding.projectCandidates,
+        legalDomain: ownershipSemantics || responsibilityScope
+          ? "responsibility"
+          : undefined,
+        personName,
+        ownershipSemantics,
+        responsibilityScope,
+        proposedValues: matchingOp?.proposedValues,
+      },
+      preflight?.world,
+      preflight?.captureEntryProjectId,
+    );
 
-    const readiness = item.disposition;
+    const assessed = assessReadiness(
+      suggestion,
+      finding,
+      matchingOp,
+      item,
+      result.capturePipeline,
+      captureText,
+      preflight,
+    );
+    const readiness =
+      assessed.readiness === "ready" ? item.disposition : assessed.readiness;
     const reviewReason = deriveReviewReason({
       readiness,
       finding,
       coverage: item,
       suggestion,
-      needsReviewReason: item.reason,
+      needsReviewReason: assessed.reason || item.reason,
       capturePipeline: result.capturePipeline,
     });
     const recordName = finding.target?.title || finding.fact.slice(0, 80);
-    const rawReason = item.reason;
+    const rawReason = assessed.reason || item.reason;
+    const executableApply = assessed.executableApply;
     const friendly = friendlierNeedsYouCopy(
       rawReason || finding.clarificationQuestion,
     );
-    const reasonText =
-      friendly ??
-      (reviewReason
-        ? reviewReasonCopy(reviewReason, {
-            recordName:
-              reviewReason === "TARGET_UNCERTAIN"
-                ? finding.target?.title
-                : recordName,
-            entityLabel: KIND_LABEL[kind],
-            projectCandidates: finding.projectCandidates,
-            incomingPersonName: suggestion.personName,
-            scope: suggestion.responsibilityScope,
-          })
-        : item.disposition === "unmatched"
-          ? `Lume understood: ${finding.fact}\n\nLume couldn't confidently identify the existing item this should update.`
-          : rawReason);
+    const reasonText = !executableApply
+      ? unsupportedApplyReason(suggestion, recordName)
+      : friendly ??
+        (reviewReason
+          ? reviewReasonCopy(reviewReason, {
+              recordName:
+                reviewReason === "TARGET_UNCERTAIN"
+                  ? finding.target?.title
+                  : recordName,
+              entityLabel: KIND_LABEL[kind],
+              projectCandidates: finding.projectCandidates,
+              incomingPersonName: suggestion.personName,
+              scope: suggestion.responsibilityScope,
+            })
+          : item.disposition === "unmatched"
+            ? `Lume understood: ${finding.fact}\n\nLume couldn't confidently identify the existing item this should update.`
+            : rawReason);
     gaps.push({
       id: suggestion.id,
       suggestion,
@@ -677,8 +793,10 @@ function buildCoverageGapViewModels(
       recordName,
       operation: op,
       operationLabel: OP_LABEL[op],
-      readiness,
-      reviewReason,
+      readiness: executableApply ? readiness : "needs_review",
+      executableApply,
+      canApprove: false,
+      reviewReason: executableApply ? reviewReason : "OPERATION_UNCERTAIN",
       needsReviewReason: reasonText,
       diff: {
         label: item.disposition === "unmatched" ? "Unmatched" : "Needs you",
@@ -705,39 +823,88 @@ function buildCoverageGapViewModels(
 
 function applyOverride(
   model: ReviewChangeViewModel,
-  override?: ReviewCorrectionOverride,
+  override: ReviewCorrectionOverride | undefined,
+  captureText: string,
+  preflight?: ReviewPreflightContext | null,
+  capturePipeline?: "legacy" | "v2",
 ): ReviewChangeViewModel {
   if (!override) return model;
   const kind = override.kind ?? model.entityKind;
   const op = override.op ?? model.operation;
   const content = override.content ?? model.suggestion.content;
   const recordName = override.recordName ?? model.recordName;
-  const suggestion: PendingSuggestion = {
-    ...model.suggestion,
-    kind,
-    op,
-    content,
-    targetTodoId: override.targetTodoId ?? model.suggestion.targetTodoId,
-    projectId:
-      override.projectId !== undefined
-        ? override.projectId
-        : model.suggestion.projectId,
-    projectName:
-      override.projectName !== undefined
-        ? override.projectName
-        : model.suggestion.projectName,
-    projectUncertain: override.accepted ? false : model.suggestion.projectUncertain,
-  };
-  let readiness = override.readiness ?? model.readiness;
-  let reviewReason =
-    override.reviewReason === null
-      ? undefined
-      : (override.reviewReason ?? model.reviewReason);
-  if (override.accepted || override.readiness === "ready") {
-    readiness = "ready";
-    reviewReason = undefined;
-  }
+  const suggestion: PendingSuggestion = attachReviewExpectedTarget(
+    {
+      ...model.suggestion,
+      kind,
+      op,
+      content,
+      date: override.date ?? model.suggestion.date,
+      targetTodoId: override.targetTodoId ?? model.suggestion.targetTodoId,
+      targetEntityId:
+        override.targetEntityId ?? model.suggestion.targetEntityId,
+      projectId:
+        override.projectId !== undefined
+          ? override.projectId
+          : model.suggestion.projectId,
+      projectName:
+        override.projectName !== undefined
+          ? override.projectName
+          : model.suggestion.projectName,
+      projectUncertain: override.accepted
+        ? false
+        : model.suggestion.projectUncertain,
+    },
+    preflight?.world,
+    preflight?.captureEntryProjectId,
+  );
+  const demoted =
+    override.readiness === "needs_review" || override.readiness === "unmatched"
+      ? override.readiness
+      : undefined;
+  const assessed = assessReadiness(
+    suggestion,
+    model.finding,
+    model.operationSource,
+    undefined,
+    capturePipeline,
+    captureText,
+    preflight,
+    {
+      userAccepted: Boolean(override.accepted) && !demoted,
+      demoted,
+      blockedReason: override.blockedReason,
+    },
+  );
+  const readiness = assessed.readiness;
+  const reviewReason = deriveReviewReason({
+    readiness,
+    finding: model.finding,
+    operation: model.operationSource,
+    suggestion,
+    needsReviewReason: assessed.reason || override.blockedReason,
+    capturePipeline,
+  });
   const entityLabel = KIND_LABEL[kind];
+  const unsupportedCopy = assessed.executableApply
+    ? undefined
+    : unsupportedApplyReason(suggestion, recordName);
+  const reasonText =
+    override.blockedReason ||
+    unsupportedCopy ||
+    (reviewReason
+      ? friendlierNeedsYouCopy(assessed.reason) ??
+        reviewReasonCopy(reviewReason, {
+          recordName:
+            reviewReason === "TARGET_UNCERTAIN"
+              ? namedTargetTitle(model.finding, suggestion)
+              : recordName,
+          entityLabel,
+          projectCandidates: suggestion.projectCandidates,
+          incomingPersonName: suggestion.personName,
+          scope: suggestion.responsibilityScope,
+        })
+      : assessed.reason);
   return {
     ...model,
     suggestion,
@@ -752,22 +919,10 @@ function applyOverride(
           ? "Resolve"
           : OP_LABEL[op],
     readiness,
-    reviewReason,
-    needsReviewReason: reviewReason
-      ? friendlierNeedsYouCopy(
-          model.needsReviewReason || model.finding?.clarificationQuestion,
-        ) ??
-        reviewReasonCopy(reviewReason, {
-            recordName:
-              reviewReason === "TARGET_UNCERTAIN"
-                ? namedTargetTitle(model.finding, suggestion)
-                : recordName,
-            entityLabel,
-            projectCandidates: suggestion.projectCandidates,
-            incomingPersonName: suggestion.personName,
-            scope: suggestion.responsibilityScope,
-          })
-      : undefined,
+    executableApply: assessed.executableApply,
+    canApprove: assessed.canApprove,
+    reviewReason: readiness === "ready" ? undefined : reviewReason,
+    needsReviewReason: readiness === "ready" ? undefined : reasonText,
     diff:
       op === "create"
         ? {
@@ -784,9 +939,7 @@ function applyOverride(
     projectName: suggestion.projectName,
     projectCode: suggestion.projectCode ?? model.projectCode,
     missingRequiredField:
-      override.accepted || override.readiness === "ready"
-        ? undefined
-        : model.missingRequiredField,
+      readiness === "ready" ? undefined : assessed.missingRequiredField,
   };
 }
 
@@ -795,8 +948,14 @@ export function buildReviewChangeViewModels(
   result: CaptureResult,
   captureText: string,
   overrides: Record<string, ReviewCorrectionOverride> = {},
+  preflight?: ReviewPreflightContext | null,
 ): ReviewChangeViewModel[] {
-  const fromSuggestions = suggestions.map((item) => {
+  const fromSuggestions = suggestions.map((rawItem) => {
+    const item = attachReviewExpectedTarget(
+      rawItem,
+      preflight?.world,
+      preflight?.captureEntryProjectId,
+    );
     const operationSource = findOperation(item, result);
     const finding =
       findFinding(operationSource, result) ??
@@ -806,12 +965,21 @@ export function buildReviewChangeViewModels(
           )
         : undefined);
     const coverage = coverageForFinding(result, finding?.id);
-    const { readiness, reason, missingRequiredField } = assessReadiness(
+    const override = overrides[item.id];
+    const {
+      readiness,
+      reason,
+      missingRequiredField,
+      executableApply: assessedExecutable,
+      canApprove,
+    } = assessReadiness(
       item,
       finding,
       operationSource,
       coverage,
       result.capturePipeline,
+      captureText,
+      preflight,
     );
     const recordName =
       operationSource?.targetTitle ||
@@ -836,25 +1004,41 @@ export function buildReviewChangeViewModels(
       needsReviewReason: reason,
       capturePipeline: result.capturePipeline,
     });
+    const executableApply = assessedExecutable;
     const friendly = friendlierNeedsYouCopy(
       reason || finding?.clarificationQuestion,
     );
-    let reasonText =
-      friendly ??
-      (reviewReason
-        ? reviewReasonCopy(reviewReason, {
-            recordName:
-              reviewReason === "TARGET_UNCERTAIN"
-                ? namedTargetTitle(finding, item)
-                : recordName,
-            entityLabel: KIND_LABEL[item.kind],
-            projectCandidates:
-              item.projectCandidates ?? finding?.projectCandidates,
-            incomingPersonName: item.personName,
-            scope: item.responsibilityScope,
-          })
-        : reason);
-    if (missingRequiredField === "date") {
+    const useCorrectionCopy =
+      reviewReason === "TARGET_UNCERTAIN" ||
+      reviewReason === "PROJECT_UNCERTAIN" ||
+      reviewReason === "OWNERSHIP_UNCERTAIN";
+    let reasonText = !executableApply
+      ? unsupportedApplyReason(item, recordName)
+      : friendly ??
+        (useCorrectionCopy && reviewReason
+          ? reviewReasonCopy(reviewReason, {
+              recordName:
+                reviewReason === "TARGET_UNCERTAIN"
+                  ? namedTargetTitle(finding, item)
+                  : recordName,
+              entityLabel: KIND_LABEL[item.kind],
+              projectCandidates:
+                item.projectCandidates ?? finding?.projectCandidates,
+              incomingPersonName: item.personName,
+              scope: item.responsibilityScope,
+            })
+          : reason) ??
+        (reviewReason
+          ? reviewReasonCopy(reviewReason, {
+              recordName: recordName,
+              entityLabel: KIND_LABEL[item.kind],
+              projectCandidates:
+                item.projectCandidates ?? finding?.projectCandidates,
+              incomingPersonName: item.personName,
+              scope: item.responsibilityScope,
+            })
+          : undefined);
+    if (executableApply && missingRequiredField === "date") {
       reasonText = missingDateCopy(recordName);
     }
 
@@ -872,6 +1056,8 @@ export function buildReviewChangeViewModels(
             ? "Remember"
             : OP_LABEL[item.op],
       readiness,
+      executableApply,
+      canApprove,
       reviewReason,
       needsReviewReason: reasonText,
       diff: buildDiff(item, operationSource, finding),
@@ -890,7 +1076,13 @@ export function buildReviewChangeViewModels(
       projectCode: item.projectCode,
       missingRequiredField,
     };
-    return applyOverride(model, overrides[item.id]);
+    return applyOverride(
+      model,
+      override,
+      captureText,
+      preflight,
+      result.capturePipeline,
+    );
   });
 
   const projectIds = new Set<string>();
@@ -920,7 +1112,16 @@ export function buildReviewChangeViewModels(
     result,
     captureText,
     coveredFindingIds,
-  ).map((m) => applyOverride(m, overrides[m.id]));
+    preflight,
+  ).map((m) =>
+    applyOverride(
+      m,
+      overrides[m.id],
+      captureText,
+      preflight,
+      result.capturePipeline,
+    ),
+  );
   return [...withLabels, ...gaps];
 }
 
