@@ -28,7 +28,14 @@ import { emptyKnowledge, mergeKnowledge } from "./knowledge";
 import { confirmResponsibilityOwner as applyConfirmResponsibilityOwner } from "@/lib/canonical-truth/confirm-responsibility";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import { ensurePersonOnProject as applyEnsurePersonOnProject } from "@/lib/people/identity";
-import { buildNewProject, type CreateProjectInput } from "./create-project";
+import {
+  buildNewProject,
+  isProjectCodeTaken,
+  normaliseProjectCode,
+  projectCodeTakenMessage,
+  suggestCode,
+  type CreateProjectInput,
+} from "./create-project";
 import { pruneBrowserResidueForDeletedProject } from "@/lib/workspace/prune-deleted-project-residue";
 import {
   projectDeleteResult,
@@ -1403,6 +1410,18 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     const scopedInput: CreateProjectInput = { ...input, clientProjectId };
 
     try {
+      const intendedCode = normaliseProjectCode(
+        scopedInput.code.trim() || suggestCode(scopedInput.name),
+      );
+      if (
+        isProjectCodeTaken(
+          stateRef.current.projects.map((p) => ({ id: p.id, code: p.code })),
+          intendedCode,
+        )
+      ) {
+        throw new Error(projectCodeTakenMessage(intendedCode));
+      }
+
       let meta = persistMetaRef.current;
 
       if (meta.mode === "supabase" && !meta.workspaceId) {

@@ -1,55 +1,55 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type FormEvent,
-} from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { LumeLogo } from "@/components/brand/LumeLogo";
-import { ProjectSetupReview } from "@/components/onboarding/ProjectSetupReview";
-import { NewProjectCategorisation } from "@/components/onboarding/NewProjectCategorisation";
 import "./new-project-ocean.css";
 import {
+  newSetupClientKey,
   suggestCode,
-  TALK_EXAMPLE,
-  TALK_GUIDANCE_TOPICS,
   type CreateProjectInput,
+  type SetupKnowledgeDraft,
+  type SetupRiskDraft,
+  type SetupStakeholderDraft,
+  type SetupTodoDraft,
 } from "@/lib/create-project";
-import type { ProvisionalItem } from "@/lib/new-project-v2";
+import { mergeOrganisedDraft } from "@/lib/new-project/merge-organised";
+import { needsYouFromDraft } from "@/lib/new-project/needs-you";
 import { useMission } from "@/lib/store";
 
-type Path = "choose" | "talk" | "blank" | "categorise" | "review";
+function emptyDraft(): CreateProjectInput {
+  return {
+    name: "",
+    code: "",
+    summary: "",
+    currentFocus: "",
+    sourceMode: "compose",
+    stakeholders: [],
+    risks: [],
+    todos: [],
+    importantDates: [],
+    knowledgeRemember: [],
+  };
+}
 
 export function NewProjectExperience({
   variant = "page",
 }: {
-  /** first-run = zero projects; page = /projects/new */
   variant?: "first-run" | "page";
 }) {
   const router = useRouter();
-  const { createProject, openaiConfigured } = useMission();
-  const [path, setPath] = useState<Path>("choose");
-  const [draft, setDraft] = useState<CreateProjectInput | null>(null);
-  const [provisionalItems, setProvisionalItems] = useState<ProvisionalItem[]>([]);
-  const [projectSeed, setProjectSeed] = useState({
-    name: "",
-    summary: "",
-    currentFocus: "",
-  });
-  const [sourceNarrative, setSourceNarrative] = useState("");
-  const [sourceMode, setSourceMode] = useState<"talk" | "paste">("talk");
-  const [categorisationApproved, setCategorisationApproved] = useState(false);
-  const [createUnlocked, setCreateUnlocked] = useState(false);
+  const { createProject } = useMission();
+  const [draft, setDraft] = useState<CreateProjectInput>(emptyDraft);
+  const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
-  const buildAbortRef = useRef<AbortController | null>(null);
+  const [organiseOpen, setOrganiseOpen] = useState(false);
   const createLockRef = useRef(false);
   const clientProjectIdRef = useRef<string | null>(null);
+  const organiseAbortRef = useRef<AbortController | null>(null);
+
+  const needsYou = useMemo(() => needsYouFromDraft(draft), [draft]);
 
   const createFromDraft = useCallback(
     async (input: CreateProjectInput) => {
@@ -63,6 +63,7 @@ export function NewProjectExperience({
       try {
         const id = await createProject({
           ...input,
+          sourceMode: "compose",
           clientProjectId: clientProjectIdRef.current,
         });
         clientProjectIdRef.current = null;
@@ -83,32 +84,32 @@ export function NewProjectExperience({
     [createProject, router],
   );
 
-  async function analyseNarrative(
-    content: string,
-    sourceMode: "talk" | "paste",
-  ) {
+  async function organiseNotes() {
+    const content = notes.trim();
+    if (!content) {
+      setError("Paste some notes first.");
+      return;
+    }
     setBusy(true);
     setError(null);
-    setCategorisationApproved(false);
-    setCreateUnlocked(false);
-    setProvisionalItems([]);
-    buildAbortRef.current?.abort();
+    organiseAbortRef.current?.abort();
     const controller = new AbortController();
-    buildAbortRef.current = controller;
+    organiseAbortRef.current = controller;
     try {
-      setSourceNarrative(content);
-      setSourceMode(sourceMode);
       const res = await fetch("/api/new-project", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({ content, sourceMode, kind: "delivery" }),
+        body: JSON.stringify({
+          content,
+          sourceMode: "paste",
+          kind: "delivery",
+        }),
       });
       if (controller.signal.aborted) return;
       if (!res.ok) {
         const fail = (await res.json().catch(() => null)) as {
           error?: string;
-          code?: string;
         } | null;
         setError(
           fail?.error ||
@@ -116,25 +117,25 @@ export function NewProjectExperience({
         );
         return;
       }
-      const data = (await res.json()) as {
-        draft?: CreateProjectInput;
-        note?: string;
-        provisionalItems?: ProvisionalItem[];
-        projectSeed?: { name?: string; summary?: string; currentFocus?: string };
-      };
-      setProvisionalItems(data.provisionalItems ?? []);
-      setProjectSeed({
-        name: data.projectSeed?.name || "",
-        summary: data.projectSeed?.summary || "",
-        currentFocus: data.projectSeed?.currentFocus || "",
-      });
-      setCategorisationApproved(false);
-      setCreateUnlocked(false);
-      setDraft(data.draft ?? null);
-      setPath("categorise");
-      if (data.note) {
-        setError(data.note);
+      const data = (await res.json()) as { draft?: CreateProjectInput };
+      if (!data.draft) {
+        setError(
+          "Could not organise this into a project map. Nothing was created.",
+        );
+        return;
       }
+      setDraft((current) =>
+        mergeOrganisedDraft(
+          {
+            ...current,
+            sourceNarrative: [current.sourceNarrative, content]
+              .filter((s) => s?.trim())
+              .join("\n\n"),
+          },
+          { ...emptyDraft(), ...data.draft, sourceMode: "compose" },
+          { codeLocked: Boolean(current.code.trim()) },
+        ),
+      );
     } catch (err) {
       if ((err as Error).name === "AbortError") {
         setError(null);
@@ -144,17 +145,23 @@ export function NewProjectExperience({
         "Could not organise this into a project map. Nothing was created.",
       );
     } finally {
-      if (buildAbortRef.current === controller) {
-        buildAbortRef.current = null;
+      if (organiseAbortRef.current === controller) {
+        organiseAbortRef.current = null;
       }
       setBusy(false);
     }
   }
 
-  function cancelBuild() {
-    buildAbortRef.current?.abort();
-    buildAbortRef.current = null;
-    setBusy(false);
+  function onCreate() {
+    if (!draft.name.trim()) {
+      setError("Give the project a name.");
+      return;
+    }
+    void createFromDraft({
+      ...draft,
+      code: draft.code.trim() || suggestCode(draft.name),
+      sourceMode: "compose",
+    });
   }
 
   return (
@@ -163,80 +170,215 @@ export function NewProjectExperience({
       data-testid="np-experience"
       data-np-variant={variant}
     >
-      {path === "choose" ? (
-        <ChoosePaths
-          variant={variant}
-          onTalk={() => setPath("talk")}
-          onBlank={() => setPath("blank")}
-        />
-      ) : null}
+      <header className="np-hero">
+        <LumeLogo className="np-hero-logo" />
+        <p className="np-brand">LUME</p>
+        <h1 className="np-hero-title">Tell Lume what this project is about</h1>
+        <p className="np-hero-sub">Add what you know now. Organise notes when you want help.</p>
+      </header>
 
-      {path === "talk" ? (
-        <TalkPath
-          busy={busy}
-          error={error}
-          openaiConfigured={openaiConfigured}
-          onBack={() => setPath("choose")}
-          onBuild={(transcript) => void analyseNarrative(transcript, "talk")}
-          onCancelBuild={cancelBuild}
-        />
-      ) : null}
+      <div className="np-four-frame" data-testid="np-four-frame">
+        <section className="np-identity">
+          <label>
+            Name
+            <input
+              value={draft.name}
+              onChange={(e) =>
+                setDraft((d) => ({
+                  ...d,
+                  name: e.target.value,
+                  code: d.code || suggestCode(e.target.value),
+                }))
+              }
+              data-testid="np-name"
+            />
+          </label>
+          <label>
+            Code
+            <input
+              value={draft.code}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, code: e.target.value.toUpperCase() }))
+              }
+              data-testid="np-code"
+            />
+          </label>
+          <label>
+            Summary
+            <textarea
+              value={draft.summary}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, summary: e.target.value }))
+              }
+              data-testid="np-summary"
+            />
+          </label>
+        </section>
 
-      {path === "blank" ? (
-        <BlankPath
-          busy={busy}
-          error={error}
-          onBack={() => setPath("choose")}
-          onCreate={(input) => {
-            if (!input.name.trim()) {
-              setError("Give the project a name.");
-              return;
+        <details
+          className="np-organise"
+          open={organiseOpen}
+          onToggle={(e) => setOrganiseOpen((e.target as HTMLDetailsElement).open)}
+        >
+          <summary>Organise notes</summary>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Paste a brief, email, or notes…"
+            data-testid="np-organise-notes"
+          />
+          <button
+            type="button"
+            className="primary-btn"
+            disabled={busy}
+            onClick={() => void organiseNotes()}
+            data-testid="np-organise"
+          >
+            {busy ? "Organising…" : "Organise"}
+          </button>
+        </details>
+
+        {needsYou.length ? (
+          <aside className="np-needs-you" data-testid="np-needs-you">
+            <p>Needs You {needsYou.length}</p>
+            <ul>
+              {needsYou.map((item) => (
+                <li key={item.id}>{item.question}</li>
+              ))}
+            </ul>
+          </aside>
+        ) : null}
+
+        <div className="np-frames">
+          <ComposeFrame
+            title="Issues"
+            testId="np-frame-issues"
+            addLabel="Add issue"
+            items={(draft.risks ?? []).map((r) => r.title)}
+            onAdd={(title) =>
+              setDraft((d) => ({
+                ...d,
+                risks: [
+                  ...(d.risks ?? []),
+                  { clientKey: newSetupClientKey(), title } satisfies SetupRiskDraft,
+                ],
+              }))
             }
-            void createFromDraft({
-              ...input,
-              sourceMode: "blank",
-            });
-          }}
-        />
-      ) : null}
-
-      {path === "categorise" ? (
-        <NewProjectCategorisation
-          sourceNarrative={sourceNarrative}
-          sourceMode={sourceMode}
-          project={projectSeed}
-          items={provisionalItems}
-          onChangeProject={setProjectSeed}
-          onChangeItems={setProvisionalItems}
-          busy={busy}
-          error={error}
-          onBack={() => setPath("talk")}
-          onApprove={(next) => {
-            setDraft(next);
-            setCategorisationApproved(true);
-            setCreateUnlocked(true);
-            setPath("review");
-          }}
-        />
-      ) : null}
-
-      {path === "review" && draft ? (
-        <ProjectSetupReview
-          draft={draft}
-          onChange={setDraft}
-          busy={busy}
-          error={error}
-          onBack={() => setPath(provisionalItems.length ? "categorise" : "talk")}
-          onConfirm={() => {
-            if (!createUnlocked) {
-              setError("Approve the categorisation map before creating the project.");
-              setPath(provisionalItems.length ? "categorise" : "talk");
-              return;
+            onRemove={(i) =>
+              setDraft((d) => ({
+                ...d,
+                risks: (d.risks ?? []).filter((_, idx) => idx !== i),
+              }))
             }
-            void createFromDraft(draft);
-          }}
-        />
-      ) : null}
+          />
+          <ComposeFrame
+            title="People"
+            testId="np-frame-people"
+            addLabel="Add person"
+            items={(draft.stakeholders ?? []).map((s) => s.name)}
+            onAdd={(name) =>
+              setDraft((d) => ({
+                ...d,
+                stakeholders: [
+                  ...(d.stakeholders ?? []),
+                  {
+                    clientKey: newSetupClientKey(),
+                    name,
+                    responsibilities: [],
+                    needsReview: true,
+                  } satisfies SetupStakeholderDraft,
+                ],
+              }))
+            }
+            onRemove={(i) =>
+              setDraft((d) => ({
+                ...d,
+                stakeholders: (d.stakeholders ?? []).filter((_, idx) => idx !== i),
+              }))
+            }
+          />
+          <ComposeFrame
+            title="To Do"
+            testId="np-frame-todo"
+            addLabel="Add to do"
+            items={(draft.todos ?? []).map((t) => t.title)}
+            onAdd={(title) =>
+              setDraft((d) => ({
+                ...d,
+                todos: [
+                  ...(d.todos ?? []),
+                  { clientKey: newSetupClientKey(), title } satisfies SetupTodoDraft,
+                ],
+              }))
+            }
+            onRemove={(i) =>
+              setDraft((d) => ({
+                ...d,
+                todos: (d.todos ?? []).filter((_, idx) => idx !== i),
+              }))
+            }
+          />
+          <ComposeFrame
+            title="Knowledge"
+            testId="np-frame-knowledge"
+            addLabel="Add knowledge"
+            items={[
+              ...(draft.importantDates ?? []).map((d) => d.label),
+              ...(draft.knowledgeRemember ?? []).map((k) => k.text),
+            ]}
+            onAdd={(text) =>
+              setDraft((d) => ({
+                ...d,
+                knowledgeRemember: [
+                  ...(d.knowledgeRemember ?? []),
+                  {
+                    clientKey: newSetupClientKey(),
+                    text,
+                    remember: true,
+                  } satisfies SetupKnowledgeDraft,
+                ],
+              }))
+            }
+            onRemove={(i) => {
+              const dates = draft.importantDates ?? [];
+              if (i < dates.length) {
+                setDraft((d) => ({
+                  ...d,
+                  importantDates: (d.importantDates ?? []).filter(
+                    (_, idx) => idx !== i,
+                  ),
+                }));
+                return;
+              }
+              const offset = i - dates.length;
+              setDraft((d) => ({
+                ...d,
+                knowledgeRemember: (d.knowledgeRemember ?? []).filter(
+                  (_, idx) => idx !== offset,
+                ),
+              }));
+            }}
+          />
+        </div>
+
+        {error ? (
+          <p className="np-create-error" data-testid="np-create-error" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <div className="np-create-row">
+          <button
+            type="button"
+            className="primary-btn"
+            disabled={busy || !draft.name.trim()}
+            onClick={onCreate}
+            data-testid="np-create"
+          >
+            {busy ? "Creating…" : "Create Project"}
+          </button>
+        </div>
+      </div>
 
       {success ? (
         <div className="np-success-block" role="status" data-testid="np-create-success">
@@ -250,483 +392,52 @@ export function NewProjectExperience({
   );
 }
 
-function ChoosePaths({
-  variant,
-  onTalk,
-  onBlank,
+function ComposeFrame({
+  title,
+  testId,
+  addLabel,
+  items,
+  onAdd,
+  onRemove,
 }: {
-  variant: "first-run" | "page";
-  onTalk: () => void;
-  onBlank: () => void;
+  title: string;
+  testId: string;
+  addLabel: string;
+  items: string[];
+  onAdd: (value: string) => void;
+  onRemove: (index: number) => void;
 }) {
+  const [value, setValue] = useState("");
   return (
-    <div className="np-choose">
-      <header className="np-hero">
-        <LumeLogo size={variant === "first-run" ? 36 : 28} className="np-hero-logo" />
-        <p className="np-brand">lume</p>
-        <h1 className="np-hero-title">
-          {variant === "first-run"
-            ? "Tell Lume what this project is about."
-            : "New project"}
-        </h1>
-        <p className="np-hero-lead">
-          Describe it in your own words. Lume organises people, dates, risks and
-          work into a starting structure — then you review before anything is
-          created.
-        </p>
-      </header>
-
-      <div className="np-trust" role="note">
-        <p>
-          <strong>Nothing is created until you review it.</strong>
-        </p>
-        <p className="meta">Edit, remove or add anything before you confirm.</p>
-      </div>
-
-      <div className="np-path-grid np-path-grid-two">
-        <article className="np-path-card is-recommended">
-          <span className="np-recommended-badge">Recommended</span>
-          <h2>Talk It Through</h2>
-          <p>
-            Tell Lume about the project in your own words — what you&apos;re
-            delivering, who&apos;s involved, what you&apos;re worried about.
-          </p>
-          <p className="meta">Lume will structure it for you to check.</p>
-          <button type="button" className="primary-btn" onClick={onTalk}>
-            Talk it through
-          </button>
-        </article>
-
-        <article className="np-path-card is-quiet">
-          <h2>Start Blank</h2>
-          <p>
-            Just a name. Add the rest from Capture once you&apos;re in the
-            workspace.
-          </p>
-          <button type="button" className="ghost-btn" onClick={onBlank}>
-            Start blank
-          </button>
-        </article>
-      </div>
-    </div>
-  );
-}
-
-function TalkPath({
-  busy,
-  error,
-  openaiConfigured,
-  onBack,
-  onBuild,
-  onCancelBuild,
-}: {
-  busy: boolean;
-  error: string | null;
-  openaiConfigured: boolean | null;
-  onBack: () => void;
-  onBuild: (transcript: string) => void;
-  onCancelBuild: () => void;
-}) {
-  const [transcript, setTranscript] = useState("");
-  const [recording, setRecording] = useState(false);
-  const [paused, setPaused] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const [exampleOpen, setExampleOpen] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<number | null>(null);
-  const recognitionRef = useRef<{ stop: () => void; start: () => void } | null>(null);
-  const tipId = useId();
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) window.clearInterval(timerRef.current);
-      mediaRecorderRef.current?.stream
-        .getTracks()
-        .forEach((track) => track.stop());
-      recognitionRef.current?.stop();
-    };
-  }, []);
-
-  function startTimer() {
-    if (timerRef.current) window.clearInterval(timerRef.current);
-    timerRef.current = window.setInterval(
-      () => setSeconds((s) => s + 1),
-      1000,
-    );
-  }
-
-  function stopTimer() {
-    if (timerRef.current) {
-      window.clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }
-
-  async function startRecording() {
-    setPaused(false);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mime = MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : "audio/mp4";
-      const recorder = new MediaRecorder(stream);
-      chunksRef.current = [];
-      recorder.ondataavailable = (e) => {
-        if (e.data.size) chunksRef.current.push(e.data);
-      };
-      mediaRecorderRef.current = recorder;
-      recorder.start();
-      setRecording(true);
-      startTimer();
-
-      type SpeechRecResult = { isFinal: boolean; 0?: { transcript: string } };
-      type SpeechRecEvent = {
-        resultIndex: number;
-        results: ArrayLike<SpeechRecResult>;
-      };
-      type SpeechRecInstance = {
-        continuous: boolean;
-        interimResults: boolean;
-        onresult: ((event: SpeechRecEvent) => void) | null;
-        start: () => void;
-        stop: () => void;
-      };
-      const w = window as Window & {
-        SpeechRecognition?: new () => SpeechRecInstance;
-        webkitSpeechRecognition?: new () => SpeechRecInstance;
-      };
-      const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
-      if (SR) {
-        const recognition = new SR();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.onresult = (event) => {
-          let finalText = "";
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const result = event.results[i];
-            if (result?.[0] && result.isFinal) {
-              finalText += `${result[0].transcript} `;
-            }
-          }
-          if (finalText.trim()) {
-            setTranscript((prev) =>
-              `${prev} ${finalText}`.replace(/\s+/g, " ").trim(),
-            );
-          }
-        };
-        recognitionRef.current = recognition;
-        recognition.start();
-      }
-    } catch {
-      setRecording(false);
-    }
-  }
-
-  function pauseRecording() {
-    mediaRecorderRef.current?.pause();
-    recognitionRef.current?.stop();
-    stopTimer();
-    setPaused(true);
-  }
-
-  function resumeRecording() {
-    mediaRecorderRef.current?.resume();
-    recognitionRef.current?.start();
-    startTimer();
-    setPaused(false);
-  }
-
-  async function stopRecording() {
-    stopTimer();
-    setPaused(false);
-    setRecording(false);
-    recognitionRef.current?.stop();
-    const recorder = mediaRecorderRef.current;
-    if (!recorder) return;
-
-    await new Promise<void>((resolve) => {
-      recorder.onstop = () => resolve();
-      recorder.stop();
-      recorder.stream.getTracks().forEach((t) => t.stop());
-    });
-
-    if (transcript.trim()) return;
-
-    const blob = new Blob(chunksRef.current, {
-      type: recorder.mimeType || "audio/webm",
-    });
-    if (!blob.size) return;
-    try {
-      const form = new FormData();
-      form.append("audio", blob, "onboarding.webm");
-      const res = await fetch("/api/transcribe", { method: "POST", body: form });
-      const data = (await res.json()) as { text?: string; error?: string };
-      if (data.text?.trim()) setTranscript(data.text.trim());
-    } catch {
-      /* keep empty — user can type */
-    }
-  }
-
-  function formatTime(total: number) {
-    const m = Math.floor(total / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (total % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  }
-
-  return (
-    <div className="np-talk">
-      <button type="button" className="ghost-btn np-back" onClick={onBack}>
-        ← Pathways
-      </button>
-      <header className="np-panel-head">
-        <h2>Tell Lume about your project</h2>
-        <p className="np-panel-lead">
-          The more you share, the better the starting structure. You review
-          everything before it is created.
-        </p>
-      </header>
-
-      <div className="np-trust is-inline" role="note">
-        Nothing is created until you review it.
-      </div>
-
-      <div className="np-talk-layout">
-        <div className="np-talk-main">
-          <div className="np-record-panel">
-            <div className="np-record-status" aria-live="polite">
-              {recording
-                ? paused
-                  ? `Paused · ${formatTime(seconds)}`
-                  : `Recording · ${formatTime(seconds)}`
-                : "Ready when you are"}
-            </div>
-            <div className="np-record-actions">
-              {!recording ? (
-                <button
-                  type="button"
-                  className="primary-btn"
-                  onClick={() => void startRecording()}
-                >
-                  Start Recording
-                </button>
-              ) : (
-                <>
-                  {paused ? (
-                    <button
-                      type="button"
-                      className="muted-btn"
-                      onClick={resumeRecording}
-                    >
-                      Resume
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="muted-btn"
-                      onClick={pauseRecording}
-                    >
-                      Pause
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="ghost-btn"
-                    onClick={() => void stopRecording()}
-                  >
-                    Stop
-                  </button>
-                </>
-              )}
-            </div>
-            <p className="np-reassure meta">
-              Don&apos;t worry about making it perfect. Ramble if you need to —
-              you&apos;ll review what Lume understood before anything is created.
-            </p>
-          </div>
-
-          <label className="field np-transcript-field">
-            Transcript
-            <textarea
-              rows={10}
-              value={transcript}
-              onChange={(e) => setTranscript(e.target.value)}
-              placeholder="Your conversation will appear here. You can also type or edit before building."
-            />
-          </label>
-
-          <div className="np-talk-footer">
-            <p className="meta">
-              {openaiConfigured === false
-                ? "Lume needs AI configured to organise this. Nothing was created."
-                : "Lume will organise what you shared into a reviewable project."}
-            </p>
-            {error ? (
-              <p className="error-copy np-create-failed" role="alert" data-testid="np-create-error">
-                {error}
-              </p>
-            ) : null}
-            {busy ? (
-              <button
-                type="button"
-                className="ghost-btn"
-                onClick={onCancelBuild}
-              >
-                Cancel
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="primary-btn"
-                disabled={!transcript.trim()}
-                onClick={() => onBuild(transcript.trim())}
-              >
-                <span className="ocean-ai-glyph" aria-hidden>
-                  ✦
-                </span>
-                Build My Project
-              </button>
-            )}
-            <span className="ai-use-hint">Uses AI when configured</span>
-          </div>
-        </div>
-
-        <aside className="np-talk-side">
-          <div className="np-guidance">
-            <h3>What should I talk about?</h3>
-            <p className="meta">
-              Talk naturally. You don&apos;t need to cover everything.
-            </p>
-            <ul className="np-guidance-list">
-              {TALK_GUIDANCE_TOPICS.map((topic) => (
-                <li key={topic}>{topic}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="np-knowledge-callout">
-            <h3>What should Lume remember?</h3>
-            <p>
-              Knowledge is the useful project context that doesn&apos;t fit
-              neatly into a task, risk or date.
-            </p>
-            <ul>
-              <li>CAB needs the pack 48 hours before the meeting</li>
-              <li>Sarah only signs releases off on Thursdays</li>
-              <li>The platform team normally needs five days&apos; notice</li>
-              <li>
-                The customer wants residual risks included in every release
-                brief
-              </li>
-            </ul>
-            <p className="meta">Share this kind of context when you have it.</p>
-          </div>
-
-          <div className="np-example">
-            <button
-              type="button"
-              className="np-example-toggle"
-              aria-expanded={exampleOpen}
-              aria-controls={tipId}
-              onClick={() => setExampleOpen((v) => !v)}
-            >
-              Show me an example
+    <section className="np-frame" data-testid={testId}>
+      <h2>{title}</h2>
+      <ul>
+        {items.map((item, index) => (
+          <li key={`${item}-${index}`}>
+            <span>{item}</span>
+            <button type="button" onClick={() => onRemove(index)} aria-label={`Remove ${item}`}>
+              ×
             </button>
-            {exampleOpen ? (
-              <blockquote id={tipId} className="np-example-body">
-                {TALK_EXAMPLE}
-              </blockquote>
-            ) : null}
-          </div>
-        </aside>
-      </div>
-    </div>
-  );
-}
-
-function BlankPath({
-  busy,
-  error,
-  onBack,
-  onCreate,
-}: {
-  busy: boolean;
-  error: string | null;
-  onBack: () => void;
-  onCreate: (input: CreateProjectInput) => void;
-}) {
-  const [name, setName] = useState("");
-  const [code, setCode] = useState("");
-  const [codeTouched, setCodeTouched] = useState(false);
-
-  useEffect(() => {
-    if (!codeTouched && name) setCode(suggestCode(name));
-  }, [name, codeTouched]);
-
-  function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    onCreate({
-      name,
-      code: code || suggestCode(name),
-      summary: "",
-      currentFocus: "",
-      sourceMode: "blank",
-    });
-  }
-
-  return (
-    <div className="np-blank">
-      <button type="button" className="ghost-btn np-back" onClick={onBack}>
-        ← Pathways
-      </button>
-      <header className="np-panel-head">
-        <h2>Start blank</h2>
-        <p className="np-panel-lead">
-          Just a name. Capture is how you tell Lume the rest.
-        </p>
-      </header>
-      <form className="np-blank-form" onSubmit={onSubmit}>
-        <label className="field">
-          Project name
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Horizon Customer Portal"
-            autoFocus
-          />
-        </label>
-        <label className="field">
-          Project code
-          <input
-            value={code}
-            onChange={(e) => {
-              setCodeTouched(true);
-              setCode(e.target.value.toUpperCase().slice(0, 12));
-            }}
-            placeholder="HORIZON"
-          />
-        </label>
-        {error ? (
-          <p className="error-copy np-create-failed" role="alert" data-testid="np-create-error">
-            {error}
-          </p>
-        ) : null}
-        <div className="np-talk-footer">
-          <button type="button" className="ghost-btn" onClick={onBack}>
-            Back
-          </button>
-          <button
-            type="submit"
-            className="primary-btn"
-            disabled={busy || !name.trim()}
-          >
-            {busy ? "Creating…" : "Create Project"}
-          </button>
-        </div>
+          </li>
+        ))}
+      </ul>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const next = value.trim();
+          if (!next) return;
+          onAdd(next);
+          setValue("");
+        }}
+      >
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          aria-label={addLabel}
+          placeholder={addLabel}
+        />
+        <button type="submit">{addLabel}</button>
       </form>
-    </div>
+    </section>
   );
 }
-

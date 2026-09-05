@@ -49,18 +49,17 @@ function main() {
 
   check("first user with no project can clearly create one", () => {
     assert.match(experience, /Tell Lume what this project is about/);
-    assert.match(experience, /Talk It Through/);
-    assert.match(experience, /Start Blank/);
-    assert.match(experience, /Talk it through/);
-    assert.match(experience, /Build My Project/);
+    assert.match(experience, /Add what you know now/);
+    assert.match(experience, /np-four-frame/);
     assert.match(experience, /Create Project/);
+    assert.doesNotMatch(experience, /Talk It Through/);
     assert.doesNotMatch(experience, /Paste Project Information/);
     assert.doesNotMatch(experience, /pricing|checkout|upgrade|Start trial/i);
   });
 
   check("New Project success adopts durable result only after createProject", () => {
     const fn = experience.slice(experience.indexOf("const createFromDraft"));
-    const body = fn.slice(0, fn.indexOf("async function analyseNarrative"));
+    const body = fn.slice(0, fn.indexOf("async function organiseNotes"));
     assert.match(body, /await createProject\(/);
     assert.match(body, /setSuccess\(/);
     assert.match(body, /router\.push\(`\/projects\/\$\{id\}`\)/);
@@ -75,7 +74,7 @@ function main() {
 
   check("failure does not falsely imply project creation", () => {
     const fn = experience.slice(experience.indexOf("const createFromDraft"));
-    const body = fn.slice(0, fn.indexOf("async function analyseNarrative"));
+    const body = fn.slice(0, fn.indexOf("async function organiseNotes"));
     assert.match(body, /setSuccess\(null\)/);
     assert.match(body, /Could not create the project/);
     assert.match(review, /np-create-error/);
@@ -83,16 +82,14 @@ function main() {
     assert.doesNotMatch(experience, /np-tell-me-nudge/);
   });
 
-  check("AI build failure stays on Talk and does not create", () => {
+  check("organise failure does not create", () => {
     assert.match(experience, /Nothing was created/);
     assert.doesNotMatch(experience, /Showing a local draft instead/);
-    const analyse = experience.slice(experience.indexOf("async function analyseNarrative"));
-    const analyseBody = analyse.slice(0, analyse.indexOf("function cancelBuild"));
-    assert.doesNotMatch(analyseBody, /createProject\(/);
-    assert.doesNotMatch(analyseBody, /setSuccess\(/);
-    assert.doesNotMatch(analyseBody, /assembleFromNarrative/);
-    assert.doesNotMatch(analyseBody, /setPath\("review"\)/);
-    assert.doesNotMatch(analyseBody, /setCreateUnlocked\(true\)/);
+    const organise = experience.slice(experience.indexOf("async function organiseNotes"));
+    const organiseBody = organise.slice(0, organise.indexOf("function onCreate"));
+    assert.doesNotMatch(organiseBody, /createProject\(/);
+    assert.doesNotMatch(organiseBody, /setSuccess\(/);
+    assert.doesNotMatch(organiseBody, /assembleFromNarrative/);
   });
 
   check("first-project state transitions into workspace after create", () => {
@@ -238,10 +235,11 @@ function main() {
     assert.match(capture, /Nothing is saved until you approve/);
   });
 
-  check("review still happens before create", () => {
-    assert.match(review, /Check this before anything is created/);
-    assert.match(experience, /if \(!createUnlocked\)/);
-    assert.match(experience, /Approve the categorisation map before creating/);
+  check("compose create stays fail-closed and surfaces Needs You", () => {
+    assert.match(experience, /needsYouFromDraft/);
+    assert.match(experience, /createLockRef/);
+    assert.match(experience, /Give the project a name/);
+    assert.doesNotMatch(experience, /Talk It Through/);
   });
 
   console.log("verify-first-run-journey: OK");

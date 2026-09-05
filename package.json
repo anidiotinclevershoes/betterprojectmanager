@@ -86,6 +86,7 @@
     "verify:project-tags": "npx --yes tsx scripts/verify-project-tags.ts",
     "verify:timeline-projection": "npx --yes tsx scripts/verify-timeline-visual-polish.ts",
     "verify:knowledge-centre-four-bucket": "npx --yes tsx scripts/verify-knowledge-centre-four-bucket.ts",
+    "verify:new-project-four-frame": "npx --yes tsx scripts/verify-new-project-four-frame.ts",
     "git:preflight": "npx --yes tsx scripts/git-preflight.ts",
     "verify:git-preflight": "npx --yes tsx scripts/verify-git-preflight.ts",
     "typecheck": "tsc --noEmit",
