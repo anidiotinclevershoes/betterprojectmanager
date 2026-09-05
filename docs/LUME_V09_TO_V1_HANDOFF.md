@@ -66,7 +66,7 @@ Top-level project modes:
 | **Ask Lume** | Authenticated server-loaded canonical truth. Client-posted MissionState is ignored. |
 | **Catch Me Up** | AI read-only briefing from authoritative server truth: where we are / attention / missed / noticed connections. Distinguishes known vs inferred. No mutation, no vector DB, no new memory store. |
 | **New Project** | Four-frame compose on current `/api/new-project` (shared Capture extract). Organise notes is fail-closed. Needs You for uncertainty. No voice. Tags are metadata-only. |
-| **Timeline** | Read-only projection of dated authoritative truth on `main`. Legacy writable Gantt still coexists. Do not add a second schedule store. |
+| **Timeline** | Read-only projection of dated authoritative truth on `main`. **Intended product:** keep Timeline as that projection; retire the legacy writable Gantt *surface* non-destructively (see §3). **Current code:** the legacy Gantt UI still coexists until a later slice hides it. Do not add a second schedule store. |
 | **Meeting Catch Me Up** | Meeting-scoped deterministic brief from stored project truth, not generic advice. Project Catch Me Up mode stays. Stored `Meeting.prep` rows are kept. |
 | **Coach** | Hidden. Not a mode. Drawer unmounted. `/coaching` leftover route only. |
 | **Advise** | Disabled / coming soon. |
@@ -107,14 +107,113 @@ Client MissionState is **not** Capture Apply authority.
 
 Project isolation inside a workspace is **application-layer** (RLS is workspace-wide). Cross-account isolation is RLS + server project membership checks.
 
+### 3.1 Standing rule — actions create canonical truth first
+
+This is a **Lume-wide** rule, not a Timeline-only rule. Future agents must read it before adding interactive surfaces.
+
+> **Actions must create or update canonical project truth based on the currently established architecture and contracts, then re-project that truth into the relevant product surfaces. Actions must never create their own parallel or feature-specific truth.**
+
+This applies regardless of where the action originates (Timeline, Knowledge Centre, Review, New Project, Meeting Catch Me Up, Advise, a future Gantt, or any later surface). The initiating surface must not become its own data authority.
+
+Required flow:
+
+```text
+User action in a product surface
+  → existing canonical write / domain contract
+  → authoritative project truth changes
+  → all projections re-read / re-project that truth
+```
+
+Forbidden flow:
+
+```text
+User action in a product surface
+  → special surface-specific record/store
+  → separate competing truth
+```
+
+Use the **then-current** established canonical architecture. Do not hard-code future features to today’s exact tables, helpers, or apply path if that architecture later evolves. The invariant is: *use the then-current established canonical architecture rather than inventing a parallel truth path.*
+
+A new surface is a view, workflow, or entry point into canonical truth **unless** an explicit architecture decision establishes a new canonical domain model. New UX must not automatically imply new storage.
+
+If a requested item does not map safely to an existing canonical domain, use Review / Needs You / the then-current canonical creation workflow. Do not invent a feature-specific type merely because the click started in that feature.
+
+### 3.2 Timeline is a projection
+
+> **Timeline is a projection of authoritative dated project truth, not an independent source of truth.**
+
+It may display meetings, deadlines/milestones, dated To Dos, person availability/away dates, dated Knowledge, and other future *canonical* dated project items.
+
+Timeline-specific storage must not compete with the authoritative project-truth spine. This is a concrete application of §3.1.
+
+**Future Timeline Add** may exist as UX. Add must not create a special timeline-only item.
+
+```text
+Timeline Add
+  → create/update the appropriate canonical project record
+    through the then-current canonical truth/write contracts
+  → authoritative project truth changes
+  → Timeline re-projects that new truth
+```
+
+Examples: Add meeting → a real Meeting; Add milestone/deadline → the appropriate canonical dated item; Add dated To Do → a real To Do with its date; Add person away → authoritative person availability; Add dated Knowledge → authoritative Knowledge.
+
+Do **not** create a generic `timeline_item` merely because the interaction began inside Timeline, unless that type has itself become part of the canonical domain architecture through a separate product/architecture decision.
+
+### 3.3 Legacy writable Gantt — retire the surface, not the data
+
+The legacy writable Gantt is **retired from the intended product experience**.
+
+This is **not** “delete the old Gantt.” Immediate intended implementation (a later slice — not this documentation task):
+
+- remove/hide the legacy Gantt from the normal production UI;
+- do **not** delete underlying records, schema, helpers, or shared date functionality merely because the UI is retired;
+- first establish whether any current functionality depends on shared Gantt/date infrastructure;
+- protect anything used by modern Timeline, milestones, meetings, deadlines, person dates, Catch Me Up, or other authoritative project truth;
+- preserve existing legacy Gantt data until a later explicit cleanup/migration proves it is safe to remove.
+
+A future cleanup may remove dead Gantt code/data **only** when proven unused and safe. That is a separate task after dependency/data analysis.
+
+**Current code still shows the writable Gantt** beside the Timeline glance. Testers and agents must not treat that leftover UI as the intended product, and must not “clean it up” by deleting schema or date helpers.
+
+### 3.4 Future Gantt / planning surfaces
+
+If Lume later gets a richer Gantt or planning experience, it must:
+
+- derive from the **same** authoritative dated truth used by Timeline; or
+- use a dedicated creation/editing wizard that writes canonical project records through the then-current canonical architecture.
+
+It must **not** resurrect the legacy model where Gantt maintains an independent schedule/truth store.
+
+A future Gantt may be a richer projection, a planning/editor surface over canonical records, or a wizard that creates canonical dated project truth. The source of truth remains the established project-truth architecture.
+
+```text
+Gantt action → canonical project truth → Gantt and other surfaces re-project
+```
+
+Never: `Gantt action → Gantt-owned truth`.
+
+### 3.5 Same rule on other surfaces
+
+Not limited to dates.
+
+| Surface | Required | Forbidden |
+| --- | --- | --- |
+| Knowledge Centre | KC action → canonical domain mutation → KC re-projects | KC-owned copies of project records |
+| Meeting Catch Me Up | Meeting action → canonical project truth → brief re-projects | Meeting-brief-owned truth |
+| Advise | Suggestion/action → normal Review / canonical write path → truth changes → surfaces refresh | Advise private truth, or bypassing Review |
+| New Project / Review | Already on the Capture / compose / Apply contracts | A second compose or review store |
+| Any future surface | View, workflow, or entry point into canonical truth | New storage implied by new UX |
+
 ---
 
 ## 4. What is parked / hidden
 
 | Item | Status | Do not |
 | --- | --- | --- |
-| Advise | Coming soon | Build it during alpha |
+| Advise | Coming soon | Build it during alpha; do not give it a private truth model (§3.1) |
 | Coach | Hidden | Redesign or auto-open |
+| Legacy writable Gantt | **Retired from intended UX.** Still visible in current code. Hide the surface later; do not delete records/schema/helpers until proven unused (§3.3) | Treat leftover Gantt UI as product; delete Gantt data to “clean up” |
 | Stripe / landing / pricing | Not required for closed alpha | Treat Legal Eagle PR #88 as current production — it was **not** the v0.9 merge |
 | Portfolio | Not required for V1 unless evidence changes | Build a home dashboard |
 | File upload | `addFileName` exists, **no caller** | Promise upload for V1 |
@@ -322,7 +421,7 @@ Landing, pricing, onboarding, Stripe — only to the level needed to acquire use
 
 | Class | Documents |
 | --- | --- |
-| **CURRENT AUTHORITATIVE** | This file; `docs/v1-reference-pack/`; `docs/LUME_V1_KNOWN_DISCOVERIES.md` (open vs resolved); `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` **except** stale Part A flag tables — **code wins** |
+| **CURRENT AUTHORITATIVE** | This file (including **§3.1–§3.5** for canonical actions / Timeline / Gantt); `docs/v1-reference-pack/`; `docs/LUME_V1_KNOWN_DISCOVERIES.md` (open vs resolved); `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` **except** stale Part A flag tables — **code wins** |
 | **HISTORICAL — KEEP** | `docs/SLICE*`, `docs/PHASE*`, `docs/current-state/`, `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md`, `docs/v1-convergence-mp/` (UX reference, not an implementation licence) |
 | **SUPERSEDED — keep, do not follow** | `docs/EXPERIMENTAL_PROGRAMME.md` (Capture V2 is no longer experimental); qualification “Stage 2 blocked” text (updated); root README Mission Control copy |
 | **DEAD / MISLEADING if treated as current** | Any claim that `LUME_CAPTURE_V2` selects engines; Coach auto-opens; Catch Me Up does not exist / is search; production localStorage is truth; v0.9 is an unfinished Phase 3 programme |

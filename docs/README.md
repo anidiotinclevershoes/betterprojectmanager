@@ -66,8 +66,10 @@ Current contracts to honour:
 - Capture V2 is the sole Analyse → Review → Apply engine.
 - Ready means the same production Apply path can execute that reviewed change. Apply still revalidates.
 - One authoritative project-truth spine (Supabase). No parallel stores.
+- **Actions create or update that canonical truth, then surfaces re-project it.** A product surface must not become its own data authority. Full rule: `docs/LUME_V09_TO_V1_HANDOFF.md` §3.1–§3.5.
 - Tags, when present, are retrieval metadata only.
-- Timeline is a read-only projection of dated truth (legacy writable Gantt may coexist until deprecated).
+- Timeline is a read-only projection of dated truth. Future Timeline Add writes canonical dated records, not `timeline_item` storage.
+- Legacy writable Gantt is **retired from the intended product**. Current code may still show it. Hide the surface later; do not delete shared date infrastructure or stored Gantt data until proven unused.
 - Meeting-scoped Catch Me Up is generated from stored project truth, not generic advice.
 
 ### 3. Living Known Discoveries
@@ -109,6 +111,8 @@ They must **not** override current implementation reality.
 
 Start with the documentation authority map. Read canonical product intent, current implementation architecture and Known Discoveries first. Read historical handovers only when relevant to the seam being extended. If historical documentation conflicts with current architecture or code, do not silently choose the historical description.
 
+Before implementing a new interactive surface or an Add/edit action on Timeline, Knowledge Centre, Catch Me Up, Advise, or Gantt: read **`docs/LUME_V09_TO_V1_HANDOFF.md` §3.1**. Actions must write canonical project truth through the then-current contracts, then re-project. Do not invent a feature-specific store because the click started in that feature.
+
 Product/trust constitution governs intended behaviour; current code/architecture handoff governs implementation reality; Known Discoveries governs known debt.
 
 Completion reports, PR checkpoints, and slice handovers must include a Plain-English section written for the product owner. See `docs/v1-reference-pack/LUME_DEVELOPMENT_AND_EVALUATION_ROADMAP_V1.md` §19. Do not rewrite historical reports to match.
@@ -121,7 +125,7 @@ For ordinary development:
 
 1. `docs/README.md` (this file) — **start here**
 2. `npm run git:preflight` and `AGENTS.md` Git rules
-3. `docs/LUME_V09_TO_V1_HANDOFF.md` (what v0.9 is, freeze, isolation, remaining debt, V1 path)
+3. `docs/LUME_V09_TO_V1_HANDOFF.md` (what v0.9 is, freeze, isolation, remaining debt, V1 path). **§3.1** is the standing rule that actions write canonical truth, then surfaces re-project.
 4. `docs/v1-reference-pack/README.md`
 5. `docs/LUME_V1_KNOWN_DISCOVERIES.md`
 6. the code on current `main` (not the 26 Aug architecture handoff)
@@ -140,7 +144,7 @@ Then open operational docs only if the task is about tests, deploy, or persisten
 
 | Kind of question | Trust this | Do not silently prefer |
 | --- | --- | --- |
-| What should the product do? (trust, Capture, Ocean, V1 scope) | `docs/v1-reference-pack/`, except V1 KC scan order / Desert / first-run / Coach / Timeline / Accept-as-known UX rule → `docs/v1-convergence-mp/SPIDERMAN_AMENDMENT.md` | Historical handovers, old UI snapshots, root README product copy |
+| What should the product do? (trust, Capture, Ocean, V1 scope) | `docs/v1-reference-pack/`, except V1 KC scan order / Desert / first-run / Coach / Accept-as-known UX rule → `docs/v1-convergence-mp/SPIDERMAN_AMENDMENT.md`. **Timeline / Gantt / “where may a click write?”** → `docs/LUME_V09_TO_V1_HANDOFF.md` §3 | Historical handovers, old UI snapshots, root README product copy; older Spiderman “Timeline deletion candidate” wording |
 | What does the code do now? | The code on current `main`, then the v0.9 handoff | Architecture Memory Handoff (26 Aug desert snapshot); 19 Aug Project Truth Audit; `docs/current-state/`; SLICE/PHASE bodies; `docs/EXPERIMENTAL_PROGRAMME.md` |
 | What is in v0.9 / what is frozen / what is next? | `docs/LUME_V09_TO_V1_HANDOFF.md` | Phase 3 “unfinished programme” language; old scorer-v1 counts; Coach-as-live-surface docs |
 | What debt is open vs fixed? | Known Discoveries (open vs resolved sections) + v0.9 handoff §10 | Duplicate headings, historical “still missing” notes, plans |
