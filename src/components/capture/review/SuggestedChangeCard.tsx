@@ -2,7 +2,10 @@
 
 import { useId, useState } from "react";
 import type { ReviewChangeViewModel } from "@/lib/capture/review/viewModel";
-import type { ReviewOwnerHit } from "@/lib/capture/review/reviewReason";
+import {
+  ownershipChoiceCopy,
+  type ReviewOwnerHit,
+} from "@/lib/capture/review/reviewReason";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
 import {
   needsYouHeadline,
@@ -103,9 +106,18 @@ export function SuggestedChangeCard({
     family === "needs_you"
       ? needsYouHeadline(model.reviewReason, model.entityLabel)
       : undefined;
+  const ownershipQuestion =
+    family === "needs_you" && model.reviewReason === "OWNERSHIP_UNCERTAIN"
+      ? ownershipChoiceCopy({
+          currentOwnerNames: currentOwners.map((owner) => owner.personName),
+          scope: model.suggestion.responsibilityScope,
+          incomingPersonName: model.suggestion.personName,
+        }).question
+      : null;
   const detail =
     family === "needs_you"
-      ? needsYouSupporting(
+      ? ownershipQuestion ??
+        needsYouSupporting(
           headline || "",
           model.needsReviewReason,
           model.recordName,

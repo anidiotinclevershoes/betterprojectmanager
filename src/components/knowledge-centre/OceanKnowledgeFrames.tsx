@@ -32,7 +32,12 @@ import { buildMeetingPrepItems } from "@/lib/workspace/frames-data";
 import "./kc-four-bucket.css";
 import "./kc-meeting-catch-up.css";
 
-const ALL_PREVIEW = 6;
+const OCEAN_FRAME_TESTID: Record<KcBucketId, string> = {
+  issues: "ocean-frame-risks",
+  people: "ocean-frame-people",
+  todo: "ocean-frame-todo",
+  knowledge: "ocean-frame-knowledge",
+};
 
 function KcItemCard({
   item,
@@ -96,31 +101,36 @@ function BucketGroup({
   items,
   selected,
   onSelect,
-  preview,
-  onShowAll,
+  oceanTestId,
+  heading,
+  alwaysRender = false,
 }: {
   bucket: KcBucketId;
   items: KcComposedItem[];
   selected: KnowledgeItemRef | null;
   onSelect: (ref: KnowledgeItemRef) => void;
-  preview?: boolean;
-  onShowAll?: () => void;
+  oceanTestId?: string;
+  heading?: string;
+  alwaysRender?: boolean;
 }) {
-  if (!items.length) return null;
-  const shown = preview ? items.slice(0, ALL_PREVIEW) : items;
-  const more = preview && items.length > ALL_PREVIEW ? items.length - ALL_PREVIEW : 0;
+  if (!items.length && !alwaysRender) return null;
+  const label = heading ?? bucketLabel(bucket);
   return (
-    <section className="kc-bucket-group" data-testid={`kc-group-${bucket}`}>
+    <section
+      className="kc-bucket-group"
+      data-testid={oceanTestId ?? `kc-group-${bucket}`}
+      data-kc-group={bucket}
+    >
       <header className="kc-bucket-group-head">
         <span className="compact-change-ico" aria-hidden>
           {KC_BUCKET_ICON[bucket]}
         </span>
         <h3>
-          {bucketLabel(bucket)} · {items.length}
+          {label} · {items.length}
         </h3>
       </header>
       <div className="kc-bucket-group-body">
-        {shown.map((item) => (
+        {items.map((item) => (
           <KcItemCard
             key={item.id}
             item={item}
@@ -128,11 +138,6 @@ function BucketGroup({
             onSelect={item.ref ? () => onSelect(item.ref!) : undefined}
           />
         ))}
-        {more > 0 && onShowAll ? (
-          <button type="button" className="kc-more-link" onClick={onShowAll}>
-            Show all {items.length} in {bucketLabel(bucket)}
-          </button>
-        ) : null}
       </div>
     </section>
   );
@@ -296,25 +301,77 @@ export function OceanKnowledgeFrames({
       <div className="kc-four-body" data-testid="kc-four-body">
         {bucket === "all" ? (
           view.globalCount ? (
-            BUCKET_IDS.map((id) => (
+            <>
+              {(["issues", "people", "todo"] as const).map((id) => (
+                <BucketGroup
+                  key={id}
+                  bucket={id}
+                  items={view.grouped[id]}
+                  selected={selected}
+                  onSelect={select}
+                  oceanTestId={OCEAN_FRAME_TESTID[id]}
+                  alwaysRender
+                />
+              ))}
               <BucketGroup
-                key={id}
-                bucket={id}
-                items={view.grouped[id]}
+                bucket="knowledge"
+                items={view.grouped.knowledge.filter(
+                  (item) => item.knowledgeSubtype === "dates",
+                )}
                 selected={selected}
                 onSelect={select}
-                preview
-                onShowAll={() => setBucket(id)}
+                oceanTestId="ocean-frame-dates"
+                heading="Dates"
+                alwaysRender
               />
-            ))
+              <BucketGroup
+                bucket="knowledge"
+                items={view.grouped.knowledge.filter(
+                  (item) => item.knowledgeSubtype !== "dates",
+                )}
+                selected={selected}
+                onSelect={select}
+                oceanTestId={OCEAN_FRAME_TESTID.knowledge}
+              />
+            </>
           ) : (
-            <p className="kc-zero">
-              {searching ? "No matches in this project." : "Nothing recorded yet."}
-            </p>
+            <>
+              <section data-testid="ocean-frame-risks" data-kc-group="issues" />
+              <section data-testid="ocean-frame-people" data-kc-group="people" />
+              <section data-testid="ocean-frame-todo" data-kc-group="todo" />
+              <section data-testid="ocean-frame-dates" data-kc-group="dates" />
+              <p className="kc-zero">
+                {searching ? "No matches in this project." : "Nothing recorded yet."}
+              </p>
+            </>
           )
         ) : view.items.length ? (
-          <div className="kc-bucket-list" data-testid={`kc-list-${bucket}`}>
-            {view.items.map((item) => (
+          <div
+            className="kc-bucket-list"
+            data-testid={
+              bucket === "knowledge"
+                ? `kc-list-${bucket}`
+                : OCEAN_FRAME_TESTID[bucket]
+            }
+          >
+            {bucket === "knowledge" ? (
+              <div data-testid="ocean-frame-dates">
+                {view.items
+                  .filter((item) => item.knowledgeSubtype === "dates")
+                  .map((item) => (
+                    <KcItemCard
+                      key={item.id}
+                      item={item}
+                      selected={item.ref ? knowledgeDetailEquals(selected, item.ref) : false}
+                      onSelect={item.ref ? () => select(item.ref!) : undefined}
+                    />
+                  ))}
+              </div>
+            ) : null}
+            {(bucket === "knowledge"
+              ? view.items.filter((item) => item.knowledgeSubtype !== "dates")
+              : view.items
+            ).map((item) => (
               <KcItemCard
                 key={item.id}
                 item={item}
@@ -323,10 +380,39 @@ export function OceanKnowledgeFrames({
               />
             ))}
           </div>
-        ) : showCrossCue ? null : (
-          <p className="kc-zero">
-            {searching ? "No matches in this view." : "Nothing here yet."}
-          </p>
+        ) : showCrossCue ? (
+          <>
+            {bucket === "issues" ? (
+              <section data-testid="ocean-frame-risks" data-kc-group="issues" />
+            ) : null}
+            {bucket === "people" ? (
+              <section data-testid="ocean-frame-people" data-kc-group="people" />
+            ) : null}
+            {bucket === "todo" ? (
+              <section data-testid="ocean-frame-todo" data-kc-group="todo" />
+            ) : null}
+            {bucket === "knowledge" ? (
+              <section data-testid="ocean-frame-dates" data-kc-group="dates" />
+            ) : null}
+          </>
+        ) : (
+          <>
+            {bucket === "issues" ? (
+              <section data-testid="ocean-frame-risks" data-kc-group="issues" />
+            ) : null}
+            {bucket === "people" ? (
+              <section data-testid="ocean-frame-people" data-kc-group="people" />
+            ) : null}
+            {bucket === "todo" ? (
+              <section data-testid="ocean-frame-todo" data-kc-group="todo" />
+            ) : null}
+            {bucket === "knowledge" ? (
+              <section data-testid="ocean-frame-dates" data-kc-group="dates" />
+            ) : null}
+            <p className="kc-zero">
+              {searching ? "No matches in this view." : "Nothing here yet."}
+            </p>
+          </>
         )}
       </div>
 

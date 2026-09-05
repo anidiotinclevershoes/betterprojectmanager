@@ -149,6 +149,10 @@ function testFramesLayoutContract() {
   assert.match(frames, /MeetingPrepFrame/);
   assert.match(frames, /ocean-frame-timeline/);
   assert.match(frames, /ocean-frame-meeting-prep/);
+  assert.match(frames, /ocean-frame-people/);
+  assert.match(frames, /ocean-frame-todo/);
+  assert.match(frames, /ocean-frame-risks/);
+  assert.match(frames, /ocean-frame-dates/);
   assert.doesNotMatch(frames, /ocean-frames-primary/);
   assert.doesNotMatch(frames, /searchProjectKnowledge/);
   void OCEAN_PRIMARY_FRAMES;

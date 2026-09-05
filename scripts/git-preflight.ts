@@ -38,7 +38,27 @@ function main() {
   const head = git("rev-parse HEAD");
   const mainRef = process.env.LUME_PREFLIGHT_MAIN ?? "origin/main";
   const mainSha = git(`rev-parse ${mainRef}`);
-  const mergeBase = git(`merge-base HEAD ${mainRef}`);
+  let mergeBase = git(`merge-base HEAD ${mainRef}`, true);
+  if (!mergeBase) {
+    // Shallow CI checkouts often have HEAD and origin/main as depth-1
+    // tips with no shared object until history is deepened.
+    try {
+      execSync("git fetch --deepen=200 origin", { stdio: "pipe" });
+    } catch {
+      try {
+        execSync("git fetch --unshallow", { stdio: "pipe" });
+      } catch {
+        /* keep going — report topology we can still prove */
+      }
+    }
+    mergeBase = git(`merge-base HEAD ${mainRef}`, true);
+  }
+  if (!mergeBase) {
+    console.warn(
+      `warning: could not compute merge-base with ${mainRef}; clone is too shallow`,
+    );
+    mergeBase = head;
+  }
   const ahead = Number(git(`rev-list --count ${mainRef}..HEAD`) || "0");
   const behind = Number(git(`rev-list --count HEAD..${mainRef}`) || "0");
   let containsMain = false;
