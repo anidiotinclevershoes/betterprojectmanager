@@ -83,13 +83,18 @@ export function CorrectionActions({
     reason === "OWNERSHIP_UNCERTAIN" ||
     model.missingRequiredField === "date";
 
+  const prompt = (text?: string | null) =>
+    !hidePrompt && text ? (
+      <p className="compact-change-review-copy">{text}</p>
+    ) : null;
+
   if (!applyExecutable && !userCanRepair) {
     const copy =
       model.needsReviewReason ||
       unsupportedApplyReason(model.suggestion, model.recordName);
     return (
       <div className="compact-change-correction">
-        {copy ? <p className="compact-change-review-copy">{copy}</p> : null}
+        {prompt(copy)}
         <div className="compact-change-action-row">
           <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
             Dismiss
@@ -132,7 +137,7 @@ export function CorrectionActions({
       otherOwners.length === 1 ? otherOwners[0]?.personId ?? null : null;
     return (
       <div className="compact-change-correction" data-testid="review-ownership-choice">
-        <p className="compact-change-review-copy">{labels.question}</p>
+        {prompt(labels.question)}
         <div className="compact-change-action-row">
           <button
             type="button"
@@ -187,9 +192,7 @@ export function CorrectionActions({
   if (model.missingRequiredField === "date") {
     return (
       <div className="compact-change-correction" data-testid="review-missing-date">
-        <p className="compact-change-review-copy">
-          {missingDateCopy(model.recordName)}
-        </p>
+        {prompt(missingDateCopy(model.recordName))}
         <div className="compact-change-action-row">
           <label className="compact-change-date-label">
             <span className="sr-only">Date</span>
@@ -228,9 +231,7 @@ export function CorrectionActions({
       [];
     return (
       <div className="compact-change-correction">
-        {!hidePrompt ? (
-          <p className="compact-change-review-copy">Which project?</p>
-        ) : null}
+        {prompt("Which project?")}
         <div className="compact-change-action-row">
           {candidates.map((p) => (
             <button
@@ -265,11 +266,7 @@ export function CorrectionActions({
         className="compact-change-correction"
         data-testid={namedTarget ? "review-existing-or-new" : undefined}
       >
-        {namedTarget ? (
-          <p className="compact-change-review-copy">{labels.question}</p>
-        ) : !hidePrompt && copy ? (
-          <p className="compact-change-review-copy">{copy}</p>
-        ) : null}
+        {prompt(namedTarget ? labels.question : copy)}
         <div className="compact-change-action-row">
           {namedTarget ? (
             <button
@@ -317,9 +314,7 @@ export function CorrectionActions({
   if (reason === "STATE_UNCERTAIN") {
     return (
       <div className="compact-change-correction">
-        {!hidePrompt && copy ? (
-          <p className="compact-change-review-copy">{copy}</p>
-        ) : null}
+        {prompt(copy)}
         <div className="compact-change-action-row">
           <button
             type="button"
@@ -339,9 +334,7 @@ export function CorrectionActions({
   if (reason === "ENTITY_TYPE_UNCERTAIN") {
     return (
       <div className="compact-change-correction">
-        {!hidePrompt && copy ? (
-          <p className="compact-change-review-copy">{copy}</p>
-        ) : null}
+        {prompt(copy)}
         <div className="compact-change-action-row compact-change-entity-row">
           <label className="compact-change-entity-select-label">
             <span className="sr-only">Entity type</span>
@@ -378,9 +371,7 @@ export function CorrectionActions({
   // OPERATION_UNCERTAIN / VALUE_UNCERTAIN / fallback
   return (
     <div className="compact-change-correction">
-      {!hidePrompt && copy ? (
-        <p className="compact-change-review-copy">{copy}</p>
-      ) : null}
+      {prompt(copy)}
       <div className="compact-change-action-row">
         {applyExecutable &&
         model.entityKind === "risk" &&

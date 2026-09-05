@@ -6,6 +6,8 @@
  * and view-model diff layouts. Does not invoke AI or persistence.
  */
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   buildCaptureObservations,
   dedupeObservationCandidates,
@@ -1419,6 +1421,19 @@ function suggestionIdFor(opId: string, index = 0) {
       "CDN deployment delayed",
     ),
     null,
+  );
+
+  const actions = readFileSync(
+    join(import.meta.dirname, "../src/components/capture/review/CorrectionActions.tsx"),
+    "utf8",
+  );
+  assert.match(actions, /hidePrompt/);
+  assert.match(actions, /const prompt = /);
+  assert.match(actions, /prompt\(missingDateCopy/);
+  assert.match(actions, /prompt\(namedTarget \? labels\.question : copy\)/);
+  assert.equal(
+    (actions.match(/compact-change-review-copy/g) || []).length,
+    1,
   );
 }
 

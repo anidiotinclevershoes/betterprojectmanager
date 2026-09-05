@@ -413,6 +413,10 @@ check("UI is four-bucket chrome, not the old taxonomy grid", () => {
   assert.match(ui, /kc-bucket-\$\{id\}/);
   assert.match(ui, /searchQuery/);
   assert.match(ui, /Show all \{view\.globalCount\}/);
+  assert.match(ui, /ocean-frame-people/);
+  assert.match(ui, /ocean-frame-todo/);
+  assert.match(ui, /ocean-frame-risks/);
+  assert.match(ui, /ocean-frame-dates/);
   assert.doesNotMatch(ui, /No items with this tag/);
   assert.doesNotMatch(ui, /accent-risks|accent-people|accent-todo/);
   assert.doesNotMatch(ui, /searchProjectKnowledge/);
