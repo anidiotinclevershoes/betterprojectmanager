@@ -8,6 +8,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Start at `docs/README.md`. That is the only current-docs entry point.
 
+**Canonical actions:** a product surface is a view, workflow, or entry point — not its own truth store. User actions must create or update canonical project truth through the then-current architecture and contracts, then re-project. Do not invent a parallel or feature-specific store. Read `docs/LUME_V09_TO_V1_HANDOFF.md` §3.1–§3.5 before implementing Timeline Add, Gantt, Knowledge Centre edits, meeting actions, or Advise execution.
+
 ## Git / integration (must)
 
 `main` is the only integration line.
