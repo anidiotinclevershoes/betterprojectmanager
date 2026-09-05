@@ -5,16 +5,17 @@
 
 **Use this page first.** Then read only what the task needs.
 
-**Current integration line:** `main`. Ready → Apply safety is on `main` (PR #126, merge `64171cd`).  
-**Not a development base:** `cursor/capture-v2-desert-new-project-56c9` and stacked experiment PRs #119–#123 / #120. Those are salvage/reference only.
+**Current integration line:** `main`.  
+**Mainline recovery complete.** Product surfaces that were stranded on the desert experiment stack now live on `main` (#126–#133).  
+**Not a development base:** `cursor/capture-v2-desert-new-project-56c9` and historical experiment PRs #119–#123 / #120. Those are salvage/reference only. Do not merge them.
 
 **v0.9 operating picture:** [`docs/LUME_V09_TO_V1_HANDOFF.md`](./LUME_V09_TO_V1_HANDOFF.md). Product constitution: [`docs/v1-reference-pack/`](./v1-reference-pack/). If those files and older PHASE / SLICE / experimental docs disagree, **this map + the code win**.
 
 Before substantial implementation: `npm run git:preflight`. **MATERIALLY STALE = STOP.**
 
-# LUME v0.9 CLOSED — mainline recovery in progress
+# LUME v0.9 CLOSED — mainline recovery complete
 
-v0.9 Capture remains frozen as the Analyse engine. Product surfaces that were stranded on the desert experiment stack are being ported onto current `main`. Do not resume work on desert-era branches.
+v0.9 Capture remains frozen as the Analyse engine. Wanted product surfaces have been rebuilt on current `main`. The next development phase starts only from this `main`. Do not resume work on desert-era branches.
 
 ---
 
@@ -129,7 +130,7 @@ For ordinary development:
 9. `docs/v1-convergence/V09_QUALIFICATION.md` when citing Capture eval evidence (scorer **v3**)
 10. `docs/v1-convergence-mp/README.md` (and `SPIDERMAN_AMENDMENT.md`) when reconciling Magic Patterns / V1 UX (reference only)
 
-`docs/EXPERIMENTAL_PROGRAMME.md` and `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` are **HISTORICAL**. Capture V2 is the sole live engine. New Project V2 remains env-flagged (`LUME_NEW_PROJECT_V2`) and is on in current Production.
+`docs/EXPERIMENTAL_PROGRAMME.md` and `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` are **HISTORICAL**. Capture V2 is the sole live engine. New Project is four-frame compose on the shared Capture extract.
 
 Then open operational docs only if the task is about tests, deploy, or persistence setup.
 
@@ -160,7 +161,7 @@ Left in place on purpose. They record *why* the architecture evolved.
 | Slice / phase handovers | `docs/SLICE*.md`, `docs/PHASE*.md`, completion reports, `docs/V1_CONVERGENCE_ARCHITECTURE_COMPLETION.md` | Seam history when extending that slice; architecture review checkpoint |
 | Older product copy | repository root `README.md` (corrected enough to point here; remaining Mission Control copy is historical) | Setup remnants; not current product/architecture authority |
 | Experimental programme | `docs/EXPERIMENTAL_PROGRAMME.md` | Decision record from 25 Aug 2026. **Capture V2 is no longer experimental.** |
-| Desert programme branch | `cursor/capture-v2-desert-new-project-56c9` | **Obsolete integration candidate.** Reference/salvage only. #119–#123 / #120 must be ported, not merged. |
+| Desert programme branch | `cursor/capture-v2-desert-new-project-56c9` | **Obsolete integration candidate.** Reference/salvage only. Do not merge. |
 | Architecture memory handoff | `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` | 26 Aug desert-era snapshot. **HISTORICAL.** Part C targets may still inform V1. |
 | Capture qualification (pre-freeze) | Historical “Stage 2 blocked” sections inside `docs/v1-convergence/V09_QUALIFICATION.md` | Chronology only; current status is at the top of that file |
 

@@ -14,6 +14,10 @@ import {
 import { evaluateEntitlement, mapStripeSubscriptionStatus } from "../src/lib/billing/entitlements";
 import { mapStripeSubscriptionToLume } from "../src/lib/billing/stripe-map";
 import { checkRateLimit, resetRateLimitStoreForTests } from "../src/lib/rate-limit";
+import {
+  MAX_TRANSCRIBE_BYTES,
+  transcribeAudioRejection,
+} from "../src/lib/transcribe-guard";
 
 let passed = 0;
 function check(name: string, fn: () => void) {
@@ -246,6 +250,35 @@ check("billing routes exist and webhook is signature-gated in code", () => {
   );
   assert.match(webhook, /constructEvent/);
   assert.match(webhook, /recordBillingEventIfNew/);
+});
+
+check("transcribe rejects empty, oversized, and non-audio uploads", () => {
+  const route = fs.readFileSync(
+    path.join(root, "src/app/api/transcribe/route.ts"),
+    "utf8",
+  );
+  const guard = fs.readFileSync(
+    path.join(root, "src/lib/transcribe-guard.ts"),
+    "utf8",
+  );
+  assert.match(route, /transcribeAudioRejection/);
+  assert.match(guard, /MAX_TRANSCRIBE_BYTES/);
+  assert.equal(
+    transcribeAudioRejection({ size: 0 }),
+    "The audio file is empty.",
+  );
+  assert.match(
+    transcribeAudioRejection({ size: MAX_TRANSCRIBE_BYTES + 1 }) ?? "",
+    /25 MB/,
+  );
+  assert.match(
+    transcribeAudioRejection({ size: 12, type: "application/pdf" }) ?? "",
+    /file type/,
+  );
+  assert.equal(
+    transcribeAudioRejection({ size: 12, type: "audio/webm" }),
+    null,
+  );
 });
 
 check("AI routes import requireAiCaller", () => {
