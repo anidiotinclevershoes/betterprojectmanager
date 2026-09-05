@@ -88,6 +88,7 @@
     "verify:knowledge-centre-four-bucket": "npx --yes tsx scripts/verify-knowledge-centre-four-bucket.ts",
     "verify:new-project-four-frame": "npx --yes tsx scripts/verify-new-project-four-frame.ts",
     "verify:meeting-catch-up": "npx --yes tsx scripts/verify-meeting-catch-up.ts",
+    "verify:legacy-influence": "npx --yes tsx scripts/verify-legacy-influence.ts",
     "git:preflight": "npx --yes tsx scripts/git-preflight.ts",
     "verify:git-preflight": "npx --yes tsx scripts/verify-git-preflight.ts",
     "typecheck": "tsc --noEmit",

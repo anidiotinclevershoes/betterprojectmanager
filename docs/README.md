@@ -66,9 +66,11 @@ Current contracts to honour:
 - Capture V2 is the sole Analyse → Review → Apply engine.
 - Ready means the same production Apply path can execute that reviewed change. Apply still revalidates.
 - One authoritative project-truth spine (Supabase). No parallel stores.
+- **Actions create or update that canonical truth, then surfaces re-project it.** A product surface must not become its own data authority. Full rule: `docs/LUME_V09_TO_V1_HANDOFF.md` §3.1–§3.5.
 - Tags, when present, are retrieval metadata only.
-- Timeline is a read-only projection of dated truth (legacy writable Gantt may coexist until deprecated).
-- Meeting-scoped Catch Me Up is generated from stored project truth, not generic advice.
+- Timeline is a read-only projection of dated truth. Future Timeline Add writes canonical dated records, not `timeline_item` storage.
+- Legacy writable Gantt is **retired from the intended product**. The write surface is unmounted from production Timeline. Do not delete shared date infrastructure or stored Gantt/`timeline` rows until proven unused.
+- Meeting-scoped Catch Me Up is generated from stored project truth, not generic advice. Stored `Meeting.prep` hydrates for compatibility and must not drive Catch Me Up or Capture context.
 
 ### 3. Living Known Discoveries
 

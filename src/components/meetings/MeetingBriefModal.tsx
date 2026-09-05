@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Leftover Meeting Prep editor. Unmounted from production Knowledge Centre.
+ * Historical `Meeting.prep` still hydrates. Writes are disabled — do not
+ * remount this as a competing meeting-truth editor.
+ */
 import { useEffect, useId, useRef, useState } from "react";
 import { isValidDateInput } from "@/lib/dates";
 import { formatWhen, toDateInputValue } from "@/lib/selectors";
@@ -23,7 +28,7 @@ export function MeetingBriefModal({
   meetingId: string | null;
   onClose: () => void;
 }) {
-  const { state, updateMeeting } = useMission();
+  const { state } = useMission();
   const meeting = meetingId
     ? state.meetings.find((m) => m.id === meetingId)
     : null;
@@ -74,22 +79,8 @@ export function MeetingBriefModal({
   const dateOk = !date || isValidDateInput(date);
 
   function save() {
-    if (!meeting || !dateOk) return;
-    const startsAt =
-      date && time
-        ? new Date(`${date}T${time}:00`).toISOString()
-        : meeting.startsAt;
-    updateMeeting(meeting.id, {
-      title,
-      projectId: projectId || meeting.projectId,
-      startsAt,
-      openingScript: opening,
-      objectives: linesToList(objectives),
-      talkingPoints: linesToList(talkingPoints),
-      questionsToAsk: linesToList(questions),
-      risksToDiscuss: linesToList(missing),
-    });
-    setSaved(true);
+    // Writes retired: leftover editor must not mutate session Meeting.prep.
+    return;
   }
 
   const fullBrief = [
@@ -119,7 +110,7 @@ export function MeetingBriefModal({
             <p className="eyebrow">
               {project?.code ?? "Project"} · {formatWhen(meeting.startsAt)}
             </p>
-            <h2 id={titleId}>Edit meeting prep</h2>
+            <h2 id={titleId}>Historical meeting prep</h2>
           </div>
           <button
             ref={closeRef}
@@ -223,9 +214,9 @@ export function MeetingBriefModal({
               type="button"
               className="primary-btn"
               onClick={save}
-              disabled={!dateOk || !title.trim()}
+              disabled
             >
-              Save changes
+              Editing retired
             </button>
             <button
               type="button"

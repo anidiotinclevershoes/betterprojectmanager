@@ -397,10 +397,11 @@ check("Today marker and event detail stay read-only", () => {
   assert.doesNotMatch(proj, /tokens\(/);
 });
 
-check("read-only Timeline mounts additively without replacing writable Gantt", () => {
+check("production Timeline is the read-only projection only", () => {
   const frame = readFileSync(join(ROOT, "src/components/frames/TimelineFrame.tsx"), "utf8");
   assert.match(frame, /KcTimeline/);
-  assert.match(frame, /ProjectTimelineGantt/);
+  assert.doesNotMatch(frame, /from \"@\/components\/ProjectTimelineGantt\"/);
+  assert.doesNotMatch(frame, /addTimelineItem/);
   assert.match(frame, /onMeetingPrep/);
   const shell = readFileSync(
     join(ROOT, "src/components/knowledge-centre/OceanKnowledgeFrames.tsx"),
@@ -409,6 +410,7 @@ check("read-only Timeline mounts additively without replacing writable Gantt", (
   assert.match(shell, /TimelineFrame/);
   assert.match(shell, /ocean-frame-timeline/);
   assert.doesNotMatch(shell, /KcTimeline/);
+  assert.doesNotMatch(shell, /ProjectTimelineGantt/);
   assert.match(shell, /composeKnowledgeCentreItems/);
 });
 
@@ -419,7 +421,7 @@ check("meeting Catch Me Up is additive and Timeline stays an embed", () => {
     "utf8",
   );
   assert.match(frames, /TimelineFrame/);
-  assert.match(frames, /MeetingPrepFrame/);
+  assert.doesNotMatch(frames, /MeetingPrepFrame/);
   assert.match(frames, /MeetingCatchUpPanel/);
 });
 

@@ -51,7 +51,7 @@ export function adaptMeeting(meeting: Meeting): AIRecord {
     type: "meeting",
     id: meeting.id,
     title: meeting.title,
-    summary: meeting.prep.objectives.slice(0, 2).join("; ") || undefined,
+    summary: meeting.attendees.slice(0, 3).join(", ") || undefined,
     status: mapMeetingStatus(meeting.phase),
     owner: meeting.attendees[0],
     date: meeting.startsAt,
