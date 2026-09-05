@@ -5,8 +5,8 @@
 
 **Use this page first.** Then read only what the task needs.
 
-**Current integration line:** `main` @ `8cea34c9116978bb89f6af37d5201e52067b2aaf`.  
-**Mainline recovery complete.** Product surfaces that were stranded on the desert experiment stack now live on `main` (#126–#135). GitHub `e2e` + `regression` are green on that SHA.  
+**Current integration line:** `main`.  
+**Mainline recovery complete.** Product surfaces that were stranded on the desert experiment stack now live on `main` (#126–#135). The e2e recovery merge is `8cea34c9116978bb89f6af37d5201e52067b2aaf` (#135); GitHub `e2e` + `regression` were green on that SHA.  
 **Not a development base:** `cursor/capture-v2-desert-new-project-56c9` and historical experiment PRs #119–#123 / #120. Those are salvage/reference only. Do not merge them.
 
 **v0.9 operating picture:** [`docs/LUME_V09_TO_V1_HANDOFF.md`](./LUME_V09_TO_V1_HANDOFF.md). Product constitution: [`docs/v1-reference-pack/`](./v1-reference-pack/). If those files and older PHASE / SLICE / experimental docs disagree, **this map + the code win**.
