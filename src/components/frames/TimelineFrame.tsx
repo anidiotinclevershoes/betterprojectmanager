@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ProjectTimelineGantt } from "@/components/ProjectTimelineGantt";
 import { KcTimeline } from "@/components/knowledge-centre/KcTimeline";
 import { useMission } from "@/lib/store";
 
+/**
+ * Production Timeline embed. Read-only projection only.
+ * Legacy writable Gantt is unmounted from this surface — do not remount
+ * that leftover editor here. Stored timeline rows stay as data.
+ */
 export function TimelineFrame({
   projectId,
   snapshot = false,
@@ -22,7 +26,6 @@ export function TimelineFrame({
     return (
       <div className="frame-body timeline-frame">
         <KcTimeline projectId={projectId} onMeetingPrep={onMeetingPrep} />
-        <ProjectTimelineGantt projectId={projectId} />
       </div>
     );
   }
@@ -49,7 +52,7 @@ export function TimelineFrame({
                 <Link href={`/projects/${project.id}`}>{project.code}</Link>
                 <span className="meta">{project.name}</span>
               </div>
-              <ProjectTimelineGantt projectId={project.id} />
+              <KcTimeline projectId={project.id} />
             </div>
           ))}
         </div>

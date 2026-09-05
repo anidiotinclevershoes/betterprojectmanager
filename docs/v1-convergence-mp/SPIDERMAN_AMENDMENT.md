@@ -50,6 +50,8 @@ Architecture owns the exact implementation boundary (Phase 3B / Capture Review /
 
 ## 5. Timeline — decided
 
+> **Later product decision (5 September 2026):** Timeline **remains** a projection of dated project truth and may later grow an Add action that writes canonical records. The legacy writable Gantt is retired from the intended product (hide the surface; do not delete data/helpers until proven unused). See `docs/LUME_V09_TO_V1_HANDOFF.md` §3. Do not treat the older “deletion candidate” line below as a licence to remove Timeline, and do not keep Gantt as a second store.
+
 Timeline must **never** become another date authority.
 
 If retained: **Timeline is a projection / view over authoritative milestone / date data.**

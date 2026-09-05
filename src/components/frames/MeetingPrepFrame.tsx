@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Leftover Meeting Prep widget. Unmounted from production Knowledge Centre.
+ * Historical `Meeting.prep` still hydrates. Do not remount this as an editor
+ * for meeting-scoped Catch Me Up.
+ */
 import { useState } from "react";
 import { MeetingBriefModal } from "@/components/meetings/MeetingBriefModal";
 import { useFrameExpand } from "@/components/workspace/FrameExpandContext";

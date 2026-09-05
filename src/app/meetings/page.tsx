@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Leftover bookmarkable Meetings list. Not in primary nav.
+ * Compatibility read of stored meetings / Meeting.prep. Not the product
+ * meeting surface — that is meeting-scoped Catch Me Up on the project.
+ */
 import Link from "next/link";
 import { PageHeader, Panel } from "@/components/DashboardChrome";
 import { formatWhen } from "@/lib/selectors";

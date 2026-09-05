@@ -7,7 +7,6 @@ import {
 } from "@/components/knowledge-centre/MeetingCatchUp";
 import { KnowledgeItemDetailDrawer } from "@/components/knowledge-centre/KnowledgeItemDetailDrawer";
 import { KnowledgeTagFilter } from "@/components/knowledge-centre/KnowledgeTagFilter";
-import { MeetingPrepFrame } from "@/components/frames/MeetingPrepFrame";
 import { TimelineFrame } from "@/components/frames/TimelineFrame";
 import {
   knowledgeDetailEquals,
@@ -28,7 +27,6 @@ import {
   type KcKnowledgeSubtype,
 } from "@/lib/knowledge-centre/four-bucket";
 import { useMission } from "@/lib/store";
-import { buildMeetingPrepItems } from "@/lib/workspace/frames-data";
 import "./kc-four-bucket.css";
 import "./kc-meeting-catch-up.css";
 
@@ -200,11 +198,6 @@ export function OceanKnowledgeFrames({
         .map((row) => row.tagId),
     );
   }, [state.itemTags, projectId]);
-
-  const meetingItems = useMemo(
-    () => buildMeetingPrepItems(state, projectId),
-    [state, projectId],
-  );
 
   const select = (ref: KnowledgeItemRef) => {
     setSelected((prev) => (knowledgeDetailEquals(prev, ref) ? null : ref));
@@ -425,15 +418,6 @@ export function OceanKnowledgeFrames({
               size="tall"
               onMeetingPrep={setCatchUpId}
             />
-          </div>
-        </div>
-      ) : null}
-
-      {bucket === "all" && meetingItems.length ? (
-        <div className="kc-feature" data-testid="ocean-frame-meeting-prep">
-          <p className="kc-feature-label">Meeting Prep</p>
-          <div className="kc-feature-body ocean-embed-frame">
-            <MeetingPrepFrame projectId={projectId} size="compact" />
           </div>
         </div>
       ) : null}

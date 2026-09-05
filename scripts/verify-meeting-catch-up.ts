@@ -96,7 +96,7 @@ check("existing Catch Me Up machinery is reused without a new AI route", () => {
   );
   assert.match(frames, /NextMeetingCue/);
   assert.match(frames, /MeetingCatchUpPanel/);
-  assert.match(frames, /MeetingPrepFrame/);
+  assert.doesNotMatch(frames, /MeetingPrepFrame/);
   assert.match(frames, /TimelineFrame/);
 });
 

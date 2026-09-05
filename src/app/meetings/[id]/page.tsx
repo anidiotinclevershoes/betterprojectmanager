@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Leftover bookmarkable Meeting Prep detail. Not in primary nav.
+ * Reads historical Meeting.prep. Does not write. Do not treat as Catch Me Up.
+ */
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { PageHeader, Panel } from "@/components/DashboardChrome";

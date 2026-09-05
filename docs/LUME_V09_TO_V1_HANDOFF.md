@@ -66,8 +66,8 @@ Top-level project modes:
 | **Ask Lume** | Authenticated server-loaded canonical truth. Client-posted MissionState is ignored. |
 | **Catch Me Up** | AI read-only briefing from authoritative server truth: where we are / attention / missed / noticed connections. Distinguishes known vs inferred. No mutation, no vector DB, no new memory store. |
 | **New Project** | Four-frame compose on current `/api/new-project` (shared Capture extract). Organise notes is fail-closed. Needs You for uncertainty. No voice. Tags are metadata-only. |
-| **Timeline** | Read-only projection of dated authoritative truth on `main`. Legacy writable Gantt still coexists. Do not add a second schedule store. |
-| **Meeting Catch Me Up** | Meeting-scoped deterministic brief from stored project truth, not generic advice. Project Catch Me Up mode stays. Stored `Meeting.prep` rows are kept. |
+| **Timeline** | Read-only projection of dated authoritative truth on `main`. Legacy writable Gantt write surface is unmounted from production Timeline (data/schema retained). Do not add a second schedule store. See §3. |
+| **Meeting Catch Me Up** | Meeting-scoped deterministic brief from stored project truth, not generic advice. Project Catch Me Up mode stays. Stored `Meeting.prep` hydrates for compatibility and must not drive the brief or Capture context. |
 | **Coach** | Hidden. Not a mode. Drawer unmounted. `/coaching` leftover route only. |
 | **Advise** | Disabled / coming soon. |
 | **Persistence** | Durable authority is **Supabase**. Production does not use localStorage as truth. In-memory/cache is UI only. Appearance/sidebar prefs may be local. |
@@ -107,14 +107,120 @@ Client MissionState is **not** Capture Apply authority.
 
 Project isolation inside a workspace is **application-layer** (RLS is workspace-wide). Cross-account isolation is RLS + server project membership checks.
 
+### 3.1 Standing rule — actions create canonical truth first
+
+This is a **Lume-wide** rule, not a Timeline-only rule. Future agents must read it before adding interactive surfaces.
+
+> **Actions must create or update canonical project truth based on the currently established architecture and contracts, then re-project that truth into the relevant product surfaces. Actions must never create their own parallel or feature-specific truth.**
+
+This applies regardless of where the action originates (Timeline, Knowledge Centre, Review, New Project, Meeting Catch Me Up, Advise, a future Gantt, or any later surface). The initiating surface must not become its own data authority.
+
+Required flow:
+
+```text
+User action in a product surface
+  → existing canonical write / domain contract
+  → authoritative project truth changes
+  → all projections re-read / re-project that truth
+```
+
+Forbidden flow:
+
+```text
+User action in a product surface
+  → special surface-specific record/store
+  → separate competing truth
+```
+
+Use the **then-current** established canonical architecture. Do not hard-code future features to today’s exact tables, helpers, or apply path if that architecture later evolves. The invariant is: *use the then-current established canonical architecture rather than inventing a parallel truth path.*
+
+A new surface is a view, workflow, or entry point into canonical truth **unless** an explicit architecture decision establishes a new canonical domain model. New UX must not automatically imply new storage.
+
+If a requested item does not map safely to an existing canonical domain, use Review / Needs You / the then-current canonical creation workflow. Do not invent a feature-specific type merely because the click started in that feature.
+
+### 3.2 Timeline is a projection
+
+> **Timeline is a projection of authoritative dated project truth, not an independent source of truth.**
+
+It may display meetings, deadlines/milestones, dated To Dos, person availability/away dates, dated Knowledge, and other future *canonical* dated project items.
+
+Timeline-specific storage must not compete with the authoritative project-truth spine. This is a concrete application of §3.1.
+
+**Future Timeline Add** may exist as UX. Add must not create a special timeline-only item.
+
+```text
+Timeline Add
+  → create/update the appropriate canonical project record
+    through the then-current canonical truth/write contracts
+  → authoritative project truth changes
+  → Timeline re-projects that new truth
+```
+
+Examples: Add meeting → a real Meeting; Add milestone/deadline → the appropriate canonical dated item; Add dated To Do → a real To Do with its date; Add person away → authoritative person availability; Add dated Knowledge → authoritative Knowledge.
+
+Do **not** create a generic `timeline_item` merely because the interaction began inside Timeline, unless that type has itself become part of the canonical domain architecture through a separate product/architecture decision.
+
+### 3.3 Legacy writable Gantt — retire the surface, not the data
+
+The legacy writable Gantt is **retired from the intended product experience**. The production Timeline embed no longer mounts `ProjectTimelineGantt` and the leftover Add form cannot write.
+
+This is **not** “delete the old Gantt.”
+
+- do **not** delete underlying records, schema, helpers, or shared date functionality merely because the UI is retired;
+- `state.timeline` / `persistTimelineItem` remain **shared infrastructure** used by Capture Apply and the modern Timeline projection;
+- preserve existing legacy Gantt / `timeline` rows until a later explicit cleanup/migration proves it is safe to remove.
+
+A future cleanup may remove dead Gantt code/data **only** when proven unused and safe. That is a separate task after dependency/data analysis.
+
+### 3.4 Future Gantt / planning surfaces
+
+If Lume later gets a richer Gantt or planning experience, it must:
+
+- derive from the **same** authoritative dated truth used by Timeline; or
+- use a dedicated creation/editing wizard that writes canonical project records through the then-current canonical architecture.
+
+It must **not** resurrect the legacy model where Gantt maintains an independent schedule/truth store.
+
+```text
+Gantt action → canonical project truth → Gantt and other surfaces re-project
+```
+
+Never: `Gantt action → Gantt-owned truth`.
+
+### 3.5 Same rule on other surfaces
+
+Not limited to dates.
+
+| Surface | Required | Forbidden |
+| --- | --- | --- |
+| Knowledge Centre | KC action → canonical domain mutation → KC re-projects | KC-owned copies of project records |
+| Meeting Catch Me Up | Meeting action → canonical project truth → brief re-projects | Meeting-brief-owned truth |
+| Advise | Suggestion/action → normal Review / canonical write path → truth changes → surfaces refresh | Advise private truth, or bypassing Review |
+| New Project / Review | Already on the Capture / compose / Apply contracts | A second compose or review store |
+| Any future surface | View, workflow, or entry point into canonical truth | New storage implied by new UX |
+
+### 3.6 Compatibility-only leftovers (do not treat as product contracts)
+
+| Leftover | Classification | Why it remains |
+| --- | --- | --- |
+| `Meeting.prep` column / hydrate / seed | COMPATIBILITY-ONLY | Historical meetings still load. Do not use as Catch Me Up or Capture advice. Do not migrate/delete in this slice. |
+| `updateMeeting` in `store.tsx` | COMPATIBILITY-ONLY | Memory-only leftover mutator. Production Meeting Prep editor no longer calls it. |
+| `MeetingPrepFrame` / `MeetingBriefModal` | Leftover UI | Unmounted from Knowledge Centre. Writes disabled. |
+| `/meetings`, `/meetings/[id]` | Leftover routes | Not in primary nav. Read leftover stored prep. Same class as `/coaching`. |
+| `ProjectTimelineGantt` | Leftover UI | Unmounted from production Timeline. Add form removed. Stored rows untouched. |
+| `WorkspaceGrid` / `ProjectWidgetGrid` | INERT | Not mounted by the current project page. |
+| `NewProjectCategorisation` | INERT | Current New Project is four-frame compose. File kept; not imported by `NewProjectExperience`. |
+| `/api/new-project` `sourceMode: "talk"` | COMPATIBILITY-ONLY label | Organise-only. Does not persist a project. Current UI sends `paste` / creates with `compose`. |
+
 ---
 
 ## 4. What is parked / hidden
 
 | Item | Status | Do not |
 | --- | --- | --- |
-| Advise | Coming soon | Build it during alpha |
+| Advise | Coming soon | Build it during alpha; do not give it a private truth model (§3.1) |
 | Coach | Hidden | Redesign or auto-open |
+| Legacy writable Gantt | **Retired from intended UX.** Unmounted from production Timeline. Do not delete records/schema/helpers until proven unused (§3.3) | Treat leftover Gantt UI as product; delete Gantt data to “clean up” |
 | Stripe / landing / pricing | Not required for closed alpha | Treat Legal Eagle PR #88 as current production — it was **not** the v0.9 merge |
 | Portfolio | Not required for V1 unless evidence changes | Build a home dashboard |
 | File upload | `addFileName` exists, **no caller** | Promise upload for V1 |
@@ -268,7 +374,7 @@ Ship to trusted testers. Watch the questions in §7.
 | Account deletion | No whole-account delete exists |
 | Export (user/project) | No export exists |
 | Terms / Privacy | Deliberately deferred for trusted alpha; required for public/commercial |
-| Meeting Prep persist **or** remove misleading edit | `updateMeeting` is memory-only; hydrate reads durable meetings |
+| Meeting Prep persist **or** remove leftover `/meetings` | Production KC no longer edits stored prep. `updateMeeting` is still memory-only. Leftover `/meetings` routes remain. |
 | Entitlement after trial / Stripe when charging | Trial is 90 days; Stripe not configured; local “50 actions left” is not billing (D-024) |
 | Hide leftover `/memory` `/coaching` `/releases` if testers find them | Confusion, not a repo-deletion programme |
 | Basic ops: call `assertProductionConfigOrThrow` at boot; payload cap on Capture; don’t log row text in `error.message` | Small boring hardening |
@@ -322,7 +428,7 @@ Landing, pricing, onboarding, Stripe — only to the level needed to acquire use
 
 | Class | Documents |
 | --- | --- |
-| **CURRENT AUTHORITATIVE** | This file; `docs/v1-reference-pack/`; `docs/LUME_V1_KNOWN_DISCOVERIES.md` (open vs resolved); `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` **except** stale Part A flag tables — **code wins** |
+| **CURRENT AUTHORITATIVE** | This file (including **§3.1–§3.5** for canonical actions / Timeline / Gantt, and **§3.6** leftover inventory); `docs/v1-reference-pack/`; `docs/LUME_V1_KNOWN_DISCOVERIES.md` (open vs resolved); `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` **except** stale Part A flag tables — **code wins** |
 | **HISTORICAL — KEEP** | `docs/SLICE*`, `docs/PHASE*`, `docs/current-state/`, `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md`, `docs/v1-convergence-mp/` (UX reference, not an implementation licence) |
 | **SUPERSEDED — keep, do not follow** | `docs/EXPERIMENTAL_PROGRAMME.md` (Capture V2 is no longer experimental); qualification “Stage 2 blocked” text (updated); root README Mission Control copy |
 | **DEAD / MISLEADING if treated as current** | Any claim that `LUME_CAPTURE_V2` selects engines; Coach auto-opens; Catch Me Up does not exist / is search; production localStorage is truth; v0.9 is an unfinished Phase 3 programme |
@@ -352,7 +458,7 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | D-041 account deletion | No whole-account delete | V1 MUST | Repo audit 28 Aug | Settings delete before public |
 | D-042 export | No user/project export | V1 MUST | Repo audit 28 Aug | Bundle dump; legal can demote to high SHOULD |
 | D-044 Terms/Privacy | Deferred for trusted alpha | V1 MUST | PR #88 not in #95 | Public/commercial launch |
-| D-043 Meeting Prep persist | `updateMeeting` memory-only | V1 MUST | `store.tsx` ~1249 | Persist **or** remove `/meetings` mutation |
+| D-043 Meeting Prep persist | Production KC no longer writes prep. `updateMeeting` still memory-only. Leftover `/meetings` remain | ACCEPTED v0.9 / leftover | `store.tsx`; leftover `/meetings` | Hide leftover routes if testers find them; do not persist prep as a product feature |
 | Entitlement/Stripe | 90-day trial live; Stripe not required | V1 MUST when charging | Live Account A trial 11/26/2026 | D-024 local meter is not billing |
 | D-037 Ready vs Apply | Ready only when Apply can plan that write | **CLOSED** | PR #126 / `main` `64171cd` | Do not weaken the contract |
 | D-038 Todo delete Knowledge remnant | Todo stays deleted; fact can remain | V1 SHOULD | Production smoke | Retire linked fact by id |
