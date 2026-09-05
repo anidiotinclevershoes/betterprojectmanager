@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  MeetingCatchUpPanel,
+  NextMeetingCue,
+} from "@/components/knowledge-centre/MeetingCatchUp";
 import { KnowledgeItemDetailDrawer } from "@/components/knowledge-centre/KnowledgeItemDetailDrawer";
 import { KnowledgeTagFilter } from "@/components/knowledge-centre/KnowledgeTagFilter";
 import { MeetingPrepFrame } from "@/components/frames/MeetingPrepFrame";
@@ -26,6 +30,7 @@ import {
 import { useMission } from "@/lib/store";
 import { buildMeetingPrepItems } from "@/lib/workspace/frames-data";
 import "./kc-four-bucket.css";
+import "./kc-meeting-catch-up.css";
 
 const ALL_PREVIEW = 6;
 
@@ -151,6 +156,7 @@ export function OceanKnowledgeFrames({
   const [tagFilter, setTagFilter] = useState<string[]>([]);
   const [bucket, setBucket] = useState<KcBucket>("all");
   const [subtype, setSubtype] = useState<KcKnowledgeSubtype>("all");
+  const [catchUpId, setCatchUpId] = useState<string | null>(null);
 
   // Keep these symbols in this module — item-detail / people UI contracts.
   void refForTodo;
@@ -229,6 +235,16 @@ export function OceanKnowledgeFrames({
           );
         })}
       </nav>
+
+      <NextMeetingCue projectId={projectId} onOpen={setCatchUpId} />
+
+      {catchUpId ? (
+        <MeetingCatchUpPanel
+          projectId={projectId}
+          meetingId={catchUpId}
+          onClose={() => setCatchUpId(null)}
+        />
+      ) : null}
 
       <KnowledgeTagFilter
         projectId={projectId}
@@ -318,7 +334,11 @@ export function OceanKnowledgeFrames({
         <div className="kc-feature" data-testid="ocean-frame-timeline">
           <p className="kc-feature-label">Timeline</p>
           <div className="kc-feature-body ocean-embed-frame">
-            <TimelineFrame projectId={projectId} size="tall" />
+            <TimelineFrame
+              projectId={projectId}
+              size="tall"
+              onMeetingPrep={setCatchUpId}
+            />
           </div>
         </div>
       ) : null}
