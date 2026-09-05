@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ProjectTimelineGantt } from "@/components/ProjectTimelineGantt";
+import { KcTimeline } from "@/components/knowledge-centre/KcTimeline";
 import { useMission } from "@/lib/store";
 
 export function TimelineFrame({
@@ -18,6 +19,7 @@ export function TimelineFrame({
   if (projectId) {
     return (
       <div className="frame-body timeline-frame">
+        <KcTimeline projectId={projectId} />
         <ProjectTimelineGantt projectId={projectId} />
       </div>
     );
