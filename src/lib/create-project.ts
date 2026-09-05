@@ -17,6 +17,8 @@ export type SetupTodoDraft = {
   kind?: TodoKind;
   waitingOn?: string;
   needsReview?: boolean;
+  /** Retrieval metadata only. Never copied onto the To Do truth fields. */
+  tags?: string[];
 };
 
 export type SetupDateDraft = {
@@ -24,6 +26,7 @@ export type SetupDateDraft = {
   label: string;
   date?: string;
   needsReview?: boolean;
+  tags?: string[];
 };
 
 export type SetupStakeholderDraft = {
@@ -33,12 +36,14 @@ export type SetupStakeholderDraft = {
   concerns?: string[];
   preferences?: string[];
   needsReview?: boolean;
+  tags?: string[];
 };
 
 export type SetupRiskDraft = {
   clientKey?: string;
   title: string;
   needsReview?: boolean;
+  tags?: string[];
 };
 
 export type SetupKnowledgeDraft = {
@@ -46,6 +51,7 @@ export type SetupKnowledgeDraft = {
   text: string;
   /** When false, excluded from create. Default true. */
   remember?: boolean;
+  tags?: string[];
 };
 
 export function newSetupClientKey() {

@@ -19,6 +19,7 @@ import type {
 } from "@/lib/types";
 import { emptyKnowledge } from "@/lib/knowledge";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
+import { isTagTargetKind, type ItemTag, type ProjectTag } from "@/lib/tags";
 
 export type LoadedWorkspace = {
   workspaceId: string;
@@ -39,6 +40,8 @@ function emptyMissionState(): MissionState {
     timeline: [],
     history: [],
     analysesThisMonth: 0,
+    projectTags: [],
+    itemTags: [],
   };
 }
 
@@ -338,6 +341,8 @@ export async function loadMissionStateFromSupabase(
     source: row.source ?? undefined,
   }));
 
+  const { projectTags, itemTags } = await loadRetrievalTags(client, workspaceId);
+
   const state: MissionState = {
     ...emptyMissionState(),
     projects,
@@ -350,9 +355,63 @@ export async function loadMissionStateFromSupabase(
     meetings,
     releases,
     history,
+    projectTags,
+    itemTags,
   };
 
   return { workspaceId, userId: user.id, state };
+}
+
+async function loadRetrievalTags(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  workspaceId: string,
+): Promise<{ projectTags: ProjectTag[]; itemTags: ItemTag[] }> {
+  const [projectRes, itemRes] = await Promise.all([
+    client.from("project_tags").select("*").eq("workspace_id", workspaceId),
+    client.from("item_tags").select("*").eq("workspace_id", workspaceId),
+  ]);
+  const missing =
+    isMissingRelation(projectRes.error) || isMissingRelation(itemRes.error);
+  if (missing) {
+    return { projectTags: [], itemTags: [] };
+  }
+  if (projectRes.error) {
+    throw new Error(`[supabase] load project tags: ${projectRes.error.message}`);
+  }
+  if (itemRes.error) {
+    throw new Error(`[supabase] load item tags: ${itemRes.error.message}`);
+  }
+  const projectTags: ProjectTag[] = (projectRes.data ?? []).map((row) => ({
+    id: String(row.id),
+    projectId: String(row.project_id),
+    name: String(row.name),
+    slug: String(row.slug),
+    origin: row.origin === "predefined" ? "predefined" : "custom",
+  }));
+  const itemTags: ItemTag[] = [];
+  for (const row of itemRes.data ?? []) {
+    if (!isTagTargetKind(row.target_kind)) continue;
+    itemTags.push({
+      id: String(row.id),
+      projectId: String(row.project_id),
+      tagId: String(row.tag_id),
+      targetKind: row.target_kind,
+      targetId: String(row.target_id),
+    });
+  }
+  return { projectTags, itemTags };
+}
+
+function isMissingRelation(error: { message?: string; code?: string } | null): boolean {
+  if (!error) return false;
+  const message = `${error.code ?? ""} ${error.message ?? ""}`.toLowerCase();
+  return (
+    message.includes("does not exist") ||
+    message.includes("could not find the table") ||
+    error.code === "42P01" ||
+    error.code === "PGRST205"
+  );
 }
 
 export { emptyMissionState, isoToDateOnly, dateToIsoDay };

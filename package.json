@@ -83,6 +83,7 @@
     "verify:new-project-v2": "npx --yes tsx scripts/verify-new-project-v2.ts",
     "verify:first-run-journey": "npx --yes tsx scripts/verify-first-run-journey.ts",
     "verify:desert-theme": "npx --yes tsx scripts/verify-desert-theme.ts",
+    "verify:project-tags": "npx --yes tsx scripts/verify-project-tags.ts",
     "git:preflight": "npx --yes tsx scripts/git-preflight.ts",
     "verify:git-preflight": "npx --yes tsx scripts/verify-git-preflight.ts",
     "typecheck": "tsc --noEmit",
