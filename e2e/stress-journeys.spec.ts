@@ -130,7 +130,7 @@ async function mockStackedCapture(page: Page, projectId: string, steps: SliceSte
 test.describe("Harbourline deep stress slices", () => {
   test.describe.configure({ timeout: 180_000 });
 
-  test("Deep Project Creation — Talk → categorise → create → reload", async ({
+  test("Deep Project Creation — paste → organise → create → reload", async ({
     page,
   }, testInfo) => {
     const payload = loadSupport("new-project-payload") as {
@@ -160,20 +160,23 @@ test.describe("Harbourline deep stress slices", () => {
     });
 
     await page.goto("/projects/new");
-    await page.getByRole("button", { name: "Talk it through" }).click();
-    await page.locator("label.field.np-transcript-field textarea").fill(payload.narrative);
-    await page.getByRole("button", { name: "Build My Project" }).click();
-    await expect(page.getByTestId("np-v2-categorise")).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText("Miriam Cole is programme sponsor")).toBeVisible();
-    // Shared Capture extract does not invent name/Objective. The user types the
-    // evidenced name; Approve stays disabled until that field is filled.
-    await expect(page.getByLabel("Objective")).toHaveValue("");
-    await expect(page.getByTestId("np-v2-approve-categorisation")).toBeDisabled();
-    await page.getByLabel("Project name").fill("Harbourline Civic Archive Refresh");
-    await expect(page.getByTestId("np-v2-approve-categorisation")).toBeEnabled();
-    await page.getByTestId("np-v2-approve-categorisation").click();
-    await page.getByRole("button", { name: "Create Project" }).click();
-    await expect(page.getByRole("heading", { name: /Harbourline Civic Archive Refresh/i })).toBeVisible({
+    await page.getByText("Organise notes", { exact: true }).click();
+    await page.getByTestId("np-organise-notes").fill(payload.narrative);
+    await page.getByTestId("np-organise").click();
+    await expect(page.getByTestId("np-frame-people").getByText("Miriam Cole")).toBeVisible({
+      timeout: 20_000,
+    });
+    // Shared Capture extract does not invent Objective. The user types the
+    // evidenced name before create.
+    await expect(page.getByTestId("np-summary")).toHaveValue("");
+    await page.getByTestId("np-name").fill("Harbourline Civic Archive Refresh");
+    await page.getByTestId("np-create").click();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: /Harbourline Civic Archive Refresh/i,
+      }),
+    ).toBeVisible({
       timeout: 20_000,
     });
     await openKnowledgeCentre(page);
@@ -182,7 +185,12 @@ test.describe("Harbourline deep stress slices", () => {
     await expect(page.getByText(/cinnamon bun/i)).toHaveCount(0);
     const before = await readMissionState(page);
     await page.reload();
-    await expect(page.getByRole("heading", { name: /Harbourline Civic Archive Refresh/i })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: /Harbourline Civic Archive Refresh/i,
+      }),
+    ).toBeVisible();
     await openKnowledgeCentre(page);
     await expect(page.getByTestId("ocean-frame-people").getByText("Miriam Cole")).toBeVisible();
     await page.goto(`/projects/${CANDYLAND_ID}`);
