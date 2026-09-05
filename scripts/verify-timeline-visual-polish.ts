@@ -401,7 +401,7 @@ check("read-only Timeline mounts additively without replacing writable Gantt", (
   const frame = readFileSync(join(ROOT, "src/components/frames/TimelineFrame.tsx"), "utf8");
   assert.match(frame, /KcTimeline/);
   assert.match(frame, /ProjectTimelineGantt/);
-  assert.doesNotMatch(frame, /onMeetingPrep/);
+  assert.match(frame, /onMeetingPrep/);
   const shell = readFileSync(
     join(ROOT, "src/components/knowledge-centre/OceanKnowledgeFrames.tsx"),
     "utf8",
@@ -412,12 +412,15 @@ check("read-only Timeline mounts additively without replacing writable Gantt", (
   assert.match(shell, /composeKnowledgeCentreItems/);
 });
 
-check("this pass does not land Meeting Catch Me Up", () => {
-  assert.equal(existsSync(join(ROOT, "src/lib/knowledge-centre/meeting-catch-up.ts")), false);
-  assert.equal(
-    existsSync(join(ROOT, "src/components/knowledge-centre/MeetingCatchUp.tsx")),
-    false,
+check("meeting Catch Me Up is additive and Timeline stays an embed", () => {
+  assert.equal(existsSync(join(ROOT, "src/lib/knowledge-centre/meeting-catch-up.ts")), true);
+  const frames = readFileSync(
+    join(ROOT, "src/components/knowledge-centre/OceanKnowledgeFrames.tsx"),
+    "utf8",
   );
+  assert.match(frames, /TimelineFrame/);
+  assert.match(frames, /MeetingPrepFrame/);
+  assert.match(frames, /MeetingCatchUpPanel/);
 });
 
 check("when-questions use natural language labels only", () => {

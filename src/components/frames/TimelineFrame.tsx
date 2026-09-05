@@ -8,18 +8,20 @@ import { useMission } from "@/lib/store";
 export function TimelineFrame({
   projectId,
   snapshot = false,
+  onMeetingPrep,
 }: {
   projectId?: string | null;
   snapshot?: boolean;
   size?: string;
   frameId?: string;
+  onMeetingPrep?: (meetingId: string) => void;
 }) {
   const { state } = useMission();
 
   if (projectId) {
     return (
       <div className="frame-body timeline-frame">
-        <KcTimeline projectId={projectId} />
+        <KcTimeline projectId={projectId} onMeetingPrep={onMeetingPrep} />
         <ProjectTimelineGantt projectId={projectId} />
       </div>
     );
