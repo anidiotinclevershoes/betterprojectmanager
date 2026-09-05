@@ -33,6 +33,8 @@ export type SetupStakeholderDraft = {
   clientKey?: string;
   name: string;
   role?: string;
+  /** Multiple concurrent responsibilities. Not a single-role taxonomy. */
+  responsibilities?: string[];
   concerns?: string[];
   preferences?: string[];
   needsReview?: boolean;
@@ -51,6 +53,9 @@ export type SetupKnowledgeDraft = {
   text: string;
   /** When false, excluded from create. Default true. */
   remember?: boolean;
+  kind?: "fact" | "decision" | "date" | "context";
+  needsReview?: boolean;
+  needsYouQuestion?: string;
   tags?: string[];
 };
 
@@ -87,7 +92,7 @@ export type CreateProjectInput = {
   notMentioned?: string[];
   /** Original Talk/Paste source for history. */
   sourceNarrative?: string;
-  sourceMode?: "talk" | "paste" | "blank" | "interview";
+  sourceMode?: "talk" | "paste" | "blank" | "interview" | "compose";
   /**
    * Client-generated UUID for this create attempt (retry/idempotency only).
    * Not a product field — ignored by `buildNewProject`.
@@ -105,6 +110,30 @@ export type BuiltProjectBundle = {
 
 function id(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+export const PROJECT_CODE_TAKEN_PREFIX = "Project code already exists";
+
+export function normaliseProjectCode(code: string) {
+  return code.trim().toUpperCase().slice(0, 12);
+}
+
+/** Workspace-scoped uniqueness. Names are not required to be unique. */
+export function isProjectCodeTaken(
+  existingCodes: Array<{ id?: string; code: string }>,
+  code: string,
+  excludeId?: string,
+) {
+  const wanted = normaliseProjectCode(code).toLowerCase();
+  if (!wanted) return false;
+  return existingCodes.some((row) => {
+    if (excludeId && row.id && row.id === excludeId) return false;
+    return row.code.trim().toLowerCase() === wanted;
+  });
+}
+
+export function projectCodeTakenMessage(code: string) {
+  return `${PROJECT_CODE_TAKEN_PREFIX}: ${normaliseProjectCode(code)}. Choose a different code.`;
 }
 
 export function suggestCode(name: string) {
@@ -164,17 +193,24 @@ export function includedItemCount(draft: CreateProjectInput) {
   );
 }
 
+function isSparseSetup(mode: CreateProjectInput["sourceMode"]) {
+  return mode === "blank" || mode === "compose";
+}
+
 export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
   const name = input.name.trim();
-  const code = (input.code.trim() || suggestCode(name)).toUpperCase();
+  const code = normaliseProjectCode(input.code.trim() || suggestCode(name));
   const projectId = id("proj");
   const now = new Date().toISOString();
+  const sparse = isSparseSetup(input.sourceMode);
 
   const stakeholders: Stakeholder[] = (input.stakeholders ?? [])
     .map((s) => ({
       id: id("st"),
       name: s.name.trim(),
-      role: (s.role ?? "Stakeholder").trim() || "Stakeholder",
+      role: sparse
+        ? (s.role ?? "").trim()
+        : (s.role ?? "Stakeholder").trim() || "Stakeholder",
       concerns: s.concerns?.map((c) => c.trim()).filter(Boolean),
       preferences: s.preferences?.map((p) => p.trim()).filter(Boolean),
     }))
@@ -206,11 +242,13 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
   };
 
   const rememberBullets = (input.knowledgeRemember ?? [])
-    .filter((k) => k.remember !== false && k.text.trim())
+    .filter((k) => k.remember !== false && k.text.trim() && !k.needsReview)
     .map((k) => k.text.trim());
 
   const riskTitles = [
-    ...(input.risks ?? []).map((r) => r.title.trim()).filter(Boolean),
+    ...(input.risks ?? [])
+      .filter((r) => r.title.trim() && !r.needsReview)
+      .map((r) => r.title.trim()),
     ...(input.knowledgeRisks ?? []),
   ];
 
@@ -249,7 +287,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     });
   };
 
-  if (!stakeholders.length && input.sourceMode !== "blank") {
+  if (!stakeholders.length && !sparse) {
     pushRec({
       kind: "stakeholder_update",
       urgency: "this_week",
@@ -262,7 +300,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     });
   }
 
-  if (!project.nextMilestone && input.sourceMode !== "blank") {
+  if (!project.nextMilestone && !sparse) {
     pushRec({
       kind: "decision",
       urgency: "today",
@@ -274,7 +312,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     });
   }
 
-  if (!knowledge.sections.risks.length && input.sourceMode !== "blank") {
+  if (!knowledge.sections.risks.length && !sparse) {
     pushRec({
       kind: "risk",
       urgency: "this_week",
@@ -286,7 +324,9 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     });
   }
 
-  const draftTodos = (input.todos ?? []).filter((t) => t.title.trim());
+  const draftTodos = (input.todos ?? []).filter(
+    (t) => t.title.trim() && !t.needsReview,
+  );
   const todos: TodoItem[] =
     draftTodos.length > 0
       ? draftTodos.map((t) => ({
@@ -299,7 +339,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
           kind: t.kind ?? "ACTION",
           waitingOn: t.waitingOn,
         }))
-      : input.sourceMode === "blank"
+      : sparse
         ? []
         : [
             {

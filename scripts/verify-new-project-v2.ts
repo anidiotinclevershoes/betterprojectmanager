@@ -354,25 +354,22 @@ function main() {
     const exp = readSrc("src/components/onboarding/NewProjectExperience.tsx");
     assert.doesNotMatch(exp, /assembleFromNarrative/);
     assert.doesNotMatch(exp, /Showing a local draft instead/);
-    const analyse = exp.slice(exp.indexOf("async function analyseNarrative"));
-    const analyseBody = analyse.slice(0, analyse.indexOf("function cancelBuild"));
-    assert.doesNotMatch(analyseBody, /setPath\("review"\)/);
-    assert.doesNotMatch(analyseBody, /setCreateUnlocked\(true\)/);
-    assert.match(analyseBody, /Nothing was created/);
+    const organise = exp.slice(exp.indexOf("async function organiseNotes"));
+    const organiseBody = organise.slice(0, organise.indexOf("function onCreate"));
+    assert.doesNotMatch(organiseBody, /createProject\(/);
+    assert.doesNotMatch(organiseBody, /setSuccess\(/);
+    assert.match(organiseBody, /Nothing was created/);
   });
 
-  check("approval cannot be skipped in the Talk V2 UI", () => {
+  check("compose uses shared extract and keeps Needs You on organised drafts", () => {
     const ui = readSrc("src/components/onboarding/NewProjectExperience.tsx");
-    assert.match(ui, /categorisationApproved/);
-    assert.match(ui, /createUnlocked/);
-    assert.match(ui, /setCreateUnlocked\(false\)/);
-    assert.match(ui, /if \(!createUnlocked\)/);
-    assert.match(ui, /Approve the categorisation map before creating/);
-    const cat = readSrc(
-      "src/components/onboarding/NewProjectCategorisation.tsx",
-    );
-    assert.match(cat, /np-v2-approve-categorisation/);
-    assert.match(cat, /not maintained project truth/);
+    assert.match(ui, /mergeOrganisedDraft/);
+    assert.match(ui, /needsYouFromDraft/);
+    assert.match(ui, /\/api\/new-project/);
+    assert.doesNotMatch(ui, /Talk It Through/);
+    const map = readSrc("src/lib/new-project-v2/map.ts");
+    assert.match(map, /needsReview/);
+    assert.match(map, /reviewSafetyGap/);
   });
 
   console.log("verify-new-project-v2: OK");
