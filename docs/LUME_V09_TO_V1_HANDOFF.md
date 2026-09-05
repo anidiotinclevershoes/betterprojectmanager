@@ -62,12 +62,12 @@ Top-level project modes:
 | **Capture** | Sole live Analyse → Review → Apply engine is **Capture V2**. Model: `gpt-4o-mini-2024-07-18` only. Engine frozen. `LUME_CAPTURE_V2` **cannot** restore legacy Capture (`isCaptureV2Enabled()` always returns true). |
 | **Review / Needs-you** | Nothing durable is written until approve. Needs-you is success for difficult/ambiguous cases. **Ready means the same production Apply path can execute that reviewed change** (PR #126). Apply still revalidates at write time. Client overrides cannot manufacture Ready. |
 | **Annotated transcript** | Uses existing Capture evidence. Matching is exact / case-normalised only. Unmatched evidence stays unhighlighted. No second model/parser. |
-| **Knowledge Centre** | v8 hierarchy: To Dos and Risks prominent; Current position below; secondary frames; inspector overlay; structured-domain precedence (D-030). |
+| **Knowledge Centre** | Four retrieval buckets on `main` (All / Issues / People / To Do / Knowledge). Search stays `searchAuthoritativeProject`. Intelligence strip and Catch Me Up mode remain. D-030 row builders still feed search. |
 | **Ask Lume** | Authenticated server-loaded canonical truth. Client-posted MissionState is ignored. |
 | **Catch Me Up** | AI read-only briefing from authoritative server truth: where we are / attention / missed / noticed connections. Distinguishes known vs inferred. No mutation, no vector DB, no new memory store. |
-| **New Project** | On `main` today: Talk It Through (recommended) or Start Blank, New Project V2 when `LUME_NEW_PROJECT_V2` is on. Four-frame compose + retrieval tags are being ported from #119 onto `main` — do not merge the desert branch. |
-| **Timeline** | Target: read-only projection of dated authoritative truth. Legacy writable Gantt may still exist until deprecated. Do not add a second schedule store. |
-| **Meeting Catch Me Up** | Target: meeting-scoped brief from stored project truth, not generic advice. Project Catch Me Up mode stays. Do not delete stored meeting-prep rows to simplify UI. |
+| **New Project** | Four-frame compose on current `/api/new-project` (shared Capture extract). Organise notes is fail-closed. Needs You for uncertainty. No voice. Tags are metadata-only. |
+| **Timeline** | Read-only projection of dated authoritative truth on `main`. Legacy writable Gantt still coexists. Do not add a second schedule store. |
+| **Meeting Catch Me Up** | Meeting-scoped deterministic brief from stored project truth, not generic advice. Project Catch Me Up mode stays. Stored `Meeting.prep` rows are kept. |
 | **Coach** | Hidden. Not a mode. Drawer unmounted. `/coaching` leftover route only. |
 | **Advise** | Disabled / coming soon. |
 | **Persistence** | Durable authority is **Supabase**. Production does not use localStorage as truth. In-memory/cache is UI only. Appearance/sidebar prefs may be local. |

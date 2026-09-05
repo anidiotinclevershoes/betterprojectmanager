@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isOpenAIConfigured, transcribeWithWhisper } from "@/lib/openai";
 import { requireAiCaller } from "@/lib/ai-gate";
 import { serverLog } from "@/lib/server-log";
+import { transcribeAudioRejection } from "@/lib/transcribe-guard";
 
 export const runtime = "nodejs";
 
@@ -33,6 +34,15 @@ export async function POST(request: Request) {
       "name" in audio && typeof audio.name === "string" && audio.name
         ? audio.name
         : "capture.webm";
+
+    const rejection = transcribeAudioRejection({
+      size: typeof audio.size === "number" ? audio.size : 0,
+      type: "type" in audio && typeof audio.type === "string" ? audio.type : undefined,
+      name: filename,
+    });
+    if (rejection) {
+      return NextResponse.json({ error: rejection }, { status: 400 });
+    }
 
     const text = await transcribeWithWhisper(audio, filename);
     return NextResponse.json({ text, provider: "openai-whisper" });
