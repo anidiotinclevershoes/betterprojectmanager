@@ -206,7 +206,7 @@ Not limited to dates.
 | `Meeting.prep` column / hydrate / seed | COMPATIBILITY-ONLY | Historical meetings still load. Do not use as Catch Me Up or Capture advice. Do not migrate/delete in this slice. |
 | `updateMeeting` in `store.tsx` | COMPATIBILITY-ONLY | Memory-only leftover mutator. Production Meeting Prep editor no longer calls it. |
 | `MeetingPrepFrame` / `MeetingBriefModal` | Leftover UI | Unmounted from Knowledge Centre. Writes disabled. |
-| `/meetings`, `/meetings/[id]` | Leftover routes | Not in primary nav. Read leftover stored prep. Same class as `/coaching`. |
+| `/meetings`, `/meetings/[id]` | Retired bookmarks | Redirect into current Knowledge Centre. Do not paint stored `Meeting.prep`. Data/schema retained. |
 | `ProjectTimelineGantt` | Leftover UI | Unmounted from production Timeline. Add form removed. Stored rows untouched. |
 | `WorkspaceGrid` / `ProjectWidgetGrid` | INERT | Not mounted by the current project page. |
 | `NewProjectCategorisation` | INERT | Current New Project is four-frame compose. File kept; not imported by `NewProjectExperience`. |
@@ -225,7 +225,7 @@ Not limited to dates.
 | Portfolio | Not required for V1 unless evidence changes | Build a home dashboard |
 | File upload | `addFileName` exists, **no caller** | Promise upload for V1 |
 
-Leftover bookmarkable routes that are **not** the v0.9 product: `/memory`, `/meetings`, `/releases`, `/coaching`. Do not delete 15% of the repo. Hide or redirect before public V1 if they confuse testers.
+Leftover bookmarkable routes that are **not** the v0.9 product: `/memory`, `/releases`, `/coaching`. `/meetings` and `/meetings/[id]` redirect into current Knowledge Centre and must not paint stored Meeting Prep. Do not delete 15% of the repo. Hide `/memory` / `/releases` / `/coaching` before public V1 if they confuse testers.
 
 ---
 
@@ -374,7 +374,7 @@ Ship to trusted testers. Watch the questions in §7.
 | Account deletion | No whole-account delete exists |
 | Export (user/project) | No export exists |
 | Terms / Privacy | Deliberately deferred for trusted alpha; required for public/commercial |
-| Meeting Prep persist **or** remove leftover `/meetings` | Production KC no longer edits stored prep. `updateMeeting` is still memory-only. Leftover `/meetings` routes remain. |
+| Meeting Prep persist **or** hide leftover `/meetings` | `/meetings` bookmarks now redirect into Knowledge Centre. `updateMeeting` is still memory-only. Stored prep is retained. |
 | Entitlement after trial / Stripe when charging | Trial is 90 days; Stripe not configured; local “50 actions left” is not billing (D-024) |
 | Hide leftover `/memory` `/coaching` `/releases` if testers find them | Confusion, not a repo-deletion programme |
 | Basic ops: call `assertProductionConfigOrThrow` at boot; payload cap on Capture; don’t log row text in `error.message` | Small boring hardening |
@@ -458,7 +458,7 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | D-041 account deletion | No whole-account delete | V1 MUST | Repo audit 28 Aug | Settings delete before public |
 | D-042 export | No user/project export | V1 MUST | Repo audit 28 Aug | Bundle dump; legal can demote to high SHOULD |
 | D-044 Terms/Privacy | Deferred for trusted alpha | V1 MUST | PR #88 not in #95 | Public/commercial launch |
-| D-043 Meeting Prep persist | Production KC no longer writes prep. `updateMeeting` still memory-only. Leftover `/meetings` remain | ACCEPTED v0.9 / leftover | `store.tsx`; leftover `/meetings` | Hide leftover routes if testers find them; do not persist prep as a product feature |
+| D-043 Meeting Prep persist | Production KC no longer writes prep. `updateMeeting` still memory-only. `/meetings` bookmarks redirect to Knowledge Centre | ACCEPTED v0.9 / leftover | `store.tsx`; retired `/meetings` routes | Do not persist prep as a product feature |
 | Entitlement/Stripe | 90-day trial live; Stripe not required | V1 MUST when charging | Live Account A trial 11/26/2026 | D-024 local meter is not billing |
 | D-037 Ready vs Apply | Ready only when Apply can plan that write | **CLOSED** | PR #126 / `main` `64171cd` | Do not weaken the contract |
 | D-038 Todo delete Knowledge remnant | Todo stays deleted; fact can remain | V1 SHOULD | Production smoke | Retire linked fact by id |
@@ -479,7 +479,7 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | D-025 Capture visual §16 | Coarse vs Ocean checklist | ACCEPTED v0.9 | CaptureWorkspace | Polish only |
 | D-026 project-code uniqueness | No unique constraint | ACCEPTED v0.9 | Schema | Product decision first |
 | D-032 NP V2 flag | Still env-gated; on in Production | ACCEPTED v0.9 | `new-project-v2/flag.ts` | Pin like Capture if drift |
-| Leftover `/memory` `/meetings` `/releases` `/coaching` | Not in primary nav | ACCEPTED v0.9 | Routes exist | Hide if testers find them |
+| Leftover `/memory` `/releases` `/coaching` | Not in primary nav | ACCEPTED v0.9 | Routes exist | Hide if testers find them. `/meetings` now redirects. |
 | `assertProductionConfigOrThrow` unused at boot | Defined, never called | ACCEPTED v0.9 | `runtime-config.ts` | Small V1 ops |
 | In-memory rate limit | Per process | ACCEPTED v0.9 | `rate-limit.ts` | Enough for alpha |
 | Missing `seed.sql` | Referenced by `supabase/config.toml` | ACCEPTED v0.9 | File absent | Local CLI only |
