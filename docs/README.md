@@ -159,6 +159,7 @@ Left in place on purpose. They record *why* the architecture evolved.
 | Area | Examples | Role |
 | --- | --- | --- |
 | Pre-slice architecture snapshot | `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` (19 Aug 2026) | Original failure analysis; **superseded as an implementation map** |
+| Adversarial integrity audit | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` (6 Sep 2026) | Evidence-backed integrity findings on `f737f8a`. **Not** a second architecture map. Code wins if they later disagree. |
 | UI/application snapshot | `docs/current-state/` (11 Aug 2026) | Screenshots and pre-Ocean / pre-Supabase UI evidence |
 | Slice / phase handovers | `docs/SLICE*.md`, `docs/PHASE*.md`, completion reports, `docs/V1_CONVERGENCE_ARCHITECTURE_COMPLETION.md` | Seam history when extending that slice; architecture review checkpoint |
 | Older product copy | repository root `README.md` (corrected enough to point here; remaining Mission Control copy is historical) | Setup remnants; not current product/architecture authority |
