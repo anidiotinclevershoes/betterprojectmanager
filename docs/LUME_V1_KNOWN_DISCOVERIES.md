@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 28 August 2026 (D-036 session-switch isolation CLOSED; LUME v0.9 CLOSED)  
+**Last housekeeping:** 6 September 2026 (adversarial integrity audit D-045–D-049; D-035 todo-instance note)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`  
 **Docs entry point:** `docs/README.md`  
@@ -563,7 +563,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | `scripts/verify-capture-server-truth.ts` cases D/E (changed / deleted between Analyse and Apply). |
 | **Target resolution / validation point** | Schema versioning only if fingerprints fail in production — not mixed into this slice |
 | **Related docs** | Handoff Part C §C5–C6; D-005; D-R13; D-035 |
-| **Notes** | Phase 3B remains the Capture mutation boundary. Slice 1C did **not** add DB versioning; existing state comparison was sufficient for Capture Apply. |
+| **Notes** | Phase 3B remains the Capture mutation boundary. Slice 1C did **not** add DB versioning. Adversarial audit D-046: existing fingerprint is **not** sufficient for todo dueAt/detail (or milestone notes/endAt). |
 
 ---
 
@@ -576,14 +576,114 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Domain** | Infra / all project-domain writes |
 | **Found in** | V1 Architectural Convergence; Thor amendment (26 Aug 2026) |
 | **Failure class** | **Invariant:** every project-domain mutation must verify that the target durable object belongs to the intended project before mutation. Workspace RLS is membership-wide, so an id-only UPDATE/DELETE can mutate another project’s row in the same workspace. `persistTodoUpdate` / `persistTodoDelete` (`.eq("id", todoId)` with no `project_id`) are **one known instance**, not the whole class. |
-| **Evidence / repro** | **Capture V2 (Slice 1C):** server world is filtered to the requested project; validator rejects foreign IDs (Person, Risk, Todo, milestone); Apply stale-check + Phase 3B `require*OnProject` refuse Toyworld/GamingStudio5000 IDs inside a Candyland Capture. **Still open:** `persistTodoUpdate` in `src/lib/data/supabase/persist-mutations.ts` updates by todo id only. Equivalent helpers must still be audited: risks (status helper is already project+workspace scoped), knowledge_items, milestones, stakeholders, memories, recommendations, history_events, sessions. |
+| **Evidence / repro** | **Capture V2 (Slice 1C):** server world is filtered to the requested project; validator rejects foreign IDs (Person, Risk, Todo, milestone); Apply stale-check + Phase 3B `require*OnProject` refuse Toyworld/GamingStudio5000 IDs inside a Candyland Capture. **Todo instance closed (audit 6 Sep 2026):** `persistTodoUpdate` / `persistTodoDelete` now go through `scopeExistingTodo` (`id` + `workspace_id` + `project_id` or `project_id IS NULL`). **Still open:** equivalent helpers must still be audited: knowledge_items, some stakeholder/memory/recommendation/history/session writes. Risks status helper is already project+workspace scoped. |
 | **Likely files** | `src/lib/data/supabase/persist-mutations.ts`; Capture apply hooks; store mutations; workspace project routes |
 | **Proposed fix direction** | Treat the quoted invariant as a persist-layer rule. Later implementation/test pass: inventory every project-domain mutation; require intended `project_id` (and workspace) on the target row before write. |
 | **Explicit non-goals** | A generic mutation framework; conflating this with D-034 versioning; calling this an RLS/IDOR tenant bug |
 | **Regression test to add** | Capture V2: `scripts/verify-capture-server-truth.ts` isolation + foreign-ID cases. Persist-helper property tests remain a later pass. |
 | **Target resolution / validation point** | Later persist-helper audit — after Capture V2 server truth, not a schema migration in this slice |
 | **Related docs** | Handoff Part C §C5 gap 5, §C6, assumption 23; D-034 (separate: apply world / version) |
-| **Notes** | Application-layer project scoping on Capture V2 is now live. The remaining defect class is **inconsistent persist-helper enforcement**. Do not document or fix this as Todo-only. |
+| **Notes** | Application-layer project scoping on Capture V2 is now live. The remaining defect class is **inconsistent persist-helper enforcement**. Do not document or fix this as Todo-only. Adversarial audit N-02: do not keep citing todo update-by-id-only as current. |
+
+---
+
+### D-045 — Apply reload failure returns pre-write state after a successful write
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | high |
+| **Domain** | Capture · Infra |
+| **Found in** | Adversarial integrity audit (6 Sep 2026) |
+| **Failure class** | If `reloadWorkspace()` throws after `executed.kind === "wrote"`, Apply still returns the **pre-write** `MissionState`. Production `/api/capture/apply` always passes the hook. The client `adoptAppliedState` can revert the UI while the database has the write. A retry of an unreceipted op (D-048) can then duplicate. |
+| **Evidence / repro** | `scripts/verify-adversarial-integrity.ts` A-001 against `applyApprovedCaptureSuggestion`. Source: `src/lib/capture/apply/apply-approved.ts` (`reload after write skipped`). |
+| **Likely files** | `src/lib/capture/apply/apply-approved.ts`; `src/app/api/capture/apply/route.ts`; `CaptureSessionContext.tsx` `adoptAppliedState` |
+| **Proposed fix direction** | Fail closed: do not return pre-write state as success. Omit `state`, force `GET /api/workspace/state`, or return 503 after write+reload failure. Invert A-001 when fixed. |
+| **Explicit non-goals** | Rolling back the already-committed write; a second truth model |
+| **Regression test to add** | Keep A-001; invert the assertion after the fix |
+| **Target resolution / validation point** | Capture hardening — before serious dogfooding |
+| **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md`; D-005; D-048 |
+| **Notes** | The write itself is not lost. The lie is the returned snapshot. |
+
+---
+
+### D-046 — Apply world / fingerprint omit fields Apply writes (dueAt, detail, notes, endAt)
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | high |
+| **Domain** | Capture |
+| **Found in** | Adversarial integrity audit (6 Sep 2026); sharpens D-034 remainder |
+| **Failure class** | `captureApplyWorldFromState` maps todos as `{ id, projectId, title, done }`. Stale check cannot see due date or detail. Ready stays Ready; Apply can overwrite a concurrent due-date edit. Milestone fingerprint has `startAt` but not `notes`/`endAt`. |
+| **Evidence / repro** | `verify-adversarial-integrity.ts` A-002: concurrent dueAt 12 Jul, Apply of 17 Jul wrote 17 Jul. |
+| **Likely files** | `src/lib/capture/apply/world.ts`; `expected-target.ts`; `dispatch.ts` `planTodo` |
+| **Proposed fix direction** | Include every field the planner may write in the world + fingerprint. Do not invent row-version columns unless this still fails. |
+| **Explicit non-goals** | App-wide command bus; weakening Ready |
+| **Regression test to add** | Keep A-002; invert once stale |
+| **Target resolution / validation point** | Capture hardening — before serious dogfooding |
+| **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md`; D-034 |
+| **Notes** | D-034’s “fingerprint is sufficient” note is no longer accurate for dueAt/detail. |
+
+---
+
+### D-047 — Capture sessionStorage is not project-scoped
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Capture |
+| **Found in** | Adversarial integrity audit (6 Sep 2026) |
+| **Failure class** | One `lume-capture-session-v1` key. Project switch does not clear Review. Delete-project is the only automatic clear. Analysis from project A can remain visible on project B. Apply uses `scopedProjectId \|\| slice.projectId \|\| item.projectId` — usually still A, so this is primarily session/UI leak; a rebound `projectId` on a create can write B. |
+| **Evidence / repro** | `verify-adversarial-integrity.ts` A-008 / N-06 |
+| **Likely files** | `src/lib/capture/suggestions.ts`; `CaptureSessionContext.tsx`; `CaptureWorkspace.tsx` |
+| **Proposed fix direction** | Key the session by project, or `clearSession` when the open project changes and `slice.projectId` differs. Do not Apply another project’s Ready queue silently. |
+| **Explicit non-goals** | A second Capture store |
+| **Regression test to add** | Project-switch + leftover Review must not stay Ready for the new project |
+| **Target resolution / validation point** | Capture hardening — before serious dogfooding |
+| **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md`; D-036 (account switch is a different key) |
+| **Notes** | D-036 closed same-browser *account* mix-up. This is same-account *project* session residue. |
+
+---
+
+### D-048 — Knowledge and availability Apply writes have no receipts
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | high |
+| **Domain** | Capture |
+| **Found in** | Adversarial integrity audit (6 Sep 2026) |
+| **Failure class** | `planKnowledge` / `writeAvailability` do not set `applyOperationId`. Persist hooks insert without consulting `capture_apply_receipts`. Retry after A-001 or a dropped response can duplicate canonical knowledge. `memory-execute` no-ops `write_knowledge`, so helper tests cannot catch this. |
+| **Evidence / repro** | `verify-adversarial-integrity.ts` A-005 / N-05 |
+| **Likely files** | `src/lib/capture/apply/dispatch.ts`; `persist-execute.ts`; `memory-execute.ts` |
+| **Proposed fix direction** | Same receipt pattern as todo/risk/milestone creates. Teach memory-execute to persist knowledge so tests see retries. |
+| **Explicit non-goals** | Receipts on every update/delete |
+| **Regression test to add** | Second Apply of the same knowledge item is `no_change` |
+| **Target resolution / validation point** | Capture hardening — before serious dogfooding |
+| **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md`; D-045 |
+| **Notes** | Person/responsibility RPC also lacks an Apply receipt; treat as the same class if a retry path exists. |
+
+---
+
+### D-049 — Hydrate silently truncates knowledge section bodies at 24
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Knowledge · Infra |
+| **Found in** | Adversarial integrity audit (6 Sep 2026) |
+| **Failure class** | `load-mission-state.ts` keeps `.slice(0, 24)` for section prose arrays. `structured` is uncapped. UI write cap is `MAX_BULLETS_PER_SECTION = 8`. After 24 rows, section lists and structured overlay disagree. Canonical rows remain in the database. |
+| **Evidence / repro** | `verify-adversarial-integrity.ts` N-03 |
+| **Likely files** | `src/lib/data/supabase/load-mission-state.ts`; `src/lib/knowledge.ts` |
+| **Proposed fix direction** | One cap, or no cap with UI pagination. Do not drop structured rows that section lists hide. Product must pick 8 vs 24 vs unlimited. |
+| **Explicit non-goals** | A second knowledge store |
+| **Regression test to add** | 25 bullets: hydrate must not hide structured rows from one surface only |
+| **Target resolution / validation point** | V1 product hardening |
+| **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` |
+| **Notes** | Derived/projection, not silent DB delete. Still a disagreement the app will not flag. |
 
 ---
 
@@ -790,19 +890,20 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 5. **D-033** — ~~Tell Me server-load~~ (Slice 1B); ~~Capture V2 Analyse+Apply~~ (Slice 1C) → Coach + legacy Capture remain
 6. **D-010** — canonical production default after eval evidence  
 7. **D-032** — default Capture V2 / New Project V2 then delete legacy OpenAI understanding paths (after Test workstream gates)  
-8. **D-034 remainder** — schema `version` columns only if fingerprints prove insufficient; legacy Capture apply still client-world  
-9. **D-035 remainder** — audit **all** project-domain persist paths (`persistTodoUpdate` is one instance); Capture V2 membership is live  
-10. **D-028** + New Project crash residual — bundle RPCs (dedicated integrity slice)  
-11. **D-003** — suggestion persist  
-12. **D-008 / D-021** — implement the decided waiting/open-loop split  
-13. **D-007** remainder — leftover Knowledge people prose without a stakeholder link  
-14. **Person identity** — workspace `people` + participation (later; not first slice). **No unique-name constraint.**  
-15. **D-014** remainder — live Supabase Capture apply job  
-16. **D-011** remainder — New Project extractors only  
-17. **D-004** remainder — history persist gaps outside New Project create  
-18. **D-026** — product decision on project-code uniqueness  
-19. **D-027** — Archive/undo only if product asks  
-20. **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031** — as scheduled (D-031: hide/retire Coach rather than rewrite)  
+8. **D-045 + D-046 + D-047 + D-048** — Apply reload fail-closed, fingerprint completeness, Capture session project scope, knowledge receipts (adversarial audit; before serious dogfooding)  
+9. **D-034 remainder** — fingerprints are **not** sufficient for dueAt/detail (D-046); schema `version` columns only if that still fails  
+10. **D-035 remainder** — audit remaining project-domain persist paths (todo update/delete now scoped); Capture V2 membership is live  
+11. **D-028** + New Project crash residual — bundle RPCs (dedicated integrity slice)  
+12. **D-003** — suggestion persist  
+13. **D-008 / D-021** — implement the decided waiting/open-loop split  
+14. **D-007** remainder — leftover Knowledge people prose without a stakeholder link  
+15. **Person identity** — workspace `people` + participation (later; not first slice). **No unique-name constraint.**  
+16. **D-014** remainder — live Supabase Capture apply job  
+17. **D-011** remainder — New Project extractors only  
+18. **D-004** remainder — history persist gaps outside New Project create  
+19. **D-026** — product decision on project-code uniqueness  
+20. **D-027** — Archive/undo only if product asks  
+21. **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031**, **D-049** — as scheduled (D-031: hide/retire Coach rather than rewrite)  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice. Do **not** begin implementation from the architecture review PR.
 
