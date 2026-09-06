@@ -26,12 +26,15 @@ export function captureApplyWorldFromState(state: MissionState): CaptureApplyWor
       projectId: t.projectId,
       title: t.title,
       done: t.done,
+      dueAt: t.dueAt,
+      detail: t.detail,
     })),
     timeline: (state.timeline ?? []).map((t) => ({
       id: t.id,
       projectId: t.projectId,
       label: t.label,
       startAt: t.startAt,
+      endAt: t.endAt,
       notes: t.notes,
     })),
     knowledge: (state.knowledge ?? []).map((k) => ({

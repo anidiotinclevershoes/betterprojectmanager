@@ -28,7 +28,14 @@ import { memoryCaptureApplyHooks } from "./memory-execute";
 export type ApplyApprovedCaptureResult = {
   decision: CaptureApplyDecision;
   executed: CaptureExecuteResult;
-  state: MissionState;
+  /**
+   * Authoritative workspace after a confirmed write + successful reload.
+   * Absent when reload failed after commit — callers must not treat a
+   * missing/pre-write snapshot as current truth.
+   */
+  state?: MissionState;
+  /** Write committed; canonical reload did not. Do not adopt stale state. */
+  reconcileFailed?: boolean;
 };
 
 function needsYouDecision(
@@ -144,22 +151,37 @@ export async function applyApprovedCaptureSuggestion(args: {
     }
   }
 
-  let state = args.hooks ? loaded.workspaceState : box.state;
-  if (executed.kind === "wrote" && args.reloadWorkspace) {
+  if (executed.kind !== "wrote") {
+    return {
+      decision,
+      executed,
+      state: args.hooks ? loaded.workspaceState : box.state,
+    };
+  }
+
+  if (args.reloadWorkspace) {
     try {
-      state = await args.reloadWorkspace();
+      return {
+        decision,
+        executed,
+        state: await args.reloadWorkspace(),
+      };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.error(
-        "[applyApprovedCaptureSuggestion] reload after write skipped",
+        "[applyApprovedCaptureSuggestion] reload after write failed",
         message,
       );
+      if (!args.hooks) {
+        return { decision, executed, state: box.state };
+      }
+      return { decision, executed, reconcileFailed: true };
     }
   }
 
   return {
     decision,
     executed,
-    state,
+    state: args.hooks ? undefined : box.state,
   };
 }

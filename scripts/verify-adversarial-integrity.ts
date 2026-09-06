@@ -214,7 +214,7 @@ await check("scanner detects constructed orphans and impossible relationships", 
   assert.ok(codes.includes("responsibility-missing-person"));
 });
 
-await check("A-001 Apply reload failure returns pre-write state after a successful write", async () => {
+await check("A-001 Apply reload failure does not return pre-write state after a successful write", async () => {
   const start = candyState();
   const before = JSON.stringify(start.todos);
   const box = { state: clone(start) };
@@ -244,20 +244,23 @@ await check("A-001 Apply reload failure returns pre-write state after a successf
     },
   });
   assert.equal(result.executed.kind, "wrote");
-  assert.equal(
-    JSON.stringify(result.state.todos),
+  assert.equal(result.reconcileFailed, true);
+  assert.equal(result.state, undefined);
+  assert.notEqual(
+    JSON.stringify(box.state.todos),
     before,
-    "production Apply returns the pre-write snapshot when reload throws",
+    "the write itself landed in the hook-backed store",
   );
   assert.ok(
     box.state.todos.some((t) => /war room/i.test(t.title)),
     "the write itself landed in the hook-backed store",
   );
   const src = readSrc("src/lib/capture/apply/apply-approved.ts");
-  assert.match(src, /reload after write skipped/);
+  assert.match(src, /reload after write failed/);
+  assert.match(src, /reconcileFailed: true/);
 });
 
-await check("A-002 concurrent dueAt/detail change does not stale Ready; Apply overwrites it", async () => {
+await check("A-002 concurrent dueAt/detail change stales Ready; Apply fails closed", async () => {
   const start = candyState();
   const item = updateTodoItem("2026-07-17T09:00:00.000Z");
   const world = captureApplyWorldFromState(start);
@@ -269,18 +272,16 @@ await check("A-002 concurrent dueAt/detail change does not stale Ready; Apply ov
   mutated.todos[0]!.dueAt = "2026-07-12T09:00:00.000Z";
   mutated.todos[0]!.detail = "Owner: Jordan — changed in another tab";
   const laterWorld = captureApplyWorldFromState(mutated);
-  assert.equal(
+  assert.ok(
     staleExpectedTargetReason(laterWorld, fingerprinted.expectedTarget, "proj-candy"),
-    null,
-    "stale gate cannot see dueAt/detail — they are not in the Apply world",
   );
   const ready = assessApplyReadiness({
     item: fingerprinted,
     text: "Move CAB approval to next Friday",
     preflight: { world: laterWorld, captureEntryProjectId: "proj-candy" },
   });
-  assert.equal(ready.canApprove, true);
-  assert.ok(!laterWorld.todos[0] || !("dueAt" in laterWorld.todos[0]));
+  assert.equal(ready.canApprove, false);
+  assert.ok("dueAt" in (laterWorld.todos[0] ?? {}));
 
   const box = { state: clone(mutated) };
   const applied = await applyApprovedCaptureSuggestion({
@@ -295,17 +296,8 @@ await check("A-002 concurrent dueAt/detail change does not stale Ready; Apply ov
     }),
     hooks: memoryCaptureApplyHooks(box),
   });
-  assert.equal(applied.executed.kind, "wrote");
-  assert.equal(
-    box.state.todos[0]?.dueAt,
-    "2026-07-17T09:00:00.000Z",
-    "Apply wrote the reviewed date over the concurrent 12 July edit",
-  );
-  assert.equal(
-    box.state.todos[0]?.detail,
-    "Owner: Jordan — changed in another tab",
-    "detail is not in the proposal so the concurrent detail survives this particular write",
-  );
+  assert.equal(applied.executed.kind, "needs_you");
+  assert.equal(box.state.todos[0]?.dueAt, "2026-07-12T09:00:00.000Z");
 });
 
 await check("A-003 New Project create is sequential inserts with best-effort cleanup, not one DB transaction", () => {
@@ -317,17 +309,18 @@ await check("A-003 New Project create is sequential inserts with best-effort cle
   assert.doesNotMatch(persist, /rpc\("persist_new_project/);
 });
 
-await check("A-004 Apply world omits fields Apply later writes (dueAt, detail, notes)", () => {
+await check("A-004 Apply world and fingerprint include fields Apply writes", () => {
   const worldSrc = readSrc("src/lib/capture/apply/world.ts");
-  assert.doesNotMatch(worldSrc, /dueAt/);
-  assert.doesNotMatch(worldSrc, /detail/);
-  assert.doesNotMatch(worldSrc, /endAt/);
+  assert.match(worldSrc, /dueAt: t\.dueAt/);
+  assert.match(worldSrc, /detail: t\.detail/);
+  assert.match(worldSrc, /endAt: t\.endAt/);
   const fp = readSrc("src/lib/capture/apply/expected-target.ts");
-  assert.doesNotMatch(fp, /dueAt/);
-  assert.doesNotMatch(fp, /detail/);
+  assert.match(fp, /dueAt: asField\(todo\.dueAt\)/);
+  assert.match(fp, /detail: asField\(todo\.detail\)/);
+  assert.match(fp, /replacePersonId/);
 });
 
-await check("A-005 knowledge write and availability write have no apply receipts", () => {
+await check("A-005 knowledge write and availability write use apply receipts", () => {
   const exec = readSrc("src/lib/capture/apply/persist-execute.ts");
   const knowledgeFn = exec.slice(
     exec.indexOf("writeKnowledge:"),
@@ -337,10 +330,10 @@ await check("A-005 knowledge write and availability write have no apply receipts
     exec.indexOf("writeAvailability:"),
     exec.indexOf("writeKnowledge:"),
   );
-  assert.match(knowledgeFn, /persistKnowledgeBullet/);
-  assert.doesNotMatch(knowledgeFn, /applyOperationId|persistFindCaptureApplyReceipt/);
-  assert.match(availabilityFn, /persistKnowledgeBullet/);
-  assert.doesNotMatch(availabilityFn, /applyOperationId|persistFindCaptureApplyReceipt/);
+  assert.match(knowledgeFn, /persistFindCaptureApplyReceipt/);
+  assert.match(knowledgeFn, /entityType: "knowledge"/);
+  assert.match(availabilityFn, /persistFindCaptureApplyReceipt/);
+  assert.match(availabilityFn, /entityType: "availability"/);
 });
 
 await check("A-006 todos.project_id is nullable SET NULL — orphans are representable in DB", () => {
@@ -356,15 +349,14 @@ await check("A-007 no unique constraint on stakeholder name, todo title, or risk
   assert.doesNotMatch(schema, /risks[\s\S]{0,400}unique \(project_id, title\)/);
 });
 
-await check("A-008 Capture sessionStorage is not reset on project switch", () => {
+await check("A-008 Capture session binds to the open project and refuses cross-project Apply", () => {
   const ctx = readSrc("src/components/capture/CaptureSessionContext.tsx");
   const ws = readSrc("src/components/capture/CaptureWorkspace.tsx");
   const keys = readSrc("src/lib/capture/suggestions.ts");
-  assert.match(keys, /CAPTURE_SESSION_KEY = "lume-capture-session-v1"/);
-  assert.match(ctx, /sessionStorage\.(get|set)Item\(CAPTURE_SESSION_KEY/);
-  assert.match(ws, /if \(defaultProjectId && !projectId\) setProjectId/);
-  assert.doesNotMatch(ctx, /defaultProjectId !== slice\.projectId/);
-  assert.doesNotMatch(ws, /useEffect\([\s\S]{0,200}clearSession/);
+  assert.match(keys, /captureSessionStorageKey/);
+  assert.match(keys, /captureSessionProjectMismatch/);
+  assert.match(ctx, /bindOpenProject/);
+  assert.match(ws, /bindOpenProject\(defaultProjectId\)/);
 });
 
 await check("A-009 meeting-scoped Catch Me Up and Capture context still isolate stored prep", () => {
@@ -410,31 +402,37 @@ await check("N-04 analysesThisMonth is always 0 on hydrate — meter is not dura
   assert.match(hydrate, /analysesThisMonth: 0/);
 });
 
-await check("N-05 planKnowledge / writeKnowledge carry no applyOperationId (retry can duplicate)", () => {
+await check("N-05 planKnowledge / writeKnowledge carry applyOperationId (retry is receipted)", () => {
   const dispatch = readSrc("src/lib/capture/apply/dispatch.ts");
   const plan = dispatch.slice(dispatch.indexOf("function planKnowledge"));
-  assert.doesNotMatch(plan.slice(0, 900), /applyOperationId/);
+  assert.match(plan.slice(0, 900), /applyOperationId/);
   const exec = readSrc("src/lib/capture/apply/persist-execute.ts");
   const writeK = exec.slice(
     exec.indexOf("writeKnowledge:"),
     exec.indexOf("findApplyReceipt:"),
   );
-  assert.doesNotMatch(writeK, /applyOperationId|persistFindCaptureApplyReceipt/);
+  assert.match(writeK, /persistFindCaptureApplyReceipt/);
   const memory = readSrc("src/lib/capture/apply/memory-execute.ts");
-  assert.match(memory, /case "write_knowledge":\s*\n\s*case "write_memory":\s*\n\s*return state;/);
+  assert.match(memory, /case "write_knowledge":/);
+  assert.doesNotMatch(
+    memory,
+    /case "write_knowledge":\s*\n\s*case "write_memory":\s*\n\s*return state;/,
+  );
 });
 
-await check("N-06 Capture session key is not project-scoped; only project-delete clears it", () => {
+await check("N-06 Capture session key is project-scoped; switch parks the prior review", () => {
   const ctx = readSrc("src/components/capture/CaptureSessionContext.tsx");
   const keys = readSrc("src/lib/capture/suggestions.ts");
   assert.match(keys, /CAPTURE_SESSION_KEY = "lume-capture-session-v1"/);
-  assert.doesNotMatch(keys, /lume-capture-session-v1:\$\{/);
-  assert.match(ctx, /lume:project-deleted/);
+  assert.match(keys, /\$\{CAPTURE_SESSION_KEY\}:\$\{id\}/);
+  assert.match(ctx, /bindOpenProject/);
+  assert.match(ctx, /captureSessionProjectMismatch/);
 });
 
-await check("N-07 replacePersonId is not part of the expected-target fingerprint", () => {
+await check("N-07 replacePersonId and owner set are part of the expected-target fingerprint", () => {
   const fp = readSrc("src/lib/capture/apply/expected-target.ts");
-  assert.doesNotMatch(fp, /replacePersonId/);
+  assert.match(fp, /replacePersonId/);
+  assert.match(fp, /ownerIds/);
   const apply = readSrc("src/lib/capture/apply/apply-approved.ts");
   assert.doesNotMatch(apply, /bindResolvedReplacement/);
 });

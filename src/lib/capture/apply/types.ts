@@ -111,6 +111,7 @@ export type CaptureLegalOperation =
       name: string;
       personId?: string;
       roleHint?: string;
+      applyOperationId?: string;
     }
   | {
       type: "confirm_responsibility";
@@ -119,6 +120,7 @@ export type CaptureLegalOperation =
       personName: string;
       personId?: string | null;
       replacePersonId?: string | null;
+      applyOperationId?: string;
     }
   | {
       type: "write_availability";
@@ -128,12 +130,14 @@ export type CaptureLegalOperation =
       awayFromIso: string;
       awayToIso: string;
       label?: string;
+      applyOperationId?: string;
     }
   | {
       type: "write_knowledge";
       projectId: string;
       section: KnowledgeSectionId;
       text: string;
+      applyOperationId?: string;
     }
   | {
       type: "write_memory";
@@ -185,12 +189,15 @@ export type CaptureApplyWorld = {
     projectId?: string | null;
     title: string;
     done?: boolean;
+    dueAt?: string;
+    detail?: string;
   }>;
   timeline: Array<{
     id: string;
     projectId: string;
     label: string;
     startAt?: string;
+    endAt?: string;
     notes?: string;
   }>;
   knowledge: Array<{

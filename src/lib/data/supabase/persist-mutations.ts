@@ -1061,6 +1061,14 @@ export async function persistKnowledgeBullet(
   const { error } = await client.from("knowledge_items").insert(row);
   if (error) throw new Error(`[supabase] create knowledge: ${error.message}`);
 
+  if (meta?.receipt) {
+    await persistPutCaptureApplyReceipt(client, workspaceId, projectId, {
+      operationId: meta.receipt.operationId,
+      entityType: meta.receipt.entityType,
+      entityId: meta.receipt.entityId || knowledgeId,
+    });
+  }
+
   return {};
 }
 

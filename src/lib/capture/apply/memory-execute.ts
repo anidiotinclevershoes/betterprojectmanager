@@ -211,15 +211,42 @@ export function applyCaptureOperationInMemory(
             awayToIso: op.awayToIso,
             label: op.label ?? null,
           },
+          applyOperationId: op.applyOperationId,
         },
         provenance: [{ type: "capture", at: now }],
       };
       return setKnowledge(state, op.projectId, {
         ...current,
+        sections: {
+          ...current.sections,
+          people: [...(current.sections.people ?? []), body],
+        },
         structured: [...(current.structured ?? []), row],
       });
     }
-    case "write_knowledge":
+    case "write_knowledge": {
+      const current = knowledgeFor(state, op.projectId);
+      const row: CanonicalTruthItem = {
+        id: newId("know"),
+        projectId: op.projectId,
+        section: op.section,
+        body: op.text,
+        kind: "fact",
+        epistemic: "confirmed",
+        lifecycle: "current",
+        meta: { applyOperationId: op.applyOperationId },
+        provenance: [{ type: "capture", at: now }],
+      };
+      const section = op.section;
+      return setKnowledge(state, op.projectId, {
+        ...current,
+        sections: {
+          ...current.sections,
+          [section]: [...(current.sections[section] ?? []), op.text],
+        },
+        structured: [...(current.structured ?? []), row],
+      });
+    }
     case "write_memory":
       return state;
     default:
@@ -229,9 +256,30 @@ export function applyCaptureOperationInMemory(
 
 export function memoryCaptureApplyHooks(box: {
   state: MissionState;
+  receipts?: Map<string, { entityType: string; entityId: string }>;
 }): CaptureApplyHooks {
+  const receipts =
+    box.receipts ??
+    (box.receipts = new Map<string, { entityType: string; entityId: string }>());
   const apply = async (op: CaptureLegalOperation) => {
+    const operationId =
+      "applyOperationId" in op ? op.applyOperationId : undefined;
+    if (operationId) {
+      const key = `${op.projectId}::${operationId}`;
+      if (receipts.has(key)) return;
+    }
+    const before = box.state;
     box.state = applyCaptureOperationInMemory(box.state, op);
+    if (operationId) {
+      const key = `${op.projectId}::${operationId}`;
+      receipts.set(key, {
+        entityType: op.type,
+        entityId: operationId,
+      });
+      if (box.state === before) {
+        /* still record — replay must no-op even if the op was a no-op write */
+      }
+    }
   };
   return {
     createTodo: apply,
@@ -247,12 +295,22 @@ export function memoryCaptureApplyHooks(box: {
     writeAvailability: apply,
     writeKnowledge: apply,
     writeMemory: apply,
-    findApplyReceipt: ({ operationId }) => {
+    findApplyReceipt: ({ projectId, operationId }) => {
+      const keyed = receipts.get(`${projectId}::${operationId}`);
+      if (keyed) return keyed;
       const todo = (box.state.todos ?? []).find(
         (t) => t.sourceRecommendationId === operationId,
       );
-      return todo
-        ? { entityType: "todo", entityId: todo.id }
+      if (todo) return { entityType: "todo", entityId: todo.id };
+      const knowledgeHit = (box.state.knowledge ?? [])
+        .flatMap((k) => k.structured ?? [])
+        .find(
+          (row) =>
+            (row.meta as { applyOperationId?: string } | null)
+              ?.applyOperationId === operationId,
+        );
+      return knowledgeHit
+        ? { entityType: "knowledge", entityId: knowledgeHit.id }
         : null;
     },
   };
