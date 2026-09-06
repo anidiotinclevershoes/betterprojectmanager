@@ -1,8 +1,9 @@
 # Lume v0.9 → V1 handoff
 
 **Status:** Canonical operating picture for closed alpha and the path to public V1  
-**Date:** 5 September 2026 (Ready → Apply closeout on `main`)  
-**Merged main (this update):** `64171cde93e837f1f755c79b0c4c43aca502bd03` (PR #126 Ready → Apply safety)  
+**Date:** 6 September 2026 (dogfood integrity gate D-045–D-048; Ready → Apply remains closed)  
+**Merged main (this update):** `f737f8a88442bff9e850d91de55c9afd82cda630` (PR #139 leftover `/meetings` redirect). Integrity remediations land in the dogfood-gate PR onto this baseline.  
+**Prior Ready → Apply SHA:** `64171cde93e837f1f755c79b0c4c43aca502bd03` (PR #126)  
 **Prior v0.9 closure SHA:** `0e68384a2271b2b27e0ac75b871ee26331a26db7` (D-036 PR #100)  
 **Qualified Capture engine SHA:** `2131444c77c3b06b666df393362a50112d2de56f` (frozen Analyse engine; Apply safety extended by #126)  
 **Production:** https://betterprojectmanager.vercel.app  
@@ -103,7 +104,7 @@ Historical scorer-v1 failure counts are **not** current product safety. Current 
 | Paint cache | `lume-mission-supabase-cache-v1` — last paint, cleared on logout, **must not** outrank server truth |
 | Local drafts / prefs | Appearance, sidebar collapse, first-run cues |
 
-Client MissionState is **not** Capture Apply authority.
+Client MissionState is **not** Capture Apply authority. After a confirmed Apply write, the client may adopt returned server state only when present. A failed reload must hydrate or ask for refresh — never the pre-write snapshot.
 
 Project isolation inside a workspace is **application-layer** (RLS is workspace-wide). Cross-account isolation is RLS + server project membership checks.
 
@@ -461,6 +462,10 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | D-043 Meeting Prep persist | Production KC no longer writes prep. `updateMeeting` still memory-only. `/meetings` bookmarks redirect to Knowledge Centre | ACCEPTED v0.9 / leftover | `store.tsx`; retired `/meetings` routes | Do not persist prep as a product feature |
 | Entitlement/Stripe | 90-day trial live; Stripe not required | V1 MUST when charging | Live Account A trial 11/26/2026 | D-024 local meter is not billing |
 | D-037 Ready vs Apply | Ready only when Apply can plan that write | **CLOSED** | PR #126 / `main` `64171cd` | Do not weaken the contract |
+| D-045 Apply reload | Failed reload after write no longer returns pre-write state | **CLOSED** | Dogfood integrity gate | Client hydrates or asks for refresh |
+| D-046 fingerprint completeness | dueAt/detail/endAt/notes/replace pin fingerprinted | **CLOSED** | Dogfood integrity gate | No integer row version |
+| D-047 Capture session project bind | Per-project session key; Apply refuses mismatch | **CLOSED** | Dogfood integrity gate | sessionStorage still client-side (D-013) |
+| D-048 knowledge/availability receipts | Same `capture_apply_receipts` table | **CLOSED** | Dogfood integrity gate | Sequential insert+receipt residual |
 | D-038 Todo delete Knowledge remnant | Todo stays deleted; fact can remain | V1 SHOULD | Production smoke | Retire linked fact by id |
 | D-039 `openaiConfigured` stale | 401 on `/login` can stick | V1 SHOULD | Smoke | Re-probe after SIGNED_IN |
 | D-003 suggestion persist | Accept/dismiss MissionState only | V1 SHOULD / TESTER EVIDENCE | `setRecommendationStatus` | Persist if testers use it |

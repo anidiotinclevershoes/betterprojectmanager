@@ -38,6 +38,20 @@ export type ApplyApprovedCaptureResult = {
   reconcileFailed?: boolean;
 };
 
+/** Callers that need the returned workspace must prove it is present. */
+export function requireAppliedState(
+  result: ApplyApprovedCaptureResult,
+): MissionState {
+  if (!result.state) {
+    throw new Error(
+      result.reconcileFailed
+        ? "Apply wrote but reload failed; no workspace state to adopt."
+        : "Apply did not return workspace state.",
+    );
+  }
+  return result.state;
+}
+
 function needsYouDecision(
   domain: CaptureApplyDecision["domain"],
   reason: string,

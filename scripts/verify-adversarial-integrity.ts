@@ -1,8 +1,10 @@
 /**
- * Adversarial integrity probes — read-only / in-memory.
- * Documents confirmed production-path defects without mutating user data.
+ * Adversarial integrity probes — read-only / in-memory by default.
+ * Closed dogfood defects (A-001/002/004/005/008, N-05/06/07) are inverted
+ * to regressions. Remaining probes still document open gaps.
+ * SQL probes printed at the end are operator-only and do not mutate.
  *
- * Run: npx tsx scripts/verify-adversarial-integrity.ts
+ * Run: npm run verify:adversarial-integrity
  */
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -112,7 +114,12 @@ export function scanMissionIntegrity(state: MissionState): IntegrityHit[] {
   for (const knowledge of state.knowledge ?? []) {
     for (const item of knowledge.structured ?? []) {
       if (item.kind !== "responsibility" || item.lifecycle !== "current") continue;
-      const personId = item.meta?.responsibility?.personId ?? item.meta?.personId;
+      const personId =
+        typeof item.meta?.responsibility?.personId === "string"
+          ? item.meta.responsibility.personId
+          : typeof item.meta?.personId === "string"
+            ? item.meta.personId
+            : undefined;
       if (personId && !personIds.has(personId)) {
         hits.push({
           code: "responsibility-missing-person",
@@ -205,6 +212,7 @@ await check("scanner detects constructed orphans and impossible relationships", 
       section: "people",
       body: "CAB · nobody",
       kind: "responsibility",
+      epistemic: null,
       lifecycle: "current",
       meta: { responsibility: { personId: "person-does-not-exist", scope: "CAB" } },
     },

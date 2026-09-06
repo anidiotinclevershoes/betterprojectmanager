@@ -14,7 +14,10 @@
  * Run: npx tsx scripts/verify-stable-object-identity.ts
  */
 import assert from "node:assert/strict";
-import { applyApprovedCaptureSuggestion } from "../src/lib/capture/apply/apply-approved";
+import {
+  applyApprovedCaptureSuggestion,
+  requireAppliedState,
+} from "../src/lib/capture/apply/apply-approved";
 import { worldFromCaptureState, runCaptureV2FromModelJson } from "../src/lib/capture-v2";
 import {
   CANDYLAND_ID,
@@ -138,7 +141,7 @@ async function applyV2(args: {
         applied.executed.kind === "needs_you" ? `: ${applied.executed.reason}` : ""
       }`,
     );
-    state = applied.state;
+    state = requireAppliedState(applied);
   }
   assert.ok(lastApplied);
   return { pipeline, applied: lastApplied, state };
