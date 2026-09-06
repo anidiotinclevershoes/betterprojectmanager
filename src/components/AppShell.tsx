@@ -180,9 +180,6 @@ function AppShellInner({ children }: { children: ReactNode }) {
         subtitle: "Measured Capture health and prompt evolution",
       };
     }
-    if (pathname.startsWith("/meetings")) {
-      return { title: "Meetings", subtitle: "Briefs and preparation" };
-    }
     if (pathname === "/projects/new") {
       return {
         title: "New project",
