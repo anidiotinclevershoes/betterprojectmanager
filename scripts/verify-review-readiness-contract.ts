@@ -19,7 +19,10 @@ import {
   writeRepresentsProposal,
   type CaptureApplyWorld,
 } from "../src/lib/capture/apply";
-import { applyApprovedCaptureSuggestion } from "../src/lib/capture/apply/apply-approved";
+import {
+  applyApprovedCaptureSuggestion,
+  requireAppliedState,
+} from "../src/lib/capture/apply/apply-approved";
 import { memoryCaptureApplyHooks } from "../src/lib/capture/apply/memory-execute";
 import { applyPendingReadyQueue } from "../src/lib/capture/review/applyReadyQueue";
 import { experimentalMissionState } from "../src/lib/eval-capture-v2/mission-state";
@@ -256,7 +259,7 @@ async function applyApprovedOn(
   w: CaptureApplyWorld,
 ) {
   const state = experimentalMissionState(w);
-  return applyApprovedCaptureSuggestion({
+  const applied = await applyApprovedCaptureSuggestion({
     item,
     text,
     projectId: "proj-candy",
@@ -267,6 +270,7 @@ async function applyApprovedOn(
       state,
     }),
   });
+  return { ...applied, state: requireAppliedState(applied) };
 }
 
 let passed = 0;

@@ -4,6 +4,7 @@
  */
 import type { CaptureApplyWorld, CaptureLegalDomain } from "./types";
 import type { PendingSuggestion } from "@/lib/capture/suggestions";
+import { currentOwners } from "./dispatch";
 
 export type CaptureExpectedTarget = {
   id: string;
@@ -11,9 +12,28 @@ export type CaptureExpectedTarget = {
   title?: string;
   status?: string;
   startAt?: string;
+  endAt?: string;
+  notes?: string;
   name?: string;
   done?: boolean;
+  dueAt?: string;
+  detail?: string;
+  replacePersonId?: string;
+  ownerIds?: string;
+  scope?: string;
+  awayFromIso?: string;
+  awayToIso?: string;
+  availabilityKey?: string;
 };
+
+function asField(value: string | null | undefined): string {
+  return value ?? "";
+}
+
+function changed(expected: string | undefined, actual: string | null | undefined) {
+  if (expected === undefined) return false;
+  return expected !== asField(actual);
+}
 
 export function parseExpectedTarget(raw: unknown): CaptureExpectedTarget | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
@@ -26,8 +46,20 @@ export function parseExpectedTarget(raw: unknown): CaptureExpectedTarget | null 
     title: typeof o.title === "string" ? o.title : undefined,
     status: typeof o.status === "string" ? o.status : undefined,
     startAt: typeof o.startAt === "string" ? o.startAt : undefined,
+    endAt: typeof o.endAt === "string" ? o.endAt : undefined,
+    notes: typeof o.notes === "string" ? o.notes : undefined,
     name: typeof o.name === "string" ? o.name : undefined,
     done: typeof o.done === "boolean" ? o.done : undefined,
+    dueAt: typeof o.dueAt === "string" ? o.dueAt : undefined,
+    detail: typeof o.detail === "string" ? o.detail : undefined,
+    replacePersonId:
+      typeof o.replacePersonId === "string" ? o.replacePersonId : undefined,
+    ownerIds: typeof o.ownerIds === "string" ? o.ownerIds : undefined,
+    scope: typeof o.scope === "string" ? o.scope : undefined,
+    awayFromIso: typeof o.awayFromIso === "string" ? o.awayFromIso : undefined,
+    awayToIso: typeof o.awayToIso === "string" ? o.awayToIso : undefined,
+    availabilityKey:
+      typeof o.availabilityKey === "string" ? o.availabilityKey : undefined,
   };
 }
 
@@ -128,6 +160,8 @@ export function fingerprintExpectedTarget(
       domain: "todo",
       title: todo.title,
       done: Boolean(todo.done),
+      dueAt: asField(todo.dueAt),
+      detail: asField(todo.detail),
     };
   }
   if (domain === "milestone" || item.kind === "milestone") {
@@ -137,7 +171,9 @@ export function fingerprintExpectedTarget(
       id,
       domain: "milestone",
       title: ms.label,
-      startAt: ms.startAt,
+      startAt: asField(ms.startAt),
+      endAt: asField(ms.endAt),
+      notes: asField(ms.notes),
     };
   }
   if (
@@ -150,10 +186,23 @@ export function fingerprintExpectedTarget(
     for (const project of world.projects) {
       const person = project.stakeholders.find((s) => s.id === id);
       if (person) {
+        const projectId = item.projectId?.trim() || project.id;
+        const scope = item.responsibilityScope?.trim() || "";
+        const owners = scope
+          ? currentOwners(world, projectId, scope)
+              .map((o) => o.personId)
+              .filter((pid): pid is string => Boolean(pid))
+              .sort()
+              .join(",")
+          : "";
         return {
           id,
           domain: domain === "unsupported" ? "person" : domain,
           name: person.name,
+          replacePersonId: asField(item.replacePersonId),
+          ownerIds: owners,
+          scope,
+          availabilityKey: availabilityKeyFor(world, projectId, id),
         };
       }
     }
@@ -197,6 +246,9 @@ export function staleExpectedTargetReason(
     if (expected.done != null && Boolean(todo.done) !== expected.done) {
       return "That To Do changed since Review. Capture again before applying.";
     }
+    if (changed(expected.dueAt, todo.dueAt) || changed(expected.detail, todo.detail)) {
+      return "That To Do changed since Review. Capture again before applying.";
+    }
     return null;
   }
 
@@ -210,6 +262,9 @@ export function staleExpectedTargetReason(
       return "That date changed since Review. Capture again before applying.";
     }
     if (expected.startAt && (ms.startAt ?? "") !== expected.startAt) {
+      return "That date changed since Review. Capture again before applying.";
+    }
+    if (changed(expected.endAt, ms.endAt) || changed(expected.notes, ms.notes)) {
       return "That date changed since Review. Capture again before applying.";
     }
     return null;
@@ -226,8 +281,53 @@ export function staleExpectedTargetReason(
     if (expected.name && person.name !== expected.name) {
       return "That person changed since Review. Capture again before applying.";
     }
+    if (expected.domain === "responsibility") {
+      const owners = currentOwners(world, projectId, expected.scope ?? "");
+      if (
+        expected.replacePersonId &&
+        !owners.some((o) => o.personId === expected.replacePersonId)
+      ) {
+        return "That ownership target changed since Review. Capture again before applying.";
+      }
+      const ownerIds = owners
+        .map((o) => o.personId)
+        .filter((pid): pid is string => Boolean(pid))
+        .sort()
+        .join(",");
+      if (changed(expected.ownerIds, ownerIds)) {
+        return "That ownership target changed since Review. Capture again before applying.";
+      }
+    }
+    if (expected.domain === "availability") {
+      const key = availabilityKeyFor(world, projectId, expected.id);
+      if (changed(expected.availabilityKey, key)) {
+        return "That availability changed since Review. Capture again before applying.";
+      }
+    }
     return null;
   }
 
   return null;
+}
+
+function availabilityKeyFor(
+  world: CaptureApplyWorld,
+  projectId: string,
+  personId: string,
+): string {
+  const knowledge = world.knowledge.find((k) => k.projectId === projectId);
+  return (knowledge?.structured ?? [])
+    .filter(
+      (row) =>
+        row.kind === "availability" &&
+        row.lifecycle === "current" &&
+        (row.meta?.availability?.personId === personId ||
+          row.meta?.personId === personId),
+    )
+    .map((row) => {
+      const meta = row.meta?.availability;
+      return `${asField(meta?.awayFromIso)}..${asField(meta?.awayToIso)}`;
+    })
+    .sort()
+    .join("|");
 }

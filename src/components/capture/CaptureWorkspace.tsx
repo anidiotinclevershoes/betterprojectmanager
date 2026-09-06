@@ -104,6 +104,7 @@ export function CaptureWorkspace({
     dismissOne,
     markOneApplied,
     clearSession,
+    bindOpenProject,
     expandAnalysis,
     editCapture,
     dismissPreReliabilityWarn,
@@ -240,8 +241,8 @@ export function CaptureWorkspace({
   );
 
   useEffect(() => {
-    if (defaultProjectId && !projectId) setProjectId(defaultProjectId);
-  }, [defaultProjectId, projectId, setProjectId]);
+    if (defaultProjectId) bindOpenProject(defaultProjectId);
+  }, [defaultProjectId, bindOpenProject]);
 
   useEffect(() => {
     if (liveRef.current && statusMessage) {

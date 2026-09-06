@@ -645,6 +645,25 @@ export type CapturePersistSlice = {
 
 export const CAPTURE_SESSION_KEY = "lume-capture-session-v1";
 
+export function captureSessionStorageKey(projectId?: string | null) {
+  const id = projectId?.trim();
+  return id ? `${CAPTURE_SESSION_KEY}:${id}` : CAPTURE_SESSION_KEY;
+}
+
+/** True when an analysed session must not Apply under a different open project. */
+export function captureSessionProjectMismatch(
+  sessionProjectId: string | undefined,
+  openProjectId: string | undefined,
+  hasAnalysedResult: boolean,
+): boolean {
+  return Boolean(
+    hasAnalysedResult &&
+      sessionProjectId?.trim() &&
+      openProjectId?.trim() &&
+      sessionProjectId.trim() !== openProjectId.trim(),
+  );
+}
+
 /**
  * Deferred: improve suggested-operation inference using existing-record
  * matching and explicit operation evidence.

@@ -311,6 +311,8 @@ type MissionContextValue = {
    * Does not treat this as a client-authored mutation.
    */
   adoptAppliedState: (next: MissionState) => void;
+  /** Reload MissionState from durable workspace after a confirmed write. */
+  reconcileDurableWorkspace: () => Promise<boolean>;
   refreshCoaching: () => void;
   /** Development: restore seeded demo baseline; preserve non-seeded data. */
   resetDemo: () => SeedResetResult;
@@ -441,22 +443,24 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const reconcileFromDurableAuthority = useCallback(async () => {
-    if (persistMetaRef.current.mode !== "supabase") return;
+  const reconcileFromDurableAuthority = useCallback(async (): Promise<boolean> => {
+    if (persistMetaRef.current.mode !== "supabase") return false;
     try {
       const serverRes = await fetch("/api/workspace/state", {
         credentials: "same-origin",
         cache: "no-store",
       });
-      if (!serverRes.ok) return;
+      if (!serverRes.ok) return false;
       const payload = (await serverRes.json()) as {
         workspaceId: string;
         userId: string;
         state: MissionState;
       };
       applyDurableWorkspace(payload, { preserveSaveError: true });
+      return true;
     } catch (err) {
       console.error("[MissionProvider] durable reconcile failed", err);
+      return false;
     }
   }, [applyDurableWorkspace]);
 
@@ -2698,6 +2702,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       addCaptureKnowledgeBullet,
       addCaptureMemory,
       adoptAppliedState,
+      reconcileDurableWorkspace: reconcileFromDurableAuthority,
       refreshCoaching,
       resetDemo,
       persistenceMode,
@@ -2743,6 +2748,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       addCaptureKnowledgeBullet,
       addCaptureMemory,
       adoptAppliedState,
+      reconcileFromDurableAuthority,
       refreshCoaching,
       resetDemo,
     ],

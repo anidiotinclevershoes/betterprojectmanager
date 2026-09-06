@@ -452,6 +452,7 @@ function planPerson(
       projectId,
       name: resolved.name,
       personId: resolved.personId,
+      applyOperationId: item.id.trim() || undefined,
     });
   }
   return needsYou(
@@ -628,6 +629,7 @@ function planResponsibility(
       personName,
       personId: personId ?? null,
       replacePersonId,
+      applyOperationId: item.id.trim() || undefined,
     });
   }
 
@@ -639,6 +641,7 @@ function planResponsibility(
     personName,
     personId: personId ?? null,
     replacePersonId: null,
+    applyOperationId: item.id.trim() || undefined,
   });
 }
 
@@ -715,6 +718,7 @@ function planAvailability(
       asString(values.label) ||
       reviewedCreateIdentity(item) ||
       personName,
+    applyOperationId: item.id.trim() || undefined,
   });
 }
 
@@ -745,6 +749,7 @@ function planKnowledge(
     projectId,
     section,
     text: body,
+    applyOperationId: item.id.trim() || undefined,
   });
 }
 

@@ -1,6 +1,6 @@
 # Lume documentation
 
-**Status:** Documentation authority map (5 September 2026)  
+**Status:** Documentation authority map (6 September 2026)  
 **Scope:** How to read Lume docs. This file does not replace product philosophy or current architecture.
 
 **Use this page first.** Then read only what the task needs.
@@ -71,6 +71,7 @@ Current contracts to honour:
 - Timeline is a read-only projection of dated truth. Future Timeline Add writes canonical dated records, not `timeline_item` storage.
 - Legacy writable Gantt is **retired from the intended product**. The write surface is unmounted from production Timeline. Do not delete shared date infrastructure or stored Gantt/`timeline` rows until proven unused.
 - Meeting-scoped Catch Me Up is generated from stored project truth, not generic advice. Stored `Meeting.prep` hydrates for compatibility and must not drive Catch Me Up or Capture context.
+- After a successful Apply, never adopt pre-write state. Capture session binds to the open project. Knowledge/availability Apply is receipted. Fingerprints include the fields Apply writes. Details: `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` (closed D-045–D-048).
 
 ### 3. Living Known Discoveries
 
@@ -90,6 +91,15 @@ Use only when the task needs them (for example test safety-net, Supabase setup, 
 They do not override (1)–(3) unless they are the specific contract for that seam (Ask/eval scoring → Intelligence Contract).
 
 Test evidence / model comparison: `docs/TEST_DASHBOARD.md`. This is an engineering Issue + Actions summary, not a Lume product surface.
+
+Integrity probes (read-only / in-memory; no production daemon):
+
+```bash
+npm run verify:adversarial-integrity
+npm run verify:dogfood-integrity-gate
+```
+
+SQL printed by the adversarial script is for operators on a copy of dogfood data. Do not run it as a migration.
 
 ### 5. Active plans
 
@@ -159,6 +169,7 @@ Left in place on purpose. They record *why* the architecture evolved.
 | Area | Examples | Role |
 | --- | --- | --- |
 | Pre-slice architecture snapshot | `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` (19 Aug 2026) | Original failure analysis; **superseded as an implementation map** |
+| Adversarial integrity audit | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` (6 Sep 2026; remediations same day) | Findings on `f737f8a` plus CLOSED / VERIFIED D-045–D-048. **Not** a second architecture map. Code wins if they later disagree. Run `npm run verify:adversarial-integrity` and `npm run verify:dogfood-integrity-gate` (non-mutating). |
 | UI/application snapshot | `docs/current-state/` (11 Aug 2026) | Screenshots and pre-Ocean / pre-Supabase UI evidence |
 | Slice / phase handovers | `docs/SLICE*.md`, `docs/PHASE*.md`, completion reports, `docs/V1_CONVERGENCE_ARCHITECTURE_COMPLETION.md` | Seam history when extending that slice; architecture review checkpoint |
 | Older product copy | repository root `README.md` (corrected enough to point here; remaining Mission Control copy is historical) | Setup remnants; not current product/architecture authority |

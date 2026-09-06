@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 3100;
+const PORT = Number(process.env.PLAYWRIGHT_PORT || 3100);
 const BASE = `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
@@ -21,7 +21,8 @@ export default defineConfig({
   webServer: {
     command: `npx next dev --port ${PORT}`,
     url: BASE,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer:
+      !process.env.CI || process.env.PLAYWRIGHT_REUSE_SERVER === "1",
     timeout: 120_000,
     env: {
       ...process.env,

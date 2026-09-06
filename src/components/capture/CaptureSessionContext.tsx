@@ -18,6 +18,8 @@ import {
 import {
   buildSuggestions,
   CAPTURE_SESSION_KEY,
+  captureSessionStorageKey,
+  captureSessionProjectMismatch,
   destinationFor,
   type CapturePersistSlice,
   type PendingSuggestion,
@@ -104,6 +106,8 @@ type CaptureSessionValue = {
   dismissOne: (id: string) => void;
   markOneApplied: (id: string) => void;
   clearSession: () => void;
+  /** Park the current project's Capture and load the open project's session. */
+  bindOpenProject: (projectId: string) => void;
   expandAnalysis: () => void;
   /** Clear analysis but keep transcript — used after limited reliability. */
   editCapture: () => void;
@@ -146,14 +150,35 @@ function normalizeSlice(raw: CapturePersistSlice | null): CapturePersistSlice {
   };
 }
 
-function readPersisted(): CapturePersistSlice | null {
+function readPersisted(projectId?: string | null): CapturePersistSlice | null {
   if (typeof window === "undefined") return null;
   try {
+    const scoped = window.sessionStorage.getItem(
+      captureSessionStorageKey(projectId),
+    );
+    if (scoped) return normalizeSlice(JSON.parse(scoped) as CapturePersistSlice);
+    if (projectId) return null;
     const raw = window.sessionStorage.getItem(CAPTURE_SESSION_KEY);
     if (!raw) return null;
     return normalizeSlice(JSON.parse(raw) as CapturePersistSlice);
   } catch {
     return null;
+  }
+}
+
+function writePersisted(slice: CapturePersistSlice) {
+  if (typeof window === "undefined") return;
+  try {
+    const payload = JSON.stringify(slice);
+    window.sessionStorage.setItem(CAPTURE_SESSION_KEY, payload);
+    if (slice.projectId) {
+      window.sessionStorage.setItem(
+        captureSessionStorageKey(slice.projectId),
+        payload,
+      );
+    }
+  } catch {
+    /* ignore */
   }
 }
 
@@ -207,6 +232,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     state,
     analyzeCaptureWithAI,
     adoptAppliedState,
+    reconcileDurableWorkspace,
   } = useMission();
 
   const [slice, setSlice] = useState<CapturePersistSlice>(emptySlice);
@@ -230,6 +256,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         if (prev.projectId !== deletedId) return prev;
         try {
           window.sessionStorage.removeItem(CAPTURE_SESSION_KEY);
+          window.sessionStorage.removeItem(captureSessionStorageKey(deletedId));
         } catch {
           /* ignore */
         }
@@ -242,11 +269,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    try {
-      window.sessionStorage.setItem(CAPTURE_SESSION_KEY, JSON.stringify(slice));
-    } catch {
-      /* ignore */
-    }
+    writePersisted(slice);
   }, [slice, hydrated]);
 
   const announce = useCallback((message: string) => {
@@ -403,9 +426,31 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     setStatusMessage(null);
     try {
       window.sessionStorage.removeItem(CAPTURE_SESSION_KEY);
+      if (slice.projectId) {
+        window.sessionStorage.removeItem(
+          captureSessionStorageKey(slice.projectId),
+        );
+      }
     } catch {
       /* ignore */
     }
+  }, [slice.projectId]);
+
+  const bindOpenProject = useCallback((projectId: string) => {
+    const openId = projectId.trim();
+    if (!openId) return;
+    setSlice((prev) => {
+      if (prev.projectId === openId) return prev;
+      if (prev.projectId) writePersisted(prev);
+      const parked = readPersisted(openId);
+      if (parked) {
+        return { ...parked, projectId: openId };
+      }
+      if (!prev.result) {
+        return { ...prev, projectId: openId };
+      }
+      return { ...emptySlice(), projectId: openId };
+    });
   }, []);
 
   const editCapture = useCallback(() => {
@@ -559,6 +604,23 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       const text = (slice.content.trim() || reviewed);
       const projectId = scopedProjectId || slice.projectId || item.projectId || "";
 
+      if (
+        captureSessionProjectMismatch(
+          slice.projectId,
+          scopedProjectId,
+          Boolean(slice.result),
+        )
+      ) {
+        const decision: CaptureApplyDecision = {
+          kind: "needs_you",
+          domain: item.legalDomain ?? "unsupported",
+          reason:
+            "This Review belongs to another project. Open that project or start a new Capture.",
+        };
+        announce(decision.reason);
+        return decision;
+      }
+
       const finishApplied = (message: string) => {
         setSlice((prev) => {
           const next = {
@@ -599,6 +661,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
             domain?: string;
           };
           state?: import("@/lib/types").MissionState;
+          reconcileFailed?: boolean;
           error?: string;
         };
         if (!response.ok) {
@@ -625,6 +688,13 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
         }
         if (data.state) {
           adoptAppliedState(data.state);
+        } else if (data.executed?.kind === "wrote" && data.reconcileFailed) {
+          const recovered = await reconcileDurableWorkspace();
+          if (!recovered) {
+            announce(
+              "Saved. Refresh the page to see the latest project — Lume could not reload it automatically.",
+            );
+          }
         }
         if (decision.kind === "needs_you") {
           setSlice((prev) => ({
@@ -671,9 +741,11 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     [
       adoptAppliedState,
       announce,
+      reconcileDurableWorkspace,
       slice.content,
       slice.editing,
       slice.projectId,
+      slice.result,
     ],
   );
 
@@ -748,6 +820,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       analyse,
       cancelAnalyse,
       applyOne,
+      bindOpenProject,
       dismissOne,
       markOneApplied,
       clearSession,
@@ -771,6 +844,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       cancelAnalyse,
       announce,
       applyOne,
+      bindOpenProject,
       busy,
       clearSession,
       dismissOne,

@@ -227,7 +227,7 @@ export async function runStackedStep(args: {
           state,
         }),
       });
-      if (applied.executed.kind === "wrote") {
+      if (applied.executed.kind === "wrote" && applied.state) {
         state = applied.state;
       }
     }

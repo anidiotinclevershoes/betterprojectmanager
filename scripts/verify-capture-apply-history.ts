@@ -8,7 +8,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { applyApprovedCaptureSuggestion } from "../src/lib/capture/apply/apply-approved";
+import {
+  applyApprovedCaptureSuggestion,
+  requireAppliedState,
+} from "../src/lib/capture/apply/apply-approved";
 import { supabaseCaptureApplyHooks } from "../src/lib/capture/apply/persist-execute";
 import { historyInputFromCaptureOperation } from "../src/lib/capture/apply/history-evidence";
 import type { CaptureApplyHooks } from "../src/lib/capture/apply/execute";
@@ -99,12 +102,13 @@ async function main() {
       loadWorkspace: async () => workspace(seed),
     });
     assert.equal(applied.executed.kind, "wrote");
+    const state = requireAppliedState(applied);
     assert.ok(
-      (applied.state.todos ?? []).some(
+      (state.todos ?? []).some(
         (t) => t.title === "Book the wet-store dehumidifier",
       ),
     );
-    const events = applied.state.history ?? [];
+    const events = state.history ?? [];
     assert.equal(events.length, 1);
     assert.equal(events[0]?.type, "task_added");
     assert.equal(events[0]?.projectId, CANDY);
@@ -143,7 +147,7 @@ async function main() {
       },
     });
     assert.equal(applied.executed.kind, "needs_you");
-    assert.equal((applied.state.history ?? []).length, 0);
+    assert.equal((requireAppliedState(applied).history ?? []).length, 0);
   });
 
   await check("no_change does not record History", async () => {
@@ -164,10 +168,11 @@ async function main() {
       loadWorkspace: async () => workspace(seed),
     });
     assert.equal(applied.executed.kind, "no_change");
-    assert.equal((applied.state.history ?? []).length, 0);
+    const state = requireAppliedState(applied);
+    assert.equal((state.history ?? []).length, 0);
     assert.equal(
       seed.todos.filter((t) => t.title === "Prepare the jelly pack").length,
-      (applied.state.todos ?? []).filter((t) => t.title === "Prepare the jelly pack")
+      (state.todos ?? []).filter((t) => t.title === "Prepare the jelly pack")
         .length,
     );
   });
@@ -199,8 +204,9 @@ async function main() {
       },
     });
     assert.equal(applied.executed.kind, "failed");
-    assert.equal((applied.state.history ?? []).length, 0);
-    assert.ok(!(applied.state.todos ?? []).some((t) => t.title === "Should not land"));
+    const state = requireAppliedState(applied);
+    assert.equal((state.history ?? []).length, 0);
+    assert.ok(!(state.todos ?? []).some((t) => t.title === "Should not land"));
   });
 
   await check("durable write then History then reload keeps both", async () => {
@@ -267,9 +273,10 @@ async function main() {
     assert.equal(fake.tables.history_events.length, 1);
     assert.equal(fake.tables.history_events[0]?.type, "task_added");
     assert.equal(fake.tables.history_events[0]?.project_id, PROJECT_A);
-    assert.equal((applied.state.todos ?? []).length, 1);
-    assert.equal((applied.state.history ?? []).length, 1);
-    assert.equal(applied.state.history?.[0]?.type, "task_added");
+    const reloaded = requireAppliedState(applied);
+    assert.equal((reloaded.todos ?? []).length, 1);
+    assert.equal((reloaded.history ?? []).length, 1);
+    assert.equal(reloaded.history?.[0]?.type, "task_added");
   });
 
   await check("durable truth-write failure records no History", async () => {

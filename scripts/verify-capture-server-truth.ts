@@ -15,7 +15,10 @@ import {
   clientPostedTruthFields,
   loadServerCaptureWorld,
 } from "../src/lib/capture-v2/server-truth";
-import { applyApprovedCaptureSuggestion } from "../src/lib/capture/apply/apply-approved";
+import {
+  applyApprovedCaptureSuggestion,
+  requireAppliedState,
+} from "../src/lib/capture/apply/apply-approved";
 import { fingerprintExpectedTarget } from "../src/lib/capture/apply/expected-target";
 import { planCaptureApply } from "../src/lib/capture/apply";
 import { DurableWorkspaceError } from "../src/lib/data/durable-workspace";
@@ -216,7 +219,7 @@ async function main() {
       assert.match(applied.decision.reason, /changed since Review/i);
     }
     assert.equal(
-      applied.state.risks?.find((r) => r.id === "risk-bridge")?.status,
+      requireAppliedState(applied).risks?.find((r) => r.id === "risk-bridge")?.status,
       "watch",
     );
   });
@@ -247,7 +250,7 @@ async function main() {
     });
     assert.equal(applied.executed.kind, "needs_you");
     assert.ok(
-      !applied.state.risks?.some((r) => r.id === "risk-bridge"),
+      !requireAppliedState(applied).risks?.some((r) => r.id === "risk-bridge"),
     );
   });
 
@@ -273,7 +276,7 @@ async function main() {
       loadWorkspace: async () => workspaceFrom(evolving),
     });
     assert.equal(applied.executed.kind, "wrote");
-    evolving = applied.state;
+    evolving = requireAppliedState(applied);
     assert.equal(
       evolving.risks?.find((r) => r.id === "risk-bridge")?.status,
       "resolved",
@@ -313,14 +316,15 @@ async function main() {
       loadWorkspace: async () => workspaceFrom(clone(durable)),
     });
     assert.equal(applied.executed.kind, "wrote");
-    assert.ok(applied.state.projects.some((p) => p.id === TOY));
-    assert.ok(applied.state.projects.some((p) => p.id === GAME));
+    const returned = requireAppliedState(applied);
+    assert.ok(returned.projects.some((p) => p.id === TOY));
+    assert.ok(returned.projects.some((p) => p.id === GAME));
     assert.equal(
-      applied.state.risks?.find((r) => r.id === "risk-bridge")?.status,
+      returned.risks?.find((r) => r.id === "risk-bridge")?.status,
       "resolved",
     );
     assert.equal(
-      applied.state.risks?.find((r) => r.id === "risk-packaging")?.status,
+      returned.risks?.find((r) => r.id === "risk-packaging")?.status,
       "open",
     );
   });
@@ -349,15 +353,16 @@ async function main() {
       loadWorkspace: async () => workspaceFrom(clone(durable)),
     });
     assert.equal(applied.executed.kind, "wrote");
+    const returned = requireAppliedState(applied);
     assert.equal(
-      applied.state.risks?.find((r) => r.id === "risk-bridge")?.status,
+      returned.risks?.find((r) => r.id === "risk-bridge")?.status,
       "resolved",
       "returned Apply state must already represent the committed result",
     );
 
     const subsequent = await loadServerCaptureWorld({
       projectId: CANDY,
-      loadWorkspace: async () => workspaceFrom(applied.state),
+      loadWorkspace: async () => workspaceFrom(returned),
     });
     assert.equal(
       subsequent.world.risks.find((r) => r.id === "risk-bridge")?.status,
@@ -365,12 +370,12 @@ async function main() {
     );
     assert.deepEqual(
       projectTruth(subsequent.workspaceState, CANDY),
-      projectTruth(applied.state, CANDY),
+      projectTruth(returned, CANDY),
       "a subsequent server load must return the same relevant project truth — no hard refresh required",
     );
     assert.deepEqual(
       projectTruth(subsequent.state, CANDY),
-      projectTruth(applied.state, CANDY),
+      projectTruth(returned, CANDY),
     );
     assert.equal(
       subsequent.workspaceState.risks?.find((r) => r.id === "risk-packaging")?.status,

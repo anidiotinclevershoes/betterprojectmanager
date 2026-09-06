@@ -38,6 +38,13 @@ export async function seedExperimentalWorlds(page: Page, testId: string) {
       if (window.sessionStorage.getItem(marker) === runId) return;
       window.localStorage.setItem(storageKey, stateJson);
       window.sessionStorage.removeItem(sessionKey);
+      const prefix = `${sessionKey}:`;
+      const scoped = [];
+      for (let i = 0; i < window.sessionStorage.length; i += 1) {
+        const key = window.sessionStorage.key(i);
+        if (key && key.startsWith(prefix)) scoped.push(key);
+      }
+      for (const key of scoped) window.sessionStorage.removeItem(key);
       window.sessionStorage.setItem(marker, runId);
     },
     {
@@ -233,6 +240,13 @@ export async function seedMissionState(
       if (window.sessionStorage.getItem(marker) === runId) return;
       window.localStorage.setItem(storageKey, stateJson);
       window.sessionStorage.removeItem(sessionKey);
+      const prefix = `${sessionKey}:`;
+      const scoped = [];
+      for (let i = 0; i < window.sessionStorage.length; i += 1) {
+        const key = window.sessionStorage.key(i);
+        if (key && key.startsWith(prefix)) scoped.push(key);
+      }
+      for (const key of scoped) window.sessionStorage.removeItem(key);
       window.sessionStorage.setItem(marker, runId);
     },
     {

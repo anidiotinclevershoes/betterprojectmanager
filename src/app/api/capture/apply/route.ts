@@ -88,6 +88,7 @@ export async function POST(request: Request) {
       decision: result.decision,
       executed: result.executed,
       state: result.state,
+      reconcileFailed: result.reconcileFailed === true,
     });
   } catch (error) {
     if (
