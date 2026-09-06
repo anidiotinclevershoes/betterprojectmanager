@@ -102,7 +102,7 @@ Maximum five, ordered:
 | **main SHA** | `f737f8a88442bff9e850d91de55c9afd82cda630` (`Merge pull request #139`) |
 | **Audit branch** | `cursor/adversarial-integrity-audit-cedc` |
 | **Preflight** | Run at start of this slice against `origin/main`; expected CURRENT / ahead 0 / behind 0. Re-run before merge of any later fix slice. |
-| **Test baseline** | Deterministic suite via `npm test` after this report lands. New script: `verify:adversarial-integrity` (25 probes). |
+| **Test baseline** | `npm test` — **67/67** deterministic suites passed after this report landed, including `adversarial-integrity` (25 probes). |
 | **Live DB** | Not mutated. No RLS bypass. No user-data cleanup. |
 | **Delegated recon** | Persistence/RLS, Review→Apply, Capture/AI boundary, hydrate/concurrency — read-only. Lead independently verified production paths below. |
 
