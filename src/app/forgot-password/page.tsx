@@ -7,6 +7,7 @@ import {
   AuthNavLink,
   AuthShell,
 } from "@/components/auth/AuthShell";
+import { ANALYTICS_EVENTS, trackAnalyticsEvent } from "@/lib/analytics";
 import { friendlyAuthError } from "@/lib/auth-password";
 
 export default function ForgotPasswordPage() {
@@ -29,6 +30,9 @@ export default function ForgotPasswordPage() {
       if (!response.ok) {
         throw new Error(friendlyAuthError(data.error));
       }
+      trackAnalyticsEvent(ANALYTICS_EVENTS.password_reset_requested, {
+        surface: "forgot_password",
+      });
       router.replace("/login?notice=reset-sent");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send reset email");

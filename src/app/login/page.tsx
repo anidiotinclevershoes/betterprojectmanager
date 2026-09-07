@@ -12,6 +12,7 @@ import {
   safeAuthNextPath,
 } from "@/lib/auth-mission-ownership";
 import { friendlyAuthError } from "@/lib/auth-password";
+import { ANALYTICS_EVENTS, trackAnalyticsEvent } from "@/lib/analytics";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 
 function LoginForm() {
@@ -46,6 +47,7 @@ function LoginForm() {
       if (!response.ok) {
         throw new Error(friendlyAuthError(data.error));
       }
+      trackAnalyticsEvent(ANALYTICS_EVENTS.login_completed, { surface: "login" });
       clearAuthenticatedBrowserState();
       navigateAuthBoundary(next);
     } catch (err) {

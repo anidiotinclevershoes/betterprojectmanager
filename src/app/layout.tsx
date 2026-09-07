@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import { AppShell } from "@/components/AppShell";
 import { AppearanceProvider } from "@/lib/appearance";
 import { MissionProvider } from "@/lib/store";
@@ -44,9 +45,11 @@ export default function RootLayout({
       </head>
       <body className="min-h-full bg-[var(--bg-app)] text-[var(--text-primary)] font-sans">
         <AppearanceProvider>
-          <MissionProvider>
-            <AppShell>{children}</AppShell>
-          </MissionProvider>
+          <AnalyticsProvider>
+            <MissionProvider>
+              <AppShell>{children}</AppShell>
+            </MissionProvider>
+          </AnalyticsProvider>
         </AppearanceProvider>
       </body>
     </html>
