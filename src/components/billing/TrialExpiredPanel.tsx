@@ -18,7 +18,9 @@ export function TrialExpiredPanel({
       <p className="eyebrow">Account</p>
       <h1>Your Lume trial has ended</h1>
       <p className="lede">
-        Keep your project memory, Capture and Coach available by subscribing.
+        Keep Capture, Review, Apply and Knowledge Centre available by
+        subscribing. Lume does not invent a price here — checkout uses the
+        server plan when billing is configured.
       </p>
       {status === "past_due" ? (
         <p className="meta">
