@@ -6,6 +6,7 @@ import {
   suggestCode,
   type CreateProjectInput,
 } from "@/lib/create-project";
+import { parsePersonLine, scopesOf } from "@/lib/new-project/person-text";
 import type { ProvisionalItem } from "./types";
 
 /**
@@ -25,13 +26,29 @@ export function draftFromProvisional(args: {
   const stakeholders = args.items
     .filter((item) => item.category === "person")
     .map((item) => {
-      const name =
+      const rawName =
         asUsableString(item.proposedValues?.name) ||
-        asUsableString(item.proposedValues?.personName);
+        asUsableString(item.proposedValues?.personName) ||
+        "";
+      const parsed = parsePersonLine(rawName);
+      const structuredScope =
+        asUsableString(item.proposedValues?.scope) ||
+        asUsableString(item.proposedValues?.role);
+      const responsibilities = [
+        ...parsed.responsibilities,
+        ...(structuredScope && structuredScope.toLowerCase() !== "stakeholder"
+          ? [structuredScope]
+          : []),
+      ].filter((scope, index, all) => {
+        const key = scope.trim().toLowerCase();
+        return key && all.findIndex((s) => s.trim().toLowerCase() === key) === index;
+      });
+      const name = parsed.name || rawName;
       return {
         clientKey: item.id,
-        name: name ?? "",
-        role: asUsableString(item.proposedValues?.role) || asUsableString(item.proposedValues?.scope),
+        name,
+        role: structuredScope,
+        responsibilities,
         needsReview: Boolean(item.needsReview) || !name,
       };
     });
@@ -112,7 +129,10 @@ export function draftFromProvisional(args: {
     knowledgeRisks: risks.filter((r) => !r.needsReview).map((r) => r.title),
     knowledgePeople: stakeholders
       .filter((s) => s.name.trim() && !s.needsReview)
-      .map((s) => (s.role ? `${s.name} — ${s.role}` : s.name)),
+      .map((s) => {
+        const scopes = scopesOf(s);
+        return scopes.length ? `${s.name} — ${scopes.join(", ")}` : s.name;
+      }),
     notMentioned,
     sourceNarrative: args.sourceNarrative,
     sourceMode: args.sourceMode,

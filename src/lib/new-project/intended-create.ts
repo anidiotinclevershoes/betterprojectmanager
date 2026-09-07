@@ -4,26 +4,13 @@
  */
 import type { CreateProjectInput } from "@/lib/create-project";
 import { tagSlug } from "@/lib/tags";
+import { scopesOf } from "./person-text";
 import {
   confirmedRiskDrafts,
   confirmedTodoDrafts,
-  personResponsibilityQuestion,
   uncertainRiskQuestion,
   uncertainTodoQuestion,
 } from "./needs-you";
-
-function scopesOf(draft: {
-  role?: string;
-  responsibilities?: string[];
-}): string[] {
-  const listed = (draft.responsibilities ?? [])
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (listed.length) return listed;
-  const role = draft.role?.trim();
-  if (role && role.toLowerCase() !== "stakeholder") return [role];
-  return [];
-}
 
 export type IntendedCreateTruth = {
   stakeholderNames: string[];
@@ -50,11 +37,6 @@ export function intendedCreateTruth(input: CreateProjectInput): IntendedCreateTr
     .map((d) => d.label.trim());
 
   const ambiguityBodies: string[] = [];
-  for (const person of people) {
-    if (scopesOf(person).length === 0) {
-      ambiguityBodies.push(personResponsibilityQuestion(person.name));
-    }
-  }
   for (const note of input.knowledgeRemember ?? []) {
     if (note.remember === false || !note.text.trim()) continue;
     if (note.needsReview && note.needsYouQuestion?.trim()) {

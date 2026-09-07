@@ -129,11 +129,11 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | partial (code unique index already shipped; name uniqueness added on the New Project dogfood branch) |
 | **Severity** | low |
 | **Domain** | Projects / Infra |
 | **Found in** | Phase 3A preflight (Aug 2026) |
-| **Failure class** | There is no unique constraint on `(workspace_id, code)` or project name. Two deliberately different New Project actions can share a code. Retry safety uses a client request UUID, not code matching. |
+| **Failure class** | Historical: there was no unique constraint on `(workspace_id, code)` or project name. Retry safety uses a client request UUID, not code matching. |
 | **Evidence / repro** | `supabase/migrations/20260812002748_workspace_schema.sql` `projects` table — `code text not null` with no unique index |
 | **Likely files** | schema; `persistNewProject`; New Project review |
 | **Proposed fix direction** | Decide the product rule first (codes unique per workspace vs allowed duplicates). If unique, add a DB unique index and a meaningful Ocean error. Do not invent fuzzy name matching. |
@@ -141,7 +141,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | If the product rule becomes “codes unique per workspace”, assert unique-violation surfaces a code-already-used error |
 | **Target resolution / validation point** | New Project/product hardening — do not silently add the constraint in an integrity slice |
 | **Related docs** | Phase 3A PR; this file D-R11 |
-| **Notes** | Phase 3A implements retry idempotency via `clientProjectId` (same user action / same UUID). That is not a product rule that two projects cannot share a code. **Phase 3A.1 delete** is keyed by durable project UUID, not code or name. |
+| **Notes** | Phase 3A implements retry idempotency via `clientProjectId` (same user action / same UUID). Code uniqueness already has `projects_workspace_code_lower_idx`. **New Project dogfood:** names are now unique per workspace too — persist checks `isProjectNameTaken` and migration `20260907120000_project_name_unique.sql` adds `projects_workspace_name_lower_idx` (fail-closed if duplicates already exist; existing names are not rewritten). **Phase 3A.1 delete** is keyed by durable project UUID, not code or name. |
 
 ---
 

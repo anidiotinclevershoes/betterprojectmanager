@@ -113,12 +113,17 @@ function id(prefix: string) {
 }
 
 export const PROJECT_CODE_TAKEN_PREFIX = "Project code already exists";
+export const PROJECT_NAME_TAKEN_PREFIX = "Project name already exists";
 
 export function normaliseProjectCode(code: string) {
   return code.trim().toUpperCase().slice(0, 12);
 }
 
-/** Workspace-scoped uniqueness. Names are not required to be unique. */
+export function normaliseProjectName(name: string) {
+  return name.trim().replace(/\s+/g, " ");
+}
+
+/** Workspace-scoped uniqueness. */
 export function isProjectCodeTaken(
   existingCodes: Array<{ id?: string; code: string }>,
   code: string,
@@ -132,24 +137,52 @@ export function isProjectCodeTaken(
   });
 }
 
+export function isProjectNameTaken(
+  existingNames: Array<{ id?: string; name: string }>,
+  name: string,
+  excludeId?: string,
+) {
+  const wanted = normaliseProjectName(name).toLowerCase();
+  if (!wanted) return false;
+  return existingNames.some((row) => {
+    if (excludeId && row.id && row.id === excludeId) return false;
+    return normaliseProjectName(row.name).toLowerCase() === wanted;
+  });
+}
+
 export function projectCodeTakenMessage(code: string) {
   return `${PROJECT_CODE_TAKEN_PREFIX}: ${normaliseProjectCode(code)}. Choose a different code.`;
 }
 
+export function projectNameTakenMessage(name: string) {
+  return `${PROJECT_NAME_TAKEN_PREFIX}: ${normaliseProjectName(name)}. Choose a different name.`;
+}
+
+const CODE_STOP = new Set(["THE", "A", "AN", "AND", "OR", "OF", "FOR", "TO", "IN", "ON"]);
+
+/**
+ * Compact workspace code from a project name.
+ * Target 2–3 characters. Never emit a one-character code.
+ */
 export function suggestCode(name: string) {
   const words = name
     .trim()
     .toUpperCase()
     .replace(/[^A-Z0-9\s-]/g, " ")
     .split(/[\s-]+/)
-    .filter(Boolean);
-  if (!words.length) return "PROJ";
-  if (words.length === 1) return words[0]!.slice(0, 8);
-  return words
+    .filter(Boolean)
+    .filter((word, _, all) => !CODE_STOP.has(word) || all.length === 1);
+  if (!words.length) return "";
+  if (words.length === 1) {
+    const word = words[0]!;
+    if (word.length < 2) return "";
+    return word.length <= 3 ? word : word.slice(0, 2);
+  }
+  const initials = words
     .slice(0, 3)
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 8);
+    .map((word) => word[0])
+    .join("");
+  return initials.length >= 2 ? initials : "";
 }
 
 export function toIsoFromDateInput(value?: string) {

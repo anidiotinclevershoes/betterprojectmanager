@@ -160,16 +160,16 @@ test.describe("Harbourline deep stress slices", () => {
     });
 
     await page.goto("/projects/new");
-    await page.getByText("Organise notes", { exact: true }).click();
     await page.getByTestId("np-organise-notes").fill(payload.narrative);
     await page.getByTestId("np-organise").click();
     await expect(page.getByTestId("np-frame-people").getByText("Miriam Cole")).toBeVisible({
       timeout: 20_000,
     });
-    // Shared Capture extract does not invent Objective. The user types the
-    // evidenced name before create.
-    await expect(page.getByTestId("np-summary")).toHaveValue("");
+    // Extract still does not invent Objective. Review may condense the user's
+    // overview into the existing Project.summary field.
+    await expect(page.getByTestId("np-summary")).toBeVisible();
     await page.getByTestId("np-name").fill("Harbourline Civic Archive Refresh");
+    await page.getByTestId("np-name").blur();
     await page.getByTestId("np-create").click();
     await expect(
       page.getByRole("heading", {

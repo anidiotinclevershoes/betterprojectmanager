@@ -2,25 +2,12 @@ import { newPeopleUuid } from "@/lib/people/identity";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import type { CreateProjectInput } from "@/lib/create-project";
 import type { ProjectRisk, Stakeholder } from "@/lib/types";
+import { scopesOf } from "./person-text";
 import {
-  personResponsibilityQuestion,
   uncertainRiskQuestion,
   uncertainTodoQuestion,
   confirmedRiskDrafts,
 } from "./needs-you";
-
-function scopesOf(draft: {
-  role?: string;
-  responsibilities?: string[];
-}): string[] {
-  const listed = (draft.responsibilities ?? [])
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (listed.length) return listed;
-  const role = draft.role?.trim();
-  if (role && role.toLowerCase() !== "stakeholder") return [role];
-  return [];
-}
 
 /**
  * Structured overlay for New Project create — reuses CanonicalTruthItem.
@@ -83,23 +70,8 @@ export function structuredItemsFromSetup(args: {
     });
   }
 
-  // Person with no scopes: do not invent unknown_owner from absence (D-009).
-  // Persist the question as stored ambiguity so Needs You survives reload.
-  (args.input.stakeholders ?? []).forEach((draft, index) => {
-    const person = args.stakeholders[index];
-    if (!person || !draft.name.trim()) return;
-    if (scopesOf(draft).length > 0) return;
-    items.push({
-      id: newPeopleUuid(),
-      projectId: args.projectId,
-      section: "people",
-      body: personResponsibilityQuestion(person.name),
-      kind: "ambiguity",
-      epistemic: "pending",
-      lifecycle: "current",
-      provenance: [{ type: "import", at: now, note: "new-project-needs-you" }],
-    });
-  });
+  // Person with no scopes: valid canonical identity. Do not invent
+  // unknown_owner (D-009) and do not persist a fake Needs You question.
 
   // Ambiguous organised notes that the user kept, with an explicit question.
   // Undated dates already have kind=date rows.

@@ -7,6 +7,8 @@ import {
   type SetupStakeholderDraft,
   type SetupTodoDraft,
 } from "@/lib/create-project";
+import { deriveProjectSummary } from "./derive-summary";
+import { parsePersonLine, scopesOf } from "./person-text";
 
 function keyName(name: string) {
   return name.trim().toLowerCase();
@@ -37,16 +39,28 @@ export function mergeOrganisedDraft(
     organised.knowledgeRemember ?? [],
   );
 
-  const name = current.name.trim() || organised.name.trim();
+  const organisedName = organised.name.trim();
+  const usableOrganisedName =
+    organisedName && organisedName.toLowerCase() !== "new project"
+      ? organisedName
+      : "";
+  const name = current.name.trim() || usableOrganisedName;
   const code = opts?.codeLocked
     ? current.code
-    : current.code.trim() || organised.code.trim();
+    : current.code.trim() ||
+      (usableOrganisedName ? organised.code.trim() : "");
+  const sourceNarrative = [current.sourceNarrative, organised.sourceNarrative]
+    .filter((s) => s?.trim())
+    .join("\n\n");
 
   return {
     ...current,
     name,
     code,
-    summary: current.summary.trim() || organised.summary.trim(),
+    summary:
+      current.summary.trim() ||
+      organised.summary.trim() ||
+      deriveProjectSummary(sourceNarrative || organised.sourceNarrative || ""),
     currentFocus: current.currentFocus.trim() || organised.currentFocus.trim(),
     stakeholders,
     risks,
@@ -66,9 +80,7 @@ export function mergeOrganisedDraft(
       ...(current.notMentioned ?? []),
       ...(organised.notMentioned ?? []),
     ]).slice(0, 8),
-    sourceNarrative: [current.sourceNarrative, organised.sourceNarrative]
-      .filter((s) => s?.trim())
-      .join("\n\n"),
+    sourceNarrative,
     sourceMode: current.sourceMode === "blank" ? "paste" : current.sourceMode,
   };
 }
@@ -78,7 +90,16 @@ function mergePeople(
   incoming: SetupStakeholderDraft[],
 ): SetupStakeholderDraft[] {
   const out = current.map((p) => ({ ...p }));
-  for (const person of incoming) {
+  for (const raw of incoming) {
+    const parsed = parsePersonLine(raw.name);
+    const person: SetupStakeholderDraft = {
+      ...raw,
+      name: parsed.name || raw.name.trim(),
+      responsibilities: uniqueStrings([
+        ...scopesOf(raw),
+        ...parsed.responsibilities,
+      ]),
+    };
     if (!person.name.trim()) continue;
     const hit = out.find((p) => keyName(p.name) === keyName(person.name));
     const incomingScopes = scopesOf(person);
@@ -96,19 +117,11 @@ function mergePeople(
       role: person.role,
       responsibilities: incomingScopes,
       concerns: person.concerns,
-      needsReview: person.needsReview || incomingScopes.length === 0,
+      needsReview: Boolean(person.needsReview),
       tags: person.tags,
     });
   }
   return out;
-}
-
-function scopesOf(person: SetupStakeholderDraft): string[] {
-  const listed = (person.responsibilities ?? []).map((s) => s.trim()).filter(Boolean);
-  if (listed.length) return listed;
-  const role = person.role?.trim();
-  if (role && role.toLowerCase() !== "stakeholder") return [role];
-  return [];
 }
 
 function mergeByTitle(

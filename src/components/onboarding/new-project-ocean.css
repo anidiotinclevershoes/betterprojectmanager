@@ -279,75 +279,195 @@
 .np-four-frame {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1.25rem;
 }
 
-.np-identity {
+.np-identity,
+.np-overview,
+.np-summary-block {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.7rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--bg-surface);
 }
 
-.np-identity label,
-.np-frame form {
+.np-identity-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8.5rem;
+  gap: 0.75rem;
+}
+
+.np-field,
+.np-frame form,
+.np-people-add {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
+.np-field.is-muted input:disabled {
+  opacity: 0.55;
+  color: var(--text-muted);
+}
+
 .np-identity input,
 .np-identity textarea,
-.np-organise textarea,
-.np-frame input {
+.np-overview textarea,
+.np-summary-block textarea,
+.np-frame input,
+.np-inline-edit,
+.np-scope-chip input {
   font: inherit;
   font-weight: 500;
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  padding: 0.45rem 0.65rem;
+  padding: 0.55rem 0.7rem;
+  background: var(--bg-app);
+}
+
+.np-overview textarea,
+.np-summary-block textarea {
+  min-height: 10.5rem;
+  resize: vertical;
+}
+
+.np-field-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.np-field-hint.is-error {
+  color: var(--danger);
+}
+
+.np-overview-head h2,
+.np-frame h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--text-primary);
+}
+
+.np-overview-head p,
+.np-frame-help,
+.np-frame-example {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.np-frame-example {
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  border: 1px dashed color-mix(in srgb, var(--border-subtle) 80%, var(--text-muted));
+  color: var(--text-muted);
+}
+
+.np-overview-input {
+  position: relative;
+}
+
+.np-mic {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.7rem;
+  min-height: 36px;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
   background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.np-mic.is-active {
+  border-color: color-mix(in srgb, var(--accent-primary) 45%, var(--border-subtle));
+  color: var(--accent-primary);
+}
+
+.np-overview-actions,
+.np-create-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
 }
 
 .np-frames {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
+  gap: 0.95rem;
 }
 
 .np-frame {
   border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  padding: 0.75rem;
+  border-radius: 12px;
+  padding: 0.85rem;
   background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
 }
 
-.np-frame h2 {
-  margin: 0 0 0.45rem;
-  font-size: 0.95rem;
-}
-
-.np-frame ul {
-  margin: 0 0 0.55rem;
+.np-proposed-list {
+  margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.55rem;
 }
 
-.np-frame li {
+.np-frame .lume-review-card {
+  box-shadow: none;
+}
+
+.np-inline-edit {
+  width: 100%;
+}
+
+.np-scope-list {
   display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  font-weight: 500;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.np-scope-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.np-scope-chip input {
+  width: 9.5rem;
+}
+
+.np-people-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 0.45rem;
+  align-items: end;
+}
+
+.np-source-notes {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
 }
 
 .np-needs-you {
   border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--border-subtle));
   border-radius: 10px;
   padding: 0.7rem 0.85rem;
+  background: color-mix(in srgb, var(--warning) 8%, var(--bg-surface));
 }
 
 .np-needs-you p {
@@ -355,14 +475,26 @@
   font-weight: 650;
 }
 
-.np-organise {
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  padding: 0.7rem 0.85rem;
+.np-create-row {
+  justify-content: flex-end;
 }
 
 @media (max-width: 720px) {
+  .np-identity-row,
+  .np-people-add,
   .np-frames {
     grid-template-columns: 1fr;
+  }
+
+  .np-overview textarea,
+  .np-summary-block textarea,
+  .np-identity input,
+  .np-frame input {
+    font-size: 16px;
+  }
+
+  .np-create-row .primary-btn,
+  .np-overview-actions .primary-btn {
+    width: 100%;
   }
 }

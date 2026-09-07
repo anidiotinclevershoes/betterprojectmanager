@@ -48,7 +48,7 @@ function main() {
   });
 
   check("first user with no project can clearly create one", () => {
-    assert.match(experience, /Tell Lume what this project is about/);
+    assert.match(experience, /Tell Lume about this project/);
     assert.match(experience, /Add what you know now/);
     assert.match(experience, /np-four-frame/);
     assert.match(experience, /Create Project/);

@@ -67,7 +67,7 @@ check("production New Project UI is four-frame compose, not Talk", () => {
     "utf8",
   );
   assert.match(ui, /np-four-frame/);
-  assert.match(ui, /Organise notes/);
+  assert.match(ui, /Organise my project/);
   assert.doesNotMatch(ui, /Talk It Through/);
   assert.doesNotMatch(ui, /Paste Project Information/);
 });

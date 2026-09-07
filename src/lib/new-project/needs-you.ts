@@ -61,12 +61,18 @@ export function needsYouFromDraft(draft: CreateProjectInput): SetupNeedsYou[] {
 
   (draft.stakeholders ?? []).forEach((person, index) => {
     if (!person.name.trim()) return;
-    if (responsibilitiesOf(person).length === 0 || person.needsReview) {
+    // Missing responsibility is incomplete enrichment, not a write blocker.
+    // Only surface Needs You when extraction itself was uncertain.
+    if (person.needsReview) {
+      const question =
+        person.responsibilities?.length || responsibilitiesOf(person).length
+          ? `Is “${person.name.trim()}” on this project, and is their responsibility right?`
+          : `Lume is not sure about “${person.name.trim()}”. Keep them only if they belong on this project.`;
       out.push({
         id: person.clientKey ?? `person-${index}`,
         clientKey: person.clientKey,
         frame: "people",
-        question: personResponsibilityQuestion(person.name),
+        question,
       });
     }
   });

@@ -450,6 +450,33 @@ class FakeQuery {
             },
           };
         }
+        if (this.table === "projects") {
+          const codeKey = String(raw.code ?? "").trim().toLowerCase();
+          const nameKey = String(raw.name ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+          const workspaceId = raw.workspace_id;
+          const duplicate = tableRows.some((row) => {
+            if (row.workspace_id !== workspaceId) return false;
+            const rowCode = String(row.code ?? "").trim().toLowerCase();
+            const rowName = String(row.name ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+            return (codeKey && rowCode === codeKey) || (nameKey && rowName === nameKey);
+          });
+          if (duplicate) {
+            const codeClash = tableRows.some(
+              (row) =>
+                row.workspace_id === workspaceId &&
+                String(row.code ?? "").trim().toLowerCase() === codeKey,
+            );
+            return {
+              data: null,
+              error: {
+                message: codeClash
+                  ? "duplicate key value violates unique constraint on projects_workspace_code_lower_idx"
+                  : "duplicate key value violates unique constraint on projects_workspace_name_lower_idx",
+                code: "23505",
+              },
+            };
+          }
+        }
         if (this.table === "capture_apply_receipts") {
           const duplicate = tableRows.some(
             (row) =>

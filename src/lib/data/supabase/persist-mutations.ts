@@ -7,7 +7,9 @@ import type { CreateProjectInput } from "@/lib/create-project";
 import {
   buildNewProject,
   isProjectCodeTaken,
+  isProjectNameTaken,
   projectCodeTakenMessage,
+  projectNameTakenMessage,
 } from "@/lib/create-project";
 import { persistTagBundle } from "@/lib/data/supabase/persist-tags";
 import { intendedCreateTruth } from "@/lib/new-project/intended-create";
@@ -491,18 +493,20 @@ export async function persistNewProject(
   try {
     const { data: existingProjects, error: codeLookupError } = await client
       .from("projects")
-      .select("id, code")
+      .select("id, code, name")
       .eq("workspace_id", workspaceId);
     if (codeLookupError) {
       throw new Error(`[supabase] lookup project codes: ${codeLookupError.message}`);
     }
-    if (
-      isProjectCodeTaken(
-        (existingProjects ?? []) as Array<{ id: string; code: string }>,
-        local.project.code,
-        requestedId,
-      )
-    ) {
+    const existing = (existingProjects ?? []) as Array<{
+      id: string;
+      code: string;
+      name: string;
+    }>;
+    if (isProjectNameTaken(existing, local.project.name, requestedId)) {
+      throw new Error(projectNameTakenMessage(local.project.name));
+    }
+    if (isProjectCodeTaken(existing, local.project.code, requestedId)) {
       throw new Error(projectCodeTakenMessage(local.project.code));
     }
 
@@ -558,6 +562,10 @@ export async function persistNewProject(
       });
     }
     if (projectError && isUniqueViolation(projectError)) {
+      const detail = `${projectError.message ?? ""} ${projectError.code ?? ""}`;
+      if (/name/i.test(detail)) {
+        throw new Error(projectNameTakenMessage(local.project.name));
+      }
       throw new Error(projectCodeTakenMessage(local.project.code));
     }
 

@@ -31,8 +31,10 @@ import { ensurePersonOnProject as applyEnsurePersonOnProject } from "@/lib/peopl
 import {
   buildNewProject,
   isProjectCodeTaken,
+  isProjectNameTaken,
   normaliseProjectCode,
   projectCodeTakenMessage,
+  projectNameTakenMessage,
   suggestCode,
   type CreateProjectInput,
 } from "./create-project";
@@ -1417,12 +1419,15 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       const intendedCode = normaliseProjectCode(
         scopedInput.code.trim() || suggestCode(scopedInput.name),
       );
-      if (
-        isProjectCodeTaken(
-          stateRef.current.projects.map((p) => ({ id: p.id, code: p.code })),
-          intendedCode,
-        )
-      ) {
+      const existingProjects = stateRef.current.projects.map((p) => ({
+        id: p.id,
+        code: p.code,
+        name: p.name,
+      }));
+      if (isProjectNameTaken(existingProjects, scopedInput.name)) {
+        throw new Error(projectNameTakenMessage(scopedInput.name));
+      }
+      if (isProjectCodeTaken(existingProjects, intendedCode)) {
         throw new Error(projectCodeTakenMessage(intendedCode));
       }
 
