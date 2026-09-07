@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useState, type FormEvent } from "react";
 import {
   AuthLinkRow,
   AuthNavLink,
@@ -20,6 +20,36 @@ function ResetPasswordForm() {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sessionState, setSessionState] = useState<
+    "checking" | "ready" | "expired"
+  >("checking");
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkSession() {
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          const res = await fetch("/api/auth/me", { cache: "no-store" });
+          const data = (await res.json()) as { user?: { id?: string } | null };
+          if (cancelled) return;
+          if (data.user?.id) {
+            setSessionState("ready");
+            return;
+          }
+        } catch {
+          /* retry */
+        }
+        if (attempt < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+        }
+      }
+      if (!cancelled) setSessionState("expired");
+    }
+    void checkSession();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -42,6 +72,10 @@ function ResetPasswordForm() {
       });
       const data = (await response.json()) as { error?: string };
       if (!response.ok) {
+        if (response.status === 401) {
+          setSessionState("expired");
+          return;
+        }
         throw new Error(friendlyAuthError(data.error));
       }
       trackAnalyticsEvent(ANALYTICS_EVENTS.password_updated, {
@@ -54,6 +88,40 @@ function ResetPasswordForm() {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (sessionState === "checking") {
+    return (
+      <AuthShell title="Choose a new password" lede="Checking your reset link…">
+        <p className="lede">Hang on a moment.</p>
+      </AuthShell>
+    );
+  }
+
+  if (sessionState === "expired") {
+    return (
+      <AuthShell
+        title="This reset link has expired"
+        lede="For safety, password reset links only work once and for a short time."
+        footer={
+          <>
+            <AuthLinkRow>
+              <AuthNavLink href="/forgot-password">
+                Request a new reset link
+              </AuthNavLink>
+            </AuthLinkRow>
+            <AuthLinkRow>
+              <AuthNavLink href="/login">Back to sign in</AuthNavLink>
+            </AuthLinkRow>
+          </>
+        }
+      >
+        <p className="auth-notice" role="status">
+          If you still need to change your password, request a new email. Do not
+          reuse an old link.
+        </p>
+      </AuthShell>
+    );
   }
 
   return (

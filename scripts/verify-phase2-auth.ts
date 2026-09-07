@@ -34,6 +34,7 @@ check("password min length enforced", () => {
 check("friendly auth errors hide raw provider text", () => {
   assert.match(friendlyAuthError("Invalid login credentials"), /credentials/i);
   assert.match(friendlyAuthError("Email not confirmed"), /confirm/i);
+  assert.match(friendlyAuthError("User already registered"), /already exists/i);
   assert.doesNotMatch(friendlyAuthError("Invalid login credentials"), /supabase/i);
 });
 
