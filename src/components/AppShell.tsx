@@ -23,6 +23,9 @@ function isAuthChromePath(pathname: string) {
     pathname === "/signup" ||
     pathname === "/forgot-password" ||
     pathname === "/reset-password" ||
+    pathname === "/privacy" ||
+    pathname === "/terms" ||
+    pathname === "/support" ||
     pathname === "/account"
   );
 }

@@ -32,6 +32,7 @@
     "verify:analytics": "npx --yes tsx scripts/verify-analytics.ts",
     "verify:public-landing": "npx --yes tsx scripts/verify-public-landing.ts",
     "verify:auth-stranger": "npx --yes tsx scripts/verify-auth-stranger.ts",
+    "verify:stranger-polish": "npx --yes tsx scripts/verify-stranger-polish.ts",
     "verify:phase2-persistence": "npx --yes tsx scripts/verify-phase2-persistence.ts",
     "verify:production-config": "npx --yes tsx scripts/verify-production-config.ts",
     "verify:billing-display": "npx --yes tsx scripts/verify-billing-display.ts",
