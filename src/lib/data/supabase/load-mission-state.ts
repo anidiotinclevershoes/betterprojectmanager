@@ -136,7 +136,7 @@ export async function loadMissionStateFromSupabase(
     list.push({
       id: row.id,
       name: row.name,
-      role: row.role || "Stakeholder",
+      role: row.role ?? "",
       preferences: Array.isArray(row.preferences) ? row.preferences : [],
       concerns: Array.isArray(row.concerns) ? row.concerns : [],
       lastContactAt: row.last_contact_at ?? undefined,

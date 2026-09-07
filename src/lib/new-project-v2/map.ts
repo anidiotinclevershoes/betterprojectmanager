@@ -103,7 +103,11 @@ export function draftFromProvisional(args: {
     .map((item) => ({
       clientKey: item.id,
       text: item.statement,
-      remember: item.truthIntent !== "non_current" && !item.needsReview,
+      remember: item.truthIntent !== "non_current",
+      needsReview: Boolean(item.needsReview),
+      needsYouQuestion: item.needsReview
+        ? `Should Lume remember “${item.statement.trim()}”?`
+        : undefined,
     }));
 
   const notMentioned = args.items

@@ -291,7 +291,9 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     ...(input.knowledgeNow ?? []),
     ...rememberBullets.slice(0, 4),
     input.currentFocus.trim() ? `Current focus: ${input.currentFocus.trim()}` : "",
-    input.summary.trim() ? input.summary.trim() : "",
+    // Compose already stores summary on the project row. Do not invent a
+    // Knowledge bullet that the user did not add.
+    !sparse && input.summary.trim() ? input.summary.trim() : "",
   ]);
   knowledge.sections.decisions = uniqueBullets([
     ...(input.knowledgeDecisions ?? []),

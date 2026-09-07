@@ -19,6 +19,7 @@ import {
   type SetupStakeholderDraft,
   type SetupTodoDraft,
 } from "@/lib/create-project";
+import { deriveProjectSummary } from "@/lib/new-project/derive-summary";
 import { mergeOrganisedDraft } from "@/lib/new-project/merge-organised";
 import { needsYouFromDraft } from "@/lib/new-project/needs-you";
 import { parsePersonLine, scopesOf } from "@/lib/new-project/person-text";
@@ -128,11 +129,27 @@ export function NewProjectExperience({
   );
 
   function applySuggestedCode(name: string) {
-    if (codeTouched) return;
+    if (codeTouched) {
+      setCodeEnabled(true);
+      return;
+    }
     const next = suggestCode(name);
-    if (next.length < 2) return;
-    setDraft((d) => ({ ...d, code: next }));
+    if (next.length >= 2) {
+      setDraft((d) => ({ ...d, code: next }));
+    }
     setCodeEnabled(true);
+  }
+
+  function openManualReview() {
+    const overview = notes.trim();
+    setDraft((d) => ({
+      ...d,
+      sourceNarrative: [d.sourceNarrative, overview]
+        .filter((s) => s?.trim())
+        .join("\n\n"),
+      summary: d.summary.trim() || deriveProjectSummary(overview),
+    }));
+    setStage("review");
   }
 
   async function organiseNotes() {
@@ -364,7 +381,7 @@ export function NewProjectExperience({
                 type="button"
                 className="ghost-btn"
                 disabled={busy || !draft.name.trim()}
-                onClick={() => setStage("review")}
+                onClick={openManualReview}
                 data-testid="np-skip-organise"
               >
                 I’ll add items myself
@@ -529,7 +546,13 @@ export function NewProjectExperience({
                     ...d,
                     knowledgeRemember: (d.knowledgeRemember ?? []).map((item, idx) =>
                       idx === offset
-                        ? { ...item, text, needsReview: false }
+                        ? {
+                            ...item,
+                            text,
+                            needsReview: false,
+                            remember: true,
+                            needsYouQuestion: undefined,
+                          }
                         : item,
                     ),
                   }));

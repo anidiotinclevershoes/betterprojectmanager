@@ -304,7 +304,7 @@ async function loadExistingProjectBundle(
     (row: Record<string, unknown>) => ({
       id: String(row.id),
       name: String(row.name),
-      role: String(row.role || "Stakeholder"),
+      role: String(row.role ?? ""),
       preferences: Array.isArray(row.preferences) ? row.preferences : [],
       concerns: Array.isArray(row.concerns) ? row.concerns : [],
     }),
@@ -563,7 +563,7 @@ export async function persistNewProject(
     }
     if (projectError && isUniqueViolation(projectError)) {
       const detail = `${projectError.message ?? ""} ${projectError.code ?? ""}`;
-      if (/name/i.test(detail)) {
+      if (/name_lower|workspace_name/i.test(detail)) {
         throw new Error(projectNameTakenMessage(local.project.name));
       }
       throw new Error(projectCodeTakenMessage(local.project.code));
@@ -580,7 +580,7 @@ export async function persistNewProject(
       workspace_id: workspaceId,
       project_id: projectId,
       name: s.name,
-      role: s.role || "Stakeholder",
+      role: (s.role ?? "").trim(),
       preferences: s.preferences ?? [],
       concerns: s.concerns ?? [],
     }));

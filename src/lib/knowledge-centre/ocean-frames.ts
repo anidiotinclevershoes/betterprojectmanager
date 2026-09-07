@@ -263,7 +263,11 @@ export function buildPeopleRows(state: MissionState, projectId: string) {
     } else {
       cards.push({
         id: person.id,
-        title: `@${person.name}${person.role ? ` · ${person.role}` : ""}`,
+        title: `@${person.name}${
+          person.role && person.role.trim().toLowerCase() !== "stakeholder"
+            ? ` · ${person.role}`
+            : ""
+        }`,
         epistemic: null,
         meta,
         personId: person.id,

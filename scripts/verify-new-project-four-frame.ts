@@ -150,6 +150,24 @@ async function main() {
     );
   });
 
+  await check("compose summary stays on the project row and is not invented as Knowledge", () => {
+    const bundle = buildNewProject(
+      composeDraft({
+        summary: "Monthly WEB BAU project centred around monthly bug fixes.",
+      }),
+    );
+    assert.equal(
+      bundle.project.summary,
+      "Monthly WEB BAU project centred around monthly bug fixes.",
+    );
+    assert.equal(
+      bundle.knowledge.sections.now.includes(
+        "Monthly WEB BAU project centred around monthly bug fixes.",
+      ),
+      false,
+    );
+  });
+
   await check("person without responsibility is persistable and is not fake Needs You", () => {
     const draft = composeDraft({
       stakeholders: [{ name: "Sarah Murphy", responsibilities: [] }],
@@ -294,6 +312,63 @@ async function main() {
     assert.ok(!questions.some((q) => /What is Sam responsible for/i.test(q.question)));
     const bundle = buildNewProject(merged);
     assert.equal(bundle.timeline.length, 0);
+  });
+
+  await check("uncertain knowledge stays as Needs You and is not discarded", () => {
+    const draft = draftFromProvisional({
+      sourceNarrative: "Maybe releases are Thursday evenings.",
+      sourceMode: "paste",
+      project: { name: "", summary: "", currentFocus: "" },
+      items: [
+        {
+          id: "k-maybe",
+          statement: "Maybe releases are Thursday evenings",
+          evidence: "Maybe releases are Thursday evenings",
+          modelDomain: "knowledge",
+          category: "knowledge",
+          needsReview: true,
+        },
+      ],
+    });
+    const item = draft.knowledgeRemember?.[0];
+    assert.equal(item?.remember, true);
+    assert.equal(item?.needsReview, true);
+    assert.match(item?.needsYouQuestion ?? "", /remember/i);
+    assert.ok(needsYouFromDraft(draft).some((q) => /remember/i.test(q.question)));
+    const bundle = buildNewProject(draft);
+    assert.equal(
+      bundle.knowledge.sections.now.some((line) => /Thursday/i.test(line)),
+      false,
+    );
+    const structured = structuredItemsFromSetup({
+      projectId: bundle.project.id,
+      input: draft,
+      stakeholders: [],
+    });
+    assert.ok(
+      structured.some(
+        (row) => row.kind === "ambiguity" && /remember/i.test(row.body),
+      ),
+    );
+  });
+
+  await check("supabase persist keeps an empty role instead of inventing Stakeholder", async () => {
+    const fake = new FakeWorkspaceClient();
+    const client = fake as unknown as Parameters<typeof persistNewProject>[0];
+    const persisted = await persistNewProject(
+      client,
+      fake.workspaceId,
+      fake.userId,
+      composeDraft({
+        stakeholders: [{ name: "Olga", responsibilities: [] }],
+      }),
+    );
+    assert.equal(persisted.project.stakeholders[0]?.name, "Olga");
+    assert.equal(persisted.project.stakeholders[0]?.role, "");
+    assert.equal(
+      fake.tables.stakeholders.some((row) => row.role === "Stakeholder"),
+      false,
+    );
   });
 
   await check("supabase persist blocks duplicate names without inventing a suffix", async () => {
@@ -504,6 +579,9 @@ async function main() {
     assert.match(mic, /\/api\/transcribe/);
     assert.match(ui, /\/api\/new-project/);
     assert.match(ui, /createProject\(/);
+    assert.match(ui, /openManualReview/);
+    assert.match(ui, /sourceNarrative/);
+    assert.match(ui, /remember: true/);
     assert.doesNotMatch(ui, /Getting Started|0 of 4 complete|Save Draft|Talk It Through/);
     assert.doesNotMatch(ui, /accent-risks|accent-people|accent-todo|accent-knowledge/);
   });

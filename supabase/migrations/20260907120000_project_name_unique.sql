@@ -12,7 +12,10 @@ begin
   )
   into dup
   from (
-    select workspace_id, lower(btrim(name)) as name, count(*) as cnt
+    select
+      workspace_id,
+      lower(regexp_replace(btrim(name), '\s+', ' ', 'g')) as name,
+      count(*) as cnt
     from public.projects
     group by 1, 2
     having count(*) > 1
@@ -27,4 +30,7 @@ end
 $$;
 
 create unique index if not exists projects_workspace_name_lower_idx
-  on public.projects (workspace_id, lower(btrim(name)));
+  on public.projects (
+    workspace_id,
+    lower(regexp_replace(btrim(name), '\s+', ' ', 'g'))
+  );
