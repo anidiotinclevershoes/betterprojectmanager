@@ -163,10 +163,8 @@ test.describe("Harbourline deep stress slices", () => {
     await page.getByTestId("np-organise-notes").fill(payload.narrative);
     await page.getByTestId("np-organise").click();
     await expect(
-      page.getByTestId("np-frame-people").getByDisplayValue("Miriam Cole"),
-    ).toBeVisible({
-      timeout: 20_000,
-    });
+      page.getByTestId("np-frame-people").getByRole("textbox", { name: "Name" }).first(),
+    ).toHaveValue("Miriam Cole", { timeout: 20_000 });
     // Extract still does not invent Objective. Review may condense the user's
     // overview into the existing Project.summary field.
     await expect(page.getByTestId("np-summary")).toBeVisible();
