@@ -186,6 +186,12 @@ export function NewProjectExperience({
         <p className="np-brand">LUME</p>
         <h1 className="np-hero-title">Tell Lume what this project is about</h1>
         <p className="np-hero-sub">Add what you know now. Organise notes when you want help.</p>
+        {variant === "first-run" ? (
+          <p className="np-first-run-next" data-testid="np-first-run-next">
+            After you create this project, Capture is how you tell Lume what
+            changed. Nothing becomes project truth until you review it.
+          </p>
+        ) : null}
       </header>
 
       <div className="np-four-frame" data-testid="np-four-frame">

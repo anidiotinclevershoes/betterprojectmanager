@@ -51,6 +51,14 @@
   margin-right: auto;
 }
 
+.np-first-run-next {
+  max-width: 36rem;
+  margin: 0.65rem auto 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
 .np-trust {
   max-width: none;
   text-align: left;
