@@ -304,7 +304,8 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     ...(input.knowledgePeople ?? []),
     ...stakeholders.map((s) => {
       const concern = s.concerns?.[0] ? ` — ${s.concerns[0]}` : "";
-      return `${s.name} (${s.role})${concern}`;
+      const role = s.role.trim();
+      return role ? `${s.name} (${role})${concern}` : `${s.name}${concern}`;
     }),
   ]);
   knowledge.sections.openLoops = uniqueBullets(input.knowledgeOpenLoops ?? []);

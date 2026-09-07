@@ -142,6 +142,7 @@ export function NewProjectExperience({
 
   function openManualReview() {
     const overview = notes.trim();
+    setError(null);
     setDraft((d) => ({
       ...d,
       sourceNarrative: [d.sourceNarrative, overview]

@@ -331,6 +331,14 @@
   background: var(--bg-app);
 }
 
+.np-identity input::placeholder,
+.np-overview textarea::placeholder,
+.np-summary-block textarea::placeholder,
+.np-frame input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.72;
+}
+
 .np-overview textarea,
 .np-summary-block textarea {
   min-height: 10.5rem;
