@@ -18,6 +18,7 @@ const SIDEBAR_KEY = "mc-sidebar-collapsed-v1";
 
 function isAuthChromePath(pathname: string) {
   return (
+    pathname === "/welcome" ||
     pathname === "/login" ||
     pathname === "/signup" ||
     pathname === "/forgot-password" ||

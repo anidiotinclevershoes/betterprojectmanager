@@ -69,6 +69,9 @@ function LoginForm() {
           <AuthLinkRow>
             New here? <AuthNavLink href="/signup">Create an account</AuthNavLink>
           </AuthLinkRow>
+          <AuthLinkRow>
+            <AuthNavLink href="/welcome">What is Lume?</AuthNavLink>
+          </AuthLinkRow>
         </>
       }
     >

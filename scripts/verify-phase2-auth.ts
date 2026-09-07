@@ -54,6 +54,7 @@ check("auth pages exist", () => {
 
 check("proxy treats auth pages as public", () => {
   const proxy = fs.readFileSync(path.join(root, "src/proxy.ts"), "utf8");
+  assert.match(proxy, /\/welcome/);
   assert.match(proxy, /\/signup/);
   assert.match(proxy, /\/forgot-password/);
   assert.match(proxy, /\/reset-password/);
