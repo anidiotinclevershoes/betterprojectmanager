@@ -95,10 +95,15 @@ export default function SignupPage() {
       title="Create account"
       lede="Start a personal Lume workspace. After you confirm your email, you can describe your first project."
       footer={
-        <AuthLinkRow>
-          Already have an account?{" "}
-          <AuthNavLink href="/login">Sign in</AuthNavLink>
-        </AuthLinkRow>
+        <>
+          <AuthLinkRow>
+            Already have an account?{" "}
+            <AuthNavLink href="/login">Sign in</AuthNavLink>
+          </AuthLinkRow>
+          <AuthLinkRow>
+            <AuthNavLink href="/welcome">What is Lume?</AuthNavLink>
+          </AuthLinkRow>
+        </>
       }
     >
       <form onSubmit={onSubmit} className="login-form">

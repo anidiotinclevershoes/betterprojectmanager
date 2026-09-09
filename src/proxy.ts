@@ -8,6 +8,7 @@ import {
 import { updateSupabaseSession } from "@/lib/supabase/middleware";
 
 const PUBLIC_PATHS = new Set([
+  "/welcome",
   "/login",
   "/signup",
   "/forgot-password",
@@ -27,6 +28,7 @@ function isPublicPath(pathname: string) {
 
 function isAuthPage(pathname: string) {
   return (
+    pathname === "/welcome" ||
     pathname === "/login" ||
     pathname === "/signup" ||
     pathname === "/forgot-password" ||
@@ -55,6 +57,10 @@ export async function proxy(request: NextRequest) {
         return redirect;
       }
       return response;
+    }
+
+    if (pathname === "/") {
+      return NextResponse.redirect(new URL("/welcome", request.url));
     }
 
     if (isPublicPath(pathname)) {
@@ -87,6 +93,10 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next();
+  }
+
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/welcome", request.url));
   }
 
   if (pathname.startsWith("/api/")) {

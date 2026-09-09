@@ -1,0 +1,63 @@
+/* Public landing — Ocean family, mobile-safe. Reuses auth chrome. */
+
+.public-landing-card {
+  width: min(34rem, 100%);
+}
+
+.public-landing .eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.public-landing-points {
+  margin: 0.85rem 0 1.15rem;
+  padding-left: 1.1rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.public-landing-points li + li {
+  margin-top: 0.4rem;
+}
+
+.public-landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.public-landing-actions .login-submit {
+  margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.public-landing-signin {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 0 0.9rem;
+}
+
+@media (max-width: 720px) {
+  .public-landing-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .public-landing-actions .login-submit,
+  .public-landing-signin {
+    width: 100%;
+    min-height: 44px;
+  }
+}
