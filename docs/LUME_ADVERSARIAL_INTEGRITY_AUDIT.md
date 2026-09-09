@@ -110,7 +110,7 @@ Replacement-pin **fingerprint** is closed (N-07). Apply must still not re-bind.
 
 The four precautions from the original audit (Apply retry, concurrent due-date overwrite, leftover Review on another project, duplicate knowledge/availability on retry) are closed and regression-proven. Workspace isolation remains real; Ready → Apply still fail-closed; Meeting Prep and the old writable Gantt still do not drive current surfaces; Capture V2 is still the only Analyse engine.
 
-Why not a claim of “finished product”: New Project is still a sequence of inserts; same-workspace RLS is still membership-wide; there is still no production integrity observer; leftover Knowledge prose and paint-cache lag can still confuse a reader. Those are later hardening, not the dogfood blockers named in this audit.
+Why not a claim of “finished product”: New Project is still a sequence of inserts (compensating cleanup is now the same atomic delete RPC); there is still no production integrity observer; leftover Knowledge prose and paint-cache lag can still confuse a reader. Those are later hardening, not the dogfood blockers named in this audit.
 
 ## Is there any credible current path that could silently corrupt project truth?
 
@@ -118,9 +118,9 @@ Why not a claim of “finished product”: New Project is still a sequence of in
 
 Remaining confirmed or high-confidence paths:
 
-1. **New Project / project delete are sequential.** A crash in the middle can leave a half-created or half-deleted bundle until cleanup runs. The app tries to clean up; another reader can see the window. (D-028 / A-003)
+1. **New Project create is sequential.** A crash in the middle can leave a half-created bundle until compensating cleanup (`delete_project_bundle`) runs. The app does not report success. Project **delete** is one transaction. (D-028 remainder / A-003)
 2. **Non-risk knowledge insert + receipt are two writes.** A crash between them could still duplicate (rare; retry after a recorded receipt is `no_change`).
-3. **Same-workspace mis-attribution** remains possible if a persist helper forgets `project_id` (D-035 remainder / N-09). Not a cross-tenant leak.
+3. **Same-workspace mis-attribution** is now refused at RLS for recommendations / history / capture_sessions (`project_belongs_to_workspace`) and at persist helpers that name a project id. Residual: a helper that still forgets `project_id` on a table whose policy is membership-only. Not a cross-tenant leak.
 
 Not silent canonical corruption: Meeting Prep leftover does **not** write current surfaces; hard-refresh paint-cache lag is **temporary UI** (N-10).
 

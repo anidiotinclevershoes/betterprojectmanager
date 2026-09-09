@@ -446,7 +446,7 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | Live gpt-4o-mini qualification | LUME FAILURE 0 / CATCH 22 / domain 100% / target-ID 100% | CLOSED | Engine SHA `2131444`; `main` `2e024d0` | Do not retune Capture |
 | `NEXT_PUBLIC_SITE_URL` | Owner confirmed Production + Preview | CLOSED | Live confirm email → `/auth/callback` | Reopen only if live evidence contradicts |
 | Single-account reload / two-project isolation | Production smoke passed | CLOSED | v0.9 smoke | Keep regression tests |
-| Project delete user-facing | Live smoke passed | CLOSED (unsafe-delete claim) | Production delete | Residual is D-028 sequential debt |
+| Project delete user-facing | Live smoke passed | CLOSED | Production delete + `delete_project_bundle` | Create path still sequential (D-028 remainder) |
 | D-030 Risks/dates peer prose | Structured-domain precedence | CLOSED | `ocean-frames.ts` | Remainder = D-038 |
 | D-031 Coach auto-open | Drawer unmounted | CLOSED | `AppShell` does not mount `CoachDrawer` | Do not rebuild Coach |
 | Catch Me Up | Live AI briefing from server truth | CLOSED (missing-feature claim) | Production CMU + isolation | No vector DB |
@@ -456,9 +456,9 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | Stable Todo/milestone identity | Thor / PR #95 | CLOSED | Qualification + identity tests | Do not reopen |
 | D-010 live Ask canonical | HTTP always canonical | CLOSED (product path) | `tell-me/route.ts` | Library default ACCEPTED v0.9 |
 | D-036 session-switch display | In-memory MissionState survives SPA login | **CLOSED** | PR #100 / production `0e68384`; regression + live B→A / A→B | Do not reopen as V1 work |
-| D-041 account deletion | No whole-account delete | V1 MUST | Repo audit 28 Aug | Settings delete before public |
-| D-042 export | No user/project export | V1 MUST | Repo audit 28 Aug | Bundle dump; legal can demote to high SHOULD |
-| D-044 Terms/Privacy | Deferred for trusted alpha | V1 MUST | PR #88 not in #95 | Public/commercial launch |
+| D-041 account deletion | Hosted Account delete with typed confirmation | CLOSED for individual-first V1 | `/api/account/delete` | Multi-member / multi-workspace accounts must contact support |
+| D-042 export | JSON workspace export from Account | CLOSED for individual-first V1 | `/api/account/export` | Legal may still require a lawyer-reviewed notice |
+| D-044 Terms/Privacy | Honest stubs + drop-in slots | LEGAL / TOM ACTION | `/privacy` `/terms` | Do not invent lawyer copy |
 | D-043 Meeting Prep persist | Production KC no longer writes prep. `updateMeeting` still memory-only. `/meetings` bookmarks redirect to Knowledge Centre | ACCEPTED v0.9 / leftover | `store.tsx`; retired `/meetings` routes | Do not persist prep as a product feature |
 | Entitlement/Stripe | 90-day trial live; Stripe not required | V1 MUST when charging | Live Account A trial 11/26/2026 | D-024 local meter is not billing |
 | D-037 Ready vs Apply | Ready only when Apply can plan that write | **CLOSED** | PR #126 / `main` `64171cd` | Do not weaken the contract |
@@ -470,8 +470,8 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | D-039 `openaiConfigured` stale | 401 on `/login` can stick | V1 SHOULD | Smoke | Re-probe after SIGNED_IN |
 | D-003 suggestion persist | Accept/dismiss MissionState only | V1 SHOULD / TESTER EVIDENCE | `setRecommendationStatus` | Persist if testers use it |
 | D-005 optimistic remainder | Capture Apply persist-first; some UI optimistic | V1 SHOULD | `store.tsx` | Exact reachable paths only |
-| D-035 remainder | Other persist helpers | V1 SHOULD | Code inventory | Not Todo-only |
-| D-028 sequential delete | Live delete works; SET NULL list hand-maintained | ACCEPTED v0.9 / V1 SHOULD | `PROJECT_BUNDLE_SET_NULL_TABLES` | Bundle RPC later |
+| D-035 remainder | Other persist helpers now fail closed on foreign project ids for history/session/memory/todo create | CLOSED for those write helpers | `requireProjectInWorkspace` | Remaining tables still rely on existing project+workspace WHERE clauses |
+| D-028 sequential delete | Delete is one RPC transaction | CLOSED (delete) | `delete_project_bundle` | New Project create remains sequential + compensating cleanup |
 | D-004 History persist gaps | Many `pushHistory` not durable | ACCEPTED v0.9 | `history_events` schema | Needed if Change Intelligence reads History |
 | D-007 people prose | Remainder: unlinked Knowledge people | ACCEPTED v0.9 | KD notes | No unique-name platform |
 | D-008 / D-021 waiting dual | Authority decided, not implemented | ACCEPTED v0.9 | Handoff Part C | Later slice |
