@@ -52,6 +52,8 @@ function main() {
     assert.match(experience, /Add what you know now/);
     assert.match(experience, /np-four-frame/);
     assert.match(experience, /Create Project/);
+    assert.match(experience, /np-first-run-next/);
+    assert.match(experience, /Capture is how you tell Lume what/);
     assert.doesNotMatch(experience, /Talk It Through/);
     assert.doesNotMatch(experience, /Paste Project Information/);
     assert.doesNotMatch(experience, /pricing|checkout|upgrade|Start trial/i);
