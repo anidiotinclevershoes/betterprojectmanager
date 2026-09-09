@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { LumeThemePicker } from "@/components/app-shell/LumeThemePicker";
 import { TrialExpiredPanel } from "@/components/billing/TrialExpiredPanel";
 import { ANALYTICS_EVENTS, resetAnalyticsIdentity, trackAnalyticsEvent } from "@/lib/analytics";
 import { navigateAuthBoundary } from "@/lib/auth-mission-ownership";
+import {
+  checkoutNoticeCopy,
+  subscriptionStatusLabel,
+  trialRemainingCopy,
+} from "@/lib/billing/display";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import type { WorkspaceEntitlement } from "@/lib/billing/types";
 
@@ -17,7 +23,9 @@ type StatusResponse = {
   error?: string;
 };
 
-export default function AccountPage() {
+function AccountPageInner() {
+  const search = useSearchParams();
+  const checkoutNotice = checkoutNoticeCopy(search.get("checkout"));
   const [user, setUser] = useState<{ email: string; name: string } | null>(
     null,
   );
@@ -165,12 +173,21 @@ export default function AccountPage() {
           <>
             <p>
               Status:{" "}
-              <strong>{entitlement?.status ?? "unknown"}</strong>
+              <strong>{subscriptionStatusLabel(entitlement?.status)}</strong>
             </p>
-            {entitlement?.trialEndsAt ? (
+            {entitlement?.status === "trialing" ? (
               <p className="meta">
-                Trial ends{" "}
+                {trialRemainingCopy(entitlement.trialEndsAt)}
+              </p>
+            ) : entitlement?.trialEndsAt ? (
+              <p className="meta">
+                Trial ended{" "}
                 {new Date(entitlement.trialEndsAt).toLocaleDateString()}
+              </p>
+            ) : null}
+            {checkoutNotice ? (
+              <p className="auth-notice" role="status">
+                {checkoutNotice}
               </p>
             ) : null}
             {status.billingConfigured ? (
@@ -202,5 +219,19 @@ export default function AccountPage() {
         {error ? <p className="login-error">{error}</p> : null}
       </div>
     </AuthShell>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <AuthShell title="Account" lede="Loading…">
+          <p className="lede">Loading account…</p>
+        </AuthShell>
+      }
+    >
+      <AccountPageInner />
+    </Suspense>
   );
 }
