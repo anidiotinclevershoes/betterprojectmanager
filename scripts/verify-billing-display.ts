@@ -81,6 +81,7 @@ check("checkout success and cancel return to account", () => {
   );
   assert.match(route, /success_url.*\/account\?checkout=success/);
   assert.match(route, /cancel_url.*\/account\?checkout=cancel/);
+  assert.match(route, /isBillingEnabled/);
   assert.match(route, /isStripeConfigured/);
 });
 

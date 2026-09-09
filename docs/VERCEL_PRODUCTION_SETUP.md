@@ -53,7 +53,8 @@ npm run verify:production-config
 | Name | Notes |
 |---|---|
 | `OPENAI_MODEL` | Defaults to gpt-4o-mini |
-| `LUME_TRIAL_DAYS` | Defaults to 14 |
+| `LUME_TRIAL_DAYS` | Defaults to 14. Used only when billing is enabled. |
+| `LUME_BILLING_ENABLED` | Must be the string `true` to allow checkout. Unset/false = early access. Independent of Stripe keys. |
 | `NEXT_PUBLIC_POSTHOG_*` | Optional product analytics. Never a PostHog personal/private key. |
 | `LUME_RATE_LIMIT_*_PER_HOUR` | AI abuse limits |
 
@@ -90,5 +91,5 @@ After you know the Vercel URL:
 
 ## Billing note
 
-Checkout / portal / webhooks are implemented but return `billing_not_configured` until Stripe env vars exist.  
-Trials can start without Stripe once the billing SQL migration is applied.
+Checkout / portal / webhooks are implemented. They return `billing_disabled` unless `LUME_BILLING_ENABLED=true`, then `billing_not_configured` until Stripe env vars exist.  
+Early-access use does not start the commercial trial clock.

@@ -265,6 +265,37 @@ export class FakeWorkspaceClient {
         return { person_id: personId, created, knowledge_id: knowledgeId };
       });
     }
+    if (fn === "delete_project_bundle") {
+      return this.runAtomic(async () => {
+        const workspaceId = String(args.p_workspace_id ?? "");
+        const projectId = String(args.p_project_id ?? "");
+        const setNullTables = [
+          "todos",
+          "memories",
+          "recommendations",
+          "history_events",
+          "capture_sessions",
+          "coach_sessions",
+        ];
+        for (const table of setNullTables) {
+          const deleted = await this.from(table)
+            .delete()
+            .eq("workspace_id", workspaceId)
+            .eq("project_id", projectId);
+          if (deleted.error) {
+            throw new FakeRpcError(deleted.error.message, deleted.error.code);
+          }
+        }
+        const project = await this.from("projects")
+          .delete()
+          .eq("id", projectId)
+          .eq("workspace_id", workspaceId);
+        if (project.error) {
+          throw new FakeRpcError(project.error.message, project.error.code);
+        }
+        return null;
+      });
+    }
     return { data: null, error: { message: `unknown rpc ${fn}` } };
   }
 

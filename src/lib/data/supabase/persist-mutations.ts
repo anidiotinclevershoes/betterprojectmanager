@@ -96,6 +96,28 @@ function requireLegalRiskSource(source: string): LegalRiskSource {
   );
 }
 
+async function requireProjectInWorkspace(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string | null | undefined,
+): Promise<void> {
+  if (!projectId) return;
+  const scoped = requireUuid(projectId, "projectId");
+  const { data, error } = await client
+    .from("projects")
+    .select("id")
+    .eq("id", scoped)
+    .eq("workspace_id", workspaceId)
+    .maybeSingle();
+  if (error) {
+    throw new Error(`[supabase] project lookup: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error("[supabase] project not found in this workspace");
+  }
+}
+
 /**
  * Schema evidence (`20260812002748_workspace_schema.sql` + snapshots migration):
  * - CASCADE: stakeholders, risks, knowledge_items, milestones, meetings, releases,
@@ -114,31 +136,13 @@ async function deleteProjectScopedBundle(
   workspaceId: string,
   projectId: string,
 ): Promise<void> {
-  const errors: string[] = [];
-  for (const table of PROJECT_BUNDLE_SET_NULL_TABLES) {
-    const { error } = await client
-      .from(table)
-      .delete()
-      .eq("workspace_id", workspaceId)
-      .eq("project_id", projectId);
-    if (error) {
-      errors.push(`${table}: ${error.message}`);
-      break;
-    }
-  }
-  if (errors.length) {
+  const { error } = await client.rpc("delete_project_bundle", {
+    p_workspace_id: workspaceId,
+    p_project_id: projectId,
+  });
+  if (error) {
     throw new Error(
-      `[supabase] cleanup failed project ${projectId}: ${errors.join("; ")}`,
-    );
-  }
-  const { error: projectError } = await client
-    .from("projects")
-    .delete()
-    .eq("id", projectId)
-    .eq("workspace_id", workspaceId);
-  if (projectError) {
-    throw new Error(
-      `[supabase] cleanup failed project ${projectId}: projects: ${projectError.message}`,
+      `[supabase] cleanup failed project ${projectId}: ${error.message}`,
     );
   }
 }
@@ -479,6 +483,8 @@ export async function persistNewProject(
   input: CreateProjectInput,
   opts?: { afterPartialCleanup?: boolean },
 ): Promise<PersistedProjectBundle> {
+  // D-028 remainder: create is still sequential inserts. Failure must not
+  // report success; compensating cleanup uses the atomic delete RPC.
   const local = buildNewProject(input);
   const requestedId =
     input.clientProjectId && UUID_RE.test(input.clientProjectId)
@@ -861,6 +867,7 @@ export async function persistTodoCreate(
   userId: string | null,
   todo: Omit<TodoItem, "id" | "createdAt"> & { createdAt?: string },
 ): Promise<TodoItem> {
+  await requireProjectInWorkspace(client, workspaceId, todo.projectId);
   const { data, error } = await client
     .from("todos")
     .insert({
@@ -1003,6 +1010,7 @@ export async function persistKnowledgeBullet(
     receipt?: CaptureApplyReceipt | null;
   },
 ): Promise<{ riskId?: string }> {
+  await requireProjectInWorkspace(client, workspaceId, projectId);
   const row: Record<string, unknown> = {
     workspace_id: workspaceId,
     project_id: projectId,
@@ -1084,14 +1092,19 @@ export async function persistRiskStatus(
   riskId: string,
   status: "open" | "watch" | "resolved" | "accepted",
 ): Promise<void> {
-  const { error } = await client
+  const { data, error } = await client
     .from("risks")
     .update({ status })
     .eq("id", riskId)
     .eq("project_id", projectId)
-    .eq("workspace_id", workspaceId);
+    .eq("workspace_id", workspaceId)
+    .select("id")
+    .maybeSingle();
   if (error) {
     throw new Error(`[supabase] update risk status: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error("[supabase] update risk status: not found in this project");
   }
 }
 
@@ -1111,6 +1124,7 @@ export async function persistEnsureStakeholder(
     role?: string;
   },
 ): Promise<{ id: string; created: boolean }> {
+  await requireProjectInWorkspace(client, workspaceId, projectId);
   const { data: existing, error: lookupError } = await client
     .from("stakeholders")
     .select("id, name")
@@ -1437,6 +1451,7 @@ export async function persistTimelineItem(
     source?: string;
   },
 ): Promise<TimelineItem> {
+  await requireProjectInWorkspace(client, workspaceId, projectId);
   const { data, error } = await client
     .from("milestones")
     .insert({
@@ -1519,6 +1534,7 @@ export async function persistHistoryEvent(
   userId: string | null,
   event: Omit<HistoryEvent, "id" | "createdAt"> & { createdAt?: string },
 ): Promise<void> {
+  await requireProjectInWorkspace(client, workspaceId, event.projectId);
   const { error } = await client.from("history_events").insert({
     workspace_id: workspaceId,
     project_id: event.projectId ?? null,
@@ -1544,6 +1560,7 @@ export async function persistCaptureSession(
     status?: string;
   },
 ): Promise<string> {
+  await requireProjectInWorkspace(client, workspaceId, input.projectId);
   const { data, error } = await client
     .from("capture_sessions")
     .insert({
@@ -1569,6 +1586,7 @@ export async function persistMemory(
   userId: string | null,
   memory: Omit<MemoryEntry, "id"> & { id?: string },
 ): Promise<MemoryEntry> {
+  await requireProjectInWorkspace(client, workspaceId, memory.projectId);
   const { data, error } = await client
     .from("memories")
     .insert({

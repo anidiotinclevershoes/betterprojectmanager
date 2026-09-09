@@ -308,13 +308,13 @@ await check("A-002 concurrent dueAt/detail change stales Ready; Apply fails clos
   assert.equal(box.state.todos[0]?.dueAt, "2026-07-12T09:00:00.000Z");
 });
 
-await check("A-003 New Project create is sequential inserts with best-effort cleanup, not one DB transaction", () => {
+await check("A-003 New Project create is sequential inserts; project delete is one DB transaction", () => {
   const persist = readSrc("src/lib/data/supabase/persist-mutations.ts");
   assert.match(persist, /cleanupFailedNewProjectBundle/);
   assert.match(persist, /from\("projects"\)[\s\S]*\.insert/);
-  assert.match(persist, /from\("stakeholders"\)[\s\S]*\.insert/);
-  assert.match(persist, /from\("todos"\)[\s\S]*\.insert/);
-  assert.doesNotMatch(persist, /rpc\("persist_new_project/);
+  assert.match(persist, /rpc\("delete_project_bundle"/);
+  const sql = readSrc("supabase/migrations/20260909160000_external_v1_safety.sql");
+  assert.match(sql, /create or replace function public.delete_project_bundle/);
 });
 
 await check("A-004 Apply world and fingerprint include fields Apply writes", () => {
@@ -450,11 +450,12 @@ await check("N-08 todo persist helpers never write source_recommendation_id", ()
   assert.doesNotMatch(persist, /source_recommendation/);
 });
 
-await check("N-09 recommendations / history_events / capture_sessions RLS are membership-only", () => {
-  const rls = readSrc("supabase/migrations/20260812002749_tenant_rls.sql");
-  const recInsert = rls.slice(rls.indexOf("create policy recommendations_insert_member"));
-  assert.match(recInsert.slice(0, 280), /is_workspace_member\(workspace_id\)/);
-  assert.doesNotMatch(recInsert.slice(0, 280), /projects/);
+await check("N-09 recommendations / history_events / capture_sessions require project in workspace", () => {
+  const sql = readSrc("supabase/migrations/20260909160000_external_v1_safety.sql");
+  assert.match(sql, /recommendations_insert_member/);
+  assert.match(sql, /history_events_insert_member/);
+  assert.match(sql, /capture_sessions_insert_member/);
+  assert.match(sql, /project_belongs_to_workspace/);
 });
 
 await check("N-10 adoptAppliedState does not refresh the durable paint cache", () => {

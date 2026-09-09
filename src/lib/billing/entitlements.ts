@@ -43,10 +43,24 @@ export function mapStripeSubscriptionStatus(
 export function evaluateEntitlement(
   workspaceId: string,
   row: SubscriptionRow | null,
-  opts?: { now?: Date; stripeConfigured?: boolean },
+  opts?: { now?: Date; stripeConfigured?: boolean; billingEnabled?: boolean },
 ): WorkspaceEntitlement {
   const now = opts?.now ?? new Date();
   const stripeConfigured = Boolean(opts?.stripeConfigured);
+
+  if (opts?.billingEnabled === false) {
+    return {
+      workspaceId,
+      status: row?.status === "active" ? "active" : row?.status === "past_due" ? "past_due" : "trialing",
+      canUseLume: true,
+      reason: "early_access",
+      trialStartedAt: row?.trial_started_at ?? null,
+      trialEndsAt: row?.trial_ends_at ?? null,
+      currentPeriodEnd: row?.current_period_end ?? null,
+      cancelAtPeriodEnd: row?.cancel_at_period_end ?? false,
+      stripeConfigured,
+    };
+  }
 
   if (!row) {
     return {
