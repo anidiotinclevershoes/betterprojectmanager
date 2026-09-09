@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { ANALYTICS_EVENTS, trackAnalyticsEvent } from "@/lib/analytics";
 import { useMission } from "@/lib/store";
 import {
   applySessionSuggestionPatch,
@@ -491,6 +492,10 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       const controller = new AbortController();
       analyseAbortRef.current = controller;
       setBusy("analysing");
+      trackAnalyticsEvent(ANALYTICS_EVENTS.capture_used, {
+        source: sourceType === "voice_note" ? "voice" : "typed",
+        has_project_scope: Boolean(scopedProjectId || slice.projectId),
+      });
       setSlice((prev) => ({
         ...prev,
         error: null,
@@ -558,6 +563,14 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           };
           persistHistory(nextSlice);
           return nextSlice;
+        });
+        trackAnalyticsEvent(ANALYTICS_EVENTS.review_reached, {
+          reliability:
+            reliability?.state === "limited"
+              ? "limited"
+              : reliability?.state === "review_recommended"
+                ? "review_recommended"
+                : "ok",
         });
         announce(
           reliability?.state === "limited"
@@ -697,6 +710,10 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           }
         }
         if (decision.kind === "needs_you") {
+          trackAnalyticsEvent(ANALYTICS_EVENTS.apply_needs_you, {
+            outcome: "needs_you",
+            domain: decision.domain,
+          });
           setSlice((prev) => ({
             ...prev,
             reviewOverrides: {
@@ -718,6 +735,10 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           return decision;
         }
         if (data.executed?.kind === "wrote") {
+          trackAnalyticsEvent(ANALYTICS_EVENTS.apply_completed, {
+            outcome: "wrote",
+            domain: decision.domain,
+          });
           finishApplied(
             item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
           );

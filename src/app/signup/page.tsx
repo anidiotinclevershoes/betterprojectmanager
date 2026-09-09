@@ -14,6 +14,7 @@ import {
   passwordRequirementsCopy,
   validatePassword,
 } from "@/lib/auth-password";
+import { ANALYTICS_EVENTS, trackAnalyticsEvent } from "@/lib/analytics";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 
 export default function SignupPage() {
@@ -27,6 +28,7 @@ export default function SignupPage() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    trackAnalyticsEvent(ANALYTICS_EVENTS.signup_started, { surface: "signup" });
     const pwError = validatePassword(password);
     if (pwError) {
       setError(pwError);
@@ -47,9 +49,15 @@ export default function SignupPage() {
         throw new Error(friendlyAuthError(data.error));
       }
       if (data.needsEmailConfirmation) {
+        trackAnalyticsEvent(ANALYTICS_EVENTS.signup_check_email, {
+          surface: "signup",
+        });
         setCheckEmail(true);
         return;
       }
+      trackAnalyticsEvent(ANALYTICS_EVENTS.signup_completed, {
+        surface: "signup",
+      });
       clearAuthenticatedBrowserState();
       navigateAuthBoundary("/");
     } catch (err) {

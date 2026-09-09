@@ -7,6 +7,7 @@ import {
   AuthNavLink,
   AuthShell,
 } from "@/components/auth/AuthShell";
+import { ANALYTICS_EVENTS, trackAnalyticsEvent } from "@/lib/analytics";
 import {
   friendlyAuthError,
   passwordRequirementsCopy,
@@ -43,6 +44,9 @@ function ResetPasswordForm() {
       if (!response.ok) {
         throw new Error(friendlyAuthError(data.error));
       }
+      trackAnalyticsEvent(ANALYTICS_EVENTS.password_updated, {
+        surface: "reset_password",
+      });
       router.replace("/login?notice=password-updated");
       router.refresh();
     } catch (err) {

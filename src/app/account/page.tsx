@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { LumeThemePicker } from "@/components/app-shell/LumeThemePicker";
 import { TrialExpiredPanel } from "@/components/billing/TrialExpiredPanel";
+import { ANALYTICS_EVENTS, resetAnalyticsIdentity, trackAnalyticsEvent } from "@/lib/analytics";
 import { navigateAuthBoundary } from "@/lib/auth-mission-ownership";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import type { WorkspaceEntitlement } from "@/lib/billing/types";
@@ -45,6 +46,8 @@ export default function AccountPage() {
 
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
+    trackAnalyticsEvent(ANALYTICS_EVENTS.logout_completed, { surface: "account" });
+    resetAnalyticsIdentity();
     clearAuthenticatedBrowserState();
     navigateAuthBoundary("/login");
   }
@@ -66,7 +69,13 @@ export default function AccountPage() {
             : data.error || "Checkout failed",
         );
       }
-      if (data.url) window.location.href = data.url;
+      if (data.url) {
+        trackAnalyticsEvent(ANALYTICS_EVENTS.billing_checkout_started, {
+          surface: "account",
+          billing_configured: true,
+        });
+        window.location.href = data.url;
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Checkout failed");
     } finally {

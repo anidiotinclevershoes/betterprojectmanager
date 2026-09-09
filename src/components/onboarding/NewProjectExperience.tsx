@@ -15,6 +15,7 @@ import {
 } from "@/lib/create-project";
 import { mergeOrganisedDraft } from "@/lib/new-project/merge-organised";
 import { needsYouFromDraft } from "@/lib/new-project/needs-you";
+import { ANALYTICS_EVENTS, trackAnalyticsEvent } from "@/lib/analytics";
 import { useMission } from "@/lib/store";
 
 function emptyDraft(): CreateProjectInput {
@@ -67,6 +68,16 @@ export function NewProjectExperience({
           clientProjectId: clientProjectIdRef.current,
         });
         clientProjectIdRef.current = null;
+        trackAnalyticsEvent(ANALYTICS_EVENTS.project_created, {
+          surface: "new_project",
+          first_run_surface: variant === "first-run",
+        });
+        if (variant === "first-run") {
+          trackAnalyticsEvent(ANALYTICS_EVENTS.first_project_created, {
+            surface: "new_project",
+            first_run_surface: true,
+          });
+        }
         setSuccess(`${input.name.trim() || input.code} is ready.`);
         router.push(`/projects/${id}`);
       } catch (err) {
@@ -81,7 +92,7 @@ export function NewProjectExperience({
         setBusy(false);
       }
     },
-    [createProject, router],
+    [createProject, router, variant],
   );
 
   async function organiseNotes() {

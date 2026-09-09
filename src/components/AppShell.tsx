@@ -8,6 +8,7 @@ import { CaptureSessionProvider } from "@/components/capture/CaptureSessionConte
 import { CoachSessionProvider } from "@/components/coach/CoachSessionContext";
 import { TellMeSessionProvider } from "@/components/tell-me/TellMeSessionContext";
 import { EntitlementGate } from "@/components/billing/EntitlementGate";
+import { ANALYTICS_EVENTS, resetAnalyticsIdentity, trackAnalyticsEvent } from "@/lib/analytics";
 import { navigateAuthBoundary } from "@/lib/auth-mission-ownership";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import { useMission } from "@/lib/store";
@@ -108,6 +109,8 @@ function AppShellInner({ children }: { children: ReactNode }) {
 
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
+    trackAnalyticsEvent(ANALYTICS_EVENTS.logout_completed, { surface: "app_shell" });
+    resetAnalyticsIdentity();
     clearAuthenticatedBrowserState();
     setUser(null);
     navigateAuthBoundary("/login");

@@ -86,7 +86,9 @@ Governs:
 
 ### 4. Relevant current operational / test documents
 
-Use only when the task needs them (for example test safety-net, Supabase setup, Vercel production, Intelligence Contract, or the Lume Test Dashboard).
+Use only when the task needs them (for example test safety-net, Supabase setup, Vercel production, Intelligence Contract, the Lume Test Dashboard, or the V1 human-action checklist).
+
+Human-only dashboard/credential actions: [`docs/V1_USER_ACTIONS.md`](./V1_USER_ACTIONS.md). It is not an architecture map.
 
 They do not override (1)–(3) unless they are the specific contract for that seam (Ask/eval scoring → Intelligence Contract).
 

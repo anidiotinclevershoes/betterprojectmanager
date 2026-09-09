@@ -3,7 +3,8 @@
 Lume is prepared for hosted deployment.  
 **Do not deploy until env vars and Supabase Auth URLs are set.**
 
-Full click-by-click remaining work: [`docs/PHASE_2_5_3_MANUAL_STEPS.md`](./PHASE_2_5_3_MANUAL_STEPS.md)
+Current human-action checklist: [`docs/V1_USER_ACTIONS.md`](./V1_USER_ACTIONS.md).  
+Historical Phase 2.5/3A steps: [`docs/PHASE_2_5_3_MANUAL_STEPS.md`](./PHASE_2_5_3_MANUAL_STEPS.md).
 
 ---
 
@@ -34,6 +35,8 @@ npm run verify:production-config
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes |
 | `NEXT_PUBLIC_SITE_URL` | Yes (exact public origin) |
+| `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` | Optional (public `phc_` project key only) |
+| `NEXT_PUBLIC_POSTHOG_HOST` | Optional (defaults to `https://us.i.posthog.com`) |
 
 ### Server-only
 
@@ -51,6 +54,7 @@ npm run verify:production-config
 |---|---|
 | `OPENAI_MODEL` | Defaults to gpt-4o-mini |
 | `LUME_TRIAL_DAYS` | Defaults to 14 |
+| `NEXT_PUBLIC_POSTHOG_*` | Optional product analytics. Never a PostHog personal/private key. |
 | `LUME_RATE_LIMIT_*_PER_HOUR` | AI abuse limits |
 
 ### Never set in production

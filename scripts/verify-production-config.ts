@@ -350,6 +350,10 @@ check("env example documents public vs server vars", () => {
   assert.match(env, /STRIPE_PRICE_ID/);
   assert.doesNotMatch(env, /NEXT_PUBLIC_STRIPE_SECRET/);
   assert.doesNotMatch(env, /NEXT_PUBLIC_SUPABASE_SERVICE/);
+  assert.match(env, /NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN/);
+  assert.match(env, /NEXT_PUBLIC_POSTHOG_HOST/);
+  assert.doesNotMatch(env, /NEXT_PUBLIC_POSTHOG_SECRET/);
+  assert.doesNotMatch(env, /POSTHOG_PERSONAL_API_KEY/);
 });
 
 check("next production build typechecks the app, not verify scripts", () => {
