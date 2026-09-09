@@ -151,6 +151,16 @@ check("PostHog project token is optional and public-only", () => {
   assert.doesNotMatch(envExample, /NEXT_PUBLIC_POSTHOG_SECRET/);
 });
 
+check("client bundle can inline the public PostHog token", () => {
+  const config = fs.readFileSync(
+    path.join(root, "src/lib/analytics/config.ts"),
+    "utf8",
+  );
+  assert.match(config, /process\.env\.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN/);
+  assert.match(config, /process\.env\.NEXT_PUBLIC_POSTHOG_HOST/);
+  assert.match(config, /process\.env\.NEXT_PUBLIC_POSTHOG_KEY/);
+});
+
 check("instrumentation never sends Capture or Knowledge text fields", () => {
   const files = [
     "src/components/onboarding/NewProjectExperience.tsx",
