@@ -172,7 +172,7 @@ async function main() {
       await assert.rejects(
         () =>
           persistNewProject(asClient(fake), fake.workspaceId, fake.userId, draft),
-        /create risks/,
+        /create project: injected failure on risks/,
       );
       assert.equal(fake.tables.projects.length, 0, "project row must be removed");
       assert.equal(fake.tables.stakeholders.length, 0);
@@ -237,7 +237,7 @@ async function main() {
               code: "CC",
             }),
           ),
-        /create milestones/,
+        /create project: injected failure on milestones/,
       );
 
       assert.ok(failing.tables.projects.some((p) => p.id === PROJECT_A_ID));

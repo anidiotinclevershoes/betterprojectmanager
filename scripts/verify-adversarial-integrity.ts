@@ -308,13 +308,26 @@ await check("A-002 concurrent dueAt/detail change stales Ready; Apply fails clos
   assert.equal(box.state.todos[0]?.dueAt, "2026-07-12T09:00:00.000Z");
 });
 
-await check("A-003 New Project create is sequential inserts; project delete is one DB transaction", () => {
+await check("A-003 New Project create and project delete are one DB transaction each", () => {
   const persist = readSrc("src/lib/data/supabase/persist-mutations.ts");
-  assert.match(persist, /cleanupFailedNewProjectBundle/);
-  assert.match(persist, /from\("projects"\)[\s\S]*\.insert/);
+  const createFn = persist.slice(persist.indexOf("export async function persistNewProject"));
+  const createBody = createFn.slice(
+    0,
+    createFn.indexOf("export async function persistTodoCreate"),
+  );
+  assert.match(createBody, /rpc\("create_project_bundle"/);
+  assert.doesNotMatch(createBody, /\.from\("projects"\)\s*\.insert/);
+  assert.doesNotMatch(createBody, /\.from\("stakeholders"\)\s*\.insert/);
+  assert.doesNotMatch(createBody, /\.from\("todos"\)\s*\.insert/);
   assert.match(persist, /rpc\("delete_project_bundle"/);
-  const sql = readSrc("supabase/migrations/20260909160000_external_v1_safety.sql");
-  assert.match(sql, /create or replace function public.delete_project_bundle/);
+  const deleteSql = readSrc(
+    "supabase/migrations/20260909160000_external_v1_safety.sql",
+  );
+  const createSql = readSrc(
+    "supabase/migrations/20260909210000_create_project_bundle.sql",
+  );
+  assert.match(deleteSql, /create or replace function public.delete_project_bundle/);
+  assert.match(createSql, /create or replace function public.create_project_bundle/);
 });
 
 await check("A-004 Apply world and fingerprint include fields Apply writes", () => {

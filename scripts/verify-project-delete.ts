@@ -484,7 +484,7 @@ async function main() {
     );
   });
 
-  await check("New Project create failure cleans up through the same atomic delete RPC", async () => {
+  await check("New Project mid-create failure rolls back the whole bundle", async () => {
     const fake = new FakeWorkspaceClient({ failOnTable: "todos" });
     await assert.rejects(() =>
       persistNewProject(
@@ -497,6 +497,26 @@ async function main() {
     assert.equal(fake.tables.projects.some((p) => p.id === PROJECT_A_ID), false);
     assert.equal(fake.rowsForProject("stakeholders", PROJECT_A_ID).length, 0);
     assert.equal(fake.rowsForProject("todos", PROJECT_A_ID).length, 0);
+    assert.equal(fake.rowsForProject("knowledge_items", PROJECT_A_ID).length, 0);
+  });
+
+  await check("New Project retry with the same client id does not duplicate", async () => {
+    const fake = new FakeWorkspaceClient();
+    const first = await persistNewProject(
+      asClient(fake),
+      fake.workspaceId,
+      fake.userId,
+      draft("Retry Create", { clientProjectId: PROJECT_A_ID }),
+    );
+    const projectCount = fake.tables.projects.length;
+    const second = await persistNewProject(
+      asClient(fake),
+      fake.workspaceId,
+      fake.userId,
+      draft("Retry Create", { clientProjectId: PROJECT_A_ID }),
+    );
+    assert.equal(second.project.id, first.project.id);
+    assert.equal(fake.tables.projects.length, projectCount);
   });
 
   await check("Retrying delete after success fails closed without duplicating cleanup", async () => {

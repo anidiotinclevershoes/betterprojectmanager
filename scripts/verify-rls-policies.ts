@@ -147,6 +147,14 @@ check("external V1 safety migration aligns project to workspace", () => {
   assert.match(safety, /recommendations_insert_member/);
   assert.match(safety, /history_events_insert_member/);
   assert.match(safety, /capture_sessions_insert_member/);
+  const createPath = path.join(
+    root,
+    "supabase/migrations/20260909210000_create_project_bundle.sql",
+  );
+  assert.equal(fs.existsSync(createPath), true);
+  const createSql = fs.readFileSync(createPath, "utf8");
+  assert.match(createSql, /create or replace function public.create_project_bundle/);
+  assert.match(createSql, /security invoker/);
 });
 
 console.log(`\n${passed} RLS/schema structural checks passed.`);

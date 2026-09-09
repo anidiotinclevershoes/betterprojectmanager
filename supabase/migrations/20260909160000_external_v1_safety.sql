@@ -1,5 +1,8 @@
 -- External V1 safety: project/workspace alignment (N-09) + atomic project-bundle delete (D-028).
--- Create remains client-orchestrated with compensating cleanup; delete is one Postgres transaction.
+-- Additive: new functions + tighter WITH CHECK. Current main still creates/deletes
+-- via table inserts; those rows already name the project they just wrote, so
+-- project_belongs_to_workspace does not reject legitimate current-main writes.
+-- Atomic New Project create is the next migration (create_project_bundle).
 
 create or replace function public.project_belongs_to_workspace(
   p_workspace_id uuid,
