@@ -48,6 +48,8 @@ check("expired and invalid reset links fail closed with a recovery path", () => 
   assert.match(reset, /expired/);
   assert.match(reset, /\/forgot-password/);
   assert.match(reset, /\/api\/auth\/me/);
+  assert.match(reset, /password_updated/);
+  assert.match(reset, /trackAnalyticsEvent/);
 });
 
 check("reset API refuses a missing session", () => {
