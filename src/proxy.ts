@@ -13,6 +13,9 @@ const PUBLIC_PATHS = new Set([
   "/signup",
   "/forgot-password",
   "/reset-password",
+  "/privacy",
+  "/terms",
+  "/support",
   "/auth/callback",
   "/favicon.ico",
 ]);

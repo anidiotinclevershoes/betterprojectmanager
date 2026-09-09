@@ -84,6 +84,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "public-landing", script: "scripts/verify-public-landing.ts" },
   { name: "auth-stranger", script: "scripts/verify-auth-stranger.ts" },
   { name: "billing-display", script: "scripts/verify-billing-display.ts" },
+  { name: "stranger-polish", script: "scripts/verify-stranger-polish.ts" },
   { name: "phase2-auth", script: "scripts/verify-phase2-auth.ts" },
   { name: "hydrate-session", script: "scripts/verify-hydrate-session.ts" },
   { name: "d036-session-switch", script: "scripts/verify-d036-session-switch.ts" },

@@ -27,6 +27,19 @@ export function AuthShell({
         {lede ? <p className="lede">{lede}</p> : null}
         {children}
         {footer ? <div className="auth-footer">{footer}</div> : null}
+        <p className="auth-legal">
+          <Link href="/privacy" className="auth-text-link">
+            Privacy
+          </Link>
+          <span aria-hidden="true"> · </span>
+          <Link href="/terms" className="auth-text-link">
+            Terms
+          </Link>
+          <span aria-hidden="true"> · </span>
+          <Link href="/support" className="auth-text-link">
+            Support
+          </Link>
+        </p>
       </div>
     </div>
   );

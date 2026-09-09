@@ -71,6 +71,12 @@
   color: var(--accent-hover);
 }
 
+.auth-legal {
+  margin: 0.85rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 .auth-next-step {
   margin: 0.15rem 0 0.85rem;
   font-size: 0.8rem;
