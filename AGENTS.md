@@ -78,7 +78,7 @@ Read `docs/README.md` → `docs/LUME_V09_TO_V1_HANDOFF.md` → `docs/LUME_V1_KNO
 
 **Still open (later hardening — see Known Discoveries backlog)**
 
-New Project create is still sequential inserts with atomic compensating cleanup (D-028 remainder). Project delete is one `delete_project_bundle` transaction. Same-workspace RLS now requires `project_belongs_to_workspace` on recommendations / history / capture_sessions (N-09). No production integrity observer. Paint cache is not written on Apply (N-10). Hydrate still caps Knowledge prose at 24 (D-049).
+New Project create is one `create_project_bundle` transaction. Project delete is one `delete_project_bundle` transaction. Same-workspace RLS now requires `project_belongs_to_workspace` on recommendations / history / capture_sessions (N-09). No production integrity observer. Paint cache is not written on Apply (N-10). Hydrate still caps Knowledge prose at 24 (D-049).
 
 **How to re-run integrity probes (read-only / in-memory)**
 

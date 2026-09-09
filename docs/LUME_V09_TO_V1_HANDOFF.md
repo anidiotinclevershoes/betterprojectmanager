@@ -471,7 +471,7 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | D-003 suggestion persist | Accept/dismiss MissionState only | V1 SHOULD / TESTER EVIDENCE | `setRecommendationStatus` | Persist if testers use it |
 | D-005 optimistic remainder | Capture Apply persist-first; some UI optimistic | V1 SHOULD | `store.tsx` | Exact reachable paths only |
 | D-035 remainder | Other persist helpers now fail closed on foreign project ids for history/session/memory/todo create | CLOSED for those write helpers | `requireProjectInWorkspace` | Remaining tables still rely on existing project+workspace WHERE clauses |
-| D-028 sequential delete | Delete is one RPC transaction | CLOSED (delete) | `delete_project_bundle` | New Project create remains sequential + compensating cleanup |
+| D-028 sequential create/delete | Create and delete are one RPC transaction each | CLOSED | `create_project_bundle` / `delete_project_bundle` | History remains secondary after create success |
 | D-004 History persist gaps | Many `pushHistory` not durable | ACCEPTED v0.9 | `history_events` schema | Needed if Change Intelligence reads History |
 | D-007 people prose | Remainder: unlinked Knowledge people | ACCEPTED v0.9 | KD notes | No unique-name platform |
 | D-008 / D-021 waiting dual | Authority decided, not implemented | ACCEPTED v0.9 | Handoff Part C | Later slice |

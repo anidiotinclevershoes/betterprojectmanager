@@ -9,15 +9,27 @@ Statuses: **pending** · **completed** · **blocked** · **before external users
 
 ---
 
+## Production deploy order (do this in this order)
+
+Apply both SQL files first. Verify with the SQL below. THEN merge the branch so Vercel can deploy the new code.
+
+Do **not** merge first. The new app expects `create_project_bundle` and `delete_project_bundle` to already exist.
+
+Paste the verification SQL below into **Supabase Dashboard → SQL Editor**. Do not use psql meta-commands.
+
+---
+
 ## Pending
 
-### Apply the external-V1 safety migration
+### 1. Apply both external-V1 SQL files on production
 
 - **Status:** pending
-- **When:** BEFORE THIS PR MERGES TO PRODUCTION
-- **Blocking external use?** YES (project delete RPC + N-09 RLS)
+- **When:** BEFORE MERGE
+- **Blocking external use?** YES
 - **Secret?:** NO
-- See **TOM — ACTION NEEDED** in the external-V1 PR.
+- **Files (in this order):**
+  1. `supabase/migrations/20260909160000_external_v1_safety.sql`
+  2. `supabase/migrations/20260909210000_create_project_bundle.sql`
 
 ### Confirm trial length for when billing is later turned on
 
@@ -51,7 +63,7 @@ Statuses: **pending** · **completed** · **blocked** · **before external users
 
 | Action | Status | Why |
 | --- | --- | --- |
-| Apply migration `20260909160000_external_v1_safety.sql` | pending | Delete RPC + project↔workspace RLS |
+| Apply both SQL files, then verify, then merge | pending | New code needs the two bundle functions |
 | Leave `LUME_BILLING_ENABLED` unset or `false` on Production | pending | First cohort is free early access |
 | Confirm `SUPABASE_SERVICE_ROLE_KEY` is already on Vercel (needed for account delete) | pending | Delete cannot run without it |
 | Own `support@lume.app` or change the address | pending | Users are told to email it |
@@ -71,7 +83,6 @@ Statuses: **pending** · **completed** · **blocked** · **before external users
 | --- | --- | --- |
 | Custom domain / DNS | later | Not required for current Vercel production |
 | Production integrity observer | later | Scanner + SQL probes exist; no daemon for controlled V1 |
-| New Project create as one DB transaction | later | Delete is atomic; create still has compensating cleanup |
 | Charging the first cohort | later | Explicitly off until evidence supports it |
 
 ---
@@ -87,6 +98,61 @@ Statuses: **pending** · **completed** · **blocked** · **before external users
 | Public welcome / signup / recovery | Commercial-readiness PRs on `main` |
 | Account export + delete (code) | This branch; Tom must still have service-role key |
 | `LUME_BILLING_ENABLED` flag | This branch; recommended Production value is unset/false |
+| New Project + delete as one DB transaction each | This branch; apply the two SQL files before merge |
+
+---
+
+## SQL Editor verification (paste as-is)
+
+After both SQL files have been run, open **Supabase Dashboard → SQL Editor → New query** and paste this whole block. You should get three result tables.
+
+```sql
+-- 1) Do the three functions exist?
+select
+  p.proname as function_name,
+  pg_get_function_identity_arguments(p.oid) as arguments
+from pg_proc p
+join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and p.proname in (
+    'create_project_bundle',
+    'delete_project_bundle',
+    'project_belongs_to_workspace'
+  )
+order by 1;
+
+-- 2) Are the tighter project/workspace policies installed?
+select
+  c.relname as table_name,
+  pol.polname as policy_name,
+  pg_get_expr(pol.polwithcheck, pol.polrelid) as with_check
+from pg_policy pol
+join pg_class c on c.oid = pol.polrelid
+join pg_namespace n on n.oid = c.relnamespace
+where n.nspname = 'public'
+  and pol.polname in (
+    'recommendations_insert_member',
+    'history_events_insert_member',
+    'capture_sessions_insert_member',
+    'memories_update_member'
+  )
+order by 1, 2;
+
+-- 3) Safe non-destructive check (does not create or delete a project)
+select
+  public.project_belongs_to_workspace(
+    '00000000-0000-4000-8000-000000000000'::uuid,
+    null
+  ) as null_project_is_allowed;
+```
+
+**Expected:**
+
+1. Three rows: `create_project_bundle`, `delete_project_bundle`, `project_belongs_to_workspace`.
+2. Four policy rows. Each `with_check` text includes `project_belongs_to_workspace`.
+3. One row: `null_project_is_allowed` = `true`.
+
+If any function is missing, run the matching SQL file again. Do not merge until all three functions appear.
 
 ---
 

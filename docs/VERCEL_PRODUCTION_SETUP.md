@@ -78,14 +78,24 @@ After you know the Vercel URL:
 
 ---
 
+## External-V1 deploy order
+
+Do **not** merge first. Apply both SQL files on production, then verify with the paste-ready SQL in [`docs/V1_USER_ACTIONS.md`](./V1_USER_ACTIONS.md), then merge so Vercel deploys the new code.
+
+1. `supabase/migrations/20260909160000_external_v1_safety.sql`
+2. `supabase/migrations/20260909210000_create_project_bundle.sql`
+
+Current main still creates and deletes with table inserts. The new functions and tighter `WITH CHECK` predicates are additive. New code calls the RPCs and will fail if they are missing.
+
 ## First deploy smoke checklist
 
 1. Fresh signup + email confirm + login  
 2. Zero demo projects  
 3. Create project → refresh → still present  
 4. Logout/login → still present  
-5. `/account` shows trial/subscription status (after billing migration)  
-6. No Golden Test / AI Cockpit / Reset Demo in nav  
+5. Capture → Review → Apply on that project  
+6. `/account` export downloads JSON; billing stays off (`LUME_BILLING_ENABLED` unset/false)  
+7. No Golden Test / AI Cockpit / Reset Demo in nav  
 
 ---
 
