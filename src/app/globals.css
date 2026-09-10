@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/lume-locked-visual.css";
 
 :root,
 [data-theme="dark"] {
@@ -15,8 +16,8 @@
   --text-secondary: #a7b0bf;
   --text-muted: #768195;
 
-  --accent-primary: #7c5cfc;
-  --accent-hover: #8f74ff;
+  --accent-primary: #7c5cff;
+  --accent-hover: #8a6dff;
   --accent-soft: rgba(124, 92, 252, 0.16);
 
   /* Frame / source identity — not status colours */
@@ -33,10 +34,10 @@
   --brand-yellow: #f5c542;
   --brand-yellow-soft: rgba(245, 197, 66, 0.18);
 
-  --success: #35b97f;
-  --warning: #e4a23b;
-  --danger: #e45b5b;
-  --info: #6c8cff;
+  --success: #45b26b;
+  --warning: #e0a33e;
+  --danger: #e8556d;
+  --info: #4c8cf8;
 
   /* Legacy aliases used by existing components */
   --ink: var(--text-primary);
@@ -3567,7 +3568,8 @@ body {
   .ghost-btn,
   .primary-btn,
   .danger-btn {
-    min-height: 44px;
+    /* Drawn size stays compact; .lume-hit / coarse pointer expands the tap band. */
+    min-height: 30px;
   }
 }
 
@@ -9012,4 +9014,96 @@ body {
   .ocean-catch-me-up-header .ocean-refresh-btn {
     align-self: flex-start;
   }
+}
+
+/* Locked MP control/field grammar wins over earlier Ocean button copies. */
+.primary-btn,
+.ghost-btn,
+.muted-btn,
+.danger-btn,
+.icon-btn {
+  position: relative;
+  min-height: 30px;
+  height: 30px;
+  border-radius: 5px;
+  font-size: 12.5px;
+  line-height: 1;
+}
+
+.primary-btn::after,
+.ghost-btn::after,
+.muted-btn::after,
+.danger-btn::after,
+.icon-btn::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 34px;
+  transform: translate(-50%, -50%);
+}
+
+@media (pointer: coarse) {
+  .primary-btn::after,
+  .ghost-btn::after,
+  .muted-btn::after,
+  .danger-btn::after,
+  .icon-btn::after {
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+  }
+}
+
+.primary-btn {
+  border-color: #7c5cff;
+  background: #7c5cff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.primary-btn:hover {
+  background: #8a6dff;
+  border-color: #8a6dff;
+}
+
+.primary-btn:disabled {
+  cursor: not-allowed;
+  border-color: #2a2e35;
+  background: #15181c;
+  color: #6e7783;
+}
+
+.ghost-btn {
+  border-color: transparent;
+  background: transparent;
+  color: #aab3c0;
+  font-weight: 500;
+}
+
+.ghost-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f1f4f8;
+}
+
+.muted-btn {
+  border: 1px solid #2e333a;
+  background: transparent;
+  color: #c6cdd6;
+}
+
+.danger-btn {
+  background: #c93e55;
+  border-color: #c93e55;
+  color: #fff;
+}
+
+.primary-btn:focus-visible,
+.ghost-btn:focus-visible,
+.muted-btn:focus-visible,
+.danger-btn:focus-visible,
+.icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--lume-surface-page, #0a0b0d),
+    0 0 0 4px #a2aebe;
 }

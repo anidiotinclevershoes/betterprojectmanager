@@ -264,8 +264,9 @@ function testPresentationContracts() {
   assert.match(workspace, /Tell Lume what changed/);
   assert.doesNotMatch(workspace, /CaptureBestPractice/);
   assert.match(workspace, /Nothing is saved until you approve/);
-  assert.match(summary, /Here.s what I understood/);
+  assert.match(summary, /Lume extracted/);
   assert.match(changes, /Check these changes/);
+  assert.match(changes, />Review</);
   assert.match(badge, /Needs You/);
   assert.match(why, /lume-review-why-toggle/);
   assert.match(annotate, /Does not collapse internal whitespace/);
@@ -286,7 +287,7 @@ function testMobileStructuralCss() {
   assert.match(css, /annotated-transcript-body/);
   assert.match(css, /overflow-wrap: anywhere/);
   assert.match(css, /capture-apply-ready-btn/);
-  assert.match(css, /min-height: 2\.75rem/);
+  assert.match(css, /lume-hit|min-height: 30px/);
 }
 
 async function main() {

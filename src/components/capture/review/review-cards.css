@@ -1,48 +1,51 @@
-/* Capture review-card visual language. Review-local — not globals.css.
-   Colour = operation/state only. Domain identity = icon + label, not colour. */
+/* Capture review-card visual language — ported from locked ReviewCard v1.
+   Colour = operation/state. Domain identity = restrained icon tint, never an op band. */
 
 .lume-review-card {
-  --lume-review-op: var(--info);
+  --lume-review-op: var(--lume-op-update, #4c8cf8);
+  --lume-review-op-text: var(--lume-op-update-text, #a2c6ff);
   display: flex;
   flex-direction: column;
   padding: 0;
   border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-surface-raised);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--lume-border-card, #2a2e35);
+  background: var(--lume-surface-card, #191c21);
   min-width: 0;
   overflow: hidden;
-  transition:
-    opacity 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease;
+  transition: border-color 150ms ease-out, background-color 150ms ease-out;
+}
+
+.lume-review-card:hover,
+.lume-review-card:focus-within {
+  border-color: var(--lume-border-hover, #4a525e);
+  background: var(--lume-surface-card-hover, #1d2026);
 }
 
 .lume-review-card.is-create {
-  --lume-review-op: var(--success);
+  --lume-review-op: var(--lume-op-create, #45b26b);
+  --lume-review-op-text: var(--lume-op-create-text, #8adca6);
 }
 
 .lume-review-card.is-update {
-  --lume-review-op: var(--info);
+  --lume-review-op: var(--lume-op-update, #4c8cf8);
+  --lume-review-op-text: var(--lume-op-update-text, #a2c6ff);
 }
 
 .lume-review-card.is-remove {
-  --lume-review-op: var(--danger);
+  --lume-review-op: var(--lume-op-remove, #e8556d);
+  --lume-review-op-text: var(--lume-op-remove-text, #ffa1ae);
 }
 
 .lume-review-card.is-needs-you {
-  --lume-review-op: var(--warning);
+  --lume-review-op: var(--lume-op-needs-you, #e0a33e);
+  --lume-review-op-text: var(--lume-op-needs-you-text, #f5cc7e);
 }
 
-.lume-review-card.is-flash {
-  outline: 1px solid color-mix(in srgb, var(--accent-timeline) 55%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-timeline) 18%, transparent);
-}
-
+.lume-review-card.is-flash,
 .suggested-change-item.is-highlighted .lume-review-card {
-  outline: 1px solid color-mix(in srgb, var(--accent-timeline) 55%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-timeline) 18%, transparent);
+  border-color: var(--lume-border-hover, #4a525e);
+  box-shadow: 0 0 0 2px var(--lume-surface-card, #191c21),
+    0 0 0 4px var(--lume-focus-ring, #a2aebe);
 }
 
 .lume-review-head {
@@ -55,13 +58,14 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  padding: 9px 12px;
+  padding: 6px 12px;
   min-width: 0;
-  background: color-mix(in srgb, var(--lume-review-op) 22%, var(--bg-surface-raised));
-  color: var(--lume-review-op);
-  font-size: 12px;
+  background: color-mix(in srgb, var(--lume-review-op) 15%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--lume-review-op) 40%, transparent);
+  color: var(--lume-review-op-text);
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.17em;
   text-transform: uppercase;
   line-height: 1.2;
 }
@@ -73,7 +77,11 @@
   width: 20px;
   height: 20px;
   flex: 0 0 auto;
-  color: var(--lume-review-op);
+  color: var(--lume-review-op-text);
+}
+
+.lume-review-op-mark svg {
+  stroke-width: 1.9;
 }
 
 .lume-review-opbar-label {
@@ -83,35 +91,86 @@
 .lume-review-body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px 12px 12px;
+  padding: 10px 12px;
   min-width: 0;
 }
 
 .lume-review-domain {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  height: 34px;
   min-width: 0;
-  color: var(--text-secondary);
+  color: var(--lume-domain, #98a3b1);
+}
+
+.lume-review-domain[data-lume-domain="issues"] {
+  --lume-domain: var(--lume-domain-issues, #e8895c);
+  --lume-domain-tint: color-mix(in srgb, var(--lume-domain-issues, #e8895c) 12%, transparent);
+}
+
+.lume-review-domain[data-lume-domain="people"] {
+  --lume-domain: var(--lume-domain-people, #5cc8f2);
+  --lume-domain-tint: color-mix(in srgb, var(--lume-domain-people, #5cc8f2) 12%, transparent);
+}
+
+.lume-review-domain[data-lume-domain="todo"] {
+  --lume-domain: var(--lume-domain-todo, #a6d45f);
+  --lume-domain-tint: color-mix(in srgb, var(--lume-domain-todo, #a6d45f) 12%, transparent);
+}
+
+.lume-review-domain[data-lume-domain="knowledge"] {
+  --lume-domain: var(--lume-domain-knowledge, #cd87e0);
+  --lume-domain-tint: color-mix(in srgb, var(--lume-domain-knowledge, #cd87e0) 12%, transparent);
 }
 
 .lume-review-domain-mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  color: var(--text-secondary);
+  width: 34px;
+  height: 34px;
   flex: 0 0 auto;
+  border-radius: 6px;
+  background: var(--lume-domain-tint, transparent);
+  color: var(--lume-domain, #98a3b1);
+}
+
+.lume-review-domain-mark svg {
+  stroke-width: 1.6;
+}
+
+.lume-review-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--lume-avatar, #7fb2ff) 55%, transparent);
+  background: color-mix(in srgb, var(--lume-avatar, #7fb2ff) 18%, transparent);
+  color: var(--lume-avatar-text, #e7f0ff);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.lume-review-avatar.is-unknown {
+  border-style: dashed;
+  --lume-avatar: var(--lume-op-needs-you, #e0a33e);
+  --lume-avatar-text: var(--lume-op-needs-you-text, #f5cc7e);
+  font-size: 16px;
+  letter-spacing: 0;
 }
 
 .lume-review-domain-label {
-  font-size: 11px;
-  font-weight: 650;
-  letter-spacing: 0.05em;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--lume-meta-label, #8992a0);
 }
 
 .lume-review-project {
@@ -120,7 +179,7 @@
   max-width: 40%;
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #6e7783;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -133,39 +192,41 @@
 }
 
 .lume-review-hero {
-  margin: 0;
+  margin: 8px 0 0;
   font-family: var(--font-sans), Inter, ui-sans-serif, system-ui, sans-serif;
   font-size: 15.5px;
-  font-weight: 700;
-  line-height: 1.28;
-  color: var(--text-primary);
+  font-weight: 600;
+  line-height: 1.375;
+  letter-spacing: -0.01em;
+  color: #f1f4f8;
   overflow-wrap: anywhere;
 }
 
 .lume-review-identity {
-  margin: 0;
+  margin: 8px 0 0;
   font-size: 15.5px;
-  font-weight: 700;
-  line-height: 1.28;
-  color: var(--text-primary);
+  font-weight: 600;
+  line-height: 1.375;
+  letter-spacing: -0.01em;
+  color: #f1f4f8;
   overflow-wrap: anywhere;
 }
 
 .lume-review-subject {
-  margin: 0;
+  margin: 4px 0 0;
   font-size: 13px;
   line-height: 1.35;
-  color: var(--text-secondary);
+  color: #a3acb9;
   overflow-wrap: anywhere;
 }
 
 .lume-review-meta,
 .lume-review-consequence,
 .lume-review-support {
-  margin: 0;
-  font-size: 12px;
+  margin: 4px 0 0;
+  font-size: 12.5px;
   line-height: 1.4;
-  color: var(--text-secondary);
+  color: #a3acb9;
   overflow-wrap: anywhere;
 }
 
@@ -173,73 +234,111 @@
   white-space: pre-line;
 }
 
+.lume-review-quote {
+  margin: 6px 0 0;
+  padding: 0 0 0 10px;
+  border-left: 2px solid var(--lume-review-op);
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.375;
+  color: #e4e9ef;
+}
+
 .lume-review-field {
   margin: 0;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lume-meta-label, #8992a0);
+}
+
+.lume-review-mutation {
+  margin-top: 10px;
+}
+
+.lume-review-change {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--lume-review-op) 28%, transparent);
+  background: color-mix(in srgb, var(--lume-review-op) 10%, transparent);
 }
 
 .lume-review-compare {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 6px 8px;
+  gap: 10px;
   min-width: 0;
-  font-size: 13.5px;
-  line-height: 1.35;
+  margin: 6px 0 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .lume-review-from {
-  color: var(--text-secondary);
+  color: #909aa8;
+  font-size: 12.5px;
   font-weight: 500;
+  text-decoration: line-through;
+  text-decoration-color: rgb(144 154 168 / 0.6);
   overflow-wrap: anywhere;
 }
 
 .lume-review-arrow {
-  color: var(--text-muted);
-  font-size: 13px;
+  color: var(--lume-review-op-text);
+  font-size: 14px;
   font-weight: 600;
   flex: 0 0 auto;
 }
 
 .lume-review-to {
-  color: var(--text-primary);
-  font-weight: 650;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
   overflow-wrap: anywhere;
+}
+
+.lume-review-card.is-remove .lume-review-consequence {
+  font-size: 12.5px;
+  color: #a3acb9;
 }
 
 .lume-review-why {
   min-width: 0;
+  margin-top: 10px;
 }
 
 .lume-review-why .why-panel {
-  border-top: 1px solid var(--border-subtle);
-  padding-top: 6px;
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+  padding-top: 10px;
 }
 
 .lume-review-why-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  min-height: 28px;
   border: 0;
   background: transparent;
-  color: var(--text-muted);
-  font-size: 11.5px;
-  font-weight: 600;
+  color: #aab3c0;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  padding: 2px 0;
-  border-radius: 4px;
+  padding: 0 8px;
+  border-radius: 5px;
+  transition: color 150ms ease-out, background-color 150ms ease-out;
 }
 
 .lume-review-why-toggle:hover {
-  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f1f4f8;
 }
 
 .lume-review-why-toggle:focus-visible {
-  color: var(--text-primary);
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--lume-surface-card, #191c21),
+    0 0 0 4px var(--lume-focus-ring, #a2aebe);
 }
 
 .lume-review-why-chevron {
@@ -249,7 +348,7 @@
   border-right: 1.5px solid currentColor;
   border-bottom: 1.5px solid currentColor;
   transform: rotate(-45deg);
-  transition: transform 140ms ease;
+  transition: transform 150ms ease-out;
 }
 
 .lume-review-why-chevron.is-open {
@@ -260,16 +359,28 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-top: 10px;
 }
 
 .lume-review-card .compact-change-action-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
+  gap: 6px 4px;
 }
 
-.lume-review-card .primary-btn {
-  min-height: 30px;
+.lume-review-card .primary-btn,
+.lume-review-card .ghost-btn,
+.lume-review-card .muted-btn {
+  min-height: 28px;
+  height: 28px;
+  border-radius: 5px;
+  font-size: 12.5px;
+}
+
+.lume-review-card .muted-btn {
+  min-height: 28px;
+  padding: 0 10px;
 }
 
 .lume-review-card.is-resolved {
@@ -277,49 +388,41 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: var(--bg-surface-raised);
-}
-
-.lume-review-card.is-resolved.is-dismissed {
-  background: var(--bg-surface-raised);
+  background: var(--lume-surface-card, #191c21);
 }
 
 .lume-review-resolved-mark {
   flex: 0 0 auto;
-  color: var(--text-secondary);
+  color: #a3acb9;
   font-weight: 700;
 }
 
 .lume-review-card.is-resolved:not(.is-dismissed) .lume-review-resolved-mark {
-  color: var(--success);
+  color: var(--lume-op-create, #45b26b);
 }
 
 .lume-review-card.is-resolved.is-dismissed .lume-review-resolved-mark {
-  color: var(--text-muted);
+  color: #6e7783;
 }
 
 .lume-review-resolved-copy {
   margin: 0;
   min-width: 0;
   font-size: 12.5px;
-  color: var(--text-secondary);
+  color: #a3acb9;
   overflow-wrap: anywhere;
 }
 
 .lume-review-resolved-copy strong {
-  color: var(--text-primary);
+  color: #f1f4f8;
   font-weight: 650;
-}
-
-.lume-review-card.is-resolved .lume-review-domain-mark {
-  color: var(--text-secondary);
 }
 
 @media (max-width: 699px) {
   .lume-review-compare {
     flex-direction: column;
     align-items: flex-start;
-    gap: 2px;
+    gap: 4px;
   }
 
   .lume-review-arrow {
@@ -328,8 +431,9 @@
 
   .lume-review-compare .lume-review-to::before {
     content: "→ ";
-    color: var(--text-muted);
+    color: var(--lume-review-op-text);
     font-weight: 600;
+    font-size: 14px;
   }
 
   .lume-review-project {
@@ -343,7 +447,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .lume-review-card,
-  .lume-review-why-chevron {
+  .lume-review-why-chevron,
+  .lume-review-why-toggle {
     transition: none;
   }
 }
