@@ -27,6 +27,7 @@ import { loadMissionStateFromSupabase } from "../src/lib/data/supabase/load-miss
 import { FakeWorkspaceClient } from "./lib/fake-supabase-workspace";
 import { captureApplyWorldFromState } from "../src/lib/capture/apply/world";
 import { composeKnowledgeCentreItems } from "../src/lib/knowledge-centre/four-bucket";
+import type { CanonicalTruthItem } from "../src/lib/canonical-truth/types";
 import type { MissionState } from "../src/lib/types";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -436,11 +437,13 @@ async function main() {
       for (const note of notes) {
         assert.ok(knowledge!.sections.now.includes(note));
         assert.equal(knowledge!.sections.decisions.includes(note), false);
-        const overlay = (knowledge!.structured ?? []).find((item) => item.body === note);
+        const overlay: CanonicalTruthItem | undefined = (
+          knowledge!.structured ?? []
+        ).find((item) => item.body === note);
         assert.ok(overlay);
-        assert.equal(overlay!.kind, "fact");
-        assert.equal(overlay!.section, "now");
-        assert.equal(overlay!.lifecycle, "current");
+        assert.equal(overlay.kind, "fact");
+        assert.equal(overlay.section, "now");
+        assert.equal(overlay.lifecycle, "current");
       }
       assert.equal(
         (knowledge!.structured ?? []).some(
