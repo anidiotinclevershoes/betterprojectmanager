@@ -60,6 +60,8 @@ Rules:
 
 ### Step 3 — Apply the database migrations
 
+**Later lesson (D-050, 10 Sep 2026):** pasting only the files named in this original Phase-1 list is not enough. Hosted production can lag the repository. Every file in `supabase/migrations/` must be applied in timestamp order. The original Option A list below is historical (schema + RLS + grants only). Do not treat it as the full current schema.
+
 You have two easy options.
 
 #### Option A (recommended): Supabase SQL Editor

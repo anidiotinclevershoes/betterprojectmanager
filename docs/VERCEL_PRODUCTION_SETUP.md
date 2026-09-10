@@ -80,12 +80,13 @@ After you know the Vercel URL:
 
 ## External-V1 deploy order
 
-Do **not** merge first. Apply both SQL files on production, then verify with the paste-ready SQL in [`docs/V1_USER_ACTIONS.md`](./V1_USER_ACTIONS.md), then merge so Vercel deploys the new code.
+PR #150 is already merged and deployed. The remaining production SQL is the hosted schema catch-up. Do **not** edit the already-applied V1 RPC files.
 
-1. `supabase/migrations/20260909160000_external_v1_safety.sql`
-2. `supabase/migrations/20260909210000_create_project_bundle.sql`
+1. Read-only audit: `scripts/hosted-schema-audit.sql`
+2. Additive catch-up: `supabase/migrations/20260910120000_hosted_canonical_schema_catchup.sql`
+3. Re-run the audit, then repeat New Project smoke.
 
-Current main still creates and deletes with table inserts. The new functions and tighter `WITH CHECK` predicates are additive. New code calls the RPCs and will fail if they are missing.
+Those files are additive. New Project stays on `create_project_bundle`. Click-by-click steps: [`docs/V1_USER_ACTIONS.md`](./V1_USER_ACTIONS.md).
 
 ## First deploy smoke checklist
 

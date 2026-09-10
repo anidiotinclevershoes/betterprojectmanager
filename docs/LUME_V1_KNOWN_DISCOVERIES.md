@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 9 September 2026 (external-V1 readiness: D-028 create+delete CLOSED; N-09 CLOSED; D-041/D-042 CLOSED for individual-first V1; integrity observer remains a bounded limitation)  
+**Last housekeeping:** 10 September 2026 (hosted New Project smoke: D-050 production schema lag vs full migration reconstruction)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main` + `docs/LUME_V09_TO_V1_HANDOFF.md`. The 26 Aug architecture memory handoff is historical.  
 **Docs entry point:** `docs/README.md`  
@@ -164,6 +164,24 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Notes** | Recorded because Archive felt desirable during regression hygiene. 3A.1 kept deletion permanent and confirmation explicit instead of expanding scope. |
 
 ---
+
+### D-050 — Hosted production schema is not the full migration reconstruction
+
+| Field | Value |
+| --- | --- |
+| **Status** | open (hosted catch-up) |
+| **Severity** | high (blocked external-V1 smoke) |
+| **Domain** | Infra / Schema |
+| **Found in** | External-V1 hosted New Project smoke (10 Sep 2026) |
+| **Failure class** | Disposable Postgres applied every `supabase/migrations` file. Hosted production was built by pasting selected SQL Editor files over time. After `create_project_bundle` deployed, New Project failed: `column "kind" of relation "knowledge_items" does not exist`. The app did not treat the change as maintained truth. |
+| **Evidence / repro** | Phase-1 `knowledge_items` has `section/body/position` only. Canonical `kind/epistemic/lifecycle/meta/provenance` are added by `20260818230000_knowledge_canonical_metadata.sql`. Current persist, Capture Apply, hydrate structured overlay, and New Project compose all write `kind` (responsibilities are `knowledge_items.kind = 'responsibility'`). The RPC is not inventing a stale column. |
+| **Likely files** | `supabase/migrations/20260818230000_knowledge_canonical_metadata.sql`; later files such as `20260831160000_project_retrieval_tags.sql` may also be absent on hosted |
+| **Fix summary** | Do not strip `kind` from `create_project_bundle`. Catch hosted schema up with additive `20260910120000_hosted_canonical_schema_catchup.sql` (replays canonical knowledge metadata + retrieval tag tables). Operator audit: `scripts/hosted-schema-audit.sql`. Contract: `scripts/verify-rpc-schema-contract.ts`. Real Postgres hosted-lag proof: `scripts/prove-hosted-schema-lag.ts`. |
+| **Explicit non-goals** | A second New Project path; editing already-applied V1 SQL files in place |
+| **Regression test to add** | `scripts/verify-rpc-schema-contract.ts` |
+| **Target resolution / validation point** | Hosted audit shows required columns present; New Project smoke repeated |
+| **Related docs** | `docs/V1_USER_ACTIONS.md`; `docs/SUPABASE_SETUP_FOR_TOM.md` (original SQL Editor only named the first three files) |
+| **Notes** | Original Tom setup listed schema + RLS + grants only. Later slices each asked for one more paste. Hosted can therefore lag repo reconstruction without any migration file being wrong. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 
@@ -911,6 +929,7 @@ Canonical categories for the later large hardening pass. Details live in the aud
 ### BEFORE EXTERNAL USERS
 
 - ~~D-028 / A-003~~ — `create_project_bundle` + `delete_project_bundle`
+- **D-050** — hosted schema must catch up to full migrations (`knowledge_items.kind` missing on production)
 - ~~N-09~~ — RLS `project_belongs_to_workspace` on recommendations / history / capture_sessions
 - ~~D-035 remainder (named write helpers)~~ — `requireProjectInWorkspace` on history/session/memory/todo/stakeholder/knowledge/timeline creates
 - ~~D-041 / D-042~~ — Account delete + JSON export (individual-first)
