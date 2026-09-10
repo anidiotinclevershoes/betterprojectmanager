@@ -62,7 +62,7 @@ function asClient(fake: FakeWorkspaceClient) {
 }
 
 /** Fifteen distinct compose Knowledge facts — above the old uniqueBullets cap of 12. */
-const FIFTEEN_KNOWLEDGE_FACTS = [
+const FIFTEEN_KNOWLEDGE_FACTS: string[] = [
   "UAT environment is shared with payroll",
   "Web launch is in scope first",
   "Mobile app follows the web release",
@@ -78,7 +78,7 @@ const FIFTEEN_KNOWLEDGE_FACTS = [
   "Regression pack still misses the mobile journeys",
   "Data migration rehearsal is booked for Friday",
   "The sponsor wants a one-page weekly",
-] as const;
+];
 
 async function main() {
   await check("deterministic code: Member Claims Upload → MCU", () => {
