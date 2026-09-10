@@ -410,12 +410,12 @@ await check("N-02 persistTodoUpdate/Delete now require workspace + project + id 
   assert.match(updateBlock.slice(0, 1600), /scopeExistingTodo/);
 });
 
-await check("N-03 hydrate caps knowledge section bodies at 24 while structured stays uncapped", () => {
+await check("N-03 hydrate keeps complete knowledge section lists aligned with structured", () => {
   const hydrate = readSrc("src/lib/data/supabase/load-mission-state.ts");
-  assert.match(hydrate, /slice\(0, 24\)/);
+  const fold = hydrate.slice(hydrate.indexOf("for (const row of knowledgeRes.data"));
+  const foldFn = fold.slice(0, fold.indexOf("const risks:"));
+  assert.doesNotMatch(foldFn, /\.slice\(\s*0\s*,\s*24\s*\)/);
   assert.match(hydrate, /current\.structured = \[/);
-  const knowledge = readSrc("src/lib/knowledge.ts");
-  assert.match(knowledge, /MAX_BULLETS_PER_SECTION = 8/);
 });
 
 await check("N-04 analysesThisMonth is always 0 on hydrate — meter is not durable", () => {

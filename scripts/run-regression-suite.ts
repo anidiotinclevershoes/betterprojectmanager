@@ -17,6 +17,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "timeline-projection", script: "scripts/verify-timeline-visual-polish.ts" },
   { name: "knowledge-centre-four-bucket", script: "scripts/verify-knowledge-centre-four-bucket.ts" },
   { name: "knowledge-reconcile", script: "scripts/verify-knowledge-reconcile.ts" },
+  { name: "d049-hydrate-completeness", script: "scripts/verify-d049-hydrate-completeness.ts" },
   { name: "project-truth-safety", script: "scripts/verify-project-truth-safety.ts" },
   { name: "risk-lifecycle", script: "scripts/verify-risk-lifecycle.ts" },
   { name: "people-entities", script: "scripts/verify-people-entities.ts" },
