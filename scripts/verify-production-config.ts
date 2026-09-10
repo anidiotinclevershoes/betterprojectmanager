@@ -304,6 +304,7 @@ check("New Project Talk/Paste uses shared Capture observation extraction", () =>
   );
   assert.match(src, /extractObservationsWithOpenAI/);
   assert.match(src, /from "@\/lib\/capture-v2\/extract"/);
+  assert.match(src, /new-project\.v2_organised/);
   assert.doesNotMatch(src, /assembleNarrativeWithOpenAI/);
   assert.doesNotMatch(src, /assembleFromNarrative/);
   assert.doesNotMatch(src, /extractNewProjectV2WithOpenAI/);

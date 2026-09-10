@@ -42,10 +42,16 @@ async function main() {
       join(process.cwd(), "src/lib/capture-v2/extract.ts"),
       "utf8",
     );
-    assert.ok(extract.includes(FROZEN_SYSTEM_MESSAGE));
+    const prompt = readFileSync(
+      join(process.cwd(), "src/lib/capture-v2/prompt.ts"),
+      "utf8",
+    );
+    assert.ok(prompt.includes(FROZEN_SYSTEM_MESSAGE));
+    assert.ok(extract.includes("CAPTURE_V2_EXTRACT_SYSTEM_MESSAGE"));
     assert.ok(extract.includes("temperature: 0.2"));
     assert.ok(extract.includes('response_format: { type: "json_object" }'));
     assert.ok(extract.includes("resolveOpenAIChatModel()"));
+    assert.ok(extract.includes("data.model"));
   });
 
   await check("V2 cannot be disabled by the old flag", () => {
