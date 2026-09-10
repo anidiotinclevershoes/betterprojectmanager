@@ -9097,3 +9097,109 @@ body {
   box-shadow: 0 0 0 2px var(--lume-surface-page, #0a0b0d),
     0 0 0 4px #a2aebe;
 }
+
+/* Locked Inputs v1 — must follow later Ocean .field copies. */
+.field > span,
+.field span,
+label.field > span,
+label.field {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #a3acb9;
+}
+
+.field input,
+.field textarea,
+.field select,
+.generic-input,
+.np-identity input,
+.np-identity textarea,
+.np-frame input,
+.np-organise textarea,
+.np-talk textarea {
+  width: 100%;
+  min-height: 30px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid #2e333a;
+  border-radius: 5px;
+  background: #0d0e11;
+  color: #f1f4f8;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  caret-color: #c6cdd6;
+}
+
+.field textarea,
+.np-identity textarea,
+.np-organise textarea,
+.np-talk textarea,
+.np-review textarea {
+  height: auto;
+  min-height: 84px;
+  padding: 7px 10px;
+  line-height: 1.55;
+}
+
+.np-organise textarea,
+.np-talk textarea {
+  min-height: 168px;
+  max-height: 320px;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.field input:hover,
+.field textarea:hover,
+.field select:hover,
+.generic-input:hover,
+.np-identity input:hover,
+.np-frame input:hover {
+  border-color: #454d59;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus,
+.generic-input:focus,
+.np-identity input:focus,
+.np-frame input:focus {
+  outline: none;
+  border-color: #4f45b0;
+  background: #12121d;
+  box-shadow: 0 0 0 2px #0a0b0d, 0 0 0 4px #a2aebe;
+}
+
+.np-organise textarea:focus,
+.np-talk textarea:focus {
+  outline: none;
+  border-color: #5a4fc4;
+  background: #161425;
+  box-shadow: 0 0 0 2px #0a0b0d, 0 0 0 4px #a2aebe;
+}
+
+.field input:disabled,
+.field textarea:disabled,
+.field select:disabled {
+  cursor: not-allowed;
+  border-color: #242830;
+  background: #101215;
+  color: #5c646e;
+}
+
+.field input[readonly],
+.field textarea[readonly] {
+  border-color: #22262c;
+  background: transparent;
+  color: #e4e9ef;
+}
+
+.field.is-invalid input,
+.field.is-invalid textarea {
+  border-color: #a8465a;
+}
