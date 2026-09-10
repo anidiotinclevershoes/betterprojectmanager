@@ -626,6 +626,126 @@ async function main() {
     },
   );
 
+  await check(
+    "New Project Knowledge fact longer than 220 characters persists in full",
+    async () => {
+      const longFact =
+        "The CAB pack must include residual risk, the identity-provider runbook, the weekend warehouse cutover window, and the named support owner, because Finance will not accept a verbal briefing as the audit trail for the winter release.";
+      assert.ok(longFact.length > 220);
+      const fake = new FakeWorkspaceClient();
+      const persisted = await persistNewProject(
+        asClient(fake),
+        fake.workspaceId,
+        fake.userId,
+        composeDraft({
+          knowledgeRemember: [{ text: longFact, remember: true }],
+        }),
+      );
+      const row = fake.tables.knowledge_items.find(
+        (item) => item.section === "now" && item.kind === "fact",
+      );
+      assert.equal(String(row?.body), longFact);
+      const loaded = await loadMissionStateFromSupabase(asClient(fake));
+      const knowledge = loaded.state.knowledge.find(
+        (k) => k.projectId === persisted.project.id,
+      );
+      assert.ok(knowledge!.sections.now.includes(longFact));
+      assert.ok((knowledge!.structured ?? []).some((item) => item.body === longFact));
+    },
+  );
+
+  await check(
+    "more than twelve New Project issues persist as risks in order",
+    async () => {
+      const titles = Array.from(
+        { length: 15 },
+        (_, i) => `Issue ${String(i + 1).padStart(2, "0")} needs a named owner`,
+      );
+      const fake = new FakeWorkspaceClient();
+      const persisted = await persistNewProject(
+        asClient(fake),
+        fake.workspaceId,
+        fake.userId,
+        composeDraft({
+          risks: titles.map((title) => ({ title })),
+        }),
+      );
+      const riskTitles = fake.tables.risks.map((row) => String(row.title));
+      assert.deepEqual(riskTitles, titles);
+      const loaded = await loadMissionStateFromSupabase(asClient(fake));
+      const projectRisks = loaded.state.risks
+        .filter((r) => r.projectId === persisted.project.id)
+        .map((r) => r.title);
+      assert.deepEqual(projectRisks, titles);
+    },
+  );
+
+  await check(
+    "more than twelve New Project people persist as people and people-context bullets",
+    async () => {
+      const names = Array.from(
+        { length: 15 },
+        (_, i) => `Person ${String(i + 1).padStart(2, "0")} Murphy`,
+      );
+      const fake = new FakeWorkspaceClient();
+      const persisted = await persistNewProject(
+        asClient(fake),
+        fake.workspaceId,
+        fake.userId,
+        composeDraft({
+          stakeholders: names.map((name) => ({ name, responsibilities: [] })),
+        }),
+      );
+      assert.deepEqual(
+        persisted.project.stakeholders.map((s) => s.name),
+        names,
+      );
+      const loaded = await loadMissionStateFromSupabase(asClient(fake));
+      const project = loaded.state.projects.find((p) => p.id === persisted.project.id);
+      assert.deepEqual(
+        project!.stakeholders.map((s) => s.name),
+        names,
+      );
+      const knowledge = loaded.state.knowledge.find(
+        (k) => k.projectId === persisted.project.id,
+      );
+      for (const name of names) {
+        assert.ok(
+          (knowledge!.sections.people ?? []).some((line) => line.includes(name)),
+          `people-context bullet missing for ${name}`,
+        );
+      }
+    },
+  );
+
+  await check(
+    "Knowledge Centre Correct must not slice a section to 8 before reconcile",
+    () => {
+      const store = readFileSync(
+        join(process.cwd(), "src/lib/store.tsx"),
+        "utf8",
+      );
+      const start = store.indexOf("const updateKnowledgeSection = useCallback");
+      const block = store.slice(start, store.indexOf("const addKnowledgeBullet"));
+      assert.doesNotMatch(
+        block,
+        /\.slice\(\s*0\s*,\s*8\s*\)/,
+        "Correcting one Knowledge line must not drop the 9th+ canonical facts",
+      );
+      const bullets = readFileSync(
+        join(process.cwd(), "src/lib/knowledge.ts"),
+        "utf8",
+      );
+      const merge = bullets.slice(bullets.indexOf("export function mergeSectionBullets"));
+      const mergeFn = merge.slice(0, merge.indexOf("export function mergeKnowledge"));
+      assert.doesNotMatch(
+        mergeFn,
+        /next\.slice\(\s*0\s*,\s*max\s*\)/,
+        "Adding Knowledge must not drop existing facts from the working set",
+      );
+    },
+  );
+
   console.log(`\n${passed} four-frame New Project checks passed.`);
 }
 

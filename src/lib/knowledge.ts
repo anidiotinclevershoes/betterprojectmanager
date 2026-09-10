@@ -60,13 +60,12 @@ function bulletKey(text: string) {
 }
 
 /**
- * Merge new bullets into a section. Prefer fresher wording when similar;
- * cap length so the brief never becomes a wall of text.
+ * Merge new bullets into a section. Prefer fresher wording when similar.
+ * Does not silently drop existing canonical bullets.
  */
 export function mergeSectionBullets(
   existing: string[],
   incoming: string[],
-  max = MAX_BULLETS_PER_SECTION,
 ): string[] {
   const next: string[] = [];
   const seen = new Set<string>();
@@ -93,7 +92,7 @@ export function mergeSectionBullets(
   for (const item of incoming) push(item);
   for (const item of existing) push(item);
 
-  return next.slice(0, max);
+  return next;
 }
 
 export function mergeKnowledge(
