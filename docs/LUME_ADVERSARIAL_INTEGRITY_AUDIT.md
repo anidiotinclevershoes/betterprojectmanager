@@ -114,6 +114,8 @@ Why not a claim of “finished product”: there is still no production integrit
 
 **9 September 2026 follow-up:** New Project create is now one `create_project_bundle` transaction (same programme as `delete_project_bundle`). D-028 / A-003 create remainder is closed. History remains secondary after success.
 
+**10 September 2026 (D-050):** Hosted New Project failed after that RPC shipped because production never received later additive migrations (`knowledge_items.kind` and retrieval tag tables). The RPC is not inventing a stale column. Reconstructing every repo migration into disposable Postgres was green; SQL Editor catch-up of selected files was not equivalent. Fail-closed at persist (`not treated as maintained project truth`). Catch-up is additive `20260910120000_hosted_canonical_schema_catchup.sql`. Do not strip `kind` from the RPC.
+
 ## Is there any credible current path that could silently corrupt project truth?
 
 **Closed by this programme (no longer current paths):** Apply returning pre-write state after a successful write; fingerprint-blind due-date overwrite; leftover Project A Review applying on Project B; unreceipted knowledge/availability/person Apply retries.

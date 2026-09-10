@@ -1,6 +1,6 @@
 # V1 human-action checklist
 
-**Status:** Living operator checklist (9 September 2026)  
+**Status:** Living operator checklist (10 September 2026)  
 **Scope:** Things Tom must do in a dashboard or as a product decision. Not an architecture map.
 
 Start with `docs/README.md` for product/architecture truth. This file only tracks human actions.
@@ -9,27 +9,34 @@ Statuses: **pending** · **completed** · **blocked** · **before external users
 
 ---
 
-## Production deploy order (do this in this order)
+## Production deploy order (current)
 
-Apply both SQL files first. Verify with the SQL below. THEN merge the branch so Vercel can deploy the new code.
+The two external-V1 SQL files are already on production. Production Vercel is on merged `main` (PR #150). **Stop the invite rollout.** Hosted New Project failed because production is missing later additive columns/tables the canonical model requires (`knowledge_items.kind`, then likely `project_tags`).
 
-Do **not** merge first. The new app expects `create_project_bundle` and `delete_project_bundle` to already exist.
+Do not edit already-applied V1 SQL. Do not strip `kind` from `create_project_bundle`.
 
-Paste the verification SQL below into **Supabase Dashboard → SQL Editor**. Do not use psql meta-commands.
+1. SQL Editor → New query → paste **all** of `scripts/hosted-schema-audit.sql` → Run. Send the full result.
+2. New query → paste **all** of `supabase/migrations/20260910120000_hosted_canonical_schema_catchup.sql` → Run.
+3. Re-run the audit until every `required_column` is `present` and `project_tags` / `item_tags` are `present`.
+4. Repeat New Project smoke from scratch only after that.
+
+The catch-up file is additive (`IF NOT EXISTS`). It replays canonical knowledge metadata plus retrieval tag tables. If duplicate project codes exist, it still creates the tag tables and skips the unique code index (D-026) with a warning.
 
 ---
 
 ## Pending
 
-### 1. Apply both external-V1 SQL files on production
+### Hosted schema catch-up after New Project smoke failure
 
 - **Status:** pending
-- **When:** BEFORE MERGE
+- **When:** NOW — before repeating smoke / before invites
 - **Blocking external use?** YES
 - **Secret?:** NO
-- **Files (in this order):**
-  1. `supabase/migrations/20260909160000_external_v1_safety.sql`
-  2. `supabase/migrations/20260909210000_create_project_bundle.sql`
+- **Do this:**
+  1. SQL Editor → New query → paste all of `scripts/hosted-schema-audit.sql` → Run. Send the full result (every `MISSING` row, plus `recent_project` / `leftover_children`).
+  2. New query → paste all of `supabase/migrations/20260910120000_hosted_canonical_schema_catchup.sql` → Run.
+  3. Re-run the audit until `knowledge_items.kind` and `project_tags.slug` are `present`.
+  4. Retry New Project on a **fresh** attempt. Match `recent_project` names against the failed smoke. If a surprise project + children exist from the failed save, stop — that is an integrity defect.
 
 ### Confirm trial length for when billing is later turned on
 
@@ -63,7 +70,7 @@ Paste the verification SQL below into **Supabase Dashboard → SQL Editor**. Do 
 
 | Action | Status | Why |
 | --- | --- | --- |
-| Apply both SQL files, then verify, then merge | pending | New code needs the two bundle functions |
+| Hosted schema catch-up (`20260910120000_hosted_canonical_schema_catchup.sql`) | pending | New Project failed: production missing `knowledge_items.kind` |
 | Leave `LUME_BILLING_ENABLED` unset or `false` on Production | pending | First cohort is free early access |
 | Confirm `SUPABASE_SERVICE_ROLE_KEY` is already on Vercel (needed for account delete) | pending | Delete cannot run without it |
 | Own `support@lume.app` or change the address | pending | Users are told to email it |
@@ -98,7 +105,8 @@ Paste the verification SQL below into **Supabase Dashboard → SQL Editor**. Do 
 | Public welcome / signup / recovery | Commercial-readiness PRs on `main` |
 | Account export + delete (code) | This branch; Tom must still have service-role key |
 | `LUME_BILLING_ENABLED` flag | This branch; recommended Production value is unset/false |
-| New Project + delete as one DB transaction each | This branch; apply the two SQL files before merge |
+| New Project + delete as one DB transaction each | Merged; hosted still needs canonical metadata columns |
+| External-V1 safety + create_project_bundle SQL | Applied on production 10 Sep 2026 |
 
 ---
 
