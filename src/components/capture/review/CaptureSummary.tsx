@@ -18,9 +18,9 @@ export function CaptureSummary({
   onSelectObservation?: (observation: CaptureObservation) => void;
 }) {
   return (
-    <section className="capture-summary-panel" aria-labelledby="capture-understood-title">
-      <h3 id="capture-understood-title" className="capture-review-section-title">
-        Here’s what I understood
+    <section className="capture-summary-panel lume-extracted-rail" aria-labelledby="capture-understood-title">
+      <h3 id="capture-understood-title" className="lume-rail-title">
+        Lume extracted
       </h3>
 
       {observations.length === 0 ? (

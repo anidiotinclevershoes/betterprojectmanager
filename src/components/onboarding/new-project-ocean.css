@@ -122,10 +122,11 @@
 .np-experience .primary-btn,
 .np-experience .ghost-btn,
 .np-experience .muted-btn {
-  min-height: 40px;
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
-  font-size: 0.84rem;
+  min-height: 30px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 5px;
+  font-size: 12.5px;
 }
 
 .np-experience .primary-btn {
@@ -245,7 +246,7 @@
   .np-experience .primary-btn,
   .np-experience .ghost-btn,
   .np-experience .muted-btn {
-    min-height: 44px;
+    min-height: 30px;
   }
 
   .np-transcript-field textarea,
@@ -293,6 +294,63 @@
 .np-identity {
   display: grid;
   gap: 0.65rem;
+}
+
+.np-identity-group {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.np-identity-name,
+.np-identity-code {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .np-identity-group {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .np-identity-name {
+    flex: 1;
+  }
+
+  .np-identity-code {
+    width: 148px;
+    flex: 0 0 148px;
+  }
+}
+
+.np-experience .primary-btn,
+.np-experience .ghost-btn,
+.np-experience .muted-btn {
+  min-height: 30px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 5px;
+  font-size: 12.5px;
+}
+
+.np-organise textarea,
+.np-talk textarea {
+  min-height: 168px;
+  max-height: 320px;
+  border-radius: 5px;
+  border-color: #2e333a;
+  background: #0d0e11;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.np-organise textarea:focus,
+.np-talk textarea:focus {
+  border-color: #5a4fc4;
+  background: #161425;
 }
 
 .np-identity label,

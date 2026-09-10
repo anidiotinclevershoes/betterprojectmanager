@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useMission } from "@/lib/store";
+import { ProjectIdentityFields } from "./ProjectIdentityFields";
 import {
   countSetupItems,
   includedItemCount,
+  isProjectCodeTaken,
   newSetupClientKey,
-  suggestCode,
   type CreateProjectInput,
   type SetupDateDraft,
   type SetupKnowledgeDraft,
@@ -30,6 +32,7 @@ export function ProjectSetupReview({
   busy?: boolean;
   error?: string | null;
 }) {
+  const { state } = useMission();
   const counts = countSetupItems(draft);
   const included = includedItemCount(draft);
   const [open, setOpen] = useState({
@@ -82,32 +85,15 @@ export function ProjectSetupReview({
         open={open.project}
         onToggle={() => setOpen((s) => ({ ...s, project: !s.project }))}
       >
-        <label className="field">
-          Project name
-          <input
-            value={draft.name}
-            onChange={(e) => {
-              const name = e.target.value;
-              onChange({
-                ...draft,
-                name,
-                code: draft.code || suggestCode(name),
-              });
-            }}
-          />
-        </label>
-        <label className="field">
-          Code
-          <input
-            value={draft.code}
-            onChange={(e) =>
-              onChange({
-                ...draft,
-                code: e.target.value.toUpperCase().slice(0, 12),
-              })
-            }
-          />
-        </label>
+        <ProjectIdentityFields
+          name={draft.name}
+          code={draft.code}
+          existingCodes={state.projects}
+          onNameChange={(name, nextCode) =>
+            onChange({ ...draft, name, code: nextCode })
+          }
+          onCodeChange={(code) => onChange({ ...draft, code })}
+        />
         <label className="field">
           Objective
           <textarea
@@ -248,7 +234,11 @@ export function ProjectSetupReview({
             type="button"
             className="primary-btn np-create-btn"
             onClick={onConfirm}
-            disabled={busy || !draft.name.trim()}
+            disabled={
+              busy ||
+              !draft.name.trim() ||
+              Boolean(draft.code.trim() && isProjectCodeTaken(state.projects, draft.code))
+            }
           >
             {busy ? "Creating…" : "Create Project"}
           </button>

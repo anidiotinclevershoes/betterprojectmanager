@@ -6,6 +6,7 @@ import { LumeLogo } from "@/components/brand/LumeLogo";
 import "./new-project-ocean.css";
 import {
   newSetupClientKey,
+  isProjectCodeTaken,
   suggestCode,
   type CreateProjectInput,
   type SetupKnowledgeDraft,
@@ -17,6 +18,7 @@ import { mergeOrganisedDraft } from "@/lib/new-project/merge-organised";
 import { needsYouFromDraft } from "@/lib/new-project/needs-you";
 import { ANALYTICS_EVENTS, trackAnalyticsEvent } from "@/lib/analytics";
 import { useMission } from "@/lib/store";
+import { ProjectIdentityFields } from "./ProjectIdentityFields";
 
 function emptyDraft(): CreateProjectInput {
   return {
@@ -39,7 +41,7 @@ export function NewProjectExperience({
   variant?: "first-run" | "page";
 }) {
   const router = useRouter();
-  const { createProject } = useMission();
+  const { createProject, state } = useMission();
   const [draft, setDraft] = useState<CreateProjectInput>(emptyDraft);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -196,30 +198,17 @@ export function NewProjectExperience({
 
       <div className="np-four-frame" data-testid="np-four-frame">
         <section className="np-identity">
-          <label>
-            Name
-            <input
-              value={draft.name}
-              onChange={(e) =>
-                setDraft((d) => ({
-                  ...d,
-                  name: e.target.value,
-                  code: d.code || suggestCode(e.target.value),
-                }))
-              }
-              data-testid="np-name"
-            />
-          </label>
-          <label>
-            Code
-            <input
-              value={draft.code}
-              onChange={(e) =>
-                setDraft((d) => ({ ...d, code: e.target.value.toUpperCase() }))
-              }
-              data-testid="np-code"
-            />
-          </label>
+          <ProjectIdentityFields
+            name={draft.name}
+            code={draft.code}
+            existingCodes={state.projects}
+            nameTestId="np-name"
+            codeTestId="np-code"
+            onNameChange={(name, nextCode) =>
+              setDraft((d) => ({ ...d, name, code: nextCode }))
+            }
+            onCodeChange={(code) => setDraft((d) => ({ ...d, code }))}
+          />
           <label>
             Summary
             <textarea
@@ -387,7 +376,11 @@ export function NewProjectExperience({
           <button
             type="button"
             className="primary-btn"
-            disabled={busy || !draft.name.trim()}
+            disabled={
+              busy ||
+              !draft.name.trim() ||
+              Boolean(draft.code.trim() && isProjectCodeTaken(state.projects, draft.code))
+            }
             onClick={onCreate}
             data-testid="np-create"
           >

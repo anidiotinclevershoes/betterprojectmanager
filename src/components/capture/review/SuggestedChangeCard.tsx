@@ -211,7 +211,7 @@ export function SuggestedChangeCard({
             />
           ) : (
             <div className="compact-change-action-row">
-              <button type="button" className="primary-btn" onClick={onApprove}>
+              <button type="button" className="muted-btn" onClick={onApprove}>
                 Approve
               </button>
               <button type="button" className="ghost-btn" onClick={onDismiss}>
