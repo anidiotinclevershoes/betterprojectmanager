@@ -389,7 +389,8 @@ button.annotated-transcript-mark:focus-visible {
   }
 
   .capture-review-workspace .compact-change-action-row > button {
-    min-height: 30px;
+    min-height: 2.75rem;
+    height: auto;
     padding-inline: 0.85rem;
   }
 
