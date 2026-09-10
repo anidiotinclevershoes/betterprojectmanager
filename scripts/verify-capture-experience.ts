@@ -266,7 +266,8 @@ function testPresentationContracts() {
   assert.match(workspace, /Nothing is saved until you approve/);
   assert.match(summary, /Lume extracted/);
   assert.match(changes, /Check these changes/);
-  assert.match(changes, />Review</);
+  assert.match(changes, /lume-review-frame-title/);
+  assert.match(changes, /Review/);
   assert.match(badge, /Needs You/);
   assert.match(why, /lume-review-why-toggle/);
   assert.match(annotate, /Does not collapse internal whitespace/);

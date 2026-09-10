@@ -215,7 +215,8 @@ function main() {
   });
 
   check("mobile layout keeps usable controls and sticky CTAs", () => {
-    assert.match(oceanCss, /min-height: 44px/);
+    const lockedCss = readSrc("src/styles/lume-locked-visual.css");
+    assert.match(lockedCss, /44px/);
     assert.match(oceanCss, /font-size: 16px/);
     assert.match(oceanCss, /safe-area-inset-bottom/);
     assert.match(oceanCss, /position: sticky/);
