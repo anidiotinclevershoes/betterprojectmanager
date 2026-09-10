@@ -61,6 +61,25 @@ function asClient(fake: FakeWorkspaceClient) {
   return fake as unknown as Parameters<typeof persistNewProject>[0];
 }
 
+/** Fifteen distinct compose Knowledge facts — above the old uniqueBullets cap of 12. */
+const FIFTEEN_KNOWLEDGE_FACTS = [
+  "UAT environment is shared with payroll",
+  "Web launch is in scope first",
+  "Mobile app follows the web release",
+  "Finance wants residual risk in writing",
+  "CAB pack is due forty eight hours early",
+  "Identity provider is the long pole",
+  "Nightly batch must finish before seven",
+  "Customer letters stay paper until autumn",
+  "The warehouse cutover is a weekend window",
+  "Training environment lags production by a day",
+  "Vendor contract renews in March",
+  "Support handover needs a named owner",
+  "Regression pack still misses the mobile journeys",
+  "Data migration rehearsal is booked for Friday",
+  "The sponsor wants a one-page weekly",
+] as const;
+
 async function main() {
   await check("deterministic code: Member Claims Upload → MCU", () => {
     assert.equal(suggestCode("Member Claims Upload"), "MCU");
@@ -514,6 +533,96 @@ async function main() {
       assert.match(personRow!.supporting ?? "", /Product Owner/);
       assert.match(personRow!.supporting ?? "", /UAT/);
       assert.equal(personRow!.needsYou, null);
+    },
+  );
+
+  await check(
+    "more than twelve distinct Knowledge facts all survive buildNewProject in order",
+    () => {
+      const notes = [...FIFTEEN_KNOWLEDGE_FACTS];
+      const draft = composeDraft({
+        knowledgeRemember: [
+          ...notes.map((text) => ({ text, remember: true as const })),
+          { text: notes[0]!, remember: true },
+        ],
+      });
+      const bundle = buildNewProject(draft);
+      const now = bundle.knowledge.sections.now;
+      assert.deepEqual(
+        now.filter((line) => notes.includes(line)),
+        notes,
+      );
+      assert.equal(
+        now.filter((line) => line === notes[0]).length,
+        1,
+        "identical Knowledge lines still dedupe",
+      );
+      assert.equal(now.includes(notes[12]!), true, "13th distinct fact must not be dropped");
+      assert.equal(now.includes(notes[14]!), true, "15th distinct fact must not be dropped");
+      assert.equal(bundle.knowledge.sections.decisions.length, 0);
+    },
+  );
+
+  await check(
+    "persist New Project: fifteen Knowledge facts survive hydrate and Knowledge Centre in order",
+    async () => {
+      const notes = [...FIFTEEN_KNOWLEDGE_FACTS];
+      const fake = new FakeWorkspaceClient();
+      const draft = composeDraft({
+        knowledgeRemember: [
+          ...notes.map((text) => ({ text, remember: true as const })),
+          { text: notes[3]!, remember: true },
+        ],
+      });
+      const persisted = await persistNewProject(
+        asClient(fake),
+        fake.workspaceId,
+        fake.userId,
+        draft,
+      );
+      const factRows = fake.tables.knowledge_items.filter(
+        (row) =>
+          notes.includes(String(row.body)) &&
+          row.section === "now" &&
+          row.kind === "fact",
+      );
+      assert.equal(factRows.length, notes.length);
+      assert.deepEqual(
+        factRows.map((row) => String(row.body)),
+        notes,
+      );
+      assert.equal(
+        fake.tables.knowledge_items.filter((row) => String(row.body) === notes[3]).length,
+        1,
+      );
+
+      const loaded = await loadMissionStateFromSupabase(asClient(fake));
+      const knowledge = loaded.state.knowledge.find(
+        (k) => k.projectId === persisted.project.id,
+      );
+      assert.ok(knowledge);
+      const nowFacts = knowledge!.sections.now.filter((line) => notes.includes(line));
+      assert.deepEqual(nowFacts, notes);
+      const overlayBodies = (knowledge!.structured ?? [])
+        .filter(
+          (item) =>
+            item.section === "now" &&
+            item.kind === "fact" &&
+            notes.includes(item.body),
+        )
+        .map((item) => item.body);
+      assert.deepEqual(overlayBodies, notes);
+
+      const kc = composeKnowledgeCentreItems(loaded.state, persisted.project.id);
+      const kcFacts = kc
+        .filter(
+          (item) =>
+            item.bucket === "knowledge" &&
+            item.knowledgeSubtype === "information" &&
+            notes.includes(item.title),
+        )
+        .map((item) => item.title);
+      assert.deepEqual(kcFacts, notes);
     },
   );
 

@@ -260,18 +260,22 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
     input.currentFocus.trim() ? `Current focus: ${input.currentFocus.trim()}` : "",
     input.summary.trim() ? input.summary.trim() : "",
   ]);
-  knowledge.sections.decisions = uniqueBullets([
-    ...(input.knowledgeDecisions ?? []),
-  ]);
-  knowledge.sections.risks = uniqueBullets(riskTitles);
-  knowledge.sections.people = uniqueBullets([
-    ...(input.knowledgePeople ?? []),
-    ...stakeholders.map((s) => {
-      const concern = s.concerns?.[0] ? ` — ${s.concerns[0]}` : "";
-      return `${s.name} (${s.role})${concern}`;
-    }),
-  ]);
-  knowledge.sections.openLoops = uniqueBullets(input.knowledgeOpenLoops ?? []);
+  knowledge.sections.decisions = uniqueBullets(
+    [...(input.knowledgeDecisions ?? [])],
+    12,
+  );
+  knowledge.sections.risks = uniqueBullets(riskTitles, 12);
+  knowledge.sections.people = uniqueBullets(
+    [
+      ...(input.knowledgePeople ?? []),
+      ...stakeholders.map((s) => {
+        const concern = s.concerns?.[0] ? ` — ${s.concerns[0]}` : "";
+        return `${s.name} (${s.role})${concern}`;
+      }),
+    ],
+    12,
+  );
+  knowledge.sections.openLoops = uniqueBullets(input.knowledgeOpenLoops ?? [], 12);
 
   const recommendations: Recommendation[] = [];
   const pushRec = (
@@ -382,7 +386,8 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
   return { project, knowledge, recommendations, todos, timeline };
 }
 
-function uniqueBullets(items: string[]) {
+/** Dedupes bullets. Pass maxCount only for non-Knowledge sections; facts must not be dropped. */
+function uniqueBullets(items: string[], maxCount?: number) {
   const seen = new Set<string>();
   const out: string[] = [];
   for (const raw of items) {
@@ -392,7 +397,7 @@ function uniqueBullets(items: string[]) {
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(t.slice(0, 220));
-    if (out.length >= 12) break;
+    if (maxCount !== undefined && out.length >= maxCount) break;
   }
   return out;
 }
