@@ -5,7 +5,7 @@ import {
   ensureWorkspaceTrial,
   getWorkspaceEntitlement,
 } from "@/lib/billing/service";
-import { isStripeConfigured } from "@/lib/runtime-config";
+import { isStripeConfigured, isBillingEnabled } from "@/lib/runtime-config";
 import { serverLog } from "@/lib/server-log";
 
 export const runtime = "nodejs";
@@ -21,14 +21,16 @@ export async function GET() {
     }
 
     const { workspaceId } = await ensurePersonalWorkspace(supabase);
-    // Idempotent trial bootstrap once the user has a real workspace.
-    await ensureWorkspaceTrial(supabase, workspaceId);
+    if (isBillingEnabled()) {
+      await ensureWorkspaceTrial(supabase, workspaceId);
+    }
     const entitlement = await getWorkspaceEntitlement(supabase, workspaceId);
 
     return NextResponse.json({
       workspaceId,
       entitlement,
       billingConfigured: isStripeConfigured(),
+      billingEnabled: isBillingEnabled(),
     });
   } catch (err) {
     serverLog.error("billing.status_failed", {

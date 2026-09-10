@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ensurePersonalWorkspace } from "@/lib/data/workspace-bootstrap";
 import { getStripeClient } from "@/lib/billing/stripe";
-import { isStripeConfigured } from "@/lib/runtime-config";
+import { isStripeConfigured, isBillingEnabled } from "@/lib/runtime-config";
 import { getSiteUrl } from "@/lib/site-url";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 import { serverLog } from "@/lib/server-log";
@@ -11,6 +11,16 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
+    if (!isBillingEnabled()) {
+      return NextResponse.json(
+        {
+          error: "billing_disabled",
+          message: "Billing isn’t required during early access.",
+        },
+        { status: 403 },
+      );
+    }
+
     if (!isStripeConfigured()) {
       return NextResponse.json(
         {

@@ -14,6 +14,10 @@ import type { CaptureApplyWorld } from "../src/lib/capture/apply/types";
 import type { PendingSuggestion } from "../src/lib/capture/suggestions";
 import { emptyMissionState } from "../src/lib/data/supabase/load-mission-state";
 import {
+  persistCaptureSession,
+  persistHistoryEvent,
+  persistMemory,
+  persistTodoCreate,
   persistTodoDelete,
   persistTodoUpdate,
 } from "../src/lib/data/supabase/persist-mutations";
@@ -26,6 +30,8 @@ const PROJECT_B = "22222222-2222-4222-8222-222222222222";
 const TODO_A = "aaaa1111-1111-4111-8111-aaaaaaaaaaaa";
 const TODO_B = "bbbb2222-2222-4222-8222-bbbbbbbbbbbb";
 const TODO_UNASSIGNED = "cccc3333-3333-4333-8333-cccccccccccc";
+const FOREIGN_PROJECT = "dddd4444-4444-4444-8444-dddddddddddd";
+const OTHER_WORKSPACE = "eeee5555-5555-4555-8555-eeeeeeeeeeee";
 
 let passed = 0;
 
@@ -399,6 +405,88 @@ async function main() {
       assert.equal(todoB(fake)?.done, false);
     },
   );
+
+  await check(
+    "history / capture session / memory / todo create refuse a foreign project id",
+    async () => {
+      const fake = new FakeWorkspaceClient();
+      seedAB(fake);
+      fake.tables.projects.push({
+        id: FOREIGN_PROJECT,
+        workspace_id: OTHER_WORKSPACE,
+        name: "Foreign",
+        code: "FOR",
+      });
+      await assert.rejects(
+        () =>
+          persistHistoryEvent(asClient(fake), fake.workspaceId, fake.userId, {
+            type: "other",
+            title: "leak",
+            projectId: FOREIGN_PROJECT,
+            source: "user",
+          }),
+        /project not found in this workspace/,
+      );
+      await assert.rejects(
+        () =>
+          persistCaptureSession(asClient(fake), fake.workspaceId, fake.userId, {
+            projectId: FOREIGN_PROJECT,
+            transcript: "nope",
+          }),
+        /project not found in this workspace/,
+      );
+      await assert.rejects(
+        () =>
+          persistMemory(asClient(fake), fake.workspaceId, fake.userId, {
+            type: "conversation",
+            projectId: FOREIGN_PROJECT,
+            title: "leak",
+            content: "nope",
+            tags: [],
+            occurredAt: "2026-09-09T00:00:00.000Z",
+            createdAt: "2026-09-09T00:00:00.000Z",
+            source: "capture",
+          }),
+        /project not found in this workspace/,
+      );
+      await assert.rejects(
+        () =>
+          persistTodoCreate(asClient(fake), fake.workspaceId, fake.userId, {
+            projectId: FOREIGN_PROJECT,
+            title: "leak todo",
+            done: false,
+          }),
+        /project not found in this workspace/,
+      );
+      assert.equal(fake.tables.history_events.length, 0);
+      assert.equal(fake.tables.capture_sessions.length, 0);
+      assert.equal(
+        fake.tables.memories.filter((row) => row.project_id === FOREIGN_PROJECT)
+          .length,
+        0,
+      );
+      assert.equal(
+        fake.tables.todos.filter((row) => row.project_id === FOREIGN_PROJECT)
+          .length,
+        0,
+      );
+    },
+  );
+
+  await check("stale / non-UUID project ids fail closed on history", async () => {
+    const fake = new FakeWorkspaceClient();
+    seedAB(fake);
+    await assert.rejects(
+      () =>
+        persistHistoryEvent(asClient(fake), fake.workspaceId, fake.userId, {
+          type: "other",
+          title: "stale",
+          projectId: "not-a-uuid",
+          source: "user",
+        }),
+      /UUID|project not found/i,
+    );
+  });
 
   console.log(`\nD-035 To Do project isolation: ${passed} checks passed`);
 }

@@ -5,7 +5,7 @@ import type {
   SubscriptionRow,
   WorkspaceEntitlement,
 } from "@/lib/billing/types";
-import { isStripeConfigured } from "@/lib/runtime-config";
+import { isBillingEnabled, isStripeConfigured } from "@/lib/runtime-config";
 import { serverLog } from "@/lib/server-log";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,6 +33,7 @@ export async function getWorkspaceEntitlement(
 
   return evaluateEntitlement(workspaceId, (data as SubscriptionRow | null) ?? null, {
     stripeConfigured: isStripeConfigured(),
+    billingEnabled: isBillingEnabled(),
   });
 }
 
@@ -44,6 +45,9 @@ export async function ensureWorkspaceTrial(
   client: Client,
   workspaceId: string,
 ): Promise<WorkspaceEntitlement> {
+  if (!isBillingEnabled()) {
+    return getWorkspaceEntitlement(client, workspaceId);
+  }
   const days = getTrialDays();
   const { data, error } = await client.rpc("ensure_workspace_trial", {
     p_workspace_id: workspaceId,
@@ -62,5 +66,6 @@ export async function ensureWorkspaceTrial(
   const row = data as SubscriptionRow | null;
   return evaluateEntitlement(workspaceId, row, {
     stripeConfigured: isStripeConfigured(),
+    billingEnabled: isBillingEnabled(),
   });
 }

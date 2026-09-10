@@ -5,7 +5,7 @@ import {
   getStripeClient,
   getStripePriceId,
 } from "@/lib/billing/stripe";
-import { isStripeConfigured } from "@/lib/runtime-config";
+import { isStripeConfigured, isBillingEnabled } from "@/lib/runtime-config";
 import { getSiteUrl } from "@/lib/site-url";
 import { serverLog } from "@/lib/server-log";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
@@ -14,6 +14,16 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
+    if (!isBillingEnabled()) {
+      return NextResponse.json(
+        {
+          error: "billing_disabled",
+          message: "Billing isn’t required during early access.",
+        },
+        { status: 403 },
+      );
+    }
+
     if (!isStripeConfigured()) {
       return NextResponse.json(
         {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMission } from "@/lib/store";
+import { SUPPORT_MAILTO } from "@/lib/support";
 import { ResetDemoDataButton } from "@/components/dev/ResetDemoDataButton";
 import { EvalsNavLink } from "@/components/evals/EvalsNavLink";
 
@@ -199,7 +200,7 @@ export function Sidebar({
           </Link>
           <a
             className="sidebar-link"
-            href="mailto:support@lume.app?subject=Lume%20help"
+            href={SUPPORT_MAILTO}
             onClick={onCloseMobile}
             data-testid="ocean-nav-help"
           >
