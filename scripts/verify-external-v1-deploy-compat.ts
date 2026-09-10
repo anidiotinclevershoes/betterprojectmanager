@@ -84,6 +84,8 @@ check("deploy order documented as migrate → verify → merge/deploy", () => {
   assert.match(actions, /THEN merge/);
   assert.match(actions, /pg_proc/);
   assert.match(actions, /pg_get_expr\(pol\.polwithcheck/);
+  assert.match(actions, /null_project_is_allowed/);
+  assert.match(actions, /missing_named_project_is_rejected/);
   assert.doesNotMatch(actions, /\\df/);
 });
 

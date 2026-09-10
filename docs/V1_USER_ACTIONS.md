@@ -106,6 +106,8 @@ Paste the verification SQL below into **Supabase Dashboard → SQL Editor**. Do 
 
 After both SQL files have been run, open **Supabase Dashboard → SQL Editor → New query** and paste this whole block. You should get three result tables.
 
+This does **not** create or delete a project. `null_project_is_allowed = true` is correct: `project_id` may be null on some tables, and RLS still requires workspace membership. The dummy workspace UUID is not a grant of access.
+
 ```sql
 -- 1) Do the three functions exist?
 select
@@ -138,19 +140,23 @@ where n.nspname = 'public'
   )
 order by 1, 2;
 
--- 3) Safe non-destructive check (does not create or delete a project)
+-- 3) Safe non-destructive checks (do not create or delete a project)
 select
   public.project_belongs_to_workspace(
     '00000000-0000-4000-8000-000000000000'::uuid,
     null
-  ) as null_project_is_allowed;
+  ) as null_project_is_allowed,
+  public.project_belongs_to_workspace(
+    '00000000-0000-4000-8000-000000000000'::uuid,
+    '00000000-0000-4000-8000-000000000001'::uuid
+  ) as missing_named_project_is_rejected;
 ```
 
 **Expected:**
 
 1. Three rows: `create_project_bundle`, `delete_project_bundle`, `project_belongs_to_workspace`.
 2. Four policy rows. Each `with_check` text includes `project_belongs_to_workspace`.
-3. One row: `null_project_is_allowed` = `true`.
+3. One row: `null_project_is_allowed` = `true` and `missing_named_project_is_rejected` = `false`.
 
 If any function is missing, run the matching SQL file again. Do not merge until all three functions appear.
 
