@@ -38,11 +38,15 @@ check("support and privacy are public and honest", () => {
   const privacy = read("src/app/privacy/page.tsx");
   assert.match(privacy, /not a lawyer-reviewed policy/);
   assert.match(privacy, /must not receive project contents/);
+  assert.match(privacy, /Lawyer-reviewed policy/);
   const terms = read("src/app/terms/page.tsx");
   assert.match(terms, /not a finished legal agreement/);
-  const support = read("src/app/support/page.tsx");
+  assert.match(terms, /Lawyer-reviewed terms/);
+  const support = read("src/app/support/page.tsx") + read("src/lib/support.ts");
   assert.match(support, /Reset link expired/);
-  assert.doesNotMatch(support, /@gmail\.com|@lume/);
+  assert.match(support, /support@lume\.app/);
+  assert.match(support, /SUPPORT_EMAIL/);
+  assert.doesNotMatch(support, /@gmail\.com/);
 });
 
 check("proxy exposes support pages without making them signed-in redirects", () => {

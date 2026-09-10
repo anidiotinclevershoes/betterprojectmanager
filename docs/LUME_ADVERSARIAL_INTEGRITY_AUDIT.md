@@ -110,7 +110,9 @@ Replacement-pin **fingerprint** is closed (N-07). Apply must still not re-bind.
 
 The four precautions from the original audit (Apply retry, concurrent due-date overwrite, leftover Review on another project, duplicate knowledge/availability on retry) are closed and regression-proven. Workspace isolation remains real; Ready → Apply still fail-closed; Meeting Prep and the old writable Gantt still do not drive current surfaces; Capture V2 is still the only Analyse engine.
 
-Why not a claim of “finished product”: New Project is still a sequence of inserts; same-workspace RLS is still membership-wide; there is still no production integrity observer; leftover Knowledge prose and paint-cache lag can still confuse a reader. Those are later hardening, not the dogfood blockers named in this audit.
+Why not a claim of “finished product”: there is still no production integrity observer; leftover Knowledge prose and paint-cache lag can still confuse a reader. Those are later hardening, not the dogfood blockers named in this audit.
+
+**9 September 2026 follow-up:** New Project create is now one `create_project_bundle` transaction (same programme as `delete_project_bundle`). D-028 / A-003 create remainder is closed. History remains secondary after success.
 
 ## Is there any credible current path that could silently corrupt project truth?
 
@@ -118,9 +120,10 @@ Why not a claim of “finished product”: New Project is still a sequence of in
 
 Remaining confirmed or high-confidence paths:
 
-1. **New Project / project delete are sequential.** A crash in the middle can leave a half-created or half-deleted bundle until cleanup runs. The app tries to clean up; another reader can see the window. (D-028 / A-003)
-2. **Non-risk knowledge insert + receipt are two writes.** A crash between them could still duplicate (rare; retry after a recorded receipt is `no_change`).
-3. **Same-workspace mis-attribution** remains possible if a persist helper forgets `project_id` (D-035 remainder / N-09). Not a cross-tenant leak.
+1. **Non-risk knowledge insert + receipt are two writes.** A crash between them could still duplicate (rare; retry after a recorded receipt is `no_change`).
+2. **Same-workspace mis-attribution** is now refused at RLS for recommendations / history / capture_sessions (`project_belongs_to_workspace`) and at persist helpers that name a project id. Residual: a helper that still forgets `project_id` on a table whose policy is membership-only. Not a cross-tenant leak.
+
+Closed 9 September 2026: New Project create and project delete are one DB transaction each (`create_project_bundle` / `delete_project_bundle`). A crash mid-create rolls back the whole bundle. The app cannot report success on a partial create.
 
 Not silent canonical corruption: Meeting Prep leftover does **not** write current surfaces; hard-refresh paint-cache lag is **temporary UI** (N-10).
 
@@ -141,7 +144,7 @@ Yes.
 
 - Receipted creates (To Do / Risk / milestone / knowledge / availability / person / responsibility with an operation id): retry is supposed to no-op.
 - Residual: crash between a non-risk knowledge insert and its receipt insert.
-- New Project: inspect-on-retry by `clientProjectId` plus a completeness check — not a full bundle compare. Sequential inserts + compensating delete.
+- New Project: one `create_project_bundle` transaction. Inspect-on-retry by `clientProjectId` plus a completeness check — not a full bundle compare. Leftover partials (pre-RPC rows) still clean up through `delete_project_bundle`.
 - Optimistic To Do toggle/edit: the UI changes first, then persists; failure reconciles from the server (known D-005). That is a **temporary** lie, not a silent durable one, if reconcile works.
 
 ## Could one project’s data ever leak into another?
@@ -170,9 +173,9 @@ Legacy influence that *can* still matter: leftover Knowledge prose, `[Resolved]`
 
 ## What scares you most technically?
 
-1. **New Project / delete mid-sequence** — sequential inserts and compensating cleanup (A-003 / D-028).
-2. **Same-workspace persist helper that forgets `project_id`** — RLS is membership-wide (D-035 remainder / N-09).
-3. **Invariants that still live only in application code** — semantic uniqueness, several project-alignment checks, knowledge insert+receipt atomicity.
+1. **Same-workspace persist helper that forgets `project_id`** — RLS is membership-wide on residual tables (D-035 remainder / N-09 closed for recommendations / history / capture_sessions).
+2. **Invariants that still live only in application code** — semantic uniqueness, several project-alignment checks, knowledge insert+receipt atomicity.
+3. **No production integrity observer** — scanner + SQL probes exist; they are not a daemon.
 
 ## What should we fix before serious dogfooding?
 
@@ -182,7 +185,7 @@ The original five are done (1–4) or demoted (5).
 
 **Still useful practice, not a required precaution:** prefer one Capture Review at a time; if the UI says “Saved. Refresh…”, refresh before clicking Apply again; do not treat Meeting Prep, Gantt, or suggestion-accept as durable.
 
-**Before outside users (later programme):** New Project / delete transaction; same-workspace RLS alignment; persist-helper membership remainder.
+**Before outside users (this programme, 9 September 2026):** New Project / delete transactions and same-workspace RLS alignment for recommendations / history / capture_sessions are closed. Residual: persist-helper membership on tables that still rely on WHERE clauses; lawyer Privacy/Terms; support inbox ownership.
 
 ---
 
@@ -219,8 +222,8 @@ Transactional Capture RPCs (`20260829200000_authoritative_apply_tx.sql`): risk+k
 | --- | --- | --- | --- |
 | `POST /api/capture/apply` | Server load + `planCaptureApply` + `supabaseCaptureApplyHooks` | Per RPC for receipted creates | To Do / Risk / milestone create |
 | Ocean To Do / Knowledge / People UI | Browser persist helpers after optimistic `setState` | Single-row | No |
-| `persistNewProject` | Sequential inserts + `cleanupFailedNewProjectBundle` | No | Retry via `clientProjectId` inspect |
-| `persistProjectDelete` | Sequential SET NULL children then project | No | N/A |
+| `persistNewProject` | `create_project_bundle` RPC (thin caller) | Yes (canonical bundle) | Retry via `clientProjectId` inspect |
+| `persistProjectDelete` | `delete_project_bundle` RPC | Yes | N/A |
 | Tell Me / Catch Me Up / Coach | No project-truth writes (Tell Me refresh may write intelligence snapshot cache) | — | — |
 | `updateMeeting` / `acceptSuggestion` / `updateTodoDueDate` | Memory-only; **not mounted** on current pages | — | — |
 
@@ -349,14 +352,14 @@ No live workspace was scanned. The in-memory scanner is clean on `createSeedStat
 
 Present: workspace membership RLS; unique project code per workspace (case-insensitive); unique apply receipts; tag uniqueness; enum checks; most child FKs.
 
-Absent / weak: semantic uniqueness; todo/project NOT NULL; project alignment on some RLS policies; `item_tags.target_id` FK; row version columns; New Project / delete transactions.
+Absent / weak: semantic uniqueness; todo/project NOT NULL; project alignment on some residual RLS policies; `item_tags.target_id` FK; row version columns. New Project / delete transactions exist (`create_project_bundle` / `delete_project_bundle`).
 
 ## Invariants that live only in application code
 
 - Same-workspace project membership on several persist paths (D-035 remainder)
 - Ready fingerprint completeness for *future* planner fields (dueAt/detail/endAt/notes/replace pin are now included)
 - Knowledge/availability receipt in the same DB transaction as the insert
-- New Project / delete atomicity and compensating cleanup
+- New Project / delete atomicity is now DB-enforced; leftover pre-RPC partials still use compensating `delete_project_bundle`
 - “Do not use Meeting.prep / Gantt as truth”
 - Capture session ↔ open project (now application-enforced; still not a DB rule)
 - `writeRepresentsProposal` (Review only)

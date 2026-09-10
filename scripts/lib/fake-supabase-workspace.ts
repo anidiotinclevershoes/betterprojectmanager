@@ -265,6 +265,94 @@ export class FakeWorkspaceClient {
         return { person_id: personId, created, knowledge_id: knowledgeId };
       });
     }
+    if (fn === "create_project_bundle") {
+      return this.runAtomic(async () => {
+        const workspaceId = String(args.p_workspace_id ?? "");
+        const createdBy = args.p_created_by ?? null;
+        const project = asRow(args.p_project);
+        const inserted = await this.from("projects").insert({
+          ...project,
+          workspace_id: workspaceId,
+          created_by: createdBy,
+        });
+        if (inserted.error) {
+          throw new FakeRpcError(inserted.error.message, inserted.error.code);
+        }
+        const projectId = String(
+          (Array.isArray(inserted.data)
+            ? inserted.data[0]?.id
+            : (inserted.data as FakeRow | null)?.id) ??
+            project.id,
+        );
+        const children: Array<{ table: string; rows: FakeRow[] }> = [
+          { table: "stakeholders", rows: asArray(args.p_stakeholders) },
+          { table: "todos", rows: asArray(args.p_todos) },
+          { table: "risks", rows: asArray(args.p_risks) },
+          { table: "knowledge_items", rows: asArray(args.p_knowledge) },
+          { table: "milestones", rows: asArray(args.p_milestones) },
+          { table: "project_tags", rows: asArray(args.p_project_tags) },
+          { table: "item_tags", rows: asArray(args.p_item_tags) },
+          { table: "recommendations", rows: asArray(args.p_recommendations) },
+        ];
+        for (const { table, rows } of children) {
+          if (!rows.length) continue;
+          const result = await this.from(table).insert(
+            rows.map((row) => ({
+              ...row,
+              workspace_id: workspaceId,
+              project_id: projectId,
+              created_by: createdBy,
+            })),
+          );
+          if (result.error) {
+            throw new FakeRpcError(result.error.message, result.error.code);
+          }
+        }
+        if (args.p_memory && typeof args.p_memory === "object") {
+          const memory = await this.from("memories").insert({
+            ...asRow(args.p_memory),
+            workspace_id: workspaceId,
+            project_id: projectId,
+            created_by: createdBy,
+          });
+          if (memory.error) {
+            throw new FakeRpcError(memory.error.message, memory.error.code);
+          }
+        }
+        return { project_id: projectId };
+      });
+    }
+    if (fn === "delete_project_bundle") {
+      return this.runAtomic(async () => {
+        const workspaceId = String(args.p_workspace_id ?? "");
+        const projectId = String(args.p_project_id ?? "");
+        const setNullTables = [
+          "todos",
+          "memories",
+          "recommendations",
+          "history_events",
+          "capture_sessions",
+          "coach_sessions",
+        ];
+        for (const table of setNullTables) {
+          const deleted = await this.from(table)
+            .delete()
+            .eq("workspace_id", workspaceId)
+            .eq("project_id", projectId);
+          if (deleted.error) {
+            throw new FakeRpcError(deleted.error.message, deleted.error.code);
+          }
+        }
+        const project = await this.from("projects")
+          .delete()
+          .eq("id", projectId)
+          .eq("workspace_id", workspaceId);
+        if (project.error) {
+          throw new FakeRpcError(project.error.message, project.error.code);
+        }
+        return null;
+      });
+    }
     return { data: null, error: { message: `unknown rpc ${fn}` } };
   }
 
@@ -568,6 +656,11 @@ class FakeRpcError extends Error {
 function asRow(value: unknown): FakeRow {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   return value as FakeRow;
+}
+
+function asArray(value: unknown): FakeRow[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((row) => asRow(row));
 }
 
 function now() {

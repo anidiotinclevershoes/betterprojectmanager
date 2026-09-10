@@ -5,14 +5,15 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { LumeThemePicker } from "@/components/app-shell/LumeThemePicker";
-import { TrialExpiredPanel } from "@/components/billing/TrialExpiredPanel";
 import { ANALYTICS_EVENTS, resetAnalyticsIdentity, trackAnalyticsEvent } from "@/lib/analytics";
 import { navigateAuthBoundary } from "@/lib/auth-mission-ownership";
 import {
   checkoutNoticeCopy,
+  earlyAccessCopy,
   subscriptionStatusLabel,
   trialRemainingCopy,
 } from "@/lib/billing/display";
+import { DELETE_CONFIRMATION } from "@/lib/account/delete";
 import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import type { WorkspaceEntitlement } from "@/lib/billing/types";
 
@@ -20,6 +21,7 @@ type StatusResponse = {
   workspaceId?: string;
   entitlement?: WorkspaceEntitlement;
   billingConfigured?: boolean;
+  billingEnabled?: boolean;
   error?: string;
 };
 
@@ -32,6 +34,7 @@ function AccountPageInner() {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deletePhrase, setDeletePhrase] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -72,9 +75,11 @@ function AccountPageInner() {
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok) {
         throw new Error(
-          data.error === "billing_not_configured"
-            ? "Billing is not configured in this environment."
-            : data.error || "Checkout failed",
+          data.error === "billing_disabled"
+            ? earlyAccessCopy()
+            : data.error === "billing_not_configured"
+              ? "Billing is not configured in this environment."
+              : data.error || "Checkout failed",
         );
       }
       if (data.url) {
@@ -103,9 +108,11 @@ function AccountPageInner() {
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok) {
         throw new Error(
-          data.error === "billing_not_configured"
-            ? "Billing is not configured in this environment."
-            : data.error || "Portal failed",
+          data.error === "billing_disabled"
+            ? earlyAccessCopy()
+            : data.error === "billing_not_configured"
+              ? "Billing is not configured in this environment."
+              : data.error || "Portal failed",
         );
       }
       if (data.url) window.location.href = data.url;
@@ -116,27 +123,62 @@ function AccountPageInner() {
     }
   }
 
-  const entitlement = status?.entitlement;
-  const showExpired =
-    entitlement && !entitlement.canUseLume && entitlement.status !== "trialing";
-
-  if (showExpired) {
-    return (
-      <div className="login-page">
-        <div className="login-card auth-card">
-          <TrialExpiredPanel
-            billingConfigured={Boolean(status?.billingConfigured)}
-            status={entitlement.status}
-          />
-        </div>
-      </div>
-    );
+  async function exportAccount() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/account/export");
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error || "Could not export your Lume data.");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "lume-export.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not export your Lume data.");
+    } finally {
+      setBusy(false);
+    }
   }
+
+  async function deleteAccount() {
+    if (deletePhrase.trim() !== DELETE_CONFIRMATION) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmation: deletePhrase }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        throw new Error(data.error || "Could not delete your account.");
+      }
+      resetAnalyticsIdentity();
+      clearAuthenticatedBrowserState();
+      navigateAuthBoundary("/welcome");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete your account.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const entitlement = status?.entitlement;
+  const billingEnabled = Boolean(status?.billingEnabled);
 
   return (
     <AuthShell
         title="Account"
-        lede="Your Lume identity, appearance, and billing status."
+        lede="Your Lume identity, appearance, and account."
       footer={
         <p className="auth-links">
           <Link href="/" className="auth-text-link">
@@ -173,24 +215,32 @@ function AccountPageInner() {
           <>
             <p>
               Status:{" "}
-              <strong>{subscriptionStatusLabel(entitlement?.status)}</strong>
+              <strong>
+                {billingEnabled
+                  ? subscriptionStatusLabel(entitlement?.status)
+                  : "Early access"}
+              </strong>
             </p>
-            {entitlement?.status === "trialing" ? (
+            {billingEnabled && entitlement?.status === "trialing" ? (
               <p className="meta">
                 {trialRemainingCopy(entitlement.trialEndsAt)}
               </p>
-            ) : entitlement?.trialEndsAt ? (
+            ) : billingEnabled && entitlement?.trialEndsAt ? (
               <p className="meta">
                 Trial ended{" "}
                 {new Date(entitlement.trialEndsAt).toLocaleDateString()}
               </p>
             ) : null}
-            {checkoutNotice ? (
+            {checkoutNotice && billingEnabled ? (
               <p className="auth-notice" role="status">
                 {checkoutNotice}
               </p>
             ) : null}
-            {status.billingConfigured ? (
+            {!billingEnabled ? (
+              <p className="auth-notice" role="status">
+                {earlyAccessCopy()}
+              </p>
+            ) : status.billingConfigured ? (
               <div className="account-actions">
                 <button
                   type="button"
@@ -217,6 +267,53 @@ function AccountPageInner() {
           </>
         )}
         {error ? <p className="login-error">{error}</p> : null}
+      </div>
+
+      <div className="account-block">
+        <p className="meta">Your data</p>
+        <p className="lede">
+          Download a JSON copy of the projects you can already see in Lume.
+          Secrets and service credentials are not included.
+        </p>
+        <div className="account-actions">
+          <button
+            type="button"
+            className="ghost-btn"
+            disabled={busy}
+            onClick={() => void exportAccount()}
+          >
+            {busy ? "Working…" : "Export my data"}
+          </button>
+        </div>
+      </div>
+
+      <div className="account-block">
+        <p className="meta">Delete account</p>
+        <p className="lede">
+          This permanently removes your hosted workspace and sign-in. Type{" "}
+          <strong>{DELETE_CONFIRMATION}</strong> to confirm. This cannot be
+          undone from the product.
+        </p>
+        <label className="field">
+          <span>Confirmation</span>
+          <input
+            type="text"
+            autoComplete="off"
+            value={deletePhrase}
+            onChange={(e) => setDeletePhrase(e.target.value)}
+            placeholder={DELETE_CONFIRMATION}
+          />
+        </label>
+        <div className="account-actions">
+          <button
+            type="button"
+            className="danger-btn"
+            disabled={busy || deletePhrase.trim() !== DELETE_CONFIRMATION}
+            onClick={() => void deleteAccount()}
+          >
+            {busy ? "Deleting…" : "Delete my account"}
+          </button>
+        </div>
       </div>
     </AuthShell>
   );

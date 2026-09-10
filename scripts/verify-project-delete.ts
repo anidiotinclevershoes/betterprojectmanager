@@ -289,15 +289,21 @@ async function main() {
     assert.ok(loaded.state.timeline.some((t) => t.projectId === PROJECT_B_ID));
   });
 
-  await check("Delete failure leaves A intact", async () => {
+  await check("Delete failure rolls back SET NULL cleanup", async () => {
     const fake = new FakeWorkspaceClient({ failOnDeleteTable: "projects" });
     await seedAB(fake);
     injectSetNullOrphans(fake, PROJECT_A_ID);
+    const todosBefore = fake.rowsForProject("todos", PROJECT_A_ID).length;
     await assert.rejects(() =>
       persistProjectDelete(asClient(fake), fake.workspaceId, PROJECT_A_ID),
     );
     assert.ok(fake.tables.projects.some((p) => p.id === PROJECT_A_ID));
     assert.ok(fake.tables.projects.some((p) => p.id === PROJECT_B_ID));
+    assert.equal(
+      fake.rowsForProject("todos", PROJECT_A_ID).length,
+      todosBefore,
+      "atomic delete must not leave Project A half-removed",
+    );
   });
 
   await check("SET NULL cleanup failure also refuses to pretend success", async () => {
@@ -476,6 +482,61 @@ async function main() {
       fake.rowsForProject("history_events", PROJECT_B_ID).length,
       bHistoryBefore,
     );
+  });
+
+  await check("New Project mid-create failure rolls back the whole bundle", async () => {
+    const fake = new FakeWorkspaceClient({ failOnTable: "todos" });
+    await assert.rejects(() =>
+      persistNewProject(
+        asClient(fake),
+        fake.workspaceId,
+        fake.userId,
+        draft("Crash Create", { clientProjectId: PROJECT_A_ID }),
+      ),
+    );
+    assert.equal(fake.tables.projects.some((p) => p.id === PROJECT_A_ID), false);
+    assert.equal(fake.rowsForProject("stakeholders", PROJECT_A_ID).length, 0);
+    assert.equal(fake.rowsForProject("todos", PROJECT_A_ID).length, 0);
+    assert.equal(fake.rowsForProject("knowledge_items", PROJECT_A_ID).length, 0);
+  });
+
+  await check("New Project retry with the same client id does not duplicate", async () => {
+    const fake = new FakeWorkspaceClient();
+    const first = await persistNewProject(
+      asClient(fake),
+      fake.workspaceId,
+      fake.userId,
+      draft("Retry Create", { clientProjectId: PROJECT_A_ID }),
+    );
+    const projectCount = fake.tables.projects.length;
+    const second = await persistNewProject(
+      asClient(fake),
+      fake.workspaceId,
+      fake.userId,
+      draft("Retry Create", { clientProjectId: PROJECT_A_ID }),
+    );
+    assert.equal(second.project.id, first.project.id);
+    assert.equal(fake.tables.projects.length, projectCount);
+  });
+
+  await check("Retrying delete after success fails closed without duplicating cleanup", async () => {
+    const fake = new FakeWorkspaceClient();
+    await seedAB(fake);
+    await persistProjectDelete(asClient(fake), fake.workspaceId, PROJECT_A_ID);
+    await assert.rejects(
+      () => persistProjectDelete(asClient(fake), fake.workspaceId, PROJECT_A_ID),
+      /not found in this workspace/,
+    );
+    assert.ok(fake.tables.projects.some((p) => p.id === PROJECT_B_ID));
+  });
+
+  await check("Delete path uses delete_project_bundle RPC, not sequential child deletes", () => {
+    const persist = readSrc("src/lib/data/supabase/persist-mutations.ts");
+    const start = persist.indexOf("async function deleteProjectScopedBundle");
+    const end = persist.indexOf("export async function cleanupFailedNewProjectBundle");
+    const body = persist.slice(start, end);
+    assert.match(body, /rpc\("delete_project_bundle"/);
+    assert.doesNotMatch(body, /from\("todos"\)/);
   });
 
   console.log(`\n${passed} project-delete checks passed.`);

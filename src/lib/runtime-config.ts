@@ -126,6 +126,16 @@ export function isStripeConfigured(
   );
 }
 
+/**
+ * Commercial rollout flag. Independent of Stripe keys.
+ * Unset or any value other than "true" means early-access (checkout refused).
+ */
+export function isBillingEnabled(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return env.LUME_BILLING_ENABLED?.trim().toLowerCase() === "true";
+}
+
 export function isStripeWebhookConfigured(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {

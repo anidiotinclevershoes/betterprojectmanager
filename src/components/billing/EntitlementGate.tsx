@@ -18,6 +18,7 @@ export function EntitlementGate({ children }: { children: ReactNode }) {
     null,
   );
   const [billingConfigured, setBillingConfigured] = useState(false);
+  const [billingEnabled, setBillingEnabled] = useState(false);
   const [checked, setChecked] = useState(false);
   const needsBillingCheck = hydrated && persistenceMode === "supabase";
 
@@ -31,10 +32,12 @@ export function EntitlementGate({ children }: { children: ReactNode }) {
         (data: {
           entitlement?: WorkspaceEntitlement;
           billingConfigured?: boolean;
+          billingEnabled?: boolean;
         }) => {
           if (cancelled) return;
           setEntitlement(data.entitlement ?? null);
           setBillingConfigured(Boolean(data.billingConfigured));
+          setBillingEnabled(data.billingEnabled === true);
           setChecked(true);
         },
       )
@@ -49,7 +52,7 @@ export function EntitlementGate({ children }: { children: ReactNode }) {
   if (!hydrated) return <>{children}</>;
   if (persistenceMode !== "supabase") return <>{children}</>;
   if (!checked) return <>{children}</>;
-  if (entitlement && !entitlement.canUseLume) {
+  if (billingEnabled && entitlement && !entitlement.canUseLume) {
     return (
       <div className="login-page">
         <div className="login-card auth-card">
@@ -64,7 +67,9 @@ export function EntitlementGate({ children }: { children: ReactNode }) {
 
   return (
     <>
-      {entitlement?.status === "past_due" && entitlement.canUseLume ? (
+      {billingEnabled &&
+      entitlement?.status === "past_due" &&
+      entitlement.canUseLume ? (
         <div className="billing-grace-banner" role="status">
           <p>
             Payment issue on your subscription — Lume still works during a short

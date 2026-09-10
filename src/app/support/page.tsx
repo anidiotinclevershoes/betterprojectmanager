@@ -1,4 +1,5 @@
 import { AuthLinkRow, AuthNavLink, AuthShell } from "@/components/auth/AuthShell";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "@/lib/support";
 
 export default function SupportPage() {
   return (
@@ -23,9 +24,13 @@ export default function SupportPage() {
           Cannot open a project? Sign out and sign in again. A short loading
           screen during the switch is expected.
         </p>
-        <p className="meta">
-          If you were invited, ask the person who invited you. Lume does not
-          publish a public support inbox in the product yet.
+        <p>
+          Email{" "}
+          <a className="auth-text-link" href={SUPPORT_MAILTO}>
+            {SUPPORT_EMAIL}
+          </a>{" "}
+          if you still need help. This is the early-access inbox, not a ticket
+          system.
         </p>
       </div>
     </AuthShell>

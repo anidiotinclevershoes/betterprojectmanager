@@ -43,3 +43,7 @@ export function checkoutNoticeCopy(
   }
   return null;
 }
+
+export function earlyAccessCopy(): string {
+  return "Billing isn’t required during early access.";
+}

@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 6 September 2026 (dogfood integrity gate: D-045–D-048 CLOSED / VERIFIED; D-049 remains open)  
+**Last housekeeping:** 9 September 2026 (external-V1 readiness: D-028 create+delete CLOSED; N-09 CLOSED; D-041/D-042 CLOSED for individual-first V1; integrity observer remains a bounded limitation)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main` + `docs/LUME_V09_TO_V1_HANDOFF.md`. The 26 Aug architecture memory handoff is historical.  
 **Docs entry point:** `docs/README.md`  
@@ -169,19 +169,37 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
-| **Severity** | low |
+| **Status** | closed |
+| **Severity** | — |
 | **Domain** | Infra / Projects |
 | **Found in** | Phase 3A.1 Safe Project Deletion (Aug 2026) |
-| **Failure class** | `persistProjectDelete` first deletes SET NULL children, then the project row. If the project-row delete fails after children were removed, the project can remain visible with some of its todos/history/sessions already gone. The UI does not fake success. Retrying delete is the recovery. |
-| **Evidence / repro** | Fake client `failOnDeleteTable: "projects"` after SET NULL deletes have succeeded |
-| **Likely files** | `src/lib/data/supabase/persist-mutations.ts` (`deleteProjectScopedBundle`) |
-| **Proposed fix direction** | A single Postgres RPC/transaction for the bundle, same class of follow-up as New Project create |
-| **Explicit non-goals** | Inventing a generic mutation framework in 3A.1 |
-| **Regression test to add** | Keep the injected project-delete failure test: A remains in `projects` and UI must not claim success |
-| **Target resolution / validation point** | V1 product hardening (bundle RPC) — not Phase 3B Capture dispatcher |
-| **Related docs** | Phase 3A compensating cleanup; this file D-R12 |
-| **Notes** | SET NULL-first is required so a successful project delete cannot leave workspace orphans. The residual is failure-after-partial-cleanup, not silent cross-project damage. |
+| **Failure class** | User-facing delete used to remove SET NULL children then the project row in separate round-trips. Create used a sequence of inserts. |
+| **Evidence / repro** | Fake client `failOnDeleteTable: "projects"` rolls back the whole delete via `delete_project_bundle`. Fake `failOnTable: "todos"` rolls back the whole create via `create_project_bundle`. |
+| **Likely files** | `src/lib/data/supabase/persist-mutations.ts`; `supabase/migrations/20260909160000_external_v1_safety.sql`; `supabase/migrations/20260909210000_create_project_bundle.sql` |
+| **Fix summary** | Delete is one Postgres transaction (`delete_project_bundle`). Create is one Postgres transaction (`create_project_bundle`). `persistNewProject` is a thin caller of that RPC. History remains secondary after success. Retry inspects `clientProjectId`. Failed leftover partials still clean up through `delete_project_bundle`. |
+| **Explicit non-goals** | A second onboarding-only create path; folding History into the create transaction |
+| **Regression test to add** | `scripts/verify-project-delete.ts` — mid-create failure leaves no partial bundle; retry with the same client id does not duplicate |
+| **Target resolution / validation point** | Closed on `release/v1-external-readiness` |
+| **Related docs** | This file; adversarial A-003; `docs/V1_USER_ACTIONS.md` |
+| **Notes** | SET NULL-first remains required inside the delete transaction so a successful project delete cannot leave workspace orphans. History is evidence, not part of the canonical create bundle. |
+
+### D-041 — Account deletion
+
+| Field | Value |
+| --- | --- |
+| **Status** | closed (individual-first V1) |
+| **Fixed in** | `release/v1-external-readiness` |
+| **Failure class** | No whole-account delete existed. |
+| **Fix summary** | Signed-in POST `/api/account/delete` requires exact `DELETE MY ACCOUNT`. Server-authoritative. Does not create a workspace. Refuses other members / extra workspaces (409). Deletes the workspace (cascade) then the Auth user, then signs out. Service-role key required. Multi-member workspaces are a support path, not silent data deletion. |
+
+### D-042 — Account / data export
+
+| Field | Value |
+| --- | --- |
+| **Status** | closed (individual-first V1 JSON export) |
+| **Fixed in** | `release/v1-external-readiness` |
+| **Failure class** | No user export existed. |
+| **Fix summary** | Authenticated GET `/api/account/export` re-projects `loadMissionStateFromSupabase` (the same canonical workspace the user can already see). JSON attachment. No service tokens. Legal may still require a lawyer-reviewed privacy notice (D-044). |
 
 ---
 
@@ -869,8 +887,8 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 7. **D-032** — default Capture V2 / New Project V2 then delete legacy OpenAI understanding paths (after Test workstream gates)  
 8. ~~**D-045 + D-046 + D-047 + D-048**~~ — closed in the dogfood integrity gate (D-R40–D-R43)  
 9. **D-034 remainder** — fingerprints now cover dueAt/detail/notes/endAt/replace pin; schema `version` columns only if that still fails in production  
-10. **D-035 remainder** — audit remaining project-domain persist paths (todo update/delete now scoped); Capture V2 membership is live  
-11. **D-028** + New Project crash residual — bundle RPCs (dedicated integrity slice)  
+10. ~~**D-035 remainder**~~ — history/session/memory/todo create now prove the project is in the workspace; Capture membership already live  
+11. ~~**D-028**~~ — `create_project_bundle` + `delete_project_bundle`  
 12. **D-003** — suggestion persist  
 13. **D-008 / D-021** — implement the decided waiting/open-loop split  
 14. **D-007** remainder — leftover Knowledge people prose without a stakeholder link  
@@ -892,10 +910,12 @@ Canonical categories for the later large hardening pass. Details live in the aud
 
 ### BEFORE EXTERNAL USERS
 
-- D-028 / A-003 — New Project and project-delete as one database transaction
-- N-09 — RLS project↔workspace alignment on recommendations / history / capture_sessions
-- D-035 remainder — persist-helper membership on remaining tables
-- Read-only integrity observer for operators (scanner + SQL already exist; do not invent a daemon in passing)
+- ~~D-028 / A-003~~ — `create_project_bundle` + `delete_project_bundle`
+- ~~N-09~~ — RLS `project_belongs_to_workspace` on recommendations / history / capture_sessions
+- ~~D-035 remainder (named write helpers)~~ — `requireProjectInWorkspace` on history/session/memory/todo/stakeholder/knowledge/timeline creates
+- ~~D-041 / D-042~~ — Account delete + JSON export (individual-first)
+- Read-only integrity observer for operators (scanner + SQL already exist; classified ACCEPTED BOUNDED V1 LIMITATION)
+- D-044 lawyer Privacy/Terms — Tom / legal, not invented in code
 - D-033 remainder — Coach must not treat client MissionState as truth if Coach returns
 
 ### HARDEN DURING V1
