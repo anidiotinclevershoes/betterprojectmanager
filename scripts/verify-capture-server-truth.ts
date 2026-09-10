@@ -600,6 +600,9 @@ async function main() {
     assert.match(route, /loadServerCaptureWorld/);
     assert.match(route, /postCaptureV2/);
     assert.match(route, /ignoredClientTruth/);
+    assert.match(route, /logIntelligenceProvenance\("capture.v2_analysed"/);
+    assert.match(route, /requestedModel/);
+    assert.match(route, /responseModel/);
     const v2Fn = route.slice(route.indexOf("async function postCaptureV2"));
     assert.doesNotMatch(route, /postCaptureLegacy/);
     assert.doesNotMatch(route, /tidyAndCoachWithOpenAI/);

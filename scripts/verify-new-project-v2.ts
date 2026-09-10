@@ -443,6 +443,7 @@ function main() {
     assert.doesNotMatch(route, /assembleNarrativeWithOpenAI/);
     assert.doesNotMatch(route, /runCaptureV2FromModelJson/);
     assert.doesNotMatch(route, /planCaptureApply|executeCaptureApply/);
+    assert.match(route, /new-project\.v2_organised/);
     assert.match(parse, /parseObservationEnvelope/);
     assert.match(parse, /validateObservations/);
   });
