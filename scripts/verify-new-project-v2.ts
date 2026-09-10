@@ -22,6 +22,8 @@ import {
 } from "../src/lib/new-project-v2";
 import { NEW_PROJECT_MESSY_INPUT } from "../src/lib/experiments/worlds";
 import { buildNewProject } from "../src/lib/create-project";
+import { mergeOrganisedDraft } from "../src/lib/new-project/merge-organised";
+import { needsYouFromDraft } from "../src/lib/new-project/needs-you";
 
 const ROOT = process.cwd();
 
@@ -311,6 +313,101 @@ function main() {
     });
     assert.equal(draft.stakeholders?.[0]?.needsReview, true);
     assert.equal(draft.risks?.[0]?.needsReview, true);
+  });
+
+  check("explicit responsibilities survive organise and do not become Needs You", () => {
+    const mapped = parseNewProjectV2Envelope({
+      observations: [
+        {
+          id: "p-olga",
+          statement: "Olga Petrov is responsible for UAT.",
+          evidence: "Olga Petrov is responsible for UAT.",
+          domain: "responsibility",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { personName: "Olga Petrov", scope: "UAT" },
+        },
+        {
+          id: "p-sarah",
+          statement: "Sarah Kim is responsible for Release.",
+          evidence: "Sarah Kim is responsible for Release.",
+          domain: "responsibility",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { personName: "Sarah Kim", scope: "Release" },
+        },
+        {
+          id: "p-olga-person",
+          statement: "Olga Petrov",
+          evidence: "Olga Petrov is responsible for UAT.",
+          domain: "person",
+          disposition: "ambiguous",
+          truthIntent: "current",
+          proposedValues: { name: "Olga Petrov" },
+        },
+        {
+          id: "p-understructured",
+          statement: "Priya Shah is responsible for Cutover.",
+          evidence: "Priya Shah is responsible for Cutover.",
+          domain: "person",
+          disposition: "ambiguous",
+          truthIntent: "current",
+          proposedValues: { name: "Priya Shah" },
+        },
+      ],
+    });
+    const draft = draftFromProvisional({
+      sourceNarrative:
+        "Olga Petrov is responsible for UAT.\nSarah Kim is responsible for Release.",
+      sourceMode: "paste",
+      project: { name: "Aurora Migration", summary: "", currentFocus: "" },
+      items: mapped.items,
+    });
+    const merged = mergeOrganisedDraft(
+      {
+        name: "Aurora Migration",
+        code: "AM",
+        summary: "",
+        kind: "delivery",
+        currentFocus: "",
+        sourceMode: "compose",
+      },
+      draft,
+    );
+    const olga = (merged.stakeholders ?? []).find((s) => s.name === "Olga Petrov");
+    const sarah = (merged.stakeholders ?? []).find((s) => s.name === "Sarah Kim");
+    const priya = (merged.stakeholders ?? []).find((s) => s.name === "Priya Shah");
+    assert.ok(olga, "Olga Petrov must be in the People draft");
+    assert.ok(sarah, "Sarah Kim must be in the People draft");
+    assert.ok(priya, "statement-only responsibility must still create a Person");
+    assert.ok(
+      (olga?.responsibilities ?? []).some((scope) => /UAT/i.test(scope)),
+      "Olga UAT responsibility must survive mapping",
+    );
+    assert.ok(
+      (sarah?.responsibilities ?? []).some((scope) => /Release/i.test(scope)),
+      "Sarah Release responsibility must survive mapping",
+    );
+    assert.ok(
+      (priya?.responsibilities ?? []).some((scope) => /Cutover/i.test(scope)),
+      "under-structured person statement must keep the explicit scope",
+    );
+    const questions = needsYouFromDraft(merged);
+    assert.equal(
+      questions.some((q) => /Olga Petrov/i.test(q.question)),
+      false,
+    );
+    assert.equal(
+      questions.some((q) => /Sarah Kim/i.test(q.question)),
+      false,
+    );
+    assert.equal(
+      questions.some((q) => /Priya Shah/i.test(q.question)),
+      false,
+    );
+    const ui = readSrc("src/components/onboarding/NewProjectExperience.tsx");
+    assert.match(ui, /responsibilities/);
+    assert.match(ui, /needsYouFromDraft/);
   });
 
   check("malformed Capture envelope fails closed in the adapter", () => {

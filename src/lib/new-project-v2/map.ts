@@ -28,10 +28,14 @@ export function draftFromProvisional(args: {
       const name =
         asUsableString(item.proposedValues?.name) ||
         asUsableString(item.proposedValues?.personName);
+      const scope = explicitResponsibilityScope(item);
+      const role = asUsableString(item.proposedValues?.role);
+      const responsibilities = scope ? [scope] : [];
       return {
         clientKey: item.id,
         name: name ?? "",
-        role: asUsableString(item.proposedValues?.role) || asUsableString(item.proposedValues?.scope),
+        role: role || undefined,
+        responsibilities,
         needsReview: Boolean(item.needsReview) || !name,
       };
     });
@@ -117,4 +121,15 @@ export function draftFromProvisional(args: {
     sourceNarrative: args.sourceNarrative,
     sourceMode: args.sourceMode,
   };
+}
+
+/** Keep explicit “is responsible for” scope. Do not invent a role as a scope. */
+function explicitResponsibilityScope(item: ProvisionalItem): string | undefined {
+  const scoped = asUsableString(item.proposedValues?.scope);
+  if (scoped) return scoped;
+  const match = item.statement
+    .trim()
+    .match(/\bis responsible for\s+(.+)$/i);
+  if (!match?.[1]) return undefined;
+  return asUsableString(match[1].replace(/[.]+$/, ""));
 }

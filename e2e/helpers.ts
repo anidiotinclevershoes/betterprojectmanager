@@ -194,19 +194,19 @@ export async function applyReadyIfPresent(page: Page) {
   const applyReady = page.getByRole("button", { name: /Apply Ready/i });
   if ((await applyReady.count()) > 0) {
     await applyReady.click();
-    await expect(page.getByText("Approved").first()).toBeVisible();
+    await expect(page.getByText("Applied").first()).toBeVisible();
     return;
   }
   const resolveRisk = page.getByRole("button", { name: /Resolve Risk|Resolve/i });
   if ((await resolveRisk.count()) > 0) {
     await resolveRisk.first().click();
-    await expect(page.getByText("Approved").first()).toBeVisible();
+    await expect(page.getByText("Applied").first()).toBeVisible();
     return;
   }
-  const approve = page.getByRole("button", { name: "Approve" });
-  if ((await approve.count()) > 0) {
-    await approve.first().click();
-    await expect(page.getByText("Approved").first()).toBeVisible();
+  const applyVisible = page.getByRole("button", { name: /Apply Ready/i });
+  if ((await applyVisible.count()) > 0) {
+    await applyVisible.first().click();
+    await expect(page.getByText("Applied").first()).toBeVisible();
   }
 }
 

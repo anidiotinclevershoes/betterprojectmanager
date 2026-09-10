@@ -44,6 +44,7 @@ export function CaptureSummary({
                   </span>
                   <span className="capture-observation-text">{obs.text}</span>
                 </span>
+                {obs.actionStatus === "no_change" ? null : (
                 <span
                   className={`capture-observation-action ${statusClass}${
                     obs.actionLabel.startsWith("Remember")
@@ -58,6 +59,7 @@ export function CaptureSummary({
                 >
                   {obs.actionLabel}
                 </span>
+                )}
               </>
             );
             return (

@@ -125,7 +125,7 @@ export function SuggestedChangeCard({
       : null;
 
   if (state !== "pending") {
-    const resolvedLabel = state === "approved" ? "Approved" : "Dismissed";
+    const resolvedLabel = state === "approved" ? "Applied" : "Excluded";
     return (
       <li
         className={[
@@ -211,11 +211,8 @@ export function SuggestedChangeCard({
             />
           ) : (
             <div className="compact-change-action-row">
-              <button type="button" className="muted-btn" onClick={onApprove}>
-                Approve
-              </button>
               <button type="button" className="ghost-btn" onClick={onDismiss}>
-                Dismiss
+                Exclude change
               </button>
             </div>
           )

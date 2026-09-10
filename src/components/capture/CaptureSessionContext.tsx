@@ -666,7 +666,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
             expectedTarget: approvedItem.expectedTarget ?? null,
           }),
         });
-        const data = (await response.json()) as {
+        let data: {
           decision?: CaptureApplyDecision;
           executed?: {
             kind: string;
@@ -676,9 +676,17 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           state?: import("@/lib/types").MissionState;
           reconcileFailed?: boolean;
           error?: string;
-        };
+        } = {};
+        try {
+          data = (await response.json()) as typeof data;
+        } catch {
+          data = {};
+        }
         if (!response.ok) {
-          const reason = data.error || "Could not apply this change.";
+          const reason =
+            data.error ||
+            `Could not apply this change (${response.status}).`;
+          setError(reason);
           announce(reason);
           return {
             kind: "needs_you",
@@ -692,11 +700,13 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           reason: data.error || "Could not apply this change.",
         };
         if (data.executed?.kind === "failed") {
-          announce(data.executed.reason || "Could not save this change.");
+          const reason = data.executed.reason || "Could not save this change.";
+          setError(reason);
+          announce(reason);
           return {
             kind: "needs_you",
             domain: decision.domain,
-            reason: data.executed.reason || "Could not save this change.",
+            reason,
           };
         }
         if (data.state) {
@@ -751,6 +761,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         const reason =
           err instanceof Error ? err.message : "Could not apply this change.";
+        setError(reason);
         announce(reason);
         return {
           kind: "needs_you",
@@ -763,6 +774,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       adoptAppliedState,
       announce,
       reconcileDurableWorkspace,
+      setError,
       slice.content,
       slice.editing,
       slice.projectId,

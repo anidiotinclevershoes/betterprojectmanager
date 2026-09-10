@@ -107,11 +107,8 @@ export function CorrectionActions({
   if (!reason && model.readiness === "ready" && canApprove) {
     return (
       <div className="compact-change-action-row">
-        <button type="button" className="primary-btn" onClick={handlers.onApprove}>
-          Approve
-        </button>
         <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
-          Dismiss
+          Exclude change
         </button>
       </div>
     );

@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import {
   isProjectCodeTaken,
+  nextDerivedProjectCode,
   projectCodeTakenMessage,
   suggestCode,
 } from "@/lib/create-project";
@@ -27,6 +29,7 @@ export function ProjectIdentityFields({
   nameTestId?: string;
   codeTestId?: string;
 }) {
+  const [codeEdited, setCodeEdited] = useState(false);
   const derived = suggestCode(name);
   const codeTaken = Boolean(code.trim()) && isProjectCodeTaken(existingCodes, code);
   const codeNote = !code.trim()
@@ -51,7 +54,7 @@ export function ProjectIdentityFields({
               const nextName = e.target.value;
               onNameChange(
                 nextName,
-                code.trim() ? code : suggestCode(nextName),
+                nextDerivedProjectCode(nextName, code, codeEdited),
               );
             }}
             placeholder="Aurora migration"
@@ -70,9 +73,11 @@ export function ProjectIdentityFields({
           <input
             id={codeId}
             value={code}
-            onChange={(e) =>
-              onCodeChange(e.target.value.toUpperCase().slice(0, 12))
-            }
+            onChange={(e) => {
+              const next = e.target.value.toUpperCase().slice(0, 12);
+              setCodeEdited(Boolean(next.trim()));
+              onCodeChange(next);
+            }}
             placeholder={derived || "AUR"}
             autoComplete="off"
             spellCheck={false}

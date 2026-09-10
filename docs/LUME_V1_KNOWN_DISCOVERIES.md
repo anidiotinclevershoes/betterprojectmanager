@@ -181,7 +181,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | `scripts/verify-rpc-schema-contract.ts` |
 | **Target resolution / validation point** | Hosted audit shows required columns present; New Project smoke repeated |
 | **Related docs** | `docs/V1_USER_ACTIONS.md`; `docs/SUPABASE_SETUP_FOR_TOM.md` (original SQL Editor only named the first three files) |
-| **Notes** | Original Tom setup listed schema + RLS + grants only. Later slices each asked for one more paste. Hosted can therefore lag repo reconstruction without any migration file being wrong. |
+| **Notes** | Original Tom setup listed schema + RLS + grants only. Later slices each asked for one more paste. Hosted can therefore lag repo reconstruction without any migration file being wrong. **10 Sep Preview (PR #155):** hosted `POST /api/capture/apply` 500 — `Could not find the table 'public.capture_apply_receipts'`. Same hosted-lag class. The existing catch-up SQL does **not** create this table. Canonical create is `supabase/migrations/20260829120000_capture_apply_receipts.sql`. Operator must apply that file on hosted. Do not bypass receipts or weaken idempotency in application code. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 

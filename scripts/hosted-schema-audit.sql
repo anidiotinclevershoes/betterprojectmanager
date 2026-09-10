@@ -17,7 +17,8 @@ with wanted_tables(table_name) as (
     ('recommendations'),
     ('memories'),
     ('project_tags'),
-    ('item_tags')
+    ('item_tags'),
+    ('capture_apply_receipts')
 ),
 required_columns(table_name, column_name) as (
   values
@@ -90,6 +91,12 @@ required_columns(table_name, column_name) as (
     ('item_tags', 'tag_id'),
     ('item_tags', 'target_kind'),
     ('item_tags', 'target_id'),
+    ('capture_apply_receipts', 'id'),
+    ('capture_apply_receipts', 'workspace_id'),
+    ('capture_apply_receipts', 'project_id'),
+    ('capture_apply_receipts', 'operation_id'),
+    ('capture_apply_receipts', 'entity_type'),
+    ('capture_apply_receipts', 'entity_id'),
     ('recommendations', 'id'),
     ('recommendations', 'workspace_id'),
     ('recommendations', 'project_id'),
