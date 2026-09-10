@@ -2,10 +2,10 @@
  * Expand/compatible deploy proof for the external-V1 migrations vs current main.
  * Credential-free. Does not talk to production.
  *
- * Current main still creates/deletes via table inserts. The new SQL only adds
- * functions and tighter WITH CHECK predicates. Legitimate current-main writes
- * already name the project they just created, so migrate-first is safe.
- * New code calls the RPCs, so it must not deploy before the functions exist.
+ * After #150, origin/main create/delete already call create_project_bundle and
+ * delete_project_bundle. The SQL remains additive (functions + tighter WITH CHECK).
+ * App persist must keep using those RPCs so it does not silently fall back to
+ * sequential table inserts.
  */
 import assert from "node:assert/strict";
 import { execSync } from "node:child_process";
@@ -60,12 +60,14 @@ check("tighter RLS is membership PLUS project-in-workspace, not a new tenancy mo
   assert.match(createSql, /security invoker/);
 });
 
-check("current main still uses table inserts — it does not require the new RPCs", () => {
-  assert.doesNotMatch(mainPersist, /create_project_bundle/);
-  assert.doesNotMatch(mainPersist, /delete_project_bundle/);
-  assert.match(mainPersist, /from\("projects"\)[\s\S]*\.insert/);
-  assert.match(mainPersist, /from\("stakeholders"\)[\s\S]*\.insert/);
-  assert.match(mainPersist, /PROJECT_BUNDLE_SET_NULL_TABLES/);
+check("current main persist already uses the project-bundle RPCs", () => {
+  assert.match(mainPersist, /rpc\("create_project_bundle"/);
+  assert.match(mainPersist, /rpc\("delete_project_bundle"/);
+  const createFn = mainPersist.slice(
+    mainPersist.indexOf("export async function persistNewProject"),
+    mainPersist.indexOf("export async function persistTodoCreate"),
+  );
+  assert.doesNotMatch(createFn, /\.from\("projects"\)\s*\.insert/);
 });
 
 check("new code requires the RPCs, so it must deploy after the migrations", () => {
