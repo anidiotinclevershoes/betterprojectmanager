@@ -1,11 +1,11 @@
 /**
- * Expand/compatible deploy proof for the external-V1 migrations vs current main.
+ * Expand/compatible deploy proof after #150 and the D-050 catch-up.
  * Credential-free. Does not talk to production.
  *
- * After #150, origin/main create/delete already call create_project_bundle and
- * delete_project_bundle. The SQL remains additive (functions + tighter WITH CHECK).
- * App persist must keep using those RPCs so it does not silently fall back to
- * sequential table inserts.
+ * origin/main create/delete already call create_project_bundle and
+ * delete_project_bundle. App persist must keep using those RPCs so it
+ * does not silently fall back to sequential table inserts. The D-050
+ * catch-up file remains additive.
  */
 import assert from "node:assert/strict";
 import { execSync } from "node:child_process";
@@ -16,14 +16,9 @@ const ROOT = path.resolve(__dirname, "..");
 let passed = 0;
 
 function check(name: string, fn: () => void) {
-  try {
-    fn();
-    passed += 1;
-    console.log(`✓ ${name}`);
-  } catch (err) {
-    console.error(`✗ ${name}`);
-    throw err;
-  }
+  fn();
+  passed += 1;
+  console.log(`✓ ${name}`);
 }
 
 function read(rel: string) {
@@ -39,18 +34,21 @@ function gitShow(refPath: string) {
 
 const safety = read("supabase/migrations/20260909160000_external_v1_safety.sql");
 const createSql = read("supabase/migrations/20260909210000_create_project_bundle.sql");
-const newPersist = read("src/lib/data/supabase/persist-mutations.ts");
+const catchup = read(
+  "supabase/migrations/20260910120000_hosted_canonical_schema_catchup.sql",
+);
+const persist = read("src/lib/data/supabase/persist-mutations.ts");
 const mainPersist = gitShow("origin/main:src/lib/data/supabase/persist-mutations.ts");
 
-check("migrations are additive — no drop table / no column rewrite", () => {
-  for (const sql of [safety, createSql]) {
+check("V1 RPC migrations remain additive — no drop table / no column rewrite", () => {
+  for (const sql of [safety, createSql, catchup]) {
     assert.doesNotMatch(sql, /drop table/i);
     assert.doesNotMatch(sql, /alter table[\s\S]{0,80}drop column/i);
     assert.doesNotMatch(sql, /alter table[\s\S]{0,80}rename/i);
   }
   assert.match(safety, /create or replace function public.delete_project_bundle/);
-  assert.match(safety, /create or replace function public.project_belongs_to_workspace/);
   assert.match(createSql, /create or replace function public.create_project_bundle/);
+  assert.match(catchup, /add column if not exists kind text;/);
 });
 
 check("tighter RLS is membership PLUS project-in-workspace, not a new tenancy model", () => {
@@ -60,7 +58,7 @@ check("tighter RLS is membership PLUS project-in-workspace, not a new tenancy mo
   assert.match(createSql, /security invoker/);
 });
 
-check("current main persist already uses the project-bundle RPCs", () => {
+check("origin/main persist already uses the project-bundle RPCs", () => {
   assert.match(mainPersist, /rpc\("create_project_bundle"/);
   assert.match(mainPersist, /rpc\("delete_project_bundle"/);
   const createFn = mainPersist.slice(
@@ -70,25 +68,22 @@ check("current main persist already uses the project-bundle RPCs", () => {
   assert.doesNotMatch(createFn, /\.from\("projects"\)\s*\.insert/);
 });
 
-check("new code requires the RPCs, so it must deploy after the migrations", () => {
-  assert.match(newPersist, /rpc\("create_project_bundle"/);
-  assert.match(newPersist, /rpc\("delete_project_bundle"/);
-  const createFn = newPersist.slice(
-    newPersist.indexOf("export async function persistNewProject"),
-    newPersist.indexOf("export async function persistTodoCreate"),
+check("working-tree persist still requires the RPCs", () => {
+  assert.match(persist, /rpc\("create_project_bundle"/);
+  assert.match(persist, /rpc\("delete_project_bundle"/);
+  const createFn = persist.slice(
+    persist.indexOf("export async function persistNewProject"),
+    persist.indexOf("export async function persistTodoCreate"),
   );
   assert.doesNotMatch(createFn, /\.from\("projects"\)\s*\.insert/);
 });
 
-check("deploy order documented as migrate → verify → merge/deploy", () => {
+check("catch-up remains the hosted SQL — do not edit the already-applied RPC file", () => {
   const actions = read("docs/V1_USER_ACTIONS.md");
-  assert.match(actions, /Apply both SQL files first/);
-  assert.match(actions, /THEN merge/);
-  assert.match(actions, /pg_proc/);
-  assert.match(actions, /pg_get_expr\(pol\.polwithcheck/);
-  assert.match(actions, /null_project_is_allowed/);
-  assert.match(actions, /missing_named_project_is_rejected/);
-  assert.doesNotMatch(actions, /\\df/);
+  assert.match(actions, /20260910120000_hosted_canonical_schema_catchup\.sql/);
+  assert.match(actions, /hosted-schema-audit\.sql/);
+  assert.match(actions, /Stop the invite rollout/);
+  assert.match(actions, /Do not edit already-applied V1 SQL/);
 });
 
 console.log(`\n${passed} external-V1 deploy-compat checks passed.`);

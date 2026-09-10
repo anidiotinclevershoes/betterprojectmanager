@@ -39,6 +39,8 @@
     "verify:billing-flag": "npx --yes tsx scripts/verify-billing-flag.ts",
     "verify:account-lifecycle": "npx --yes tsx scripts/verify-account-lifecycle.ts",
     "verify:external-v1-deploy-compat": "npx --yes tsx scripts/verify-external-v1-deploy-compat.ts",
+    "verify:rpc-schema-contract": "npx --yes tsx scripts/verify-rpc-schema-contract.ts",
+    "prove:hosted-schema-lag": "npx --yes tsx scripts/prove-hosted-schema-lag.ts",
     "verify:tell-me": "npx --yes tsx scripts/verify-tell-me.ts",
     "verify:tell-me-server-truth": "npx --yes tsx scripts/verify-tell-me-server-truth.ts",
     "verify:capture-server-truth": "npx --yes tsx scripts/verify-capture-server-truth.ts",
