@@ -302,7 +302,6 @@ export function NewProjectExperience({
                     clientKey: newSetupClientKey(),
                     name,
                     responsibilities: [],
-                    needsReview: true,
                   } satisfies SetupStakeholderDraft,
                 ],
               }))

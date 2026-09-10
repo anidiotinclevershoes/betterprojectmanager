@@ -1,10 +1,11 @@
 /**
- * Expand/compatible deploy proof for remaining hosted schema catch-up.
+ * Expand/compatible deploy proof after #150 and the D-050 catch-up.
  * Credential-free. Does not talk to production.
  *
- * After PR #150, origin/main already calls create_project_bundle.
- * Production Vercel is on that SHA. The remaining production SQL is the
- * additive catch-up for columns/tables hosted never received.
+ * origin/main create/delete already call create_project_bundle and
+ * delete_project_bundle. App persist must keep using those RPCs so it
+ * does not silently fall back to sequential table inserts. The D-050
+ * catch-up file remains additive.
  */
 import assert from "node:assert/strict";
 import { execSync } from "node:child_process";
@@ -57,9 +58,19 @@ check("tighter RLS is membership PLUS project-in-workspace, not a new tenancy mo
   assert.match(createSql, /security invoker/);
 });
 
-check("origin/main already requires create_project_bundle (PR #150 is merged)", () => {
+check("origin/main persist already uses the project-bundle RPCs", () => {
   assert.match(mainPersist, /rpc\("create_project_bundle"/);
+  assert.match(mainPersist, /rpc\("delete_project_bundle"/);
+  const createFn = mainPersist.slice(
+    mainPersist.indexOf("export async function persistNewProject"),
+    mainPersist.indexOf("export async function persistTodoCreate"),
+  );
+  assert.doesNotMatch(createFn, /\.from\("projects"\)\s*\.insert/);
+});
+
+check("working-tree persist still requires the RPCs", () => {
   assert.match(persist, /rpc\("create_project_bundle"/);
+  assert.match(persist, /rpc\("delete_project_bundle"/);
   const createFn = persist.slice(
     persist.indexOf("export async function persistNewProject"),
     persist.indexOf("export async function persistTodoCreate"),
@@ -67,7 +78,7 @@ check("origin/main already requires create_project_bundle (PR #150 is merged)", 
   assert.doesNotMatch(createFn, /\.from\("projects"\)\s*\.insert/);
 });
 
-check("catch-up is the remaining hosted SQL — do not edit the already-applied RPC file", () => {
+check("catch-up remains the hosted SQL — do not edit the already-applied RPC file", () => {
   const actions = read("docs/V1_USER_ACTIONS.md");
   assert.match(actions, /20260910120000_hosted_canonical_schema_catchup\.sql/);
   assert.match(actions, /hosted-schema-audit\.sql/);

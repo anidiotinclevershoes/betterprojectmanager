@@ -256,13 +256,12 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
   knowledge.updatedAt = now;
   knowledge.sections.now = uniqueBullets([
     ...(input.knowledgeNow ?? []),
-    ...rememberBullets.slice(0, 4),
+    ...rememberBullets,
     input.currentFocus.trim() ? `Current focus: ${input.currentFocus.trim()}` : "",
     input.summary.trim() ? input.summary.trim() : "",
   ]);
   knowledge.sections.decisions = uniqueBullets([
     ...(input.knowledgeDecisions ?? []),
-    ...rememberBullets.slice(4),
   ]);
   knowledge.sections.risks = uniqueBullets(riskTitles);
   knowledge.sections.people = uniqueBullets([
@@ -383,6 +382,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
   return { project, knowledge, recommendations, todos, timeline };
 }
 
+/** Dedupes bullets. Does not count-cap or silently shorten user-entered truth. */
 function uniqueBullets(items: string[]) {
   const seen = new Set<string>();
   const out: string[] = [];
@@ -392,8 +392,7 @@ function uniqueBullets(items: string[]) {
     const key = t.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    out.push(t.slice(0, 220));
-    if (out.length >= 12) break;
+    out.push(t);
   }
   return out;
 }

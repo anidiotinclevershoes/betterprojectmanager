@@ -405,6 +405,43 @@ function testUnaffectedSectionUntouchedInPartialReconcile() {
   assert.ok(!plan.updates.some((u) => u.id === ID_DEC));
 }
 
+function testCorrectingOneOfFifteenFactsDoesNotDeleteTheOthers() {
+  const bodies = Array.from(
+    { length: 15 },
+    (_, i) => `Canonical fact ${String(i + 1).padStart(2, "0")} stays in the project`,
+  );
+  const ids = bodies.map(
+    (_, i) => `aaaaaaaa-aaaa-4aaa-8aaa-${String(i + 1).padStart(12, "0")}`,
+  );
+  const existing = bodies.map((body, i) =>
+    row({
+      id: ids[i]!,
+      section: "now",
+      body,
+      position: i,
+      kind: "fact",
+    }),
+  );
+  const desired = emptyKnowledge(PROJECT_A);
+  desired.sections.now = bodies.map((body, i) =>
+    i === 0 ? `${body} — corrected` : body,
+  );
+  desired.sectionItemIds = { now: ids };
+
+  const plan = planKnowledgeReconcile({
+    projectId: PROJECT_A,
+    workspaceId: WS,
+    desired,
+    existingRows: existing,
+    sections: ["now"],
+  });
+
+  assert.equal(plan.deleteIds.length, 0, "correcting one line must not drop the other facts");
+  assert.equal(plan.updates.length, 1);
+  assert.equal(plan.updates[0]!.id, ids[0]);
+  assert.equal(plan.inserts.length, 0);
+}
+
 testEditPreservesIdAndMetadata();
 testSectionReplacementDoesNotTouchOtherProjectRows();
 testRemoveAndAdd();
@@ -416,5 +453,6 @@ testAlignSectionLinesNeverUsesIndexAlone();
 testRemapStructuredPreservesIdentity();
 testRemapUnrelatedDoesNotInheritMetadata();
 testUnaffectedSectionUntouchedInPartialReconcile();
+testCorrectingOneOfFifteenFactsDoesNotDeleteTheOthers();
 
 console.log("verify-knowledge-reconcile: OK");

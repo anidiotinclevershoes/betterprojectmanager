@@ -1687,8 +1687,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           emptyKnowledge(projectId);
         const cleaned = bullets
           .map((b) => b.trim())
-          .filter(Boolean)
-          .slice(0, 8);
+          .filter(Boolean);
         const sections = { ...current.sections, [sectionId]: cleaned };
         const next: ProjectKnowledge = {
           ...current,

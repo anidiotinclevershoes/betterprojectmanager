@@ -212,7 +212,6 @@ export function composeKnowledgeCentreItems(
     const supporting = [person.scopes.join(" · ") || null, person.meta]
       .filter(Boolean)
       .join(" · ");
-    const missingScope = person.scopes.length === 0;
     remember(
       withSearch({
         id: `person:${personId}`,
@@ -220,10 +219,9 @@ export function composeKnowledgeCentreItems(
         typeLabel: "Person",
         title: person.name,
         supporting: supporting || null,
-        needsYou:
-          missingScope || person.unconfirmed
-            ? `Needs You — What is ${person.name} responsible for?`
-            : null,
+        needsYou: person.unconfirmed
+          ? `Needs You — What is ${person.name} responsible for?`
+          : null,
         icon: KC_BUCKET_ICON.people,
         tagKind: "stakeholder",
         tagTargetId: personId,

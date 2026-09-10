@@ -7,19 +7,6 @@ export type SetupNeedsYou = {
   clientKey?: string;
 };
 
-function responsibilitiesOf(draft: {
-  role?: string;
-  responsibilities?: string[];
-}): string[] {
-  const fromList = (draft.responsibilities ?? [])
-    .map((r) => r.trim())
-    .filter(Boolean);
-  if (fromList.length) return fromList;
-  const role = draft.role?.trim();
-  if (role && role.toLowerCase() !== "stakeholder") return [role];
-  return [];
-}
-
 export function personResponsibilityQuestion(name: string): string {
   return `What is ${name.trim()} responsible for?`;
 }
@@ -61,14 +48,15 @@ export function needsYouFromDraft(draft: CreateProjectInput): SetupNeedsYou[] {
 
   (draft.stakeholders ?? []).forEach((person, index) => {
     if (!person.name.trim()) return;
-    if (responsibilitiesOf(person).length === 0 || person.needsReview) {
-      out.push({
-        id: person.clientKey ?? `person-${index}`,
-        clientKey: person.clientKey,
-        frame: "people",
-        question: personResponsibilityQuestion(person.name),
-      });
-    }
+    // Responsibilities are optional. Absence is complete Person truth.
+    // Only an explicit uncertain person/responsibility relationship is Needs You.
+    if (!person.needsReview) return;
+    out.push({
+      id: person.clientKey ?? `person-${index}`,
+      clientKey: person.clientKey,
+      frame: "people",
+      question: personResponsibilityQuestion(person.name),
+    });
   });
 
   (draft.importantDates ?? []).forEach((date, index) => {

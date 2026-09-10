@@ -83,11 +83,12 @@ export function structuredItemsFromSetup(args: {
     });
   }
 
-  // Person with no scopes: do not invent unknown_owner from absence (D-009).
-  // Persist the question as stored ambiguity so Needs You survives reload.
+  // Name-only people are complete. Persist a responsibility Needs You only when
+  // Organise/review marked the person/relationship as genuinely uncertain.
   (args.input.stakeholders ?? []).forEach((draft, index) => {
     const person = args.stakeholders[index];
     if (!person || !draft.name.trim()) return;
+    if (!draft.needsReview) return;
     if (scopesOf(draft).length > 0) return;
     items.push({
       id: newPeopleUuid(),

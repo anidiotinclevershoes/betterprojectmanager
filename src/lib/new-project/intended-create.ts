@@ -51,7 +51,7 @@ export function intendedCreateTruth(input: CreateProjectInput): IntendedCreateTr
 
   const ambiguityBodies: string[] = [];
   for (const person of people) {
-    if (scopesOf(person).length === 0) {
+    if (person.needsReview && scopesOf(person).length === 0) {
       ambiguityBodies.push(personResponsibilityQuestion(person.name));
     }
   }
