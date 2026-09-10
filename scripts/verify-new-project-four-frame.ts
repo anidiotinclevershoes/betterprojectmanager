@@ -673,7 +673,7 @@ async function main() {
       const riskTitles = fake.tables.risks.map((row) => String(row.title));
       assert.deepEqual(riskTitles, titles);
       const loaded = await loadMissionStateFromSupabase(asClient(fake));
-      const projectRisks = loaded.state.risks
+      const projectRisks = (loaded.state.risks ?? [])
         .filter((r) => r.projectId === persisted.project.id)
         .map((r) => r.title);
       assert.deepEqual(projectRisks, titles);
