@@ -16,6 +16,7 @@ import {
 } from "@/lib/create-project";
 import { mergeOrganisedDraft } from "@/lib/new-project/merge-organised";
 import { needsYouFromDraft } from "@/lib/new-project/needs-you";
+import { composePersonLine } from "@/lib/new-project/people-line";
 import { ANALYTICS_EVENTS, trackAnalyticsEvent } from "@/lib/analytics";
 import { useMission } from "@/lib/store";
 import { ProjectIdentityFields } from "./ProjectIdentityFields";
@@ -281,7 +282,7 @@ export function NewProjectExperience({
             title="People"
             testId="np-frame-people"
             addLabel="Add person"
-            items={(draft.stakeholders ?? []).map((s) => s.name)}
+            items={(draft.stakeholders ?? []).map((s) => composePersonLine(s))}
             onAdd={(name) =>
               setDraft((d) => ({
                 ...d,
@@ -418,7 +419,11 @@ function ComposeFrame({
 }) {
   const [value, setValue] = useState("");
   return (
-    <section className="np-frame" data-testid={testId}>
+    <section
+      className="np-frame"
+      data-testid={testId}
+      data-np-domain={title.toLowerCase()}
+    >
       <h2>{title}</h2>
       <ul>
         {items.map((item, index) => (

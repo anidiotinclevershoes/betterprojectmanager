@@ -428,12 +428,15 @@ export function CaptureWorkspace({
   }
 
   async function approveReady() {
-    const { confirmOwner } = await applyPendingReadyQueue({
+    const { confirmOwner, failures } = await applyPendingReadyQueue({
       models: pendingReadyModels(reviewModels, added, dismissed),
       applyOne: (item) => applyOne(item, defaultProjectId),
     });
     if (confirmOwner) {
       setConfirmOwner(confirmOwner);
+    }
+    if (failures.length) {
+      setError(failures[0] ?? "Could not apply these changes.");
     }
   }
 
@@ -1046,10 +1049,12 @@ export function CaptureWorkspace({
       ) : null}
       </div>
 
-      {error && !isAnalysed ? (
+      {error ? (
         <div className="error-banner capture-error" role="alert">
           <p>{error}</p>
           <div className="row-actions">
+            {!isAnalysed ? (
+              <>
             <button
               type="button"
               className="ghost-btn"
@@ -1066,6 +1071,16 @@ export function CaptureWorkspace({
             >
               Copy text
             </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="ghost-btn"
+                onClick={() => setError(null)}
+              >
+                Dismiss
+              </button>
+            )}
           </div>
         </div>
       ) : null}

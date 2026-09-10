@@ -8,6 +8,7 @@ import assert from "node:assert/strict";
 import {
   buildNewProject,
   isProjectCodeTaken,
+  nextDerivedProjectCode,
   projectCodeTakenMessage,
   suggestCode,
   type CreateProjectInput,
@@ -17,6 +18,11 @@ import {
   needsYouFromDraft,
   personResponsibilityQuestion,
 } from "../src/lib/new-project/needs-you";
+import { composePersonLine } from "../src/lib/new-project/people-line";
+import {
+  draftFromProvisional,
+  parseNewProjectV2Envelope,
+} from "../src/lib/new-project-v2";
 import { intendedCreateTruth } from "../src/lib/new-project/intended-create";
 import {
   risksFromSetup,
@@ -84,6 +90,21 @@ async function main() {
   await check("deterministic code: Member Claims Upload → MCU", () => {
     assert.equal(suggestCode("Member Claims Upload"), "MCU");
     assert.equal(suggestCode("  atlas  "), "ATLAS");
+    assert.equal(suggestCode("Aurora Migration"), "AM");
+    assert.equal(suggestCode("Aurora"), "AURORA");
+    let code = "";
+    for (const name of [
+      "A",
+      "Au",
+      "Aurora",
+      "Aurora ",
+      "Aurora M",
+      "Aurora Migration",
+    ]) {
+      code = nextDerivedProjectCode(name, code, false);
+    }
+    assert.equal(code, "AM");
+    assert.equal(nextDerivedProjectCode("Aurora Migration", "A", true), "A");
   });
 
   await check("manual code is not overwritten by name helper", () => {
@@ -164,6 +185,60 @@ async function main() {
     assert.ok(
       needsYouFromDraft(draft).some((q) => /When is the Beta milestone/i.test(q.question)),
     );
+  });
+
+  await check("organise path keeps explicit responsibilities and does not re-ask", () => {
+    const mapped = parseNewProjectV2Envelope({
+      observations: [
+        {
+          id: "p-olga",
+          statement: "Olga Petrov is responsible for UAT.",
+          evidence: "Olga Petrov is responsible for UAT.",
+          domain: "responsibility",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { personName: "Olga Petrov", scope: "UAT" },
+        },
+        {
+          id: "p-sarah",
+          statement: "Sarah Kim is responsible for Release.",
+          evidence: "Sarah Kim is responsible for Release.",
+          domain: "person",
+          disposition: "ambiguous",
+          truthIntent: "current",
+          proposedValues: { name: "Sarah Kim" },
+        },
+      ],
+    });
+    const organised = draftFromProvisional({
+      sourceNarrative:
+        "Olga Petrov is responsible for UAT.\nSarah Kim is responsible for Release.",
+      sourceMode: "paste",
+      project: mapped.project,
+      items: mapped.items,
+    });
+    const merged = mergeOrganisedDraft(
+      composeDraft({ name: "Aurora Migration", code: "AM" }),
+      { ...organised, sourceMode: "compose" },
+    );
+    const olga = (merged.stakeholders ?? []).find((s) => s.name === "Olga Petrov");
+    const sarah = (merged.stakeholders ?? []).find((s) => s.name === "Sarah Kim");
+    assert.ok(olga, "Olga Petrov must survive the production organise map");
+    assert.ok(sarah, "Sarah Kim must survive the production organise map");
+    assert.ok((olga?.responsibilities ?? []).some((scope) => /UAT/i.test(scope)));
+    assert.ok(
+      (sarah?.responsibilities ?? []).some((scope) => /Release/i.test(scope)),
+      "statement-only responsibility must not be discarded",
+    );
+    const questions = needsYouFromDraft(merged);
+    assert.equal(questions.some((q) => /Olga Petrov/i.test(q.question)), false);
+    assert.equal(questions.some((q) => /Sarah Kim/i.test(q.question)), false);
+    assert.equal(composePersonLine(olga!), "Olga Petrov — UAT");
+    assert.equal(composePersonLine(sarah!), "Sarah Kim — Release");
+    const ui = readFileSync(join(process.cwd(), "src/components/onboarding/NewProjectExperience.tsx"), "utf8");
+    assert.match(ui, /composePersonLine/);
+    assert.match(ui, /mergeOrganisedDraft/);
+    assert.match(ui, /\/api\/new-project/);
   });
 
   await check("person with only a name is complete — no Needs You or responsibility ambiguity", () => {

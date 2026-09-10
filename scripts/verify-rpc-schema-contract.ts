@@ -223,11 +223,13 @@ check("hosted schema audit SQL is read-only and covers every RPC insert column",
   assert.match(auditSql, /recent_project/);
   assert.match(auditSql, /leftover_children/);
   assert.match(auditSql, /interval '24 hours'/);
+  assert.match(auditSql, /capture_apply_receipts/);
 });
 
 check("operator checklist uses the forward catch-up file, not an in-place RPC edit", () => {
   const actions = read("docs/V1_USER_ACTIONS.md");
   assert.match(actions, /20260910120000_hosted_canonical_schema_catchup\.sql/);
+  assert.match(actions, /20260829120000_capture_apply_receipts\.sql/);
   assert.match(actions, /hosted-schema-audit\.sql/);
   assert.doesNotMatch(actions, /strip `kind` from create_project_bundle/);
 });

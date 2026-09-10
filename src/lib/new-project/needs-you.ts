@@ -49,6 +49,11 @@ export function needsYouFromDraft(draft: CreateProjectInput): SetupNeedsYou[] {
   (draft.stakeholders ?? []).forEach((person, index) => {
     if (!person.name.trim()) return;
     // Responsibilities are optional. Absence is complete Person truth.
+    // Explicit scopes must not be discarded and then asked for again.
+    const listed = (person.responsibilities ?? [])
+      .map((scope) => scope.trim())
+      .filter(Boolean);
+    if (listed.length > 0) return;
     // Only an explicit uncertain person/responsibility relationship is Needs You.
     if (!person.needsReview) return;
     out.push({
