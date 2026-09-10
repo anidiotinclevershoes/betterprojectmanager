@@ -256,13 +256,12 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
   knowledge.updatedAt = now;
   knowledge.sections.now = uniqueBullets([
     ...(input.knowledgeNow ?? []),
-    ...rememberBullets.slice(0, 4),
+    ...rememberBullets,
     input.currentFocus.trim() ? `Current focus: ${input.currentFocus.trim()}` : "",
     input.summary.trim() ? input.summary.trim() : "",
   ]);
   knowledge.sections.decisions = uniqueBullets([
     ...(input.knowledgeDecisions ?? []),
-    ...rememberBullets.slice(4),
   ]);
   knowledge.sections.risks = uniqueBullets(riskTitles);
   knowledge.sections.people = uniqueBullets([

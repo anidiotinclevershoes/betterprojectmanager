@@ -13,14 +13,20 @@ import {
   type CreateProjectInput,
 } from "../src/lib/create-project";
 import { mergeOrganisedDraft } from "../src/lib/new-project/merge-organised";
-import { needsYouFromDraft } from "../src/lib/new-project/needs-you";
+import {
+  needsYouFromDraft,
+  personResponsibilityQuestion,
+} from "../src/lib/new-project/needs-you";
+import { intendedCreateTruth } from "../src/lib/new-project/intended-create";
 import {
   risksFromSetup,
   structuredItemsFromSetup,
 } from "../src/lib/new-project/materialise-setup";
 import { persistNewProject } from "../src/lib/data/supabase/persist-mutations";
+import { loadMissionStateFromSupabase } from "../src/lib/data/supabase/load-mission-state";
 import { FakeWorkspaceClient } from "./lib/fake-supabase-workspace";
 import { captureApplyWorldFromState } from "../src/lib/capture/apply/world";
+import { composeKnowledgeCentreItems } from "../src/lib/knowledge-centre/four-bucket";
 import type { MissionState } from "../src/lib/types";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -48,6 +54,10 @@ function composeDraft(overrides: Partial<CreateProjectInput> = {}): CreateProjec
     knowledgeRemember: [],
     ...overrides,
   };
+}
+
+function asClient(fake: FakeWorkspaceClient) {
+  return fake as unknown as Parameters<typeof persistNewProject>[0];
 }
 
 async function main() {
@@ -136,17 +146,38 @@ async function main() {
     );
   });
 
-  await check("person without responsibility surfaces Needs You and is still persistable", () => {
+  await check("person with only a name is complete — no Needs You or responsibility ambiguity", () => {
     const draft = composeDraft({
       stakeholders: [{ name: "Sarah Murphy", responsibilities: [] }],
     });
     const bundle = buildNewProject(draft);
     assert.equal(bundle.project.stakeholders[0]?.name, "Sarah Murphy");
     assert.equal(bundle.project.stakeholders[0]?.role, "");
-    assert.ok(
+    assert.equal(
       needsYouFromDraft(draft).some((q) =>
         /What is Sarah Murphy responsible for/i.test(q.question),
       ),
+      false,
+    );
+    const structured = structuredItemsFromSetup({
+      projectId: bundle.project.id,
+      input: draft,
+      stakeholders: bundle.project.stakeholders,
+    });
+    assert.equal(
+      structured.some(
+        (item) =>
+          item.kind === "ambiguity" &&
+          item.body === personResponsibilityQuestion("Sarah Murphy"),
+      ),
+      false,
+    );
+    assert.equal(structured.filter((item) => item.kind === "responsibility").length, 0);
+    assert.equal(
+      intendedCreateTruth(draft).ambiguityBodies.includes(
+        personResponsibilityQuestion("Sarah Murphy"),
+      ),
+      false,
     );
   });
 
@@ -186,7 +217,8 @@ async function main() {
     assert.equal(merged.code, "CLAIMS");
     assert.equal(merged.risks?.[0]?.title, "Vendor delay");
     assert.equal(merged.risks?.[0]?.needsReview, true);
-    assert.equal(merged.stakeholders?.[0]?.needsReview, true);
+    assert.equal(merged.stakeholders?.[0]?.name, "Ava Chen");
+    assert.notEqual(merged.stakeholders?.[0]?.needsReview, true);
   });
 
   await check("ambiguous organise result stays Needs You, not Ready truth", () => {
@@ -300,7 +332,187 @@ async function main() {
     assert.match(ui, /Needs You \{needsYou\.length\}/);
     assert.doesNotMatch(ui, /Getting Started|0 of 4 complete|Save Draft|Talk It Through/);
     assert.doesNotMatch(ui, /accent-risks|accent-people|accent-todo|accent-knowledge/);
+    assert.doesNotMatch(
+      ui,
+      /needsReview:\s*true/,
+      "compose must not mark a manually added person as Needs You",
+    );
+    const todoAdd = ui.slice(ui.indexOf('addLabel="Add to do"'));
+    const todoAddBlock = todoAdd.slice(0, todoAdd.indexOf("ComposeFrame"));
+    assert.doesNotMatch(todoAddBlock, /dueAt/);
+    assert.doesNotMatch(ui, /type="date"/);
   });
+
+  await check("five or more compose Knowledge notes all remain ordinary facts", () => {
+    const notes = [
+      "UAT environment is shared with payroll",
+      "Web launch is in scope first",
+      "Mobile app follows the web release",
+      "Finance wants residual risk in writing",
+      "CAB pack is due forty eight hours early",
+      "Identity provider is the long pole",
+    ];
+    const draft = composeDraft({
+      knowledgeRemember: notes.map((text) => ({ text, remember: true })),
+      knowledgeDecisions: ["Board approved the winter window"],
+    });
+    const bundle = buildNewProject(draft);
+    for (const note of notes) {
+      assert.ok(
+        bundle.knowledge.sections.now.includes(note),
+        `expected fact in now: ${note}`,
+      );
+      assert.equal(
+        bundle.knowledge.sections.decisions.includes(note),
+        false,
+        `note must not become a decision: ${note}`,
+      );
+    }
+    assert.ok(
+      bundle.knowledge.sections.decisions.includes("Board approved the winter window"),
+    );
+  });
+
+  await check(
+    "persist New Project: name-only person and five Knowledge facts hydrate without Needs You",
+    async () => {
+      const notes = [
+        "UAT environment is shared with payroll",
+        "Web launch is in scope first",
+        "Mobile app follows the web release",
+        "Finance wants residual risk in writing",
+        "CAB pack is due forty eight hours early",
+      ];
+      const fake = new FakeWorkspaceClient();
+      const draft = composeDraft({
+        stakeholders: [{ name: "Sarah Murphy", responsibilities: [] }],
+        knowledgeRemember: notes.map((text) => ({ text, remember: true })),
+      });
+      const persisted = await persistNewProject(
+        asClient(fake),
+        fake.workspaceId,
+        fake.userId,
+        draft,
+      );
+      assert.ok(persisted.project.stakeholders.some((s) => s.name === "Sarah Murphy"));
+      const ambiguityQuestion = personResponsibilityQuestion("Sarah Murphy");
+      assert.equal(
+        fake.tables.knowledge_items.some(
+          (row) =>
+            row.kind === "ambiguity" && String(row.body) === ambiguityQuestion,
+        ),
+        false,
+      );
+      assert.equal(
+        fake.tables.knowledge_items.some((row) => row.kind === "responsibility"),
+        false,
+      );
+      for (const note of notes) {
+        const row = fake.tables.knowledge_items.find(
+          (item) => String(item.body) === note,
+        );
+        assert.ok(row, `missing persisted knowledge: ${note}`);
+        assert.equal(row.section, "now");
+        assert.equal(row.kind, "fact");
+        assert.equal(String(row.lifecycle ?? "current"), "current");
+      }
+      assert.equal(
+        fake.tables.knowledge_items.filter((row) =>
+          notes.includes(String(row.body)) && row.section === "decisions",
+        ).length,
+        0,
+      );
+
+      const loaded = await loadMissionStateFromSupabase(asClient(fake));
+      const project = loaded.state.projects.find(
+        (p) => p.id === persisted.project.id,
+      );
+      assert.ok(project);
+      assert.ok(project!.stakeholders.some((s) => s.name === "Sarah Murphy"));
+      const knowledge = loaded.state.knowledge.find(
+        (k) => k.projectId === persisted.project.id,
+      );
+      assert.ok(knowledge);
+      for (const note of notes) {
+        assert.ok(knowledge!.sections.now.includes(note));
+        assert.equal(knowledge!.sections.decisions.includes(note), false);
+        const overlay = (knowledge!.structured ?? []).find((item) => item.body === note);
+        assert.ok(overlay);
+        assert.equal(overlay!.kind, "fact");
+        assert.equal(overlay!.section, "now");
+        assert.equal(overlay!.lifecycle, "current");
+      }
+      assert.equal(
+        (knowledge!.structured ?? []).some(
+          (item) =>
+            item.kind === "ambiguity" && item.body === ambiguityQuestion,
+        ),
+        false,
+      );
+      const kc = composeKnowledgeCentreItems(loaded.state, persisted.project.id);
+      const personRow = kc.find(
+        (item) => item.bucket === "people" && item.title === "Sarah Murphy",
+      );
+      assert.ok(personRow, "name-only person must re-project into Knowledge Centre");
+      assert.equal(personRow!.needsYou, null);
+    },
+  );
+
+  await check(
+    "persist New Project: explicit responsibilities still write the established overlay",
+    async () => {
+      const fake = new FakeWorkspaceClient();
+      const draft = composeDraft({
+        stakeholders: [
+          {
+            name: "Sarah Murphy",
+            responsibilities: ["Product Owner", "UAT"],
+          },
+        ],
+      });
+      const persisted = await persistNewProject(
+        asClient(fake),
+        fake.workspaceId,
+        fake.userId,
+        draft,
+      );
+      assert.ok(persisted.project.stakeholders.some((s) => s.name === "Sarah Murphy"));
+      const scopes = fake.tables.knowledge_items
+        .filter((row) => row.kind === "responsibility")
+        .map((row) => {
+          const meta = row.meta as { responsibility?: { scope?: string } } | null;
+          return meta?.responsibility?.scope;
+        });
+      assert.ok(scopes.includes("Product Owner"));
+      assert.ok(scopes.includes("UAT"));
+      assert.equal(
+        fake.tables.knowledge_items.some(
+          (row) =>
+            row.kind === "ambiguity" &&
+            String(row.body) === personResponsibilityQuestion("Sarah Murphy"),
+        ),
+        false,
+      );
+
+      const loaded = await loadMissionStateFromSupabase(asClient(fake));
+      const knowledge = loaded.state.knowledge.find(
+        (k) => k.projectId === persisted.project.id,
+      );
+      const overlayScopes = (knowledge?.structured ?? [])
+        .filter((item) => item.kind === "responsibility" && item.lifecycle === "current")
+        .map((item) => item.meta?.responsibility?.scope);
+      assert.ok(overlayScopes.includes("Product Owner"));
+      assert.ok(overlayScopes.includes("UAT"));
+      const kc = composeKnowledgeCentreItems(loaded.state, persisted.project.id);
+      const personRow = kc.find(
+        (item) => item.bucket === "people" && item.title === "Sarah Murphy",
+      );
+      assert.ok(personRow);
+      assert.match(personRow!.supporting ?? "", /Product Owner/);
+      assert.match(personRow!.supporting ?? "", /UAT/);
+      assert.equal(personRow!.needsYou, null);
+    },
+  );
 
   console.log(`\n${passed} four-frame New Project checks passed.`);
 }

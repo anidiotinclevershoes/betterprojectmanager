@@ -96,7 +96,7 @@ function mergePeople(
       role: person.role,
       responsibilities: incomingScopes,
       concerns: person.concerns,
-      needsReview: person.needsReview || incomingScopes.length === 0,
+      needsReview: Boolean(person.needsReview),
       tags: person.tags,
     });
   }
