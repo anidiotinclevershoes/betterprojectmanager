@@ -70,7 +70,7 @@ See also `docs/LUME_V1_KNOWN_DISCOVERIES.md` § Future hardening backlog.
 
 **HARDEN DURING V1**
 
-- Hydrate 24 vs structured vs UI 8 (D-049 / N-03)
+- ~~Hydrate 24 vs structured vs UI 8 (D-049 / N-03)~~ closed as D-R44
 - Durable `analysesThisMonth` (N-04 / D-024)
 - Paint cache after confirmed Apply (N-10)
 - `source_recommendation_id` if product still wants the link (N-08)
@@ -95,7 +95,7 @@ See also `docs/LUME_V1_KNOWN_DISCOVERIES.md` § Future hardening backlog.
 - Waiting vs open-loop split (D-008 / D-021)
 - People uniqueness / workspace people
 - Archive / undo (D-027)
-- Whether 8 or 24 is the Knowledge section law
+- Knowledge presentation/prompt ranks (Capture, Catch Me Up) — hydrate is complete (D-R44)
 - Whether API Apply without Review is an accepted power
 
 Replacement-pin **fingerprint** is closed (N-07). Apply must still not re-bind.
@@ -281,7 +281,7 @@ Corrections are intended as state transitions on canonical rows, not a second st
 | A-010 | — | FALSE ALARM | Timeline / meetings | No | Source | Gantt unmounted; `/meetings` redirects | — |
 | N-01 | — | FALSE ALARM | Dual Capture engine | No | Source | `isCaptureV2Enabled` always true | — |
 | N-02 | — | FALSE ALARM | D-035 todo instance | No (that instance) | Source | `scopeExistingTodo` on update/delete | Update D-035 text; class remains |
-| N-03 | MEDIUM | CONFIRMED DEFECT | Hydrate projection | **Derived** — DB still complete | Source | Section bodies `.slice(0, 24)`; structured uncapped; UI cap 8 | HARDEN DURING V1 |
+| N-03 | MEDIUM | **CLOSED / VERIFIED** | Hydrate projection | Was derived truncation | Source + inverted runtime | Section bodies and `sectionItemIds` hydrate complete; structured uncapped | closed by D-049 / D-R44 |
 | N-04 | LOW | OBSERVABILITY GAP / known D-024 | Usage meter | No (display) | Source | `analysesThisMonth: 0` | HARDEN DURING V1 |
 | N-07 | MEDIUM | **CLOSED / VERIFIED** (fingerprint). Residual: Apply still does not re-bind | Responsibility replace | Fingerprint gap closed | Source; inverted | `replacePersonId` + owner set in expected-target; Apply does not `bindResolvedReplacement` (by design) | fingerprint closed with D-046 |
 | N-08 | LOW | DOCUMENTED / ACCEPTED V1 LIMITATION | Todo provenance | Link never persisted | Source | No `source_recommendation_id` writes | HARDEN DURING V1 |
@@ -329,7 +329,7 @@ Production `/api/capture/apply` always passes `reloadWorkspace`. Client `adoptAp
 | --- | --- | --- | --- |
 | 1 | Dual Capture engine still reachable via env flag | `flag.ts` always `true` | **FALSE ALARM** (N-01) |
 | 2 | `persistTodoUpdate` still updates by id only (D-035 text) | `scopeExistingTodo` | **FALSE ALARM** for that instance (N-02). Class remains. |
-| 3 | Hydrate drops extra knowledge silently | `.slice(0, 24)` vs uncapped `structured` | **CONFIRMED** projection (N-03) |
+| 3 | Hydrate drops extra knowledge silently | `.slice(0, 24)` vs uncapped `structured` | **CLOSED / VERIFIED** (N-03 / D-049) |
 | 4 | Usage meter is durable | `analysesThisMonth: 0` | **CONFIRMED** display gap (N-04) |
 | 5 | Knowledge Apply is receipted like todos | plan + persist | **CLOSED / VERIFIED** (N-05 / D-048). Residual: sequential insert+receipt |
 | 6 | Capture session is keyed per project | `captureSessionStorageKey` + bind on project change | **CLOSED / VERIFIED** (N-06 / A-008 / D-047) |
@@ -435,7 +435,7 @@ Do not treat a green helper suite as proof the production caller is safe. That i
 
 ### 3. HARDEN DURING V1
 
-- Hydrate 24 vs structured vs UI 8 (N-03 / D-049)
+- ~~Hydrate 24 vs structured vs UI 8 (N-03 / D-049)~~ closed as D-R44
 - `analysesThisMonth` from durable usage (N-04)
 - Write paint cache after confirmed Apply (N-10)
 - `source_recommendation_id` on todo create if product still wants the link (N-08)
@@ -458,7 +458,7 @@ Do not treat a green helper suite as proof the production caller is safe. That i
 - Waiting vs open-loop dual representation (D-008 / D-021)
 - Workspace-level people vs per-project stakeholders
 - Archive / undo after project delete (D-027)
-- Whether 8 or 24 is the Knowledge section law
+- Knowledge presentation/prompt ranks (Capture, Catch Me Up) — hydrate is complete (D-R44)
 - Whether Capture may legally Apply without the user having seen Review (API clients)
 
 ---

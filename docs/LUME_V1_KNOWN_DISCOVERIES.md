@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 10 September 2026 (hosted New Project smoke: D-050 production schema lag vs full migration reconstruction)  
+**Last housekeeping:** 10 September 2026 (D-050 hosted schema catch-up merged; D-049 hydrate completeness: authoritative Knowledge section lists no longer `.slice(0, 24)`)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main` + `docs/LUME_V09_TO_V1_HANDOFF.md`. The 26 Aug architecture memory handoff is historical.  
 **Docs entry point:** `docs/README.md`  
@@ -624,29 +624,21 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
-### D-049 — Hydrate silently truncates knowledge section bodies at 24
-
-| Field | Value |
-| --- | --- |
-| **Status** | open |
-| **Severity** | medium |
-| **Domain** | Knowledge · Infra |
-| **Found in** | Adversarial integrity audit (6 Sep 2026) |
-| **Failure class** | `load-mission-state.ts` keeps `.slice(0, 24)` for section prose arrays. `structured` is uncapped. UI write cap is `MAX_BULLETS_PER_SECTION = 8`. After 24 rows, section lists and structured overlay disagree. Canonical rows remain in the database. |
-| **Evidence / repro** | `verify-adversarial-integrity.ts` N-03 |
-| **Likely files** | `src/lib/data/supabase/load-mission-state.ts`; `src/lib/knowledge.ts` |
-| **Proposed fix direction** | One cap, or no cap with UI pagination. Do not drop structured rows that section lists hide. Product must pick 8 vs 24 vs unlimited. |
-| **Explicit non-goals** | A second knowledge store |
-| **Regression test to add** | 25 bullets: hydrate must not hide structured rows from one surface only |
-| **Target resolution / validation point** | V1 product hardening |
-| **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` |
-| **Notes** | Derived/projection, not silent DB delete. Still a disagreement the app will not flag. |
-
----
-
 ## Resolved discoveries (reference)
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
+
+### D-R44 — Hydrate no longer truncates Knowledge section lists (D-049)
+
+| Field | Value |
+| --- | --- |
+| **Status** | CLOSED / VERIFIED |
+| **Fixed in** | D-049 hydrate completeness — `cursor/d049-hydrate-completeness-b296` |
+| **Failure class** | `loadMissionStateFromSupabase` loaded every `knowledge_items` row, then folded `sections` / `sectionItemIds` with `.slice(0, 24)` while `structured` stayed uncapped. Knowledge Centre Correct built the desired write-set from the truncated section list. `persistKnowledgeReconcile` loaded the full DB section and deleted unmatched ids, so facts 25+ could be destroyed by correcting a visible line. |
+| **Fix summary** | Authoritative hydrate keeps every canonical section body and its matching `sectionItemIds` entry. Structured overlay remains complete. Capture/Ask/briefing ranking limits stay at those presentation/prompt layers. |
+| **Evidence** | `scripts/verify-d049-hydrate-completeness.ts` — 30 now facts, 30 decisions, 30 open loops persist, hydrate, Correct, and rehydrate without loss. Risks-table overlay no longer re-slices section lists at 24. N-03 inverted. |
+| **Residual** | Capture context and Catch Me Up briefings still rank a subset (honest `limitsReached` / snapshot slices). Local `store` availability and `confirmResponsibilityOwner` still `.slice(0, 24)` the in-memory people section; persist is insert/bundle, not reconcile-from-truncated-list. |
+| **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` N-03 |
 
 ### D-R40 — Apply reload failure no longer returns pre-write state (D-045)
 
@@ -916,7 +908,7 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 18. **D-004** remainder — history persist gaps outside New Project create  
 19. **D-026** — product decision on project-code uniqueness  
 20. **D-027** — Archive/undo only if product asks  
-21. **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031**, **D-049** — as scheduled (D-031: hide/retire Coach rather than rewrite)  
+21. **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031** — as scheduled (D-031: hide/retire Coach rather than rewrite)  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice. Do **not** begin implementation from the architecture review PR.
 
@@ -939,7 +931,7 @@ Canonical categories for the later large hardening pass. Details live in the aud
 
 ### HARDEN DURING V1
 
-- D-049 / N-03 — one Knowledge cap (8 vs 24 vs unlimited) instead of silent hydrate truncation
+- ~~D-049 / N-03 — one Knowledge cap (8 vs 24 vs unlimited) instead of silent hydrate truncation~~ **Closed as D-R44.** Hydrate is complete. Capture ranked-12 and Catch Me Up snapshot-6 remain presentation/prompt bounds.
 - N-04 / D-024 — durable analyses/usage meter
 - N-10 — write paint cache after confirmed Apply
 - N-08 — `source_recommendation_id` if product still wants the link

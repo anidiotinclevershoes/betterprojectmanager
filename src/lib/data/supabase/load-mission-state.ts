@@ -175,7 +175,8 @@ export async function loadMissionStateFromSupabase(
     sourceRecommendationId: row.source_recommendation_id ?? undefined,
   }));
 
-  // Knowledge: fold bullets by project + section; risks table also folds into knowledge.risks
+  // Knowledge: fold every canonical row. Do not count-cap sections or
+  // sectionItemIds — presentation/prompt bounds belong downstream.
   const knowledgeMap = new Map<string, ProjectKnowledge>();
   for (const project of projects) {
     knowledgeMap.set(project.id, emptyKnowledge(project.id));
@@ -185,9 +186,9 @@ export async function loadMissionStateFromSupabase(
       knowledgeMap.get(row.project_id) ?? emptyKnowledge(row.project_id);
     const section = row.section as keyof ProjectKnowledge["sections"];
     if (section in current.sections) {
-      const nextBodies = [...current.sections[section], row.body].slice(0, 24);
+      const nextBodies = [...current.sections[section], row.body];
       const priorIds = current.sectionItemIds?.[section] ?? [];
-      const nextIds = [...priorIds, row.id].slice(0, 24);
+      const nextIds = [...priorIds, row.id];
       current.sections[section] = nextBodies;
       current.sectionItemIds = {
         ...(current.sectionItemIds ?? {}),
@@ -238,10 +239,7 @@ export async function loadMissionStateFromSupabase(
     const current =
       knowledgeMap.get(row.project_id) ?? emptyKnowledge(row.project_id);
     if (!current.sections.risks.includes(row.title)) {
-      current.sections.risks = [...current.sections.risks, row.title].slice(
-        0,
-        24,
-      );
+      current.sections.risks = [...current.sections.risks, row.title];
       knowledgeMap.set(row.project_id, current);
     }
   }
