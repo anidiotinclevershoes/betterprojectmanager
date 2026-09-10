@@ -2634,19 +2634,9 @@ body {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 6px;
-}
-
-@media (min-width: 960px) {
-  .suggested-change-list {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .suggested-change-item.is-span-2 {
-    grid-column: 1 / -1;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .suggested-change-item {
