@@ -271,15 +271,16 @@ export function SuggestedChangesList({
               </>
             ) : null}
           </p>
-          <button
-            type="button"
-            className="primary-btn lume-hit capture-apply-ready-btn"
-            onClick={onApproveReady}
-            disabled={readyCount <= 0}
-            aria-label={`Apply Ready (${readyCount})`}
-          >
-            Apply {readyCount} changes
-          </button>
+          {readyCount > 0 ? (
+            <button
+              type="button"
+              className="primary-btn lume-hit capture-apply-ready-btn"
+              onClick={onApproveReady}
+              aria-label={`Apply Ready (${readyCount})`}
+            >
+              Apply {readyCount} changes
+            </button>
+          ) : null}
         </div>
       </section>
 
