@@ -185,3 +185,5 @@ Later, a **manual** GitHub Action (`workflow_dispatch` only) with repository sec
 - Default Playwright config (`e2e/`, `npm run test:e2e`) is unchanged and still freezes/mocks OpenAI.
 - `scripts/run-regression-suite.ts` does not include this suite.
 - No Capture / New Project production behaviour is changed by this folder.
+
+Independent holdout (second suite, frozen separately): `e2e-hosted-holdout/`. Command: `npm run e2e:hosted-holdout`.

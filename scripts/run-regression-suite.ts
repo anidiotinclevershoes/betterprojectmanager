@@ -91,6 +91,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "account-lifecycle", script: "scripts/verify-account-lifecycle.ts" },
   { name: "external-v1-deploy-compat", script: "scripts/verify-external-v1-deploy-compat.ts" },
   { name: "rpc-schema-contract", script: "scripts/verify-rpc-schema-contract.ts" },
+  { name: "hosted-holdout-precommit", script: "scripts/verify-hosted-holdout-precommit.ts" },
   { name: "stranger-polish", script: "scripts/verify-stranger-polish.ts" },
   { name: "phase2-auth", script: "scripts/verify-phase2-auth.ts" },
   { name: "hydrate-session", script: "scripts/verify-hydrate-session.ts" },
