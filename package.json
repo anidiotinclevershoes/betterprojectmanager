@@ -113,6 +113,7 @@
     "verify:capture-convergence": "npx --yes tsx scripts/verify-capture-convergence.ts",
     "verify:capture-convergence:smoke": "npx --yes tsx scripts/verify-capture-convergence.ts --smoke",
     "eval:capture-live": "npx --yes tsx scripts/eval-capture-live.ts",
+    "eval:capture-prompt-holdout": "npx --yes tsx scripts/capture-convergence/prompt-experiment/run.ts",
     "typecheck": "tsc --noEmit",
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",
     "evals:pre-baseline": "npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
