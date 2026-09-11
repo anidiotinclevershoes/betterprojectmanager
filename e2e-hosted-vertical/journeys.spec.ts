@@ -241,7 +241,10 @@ test("Capture date update → Apply → reload", async ({ page }, testInfo) => {
       page,
       "The Production release is scheduled for 12 September 2026.\nOlga Petrov is responsible for UAT.",
     );
+    row.hostedApi = passCell(Boolean(organise && organise.status === 200));
     assertLiveOpenAi(organise?.provenance, "Date journey organise");
+    row.liveOpenAi = "PASS";
+    row.notes = provenanceNote(organise);
     await createProjectFromComposer(page);
 
     await openCapture(page);
@@ -298,7 +301,10 @@ test("New person / responsibility", async ({ page }, testInfo) => {
       page,
       "Olga Petrov is responsible for UAT.\nSarah Kim is responsible for Release.",
     );
+    row.hostedApi = passCell(Boolean(organise && organise.status === 200));
     assertLiveOpenAi(organise?.provenance, "Andris journey organise");
+    row.liveOpenAi = "PASS";
+    row.notes = provenanceNote(organise);
     await createProjectFromComposer(page);
 
     await openCapture(page);
@@ -350,7 +356,10 @@ test("Ambiguity stays local", async ({ page }, testInfo) => {
       page,
       "Olga Petrov is responsible for UAT.\nSarah Kim is responsible for Release.\nThe Production release is scheduled for 12 September 2026.",
     );
+    row.hostedApi = passCell(Boolean(organise && organise.status === 200));
     assertLiveOpenAi(organise?.provenance, "Ambiguity journey organise");
+    row.liveOpenAi = "PASS";
+    row.notes = provenanceNote(organise);
     await createProjectFromComposer(page);
 
     await openCapture(page);
@@ -408,7 +417,10 @@ test("Mixed realistic paste", async ({ page }, testInfo) => {
     await openNewProject(page);
     await fillProjectName(page, `E2E Mixed ${RUN_ID}`);
     const organise = await organiseNotes(page, FULL_NOTES);
+    row.hostedApi = passCell(Boolean(organise && organise.status === 200));
     assertLiveOpenAi(organise?.provenance, "Mixed journey organise");
+    row.liveOpenAi = "PASS";
+    row.notes = provenanceNote(organise);
     await createProjectFromComposer(page);
 
     await openCapture(page);
@@ -485,6 +497,7 @@ function classifyThrown(error: unknown): VerticalBoundary {
   if (/Apply HTTP|Apply Ready/i.test(message)) return "APPLY";
   if (/reload|afterReload|2026-09-20|2026-09-21|20 Sep|21 Sep/i.test(message)) return "PROJECTION_RELOAD";
   if (/review|data-review-family|Needs you|needs_you|finding/i.test(message)) return "REVIEW_UI";
-  if (/np-name|np-organise|ocean-capture-input|fill|Timeout/i.test(message)) return "UI_INPUT";
+  if (/waitForResponse|did not return \/api\//i.test(message)) return "HOSTED_API";
+  if (/np-name|np-organise|ocean-capture-input|fill|Timeout|UI_INPUT:/i.test(message)) return "UI_INPUT";
   return "UNKNOWN";
 }

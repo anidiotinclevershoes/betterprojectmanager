@@ -274,14 +274,13 @@ export async function collectNeedsYou(page: Page): Promise<string[]> {
 export function installApiRecorder(page: Page): { calls: HostedApiCall[] } {
   const calls: HostedApiCall[] = [];
   CALLS.set(page, calls);
-  page.on("response", async (response) => {
-    const url = response.url();
-    if (!/\/api\/(new-project|capture(?:\/apply)?|auth\/login)(?:\?|$)/.test(url)) return;
-    if (response.request().method() !== "POST") return;
-    const call = await recordResponse(response);
-    calls.push(call);
-  });
   return { calls };
+}
+
+function rememberCall(page: Page, call: HostedApiCall): void {
+  const calls = CALLS.get(page) ?? [];
+  calls.push(call);
+  CALLS.set(page, calls);
 }
 
 function appendOpenAiAudit(call: HostedApiCall): void {
@@ -336,6 +335,12 @@ async function recordResponse(response: Response): Promise<HostedApiCall> {
     requestPreview: sanitizeBody(response.request().postData() || undefined),
   };
   appendOpenAiAudit(call);
+  return call;
+}
+
+async function recordAndRemember(page: Page, response: Response): Promise<HostedApiCall> {
+  const call = await recordResponse(response);
+  rememberCall(page, call);
   return call;
 }
 
@@ -426,33 +431,44 @@ export async function dismissCoachIfPresent(page: Page): Promise<void> {
 }
 
 export async function openNewProject(page: Page): Promise<void> {
-  await page.goto("/projects/new", { waitUntil: "domcontentloaded" });
+  await page.goto("/projects/new", { waitUntil: "load" });
   await expect(page.getByTestId("np-experience")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByLabel("Project name")).toBeEditable({ timeout: 20_000 });
 }
 
 export async function organiseNotes(page: Page, notes: string): Promise<HostedApiCall | undefined> {
-  const organise = page.getByTestId("np-organise-notes");
-  const details = page.locator("details").filter({ has: organise });
-  if (await details.count()) {
-    const open = await details.first().getAttribute("open");
-    if (open == null) {
-      await details.first().locator("summary").click();
-    }
+  const details = page.locator("details.np-organise");
+  if ((await details.count()) && (await details.first().getAttribute("open")) == null) {
+    await details.first().locator("summary").click();
   }
+  const organise = page.getByTestId("np-organise-notes");
   await expect(organise).toBeVisible({ timeout: 10_000 });
   await organise.fill(notes);
+  await expect(organise).toHaveValue(notes);
   const responsePromise = page.waitForResponse(
     (res) => /\/api\/new-project(?:\?|$)/.test(new URL(res.url()).pathname) && res.request().method() === "POST",
     { timeout: 180_000 },
   );
   await page.getByTestId("np-organise").click();
-  const response = await responsePromise;
+  const pasteError = page.getByText("Paste some notes first.");
+  const pasteShown = await pasteError
+    .waitFor({ state: "visible", timeout: 2_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (pasteShown) {
+    throw new Error("UI_INPUT: Organise ran with empty notes.");
+  }
+  const http = await responsePromise;
   await expect(page.getByTestId("np-organise")).toBeEnabled({ timeout: 180_000 });
-  return recordResponse(response);
+  return recordAndRemember(page, http);
 }
 
 export async function fillProjectName(page: Page, name: string): Promise<void> {
-  await page.getByTestId("np-name").fill(name);
+  const field = page.getByLabel("Project name");
+  await expect(field).toBeEditable({ timeout: 20_000 });
+  await field.click();
+  await field.fill(name);
+  await expect(field).toHaveValue(name);
 }
 
 export async function createProjectFromComposer(page: Page): Promise<string> {
@@ -499,7 +515,7 @@ export async function analyseCapture(page: Page, text: string): Promise<HostedAp
   }
   const response = await responsePromise;
   await expect(page.getByTestId("ocean-capture-review")).toBeVisible({ timeout: 30_000 });
-  return recordResponse(response);
+  return recordAndRemember(page, response);
 }
 
 export async function applyReady(page: Page): Promise<HostedApiCall | undefined> {
@@ -518,7 +534,7 @@ export async function applyReady(page: Page): Promise<HostedApiCall | undefined>
   await button.click();
   const response = await responsePromise.catch(() => undefined);
   await page.getByText("Applied").first().waitFor({ timeout: 20_000 }).catch(() => undefined);
-  return response ? recordResponse(response) : undefined;
+  return response ? recordAndRemember(page, response) : undefined;
 }
 
 export async function expectNoCaptureError(page: Page): Promise<void> {
