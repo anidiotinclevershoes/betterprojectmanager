@@ -821,6 +821,51 @@ async function main() {
     },
   );
 
+  await check(
+    "hosted Bob/Mike organise HTTP draft merges into People lines; name-only Person is complete",
+    () => {
+      const hosted = JSON.parse(
+        readFileSync(
+          join(process.cwd(), "e2e/fixtures/new-project-bob-mike-organise.json"),
+          "utf8",
+        ),
+      ) as { draft: CreateProjectInput };
+      const merged = mergeOrganisedDraft(
+        composeDraft({ name: "", code: "", sourceMode: "compose" }),
+        { ...hosted.draft, sourceMode: "compose" },
+      );
+      const bob = (merged.stakeholders ?? []).find((s) => s.name === "Bob");
+      const mike = (merged.stakeholders ?? []).find((s) => s.name === "Mike");
+      assert.ok(bob, "Bob must survive mergeOrganisedDraft");
+      assert.ok(mike, "Mike must survive mergeOrganisedDraft");
+      assert.equal((bob?.responsibilities ?? []).length, 0);
+      assert.equal(composePersonLine(bob!), "Bob");
+      assert.equal(composePersonLine(mike!), "Mike — legacy builds");
+      assert.equal(
+        needsYouFromDraft(merged).some((q) => /Bob/i.test(q.question)),
+        false,
+        "name-only Person is valid truth — not Needs You",
+      );
+    },
+  );
+
+  await check(
+    "EntitlementGate keeps composer children in a stable fragment slot",
+    () => {
+      const gate = readFileSync(
+        join(process.cwd(), "src/components/billing/EntitlementGate.tsx"),
+        "utf8",
+      );
+      assert.equal(
+        [...gate.matchAll(/return\s+<>\{children\}<\/>/g)].length,
+        0,
+        "early <>{children}</> remounts New Project when billing paint adds a sibling",
+      );
+      assert.match(gate, /billingEnabled && entitlement && !entitlement.canUseLume/);
+      assert.match(gate, /\{children\}/);
+    },
+  );
+
   console.log(`\n${passed} four-frame New Project checks passed.`);
 }
 
