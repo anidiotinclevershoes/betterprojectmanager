@@ -134,6 +134,12 @@ npm run e2e:hosted-vertical -- --grep "Ambiguity stays local"
 npm run e2e:hosted-vertical -- --grep "Mixed realistic paste"
 ```
 
+Opt-in Apply/reload + Ambiguity traces (not part of the calibrated six):
+
+```bash
+npx playwright test -c e2e-hosted-vertical/playwright.trace.config.ts
+```
+
 Install Chromium once on the machine that will run the suite:
 
 ```bash
