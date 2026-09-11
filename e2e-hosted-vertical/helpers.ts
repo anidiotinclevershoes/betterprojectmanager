@@ -443,8 +443,11 @@ export async function organiseNotes(page: Page, notes: string): Promise<HostedAp
   }
   const organise = page.getByTestId("np-organise-notes");
   await expect(organise).toBeVisible({ timeout: 10_000 });
-  await organise.fill(notes);
-  await expect(organise).toHaveValue(notes);
+  await fillReactInput(organise, notes);
+  const nameField = page.getByTestId("np-name");
+  if (!((await nameField.inputValue().catch(() => "")) || "").trim()) {
+    throw new Error("UI_INPUT: Project name was cleared before Organise.");
+  }
   const responsePromise = page.waitForResponse(
     (res) => /\/api\/new-project(?:\?|$)/.test(new URL(res.url()).pathname) && res.request().method() === "POST",
     { timeout: 180_000 },
@@ -463,17 +466,30 @@ export async function organiseNotes(page: Page, notes: string): Promise<HostedAp
   return recordAndRemember(page, http);
 }
 
+async function fillReactInput(locator: ReturnType<Page["getByLabel"]>, value: string): Promise<void> {
+  await expect(locator).toBeVisible({ timeout: 20_000 });
+  await locator.click();
+  await locator.fill("");
+  await locator.pressSequentially(value, { delay: 8 });
+  await locator.blur();
+  await expect(locator).toHaveValue(value);
+}
+
 export async function fillProjectName(page: Page, name: string): Promise<void> {
-  const field = page.getByLabel("Project name");
-  await expect(field).toBeEditable({ timeout: 20_000 });
-  await field.click();
-  await field.fill(name);
-  await expect(field).toHaveValue(name);
+  const field = page.getByTestId("np-name");
+  await expect(field).toHaveCount(1);
+  await fillReactInput(field, name);
 }
 
 export async function createProjectFromComposer(page: Page): Promise<string> {
-  await expect(page.getByTestId("np-create")).toBeEnabled({ timeout: 10_000 });
-  await page.getByTestId("np-create").click();
+  const create = page.getByTestId("np-create");
+  const name = page.getByLabel("Project name");
+  const nameValue = ((await name.inputValue().catch(() => "")) || "").trim();
+  if (!nameValue) {
+    throw new Error("UI_INPUT: Create Project is blocked because Project name is empty.");
+  }
+  await expect(create).toBeEnabled({ timeout: 10_000 });
+  await create.click();
   await page.waitForURL((url) => /\/projects\/(?!new(?:\/|$))[^/]+/.test(url.pathname), {
     timeout: 60_000,
   });
