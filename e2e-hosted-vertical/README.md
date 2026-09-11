@@ -49,6 +49,8 @@ Do **not** put these values in git, chat, or screenshots.
 
 Until those three are set, every journey fails at **AUTH**. That is an honest baseline, not a product pass.
 
+First recorded run: [`baselines/pr-155-first-run.md`](./baselines/pr-155-first-run.md) — all six journeys FAIL at AUTH against PR #155 Preview.
+
 Optional:
 
 ```bash
