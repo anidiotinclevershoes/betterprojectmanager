@@ -135,6 +135,8 @@ export type ConvergenceCase = {
     np?: {
       needsYouCount?: number;
       responsibilitiesByName?: Record<string, string[]>;
+      /** Informal / name-only people that must still appear after the NP adapter. */
+      names?: string[];
     };
   };
   heldOut?: boolean;

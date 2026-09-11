@@ -1,21 +1,21 @@
 {
   "sourceSha": "58b15c8fd5552dc07a2139632b683a9ca3c61df9",
-  "experimentSha": "3f665cb2388b023c03e3253f2489a6cccdc81552",
-  "generatedAt": "2026-09-11T10:24:02.405Z",
-  "elapsedMs": 97,
-  "total": 534,
-  "pass": 525,
-  "fail": 9,
+  "experimentSha": "4452bcbd1b43d6c5d06325f1754978654371d1e0",
+  "generatedAt": "2026-09-11T16:12:44.562Z",
+  "elapsedMs": 99,
+  "total": 538,
+  "pass": 526,
+  "fail": 12,
   "families": {
     "historical_regression": {
-      "pass": 16,
+      "pass": 17,
       "fail": 0,
-      "total": 16
+      "total": 17
     },
     "information_preservation": {
       "pass": 18,
-      "fail": 0,
-      "total": 18
+      "fail": 3,
+      "total": 21
     },
     "cross_observation_contamination": {
       "pass": 13,
@@ -75,7 +75,7 @@
   },
   "clusters": [
     {
-      "id": "cluster-01",
+      "id": "cluster-02",
       "label": "Transcript-wide identity gate (identityEvidenceText uses the whole Capture)",
       "classification": "IDENTITY RESOLUTION",
       "earliestStage": "IDENTITY",
@@ -89,7 +89,19 @@
       "note": "Same observed semantic transition. Not a proven single root cause."
     },
     {
-      "id": "cluster-02",
+      "id": "cluster-01",
+      "label": "New Project adapter silently drops schema-rejected people (Capture keeps them visible)",
+      "classification": "INFORMATION LOSS",
+      "earliestStage": "PRESERVE",
+      "caseIds": [
+        "pres-np-adapter-foreign-id",
+        "pres-np-adapter-missing-truth-intent",
+        "pres-np-adapter-unknown-disposition"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    },
+    {
+      "id": "cluster-03",
       "label": "Contradictory sibling observations both stay Apply-eligible writes",
       "classification": "PLANNER",
       "earliestStage": "PLANNER",
@@ -99,7 +111,7 @@
       "note": "Same observed semantic transition. Not a proven single root cause."
     },
     {
-      "id": "cluster-03",
+      "id": "cluster-04",
       "label": "Product-model gap: cab-cancelled",
       "classification": "PRODUCT MODEL GAP",
       "earliestStage": "PLANNER",
@@ -109,7 +121,7 @@
       "note": "Same observed semantic transition. Not a proven single root cause."
     },
     {
-      "id": "cluster-04",
+      "id": "cluster-05",
       "label": "Product-model gap: runbook-v3",
       "classification": "PRODUCT MODEL GAP",
       "earliestStage": "PLANNER",
@@ -119,7 +131,7 @@
       "note": "Same observed semantic transition. Not a proven single root cause."
     },
     {
-      "id": "cluster-05",
+      "id": "cluster-06",
       "label": "Product-model gap: cab-as-knowledge",
       "classification": "PRODUCT MODEL GAP",
       "earliestStage": "PLANNER",
@@ -130,6 +142,51 @@
     }
   ],
   "failures": [
+    {
+      "id": "pres-np-adapter-foreign-id",
+      "family": "information_preservation",
+      "seed": 556293963,
+      "baseScenario": "np-informal-people-foreign-id",
+      "perturbation": "unscoped New Project; model invented candidateTargetId",
+      "expectedInvariant": "Name-only Bob/Mike must survive the New Project adapter even when the extractor invents target ids",
+      "ok": false,
+      "expected": "Name-only Bob/Mike must survive the New Project adapter even when the extractor invents target ids",
+      "actual": "NP missing person bob | NP missing person mike",
+      "earliestStage": "PRESERVE",
+      "classification": "INFORMATION LOSS",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "pres-np-adapter-missing-truth-intent",
+      "family": "information_preservation",
+      "seed": 1992160512,
+      "baseScenario": "np-informal-people-missing-truth-intent",
+      "perturbation": "extractor omitted truthIntent",
+      "expectedInvariant": "Named people in a structurally valid observations array must not vanish from New Project Organise",
+      "ok": false,
+      "expected": "Named people in a structurally valid observations array must not vanish from New Project Organise",
+      "actual": "NP missing person bob | NP missing person mike",
+      "earliestStage": "PRESERVE",
+      "classification": "INFORMATION LOSS",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "pres-np-adapter-unknown-disposition",
+      "family": "information_preservation",
+      "seed": 2924620871,
+      "baseScenario": "np-informal-people-unknown-disposition",
+      "perturbation": "extractor used disposition create instead of create_new",
+      "expectedInvariant": "Named people must not vanish from New Project Organise because of a near-miss disposition enum",
+      "ok": false,
+      "expected": "Named people must not vanish from New Project Organise because of a near-miss disposition enum",
+      "actual": "NP missing person bob | NP missing person mike",
+      "earliestStage": "PRESERVE",
+      "classification": "INFORMATION LOSS",
+      "productModelGap": false,
+      "heldOut": false
+    },
     {
       "id": "cross-andris-olga-uat",
       "family": "cross_observation_contamination",
@@ -266,12 +323,12 @@
       "heldOut": false
     }
   ],
-  "historicalScenarioCount": 33,
+  "historicalScenarioCount": 35,
   "historicalCaptureBehaviours": 27,
-  "historicalNewProjectBehaviours": 6,
-  "perturbationCaseCount": 460,
+  "historicalNewProjectBehaviours": 8,
+  "perturbationCaseCount": 463,
   "heldOutCount": 39,
-  "uniqueFailureFamilies": 5,
+  "uniqueFailureFamilies": 6,
   "combinedOnlyBreaks": [
     "cross-andris-olga-uat",
     "cross-andris-sarah-rel",
@@ -281,7 +338,11 @@
   ],
   "orderChangesSemantics": [],
   "unrelatedContextChanges": [],
-  "informationLossCases": [],
+  "informationLossCases": [
+    "pres-np-adapter-foreign-id",
+    "pres-np-adapter-missing-truth-intent",
+    "pres-np-adapter-unknown-disposition"
+  ],
   "productModelGapCases": [
     "gap-cab-cancel-remove",
     "gap-runbook-v3-retire-v2",
@@ -290,6 +351,9 @@
   "architectureJudgement": "B",
   "architectureNote": "Independent observations change identity reasonClass / bind when sibling names appear in the same Capture. Strong evidence of transcript-wide identity coupling. Product-model gaps are separate and should not be treated as the same defect.",
   "reproduce": [
+    "npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-foreign-id",
+    "npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-missing-truth-intent",
+    "npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-unknown-disposition",
     "npx tsx scripts/verify-capture-convergence.ts --id cross-andris-olga-uat",
     "npx tsx scripts/verify-capture-convergence.ts --id cross-andris-sarah-rel",
     "npx tsx scripts/verify-capture-convergence.ts --id cross-olga-sarah",

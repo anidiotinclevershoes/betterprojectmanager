@@ -254,6 +254,45 @@ function historicalCases(): ConvergenceCase[] {
         np: { needsYouCount: 0, responsibilitiesByName: { "Sarah Murphy": [] } },
       },
     }),
+    makeCase({
+      id: "hist-np-informal-name-only",
+      family: "historical_regression",
+      surface: "new_project",
+      baseScenario: "np-informal-name-only-people",
+      perturbation: "none (schema-valid name-only people)",
+      expectedInvariant:
+        "Schema-valid name-only Person observations survive Organise; missing responsibility is not a discard",
+      world: "aurora",
+      projectId: AURORA_ID,
+      focusIds: ["obs-bob", "obs-mike"],
+      ...pack([
+        {
+          id: "obs-bob",
+          statement: "bob is the ba",
+          evidence: "bob is the ba",
+          domain: "person",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { name: "bob" },
+        },
+        {
+          id: "obs-mike",
+          statement: "mike handles the legacy builds",
+          evidence: "mike handles the legacy builds",
+          domain: "person",
+          disposition: "create_new",
+          truthIntent: "current",
+          proposedValues: { name: "mike" },
+        },
+      ]),
+      expect: {
+        np: {
+          needsYouCount: 0,
+          names: ["bob", "mike"],
+          responsibilitiesByName: { bob: [], mike: [] },
+        },
+      },
+    }),
   );
   return out;
 }
@@ -1197,6 +1236,117 @@ function preservationExtras(): ConvergenceCase[] {
       ...pack([SARAH_RELEASE]),
       expect: {
         preserve: [{ id: "obs-sarah-rel", fields: ["name", "scope", "statement"] }],
+      },
+    }),
+    makeCase({
+      id: "pres-np-adapter-foreign-id",
+      family: "information_preservation",
+      surface: "new_project",
+      baseScenario: "np-informal-people-foreign-id",
+      perturbation: "unscoped New Project; model invented candidateTargetId",
+      expectedInvariant:
+        "Name-only Bob/Mike must survive the New Project adapter even when the extractor invents target ids",
+      world: "aurora",
+      projectId: AURORA_ID,
+      focusIds: ["obs-bob", "obs-mike"],
+      ...pack([
+        {
+          id: "obs-bob",
+          statement: "bob is the ba",
+          evidence: "bob is the ba",
+          domain: "person",
+          disposition: "create_new",
+          truthIntent: "current",
+          candidateTargetId: "person-bob",
+          proposedValues: { name: "bob" },
+        },
+        {
+          id: "obs-mike",
+          statement: "mike handles the legacy builds",
+          evidence: "mike handles the legacy builds",
+          domain: "responsibility",
+          disposition: "create_new",
+          truthIntent: "current",
+          candidateTargetId: "person-mike",
+          proposedValues: { personName: "mike" },
+        },
+      ]),
+      expect: {
+        np: { names: ["bob", "mike"] },
+      },
+    }),
+    makeCase({
+      id: "pres-np-adapter-missing-truth-intent",
+      family: "information_preservation",
+      surface: "new_project",
+      baseScenario: "np-informal-people-missing-truth-intent",
+      perturbation: "extractor omitted truthIntent",
+      expectedInvariant:
+        "Named people in a structurally valid observations array must not vanish from New Project Organise",
+      world: "aurora",
+      projectId: AURORA_ID,
+      focusIds: ["obs-bob", "obs-mike"],
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-bob",
+            statement: "bob is the ba",
+            evidence: "bob is the ba",
+            domain: "person",
+            disposition: "create_new",
+            proposedValues: { name: "bob" },
+          },
+          {
+            id: "obs-mike",
+            statement: "mike handles the legacy builds",
+            evidence: "mike handles the legacy builds",
+            domain: "person",
+            disposition: "create_new",
+            proposedValues: { name: "mike" },
+          },
+        ],
+      },
+      transcript: "bob is the ba\n\nmike handles the legacy builds",
+      expect: {
+        np: { names: ["bob", "mike"] },
+      },
+    }),
+    makeCase({
+      id: "pres-np-adapter-unknown-disposition",
+      family: "information_preservation",
+      surface: "new_project",
+      baseScenario: "np-informal-people-unknown-disposition",
+      perturbation: "extractor used disposition create instead of create_new",
+      expectedInvariant:
+        "Named people must not vanish from New Project Organise because of a near-miss disposition enum",
+      world: "aurora",
+      projectId: AURORA_ID,
+      focusIds: ["obs-bob", "obs-mike"],
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-bob",
+            statement: "bob is the ba",
+            evidence: "bob is the ba",
+            domain: "person",
+            disposition: "create",
+            truthIntent: "current",
+            proposedValues: { name: "bob" },
+          },
+          {
+            id: "obs-mike",
+            statement: "mike handles the legacy builds",
+            evidence: "mike handles the legacy builds",
+            domain: "person",
+            disposition: "create",
+            truthIntent: "current",
+            proposedValues: { name: "mike" },
+          },
+        ],
+      },
+      transcript: "bob is the ba\n\nmike handles the legacy builds",
+      expect: {
+        np: { names: ["bob", "mike"] },
       },
     }),
   ];

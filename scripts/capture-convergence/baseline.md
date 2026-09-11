@@ -1,17 +1,17 @@
 CAPTURE CONVERGENCE GATE — BASELINE MAP
 Observe-only. Do not treat this as a green/red product gate.
 Source SHA:     58b15c8fd5552dc07a2139632b683a9ca3c61df9
-Experiment SHA: 3f665cb2388b023c03e3253f2489a6cccdc81552
-Generated at:   2026-09-11T10:24:02.405Z
-Runtime:        97 ms
+Experiment SHA: 4452bcbd1b43d6c5d06325f1754978654371d1e0
+Generated at:   2026-09-11T16:12:44.562Z
+Runtime:        99 ms
 
-TOTAL CASES  534
-PASS         525
-FAIL         9
+TOTAL CASES  538
+PASS         526
+FAIL         12
 
 By family:
-  historical_regression              16/16 pass   0 fail
-  information_preservation           18/18 pass   0 fail
+  historical_regression              17/17 pass   0 fail
+  information_preservation           18/21 pass   3 fail
   cross_observation_contamination    13/18 pass   5 fail
   order_invariance                   48/48 pass   0 fail
   irrelevant_context                 210/210 pass   0 fail
@@ -24,23 +24,25 @@ By family:
   product_model_gap                  0/3 pass   3 fail
   held_out                           39/39 pass   0 fail
 
-Historical catalogue behaviours: 33 (capture 27, new-project 6)
-Perturbation/metamorphic cases:  460
+Historical catalogue behaviours: 35 (capture 27, new-project 8)
+Perturbation/metamorphic cases:  463
 Held-out scenarios:              39
-UNIQUE failure families:         5
+UNIQUE failure families:         6
 Architecture judgement:          B
 Independent observations change identity reasonClass / bind when sibling names appear in the same Capture. Strong evidence of transcript-wide identity coupling. Product-model gaps are separate and should not be treated as the same defect.
 
 Failure clusters (same observed transition; not proven one root cause):
-  [cluster-01] Transcript-wide identity gate (identityEvidenceText uses the whole Capture)  n=5  class=IDENTITY RESOLUTION  stage=IDENTITY
+  [cluster-02] Transcript-wide identity gate (identityEvidenceText uses the whole Capture)  n=5  class=IDENTITY RESOLUTION  stage=IDENTITY
       cross-andris-olga-uat, cross-andris-sarah-rel, cross-olga-sarah, cross-olga-sarah-rev, cross-andris-transcript-olga-sarah
-  [cluster-02] Contradictory sibling observations both stay Apply-eligible writes  n=1  class=PLANNER  stage=PLANNER
+  [cluster-01] New Project adapter silently drops schema-rejected people (Capture keeps them visible)  n=3  class=INFORMATION LOSS  stage=PRESERVE
+      pres-np-adapter-foreign-id, pres-np-adapter-missing-truth-intent, pres-np-adapter-unknown-disposition
+  [cluster-03] Contradictory sibling observations both stay Apply-eligible writes  n=1  class=PLANNER  stage=PLANNER
       contra-risk-open-and-closed
-  [cluster-03] Product-model gap: cab-cancelled  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
+  [cluster-04] Product-model gap: cab-cancelled  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
       gap-cab-cancel-remove
-  [cluster-04] Product-model gap: runbook-v3  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
+  [cluster-05] Product-model gap: runbook-v3  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
       gap-runbook-v3-retire-v2
-  [cluster-05] Product-model gap: cab-as-knowledge  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
+  [cluster-06] Product-model gap: cab-as-knowledge  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
       gap-cab-as-knowledge
 
 Combined-only breaks:
@@ -54,13 +56,39 @@ Order changes semantics:
 Unrelated context changes semantics:
   (none)
 Information-loss cases:
-  (none)
+  pres-np-adapter-foreign-id
+  pres-np-adapter-missing-truth-intent
+  pres-np-adapter-unknown-disposition
 Product-model gaps (not coding bugs):
   gap-cab-cancel-remove
   gap-runbook-v3-retire-v2
   gap-cab-as-knowledge
 
 Failures:
+--- pres-np-adapter-foreign-id  seed=556293963  family=information_preservation
+    base: np-informal-people-foreign-id
+    perturbation: unscoped New Project; model invented candidateTargetId
+    expected: Name-only Bob/Mike must survive the New Project adapter even when the extractor invents target ids
+    actual: NP missing person bob | NP missing person mike
+    earliest stage: PRESERVE
+    class: INFORMATION LOSS
+    reproduce: npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-foreign-id
+--- pres-np-adapter-missing-truth-intent  seed=1992160512  family=information_preservation
+    base: np-informal-people-missing-truth-intent
+    perturbation: extractor omitted truthIntent
+    expected: Named people in a structurally valid observations array must not vanish from New Project Organise
+    actual: NP missing person bob | NP missing person mike
+    earliest stage: PRESERVE
+    class: INFORMATION LOSS
+    reproduce: npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-missing-truth-intent
+--- pres-np-adapter-unknown-disposition  seed=2924620871  family=information_preservation
+    base: np-informal-people-unknown-disposition
+    perturbation: extractor used disposition create instead of create_new
+    expected: Named people must not vanish from New Project Organise because of a near-miss disposition enum
+    actual: NP missing person bob | NP missing person mike
+    earliest stage: PRESERVE
+    class: INFORMATION LOSS
+    reproduce: npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-unknown-disposition
 --- cross-andris-olga-uat  seed=3247213658  family=cross_observation_contamination
     base: andris
     perturbation: Andris + Olga UAT observations together
@@ -135,6 +163,9 @@ Failures:
     reproduce: npx tsx scripts/verify-capture-convergence.ts --id gap-cab-as-knowledge
 
 Reproduce all failures:
+  npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-foreign-id
+  npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-missing-truth-intent
+  npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-unknown-disposition
   npx tsx scripts/verify-capture-convergence.ts --id cross-andris-olga-uat
   npx tsx scripts/verify-capture-convergence.ts --id cross-andris-sarah-rel
   npx tsx scripts/verify-capture-convergence.ts --id cross-olga-sarah

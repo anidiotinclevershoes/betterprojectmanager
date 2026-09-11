@@ -18,6 +18,9 @@ function pattern(row: CaseResult): string {
   if (/decision write \(expected needs_you\)/.test(actual) && /first-name/.test(row.perturbation)) {
     return "first-name-still-writes";
   }
+  if (/NP missing person/.test(actual)) {
+    return "np-adapter-drops-rejected-people";
+  }
   if (/contradiction locality/.test(actual)) return "contradictory-both-write";
   const cls = row.classification ?? "UNKNOWN";
   const stage = row.earliestStage ?? "UNKNOWN";
@@ -36,6 +39,9 @@ function labelFor(key: string, sample: CaseResult): string {
   }
   if (key === "contradictory-both-write") {
     return "Contradictory sibling observations both stay Apply-eligible writes";
+  }
+  if (key === "np-adapter-drops-rejected-people") {
+    return "New Project adapter silently drops schema-rejected people (Capture keeps them visible)";
   }
   if (key.startsWith("product-gap:")) {
     return `Product-model gap: ${sample.baseScenario}`;

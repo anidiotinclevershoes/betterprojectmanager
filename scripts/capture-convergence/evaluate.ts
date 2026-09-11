@@ -283,6 +283,16 @@ function checkAbsolute(testCase: ConvergenceCase, executed: Executed): string[] 
         }
       }
     }
+    if (expect.np.names) {
+      const got = new Set(
+        executed.np.names.map((name) => name.trim().toLowerCase()).filter(Boolean),
+      );
+      for (const name of expect.np.names) {
+        if (!got.has(name.trim().toLowerCase())) {
+          diffs.push(`NP missing person ${name}`);
+        }
+      }
+    }
   }
   return diffs;
 }

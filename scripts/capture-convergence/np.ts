@@ -6,6 +6,10 @@ import {
   draftFromProvisional,
   parseNewProjectV2Envelope,
 } from "../../src/lib/new-project-v2";
+import {
+  parseObservationEnvelope,
+  validateObservations,
+} from "../../src/lib/capture-v2/validate";
 import { mergeOrganisedDraft } from "../../src/lib/new-project/merge-organised";
 import { needsYouFromDraft } from "../../src/lib/new-project/needs-you";
 import type { CreateProjectInput } from "../../src/lib/create-project";
@@ -36,6 +40,8 @@ export function runNewProjectAdapter(args: {
   transcript: string;
   rawModelJson: unknown;
 }): NpRun {
+  const envelope = parseObservationEnvelope(args.rawModelJson);
+  const validation = validateObservations(envelope.observations, [], null);
   const parsed = parseNewProjectV2Envelope(args.rawModelJson);
   const draft = draftFromProvisional({
     sourceNarrative: args.transcript,
@@ -47,13 +53,18 @@ export function runNewProjectAdapter(args: {
   const questions = needsYouFromDraft(merged);
   const responsibilitiesByName: Record<string, string[]> = {};
   const atoms: SemanticAtom[] = [];
+  const rejectCodes = [
+    ...envelope.issues.map((issue) => issue.code),
+    ...validation.issues.map((issue) => issue.code),
+  ];
   for (const person of merged.stakeholders ?? []) {
     const name = person.name ?? "";
     const scopes = [...(person.responsibilities ?? [])];
     if (name) responsibilitiesByName[name] = scopes;
+    const item = parsed.items.find((row) => row.id === person.clientKey);
     atoms.push({
-      observationId: person.clientKey ?? name,
-      domain: "person",
+      observationId: item?.modelObservationId ?? person.clientKey ?? name,
+      domain: item?.modelDomain ?? "person",
       disposition: person.needsReview ? "ambiguous" : "create_new",
       truthIntent: "current",
       decisionKind: person.needsReview ? "needs_you" : "write",
@@ -71,19 +82,19 @@ export function runNewProjectAdapter(args: {
   return {
     needsYouCount: questions.length,
     responsibilitiesByName,
-    names: (merged.stakeholders ?? []).map((s) => s.name ?? ""),
+    names: (merged.stakeholders ?? []).map((s) => s.name ?? "").filter(Boolean),
     envelopeMalformed: parsed.envelopeMalformed,
     snapshot: {
       atoms,
-      rejectedCodes: parsed.envelopeMalformed ? ["malformed"] : [],
+      rejectedCodes: parsed.envelopeMalformed ? ["malformed"] : rejectCodes,
       parseMalformed: parsed.envelopeMalformed,
     },
     trace: {
       parseMalformed: parsed.envelopeMalformed,
-      parseIssueCodes: parsed.envelopeMalformed ? ["malformed"] : [],
-      keptIds: atoms.map((a) => a.observationId),
-      rejectedIds: [],
-      rejectedCodes: [],
+      parseIssueCodes: rejectCodes,
+      keptIds: parsed.items.map((item) => item.modelObservationId ?? item.id),
+      rejectedIds: validation.rejected.map((row) => row.id),
+      rejectedCodes: validation.issues.map((issue) => issue.code),
       preserved: atoms.map((a) => ({
         id: a.observationId,
         statement: true,

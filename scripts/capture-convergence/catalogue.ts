@@ -296,6 +296,25 @@ export const HISTORICAL_BEHAVIOURS: CatalogueEntry[] = [
     source: "scripts/verify-new-project-four-frame.ts",
   },
   {
+    id: "np-informal-name-only-people",
+    surface: "new_project",
+    input: "bob is the ba / mike handles the legacy builds",
+    startingState: "unscoped",
+    expectedInvariant: "schema-valid name-only Person observations survive Organise",
+    historicalDefect: null,
+    source: "scripts/verify-np-organise-observation-loss.ts",
+  },
+  {
+    id: "np-adapter-drops-rejected-observations",
+    surface: "new_project",
+    input: "Same informal people, extractor near-miss (foreign_id / missing truthIntent / unknown disposition)",
+    startingState: "unscoped empty records",
+    expectedInvariant:
+      "Named people must not silently disappear from /api/new-project after a valid observations envelope",
+    historicalDefect: "D-052 New Project adapter maps only validation.observations",
+    source: "scripts/verify-np-organise-observation-loss.ts",
+  },
+  {
     id: "np-knowledge-no-slice",
     surface: "new_project",
     input: "15 distinct Knowledge facts",
