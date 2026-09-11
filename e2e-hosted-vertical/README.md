@@ -19,35 +19,88 @@ A later deterministic E2E mode may exist. It does **not** satisfy this gate.
 
 ## One-time configuration (Tom)
 
-Do **not** put these values in git, chat, or screenshots.
+Do **not** put these values in git, chat, screenshots, or a Cursor message. Put them only in your local shell, or in Cloud Agent environment secrets.
 
-1. **Preview URL** — copy the Vercel bot Preview link from the target PR (first baseline: PR #155). Set:
+Do the Vercel bypass **first**. Preview is behind Deployment Protection; without the bypass you cannot open `/signup` on the Preview.
 
-   ```bash
-   export LUME_E2E_BASE_URL="https://<preview-from-vercel-bot>.vercel.app"
+### 1. Protection Bypass for Automation
+
+Official docs: [Protection Bypass for Automation](https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation). You need Vercel **Member** or **Project Administrator**.
+
+1. Open [vercel.com/dashboard](https://vercel.com/dashboard) and select the **betterprojectmanager** project.
+2. **Settings** → **Deployment Protection**.
+3. Find **Protection Bypass for Automation**.
+4. Click **Create** / **Generate**. Label it `hosted-vertical-playwright` (or similar).
+5. Copy the secret **once**. Store it in a password manager. Do not paste it into Slack, GitHub, or chat.
+6. Leave Deployment Protection **on**. Do not make the Preview public.
+
+On the machine that will run the suite:
+
+```bash
+export LUME_E2E_VERCEL_BYPASS_SECRET="the-secret-from-vercel"
+```
+
+`VERCEL_AUTOMATION_BYPASS_SECRET` is accepted as an alias. The harness sends `x-vercel-protection-bypass` and `x-vercel-set-bypass-cookie: true`. It never logs the secret.
+
+Check the bypass without logging it (expect HTTP 200, not a 302 to `vercel.com/sso-api`):
+
+```bash
+curl -sI \
+  -H "x-vercel-protection-bypass: $LUME_E2E_VERCEL_BYPASS_SECRET" \
+  -H "x-vercel-set-bypass-cookie: true" \
+  "$LUME_E2E_BASE_URL/login"
+```
+
+### 2. Preview URL
+
+1. Open the PR under test (first baseline: GitHub PR #155).
+2. Find the **Vercel** bot comment. In the table, click **Preview**.
+3. Copy the `https://….vercel.app` origin only (no path, no query).
+
+```bash
+export LUME_E2E_BASE_URL="https://….vercel.app"
+```
+
+Never commit that hostname. It changes per PR.
+
+### 3. Disposable Lume account
+
+Do **not** use a personal dogfood login. Create a throwaway mailbox you control (or a plus-address you will not reuse for real work).
+
+Password: at least 8 characters. After signup, **confirm the email** if Lume says “Check your email”.
+
+**Easiest path if Production is reachable:** sign up on Production (`/signup` on the live Lume host). Preview uses the same Supabase Auth, so that account can sign in on Preview once the bypass is set.
+
+**If you must sign up on the Preview** (Production also gated, or you want Preview-only):
+
+1. Set `LUME_E2E_BASE_URL` and `LUME_E2E_VERCEL_BYPASS_SECRET` as above.
+2. Open this URL once in your browser (it sets the bypass cookie, then you can use the app normally):
+
+   ```text
+   $LUME_E2E_BASE_URL/signup?x-vercel-protection-bypass=<secret>&x-vercel-set-bypass-cookie=true
    ```
 
-   Never hardcode the hostname in source.
+3. Create the account. Confirm the email if asked. Sign in once by hand to prove it works.
 
-2. **Vercel Protection Bypass for Automation**
-   - Vercel → Project → Settings → Deployment Protection
-   - Enable **Protection Bypass for Automation**
-   - Copy the secret:
+Then:
 
-   ```bash
-   export LUME_E2E_VERCEL_BYPASS_SECRET="…"
-   ```
+```bash
+export LUME_E2E_EMAIL="the-disposable-address"
+export LUME_E2E_PASSWORD="the-password"
+```
 
-   `VERCEL_AUTOMATION_BYPASS_SECRET` is accepted as an alias. The harness sends `x-vercel-protection-bypass` and `x-vercel-set-bypass-cookie: true`. It never logs the secret.
+### 4. Hand the values to the runner (never to chat)
 
-3. **Disposable Lume account** (not a personal dogfood login):
+**Tom runs it locally** (preferred):
 
-   ```bash
-   export LUME_E2E_EMAIL="…"
-   export LUME_E2E_PASSWORD="…"
-   ```
+```bash
+npx playwright install chromium   # once
+npm run e2e:hosted-vertical
+```
 
-Until those three are set, every journey fails at **AUTH**. That is an honest baseline, not a product pass.
+**Cursor / Cloud Agent runs it:** add the four values as **environment secrets** on the Cloud Agent environment (not in `.env.local` committed to git, not in the PR). Then tell the agent “hosted vertical secrets are set — re-run” **without** pasting the values.
+
+Until those are set, every journey fails at **AUTH**. That is an honest baseline, not a product pass.
 
 First recorded run: [`baselines/pr-155-first-run.md`](./baselines/pr-155-first-run.md) — all six journeys FAIL at AUTH against PR #155 Preview.
 
