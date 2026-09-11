@@ -646,6 +646,18 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
 
+### D-R45 — Apply refreshes paint cache from confirmed reload (N-10)
+
+| Field | Value |
+| --- | --- |
+| **Status** | CLOSED / VERIFIED |
+| **Fixed in** | Family 1 Apply authoritative first paint — `cursor/apply-authoritative-first-paint-2024` |
+| **Failure class** | `update_milestone` wrote `milestones.start_on` and Apply `reloadWorkspace` returned 20 Sep, but `adoptAppliedState` did not write `lume-mission-supabase-cache-v1`. Hard reload painted create-time 12 Sep until hydrate. `projects.next_milestone_on` stayed 12 Sep as a contradictory denormalized pointer. |
+| **Fix summary** | Confirmed Apply reload is written to the paint cache (`writeConfirmedAppliedWorkspaceCache`). `persistTimelineUpdate` rederives `projects.next_milestone` / `next_milestone_on` when that pointer names the updated milestone. Cache is not a source of truth; it only mirrors confirmed reload. |
+| **Evidence** | Hosted trace `hv-trace-20260911T201500Z`; `scripts/verify-apply-authoritative-first-paint.ts`; inverted adversarial N-10. |
+| **Residual** | Failed Apply reload (`reconcileFailed`) still asks the client to hydrate. History persist remains best-effort. |
+| **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` N-10 |
+
 ### D-R44 — Hydrate no longer truncates Knowledge section lists (D-049)
 
 | Field | Value |
@@ -667,7 +679,7 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 | **Failure class** | After a successful write, a failed `reloadWorkspace` returned the pre-write MissionState. The client could revert the UI; retrying an unreceipted write could duplicate. |
 | **Fix summary** | Production Apply omits `state` and sets `reconcileFailed` after write+reload failure. Client hydrates via `GET /api/workspace/state` or asks for refresh. Never adopts the old snapshot. |
 | **Evidence** | Inverted A-001; `npm run verify:dogfood-integrity-gate` D-045. |
-| **Residual** | Honest UI lag until hydrate; History persist still best-effort; paint cache still not written on Apply (N-10). |
+| **Residual** | Honest UI lag until hydrate when reload fails (`reconcileFailed`); History persist still best-effort. |
 | **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` |
 
 ---
@@ -951,7 +963,7 @@ Canonical categories for the later large hardening pass. Details live in the aud
 
 - ~~D-049 / N-03 — one Knowledge cap (8 vs 24 vs unlimited) instead of silent hydrate truncation~~ **Closed as D-R44.** Hydrate is complete. Capture ranked-12 and Catch Me Up snapshot-6 remain presentation/prompt bounds.
 - N-04 / D-024 — durable analyses/usage meter
-- N-10 — write paint cache after confirmed Apply
+- ~~N-10 — write paint cache after confirmed Apply~~ **Closed as D-R45.** `adoptAppliedState` writes confirmed Apply reload into the paint cache; `persistTimelineUpdate` rederives `projects.next_milestone_on` when that pointer names the updated row.
 - N-08 — `source_recommendation_id` if product still wants the link
 - N-13 — `supersedes_id` same-project check
 - Date-only hydrate normalisation (`T12:00:00.000Z`)

@@ -1378,6 +1378,33 @@ export async function persistTimelineItem(
 }
 
 /**
+ * `projects.next_milestone` / `next_milestone_on` is a denormalized pointer
+ * copied at create. Canonical dated truth is `milestones`. When Apply updates
+ * the row that pointer names (label) or the date it currently holds, rederive
+ * the pointer in the same persist helper — not a second truth path.
+ */
+export function projectNextMilestoneFollowsUpdatedRow(args: {
+  nextMilestone?: string | null;
+  nextMilestoneOn?: string | null;
+  previousLabel: string;
+  previousStartOn?: string | null;
+  nextLabel: string;
+}): boolean {
+  const pointer = args.nextMilestone?.trim();
+  if (
+    pointer &&
+    (namesMatch(pointer, args.previousLabel) || namesMatch(pointer, args.nextLabel))
+  ) {
+    return true;
+  }
+  return Boolean(
+    args.nextMilestoneOn &&
+      args.previousStartOn &&
+      args.nextMilestoneOn === args.previousStartOn,
+  );
+}
+
+/**
  * Phase 3B: update an existing milestone/date in place.
  * Completing a milestone is not a column on this table — callers must fail closed.
  */
@@ -1396,6 +1423,14 @@ export async function persistTimelineUpdate(
 ): Promise<TimelineItem> {
   const scopedProjectId = requireUuid(projectId, "projectId");
   const scopedMilestoneId = requireUuid(milestoneId, "milestoneId");
+  const { data: existing, error: existingError } = await client
+    .from("milestones")
+    .select("id, label, start_on")
+    .eq("id", scopedMilestoneId)
+    .eq("project_id", scopedProjectId)
+    .eq("workspace_id", workspaceId)
+    .single();
+  const current = requireData(existing, existingError, "load milestone");
   const update: Record<string, unknown> = {};
   if (patch.label != null) update.label = patch.label;
   if (patch.startAt !== undefined) update.start_on = isoToDateOnly(patch.startAt);
@@ -1413,6 +1448,43 @@ export async function persistTimelineUpdate(
     .select("*")
     .single();
   const row = requireData(data, error, "update milestone");
+
+  const { data: project, error: projectError } = await client
+    .from("projects")
+    .select("id, next_milestone, next_milestone_on")
+    .eq("id", scopedProjectId)
+    .eq("workspace_id", workspaceId)
+    .single();
+  const pointer = requireData(project, projectError, "load project next milestone");
+  const nextLabel = String(row.label ?? current.label);
+  if (
+    projectNextMilestoneFollowsUpdatedRow({
+      nextMilestone: (pointer.next_milestone as string | null) ?? null,
+      nextMilestoneOn: (pointer.next_milestone_on as string | null) ?? null,
+      previousLabel: String(current.label ?? ""),
+      previousStartOn: (current.start_on as string | null) ?? null,
+      nextLabel,
+    })
+  ) {
+    const projectPatch: Record<string, unknown> = {};
+    if (patch.label != null) projectPatch.next_milestone = nextLabel;
+    if (patch.startAt !== undefined) {
+      projectPatch.next_milestone_on = isoToDateOnly(patch.startAt) ?? row.start_on;
+    }
+    if (Object.keys(projectPatch).length) {
+      const { error: pointerError } = await client
+        .from("projects")
+        .update(projectPatch)
+        .eq("id", scopedProjectId)
+        .eq("workspace_id", workspaceId);
+      if (pointerError) {
+        throw new Error(
+          `[supabase] update project next milestone: ${pointerError.message}`,
+        );
+      }
+    }
+  }
+
   return {
     id: row.id,
     projectId: row.project_id,
