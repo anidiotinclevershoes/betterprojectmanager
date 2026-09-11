@@ -199,25 +199,25 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | `scripts/verify-capture-intelligence-diagnostic.ts`; hosted logs must include `requestedModel` / `responseModel` / `fallback` |
 | **Target resolution / validation point** | Capture hardening after Preview re-inspection; do not treat this as a prompt rewrite licence |
 | **Related docs** | Intelligence Contract; this file D-R14 (UUID is not identity); PR #155 Preview remediation |
-| **Notes** | Cockpit metrics already stored model in development only (`NODE_ENV=development`). Vercel Preview is production runtime, so cockpit was silent. The 22:34 Preview mapper recovers statement-only “is responsible for” scope; that does not retune the model. Person-linked identity uses the whole Capture transcript, so naming two existing people in one paste can Needs You unrelated statements (Andris blocked because Olga and Sarah were also named). |
+| **Notes** | Cockpit metrics already stored model in development only (`NODE_ENV=development`). Vercel Preview is production runtime, so cockpit was silent. The 22:34 Preview mapper recovers statement-only “is responsible for” scope; that does not retune the model. **Identity evidence is now observation-local** (quoted `evidence` only; sibling names in the same Capture no longer poison Andris). Pronoun evidence that itself names two people still Needs You. Invented evidence that is not a quote from the Capture fails closed. |
 
 ### D-052 — New Project Organise silently drops schema-rejected observations
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | fixed |
+| **Fixed in** | `cursor/experiment-capture-convergence-30ae` |
 | **Severity** | high |
 | **Domain** | New Project / People |
 | **Found in** | Hosted Preview on PR #155, 11 Sep 2026. Input: “bob is the ba” / “mike handles the legacy builds”. |
-| **Failure class** | Shared extractor returned a structurally valid envelope (`observationCount: 2`, `envelopeMalformed: false`). `parseNewProjectV2Envelope` maps only `validateObservations(...).observations` (accepted). Rejected rows never become `provisionalItems`, so `draftFromProvisional` never sees them. HTTP Organise returns empty people. Capture keeps the same rejected rows as Review findings. |
-| **Evidence / repro** | Hosted `POST /api/new-project` 200 with empty `draft` + `provisionalItems: []`. Deterministic: `scripts/verify-np-organise-observation-loss.ts`. Convergence: `pres-np-adapter-foreign-id`, `pres-np-adapter-missing-truth-intent`, `pres-np-adapter-unknown-disposition`. Raw model JSON was not logged (provenance never stores content). |
-| **Likely files** | `src/lib/new-project-v2/parse.ts`; `src/lib/capture-v2/validate.ts` (`foreign_id` against empty records); `src/app/api/new-project/route.ts` |
-| **Proposed fix direction** | Do not retune prompts/models. Smallest structural fix: New Project adapter must not drop observations that still carry a usable person name. For unscoped Organise, invented `candidateTargetId` is not a foreign record (there are no records) — strip it before validate, or keep `foreign_id` rejects that retain `proposedValues.name` / `personName` as name-only Person provisional items. Broader schema-near-miss recovery (missing `truthIntent`, unknown disposition/domain) is a separate approval. |
+| **Failure class** | Shared extractor returned a structurally valid envelope (`observationCount: 2`, `envelopeMalformed: false`). `parseNewProjectV2Envelope` mapped only accepted VALIDATE rows, so rejected named people vanished from Organise. |
+| **Evidence / repro** | `scripts/verify-np-organise-observation-loss.ts`. Convergence: `pres-np-adapter-foreign-id`, `pres-np-adapter-missing-truth-intent`, `pres-np-adapter-unknown-disposition`. |
+| **Likely files** | `src/lib/new-project-v2/parse.ts` |
+| **Fix summary** | Adapter recovers a usable person name from VALIDATE-rejected raw rows as a name-only Person. Does not invent responsibilities. Capture scoped `foreign_id` fail-closed is unchanged. |
 | **Explicit non-goals** | Prompt/model changes; Bob/Mike special cases; changing Capture `foreign_id` fail-closed on a scoped project; inventing responsibilities |
-| **Regression test to add** | `scripts/verify-np-organise-observation-loss.ts` (POST `/api/new-project` + extractor fixture). Contract that rejected named people survive is `knownGap` until the adapter change is approved. |
-| **Target resolution / validation point** | New Project/persistence touchpoint; Capture hardening of the shared adapter |
-| **Related docs** | D-051 (same adapter, different loss: scope→Needs You while names survived); People rules (name-only Person is complete) |
-| **Notes** | A schema-valid name-only Person already survives Organise and is not Needs You. Weak `responsibility` without scope also keeps the person (then Needs You). The hosted empty draft is therefore **not** `draftFromProvisional` dropping weak responsibility. It is VALIDATE reject + adapter mapping only accepted rows. New Project always calls `validateObservations(raw, [], null)`, so **any** non-empty `candidateTargetId` is `foreign_id`. |
+| **Regression test to add** | `scripts/verify-np-organise-observation-loss.ts` now asserts recovered names. |
+| **Related docs** | D-051; People rules (name-only Person is complete) |
+| **Notes** | VALIDATE still rejects invented ids / schema near-misses. Organise no longer drops the name. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 

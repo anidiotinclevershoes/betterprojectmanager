@@ -16,7 +16,8 @@
  *   → POST /api/new-project response
  *
  * Does not call live OpenAI. Does not retune prompts/models.
- * Does not change the adapter (fix waits for approval).
+ * Adapter recovers name-only people from VALIDATE rejects (D-052).
+ * Capture scoped foreign_id fail-closed is unchanged.
  *
  * Run: npx tsx scripts/verify-np-organise-observation-loss.ts
  */
@@ -288,7 +289,7 @@ async function main() {
       assert.match(parse, /parseObservationEnvelope/);
       assert.match(parse, /validateObservations\(parsed\.observations, \[\], null\)/);
       assert.match(parse, /validation\.observations\.map/);
-      assert.doesNotMatch(parse, /validation\.rejected/);
+      assert.match(parse, /recoverablePersonName/);
     });
 
     await check("schema-valid name-only Person survives parse → draft and is complete", () => {
@@ -330,7 +331,7 @@ async function main() {
 
     for (const row of lossEnvelopes) {
       await check(
-        `hosted empty-Organise signature: ${row.label} disappears at VALIDATE, not draftFromProvisional`,
+        `VALIDATE still rejects ${row.label}; adapter recovers name-only people`,
         () => {
           const staged = trace(row.raw);
           assert.equal(staged.observationCount, 2);
@@ -341,27 +342,26 @@ async function main() {
             staged.rejectCodes.every((code) => code === row.code),
             `${row.label} codes ${staged.rejectCodes.join(",")} expected ${row.code}`,
           );
-          assert.equal(
-            staged.provisionalCount,
-            0,
-            "D-052 current: rejected observations never become provisionalItems",
-          );
-          assert.deepEqual(staged.draftNames, []);
+          assert.equal(staged.provisionalCount, 2);
+          assert.deepEqual(staged.draftNames, ["bob", "mike"]);
+          assert.equal(staged.draftNeedsReview.every((flag) => flag === false), true);
+          assert.equal(staged.needsYou.length, 0);
         },
       );
 
       await check(
-        `POST /api/new-project reproduces hosted empty draft for ${row.label}`,
+        `POST /api/new-project keeps named people after ${row.label}`,
         async () => {
           const { status, body, calledOpenAI } = await organise(row.raw);
           assert.equal(calledOpenAI, true);
           assert.equal(status, 200, body.error);
-          assert.equal((body.provisionalItems ?? []).length, 0);
-          assert.equal((body.draft?.stakeholders ?? []).length, 0);
+          const names = (body.draft?.stakeholders ?? []).map((row) => row.name);
+          assert.deepEqual(names, ["bob", "mike"]);
+          assert.equal((body.provisionalItems ?? []).length, 2);
         },
       );
 
-      await check(`Capture keeps ${row.label} visible as rejected findings`, () => {
+      await check(`Capture still keeps ${row.label} visible as rejected findings`, () => {
         const run = runCaptureV2FromModelJson({
           transcript: NARRATIVE,
           rawModelJson: row.raw,
@@ -372,11 +372,6 @@ async function main() {
         assert.equal((run.result.findings ?? []).length, 2);
       });
     }
-
-    knownGap(
-      "D-052 named people in a valid envelope must survive Organise",
-      "parseNewProjectV2Envelope maps only accepted observations. Wait for approval before changing anything beyond preserving already-valid name-only Person truth (that path already passes).",
-    );
   } finally {
     if (prevAuth === undefined) delete process.env.LUME_AUTH;
     else process.env.LUME_AUTH = prevAuth;

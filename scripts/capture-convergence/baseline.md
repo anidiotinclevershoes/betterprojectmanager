@@ -1,17 +1,17 @@
 CAPTURE CONVERGENCE GATE — BASELINE MAP
 Observe-only. Do not treat this as a green/red product gate.
 Source SHA:     90dfb6cb1f67939358ba3fa3c878f2749d3e4b5b
-Experiment SHA: a23922d28685bce53bc6580715ce01a622ba68c4
-Generated at:   2026-09-11T23:19:12.200Z
-Runtime:        108 ms
+Experiment SHA: 5cc7a993a2c311e52a364fddfab70ffab1277c08
+Generated at:   2026-09-11T23:20:42.295Z
+Runtime:        105 ms
 
 TOTAL CASES  538
-PASS         531
-FAIL         7
+PASS         534
+FAIL         4
 
 By family:
   historical_regression              17/17 pass   0 fail
-  information_preservation           18/21 pass   3 fail
+  information_preservation           21/21 pass   0 fail
   cross_observation_contamination    18/18 pass   0 fail
   order_invariance                   48/48 pass   0 fail
   irrelevant_context                 210/210 pass   0 fail
@@ -27,20 +27,18 @@ By family:
 Historical catalogue behaviours: 35 (capture 27, new-project 8)
 Perturbation/metamorphic cases:  463
 Held-out scenarios:              39
-UNIQUE failure families:         5
+UNIQUE failure families:         4
 Architecture judgement:          A
-Mixed picture. Prefer the cluster list over this letter. Do not overclaim causality.
+A small number of clusters account for most failures. Bounded defects are plausible; confirm before treating as a rewrite.
 
 Failure clusters (same observed transition; not proven one root cause):
-  [cluster-01] New Project adapter silently drops schema-rejected people (Capture keeps them visible)  n=3  class=INFORMATION LOSS  stage=PRESERVE
-      pres-np-adapter-foreign-id, pres-np-adapter-missing-truth-intent, pres-np-adapter-unknown-disposition
-  [cluster-02] Contradictory sibling observations both stay Apply-eligible writes  n=1  class=PLANNER  stage=PLANNER
+  [cluster-01] Contradictory sibling observations both stay Apply-eligible writes  n=1  class=PLANNER  stage=PLANNER
       contra-risk-open-and-closed
-  [cluster-03] Product-model gap: cab-cancelled  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
+  [cluster-02] Product-model gap: cab-cancelled  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
       gap-cab-cancel-remove
-  [cluster-04] Product-model gap: runbook-v3  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
+  [cluster-03] Product-model gap: runbook-v3  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
       gap-runbook-v3-retire-v2
-  [cluster-05] Product-model gap: cab-as-knowledge  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
+  [cluster-04] Product-model gap: cab-as-knowledge  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
       gap-cab-as-knowledge
 
 Combined-only breaks:
@@ -50,39 +48,13 @@ Order changes semantics:
 Unrelated context changes semantics:
   (none)
 Information-loss cases:
-  pres-np-adapter-foreign-id
-  pres-np-adapter-missing-truth-intent
-  pres-np-adapter-unknown-disposition
+  (none)
 Product-model gaps (not coding bugs):
   gap-cab-cancel-remove
   gap-runbook-v3-retire-v2
   gap-cab-as-knowledge
 
 Failures:
---- pres-np-adapter-foreign-id  seed=556293963  family=information_preservation
-    base: np-informal-people-foreign-id
-    perturbation: unscoped New Project; model invented candidateTargetId
-    expected: Name-only Bob/Mike must survive the New Project adapter even when the extractor invents target ids
-    actual: NP missing person bob | NP missing person mike
-    earliest stage: PRESERVE
-    class: INFORMATION LOSS
-    reproduce: npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-foreign-id
---- pres-np-adapter-missing-truth-intent  seed=1992160512  family=information_preservation
-    base: np-informal-people-missing-truth-intent
-    perturbation: extractor omitted truthIntent
-    expected: Named people in a structurally valid observations array must not vanish from New Project Organise
-    actual: NP missing person bob | NP missing person mike
-    earliest stage: PRESERVE
-    class: INFORMATION LOSS
-    reproduce: npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-missing-truth-intent
---- pres-np-adapter-unknown-disposition  seed=2924620871  family=information_preservation
-    base: np-informal-people-unknown-disposition
-    perturbation: extractor used disposition create instead of create_new
-    expected: Named people must not vanish from New Project Organise because of a near-miss disposition enum
-    actual: NP missing person bob | NP missing person mike
-    earliest stage: PRESERVE
-    class: INFORMATION LOSS
-    reproduce: npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-unknown-disposition
 --- contra-risk-open-and-closed  seed=1678779826  family=contradiction
     base: bridge-open-closed
     perturbation: same risk open and resolved
@@ -117,9 +89,6 @@ Failures:
     reproduce: npx tsx scripts/verify-capture-convergence.ts --id gap-cab-as-knowledge
 
 Reproduce all failures:
-  npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-foreign-id
-  npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-missing-truth-intent
-  npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-unknown-disposition
   npx tsx scripts/verify-capture-convergence.ts --id contra-risk-open-and-closed
   npx tsx scripts/verify-capture-convergence.ts --id gap-cab-cancel-remove
   npx tsx scripts/verify-capture-convergence.ts --id gap-runbook-v3-retire-v2
