@@ -51,6 +51,19 @@ The catch-up file is additive (`IF NOT EXISTS`). It replays canonical knowledge 
 - **When:** BEFORE BILLING ENABLES
 - **Note:** Checkout stays refused until `LUME_BILLING_ENABLED=true` **and** Stripe keys exist. Keys alone do not turn billing on. Do not paste Stripe secrets into chat.
 
+### Hosted vertical journey secrets (opt-in harness)
+
+- **Status:** pending
+- **When:** before a live hosted baseline can pass AUTH
+- **Secret?:** YES — never paste into chat or git
+- **Blocking external use?** NO
+- **Do this:**
+  1. Vercel → Project → Settings → Deployment Protection → enable **Protection Bypass for Automation**. Put the secret in `LUME_E2E_VERCEL_BYPASS_SECRET` (or `VERCEL_AUTOMATION_BYPASS_SECRET`).
+  2. Create a disposable Lume account. Put email/password in `LUME_E2E_EMAIL` / `LUME_E2E_PASSWORD`.
+  3. Set `LUME_E2E_BASE_URL` to the Vercel Preview URL for the PR under test (first target: PR #155). Do not hardcode the hostname in source.
+  4. Run `npm run e2e:hosted-vertical`. See `e2e-hosted-vertical/README.md`.
+  5. Do not add this suite to ordinary CI until explicitly approved.
+
 ### Own the support inbox
 
 - **Status:** pending
