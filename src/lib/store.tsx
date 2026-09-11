@@ -1429,37 +1429,44 @@ export function MissionProvider({ children }: { children: ReactNode }) {
 
       let meta = persistMetaRef.current;
 
-      if (meta.mode === "supabase" && !meta.workspaceId) {
+      // Compose-UI can be clickable before hydrate finishes. Establish the
+      // cookie persist path whenever authority is still local or workspace-less.
+      // Never fall through to a second browser persist after server failure.
+      if (meta.mode !== "supabase" || !meta.workspaceId) {
         setSaveStatus("saving");
         setSaveError(null);
         const boot = await fetch("/api/workspace/state", {
           credentials: "same-origin",
           cache: "no-store",
         });
-        if (!boot.ok) {
+        if (boot.ok) {
+          const bootPayload = (await boot.json()) as {
+            workspaceId: string;
+            userId: string;
+            state: MissionState;
+          };
+          persistMetaRef.current = {
+            mode: "supabase",
+            workspaceId: bootPayload.workspaceId,
+            userId: bootPayload.userId,
+          };
+          meta = persistMetaRef.current;
+          if (
+            stateRef.current.projects.length === 0 &&
+            bootPayload.state.projects.length
+          ) {
+            setState(normaliseState(bootPayload.state));
+          }
+        } else if (
+          meta.mode === "supabase" ||
+          process.env.NODE_ENV === "production"
+        ) {
           const fail = (await boot.json().catch(() => null)) as {
             error?: string;
           } | null;
           throw new Error(
             fail?.error || "Could not open your workspace. Please refresh.",
           );
-        }
-        const bootPayload = (await boot.json()) as {
-          workspaceId: string;
-          userId: string;
-          state: MissionState;
-        };
-        persistMetaRef.current = {
-          mode: "supabase",
-          workspaceId: bootPayload.workspaceId,
-          userId: bootPayload.userId,
-        };
-        meta = persistMetaRef.current;
-        if (
-          stateRef.current.projects.length === 0 &&
-          bootPayload.state.projects.length
-        ) {
-          setState(normaliseState(bootPayload.state));
         }
       }
 

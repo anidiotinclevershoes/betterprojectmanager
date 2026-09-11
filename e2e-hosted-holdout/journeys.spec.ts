@@ -85,6 +85,9 @@ function classifyThrown(error: unknown): VerticalBoundary {
     : undefined;
   if (apiBoundary) return apiBoundary;
   if (/vanished|stakeholders|provisional|Organised draft is missing/i.test(message)) return "VALIDATION";
+  if (/Create Project failed|not saved to your account|Could not open your workspace/i.test(message)) {
+    return "PERSISTENCE";
+  }
   if (/APPLY:|Apply HTTP|Apply Ready|persist_|schema cache/i.test(message)) return "APPLY";
   if (/reload|afterReload|lost or reverted|does not represent 2026-10/i.test(message)) {
     return "PROJECTION_RELOAD";

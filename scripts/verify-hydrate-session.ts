@@ -48,6 +48,8 @@ async function main() {
     // One deliberate create path — never fall through to a second browser persist.
     assert.doesNotMatch(store, /trying browser persist/);
     assert.match(store, /createProjectInFlightRef/);
+    // Create must boot cookie persist when hydrate has not yet marked supabase.
+    assert.match(store, /meta\.mode !== "supabase" \|\| !meta\.workspaceId/);
     // Durable paint cache only after hydrate or confirmed persist.
     assert.match(store, /shouldWriteDurableMissionCache/);
     assert.match(store, /saveStatus !== "saved"/);
