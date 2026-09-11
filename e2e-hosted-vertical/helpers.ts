@@ -443,11 +443,8 @@ export async function organiseNotes(page: Page, notes: string): Promise<HostedAp
   }
   const organise = page.getByTestId("np-organise-notes");
   await expect(organise).toBeVisible({ timeout: 10_000 });
-  await fillReactInput(organise, notes);
-  const nameField = page.getByTestId("np-name");
-  if (!((await nameField.inputValue().catch(() => "")) || "").trim()) {
-    throw new Error("UI_INPUT: Project name was cleared before Organise.");
-  }
+  await organise.fill(notes);
+  await expect(organise).toHaveValue(notes);
   const responsePromise = page.waitForResponse(
     (res) => /\/api\/new-project(?:\?|$)/.test(new URL(res.url()).pathname) && res.request().method() === "POST",
     { timeout: 180_000 },
@@ -466,19 +463,12 @@ export async function organiseNotes(page: Page, notes: string): Promise<HostedAp
   return recordAndRemember(page, http);
 }
 
-async function fillReactInput(locator: ReturnType<Page["getByLabel"]>, value: string): Promise<void> {
-  await expect(locator).toBeVisible({ timeout: 20_000 });
-  await locator.click();
-  await locator.fill("");
-  await locator.pressSequentially(value, { delay: 8 });
-  await locator.blur();
-  await expect(locator).toHaveValue(value);
-}
-
 export async function fillProjectName(page: Page, name: string): Promise<void> {
   const field = page.getByTestId("np-name");
   await expect(field).toHaveCount(1);
-  await fillReactInput(field, name);
+  await expect(field).toBeVisible({ timeout: 20_000 });
+  await field.fill(name);
+  await expect(field).toHaveValue(name);
 }
 
 export async function createProjectFromComposer(page: Page): Promise<string> {

@@ -102,7 +102,8 @@ npm run e2e:hosted-vertical
 
 Until those are set, every journey fails at **AUTH**. That is an honest baseline, not a product pass.
 
-First recorded run: [`baselines/pr-155-first-run.md`](./baselines/pr-155-first-run.md) — all six journeys FAIL at AUTH against PR #155 Preview.
+First recorded AUTH-blocked run: [`baselines/pr-155-first-run.md`](./baselines/pr-155-first-run.md).
+First secrets-present run: [`baselines/pr-155-secrets-present-run.md`](./baselines/pr-155-secrets-present-run.md) — Vercel and Lume auth pass; Bob/Mike Organise returns people in HTTP and paints an empty People frame.
 
 Optional:
 
