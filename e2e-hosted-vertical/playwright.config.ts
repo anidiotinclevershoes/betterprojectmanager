@@ -32,6 +32,8 @@ export default defineConfig({
     ...devices["Desktop Chrome"],
     baseURL: baseURL || "http://127.0.0.1:9",
     extraHTTPHeaders,
+    navigationTimeout: 20_000,
+    actionTimeout: 15_000,
     trace: "retain-on-failure",
     screenshot: "off",
     video: "off",
