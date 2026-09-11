@@ -101,6 +101,8 @@ npm run verify:adversarial-integrity
 npm run verify:dogfood-integrity-gate
 ```
 
+Capture convergence diagnostic (experiment; observe-only; **do not tune Capture against it until evaluation**): [`docs/CAPTURE_CONVERGENCE_GATE.md`](./CAPTURE_CONVERGENCE_GATE.md) — `npm run verify:capture-convergence`. Not part of ordinary `npm test`.
+
 SQL printed by the adversarial script is for operators on a copy of dogfood data. Do not run it as a migration.
 
 ### 5. Active plans
