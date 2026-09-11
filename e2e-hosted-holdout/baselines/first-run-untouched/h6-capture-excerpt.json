@@ -1,0 +1,266 @@
+{
+  "journey": "Messy ops paste",
+  "runId": "ho-baseline-1",
+  "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+  "url": "/projects/b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+  "calls": [
+    {
+      "url": "/api/new-project",
+      "status": 200,
+      "provenance": {
+        "provider": "openai",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "promptId": "capture-v2-observations",
+        "promptVersion": "capture-v2-eval-baseline-v1",
+        "path": "new-project-v2/parseObservationEnvelope+draftFromProvisional",
+        "fallback": false
+      },
+      "observationAccount": null,
+      "findingsValidation": null,
+      "findings": null,
+      "proposedOperations": null,
+      "contextManifest": null
+    },
+    {
+      "url": "/api/capture",
+      "status": 200,
+      "provenance": {
+        "provider": "openai",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "promptId": "capture-v2-observations",
+        "promptVersion": "capture-v2-eval-baseline-v1",
+        "path": "capture-v2/extractObservationsWithOpenAI",
+        "fallback": false
+      },
+      "observationAccount": {
+        "total": 5,
+        "proposedChanges": 3,
+        "alreadyKnown": 1,
+        "merged": 0,
+        "needsYou": 1,
+        "commentary": 0,
+        "rejected": 0
+      },
+      "findingsValidation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "invalidTargetCount": 0
+      },
+      "findings": [
+        {
+          "id": "find-a325aa74-9eac-4838-9b3b-2c053d7d3758",
+          "fact": "The new mobilisation workshop date is 22/10/2026.",
+          "evidence": "22/10/2026 is the new mobilisation workshop date (was 8 Oct).",
+          "findingType": "ENTITY_UPDATED",
+          "target": {
+            "entityType": "milestone",
+            "entityId": "0ccaaa9d-889d-401f-a1fe-218d07020869",
+            "title": "Mobilisation Workshop"
+          },
+          "changes": {
+            "value": {
+              "proposed": "The new mobilisation workshop date is 22/10/2026."
+            }
+          },
+          "confidence": 0,
+          "requiresClarification": false,
+          "reasoningSummary": "The new mobilisation workshop date is 22/10/2026.",
+          "invalidTarget": false,
+          "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+          "projectName": "HO messy ho-baseline-1"
+        },
+        {
+          "id": "find-ebea72cb-2be5-46d0-a471-fe1486e6126c",
+          "fact": "The contractor lead for Harbour is Kwame Boateng.",
+          "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+          "findingType": "NEW_INFORMATION",
+          "target": {
+            "entityType": "stakeholder",
+            "title": "Kwame Boateng"
+          },
+          "changes": {
+            "value": {
+              "proposed": "The contractor lead for Harbour is Kwame Boateng."
+            }
+          },
+          "confidence": 0,
+          "requiresClarification": false,
+          "reasoningSummary": "The contractor lead for Harbour is Kwame Boateng.",
+          "invalidTarget": false,
+          "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+          "projectName": "HO messy ho-baseline-1"
+        },
+        {
+          "id": "find-b888129c-9bca-4175-bc5b-fed9022d2242",
+          "fact": "Void keys need collecting from the depot on 16 Oct 2026.",
+          "evidence": "Void keys still need collecting from the depot on 16 Oct 2026.",
+          "findingType": "NEW_INFORMATION",
+          "target": {
+            "entityType": "todo",
+            "title": "Collect void keys from depot"
+          },
+          "changes": {
+            "value": {
+              "proposed": "Void keys need collecting from the depot on 16 Oct 2026."
+            }
+          },
+          "confidence": 0,
+          "requiresClarification": false,
+          "reasoningSummary": "Void keys need collecting from the depot on 16 Oct 2026.",
+          "invalidTarget": false,
+          "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+          "projectName": "HO messy ho-baseline-1"
+        },
+        {
+          "id": "find-f7e686da-f821-43d7-ab86-eb389d911812",
+          "fact": "Elena stated that the repairs policy v3 remains current.",
+          "evidence": "Elena said the repairs policy v3 remains current.",
+          "findingType": "NO_CHANGE",
+          "target": {
+            "entityType": "knowledge",
+            "entityId": "bcf79cb0-08ce-40a6-a904-339134e7181f",
+            "title": "Elena Voss"
+          },
+          "confidence": 0,
+          "requiresClarification": false,
+          "reasoningSummary": "Elena stated that the repairs policy v3 remains current.",
+          "invalidTarget": false,
+          "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+          "projectName": "HO messy ho-baseline-1"
+        },
+        {
+          "id": "find-6ce5b2f5-2781-4f88-9bb0-3260591d4595",
+          "fact": "Tomos mentioned Priya might take DHP if housing insist.",
+          "evidence": "Tomos mentioned Priya might take DHP if housing insist, but that was just speculation.",
+          "findingType": "AMBIGUOUS",
+          "confidence": 0,
+          "requiresClarification": true,
+          "clarificationQuestion": "It is unclear whether this should change current project truth.",
+          "reasoningSummary": "Tomos mentioned Priya might take DHP if housing insist.",
+          "invalidTarget": false,
+          "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+          "projectName": "HO messy ho-baseline-1"
+        }
+      ],
+      "proposedOperations": [
+        {
+          "id": "op-a325aa74-9eac-4838-9b3b-2c053d7d3758",
+          "sourceFindingId": "find-a325aa74-9eac-4838-9b3b-2c053d7d3758",
+          "operation": "UPDATE",
+          "entityType": "milestone",
+          "targetId": "0ccaaa9d-889d-401f-a1fe-218d07020869",
+          "targetTitle": "Mobilisation Workshop",
+          "proposedValues": {
+            "label": "Mobilisation Workshop",
+            "date": "2026-10-22",
+            "expectedTarget": {
+              "id": "0ccaaa9d-889d-401f-a1fe-218d07020869",
+              "domain": "milestone",
+              "title": "Mobilisation Workshop",
+              "startAt": "2026-10-08T12:00:00.000Z",
+              "endAt": "",
+              "notes": ""
+            }
+          },
+          "reason": "The new mobilisation workshop date is 22/10/2026.",
+          "evidence": "22/10/2026 is the new mobilisation workshop date (was 8 Oct).",
+          "confidence": 0,
+          "destructive": false,
+          "requiresClarification": false,
+          "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+          "projectName": "HO messy ho-baseline-1"
+        },
+        {
+          "id": "op-ebea72cb-2be5-46d0-a471-fe1486e6126c",
+          "sourceFindingId": "find-ebea72cb-2be5-46d0-a471-fe1486e6126c",
+          "operation": "CREATE",
+          "entityType": "stakeholder",
+          "targetTitle": "Kwame Boateng",
+          "proposedValues": {
+            "name": "Kwame Boateng",
+            "personName": "Kwame Boateng"
+          },
+          "reason": "The contractor lead for Harbour is Kwame Boateng.",
+          "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+          "confidence": 0,
+          "destructive": false,
+          "requiresClarification": false,
+          "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+          "projectName": "HO messy ho-baseline-1"
+        },
+        {
+          "id": "op-b888129c-9bca-4175-bc5b-fed9022d2242",
+          "sourceFindingId": "find-b888129c-9bca-4175-bc5b-fed9022d2242",
+          "operation": "CREATE",
+          "entityType": "todo",
+          "targetTitle": "Collect void keys from depot",
+          "proposedValues": {
+            "title": "Collect void keys from depot",
+            "date": "2026-10-16"
+          },
+          "reason": "Void keys need collecting from the depot on 16 Oct 2026.",
+          "evidence": "Void keys still need collecting from the depot on 16 Oct 2026.",
+          "confidence": 0,
+          "destructive": false,
+          "requiresClarification": false,
+          "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+          "projectName": "HO messy ho-baseline-1"
+        },
+        {
+          "id": "op-f7e686da-f821-43d7-ab86-eb389d911812",
+          "sourceFindingId": "find-f7e686da-f821-43d7-ab86-eb389d911812",
+          "operation": "NO_CHANGE",
+          "entityType": "knowledge",
+          "targetId": "bcf79cb0-08ce-40a6-a904-339134e7181f",
+          "targetTitle": "Elena Voss",
+          "proposedValues": {},
+          "reason": "Already known \u2014 no mutation.",
+          "evidence": "Elena said the repairs policy v3 remains current.",
+          "confidence": 0,
+          "destructive": false,
+          "requiresClarification": false,
+          "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+          "projectName": "HO messy ho-baseline-1"
+        },
+        {
+          "id": "op-6ce5b2f5-2781-4f88-9bb0-3260591d4595",
+          "sourceFindingId": "find-6ce5b2f5-2781-4f88-9bb0-3260591d4595",
+          "operation": "NO_CHANGE",
+          "entityType": "risk",
+          "targetTitle": "Tomos mentioned Priya might take DHP if housing insist.",
+          "proposedValues": {},
+          "reason": "It is unclear whether this should change current project truth.",
+          "evidence": "Tomos mentioned Priya might take DHP if housing insist, but that was just speculation.",
+          "confidence": 0,
+          "destructive": false,
+          "requiresClarification": true,
+          "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+          "projectName": "HO messy ho-baseline-1"
+        }
+      ],
+      "contextManifest": {
+        "projectId": "b543aeae-b12b-491e-b9fd-6a6ca5d52077",
+        "projectName": "HO messy ho-baseline-1",
+        "counts": {
+          "To Dos": 0,
+          "Completed To Dos": 0,
+          "Nudges": 3,
+          "Meetings": 0,
+          "Milestones": 1,
+          "Risks": 0,
+          "Stakeholders": 3,
+          "Knowledge": 10,
+          "History": 1,
+          "Releases": 0
+        }
+      }
+    }
+  ],
+  "visibleNeedsYou": [
+    "NEEDS YOU TO DO Which record does this refer to? Collect void keys from depot Is this a new to do or the existing \u201cCollect void keys from depot\u201d to do? Why this Update Collect void keys from depot Choose another Create a new to do Dismiss",
+    "NEEDS YOU RISK Which record does this refer to? Tomos mentioned Priya might take DHP if housing insist. Lume couldn't confidently identify which existing record this refers to. Why this Choose another Create a new risk Dismiss"
+  ]
+}
