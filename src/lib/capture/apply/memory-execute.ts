@@ -177,9 +177,10 @@ export function applyCaptureOperationInMemory(
             Boolean(pointer) &&
             (pointer === previous?.label?.trim().toLowerCase() ||
               pointer === updated?.label?.trim().toLowerCase());
-          const followsDate =
-            Boolean(project.nextMilestoneAt && previousDay) &&
-            project.nextMilestoneAt.slice(0, 10) === previousDay;
+          const pointerDay = project.nextMilestoneAt?.slice(0, 10);
+          const followsDate = Boolean(
+            pointerDay && previousDay && pointerDay === previousDay,
+          );
           if (!followsLabel && !followsDate) return project;
           return {
             ...project,
