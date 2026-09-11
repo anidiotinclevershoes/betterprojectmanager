@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 10 September 2026 (D-050 hosted schema catch-up merged; D-049 hydrate completeness: authoritative Knowledge section lists no longer `.slice(0, 24)`)  
+**Last housekeeping:** 11 September 2026 (D-052 New Project Organise silently drops schema-rejected people; D-050 hosted schema catch-up merged; D-049 hydrate completeness: authoritative Knowledge section lists no longer `.slice(0, 24)`)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main` + `docs/LUME_V09_TO_V1_HANDOFF.md`. The 26 Aug architecture memory handoff is historical.  
 **Docs entry point:** `docs/README.md`  
@@ -182,6 +182,24 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Target resolution / validation point** | Hosted audit shows required columns present; New Project smoke repeated |
 | **Related docs** | `docs/V1_USER_ACTIONS.md`; `docs/SUPABASE_SETUP_FOR_TOM.md` (original SQL Editor only named the first three files) |
 | **Notes** | Original Tom setup listed schema + RLS + grants only. Later slices each asked for one more paste. Hosted can therefore lag repo reconstruction without any migration file being wrong. |
+
+### D-052 — New Project Organise silently drops schema-rejected observations
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | high |
+| **Domain** | New Project / People |
+| **Found in** | Hosted Preview on PR #155, 11 Sep 2026. Input: “bob is the ba” / “mike handles the legacy builds”. |
+| **Failure class** | Shared extractor returned a structurally valid envelope (`observationCount: 2`, `envelopeMalformed: false`). `parseNewProjectV2Envelope` maps only `validateObservations(...).observations` (accepted). Rejected rows never become `provisionalItems`, so `draftFromProvisional` never sees them. HTTP Organise returns empty people. Capture keeps the same rejected rows as Review findings. |
+| **Evidence / repro** | Hosted `POST /api/new-project` 200 with empty `draft` + `provisionalItems: []`. Deterministic: `scripts/verify-np-organise-observation-loss.ts`. Raw model JSON was not logged (provenance never stores content). |
+| **Likely files** | `src/lib/new-project-v2/parse.ts`; `src/lib/capture-v2/validate.ts` (`foreign_id` against empty records); `src/app/api/new-project/route.ts` |
+| **Proposed fix direction** | Do not retune prompts/models. Smallest structural fix: New Project adapter must not drop observations that still carry a usable person name. For unscoped Organise, invented `candidateTargetId` is not a foreign record (there are no records) — strip it before validate, or keep `foreign_id` rejects that retain `proposedValues.name` / `personName` as name-only Person provisional items. Broader schema-near-miss recovery (missing `truthIntent`, unknown disposition/domain) is a separate approval. |
+| **Explicit non-goals** | Prompt/model changes; Bob/Mike special cases; changing Capture `foreign_id` fail-closed on a scoped project; inventing responsibilities |
+| **Regression test to add** | `scripts/verify-np-organise-observation-loss.ts` (POST `/api/new-project` + extractor fixture). Contract that rejected named people survive is `knownGap` until the adapter change is approved. |
+| **Target resolution / validation point** | New Project/persistence touchpoint; Capture hardening of the shared adapter |
+| **Related docs** | People rules (name-only Person is complete); PR #155 Preview Organise empty-draft reproduction |
+| **Notes** | A schema-valid name-only Person already survives Organise and is not Needs You. Weak `responsibility` without scope also keeps the person (then Needs You). The hosted empty draft is therefore **not** `draftFromProvisional` dropping weak responsibility. It is VALIDATE reject + adapter mapping only accepted rows. New Project always calls `validateObservations(raw, [], null)`, so **any** non-empty `candidateTargetId` is `foreign_id`. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 

@@ -49,6 +49,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   // the freeze authority.
   { name: "test-dashboard", script: "scripts/verify-test-dashboard.ts" },
   { name: "new-project-v2", script: "scripts/verify-new-project-v2.ts" },
+  { name: "np-organise-observation-loss", script: "scripts/verify-np-organise-observation-loss.ts" },
   { name: "new-project-four-frame", script: "scripts/verify-new-project-four-frame.ts" },
   { name: "meeting-catch-up", script: "scripts/verify-meeting-catch-up.ts" },
   { name: "legacy-influence", script: "scripts/verify-legacy-influence.ts" },
