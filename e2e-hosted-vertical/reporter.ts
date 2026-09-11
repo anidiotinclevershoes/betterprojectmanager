@@ -16,13 +16,17 @@ function cell(value: string | undefined, fallback: JourneyMatrixRow["hostedApi"]
 
 class HostedVerticalReporter implements Reporter {
   private rows: JourneyMatrixRow[] = [];
+  private startedAt = Date.now();
 
   onTestEnd(test: TestCase, result: TestResult): void {
     const journey = annotation(test, "journey") || test.title;
     const failed = result.status !== "passed";
-    const boundary = (annotation(test, "boundary") || (failed ? "UNKNOWN" : undefined)) as VerticalBoundary | undefined;
+    const boundary = (annotation(test, "boundary") ||
+      (failed ? "UNKNOWN" : undefined)) as VerticalBoundary | undefined;
     this.rows.push({
       journey,
+      vercelAccess: cell(annotation(test, "vercelAccess"), failed ? "FAIL" : "PASS"),
+      lumeAuth: cell(annotation(test, "lumeAuth"), failed ? "FAIL" : "PASS"),
       hostedApi: cell(annotation(test, "hostedApi"), failed ? "FAIL" : "PASS"),
       liveOpenAi: cell(annotation(test, "liveOpenAi"), failed ? "FAIL" : "PASS"),
       uiInterpretation: cell(annotation(test, "uiInterpretation"), failed ? "FAIL" : "PASS"),
@@ -39,17 +43,22 @@ class HostedVerticalReporter implements Reporter {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
     const jsonPath = path.join(OUTPUT_DIR, "matrix.json");
     const mdPath = path.join(OUTPUT_DIR, "matrix.md");
-    fs.writeFileSync(jsonPath, JSON.stringify(this.rows, null, 2));
+    const elapsedMs = Date.now() - this.startedAt;
+    fs.writeFileSync(
+      jsonPath,
+      JSON.stringify({ elapsedMs, rows: this.rows }, null, 2),
+    );
     const header = [
-      "| Journey | Hosted API | Live OpenAI | UI interpretation | Review | Apply | Reload/persistence | PASS/FAIL | Earliest boundary |",
-      "|---|---|---|---|---|---|---|---|---|",
+      "| Journey | Vercel access | Lume auth | Hosted API | Live OpenAI | UI interpretation | Review | Apply | Reload/persistence | Result | Earliest boundary |",
+      "|---|---|---|---|---|---|---|---|---|---|---|",
     ];
-    const lines = this.rows.map((row) =>
-      `| ${row.journey} | ${row.hostedApi} | ${row.liveOpenAi} | ${row.uiInterpretation} | ${row.review} | ${row.apply} | ${row.reload} | ${row.result} | ${row.earliestBoundary || ""} |`,
+    const lines = this.rows.map(
+      (row) =>
+        `| ${row.journey} | ${row.vercelAccess} | ${row.lumeAuth} | ${row.hostedApi} | ${row.liveOpenAi} | ${row.uiInterpretation} | ${row.review} | ${row.apply} | ${row.reload} | ${row.result} | ${row.earliestBoundary || ""} |`,
     );
     fs.writeFileSync(
       mdPath,
-      `# Hosted vertical journey matrix\n\n${[...header, ...lines].join("\n")}\n`,
+      `# Hosted vertical journey matrix\n\nRuntime: ${Math.round(elapsedMs / 1000)}s\n\n${[...header, ...lines].join("\n")}\n`,
     );
     // eslint-disable-next-line no-console
     console.log(`\nHosted vertical matrix written to ${mdPath}\n`);

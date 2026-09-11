@@ -4,14 +4,17 @@ import * as path from "node:path";
 import type {
   HostedApiCall,
   JourneyMatrixRow,
+  MatrixCell,
   Provenance,
   VerticalBoundary,
 } from "./types";
 
 export const RUN_ID = process.env.LUME_E2E_RUN_ID || `hv-${Date.now().toString(36)}`;
 
-const SECRET_KEYS = /password|passwd|secret|token|cookie|authorization|api[_-]?key|openai|bypass/i;
+const SECRET_KEYS = /password|passwd|secret|token|cookie|authorization|api[_-]?key|openai|bypass|email/i;
 const CALLS = new WeakMap<Page, HostedApiCall[]>();
+const AUDIT_PATH = path.join(process.cwd(), "test-results", "hosted-vertical", "openai-audit.jsonl");
+const recentAudit: string[] = [];
 
 export function hostedBaseUrl(): string {
   const raw = process.env.LUME_E2E_BASE_URL || process.env.PLAYWRIGHT_BASE_URL || "";
@@ -83,6 +86,19 @@ export function sanitizeBody(raw: string | undefined): unknown {
   }
 }
 
+export function redactPageUrl(raw: string): string {
+  try {
+    const parsed = new URL(raw);
+    for (const key of [...parsed.searchParams.keys()]) {
+      if (SECRET_KEYS.test(key) || /vercel|bypass/i.test(key)) parsed.searchParams.set(key, "[redacted]");
+    }
+    const search = parsed.searchParams.toString();
+    return `${parsed.pathname}${search ? `?${search}` : ""}`;
+  } catch {
+    return "/unknown";
+  }
+}
+
 export function readProvenance(body: unknown): Provenance | undefined {
   if (!body || typeof body !== "object") return undefined;
   const provenance = (body as { provenance?: unknown }).provenance;
@@ -104,10 +120,10 @@ export function assertLiveOpenAi(provenance: Provenance | undefined, label: stri
 }
 
 export function classifyFromApi(call: HostedApiCall | undefined): VerticalBoundary | undefined {
-  if (!call) return "HOSTED API";
-  if (call.status === 0) return "HOSTED API";
+  if (!call) return "HOSTED_API";
+  if (call.status === 0) return "HOSTED_API";
   if (call.status === 401 || call.status === 403) return "AUTH";
-  if (call.status >= 400) return "HOSTED API";
+  if (call.status >= 400) return "HOSTED_API";
   const provenance = call.provenance;
   if (!provenance) return "OPENAI";
   if (provenance.provider !== "openai" || provenance.fallback !== false) return "OPENAI";
@@ -129,10 +145,10 @@ export function classifyNewProjectLoss(
       return "VALIDATION";
     }
     if (stakeholders.length === 0 && provisional.length > 0) {
-      return "NEW PROJECT ADAPTER";
+      return "NEW_PROJECT_ADAPTER";
     }
   }
-  if (peopleVisible.length === 0) return "NEW PROJECT ADAPTER";
+  if (peopleVisible.length === 0) return "NEW_PROJECT_ADAPTER";
   return "IDENTITY";
 }
 
@@ -147,6 +163,13 @@ export function recordedCalls(page: Page): HostedApiCall[] {
   return CALLS.get(page) ?? [];
 }
 
+async function clearCredentialFields(page: Page): Promise<void> {
+  const email = page.getByLabel("Email");
+  const password = page.getByLabel("Password");
+  if (await email.count()) await email.fill("").catch(() => undefined);
+  if (await password.count()) await password.fill("").catch(() => undefined);
+}
+
 export async function captureFailureArtifacts(args: {
   page: Page;
   testInfo: TestInfo;
@@ -156,11 +179,12 @@ export async function captureFailureArtifacts(args: {
 }): Promise<void> {
   const dir = args.testInfo.outputPath("diagnostics");
   fs.mkdirSync(dir, { recursive: true });
+  await clearCredentialFields(args.page);
   const screenshotPath = path.join(dir, `${slug(args.journey)}-failure.png`);
   await args.page
     .screenshot({ path: screenshotPath, fullPage: false, timeout: 8_000 })
     .catch(() => undefined);
-  const url = args.page.url();
+  const url = redactPageUrl(args.page.url());
   const sso = await detectVercelSso(args.page);
   const visibleState = sso
     ? {
@@ -260,7 +284,42 @@ export function installApiRecorder(page: Page): { calls: HostedApiCall[] } {
   return { calls };
 }
 
+function appendOpenAiAudit(call: HostedApiCall): void {
+  let pathname = call.url;
+  try {
+    pathname = new URL(call.url, "https://lume.example").pathname;
+  } catch {
+    pathname = call.url.split("?")[0] || call.url;
+  }
+  if (!/^\/api\/(new-project|capture)$/.test(pathname)) return;
+  const line = JSON.stringify({
+    runId: RUN_ID,
+    path: pathname,
+    status: call.status,
+    provenance: call.provenance || null,
+  });
+  if (recentAudit.includes(line)) return;
+  recentAudit.push(line);
+  fs.mkdirSync(path.dirname(AUDIT_PATH), { recursive: true });
+  fs.appendFileSync(AUDIT_PATH, `${line}\n`);
+}
+
 async function recordResponse(response: Response): Promise<HostedApiCall> {
+  const url = stripQuerySecrets(response.url());
+  let pathname = url;
+  try {
+    pathname = new URL(url, "https://lume.example").pathname;
+  } catch {
+    pathname = url.split("?")[0] || url;
+  }
+  if (/\/api\/auth\//.test(pathname)) {
+    return {
+      url: pathname,
+      method: response.request().method(),
+      status: response.status(),
+      body: { authResponse: "[redacted]", ok: response.status() < 400 },
+    };
+  }
   let text = "";
   try {
     text = await response.text();
@@ -268,14 +327,16 @@ async function recordResponse(response: Response): Promise<HostedApiCall> {
     text = "";
   }
   const body = sanitizeBody(text);
-  return {
-    url: stripQuerySecrets(response.url()),
+  const call: HostedApiCall = {
+    url: pathname,
     method: response.request().method(),
     status: response.status(),
     body,
     provenance: readProvenance(body),
     requestPreview: sanitizeBody(response.request().postData() || undefined),
   };
+  appendOpenAiAudit(call);
+  return call;
 }
 
 function stripQuerySecrets(url: string): string {
@@ -284,7 +345,7 @@ function stripQuerySecrets(url: string): string {
     for (const key of [...parsed.searchParams.keys()]) {
       if (SECRET_KEYS.test(key)) parsed.searchParams.set(key, "[redacted]");
     }
-    return `${parsed.origin}${parsed.pathname}${parsed.search}`;
+    return `${parsed.pathname}${parsed.search}`;
   } catch {
     return url.split("?")[0] || url;
   }
@@ -303,7 +364,7 @@ export async function detectVercelSso(page: Page): Promise<boolean> {
   return false;
 }
 
-export async function signIn(page: Page): Promise<void> {
+export async function signIn(page: Page): Promise<{ vercelAccess: MatrixCell; lumeAuth: MatrixCell }> {
   const missing = missingHostedConfig();
   if (missing.includes("LUME_E2E_BASE_URL")) {
     throw new Error(
@@ -315,23 +376,23 @@ export async function signIn(page: Page): Promise<void> {
   const bypass = vercelBypassSecret();
   await page.goto("/login", { waitUntil: "domcontentloaded", timeout: 20_000 });
   if ((await detectVercelSso(page)) && bypass) {
-    await page.goto(`/login?x-vercel-protection-bypass=${encodeURIComponent(bypass)}`, {
+    await page.goto("/login", {
       waitUntil: "domcontentloaded",
       timeout: 20_000,
     });
   }
   if (await detectVercelSso(page)) {
     throw new Error(
-      "AUTH: Preview is behind Vercel Deployment Protection. Enable Protection Bypass for Automation and set LUME_E2E_VERCEL_BYPASS_SECRET. See e2e-hosted-vertical/README.md.",
+      "VERCEL_PROTECTION: Preview is behind Vercel Deployment Protection. Enable Protection Bypass for Automation and set LUME_E2E_VERCEL_BYPASS_SECRET. See e2e-hosted-vertical/README.md.",
     );
   }
   if (!email || !password) {
     throw new Error(
-      `AUTH: Hosted vertical journeys require ${[!email && "LUME_E2E_EMAIL", !password && "LUME_E2E_PASSWORD"].filter(Boolean).join(" and ")} after reaching ${page.url()}. See e2e-hosted-vertical/README.md.`,
+      `AUTH: Hosted vertical journeys require ${[!email && "LUME_E2E_EMAIL", !password && "LUME_E2E_PASSWORD"].filter(Boolean).join(" and ")} after reaching Lume /login. See e2e-hosted-vertical/README.md.`,
     );
   }
   if (!/\/login/.test(page.url()) && (await page.getByLabel("Email").count()) === 0) {
-    return;
+    return { vercelAccess: "PASS", lumeAuth: "PASS" };
   }
   await expect(page.getByLabel("Email")).toBeVisible({ timeout: 20_000 });
   await page.getByLabel("Email").fill(email);
@@ -347,11 +408,13 @@ export async function signIn(page: Page): Promise<void> {
   await page.waitForURL((url) => !/\/login(?:\?|$)/.test(url.pathname), { timeout: 30_000 }).catch(() => undefined);
   if (/\/login/.test(page.url()) && (await page.getByLabel("Email").count()) > 0) {
     const body = ((await page.locator("body").innerText()) || "");
+    await clearCredentialFields(page);
     const error = /invalid|don’t match|don't match|failed/i.test(body)
       ? "Invalid email or password"
       : "Still on /login after Sign in";
     throw new Error(`AUTH: ${error}`);
   }
+  return { vercelAccess: "PASS", lumeAuth: "PASS" };
 }
 
 export async function dismissCoachIfPresent(page: Page): Promise<void> {
@@ -440,7 +503,10 @@ export async function analyseCapture(page: Page, text: string): Promise<HostedAp
 }
 
 export async function applyReady(page: Page): Promise<HostedApiCall | undefined> {
-  const button = page.getByRole("button", { name: /Apply Ready/i });
+  const button = page.getByRole("button", { name: /Apply Ready|Apply \d+ changes/i });
+  if ((await button.count()) === 0) {
+    throw new Error("APPLY: Apply Ready control is missing (silent dead button or nothing marked ready).");
+  }
   await expect(button).toBeEnabled({ timeout: 15_000 });
   const responsePromise = page.waitForResponse(
     (res) => {
@@ -480,6 +546,8 @@ export async function reviewFamilies(page: Page): Promise<string[]> {
 export function emptyMatrix(journey: string): JourneyMatrixRow {
   return {
     journey,
+    vercelAccess: "PASS",
+    lumeAuth: "PASS",
     hostedApi: "FAIL",
     liveOpenAi: "FAIL",
     uiInterpretation: "FAIL",

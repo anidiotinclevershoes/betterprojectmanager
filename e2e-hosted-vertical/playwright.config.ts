@@ -34,7 +34,7 @@ export default defineConfig({
     extraHTTPHeaders,
     navigationTimeout: 20_000,
     actionTimeout: 15_000,
-    trace: "retain-on-failure",
+    trace: "off",
     screenshot: "off",
     video: "off",
     ignoreHTTPSErrors: true,
