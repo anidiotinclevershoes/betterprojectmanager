@@ -699,6 +699,88 @@ function main() {
     assert.equal(todo?.targetTodoId, undefined);
   });
 
+  check("independently complete dated create survives uncertain truthIntent", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript:
+        "After the call with Elena Voss and Tomos Reed, they agreed one of them will chair the weekly mobilisation huddle. I could not hear who.\nSeparately: collect the void keys from the depot on 16 October 2026.",
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-chair",
+            statement:
+              "Elena Voss and Tomos Reed agreed one of them will chair the weekly mobilisation huddle.",
+            evidence: "they agreed one of them will chair the weekly mobilisation huddle.",
+            domain: "responsibility",
+            disposition: "no_change",
+            truthIntent: "current",
+            proposedValues: {
+              personName: "Elena Voss",
+              scope: "chair the weekly mobilisation huddle",
+              ownershipSemantics: "ambiguous",
+            },
+          },
+          {
+            id: "obs-keys",
+            statement: "The void keys need to be collected from the depot on 16 October 2026.",
+            evidence: "collect the void keys from the depot on 16 October 2026.",
+            domain: "todo",
+            disposition: "create_new",
+            truthIntent: "uncertain",
+            proposedValues: {
+              title: "Collect void keys from the depot",
+              date: "2026-10-16",
+            },
+          },
+        ],
+      },
+      world,
+      projectId: CANDYLAND_ID,
+    });
+    const chair = run.resolved.find((row) => /chair|huddle/i.test(row.observation.statement));
+    const keys = run.resolved.find((row) => /void keys/i.test(row.observation.statement));
+    assert.equal(chair?.decision.kind, "needs_you");
+    assert.equal(keys?.decision.kind, "write");
+    assert.equal(
+      keys?.decision.kind === "write" ? keys.decision.operation.type : "",
+      "create_todo",
+    );
+    const keysOp = (run.result.proposedOperations ?? []).find((op) => op.entityType === "todo");
+    assert.equal(keysOp?.operation, "CREATE");
+    assert.equal(keysOp?.requiresClarification, false);
+    assert.equal(keysOp?.proposedValues?.date, "2026-10-16");
+  });
+
+  check("update without id rematerializes to create when no in-project title matches", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript: "Void keys still need collecting from the depot on 16 Oct 2026.",
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-keys-update",
+            statement: "Void keys need collecting from the depot on 16 Oct 2026.",
+            evidence: "Void keys still need collecting from the depot on 16 Oct 2026.",
+            domain: "todo",
+            disposition: "update_existing",
+            truthIntent: "uncertain",
+            proposedValues: {
+              title: "Collect void keys from the depot",
+              date: "2026-10-16",
+            },
+          },
+        ],
+      },
+      world,
+      projectId: CANDYLAND_ID,
+    });
+    assert.equal(run.resolved[0]?.decision.kind, "write");
+    assert.equal(
+      run.resolved[0]?.decision.kind === "write"
+        ? run.resolved[0].decision.operation.type
+        : "",
+      "create_todo",
+    );
+  });
+
   check("ambiguous they-chair restatement stays Needs You, not silent no_change", () => {
     const harbourWorld = {
       ...world,
