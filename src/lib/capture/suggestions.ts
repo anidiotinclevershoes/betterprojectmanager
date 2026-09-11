@@ -486,7 +486,11 @@ function buildSuggestionsFromProposedOps(
     const proposedText =
       typeof op.proposedValues?.text === "string"
         ? String(op.proposedValues.text)
-        : op.targetTitle ?? op.reason;
+        : typeof op.proposedValues?.title === "string"
+          ? String(op.proposedValues.title)
+          : typeof op.proposedValues?.label === "string"
+            ? String(op.proposedValues.label)
+            : op.targetTitle ?? op.reason;
     const projectName =
       op.projectName ??
       finding?.projectName ??

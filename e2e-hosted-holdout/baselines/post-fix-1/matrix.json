@@ -1,0 +1,89 @@
+{
+  "suite": "hosted-holdout-v1",
+  "elapsedMs": 151226,
+  "rows": [
+    {
+      "journey": "New Project issues and dated todos",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "n/a",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false"
+    },
+    {
+      "journey": "Capture create dated action",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "FAIL",
+      "review": "n/a",
+      "apply": "n/a",
+      "reload": "n/a",
+      "result": "FAIL",
+      "earliestBoundary": "REVIEW_UI",
+      "classification": "PRODUCT_DEFECT",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | Depot void-key create missing or undated: [{\"family\":\"create\",\"text\":\"CREATE TO DO HO create ho-fix1-1 (KHOFIX11) Due Oct 16 Why this Exclude change\"}]"
+    },
+    {
+      "journey": "Capture ISO date update",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "PASS",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | executed.kind=wrote reason="
+    },
+    {
+      "journey": "Multi-person identity isolation",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "PASS",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | executed.kind=wrote reason="
+    },
+    {
+      "journey": "Ambiguous they plus safe date",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "FAIL",
+      "liveOpenAi": "FAIL",
+      "uiInterpretation": "FAIL",
+      "review": "n/a",
+      "apply": "n/a",
+      "reload": "n/a",
+      "result": "FAIL",
+      "earliestBoundary": "REVIEW_UI",
+      "notes": "IDENTITY: Create Project failed: Project was not saved to your account. Please refresh and try again."
+    },
+    {
+      "journey": "Messy ops paste",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "FAIL",
+      "review": "n/a",
+      "apply": "n/a",
+      "reload": "n/a",
+      "result": "FAIL",
+      "earliestBoundary": "REVIEW_UI",
+      "classification": "PRODUCT_DEFECT",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | Messy paste lost or transformed observations incorrectly: workshopReady=true keysReady=false kwame=true plantsWritten=false speculativeDhpWritten=false. Cards=[{\"family\":\"needs_you\",\"text\":\"NEEDS YOU TO DO Which record does this refer to? Collect void keys from the depot Lume couldn't confidently identify which existing record this refers to. DATE Oct 16 Why this Choose another Create a new to do Dismiss\"},{\"family\":\"needs_you\",\"text\":\"NEEDS YOU RISK Which record does this refer to? Priya might take DHP if housing insists Lume couldn't confidently identify which existing record this refers to. Why this Choose another Create a new risk Dismiss\"},{\"family\":\"needs_you\",\"text\":\"NEEDS YOU ? STAKEHOLDER Which record does this refer to? Kwame Boateng Kwame Boateng is mentioned, but Lume cannot represent this as a stakeholder change. Lume needs clarification about what that means for this stakeholder. Why this Choose another Create a new stakeholder Dismiss\"},{\"family\":\"update\",\"text\":\"UPDATE MILESTONE Mobilisation Workshop RELEASE DATE Oct 22 Why this Exclude change\"}]"
+    }
+  ]
+}

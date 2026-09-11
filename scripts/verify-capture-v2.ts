@@ -635,6 +635,10 @@ function main() {
         : "",
       "create_todo",
     );
+    const created = buildSuggestions(run.result);
+    const todo = created.find((item) => item.kind === "action");
+    assert.match(todo?.content || "", /void keys|depot/i);
+    assert.doesNotMatch(todo?.content || "", /Harbour isolate/i);
   });
 
   check("foreign person update still fails closed", () => {

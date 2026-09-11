@@ -66,10 +66,16 @@ export function captureResultFromResolved(args: {
     const systemId = row.resolved?.suggestion?.id ?? newReviewOperationId();
     const findingId = `find-${systemId}`;
     const entityType = DOMAIN_ENTITY[observation.domain];
+    const proposedTitle = String(
+      observation.proposedValues?.title ??
+        observation.proposedValues?.label ??
+        observation.proposedValues?.name ??
+        "",
+    ).trim();
     const title =
-      observation.candidateTargetTitle ||
-      String(observation.proposedValues?.name ?? observation.proposedValues?.title ?? "") ||
-      observation.statement;
+      observation.disposition === "create_new"
+        ? proposedTitle || observation.candidateTargetTitle || observation.statement
+        : observation.candidateTargetTitle || proposedTitle || observation.statement;
     const requiresClarification =
       Boolean(row.rejected) ||
       decision?.kind === "needs_you" ||

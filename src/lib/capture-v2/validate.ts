@@ -191,6 +191,7 @@ export function validateObservations(
           message: `Target ${candidateTargetId} is not in supplied project state.`,
         });
         if (canAcceptForeignTargetAsCreate(dispositionRaw, domainRaw, obj)) {
+          const proposed = asObject(obj.proposedValues);
           accepted.push(
             buildObservation({
               id,
@@ -201,7 +202,9 @@ export function validateObservations(
               truthIntent: truthIntentRaw,
               projectId: projectId ?? scopedProjectId ?? null,
               candidateTargetId: null,
-              candidateTargetTitle: asString(obj.candidateTargetTitle),
+              candidateTargetTitle:
+                (proposed && (asString(proposed.title) || asString(proposed.label))) ||
+                asString(obj.candidateTargetTitle),
               obj,
             }),
           );
