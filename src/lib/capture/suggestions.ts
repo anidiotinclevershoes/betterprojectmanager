@@ -251,12 +251,16 @@ function inferOpFromText(title: string, action: string): SuggestionOp | null {
 }
 
 function matchTodo(
-  openTodos: { id: string; title: string }[],
+  openTodos: { id: string; title: string; projectId?: string | null }[],
   targetTitle?: string,
+  projectId?: string | null,
 ) {
   if (!targetTitle?.trim()) return undefined;
   const needle = targetTitle.trim().toLowerCase();
-  const exact = openTodos.filter((t) => t.title.toLowerCase() === needle);
+  const pool = projectId
+    ? openTodos.filter((todo) => !todo.projectId || todo.projectId === projectId)
+    : openTodos;
+  const exact = pool.filter((todo) => todo.title.toLowerCase() === needle);
   return exact.length === 1 ? exact[0] : undefined;
 }
 
@@ -289,7 +293,7 @@ export function buildSuggestions(
 
   for (const rec of result.recommendations) {
     const kind = kindFromRecommendation(rec);
-    const matched = matchTodo(openTodos, rec.targetTitle);
+    const matched = matchTodo(openTodos, rec.targetTitle, rec.projectId ?? projectId);
     const fromSchema = rec.operation
       ? parseSuggestionOp(rec.operation, rec.title)
       : null;
@@ -455,22 +459,11 @@ function buildSuggestionsFromProposedOps(
       ? ("update" as SuggestionOp)
       : parseSuggestionOp(op.operation, op.id);
     const suggestionOp: SuggestionOp = parsedOp ?? "create";
-    const matched =
-      op.entityType === "todo" || op.entityType === "nudge"
-        ? op.targetId
-          ? openTodos.find((t) => t.id === op.targetId)
-          : matchTodo(openTodos, op.targetTitle)
-        : undefined;
     const rec = result.recommendations.find(
       (r) =>
         r.proposedOperationId === op.id ||
         r.sourceFindingId === op.sourceFindingId,
     );
-    const proposedText =
-      typeof op.proposedValues?.text === "string"
-        ? String(op.proposedValues.text)
-        : op.targetTitle ?? op.reason;
-
     const finding = result.findings?.find((f) => f.id === op.sourceFindingId);
     const pid =
       op.projectId ??
@@ -478,6 +471,22 @@ function buildSuggestionsFromProposedOps(
       rec?.projectId ??
       projectId ??
       null;
+    const matched =
+      op.entityType === "todo" || op.entityType === "nudge"
+        ? op.targetId
+          ? openTodos.find(
+              (todo) =>
+                todo.id === op.targetId &&
+                (!pid || !todo.projectId || todo.projectId === pid),
+            )
+          : suggestionOp === "create"
+            ? undefined
+            : matchTodo(openTodos, op.targetTitle, pid)
+        : undefined;
+    const proposedText =
+      typeof op.proposedValues?.text === "string"
+        ? String(op.proposedValues.text)
+        : op.targetTitle ?? op.reason;
     const projectName =
       op.projectName ??
       finding?.projectName ??

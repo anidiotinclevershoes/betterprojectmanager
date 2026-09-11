@@ -599,6 +599,102 @@ function main() {
     assert.doesNotMatch(barrel, /extractObservationsWithOpenAI/);
   });
 
+  check("project UUID as dated todo target rematerializes to create", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript:
+        "Separately: collect the void keys from the depot on 16 October 2026.",
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-keys",
+            statement: "Collect the void keys from the depot on 16 October 2026",
+            evidence: "Separately: collect the void keys from the depot on 16 October 2026.",
+            domain: "todo",
+            disposition: "update_existing",
+            truthIntent: "current",
+            projectId: CANDYLAND_ID,
+            candidateTargetId: CANDYLAND_ID,
+            candidateTargetTitle: "Harbour isolate",
+            proposedValues: {
+              title: "Collect void keys from the depot",
+              date: "2026-10-16",
+            },
+          },
+        ],
+      },
+      world,
+      projectId: CANDYLAND_ID,
+    });
+    assert.ok(run.validation.issues.some((issue) => issue.code === "foreign_id"));
+    assert.equal(run.validation.observations[0]?.disposition, "create_new");
+    assert.equal(run.validation.observations[0]?.candidateTargetId, null);
+    assert.equal(run.resolved[0]?.decision.kind, "write");
+    assert.equal(
+      run.resolved[0]?.decision.kind === "write"
+        ? run.resolved[0].decision.operation.type
+        : "",
+      "create_todo",
+    );
+  });
+
+  check("foreign person update still fails closed", () => {
+    const validated = validateObservations(
+      [
+        {
+          id: "obs-chair",
+          statement: "One of them will chair the huddle",
+          evidence: "they agreed one of them will chair the weekly mobilisation huddle",
+          domain: "responsibility",
+          disposition: "update_existing",
+          truthIntent: "current",
+          candidateTargetId: CANDYLAND_ID,
+          proposedValues: { personName: "Elena Voss", scope: "chair the huddle" },
+        },
+      ],
+      candyRecords,
+      CANDYLAND_ID,
+    );
+    assert.equal(validated.observations.length, 0);
+    assert.ok(validated.issues.some((issue) => issue.code === "foreign_id"));
+  });
+
+  check("create todo does not bind another project's same title", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript: "Void keys still need collecting from the depot on 16 Oct 2026.",
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-keys-create",
+            statement: "Collect void keys from depot on 16 Oct 2026",
+            evidence: "Void keys still need collecting from the depot on 16 Oct 2026.",
+            domain: "todo",
+            disposition: "create_new",
+            truthIntent: "current",
+            projectId: CANDYLAND_ID,
+            proposedValues: {
+              title: "Collect void keys from depot",
+              date: "2026-10-16",
+            },
+          },
+        ],
+      },
+      world,
+      projectId: CANDYLAND_ID,
+    });
+    const suggestions = buildSuggestions(run.result, [
+      {
+        id: "todo-other-project",
+        title: "Collect void keys from depot",
+        projectId: GAMING_ID,
+        dueAt: "2026-10-16",
+      },
+    ]);
+    const todo = suggestions.find((item) => item.kind === "action");
+    assert.ok(todo);
+    assert.equal(todo?.op, "create");
+    assert.equal(todo?.targetTodoId, undefined);
+  });
+
   check("observation projectId cannot retarget another project", () => {
     const validated = validateObservations(
       [
