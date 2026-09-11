@@ -1,6 +1,6 @@
 "use client";
 
-import { DomainMark, OperationMark } from "./DomainMark";
+import { DomainMark, OperationMark, ReviewPersonAvatar } from "./DomainMark";
 import type { SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
 import {
   reviewDomainLabel,
@@ -8,6 +8,14 @@ import {
   reviewOpWord,
   type ReviewOpFamily,
 } from "@/lib/capture/review/reviewLanguage";
+
+function domainIdentity(kind: SuggestionKind): "issues" | "people" | "todo" | "knowledge" | undefined {
+  if (kind === "risk") return "issues";
+  if (kind === "stakeholder" || kind === "availability") return "people";
+  if (kind === "action") return "todo";
+  if (kind === "knowledge" || kind === "memory") return "knowledge";
+  return undefined;
+}
 
 export function OperationBar({
   family,
@@ -28,14 +36,30 @@ export function DomainRow({
   entityKind,
   entityLabel,
   projectLabel,
+  personName,
+  unknownIdentity = false,
 }: {
   entityKind: SuggestionKind;
   entityLabel: string;
   projectLabel?: string;
+  personName?: string;
+  unknownIdentity?: boolean;
 }) {
+  const isPerson = entityKind === "stakeholder" || entityKind === "availability";
+  const identity = domainIdentity(entityKind);
   return (
-    <div className="lume-review-domain">
-      <DomainMark kind={entityKind} title={entityLabel} size={22} />
+    <div
+      className="lume-review-domain"
+      data-lume-domain={identity}
+    >
+      {isPerson ? (
+        <ReviewPersonAvatar
+          name={personName || entityLabel}
+          unknown={unknownIdentity}
+        />
+      ) : (
+        <DomainMark kind={entityKind} title={entityLabel} size={30} />
+      )}
       <span className="lume-review-domain-label">
         {reviewDomainLabel(entityKind)}
       </span>

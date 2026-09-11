@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 10 September 2026 (D-050 hosted schema catch-up merged; D-049 hydrate completeness: authoritative Knowledge section lists no longer `.slice(0, 24)`)  
+**Last housekeeping:** 10 September 2026 (D-051 Capture intelligence diagnostic on Preview; D-050 hosted schema catch-up merged; D-049 hydrate completeness: authoritative Knowledge section lists no longer `.slice(0, 24)`)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main` + `docs/LUME_V09_TO_V1_HANDOFF.md`. The 26 Aug architecture memory handoff is historical.  
 **Docs entry point:** `docs/README.md`  
@@ -181,7 +181,25 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | `scripts/verify-rpc-schema-contract.ts` |
 | **Target resolution / validation point** | Hosted audit shows required columns present; New Project smoke repeated |
 | **Related docs** | `docs/V1_USER_ACTIONS.md`; `docs/SUPABASE_SETUP_FOR_TOM.md` (original SQL Editor only named the first three files) |
-| **Notes** | Original Tom setup listed schema + RLS + grants only. Later slices each asked for one more paste. Hosted can therefore lag repo reconstruction without any migration file being wrong. |
+| **Notes** | Original Tom setup listed schema + RLS + grants only. Later slices each asked for one more paste. Hosted can therefore lag repo reconstruction without any migration file being wrong. **10 Sep Preview (PR #155):** hosted `POST /api/capture/apply` 500 — `Could not find the table 'public.capture_apply_receipts'`. Same hosted-lag class. The existing catch-up SQL does **not** create this table. Canonical create is `supabase/migrations/20260829120000_capture_apply_receipts.sql`. Operator must apply that file on hosted. Do not bypass receipts or weaken idempotency in application code. |
+
+### D-051 — Hosted Capture telemetry could not prove provider/model; New Project shares extract then diverges
+
+| Field | Value |
+| --- | --- |
+| **Status** | open (telemetry added; intelligence not retuned) |
+| **Severity** | high (Preview dogfood: responsibilities became Needs You; Capture Review surprises) |
+| **Domain** | Capture / New Project |
+| **Found in** | Tom hosted Preview test 10 Sep 2026 22:07–22:09 UTC; diagnostic on visual-convergence branch |
+| **Failure class** | `capture.v2_analysed` proved the live OpenAI extract path ran (`ignoredClientTruth: true`) but did not record provider, requested/response model, prompt id/version, path, or whether fallback occurred. New Project Organise uses the shared Capture extractor then a separate adapter (`parse` + `draftFromProvisional`) — not Capture resolve/plan. On the 22:07 mapper, explicit “is responsible for X” scope never reached `responsibilities[]`, so People showed names only and Needs You re-asked the same fact. |
+| **Evidence / repro** | `scripts/verify-capture-intelligence-diagnostic.ts`. Hosted `POST /api/capture` at 22:09:36 completed ~11s with `capture.v2_analysed`. Local fallback is unreachable when `NODE_ENV=production`. Pronoun “She will own UAT” with Olga Petrov and Sarah Kim both named stays Needs You (ambiguous, or UUID guess refused because the reviewed statement is only “She…”). Milestone cancel/complete has no legal write. A model `create_new` for a moved date would mint a second milestone. |
+| **Likely files** | `src/app/api/capture/route.ts`; `src/app/api/new-project/route.ts`; `src/lib/capture-v2/extract.ts`; `src/lib/capture-v2/resolve.ts`; `src/lib/new-project-v2/map.ts`; `src/lib/new-project/needs-you.ts` |
+| **Proposed fix direction** | Do not retune prompts in this slice. Keep provenance logs. Later Capture hardening: identity-gate evidence should be observation-local so sibling names do not poison Andris; decide whether cancelled dates are a legal remove; keep the planner catch that a pronoun statement cannot write via UUID. |
+| **Explicit non-goals** | Prompt/model upgrade; weakening Apply receipts; a second New Project extractor |
+| **Regression test to add** | `scripts/verify-capture-intelligence-diagnostic.ts`; hosted logs must include `requestedModel` / `responseModel` / `fallback` |
+| **Target resolution / validation point** | Capture hardening after Preview re-inspection; do not treat this as a prompt rewrite licence |
+| **Related docs** | Intelligence Contract; this file D-R14 (UUID is not identity); PR #155 Preview remediation |
+| **Notes** | Cockpit metrics already stored model in development only (`NODE_ENV=development`). Vercel Preview is production runtime, so cockpit was silent. The 22:34 Preview mapper recovers statement-only “is responsible for” scope; that does not retune the model. Person-linked identity uses the whole Capture transcript, so naming two existing people in one paste can Needs You unrelated statements (Andris blocked because Olga and Sarah were also named). |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 
@@ -628,6 +646,18 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
 
+### D-R45 — Apply refreshes paint cache from confirmed reload (N-10)
+
+| Field | Value |
+| --- | --- |
+| **Status** | CLOSED / VERIFIED |
+| **Fixed in** | Family 1 Apply authoritative first paint — `cursor/apply-authoritative-first-paint-2024` |
+| **Failure class** | `update_milestone` wrote `milestones.start_on` and Apply `reloadWorkspace` returned 20 Sep, but `adoptAppliedState` did not write `lume-mission-supabase-cache-v1`. Hard reload painted create-time 12 Sep until hydrate. `projects.next_milestone_on` stayed 12 Sep as a contradictory denormalized pointer. |
+| **Fix summary** | Confirmed Apply reload is written to the paint cache (`writeConfirmedAppliedWorkspaceCache`). `persistTimelineUpdate` rederives `projects.next_milestone` / `next_milestone_on` when that pointer names the updated milestone. Cache is not a source of truth; it only mirrors confirmed reload. |
+| **Evidence** | Hosted trace `hv-trace-20260911T201500Z`; `scripts/verify-apply-authoritative-first-paint.ts`; inverted adversarial N-10. |
+| **Residual** | Failed Apply reload (`reconcileFailed`) still asks the client to hydrate. History persist remains best-effort. |
+| **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` N-10 |
+
 ### D-R44 — Hydrate no longer truncates Knowledge section lists (D-049)
 
 | Field | Value |
@@ -649,7 +679,7 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 | **Failure class** | After a successful write, a failed `reloadWorkspace` returned the pre-write MissionState. The client could revert the UI; retrying an unreceipted write could duplicate. |
 | **Fix summary** | Production Apply omits `state` and sets `reconcileFailed` after write+reload failure. Client hydrates via `GET /api/workspace/state` or asks for refresh. Never adopts the old snapshot. |
 | **Evidence** | Inverted A-001; `npm run verify:dogfood-integrity-gate` D-045. |
-| **Residual** | Honest UI lag until hydrate; History persist still best-effort; paint cache still not written on Apply (N-10). |
+| **Residual** | Honest UI lag until hydrate when reload fails (`reconcileFailed`); History persist still best-effort. |
 | **Related docs** | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` |
 
 ---
@@ -933,7 +963,7 @@ Canonical categories for the later large hardening pass. Details live in the aud
 
 - ~~D-049 / N-03 — one Knowledge cap (8 vs 24 vs unlimited) instead of silent hydrate truncation~~ **Closed as D-R44.** Hydrate is complete. Capture ranked-12 and Catch Me Up snapshot-6 remain presentation/prompt bounds.
 - N-04 / D-024 — durable analyses/usage meter
-- N-10 — write paint cache after confirmed Apply
+- ~~N-10 — write paint cache after confirmed Apply~~ **Closed as D-R45.** `adoptAppliedState` writes confirmed Apply reload into the paint cache; `persistTimelineUpdate` rederives `projects.next_milestone_on` when that pointer names the updated row.
 - N-08 — `source_recommendation_id` if product still wants the link
 - N-13 — `supersedes_id` same-project check
 - Date-only hydrate normalisation (`T12:00:00.000Z`)

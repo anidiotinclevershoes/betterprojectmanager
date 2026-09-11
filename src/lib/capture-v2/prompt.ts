@@ -1,3 +1,14 @@
+/** Stable id for hosted provenance logs. Not a prompt rewrite. */
+export const CAPTURE_V2_PROMPT_ID = "capture-v2-observations";
+/** Matches the frozen eval baseline version. Do not bump without a deliberate freeze. */
+export const CAPTURE_V2_PROMPT_VERSION = "capture-v2-eval-baseline-v1";
+export const CAPTURE_V2_EXTRACT_PATH = "capture-v2/extractObservationsWithOpenAI";
+export const NEW_PROJECT_ADAPTER_PATH =
+  "new-project-v2/parseObservationEnvelope+draftFromProvisional";
+
+export const CAPTURE_V2_EXTRACT_SYSTEM_MESSAGE =
+  "You extract atomic project observations as JSON. You do not mutate a database. You never invent record IDs.";
+
 export const CAPTURE_V2_OBSERVATION_SCHEMA = `{
   "observations": [
     {

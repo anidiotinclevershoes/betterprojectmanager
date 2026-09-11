@@ -1,0 +1,323 @@
+/* Locked Magic Patterns visual tokens and control/field grammar.
+   Visual only. Does not change persistence, Apply, or hydrate contracts. */
+
+:root,
+[data-theme="dark"],
+[data-theme="desert"] {
+  --lume-op-create: #45b26b;
+  --lume-op-create-text: #8adca6;
+  --lume-op-update: #4c8cf8;
+  --lume-op-update-text: #a2c6ff;
+  --lume-op-remove: #e8556d;
+  --lume-op-remove-text: #ffa1ae;
+  --lume-op-needs-you: #e0a33e;
+  --lume-op-needs-you-text: #f5cc7e;
+  --lume-primary: #7c5cff;
+  --lume-primary-hover: #8a6dff;
+  --lume-primary-pressed: #6b4ce6;
+  --lume-destructive: #c93e55;
+  --lume-destructive-hover: #d8485f;
+  --lume-destructive-pressed: #b3364a;
+  --lume-focus-ring: #a2aebe;
+  --lume-surface-page: #0a0b0d;
+  --lume-surface-recessed: #0f1114;
+  --lume-surface-card: #191c21;
+  --lume-surface-card-hover: #1d2026;
+  --lume-border-card: #2a2e35;
+  --lume-border-hover: #4a525e;
+  --lume-border-field: #2e333a;
+  --lume-control-radius: 5px;
+  --lume-domain-issues: #e8895c;
+  --lume-domain-people: #5cc8f2;
+  --lume-domain-todo: #a6d45f;
+  --lume-domain-knowledge: #cd87e0;
+  --lume-invalid: #a8465a;
+  --lume-invalid-hover: #be5568;
+  --lume-invalid-text: #ee95a2;
+  --lume-field-accent: #4f45b0;
+  --lume-field-accent-bg: #12121d;
+  --lume-composer-accent: #5a4fc4;
+  --lume-composer-accent-bg: #161425;
+  --lume-field-surface: #0d0e11;
+  --lume-meta-label: #8992a0;
+  --lume-text-value: #f1f4f8;
+  --accent-primary: #7c5cff;
+  --accent-hover: #8a6dff;
+}
+
+[data-theme="light"] {
+  --lume-surface-page: var(--bg-app);
+  --lume-surface-recessed: #f3f5f8;
+  --lume-surface-card: #ffffff;
+  --lume-surface-card-hover: #f7f8fa;
+  --lume-border-card: #d5dbe5;
+  --lume-border-hover: #9aa6b8;
+  --lume-border-field: #d5dbe5;
+  --lume-field-surface: #ffffff;
+  --lume-field-accent-bg: #f4f2ff;
+  --lume-composer-accent-bg: #f3f1ff;
+  --lume-text-value: var(--text-primary);
+  --accent-primary: #7c5cff;
+  --accent-hover: #6b4ce6;
+}
+
+/*
+ * Hit area is a property of the pointer. Drawn control stays 30px / 26px.
+ * Fine pointer: 34px band. Coarse pointer: at least 44×44.
+ */
+.lume-hit {
+  position: relative;
+}
+
+.lume-hit::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 34px;
+  transform: translate(-50%, -50%);
+}
+
+@media (pointer: coarse) {
+  .lume-hit::after {
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+  }
+}
+
+.primary-btn,
+.ghost-btn,
+.muted-btn,
+.danger-btn,
+.icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--lume-control-radius);
+  font-size: 12.5px;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 150ms ease-out, background-color 150ms ease-out,
+    border-color 150ms ease-out;
+}
+
+.primary-btn.lume-hit,
+.ghost-btn.lume-hit,
+.muted-btn.lume-hit,
+.danger-btn.lume-hit,
+.icon-btn.lume-hit,
+.primary-btn,
+.ghost-btn,
+.muted-btn,
+.danger-btn,
+.icon-btn {
+  /* hit band from .lume-hit when the class is present; always reserve the geometry */
+}
+
+.primary-btn {
+  border: 1px solid var(--lume-primary);
+  background: var(--lume-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.primary-btn:hover {
+  background: var(--lume-primary-hover);
+  border-color: var(--lume-primary-hover);
+}
+
+.primary-btn:active {
+  background: var(--lume-primary-pressed);
+  border-color: var(--lume-primary-pressed);
+}
+
+.primary-btn:disabled,
+.primary-btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  border-color: var(--lume-border-card);
+  background: #15181c;
+  color: #6e7783;
+}
+
+.ghost-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #aab3c0;
+  font-weight: 500;
+  padding: 0 8px;
+}
+
+.ghost-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f1f4f8;
+}
+
+.muted-btn {
+  border: 1px solid #2e333a;
+  background: transparent;
+  color: #c6cdd6;
+  font-weight: 500;
+}
+
+.muted-btn:hover {
+  border-color: #454d59;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f1f4f8;
+}
+
+.danger-btn {
+  border: 1px solid var(--lume-destructive);
+  background: var(--lume-destructive);
+  color: #fff;
+  font-weight: 600;
+}
+
+.danger-btn:hover {
+  background: var(--lume-destructive-hover);
+  border-color: var(--lume-destructive-hover);
+}
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+}
+
+.primary-btn:focus-visible,
+.ghost-btn:focus-visible,
+.muted-btn:focus-visible,
+.danger-btn:focus-visible,
+.icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--lume-surface-page), 0 0 0 4px var(--lume-focus-ring);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.field > span,
+.field > label,
+label.field {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #a3acb9;
+}
+
+.field input,
+.field textarea,
+.field select,
+.generic-input {
+  width: 100%;
+  min-height: 30px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--lume-border-field);
+  border-radius: var(--lume-control-radius);
+  background: var(--lume-field-surface);
+  color: var(--lume-text-value);
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  caret-color: #c6cdd6;
+  transition: color 150ms ease-out, background-color 150ms ease-out,
+    border-color 150ms ease-out;
+}
+
+.field textarea,
+.np-experience textarea,
+.np-review textarea,
+.np-organise textarea,
+.np-talk textarea {
+  height: auto;
+  min-height: 84px;
+  padding: 7px 10px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.field input:hover,
+.field textarea:hover,
+.field select:hover,
+.generic-input:hover {
+  border-color: #454d59;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus,
+.generic-input:focus {
+  outline: none;
+  border-color: var(--lume-field-accent);
+  background: var(--lume-field-accent-bg);
+  box-shadow: 0 0 0 2px var(--lume-surface-page), 0 0 0 4px var(--lume-focus-ring);
+}
+
+.field input:disabled,
+.field textarea:disabled,
+.field select:disabled {
+  cursor: not-allowed;
+  border-color: #242830;
+  background: #101215;
+  color: #5c646e;
+}
+
+.field input[readonly],
+.field textarea[readonly] {
+  border-color: #22262c;
+  background: transparent;
+  color: #e4e9ef;
+}
+
+.field.is-invalid input,
+.field.is-invalid textarea,
+.np-identity-field.is-invalid input {
+  border-color: var(--lume-invalid);
+}
+
+.field-error,
+.np-identity-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--lume-invalid-text);
+}
+
+.np-identity-meta {
+  min-height: 15px;
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #79828f;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-btn,
+  .ghost-btn,
+  .muted-btn,
+  .danger-btn,
+  .icon-btn,
+  .field input,
+  .field textarea,
+  .field select {
+    transition: none;
+  }
+}

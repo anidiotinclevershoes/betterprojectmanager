@@ -10,6 +10,7 @@
 
 import {
   CAPTURE_V2_OBSERVATION_SCHEMA,
+  CAPTURE_V2_EXTRACT_SYSTEM_MESSAGE,
   buildObservationExtractionPrompt,
 } from "@/lib/capture-v2/prompt";
 import { PINNED_OPENAI_CHAT_MODEL } from "@/lib/openai-model";
@@ -41,8 +42,7 @@ export const FROZEN_PROGRAMME_BASE = {
 } as const;
 
 /** Copied from src/lib/capture-v2/extract.ts at freeze time. */
-export const FROZEN_SYSTEM_MESSAGE =
-  "You extract atomic project observations as JSON. You do not mutate a database. You never invent record IDs.";
+export const FROZEN_SYSTEM_MESSAGE = CAPTURE_V2_EXTRACT_SYSTEM_MESSAGE;
 
 export const FROZEN_TEMPERATURE = 0.2;
 export const FROZEN_RESPONSE_FORMAT = { type: "json_object" } as const;

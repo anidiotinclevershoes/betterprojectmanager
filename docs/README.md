@@ -94,6 +94,8 @@ They do not override (1)–(3) unless they are the specific contract for that se
 
 Test evidence / model comparison: `docs/TEST_DASHBOARD.md`. This is an engineering Issue + Actions summary, not a Lume product surface.
 
+Hosted live-OpenAI vertical journeys (opt-in, never `npm test`): [`e2e-hosted-vertical/README.md`](../e2e-hosted-vertical/README.md). Command: `npm run e2e:hosted-vertical`.
+
 Integrity probes (read-only / in-memory; no production daemon):
 
 ```bash

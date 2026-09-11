@@ -33,6 +33,13 @@ export {
   formatObservationAccount,
 } from "./account";
 export { buildObservationExtractionPrompt } from "./prompt";
+export {
+  CAPTURE_V2_EXTRACT_PATH,
+  CAPTURE_V2_EXTRACT_SYSTEM_MESSAGE,
+  CAPTURE_V2_PROMPT_ID,
+  CAPTURE_V2_PROMPT_VERSION,
+  NEW_PROJECT_ADAPTER_PATH,
+} from "./prompt";
 export { captureResultFromResolved } from "./toResult";
 export {
   runCaptureV2FromModelJson,

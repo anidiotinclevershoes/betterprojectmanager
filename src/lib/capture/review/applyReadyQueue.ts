@@ -13,8 +13,9 @@ export type ApplyReadyOwnerPrompt = CaptureConfirmOwnerRequest & {
 export async function applyPendingReadyQueue(args: {
   models: ReviewChangeViewModel[];
   applyOne: (item: PendingSuggestion) => Promise<CaptureApplyDecision>;
-}): Promise<{ confirmOwner: ApplyReadyOwnerPrompt | null }> {
+}): Promise<{ confirmOwner: ApplyReadyOwnerPrompt | null; failures: string[] }> {
   let confirmOwner: ApplyReadyOwnerPrompt | null = null;
+  const failures: string[] = [];
   for (const model of args.models) {
     if (model.canApprove === false || model.executableApply === false) {
       continue;
@@ -25,7 +26,9 @@ export async function applyPendingReadyQueue(args: {
         suggestionId: model.id,
         ...decision.confirmOwner,
       };
+    } else if (decision.kind === "needs_you" && !decision.confirmOwner) {
+      failures.push(decision.reason);
     }
   }
-  return { confirmOwner };
+  return { confirmOwner, failures };
 }

@@ -19,6 +19,7 @@ import {
 import {
   readMissionSupabaseCache,
   shouldWriteDurableMissionCache,
+  writeConfirmedAppliedWorkspaceCache,
   writeMissionSupabaseCache,
 } from "@/lib/mission-cache";
 import {
@@ -307,8 +308,8 @@ type MissionContextValue = {
     content?: string;
   }) => Promise<{ ok: boolean; error?: string }>;
   /**
-   * Slice 1C: replace the hydrate cache with server-returned Apply state.
-   * Does not treat this as a client-authored mutation.
+   * Adopt confirmed Apply reload state (`reloadWorkspace` after a durable write).
+   * Refreshes the paint cache from that authoritative state. Not a client-authored mutation.
    */
   adoptAppliedState: (next: MissionState) => void;
   /** Reload MissionState from durable workspace after a confirmed write. */
@@ -2615,7 +2616,15 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   );
 
   const adoptAppliedState = useCallback((next: MissionState) => {
-    setState(normaliseState(next));
+    const normalised = normaliseState(next);
+    setState(normalised);
+    const meta = persistMetaRef.current;
+    writeConfirmedAppliedWorkspaceCache({
+      persistenceMode: meta.mode,
+      workspaceId: meta.workspaceId,
+      userId: meta.userId,
+      state: normalised,
+    });
   }, []);
 
   const refreshCoaching = useCallback(() => {

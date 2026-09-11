@@ -1,11 +1,28 @@
 import { getOpenAIKey } from "@/lib/openai";
 import { resolveOpenAIChatModel } from "@/lib/openai-model";
-import { buildObservationExtractionPrompt } from "./prompt";
+import {
+  buildObservationExtractionPrompt,
+  CAPTURE_V2_EXTRACT_PATH,
+  CAPTURE_V2_EXTRACT_SYSTEM_MESSAGE,
+  CAPTURE_V2_PROMPT_ID,
+  CAPTURE_V2_PROMPT_VERSION,
+} from "./prompt";
+import { observationCountFromRaw } from "./provenance";
 
 export type ObservationExtractionCall = {
   rawModelJson: unknown;
   responseText: string;
+  /** Requested chat model id. */
   model: string;
+  requestedModel: string;
+  /** Provider-reported model id when present. */
+  responseModel: string;
+  provider: "openai";
+  promptId: string;
+  promptVersion: string;
+  path: string;
+  fallback: false;
+  observationCount: number;
   providerUsage: {
     prompt_tokens?: number;
     completion_tokens?: number;
@@ -38,7 +55,7 @@ export async function extractObservationsWithOpenAI(args: {
   if (!key) {
     throw new Error("OPENAI_API_KEY is not configured");
   }
-  const model = resolveOpenAIChatModel();
+  const requestedModel = resolveOpenAIChatModel();
   const prompt = buildObservationExtractionPrompt({
     transcript: args.transcript,
     projectBlock: args.projectBlock,
@@ -51,14 +68,13 @@ export async function extractObservationsWithOpenAI(args: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model,
+      model: requestedModel,
       temperature: 0.2,
       response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
-          content:
-            "You extract atomic project observations as JSON. You do not mutate a database. You never invent record IDs.",
+          content: CAPTURE_V2_EXTRACT_SYSTEM_MESSAGE,
         },
         { role: "user", content: prompt },
       ],
@@ -71,6 +87,7 @@ export async function extractObservationsWithOpenAI(args: {
   }
 
   const data = (await response.json()) as {
+    model?: string;
     choices?: Array<{ message?: { content?: string } }>;
     usage?: {
       prompt_tokens?: number;
@@ -83,10 +100,24 @@ export async function extractObservationsWithOpenAI(args: {
     throw new Error("OpenAI returned an empty observation response");
   }
 
+  const rawModelJson = parseJsonObject(content);
+  const responseModel =
+    typeof data.model === "string" && data.model.trim()
+      ? data.model.trim()
+      : requestedModel;
+
   return {
-    rawModelJson: parseJsonObject(content),
+    rawModelJson,
     responseText: content,
-    model,
+    model: requestedModel,
+    requestedModel,
+    responseModel,
+    provider: "openai",
+    promptId: CAPTURE_V2_PROMPT_ID,
+    promptVersion: CAPTURE_V2_PROMPT_VERSION,
+    path: CAPTURE_V2_EXTRACT_PATH,
+    fallback: false,
+    observationCount: observationCountFromRaw(rawModelJson),
     providerUsage: data.usage ?? null,
   };
 }

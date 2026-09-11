@@ -15,7 +15,7 @@
 }
 
 .np-experience.is-first-run .np-hero {
-  text-align: center;
+  text-align: left;
 }
 
 .np-hero-logo {
@@ -24,7 +24,7 @@
 }
 
 .np-experience.is-first-run .np-hero-logo {
-  margin: 0 auto 8px;
+  margin: 0 0 8px;
 }
 
 .np-brand {
@@ -35,9 +35,9 @@
 }
 
 .np-hero-title {
-  font-size: clamp(1.35rem, 3vw, 1.75rem);
-  font-weight: 650;
-  letter-spacing: -0.025em;
+  font-size: clamp(1.15rem, 2.4vw, 1.2rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
 }
 
 .np-hero-lead {
@@ -47,13 +47,13 @@
 }
 
 .np-experience.is-first-run .np-hero-lead {
-  margin-left: auto;
-  margin-right: auto;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .np-first-run-next {
   max-width: 36rem;
-  margin: 0.65rem auto 0;
+  margin: 0.65rem 0 0;
   font-size: 0.88rem;
   line-height: 1.45;
   color: var(--text-secondary);
@@ -69,7 +69,7 @@
 }
 
 .np-experience.is-first-run .np-trust {
-  text-align: center;
+  text-align: left;
 }
 
 .np-trust p {
@@ -122,10 +122,11 @@
 .np-experience .primary-btn,
 .np-experience .ghost-btn,
 .np-experience .muted-btn {
-  min-height: 40px;
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
-  font-size: 0.84rem;
+  min-height: 30px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 5px;
+  font-size: 12.5px;
 }
 
 .np-experience .primary-btn {
@@ -245,7 +246,7 @@
   .np-experience .primary-btn,
   .np-experience .ghost-btn,
   .np-experience .muted-btn {
-    min-height: 44px;
+    min-height: 30px;
   }
 
   .np-transcript-field textarea,
@@ -295,6 +296,63 @@
   gap: 0.65rem;
 }
 
+.np-identity-group {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.np-identity-name,
+.np-identity-code {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .np-identity-group {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .np-identity-name {
+    flex: 1;
+  }
+
+  .np-identity-code {
+    width: 148px;
+    flex: 0 0 148px;
+  }
+}
+
+.np-experience .primary-btn,
+.np-experience .ghost-btn,
+.np-experience .muted-btn {
+  min-height: 30px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 5px;
+  font-size: 12.5px;
+}
+
+.np-organise textarea,
+.np-talk textarea {
+  min-height: 168px;
+  max-height: 320px;
+  border-radius: 5px;
+  border-color: #2e333a;
+  background: #0d0e11;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.np-organise textarea:focus,
+.np-talk textarea:focus {
+  border-color: #5a4fc4;
+  background: #161425;
+}
+
 .np-identity label,
 .np-frame form {
   display: flex;
@@ -311,11 +369,6 @@
 .np-frame input {
   font: inherit;
   font-weight: 500;
-  color: var(--text-primary);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 0.45rem 0.65rem;
-  background: var(--bg-surface);
 }
 
 .np-frames {
@@ -325,24 +378,46 @@
 }
 
 .np-frame {
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  padding: 0.75rem;
-  background: var(--bg-surface);
+  border: 1px solid #2a2e35;
+  border-radius: 5px;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
 }
 
 .np-frame h2 {
-  margin: 0 0 0.45rem;
-  font-size: 0.95rem;
+  margin: 0;
+  padding: 0.45rem 0.65rem;
+  font-size: 13px;
+  font-weight: 600;
+  border-bottom: 1px solid color-mix(in srgb, var(--lume-domain, #98a3b1) 40%, transparent);
+  background: color-mix(in srgb, var(--lume-domain, #98a3b1) 12%, transparent);
+}
+
+.np-frame[data-np-domain="issues"] {
+  --lume-domain: #e8895c;
+}
+.np-frame[data-np-domain="people"] {
+  --lume-domain: #5cc8f2;
+}
+.np-frame[data-np-domain="to do"] {
+  --lume-domain: #a6d45f;
+}
+.np-frame[data-np-domain="knowledge"] {
+  --lume-domain: #cd87e0;
 }
 
 .np-frame ul {
-  margin: 0 0 0.55rem;
-  padding: 0;
+  margin: 0;
+  padding: 0.65rem;
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+}
+
+.np-frame form {
+  padding: 0 0.65rem 0.65rem;
 }
 
 .np-frame li {

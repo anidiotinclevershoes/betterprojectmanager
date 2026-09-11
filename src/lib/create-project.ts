@@ -152,6 +152,16 @@ export function suggestCode(name: string) {
     .slice(0, 8);
 }
 
+/** Keep deriving until the user edits Code. First keystroke must not lock "A". */
+export function nextDerivedProjectCode(
+  name: string,
+  currentCode: string,
+  codeEdited: boolean,
+) {
+  if (codeEdited && currentCode.trim()) return currentCode;
+  return suggestCode(name);
+}
+
 export function toIsoFromDateInput(value?: string) {
   if (!value?.trim()) return undefined;
   if (value.includes("T")) return value;

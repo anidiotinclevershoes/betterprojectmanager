@@ -38,6 +38,15 @@ import {
   loadServerCaptureWorld,
 } from "@/lib/capture-v2/server-truth";
 import { extractObservationsWithOpenAI } from "@/lib/capture-v2/extract";
+import {
+  extractProvenanceBase,
+  logIntelligenceProvenance,
+} from "@/lib/capture-v2/provenance";
+import {
+  CAPTURE_V2_EXTRACT_PATH,
+  CAPTURE_V2_PROMPT_ID,
+  CAPTURE_V2_PROMPT_VERSION,
+} from "@/lib/capture-v2/prompt";
 import { DurableWorkspaceError } from "@/lib/data/durable-workspace";
 
 export const runtime = "nodejs";
@@ -71,6 +80,7 @@ function requestId() {
 
 export async function GET() {
   const diagnostics = getOpenAIKeyDiagnostics();
+  const productionRuntime = isProductionRuntime();
   return NextResponse.json({
     openaiConfigured: diagnostics.openaiConfigured,
     model: resolveOpenAIChatModel(),
@@ -78,6 +88,11 @@ export async function GET() {
     keyLength: diagnostics.length,
     reason: diagnostics.reason,
     captureV2Enabled: true,
+    promptId: CAPTURE_V2_PROMPT_ID,
+    promptVersion: CAPTURE_V2_PROMPT_VERSION,
+    extractPath: CAPTURE_V2_EXTRACT_PATH,
+    productionRuntime,
+    localFallbackReachable: !productionRuntime,
   });
 }
 
@@ -98,7 +113,15 @@ export async function POST(request: Request) {
 
     if (isProductionRuntime() && !isOpenAIConfigured()) {
       serverLog.error("capture.openai_missing_in_production", {
+        ...extractProvenanceBase(),
         userId: gate.userId,
+        provider: "none",
+        requestedModel: resolveOpenAIChatModel(),
+        responseModel: null,
+        fallback: false,
+        fallbackReason: "production_refuses_unconfigured_ai",
+        elapsedMs: Date.now() - startedAt,
+        observationCount: 0,
       });
       return NextResponse.json(
         { error: "AI is not configured for this environment." },
@@ -213,10 +236,21 @@ async function postCaptureV2(args: {
       result,
       contextManifest,
     });
-    serverLog.info("capture.v2_local_fallback", {
+    logIntelligenceProvenance("capture.v2_local_fallback", {
+      ...extractProvenanceBase(),
       userId: args.gateUserId,
       projectId: loaded.projectId,
       ignoredClientTruth,
+      provider: "local",
+      requestedModel: null,
+      responseModel: null,
+      fallback: true,
+      fallbackReason: "openai_unconfigured_non_production",
+      elapsedMs: Date.now() - startedAt,
+      observationCount: 0,
+      usagePrompt: null,
+      usageCompletion: null,
+      usageTotal: null,
     });
     return NextResponse.json({
       result,
@@ -226,6 +260,16 @@ async function postCaptureV2(args: {
       captureContextDiagnostics: captureContext.diagnostics,
       reliability,
       capturePipeline: "v2",
+      provenance: {
+        provider: "local" as const,
+        requestedModel: null,
+        responseModel: null,
+        promptId: CAPTURE_V2_PROMPT_ID,
+        promptVersion: CAPTURE_V2_PROMPT_VERSION,
+        path: CAPTURE_V2_EXTRACT_PATH,
+        fallback: true,
+        fallbackReason: "openai_unconfigured_non_production",
+      },
       notice:
         "OPENAI_API_KEY not set — used local coaching. Add your OpenAI key to enable tidy-up.",
     });
@@ -298,14 +342,25 @@ async function postCaptureV2(args: {
     result: v2.result,
     providerUsage: extraction.providerUsage,
     responseText: extraction.responseText,
-    model: extraction.model,
-    systemPrompt: "capture-v2-observations",
+    model: extraction.responseModel,
+    systemPrompt: extraction.promptId,
     reliability: reliabilityForCockpit(reliability),
   });
-  serverLog.info("capture.v2_analysed", {
+  logIntelligenceProvenance("capture.v2_analysed", {
+    ...extractProvenanceBase(),
     userId: args.gateUserId,
     projectId: loaded.projectId,
     ignoredClientTruth,
+    provider: extraction.provider,
+    requestedModel: extraction.requestedModel,
+    responseModel: extraction.responseModel,
+    fallback: false,
+    fallbackReason: null,
+    elapsedMs: Date.now() - startedAt,
+    observationCount: extraction.observationCount,
+    usagePrompt: extraction.providerUsage?.prompt_tokens ?? null,
+    usageCompletion: extraction.providerUsage?.completion_tokens ?? null,
+    usageTotal: extraction.providerUsage?.total_tokens ?? null,
   });
   return NextResponse.json({
     result: v2.result,
@@ -315,5 +370,14 @@ async function postCaptureV2(args: {
     captureContextDiagnostics: captureContext.diagnostics,
     reliability,
     capturePipeline: "v2",
+    provenance: {
+      provider: extraction.provider,
+      requestedModel: extraction.requestedModel,
+      responseModel: extraction.responseModel,
+      promptId: extraction.promptId,
+      promptVersion: extraction.promptVersion,
+      path: extraction.path,
+      fallback: false,
+    },
   });
 }

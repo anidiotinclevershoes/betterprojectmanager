@@ -428,12 +428,15 @@ export function CaptureWorkspace({
   }
 
   async function approveReady() {
-    const { confirmOwner } = await applyPendingReadyQueue({
+    const { confirmOwner, failures } = await applyPendingReadyQueue({
       models: pendingReadyModels(reviewModels, added, dismissed),
       applyOne: (item) => applyOne(item, defaultProjectId),
     });
     if (confirmOwner) {
       setConfirmOwner(confirmOwner);
+    }
+    if (failures.length) {
+      setError(failures[0] ?? "Could not apply these changes.");
     }
   }
 
@@ -718,14 +721,18 @@ export function CaptureWorkspace({
       ) : null}
 
       {/* Transcript stays visible after analysis (read-only), including when collapsed. */}
+      <div className={reviewOpen ? "lume-review-frame" : undefined}>
       <section
-        className="capture-transcript-panel"
+        className={`capture-transcript-panel${isAnalysed ? " is-captured" : ""}`}
         aria-labelledby={isAnalysed ? "capture-transcript-title" : undefined}
       >
         {isAnalysed ? (
-          <h3 id="capture-transcript-title" className="capture-review-section-title">
-            Your notes
-          </h3>
+          <div className="lume-captured-head">
+            <h3 id="capture-transcript-title" className="lume-rail-title">
+              Captured Information
+            </h3>
+            <span className="lume-captured-meta">Read-only</span>
+          </div>
         ) : null}
         <form onSubmit={onSubmit} className="capture-form">
         {isAnalysed ? null : (
@@ -1040,11 +1047,14 @@ export function CaptureWorkspace({
           />
         </div>
       ) : null}
+      </div>
 
-      {error && !isAnalysed ? (
+      {error ? (
         <div className="error-banner capture-error" role="alert">
           <p>{error}</p>
           <div className="row-actions">
+            {!isAnalysed ? (
+              <>
             <button
               type="button"
               className="ghost-btn"
@@ -1061,6 +1071,16 @@ export function CaptureWorkspace({
             >
               Copy text
             </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="ghost-btn"
+                onClick={() => setError(null)}
+              >
+                Dismiss
+              </button>
+            )}
           </div>
         </div>
       ) : null}
@@ -1099,7 +1119,9 @@ function CaptureAutoTextarea({
     const el = ref.current;
     if (!el) return;
     el.style.height = "0px";
-    el.style.height = `${Math.max(el.scrollHeight, 72)}px`;
+    const next = Math.min(Math.max(el.scrollHeight, 168), 320);
+    el.style.height = `${next}px`;
+    el.style.overflowY = el.scrollHeight > 320 ? "auto" : "hidden";
   }, [value]);
 
   return (

@@ -43,7 +43,7 @@ function ChangeCompare({ diff }: { diff: ChangeDiff }) {
 
   return (
     <div
-      className="lume-review-mutation"
+      className="lume-review-change"
       aria-label={`${diff.label}: ${diff.from} to ${diff.to}`}
     >
       {diff.label ? <p className="lume-review-field">{diff.label}</p> : null}
@@ -52,6 +52,7 @@ function ChangeCompare({ diff }: { diff: ChangeDiff }) {
         <span className="lume-review-arrow" aria-hidden>
           →
         </span>
+        <span className="sr-only">changing to</span>
         <span className="lume-review-to">{diff.to}</span>
       </p>
     </div>
@@ -84,7 +85,7 @@ function ReviewTruth({
         </h4>
         {recordName ? <p className="lume-review-subject">{recordName}</p> : null}
         {needsYouDetail ? (
-          <p className="lume-review-support">{needsYouDetail}</p>
+          <p className="lume-review-quote">{needsYouDetail}</p>
         ) : null}
         {showCompare ? <ChangeCompare diff={diff} /> : null}
       </div>
@@ -203,6 +204,13 @@ export function CompactChangeCard({
           entityKind={entityKind}
           entityLabel={entityLabel}
           projectLabel={projectLabel}
+          personName={recordName}
+          unknownIdentity={
+            (entityKind === "stakeholder" || entityKind === "availability") &&
+            (readiness === "unmatched" ||
+              !recordName.trim() ||
+              reviewReason === "TARGET_UNCERTAIN")
+          }
         />
 
         <ReviewTruth

@@ -471,11 +471,12 @@ await check("N-09 recommendations / history_events / capture_sessions require pr
   assert.match(sql, /project_belongs_to_workspace/);
 });
 
-await check("N-10 adoptAppliedState does not refresh the durable paint cache", () => {
+await check("N-10 adoptAppliedState refreshes the durable paint cache from confirmed Apply state", () => {
   const store = readSrc("src/lib/store.tsx");
   const adopt = store.slice(store.indexOf("const adoptAppliedState"));
-  assert.match(adopt.slice(0, 200), /setState\(normaliseState\(next\)\)/);
-  assert.doesNotMatch(adopt.slice(0, 200), /writeMissionSupabaseCache/);
+  assert.match(adopt.slice(0, 800), /writeConfirmedAppliedWorkspaceCache/);
+  const cache = readSrc("src/lib/mission-cache.ts");
+  assert.match(cache, /reason: "confirmed-persist"/);
 });
 
 await check("N-11 memory-only updateMeeting / acceptSuggestion are not mounted on current pages", () => {

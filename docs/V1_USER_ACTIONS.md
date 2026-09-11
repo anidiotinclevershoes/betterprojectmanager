@@ -17,8 +17,9 @@ Do not edit already-applied V1 SQL. Do not strip `kind` from `create_project_bun
 
 1. SQL Editor → New query → paste **all** of `scripts/hosted-schema-audit.sql` → Run. Send the full result.
 2. New query → paste **all** of `supabase/migrations/20260910120000_hosted_canonical_schema_catchup.sql` → Run.
-3. Re-run the audit until every `required_column` is `present` and `project_tags` / `item_tags` are `present`.
-4. Repeat New Project smoke from scratch only after that.
+3. New query → paste **all** of `supabase/migrations/20260829120000_capture_apply_receipts.sql` → Run. Preview Apply 500 is this missing table. Do not skip it. The catch-up file does not create it.
+4. Re-run the audit until every `required_column` is `present` and `project_tags` / `item_tags` / `capture_apply_receipts` are `present`.
+5. Repeat New Project / Capture Apply smoke from scratch only after that.
 
 The catch-up file is additive (`IF NOT EXISTS`). It replays canonical knowledge metadata plus retrieval tag tables. If duplicate project codes exist, it still creates the tag tables and skips the unique code index (D-026) with a warning.
 
@@ -35,8 +36,9 @@ The catch-up file is additive (`IF NOT EXISTS`). It replays canonical knowledge 
 - **Do this:**
   1. SQL Editor → New query → paste all of `scripts/hosted-schema-audit.sql` → Run. Send the full result (every `MISSING` row, plus `recent_project` / `leftover_children`).
   2. New query → paste all of `supabase/migrations/20260910120000_hosted_canonical_schema_catchup.sql` → Run.
-  3. Re-run the audit until `knowledge_items.kind` and `project_tags.slug` are `present`.
-  4. Retry New Project on a **fresh** attempt. Match `recent_project` names against the failed smoke. If a surprise project + children exist from the failed save, stop — that is an integrity defect.
+  3. New query → paste all of `supabase/migrations/20260829120000_capture_apply_receipts.sql` → Run. Hosted Preview Apply 500 is this missing table.
+  4. Re-run the audit until `knowledge_items.kind`, `project_tags.slug`, and `capture_apply_receipts` are `present`.
+  5. Retry New Project / Capture Apply on a **fresh** attempt. Match `recent_project` names against the failed smoke. If a surprise project + children exist from the failed save, stop — that is an integrity defect.
 
 ### Confirm trial length for when billing is later turned on
 
@@ -50,6 +52,19 @@ The catch-up file is additive (`IF NOT EXISTS`). It replays canonical knowledge 
 - **Status:** pending
 - **When:** BEFORE BILLING ENABLES
 - **Note:** Checkout stays refused until `LUME_BILLING_ENABLED=true` **and** Stripe keys exist. Keys alone do not turn billing on. Do not paste Stripe secrets into chat.
+
+### Hosted vertical journey secrets (opt-in harness)
+
+- **Status:** pending
+- **When:** before a live hosted baseline can pass AUTH
+- **Secret?:** YES — never paste into chat or git
+- **Blocking external use?** NO
+- **Do this:**
+  1. Vercel → Project → Settings → Deployment Protection → enable **Protection Bypass for Automation**. Put the secret in `LUME_E2E_VERCEL_BYPASS_SECRET` (or `VERCEL_AUTOMATION_BYPASS_SECRET`).
+  2. Create a disposable Lume account. Put email/password in `LUME_E2E_EMAIL` / `LUME_E2E_PASSWORD`.
+  3. Set `LUME_E2E_BASE_URL` to the Vercel Preview URL for the PR under test (first target: PR #155). Do not hardcode the hostname in source.
+  4. Run `npm run e2e:hosted-vertical`. Click-by-click: `e2e-hosted-vertical/README.md` → “One-time configuration”.
+  5. Do not add this suite to ordinary CI until explicitly approved.
 
 ### Own the support inbox
 
@@ -70,7 +85,7 @@ The catch-up file is additive (`IF NOT EXISTS`). It replays canonical knowledge 
 
 | Action | Status | Why |
 | --- | --- | --- |
-| Hosted schema catch-up (`20260910120000_hosted_canonical_schema_catchup.sql`) | pending | New Project failed: production missing `knowledge_items.kind` |
+| Hosted schema catch-up (`20260910120000_hosted_canonical_schema_catchup.sql` + `20260829120000_capture_apply_receipts.sql`) | pending | New Project missing `knowledge_items.kind`; Preview Apply 500 missing `capture_apply_receipts` |
 | Leave `LUME_BILLING_ENABLED` unset or `false` on Production | pending | First cohort is free early access |
 | Confirm `SUPABASE_SERVICE_ROLE_KEY` is already on Vercel (needed for account delete) | pending | Delete cannot run without it |
 | Own `support@lume.app` or change the address | pending | Users are told to email it |

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
 import type { ReviewOpFamily } from "@/lib/capture/review/reviewLanguage";
 
@@ -9,9 +9,11 @@ const cap = {
 
 function IconFrame({
   size,
+  strokeWidth = 1.9,
   children,
 }: {
   size: number;
+  strokeWidth?: number;
   children: ReactNode;
 }) {
   return (
@@ -21,7 +23,7 @@ function IconFrame({
       height={size}
       fill="none"
       stroke="currentColor"
-      strokeWidth={2}
+      strokeWidth={strokeWidth}
       {...cap}
       aria-hidden
     >
@@ -30,11 +32,66 @@ function IconFrame({
   );
 }
 
+const AVATAR_COLORS = [
+  { tint: "#7FB2FF", text: "#E7F0FF" },
+  { tint: "#6FD0C4", text: "#E1F7F4" },
+  { tint: "#F2B36B", text: "#FCEEDC" },
+  { tint: "#C79BF5", text: "#F2E9FE" },
+  { tint: "#F5949F", text: "#FDE7EA" },
+  { tint: "#8FDC9A", text: "#E6F8E9" },
+  { tint: "#E0D07A", text: "#FAF5DE" },
+  { tint: "#9FB0E8", text: "#ECEFFB" },
+] as const;
+
+function avatarColor(name: string) {
+  let total = 0;
+  const key = name.trim().toLowerCase();
+  for (let i = 0; i < key.length; i += 1) {
+    total = (total * 31 + key.charCodeAt(i)) % 100000;
+  }
+  return AVATAR_COLORS[total % AVATAR_COLORS.length];
+}
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length > 1) {
+    return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
+  }
+  return (parts[0] ?? "?").slice(0, 2).toUpperCase();
+}
+
+/** Known-person initials, or amber ? when identity is unresolved. */
+export function ReviewPersonAvatar({
+  name,
+  unknown = false,
+}: {
+  name: string;
+  unknown?: boolean;
+}) {
+  const color = unknown
+    ? { tint: "#E0A33E", text: "#F5CC7E" }
+    : avatarColor(name || "?");
+  return (
+    <span
+      className={`lume-review-avatar${unknown ? " is-unknown" : ""}`}
+      style={
+        {
+          "--lume-avatar": color.tint,
+          "--lume-avatar-text": color.text,
+        } as CSSProperties
+      }
+      aria-hidden
+    >
+      {unknown ? "?" : initials(name)}
+    </span>
+  );
+}
+
 /** Lucide-equivalent domain marks. Neutral colour is applied by CSS. */
 export function DomainMark({
   kind,
   title,
-  size = 22,
+  size = 30,
 }: {
   kind: SuggestionKind;
   title?: string;
@@ -42,7 +99,7 @@ export function DomainMark({
 }) {
   return (
     <span className="lume-review-domain-mark" title={title} aria-hidden>
-      <IconFrame size={size}>
+      <IconFrame size={size} strokeWidth={1.6}>
         <DomainGlyph kind={kind} />
       </IconFrame>
     </span>

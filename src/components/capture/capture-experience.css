@@ -6,7 +6,8 @@
 }
 
 .ocean-capture-workspace .capture-textarea-idle:not(.is-readonly) {
-  min-height: 8.5rem;
+  min-height: 168px;
+  max-height: 320px;
 }
 
 .ocean-capture-review-boundary {
@@ -145,9 +146,202 @@ button.annotated-transcript-mark:focus-visible {
   --transcript-mark: var(--accent-todo);
 }
 
+.lume-review-frame {
+  display: grid;
+  gap: 24px 32px;
+  min-width: 0;
+}
+
+.lume-review-frame-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: #f1f4f8;
+  text-transform: none;
+}
+
+.lume-rail-title,
+.lume-queue-heading {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8992a0;
+}
+
+.capture-transcript-panel.is-captured {
+  padding: 12px 16px;
+  border: 1px solid #1e2126;
+  border-radius: 8px;
+  background: #0f1114;
+}
+
+.lume-captured-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+}
+
+.lume-captured-meta {
+  margin-left: auto;
+  font-size: 11px;
+  color: #6e7783;
+}
+
+.lume-extracted-rail {
+  padding: 12px 16px;
+  border: 1px solid #1e2126;
+  border-radius: 8px;
+  background: #0f1114;
+}
+
+.lume-queue-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 4px 0 16px;
+}
+
+.lume-queue-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.lume-queue-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: #98a3b1;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.lume-queue-filter.is-selected {
+  border-color: #4a525e;
+  background: #1d2026;
+  color: #f1f4f8;
+}
+
+.lume-queue-filter[data-filter="needsYou"] .lume-queue-dot {
+  background: #e0a33e;
+}
+.lume-queue-filter[data-filter="create"] .lume-queue-dot {
+  background: #45b26b;
+}
+.lume-queue-filter[data-filter="update"] .lume-queue-dot {
+  background: #4c8cf8;
+}
+.lume-queue-filter[data-filter="remove"] .lume-queue-dot {
+  background: #e8556d;
+}
+
+.lume-queue-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #5f6874;
+}
+
+.lume-queue-count {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: #818b99;
+}
+
+.lume-queue-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.lume-queue-rule {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1e2126;
+}
+
+.lume-commit-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 8;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #1e2126;
+  background: color-mix(in srgb, var(--bg-app) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.lume-commit-status {
+  margin: 0;
+  font-size: 12.5px;
+  color: #a3acb9;
+}
+
+.lume-commit-ready strong {
+  color: #f1f4f8;
+  font-variant-numeric: tabular-nums;
+}
+
+.lume-commit-blocked {
+  color: #f5cc7e;
+  font-variant-numeric: tabular-nums;
+}
+
+.lume-commit-bar .capture-apply-ready-btn {
+  margin-left: auto;
+}
+
+@media (min-width: 1280px) {
+  .lume-review-frame {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .lume-review-frame > .capture-transcript-panel {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .lume-review-frame > .capture-review-workspace {
+    display: contents;
+  }
+
+  .lume-review-frame .ocean-capture-review-boundary,
+  .lume-review-frame .capture-v2-account,
+  .lume-review-frame .capture-changes-panel {
+    grid-column: 1;
+  }
+
+  .lume-review-frame .capture-summary-panel {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    position: sticky;
+    top: 60px;
+  }
+}
+
 .capture-review-workspace .compact-change-action-row > button,
 .capture-review-workspace .compact-change-date-input {
-  min-height: 2.5rem;
+  min-height: 30px;
 }
 
 .capture-review-workspace .compact-change-date-input {
@@ -184,7 +378,6 @@ button.annotated-transcript-mark:focus-visible {
   .capture-apply-ready-btn {
     width: 100%;
     justify-content: center;
-    min-height: 2.75rem;
   }
 
   .capture-review-workspace {
@@ -197,6 +390,7 @@ button.annotated-transcript-mark:focus-visible {
 
   .capture-review-workspace .compact-change-action-row > button {
     min-height: 2.75rem;
+    height: auto;
     padding-inline: 0.85rem;
   }
 

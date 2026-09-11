@@ -187,7 +187,7 @@ test.describe("Capture Review Needs-you interactions", () => {
       page.getByText(/Fizz Caramel|Share with Fizz/i).first(),
     ).toBeVisible();
     await page.getByTestId("review-ownership-share").click();
-    await expect(page.getByText("Approved").first()).toBeVisible();
+    await expect(page.getByText("Applied").first()).toBeVisible();
   });
 
   test("missing milestone date asks for a date and does not invent today", async ({
