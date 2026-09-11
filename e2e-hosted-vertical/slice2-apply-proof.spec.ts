@@ -3,18 +3,14 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {
   RUN_ID,
-  addComposeLine,
   analyseCapture,
   applyReady,
   assertHostedAiSuccess,
   collectReviewCards,
-  createProjectFromComposer,
   currentProjectId,
   expectNoCaptureError,
-  fillUniqueProject,
   installApiRecorder,
   openCapture,
-  openNewProject,
   sanitizeValue,
   signIn,
   textRepresentsYmd,
@@ -38,11 +34,36 @@ test("Slice 2 hosted milestone-create Apply + receipt replay", async ({ page }) 
   await installApiRecorder(page);
   await signIn(page);
 
-  await openNewProject(page);
-  const identity = await fillUniqueProject(page, "capture");
-  await addComposeLine(page, "np-frame-people", "Proof Owner");
-  const projectId = await createProjectFromComposer(page);
-  expect(projectId).toBeTruthy();
+  // Isolated project via the same cookie-authenticated create contract the UI
+  // uses. Avoids the New Project page's pre-hydrate local persistMeta race.
+  const identity = {
+    name: `E2E slice2 ${RUN_ID}`,
+    code: `S2${RUN_ID.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(-10)}`.slice(0, 12),
+  };
+  const created = await page.request.post("/api/workspace/projects", {
+    data: {
+      input: {
+        name: identity.name,
+        code: identity.code,
+        summary: "Slice 2 hosted Apply receipt proof",
+        currentFocus: "Prove persist_milestone_create_with_receipt",
+        stakeholders: [{ name: "Proof Owner", role: "Stakeholder" }],
+      },
+    },
+    headers: { Accept: "application/json" },
+  });
+  const createdBody = (await created.json().catch(() => ({}))) as {
+    projectId?: string;
+    error?: string;
+  };
+  if (!created.ok() || !createdBody.projectId) {
+    throw new Error(
+      `IDENTITY: isolated project create HTTP ${created.status()} ${createdBody.error ?? ""}`.trim(),
+    );
+  }
+  const projectId = createdBody.projectId;
+  await page.goto(`/projects/${projectId}`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("ocean-project-workspace")).toBeVisible({ timeout: 30_000 });
 
   await openCapture(page);
   const capture = await analyseCapture(
