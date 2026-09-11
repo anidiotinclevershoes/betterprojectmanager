@@ -111,7 +111,9 @@ Optional:
 export LUME_E2E_RUN_ID="hv-manual-1"
 ```
 
-Project names are timestamped, for example `E2E People <run-id>`. Cleanup via delete is optional and is **not** a pass condition.
+Every journey fills **both** a unique project name and a unique `np-code` (max 12 characters). Derived three-letter codes collide (`E2E Andris…` and `E2E Ambiguity…` both become `EAH`). Cleanup via delete is optional and is **not** a pass condition.
+
+After Sign in, the harness probes `/api/auth/me` (must include `user.id`), plus `/api/workspace/state` or `/api/billing/status`, until an authenticated Lume endpoint is actually usable. Leaving `/login` is not enough. Organise/Capture **401 is not retried**.
 
 ## Commands
 
@@ -159,12 +161,12 @@ Artifacts: `test-results/hosted-vertical/` (`matrix.md`, `matrix.json`, HTML rep
 
 | Journey | What must remain true |
 | --- | --- |
-| New Project partial people | Organise `bob is the ba` / `mike handles the legacy builds`. Name-only Person is valid. Bob/Mike must not vanish. **Expected to FAIL on current Preview if draft stakeholders and provisional items are empty.** |
-| Full New Project + Create + hard reload | Olga Petrov / Sarah Kim / Production release 12 Sep 2026 / CAB 15 Sep 2026 / UAT unavailable / Cutover runbook v2 survive Organise, Create, and reload. |
-| Capture date update → Apply → reload | Live OpenAI; ordinary Update included by default; Apply via real UI; no error banner; 20 Sep persists after reload. Also exercises hosted `capture_apply_receipts`. |
+| New Project partial people | Organise `bob is the ba` / `mike handles the legacy builds`. Name-only Person is valid. Bob/Mike must not vanish. Session must be proven usable before Organise. **401 after that proof is AUTH, not OpenAI.** Empty `draft.stakeholders` + empty `provisionalItems` is the separate D-052 empty-server class. |
+| Full New Project + Create + hard reload | Organise must store `2026-09-12` and `2026-09-15` on the draft. Compact composer may show titles only (`Olga Petrov — UAT`, `Production release`) without spelling the long date. Create, then hard reload, must project the canonical dates (including compact `12 Sep` / `15 Sep`). |
+| Capture date update → Apply → reload | Live OpenAI; ordinary Update included by default; Apply via real UI; no error banner; `20 Sep` is a valid compact rendering of 20 September 2026; that date must persist after hard reload. Also exercises hosted `capture_apply_receipts`. |
 | New person / responsibility | “Andris is responsible for Legacy.” Unrelated people must not steal identity. Andris must not vanish. First-name-only **Needs You is acceptable**. Do not force an unsafe Create. |
-| Ambiguity stays local | Seed Olga/Sarah. Capture “She will own UAT going forward” plus Production release 21 Sep 2026. Pronoun stays Needs You. Clear date remains independently actionable, is Applied, and survives reload. |
-| Mixed realistic paste | Clear update, new fact, Person, genuine ambiguity, unrelated context. Clear items keep disposition; ambiguity stays local; Apply-ready can apply; reload shows only applied truth. |
+| Ambiguity stays local | Seed Olga Petrov / Sarah Kim / Production release through New Project **Add person / Add knowledge** (not live Organise, not Supabase). Unique code per run. Capture pronoun UAT ownership plus Production release 21 Sep 2026. Pronoun stays Needs You. Date sibling may be create or update, is Applied, and survives reload. Fail only if Capture ambiguity behaviour itself fails. |
+| Mixed realistic paste | Compare semantics, not exact source sentences. Clear date update, Andris, genuine ambiguity, unrelated catering. Ambiguity stays local; Apply-ready can apply; reload shows only applied truth. |
 
 Do **not** change expectations to make the current build green. Do **not** fix product defects from this harness.
 

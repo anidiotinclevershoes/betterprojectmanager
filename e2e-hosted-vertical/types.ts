@@ -17,6 +17,17 @@ export const VERTICAL_BOUNDARIES = [
 
 export type VerticalBoundary = (typeof VERTICAL_BOUNDARIES)[number];
 
+export const JOURNEY_CLASSIFICATIONS = [
+  "PRODUCT_DEFECT",
+  "HARNESS_ASSERTION",
+  "HARNESS_SETUP",
+  "AUTH_FLAKE",
+  "EXPECTED_PRODUCT_BEHAVIOUR",
+  "UNKNOWN",
+] as const;
+
+export type JourneyClassification = (typeof JOURNEY_CLASSIFICATIONS)[number];
+
 export type MatrixCell = "PASS" | "FAIL" | "BLOCKED" | "n/a";
 
 export type Provenance = {
@@ -48,5 +59,6 @@ export type JourneyMatrixRow = {
   reload: MatrixCell;
   result: "PASS" | "FAIL" | "BLOCKED";
   earliestBoundary?: VerticalBoundary;
+  classification?: JourneyClassification;
   notes?: string;
 };
