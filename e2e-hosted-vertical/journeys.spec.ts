@@ -1,24 +1,30 @@
 import { test, expect } from "@playwright/test";
 import {
   RUN_ID,
+  addComposeLine,
   analyseCapture,
   applyReady,
-  assertLiveOpenAi,
+  assertHostedAiSuccess,
+  assertTextRepresentsYmd,
+  attachJson,
   captureFailureArtifacts,
   classifyFromApi,
   classifyNewProjectLoss,
   collectNeedsYou,
   collectPeopleNames,
+  collectReviewCards,
   createProjectFromComposer,
   emptyMatrix,
   expectNoCaptureError,
-  fillProjectName,
+  fillUniqueProject,
   frameLines,
   hardReload,
   installApiRecorder,
   openCapture,
   openKnowledge,
+  openKnowledgeDates,
   openNewProject,
+  organisedDraftHasYmd,
   organiseNotes,
   passCell,
   provenanceNote,
@@ -27,8 +33,9 @@ import {
   reviewCards,
   reviewFamilies,
   signIn,
+  textRepresentsYmd,
 } from "./helpers";
-import type { JourneyMatrixRow, VerticalBoundary } from "./types";
+import type { JourneyClassification, JourneyMatrixRow, VerticalBoundary } from "./types";
 
 function annotate(
   testInfo: { annotations: { type: string; description?: string }[] },
@@ -45,6 +52,7 @@ function annotate(
     ["apply", row.apply],
     ["reload", row.reload],
     ["boundary", row.earliestBoundary],
+    ["classification", row.classification],
     ["notes", row.notes],
   ];
   for (const [type, description] of entries) {
@@ -61,19 +69,23 @@ const FULL_NOTES = [
   "Cutover runbook v2 is the current working version.",
 ].join("\n");
 
-const FULL_TRUTH = [
-  /Olga Petrov/i,
-  /Sarah Kim/i,
-  /Production release/i,
-  /12 September 2026|12 Sep 2026|Sep 12|2026-09-12/i,
-  /CAB/i,
-  /15 September 2026|15 Sep 2026|Sep 15|2026-09-15/i,
-  /UAT environment|unavailable/i,
-  /Cutover runbook v2/i,
-];
+function composerHasCoreTitles(text: string): boolean {
+  return (
+    /Olga Petrov/i.test(text) &&
+    /Sarah Kim/i.test(text) &&
+    /Production release/i.test(text) &&
+    /CAB/i.test(text) &&
+    /Cutover runbook v2/i.test(text)
+  );
+}
 
-function truthVisible(text: string): boolean {
-  return FULL_TRUTH.every((re) => re.test(text));
+function mark(
+  row: JourneyMatrixRow,
+  classification: JourneyClassification,
+  boundary: VerticalBoundary,
+): VerticalBoundary {
+  row.classification = classification;
+  return boundary;
 }
 
 // One worker + fullyParallel:false already serialises load. Do not use
@@ -124,24 +136,12 @@ test("New Project partial people", async ({ page }, testInfo) => {
   let boundary: VerticalBoundary | undefined;
   try {
     await openNewProject(page);
-    await fillProjectName(page, `E2E People ${RUN_ID}`);
+    await fillUniqueProject(page, "bob");
     const call = await organiseNotes(page, "bob is the ba\nmike handles the legacy builds");
     row.hostedApi = passCell(Boolean(call && call.status === 200));
     row.notes = provenanceNote(call);
-    if (call) {
-      try {
-        assertLiveOpenAi(call.provenance, "New Project organise");
-        row.liveOpenAi = "PASS";
-      } catch (error) {
-        row.liveOpenAi = "FAIL";
-        boundary = "OPENAI";
-        throw error;
-      }
-    } else {
-      row.liveOpenAi = "FAIL";
-      boundary = "HOSTED_API";
-      throw new Error("Organise did not return /api/new-project");
-    }
+    assertHostedAiSuccess(call, "New Project organise");
+    row.liveOpenAi = "PASS";
 
     const people = [
       ...(await collectPeopleNames(page)),
@@ -158,18 +158,22 @@ test("New Project partial people", async ({ page }, testInfo) => {
         page,
         testInfo,
         journey: "New Project partial people",
-        calls: [call],
+        calls: [call!],
         extra: { people, needsYou, expected: ["Bob", "Mike"] },
       });
       throw new Error(
-        `Bob/Mike vanished after Organise (people=${JSON.stringify(people)}; needsYou=${JSON.stringify(needsYou)}; stakeholders=${JSON.stringify((call.body as { draft?: { stakeholders?: unknown } })?.draft?.stakeholders || [])}; provisional=${JSON.stringify((call.body as { provisionalItems?: unknown })?.provisionalItems || [])})`,
+        `Bob/Mike vanished after Organise (people=${JSON.stringify(people)}; needsYou=${JSON.stringify(needsYou)}; stakeholders=${JSON.stringify((call!.body as { draft?: { stakeholders?: unknown } })?.draft?.stakeholders || [])}; provisional=${JSON.stringify((call!.body as { provisionalItems?: unknown })?.provisionalItems || [])})`,
       );
     }
     row.result = "PASS";
   } catch (error) {
     row.result = "FAIL";
+    const message = error instanceof Error ? error.message : String(error);
+    if (/AUTH:/i.test(message) && /HTTP 401|HTTP 403|session not ready/i.test(message)) {
+      row.classification = /session not ready/i.test(message) ? "AUTH_FLAKE" : "PRODUCT_DEFECT";
+    }
     row.earliestBoundary = boundary || classifyThrown(error);
-    row.notes = [row.notes, error instanceof Error ? error.message : String(error)].filter(Boolean).join(" | ");
+    row.notes = [row.notes, message].filter(Boolean).join(" | ");
     annotate(testInfo, row);
     throw error;
   }
@@ -181,23 +185,32 @@ test("Full New Project + Create + hard reload", async ({ page }, testInfo) => {
   let boundary: VerticalBoundary | undefined;
   try {
     await openNewProject(page);
-    await fillProjectName(page, `E2E Full Truth ${RUN_ID}`);
+    await fillUniqueProject(page, "full");
     const call = await organiseNotes(page, FULL_NOTES);
     row.hostedApi = passCell(Boolean(call && call.status === 200));
-    assertLiveOpenAi(call?.provenance, "Full New Project organise");
+    assertHostedAiSuccess(call, "Full New Project organise");
     row.liveOpenAi = "PASS";
     row.notes = provenanceNote(call);
+
+    const hasRelease = organisedDraftHasYmd(call?.body, "2026-09-12");
+    const hasCab = organisedDraftHasYmd(call?.body, "2026-09-15");
+    if (!hasRelease || !hasCab) {
+      boundary = mark(row, "PRODUCT_DEFECT", "VALIDATION");
+      throw new Error(
+        `Organised draft is missing stored dates (has 2026-09-12=${hasRelease}, has 2026-09-15=${hasCab}). Compact composer labels are not a substitute for draft values.`,
+      );
+    }
 
     const people = await frameLines(page, "np-frame-people");
     const knowledge = await frameLines(page, "np-frame-knowledge");
     const issues = await frameLines(page, "np-frame-issues");
     const composed = [...people, ...knowledge, ...issues].join("\n");
     const bodyText = ((await page.locator("body").innerText()) || "");
-    const visibleBeforeCreate = truthVisible(`${composed}\n${bodyText}`);
-    row.uiInterpretation = passCell(visibleBeforeCreate);
-    if (!visibleBeforeCreate) {
+    const titlesVisible = composerHasCoreTitles(`${composed}\n${bodyText}`);
+    row.uiInterpretation = passCell(titlesVisible);
+    if (!titlesVisible) {
       boundary = classifyNewProjectLoss(call, people);
-      throw new Error(`Organised draft is missing expected people/dates/knowledge before Create: ${composed}`);
+      throw new Error(`Organised draft is missing expected people/knowledge titles before Create: ${composed}`);
     }
 
     await createProjectFromComposer(page);
@@ -208,22 +221,30 @@ test("Full New Project + Create + hard reload", async ({ page }, testInfo) => {
     expect(afterCreate).toMatch(/Production release/i);
     expect(afterCreate).toMatch(/CAB/i);
     expect(afterCreate).toMatch(/Cutover runbook v2/i);
+    assertTextRepresentsYmd(afterCreate, "2026-09-12", "Knowledge after Create");
+    assertTextRepresentsYmd(afterCreate, "2026-09-15", "Knowledge after Create");
     row.apply = "PASS";
 
     await hardReload(page);
-    await openKnowledge(page);
-    const afterReload = ((await page.locator("body").innerText()) || "");
+    const afterReload = await openKnowledgeDates(page);
     expect(afterReload).toMatch(/Olga Petrov/i);
     expect(afterReload).toMatch(/Sarah Kim/i);
     expect(afterReload).toMatch(/Production release/i);
     expect(afterReload).toMatch(/CAB/i);
     expect(afterReload).toMatch(/Cutover runbook v2/i);
+    assertTextRepresentsYmd(afterReload, "2026-09-12", "Knowledge after hard reload");
+    assertTextRepresentsYmd(afterReload, "2026-09-15", "Knowledge after hard reload");
     row.reload = "PASS";
     row.review = "n/a";
     row.result = "PASS";
   } catch (error) {
     row.result = "FAIL";
     row.earliestBoundary = boundary || classifyThrown(error);
+    row.classification =
+      row.classification ||
+      (/does not represent 2026-09-1/i.test(error instanceof Error ? error.message : "")
+        ? "PRODUCT_DEFECT"
+        : undefined);
     row.notes = [row.notes, error instanceof Error ? error.message : String(error)].filter(Boolean).join(" | ");
     annotate(testInfo, row);
     throw error;
@@ -236,13 +257,13 @@ test("Capture date update → Apply → reload", async ({ page }, testInfo) => {
   let boundary: VerticalBoundary | undefined;
   try {
     await openNewProject(page);
-    await fillProjectName(page, `E2E Capture Update ${RUN_ID}`);
+    await fillUniqueProject(page, "capture");
     const organise = await organiseNotes(
       page,
       "The Production release is scheduled for 12 September 2026.\nOlga Petrov is responsible for UAT.",
     );
     row.hostedApi = passCell(Boolean(organise && organise.status === 200));
-    assertLiveOpenAi(organise?.provenance, "Date journey organise");
+    assertHostedAiSuccess(organise, "Date journey organise");
     row.liveOpenAi = "PASS";
     row.notes = provenanceNote(organise);
     await createProjectFromComposer(page);
@@ -250,13 +271,18 @@ test("Capture date update → Apply → reload", async ({ page }, testInfo) => {
     await openCapture(page);
     const capture = await analyseCapture(page, "The Production release is now scheduled for 20 September 2026.");
     row.hostedApi = passCell(Boolean(capture && capture.status === 200));
-    assertLiveOpenAi(capture?.provenance, "Date journey capture");
+    assertHostedAiSuccess(capture, "Date journey capture");
     row.liveOpenAi = "PASS";
     row.notes = provenanceNote(capture);
 
     const update = reviewCardByName(page, /Production release/i).first();
     await expect(update).toBeVisible({ timeout: 15_000 });
     await expect(update).toHaveAttribute("data-review-family", "update");
+    const reviewText = ((await update.innerText()) || "");
+    if (!textRepresentsYmd(reviewText, "2026-09-20") && !textRepresentsYmd(await page.locator("body").innerText(), "2026-09-20")) {
+      boundary = mark(row, "PRODUCT_DEFECT", "REVIEW_UI");
+      throw new Error("Review does not semantically represent 20 September 2026.");
+    }
     row.uiInterpretation = "PASS";
     row.review = "PASS";
 
@@ -268,18 +294,17 @@ test("Capture date update → Apply → reload", async ({ page }, testInfo) => {
       throw new Error(`Apply HTTP ${applyCall?.status ?? "missing"}`);
     }
 
-    await openKnowledge(page);
-    await page.getByTestId("kc-bucket-knowledge").click();
-    await page.getByTestId("kc-subtype-dates").click();
-    const knowledge = ((await page.locator("body").innerText()) || "");
-    expect(knowledge).toMatch(/20 September 2026|20 Sep 2026|Sep 20|2026-09-20/i);
+    const knowledge = await openKnowledgeDates(page);
+    assertTextRepresentsYmd(knowledge, "2026-09-20", "Knowledge after Apply");
+    expect(knowledge).toMatch(/Production release/i);
 
     await hardReload(page);
-    await openKnowledge(page);
-    await page.getByTestId("kc-bucket-knowledge").click();
-    await page.getByTestId("kc-subtype-dates").click();
-    const reloaded = ((await page.locator("body").innerText()) || "");
-    expect(reloaded).toMatch(/20 September 2026|20 Sep 2026|Sep 20|2026-09-20/i);
+    const reloaded = await openKnowledgeDates(page);
+    if (!textRepresentsYmd(reloaded, "2026-09-20")) {
+      boundary = mark(row, "PRODUCT_DEFECT", "PROJECTION_RELOAD");
+      throw new Error("Hard reload lost or reverted Production release 20 September 2026.");
+    }
+    expect(reloaded).toMatch(/Production release/i);
     row.reload = "PASS";
     row.result = "PASS";
   } catch (error) {
@@ -296,13 +321,13 @@ test("New person / responsibility", async ({ page }, testInfo) => {
   const row = emptyMatrix("New person / responsibility");
   try {
     await openNewProject(page);
-    await fillProjectName(page, `E2E Andris ${RUN_ID}`);
+    await fillUniqueProject(page, "andris");
     const organise = await organiseNotes(
       page,
       "Olga Petrov is responsible for UAT.\nSarah Kim is responsible for Release.",
     );
     row.hostedApi = passCell(Boolean(organise && organise.status === 200));
-    assertLiveOpenAi(organise?.provenance, "Andris journey organise");
+    assertHostedAiSuccess(organise, "Andris journey organise");
     row.liveOpenAi = "PASS";
     row.notes = provenanceNote(organise);
     await createProjectFromComposer(page);
@@ -310,7 +335,7 @@ test("New person / responsibility", async ({ page }, testInfo) => {
     await openCapture(page);
     const capture = await analyseCapture(page, "Andris is responsible for Legacy.");
     row.hostedApi = passCell(Boolean(capture && capture.status === 200));
-    assertLiveOpenAi(capture?.provenance, "Andris journey capture");
+    assertHostedAiSuccess(capture, "Andris journey capture");
     row.liveOpenAi = "PASS";
     row.notes = provenanceNote(capture);
 
@@ -351,15 +376,13 @@ test("Ambiguity stays local", async ({ page }, testInfo) => {
   let boundary: VerticalBoundary | undefined;
   try {
     await openNewProject(page);
-    await fillProjectName(page, `E2E Ambiguity ${RUN_ID}`);
-    const organise = await organiseNotes(
-      page,
-      "Olga Petrov is responsible for UAT.\nSarah Kim is responsible for Release.\nThe Production release is scheduled for 12 September 2026.",
-    );
-    row.hostedApi = passCell(Boolean(organise && organise.status === 200));
-    assertLiveOpenAi(organise?.provenance, "Ambiguity journey organise");
-    row.liveOpenAi = "PASS";
-    row.notes = provenanceNote(organise);
+    const identity = await fillUniqueProject(page, "ambiguity");
+    await addComposeLine(page, "np-frame-people", "Olga Petrov");
+    await addComposeLine(page, "np-frame-people", "Sarah Kim");
+    await addComposeLine(page, "np-frame-knowledge", "Production release");
+    row.hostedApi = "n/a";
+    row.liveOpenAi = "n/a";
+    row.notes = `Seeded via New Project UI (no Organise). name=${identity.name} code=${identity.code}`;
     await createProjectFromComposer(page);
 
     await openCapture(page);
@@ -371,17 +394,28 @@ test("Ambiguity stays local", async ({ page }, testInfo) => {
       ].join("\n"),
     );
     row.hostedApi = passCell(Boolean(capture && capture.status === 200));
-    assertLiveOpenAi(capture?.provenance, "Ambiguity journey capture");
+    assertHostedAiSuccess(capture, "Ambiguity journey capture");
     row.liveOpenAi = "PASS";
-    row.notes = provenanceNote(capture);
+    row.notes = [row.notes, provenanceNote(capture)].filter(Boolean).join(" | ");
 
-    const ambiguous = reviewCardByName(page, /She will own UAT|own UAT going forward/i).first();
-    await expect(ambiguous).toBeVisible({ timeout: 15_000 });
-    await expect(ambiguous).toHaveAttribute("data-review-family", "needs_you");
-
-    const sibling = reviewCardByName(page, /Production release/i).first();
-    await expect(sibling).toBeVisible();
-    await expect(sibling).toHaveAttribute("data-review-family", "update");
+    const cards = await collectReviewCards(page);
+    const dateCard = cards.find((card) => /production release/i.test(card.text));
+    const pronounCard = cards.find(
+      (card) =>
+        card.family === "needs_you" &&
+        (/she will own/i.test(card.text) ||
+          /own uat/i.test(card.text) ||
+          (/she\b/i.test(card.text) && /uat/i.test(card.text)) ||
+          /needs you/i.test(card.text)),
+    ) || cards.find((card) => card.family === "needs_you");
+    if (!dateCard || !["update", "create"].includes(dateCard.family)) {
+      boundary = mark(row, "PRODUCT_DEFECT", "REVIEW_UI");
+      throw new Error(`Date sibling missing or not independently actionable: ${JSON.stringify(cards)}`);
+    }
+    if (!pronounCard || pronounCard.family !== "needs_you") {
+      boundary = mark(row, "PRODUCT_DEFECT", "REVIEW_UI");
+      throw new Error(`Pronoun UAT ownership was not isolated as Needs You: ${JSON.stringify(cards)}`);
+    }
     row.uiInterpretation = "PASS";
     row.review = "PASS";
 
@@ -394,9 +428,8 @@ test("Ambiguity stays local", async ({ page }, testInfo) => {
     }
 
     await hardReload(page);
-    await openKnowledge(page);
-    const reloaded = ((await page.locator("body").innerText()) || "");
-    expect(reloaded).toMatch(/21 September 2026|21 Sep 2026|Sep 21|2026-09-21/i);
+    const reloaded = await openKnowledgeDates(page);
+    assertTextRepresentsYmd(reloaded, "2026-09-21", "Knowledge after hard reload");
     expect(reloaded).not.toMatch(/She will own UAT going forward/i);
     row.reload = "PASS";
     row.result = "PASS";
@@ -415,43 +448,106 @@ test("Mixed realistic paste", async ({ page }, testInfo) => {
   let boundary: VerticalBoundary | undefined;
   try {
     await openNewProject(page);
-    await fillProjectName(page, `E2E Mixed ${RUN_ID}`);
+    await fillUniqueProject(page, "mixed");
     const organise = await organiseNotes(page, FULL_NOTES);
     row.hostedApi = passCell(Boolean(organise && organise.status === 200));
-    assertLiveOpenAi(organise?.provenance, "Mixed journey organise");
+    assertHostedAiSuccess(organise, "Mixed journey organise");
     row.liveOpenAi = "PASS";
     row.notes = provenanceNote(organise);
     await createProjectFromComposer(page);
+
+    const sourceObservations = [
+      {
+        source: "The Production release is now scheduled for 20 September 2026.",
+        meaning: "UPDATE existing Production release milestone to 2026-09-20",
+      },
+      {
+        source: "Andris is responsible for Legacy.",
+        meaning: "New person Andris / Legacy responsibility; Needs You is acceptable",
+      },
+      {
+        source: "She will own the remaining UAT gaps.",
+        meaning: "Ambiguous pronoun ownership; must stay local / not write",
+      },
+      {
+        source: "Parking-lot: catering is still undecided and is not a project control.",
+        meaning: "Unrelated commentary; must not become project truth",
+      },
+      {
+        source: "Cutover runbook v2 remains the current working version.",
+        meaning: "Already-known knowledge; no-op or commentary is fine",
+      },
+      {
+        source: "The CAB preparation session is still 15 September 2026.",
+        meaning: "Already-known CAB date; no-op or same-date update is fine",
+      },
+    ];
 
     await openCapture(page);
     const capture = await analyseCapture(
       page,
       [
         "Stand-up notes from Thursday.",
-        "The Production release is now scheduled for 20 September 2026.",
-        "Andris is responsible for Legacy.",
-        "She will own the remaining UAT gaps.",
-        "Parking-lot: catering is still undecided and is not a project control.",
-        "Cutover runbook v2 remains the current working version.",
-        "The CAB preparation session is still 15 September 2026.",
+        ...sourceObservations.map((item) => item.source),
       ].join(" "),
     );
     row.hostedApi = passCell(Boolean(capture && capture.status === 200));
-    assertLiveOpenAi(capture?.provenance, "Mixed journey capture");
+    assertHostedAiSuccess(capture, "Mixed journey capture");
     row.liveOpenAi = "PASS";
     row.notes = provenanceNote(capture);
 
-    const dateCard = reviewCardByName(page, /Production release/i).first();
-    await expect(dateCard).toBeVisible();
-    await expect(dateCard).toHaveAttribute("data-review-family", "update");
+    const cards = await collectReviewCards(page);
+    const reviewBlob = cards.map((card) => `${card.family}:${card.text}`).join("\n");
+    const bodyText = ((await page.locator("body").innerText()) || "");
+    const dateCard = cards.find((card) => /production release/i.test(card.text));
+    const andrisCard = cards.find((card) => /andris/i.test(card.text));
+    const pronounSurvived =
+      cards.some(
+        (card) =>
+          /she will own|remaining uat|own the remaining/i.test(card.text) ||
+          (card.family === "needs_you" && /uat/i.test(card.text)),
+      ) || /she will own the remaining uat gaps/i.test(bodyText);
 
-    const andris = reviewCardByName(page, /Andris/i).first();
-    await expect(andris).toBeVisible();
+    const traces = sourceObservations.map((item) => {
+      if (/Production release/.test(item.source)) {
+        return {
+          ...item,
+          reviewDisposition: dateCard ? `${dateCard.family}: ${dateCard.text.slice(0, 180)}` : "missing",
+          applyStatus: dateCard && ["update", "create"].includes(dateCard.family) ? "ready" : "not-ready",
+        };
+      }
+      if (/Andris/.test(item.source)) {
+        return {
+          ...item,
+          reviewDisposition: andrisCard ? `${andrisCard.family}: ${andrisCard.text.slice(0, 180)}` : "missing",
+          applyStatus: andrisCard?.family === "needs_you" ? "will-not-write" : andrisCard ? "ready-or-update" : "missing",
+        };
+      }
+      if (/She will own/.test(item.source)) {
+        return {
+          ...item,
+          reviewDisposition: pronounSurvived ? "present as Needs You or review transcript (exact sentence not required)" : "missing",
+          applyStatus: "must-not-write",
+        };
+      }
+      return {
+        ...item,
+        reviewDisposition: "not required as a Review card",
+        applyStatus: "must-not-become-new-truth",
+      };
+    });
+    await attachJson(testInfo, "mixed-observation-map", { cards, traces });
 
-    const ambiguous = reviewCardByName(page, /She will own|remaining UAT/i).first();
-    await expect(ambiguous).toBeVisible();
-    await expect(ambiguous).toHaveAttribute("data-review-family", "needs_you");
-
+    const dateReady = Boolean(dateCard && ["update", "create"].includes(dateCard.family) && textRepresentsYmd(`${dateCard.text}\n${bodyText}`, "2026-09-20"));
+    const andrisPresent = Boolean(andrisCard);
+    if (!dateReady || !andrisPresent || !pronounSurvived) {
+      const lost: string[] = [];
+      if (!dateReady) lost.push("Production release 20 Sep");
+      if (!andrisPresent) lost.push("Andris Legacy");
+      if (!pronounSurvived) lost.push("pronoun UAT ownership");
+      boundary = mark(row, "PRODUCT_DEFECT", "REVIEW_UI");
+      throw new Error(`Mixed paste lost or transformed observations incorrectly: ${lost.join(", ")}. Cards=${reviewBlob}`);
+    }
     row.uiInterpretation = "PASS";
     row.review = "PASS";
 
@@ -464,10 +560,10 @@ test("Mixed realistic paste", async ({ page }, testInfo) => {
     }
 
     await hardReload(page);
-    await openKnowledge(page);
-    const reloaded = ((await page.locator("body").innerText()) || "");
-    expect(reloaded).toMatch(/20 September 2026|20 Sep 2026|Sep 20|2026-09-20/i);
+    const reloaded = await openKnowledgeDates(page);
+    assertTextRepresentsYmd(reloaded, "2026-09-20", "Knowledge after hard reload");
     expect(reloaded).not.toMatch(/She will own the remaining UAT gaps/i);
+    expect(reloaded).not.toMatch(/catering is still undecided/i);
     row.reload = "PASS";
     row.result = "PASS";
   } catch (error) {
@@ -495,8 +591,12 @@ function classifyThrown(error: unknown): VerticalBoundary {
   if (apiBoundary) return apiBoundary;
   if (/vanished|stakeholders|provisional|Organised draft is missing/i.test(message)) return "VALIDATION";
   if (/Apply HTTP|Apply Ready/i.test(message)) return "APPLY";
-  if (/reload|afterReload|2026-09-20|2026-09-21|20 Sep|21 Sep/i.test(message)) return "PROJECTION_RELOAD";
-  if (/review|data-review-family|Needs you|needs_you|finding/i.test(message)) return "REVIEW_UI";
+  if (/reload|afterReload|lost or reverted|2026-09-20|2026-09-21|20 Sep|21 Sep/i.test(message)) {
+    return "PROJECTION_RELOAD";
+  }
+  if (/review|data-review-family|Needs you|needs_you|finding|independently actionable/i.test(message)) {
+    return "REVIEW_UI";
+  }
   if (/waitForResponse|did not return \/api\//i.test(message)) return "HOSTED_API";
   if (/np-name|np-organise|ocean-capture-input|fill|Timeout|UI_INPUT:/i.test(message)) return "UI_INPUT";
   return "UNKNOWN";

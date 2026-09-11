@@ -1,6 +1,7 @@
 import { expect, type Page, type Response, type TestInfo } from "@playwright/test";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { organisedDraftHasYmd, textRepresentsYmd } from "./dates";
 import type {
   HostedApiCall,
   JourneyMatrixRow,
@@ -8,6 +9,19 @@ import type {
   Provenance,
   VerticalBoundary,
 } from "./types";
+
+export { organisedDraftHasYmd, textRepresentsYmd } from "./dates";
+
+export type JourneyKind = "bob" | "full" | "capture" | "andris" | "ambiguity" | "mixed";
+
+const JOURNEY_CODE_PREFIX: Record<JourneyKind, string> = {
+  bob: "B",
+  full: "F",
+  capture: "C",
+  andris: "N",
+  ambiguity: "G",
+  mixed: "M",
+};
 
 export const RUN_ID = process.env.LUME_E2E_RUN_ID || `hv-${Date.now().toString(36)}`;
 
@@ -128,6 +142,125 @@ export function classifyFromApi(call: HostedApiCall | undefined): VerticalBounda
   if (!provenance) return "OPENAI";
   if (provenance.provider !== "openai" || provenance.fallback !== false) return "OPENAI";
   return undefined;
+}
+
+export function uniqueProjectIdentity(kind: JourneyKind): { name: string; code: string } {
+  const compact = RUN_ID.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(-10);
+  const code = `${JOURNEY_CODE_PREFIX[kind]}${compact}`.slice(0, 12);
+  return {
+    name: `E2E ${kind} ${RUN_ID}`,
+    code,
+  };
+}
+
+export async function fillUniqueProject(page: Page, kind: JourneyKind): Promise<{ name: string; code: string }> {
+  const identity = uniqueProjectIdentity(kind);
+  await fillProjectName(page, identity.name);
+  const codeField = page.getByTestId("np-code");
+  await expect(codeField).toBeVisible({ timeout: 20_000 });
+  await codeField.fill(identity.code);
+  await expect(codeField).toHaveValue(identity.code);
+  return identity;
+}
+
+export async function addComposeLine(page: Page, testId: string, value: string): Promise<void> {
+  const frame = page.getByTestId(testId);
+  await expect(frame).toBeVisible({ timeout: 20_000 });
+  const input = frame.locator("form input").first();
+  await expect(input).toBeVisible();
+  await input.fill(value);
+  await frame.locator("form").getByRole("button").click();
+  await expect(frame.locator("li span").filter({ hasText: value })).toBeVisible({
+    timeout: 10_000,
+  });
+}
+
+export async function assertHostedSessionReady(page: Page): Promise<void> {
+  const deadline = Date.now() + 40_000;
+  let last = "no-probe";
+  while (Date.now() < deadline) {
+    const probe = await page.evaluate(async () => {
+      async function peek(path: string): Promise<{ status: number; hasUser?: boolean }> {
+        const res = await fetch(path, { credentials: "include", cache: "no-store" });
+        if (path.includes("/api/auth/me")) {
+          const json = (await res.json().catch(() => ({}))) as { user?: { id?: string } };
+          return { status: res.status, hasUser: Boolean(json.user?.id) };
+        }
+        return { status: res.status };
+      }
+      const [me, workspace, billing] = await Promise.all([
+        peek("/api/auth/me"),
+        peek("/api/workspace/state"),
+        peek("/api/billing/status"),
+      ]);
+      return { meStatus: me.status, hasUser: Boolean(me.hasUser), wsStatus: workspace.status, billingStatus: billing.status };
+    });
+    last = JSON.stringify(probe);
+    if (
+      probe.meStatus === 200 &&
+      probe.hasUser &&
+      probe.wsStatus !== 401 &&
+      probe.billingStatus !== 401 &&
+      (probe.wsStatus === 200 || probe.billingStatus === 200)
+    ) {
+      return;
+    }
+    await page.waitForTimeout(400);
+  }
+  throw new Error(`AUTH: session not ready after login (${last})`);
+}
+
+function unauthenticatedMessage(call: HostedApiCall, label: string): string {
+  const body = call.body && typeof call.body === "object" ? (call.body as Record<string, unknown>) : {};
+  const code = typeof body.code === "string" ? body.code : "";
+  const error = typeof body.error === "string" ? body.error : "";
+  return `AUTH: ${label} ${call.method} ${call.url} HTTP ${call.status}${code ? ` ${code}` : ""}${error ? ` ${error}` : ""} after session readiness. Not retrying.`;
+}
+
+export function throwIfUnauthenticatedAiCall(call: HostedApiCall, label: string): void {
+  if (call.status === 401 || call.status === 403) {
+    throw new Error(unauthenticatedMessage(call, label));
+  }
+}
+
+export function assertHostedAiSuccess(call: HostedApiCall | undefined, label: string): HostedApiCall {
+  if (!call) {
+    throw new Error(`HOSTED_API: ${label} did not return a recorded response.`);
+  }
+  throwIfUnauthenticatedAiCall(call, label);
+  if (call.status !== 200) {
+    throw new Error(`HOSTED_API: ${label} HTTP ${call.status}`);
+  }
+  assertLiveOpenAi(call.provenance, label);
+  return call;
+}
+
+export async function collectReviewCards(
+  page: Page,
+): Promise<Array<{ family: string; text: string }>> {
+  const cards = reviewCards(page);
+  const count = await cards.count();
+  const out: Array<{ family: string; text: string }> = [];
+  for (let i = 0; i < count; i += 1) {
+    const family = (await cards.nth(i).getAttribute("data-review-family")) || "unknown";
+    const text = ((await cards.nth(i).innerText().catch(() => "")) || "").replace(/\s+/g, " ").trim();
+    if (text) out.push({ family, text: text.slice(0, 500) });
+  }
+  return out;
+}
+
+export async function openKnowledgeDates(page: Page): Promise<string> {
+  await openKnowledge(page);
+  const knowledgeTab = page.getByTestId("kc-bucket-knowledge");
+  if ((await knowledgeTab.count()) > 0) await knowledgeTab.click();
+  const datesTab = page.getByTestId("kc-subtype-dates");
+  if ((await datesTab.count()) > 0) await datesTab.click();
+  return ((await page.locator("body").innerText().catch(() => "")) || "").replace(/\s+/g, " ");
+}
+
+export function assertTextRepresentsYmd(text: string, ymd: string, label: string): void {
+  if (textRepresentsYmd(text, ymd)) return;
+  throw new Error(`${label} does not represent ${ymd}.`);
 }
 
 export function classifyNewProjectLoss(
@@ -397,6 +530,7 @@ export async function signIn(page: Page): Promise<{ vercelAccess: MatrixCell; lu
     );
   }
   if (!/\/login/.test(page.url()) && (await page.getByLabel("Email").count()) === 0) {
+    await assertHostedSessionReady(page);
     return { vercelAccess: "PASS", lumeAuth: "PASS" };
   }
   await expect(page.getByLabel("Email")).toBeVisible({ timeout: 20_000 });
@@ -419,6 +553,7 @@ export async function signIn(page: Page): Promise<{ vercelAccess: MatrixCell; lu
       : "Still on /login after Sign in";
     throw new Error(`AUTH: ${error}`);
   }
+  await assertHostedSessionReady(page);
   return { vercelAccess: "PASS", lumeAuth: "PASS" };
 }
 
@@ -460,7 +595,9 @@ export async function organiseNotes(page: Page, notes: string): Promise<HostedAp
   }
   const http = await responsePromise;
   await expect(page.getByTestId("np-organise")).toBeEnabled({ timeout: 180_000 });
-  return recordAndRemember(page, http);
+  const call = await recordAndRemember(page, http);
+  throwIfUnauthenticatedAiCall(call, "Organise");
+  return call;
 }
 
 export async function fillProjectName(page: Page, name: string): Promise<void> {
@@ -480,9 +617,15 @@ export async function createProjectFromComposer(page: Page): Promise<string> {
   }
   await expect(create).toBeEnabled({ timeout: 10_000 });
   await create.click();
-  await page.waitForURL((url) => /\/projects\/(?!new(?:\/|$))[^/]+/.test(url.pathname), {
-    timeout: 60_000,
-  });
+  try {
+    await page.waitForURL((url) => /\/projects\/(?!new(?:\/|$))[^/]+/.test(url.pathname), {
+      timeout: 60_000,
+    });
+  } catch (error) {
+    const text = ((await page.getByTestId("np-create-error").innerText().catch(() => "")) || "").trim();
+    if (text) throw new Error(`IDENTITY: Create Project failed: ${text}`);
+    throw error;
+  }
   await expect(page.getByTestId("ocean-project-workspace")).toBeVisible({ timeout: 30_000 });
   return (await currentProjectId(page)) || "";
 }
@@ -521,7 +664,9 @@ export async function analyseCapture(page: Page, text: string): Promise<HostedAp
   }
   const response = await responsePromise;
   await expect(page.getByTestId("ocean-capture-review")).toBeVisible({ timeout: 30_000 });
-  return recordAndRemember(page, response);
+  const call = await recordAndRemember(page, response);
+  throwIfUnauthenticatedAiCall(call, "Capture analyse");
+  return call;
 }
 
 export async function applyReady(page: Page): Promise<HostedApiCall | undefined> {

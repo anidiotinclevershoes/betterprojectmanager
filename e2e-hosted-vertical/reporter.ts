@@ -35,6 +35,7 @@ class HostedVerticalReporter implements Reporter {
       reload: cell(annotation(test, "reload"), "n/a"),
       result: result.status === "skipped" || result.status === "interrupted" ? "BLOCKED" : failed ? "FAIL" : "PASS",
       earliestBoundary: boundary || (result.status === "skipped" || result.status === "interrupted" ? "AUTH" : undefined),
+      classification: annotation(test, "classification") as JourneyMatrixRow["classification"],
       notes: annotation(test, "notes") || result.error?.message?.split("\n")[0],
     });
   }
@@ -49,12 +50,12 @@ class HostedVerticalReporter implements Reporter {
       JSON.stringify({ elapsedMs, rows: this.rows }, null, 2),
     );
     const header = [
-      "| Journey | Vercel access | Lume auth | Hosted API | Live OpenAI | UI interpretation | Review | Apply | Reload/persistence | Result | Earliest boundary |",
-      "|---|---|---|---|---|---|---|---|---|---|---|",
+      "| Journey | Vercel access | Lume auth | Hosted API | Live OpenAI | UI interpretation | Review | Apply | Reload/persistence | Result | Classification | Earliest boundary |",
+      "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ];
     const lines = this.rows.map(
       (row) =>
-        `| ${row.journey} | ${row.vercelAccess} | ${row.lumeAuth} | ${row.hostedApi} | ${row.liveOpenAi} | ${row.uiInterpretation} | ${row.review} | ${row.apply} | ${row.reload} | ${row.result} | ${row.earliestBoundary || ""} |`,
+        `| ${row.journey} | ${row.vercelAccess} | ${row.lumeAuth} | ${row.hostedApi} | ${row.liveOpenAi} | ${row.uiInterpretation} | ${row.review} | ${row.apply} | ${row.reload} | ${row.result} | ${row.classification || ""} | ${row.earliestBoundary || ""} |`,
     );
     fs.writeFileSync(
       mdPath,
