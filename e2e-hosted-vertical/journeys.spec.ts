@@ -226,7 +226,8 @@ test("Full New Project + Create + hard reload", async ({ page }, testInfo) => {
     row.apply = "PASS";
 
     await hardReload(page);
-    const afterReload = await openKnowledgeDates(page);
+    await openKnowledge(page);
+    const afterReload = ((await page.locator("body").innerText()) || "");
     expect(afterReload).toMatch(/Olga Petrov/i);
     expect(afterReload).toMatch(/Sarah Kim/i);
     expect(afterReload).toMatch(/Production release/i);
@@ -234,6 +235,9 @@ test("Full New Project + Create + hard reload", async ({ page }, testInfo) => {
     expect(afterReload).toMatch(/Cutover runbook v2/i);
     assertTextRepresentsYmd(afterReload, "2026-09-12", "Knowledge after hard reload");
     assertTextRepresentsYmd(afterReload, "2026-09-15", "Knowledge after hard reload");
+    const datesOnly = await openKnowledgeDates(page);
+    assertTextRepresentsYmd(datesOnly, "2026-09-12", "Dates filter after hard reload");
+    assertTextRepresentsYmd(datesOnly, "2026-09-15", "Dates filter after hard reload");
     row.reload = "PASS";
     row.review = "n/a";
     row.result = "PASS";
@@ -590,14 +594,14 @@ function classifyThrown(error: unknown): VerticalBoundary {
     : undefined;
   if (apiBoundary) return apiBoundary;
   if (/vanished|stakeholders|provisional|Organised draft is missing/i.test(message)) return "VALIDATION";
-  if (/Apply HTTP|Apply Ready/i.test(message)) return "APPLY";
-  if (/reload|afterReload|lost or reverted|2026-09-20|2026-09-21|20 Sep|21 Sep/i.test(message)) {
+  if (/APPLY:|Apply HTTP|Apply Ready|persist_|schema cache/i.test(message)) return "APPLY";
+  if (/reload|afterReload|lost or reverted|does not represent 2026-09-2/i.test(message)) {
     return "PROJECTION_RELOAD";
   }
   if (/review|data-review-family|Needs you|needs_you|finding|independently actionable/i.test(message)) {
     return "REVIEW_UI";
   }
   if (/waitForResponse|did not return \/api\//i.test(message)) return "HOSTED_API";
-  if (/np-name|np-organise|ocean-capture-input|fill|Timeout|UI_INPUT:/i.test(message)) return "UI_INPUT";
+  if (/np-name|np-organise|ocean-capture-input|fill|UI_INPUT:/i.test(message)) return "UI_INPUT";
   return "UNKNOWN";
 }
