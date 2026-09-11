@@ -1,0 +1,77 @@
+{
+  "draft": {
+    "name": "New project",
+    "code": "NP",
+    "summary": "",
+    "kind": "delivery",
+    "currentFocus": "",
+    "stakeholders": [
+      {
+        "clientKey": "6fbadb0f-c259-443e-b101-382dc2ca2bc6",
+        "name": "Bob",
+        "responsibilities": [],
+        "needsReview": false
+      },
+      {
+        "clientKey": "2c661336-ce9e-4cc3-bdf0-adeb75a99937",
+        "name": "Mike",
+        "responsibilities": ["legacy builds"],
+        "needsReview": false
+      }
+    ],
+    "risks": [],
+    "todos": [],
+    "importantDates": [],
+    "knowledgeRemember": [],
+    "knowledgeRisks": [],
+    "knowledgePeople": ["Bob", "Mike"],
+    "notMentioned": [],
+    "sourceNarrative": "bob is the ba\nmike handles the legacy builds",
+    "sourceMode": "paste"
+  },
+  "provisionalItems": [
+    {
+      "id": "6fbadb0f-c259-443e-b101-382dc2ca2bc6",
+      "modelObservationId": "obs-1",
+      "statement": "Bob is the business analyst.",
+      "evidence": "bob is the ba",
+      "modelDomain": "person",
+      "category": "person",
+      "proposedValues": { "name": "Bob" },
+      "disposition": "create_new",
+      "truthIntent": "current",
+      "needsReview": false,
+      "reviewReason": null
+    },
+    {
+      "id": "2c661336-ce9e-4cc3-bdf0-adeb75a99937",
+      "modelObservationId": "obs-2",
+      "statement": "Mike handles the legacy builds.",
+      "evidence": "mike handles the legacy builds",
+      "modelDomain": "responsibility",
+      "category": "person",
+      "proposedValues": {
+        "personName": "Mike",
+        "scope": "legacy builds",
+        "ownershipSemantics": "continue"
+      },
+      "disposition": "create_new",
+      "truthIntent": "current",
+      "needsReview": false,
+      "reviewReason": null
+    }
+  ],
+  "projectSeed": { "name": "", "summary": "", "currentFocus": "" },
+  "provider": "openai",
+  "openaiConfigured": true,
+  "pipeline": "v2",
+  "provenance": {
+    "provider": "openai",
+    "requestedModel": "gpt-4o-mini-2024-07-18",
+    "responseModel": "gpt-4o-mini-2024-07-18",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v1",
+    "path": "new-project-v2/parseObservationEnvelope+draftFromProvisional",
+    "fallback": false
+  }
+}

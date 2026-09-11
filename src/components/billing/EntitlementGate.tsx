@@ -5,6 +5,10 @@
  * block the main workspace with the entitlement panel.
  * Development local mode is never blocked.
  * past_due is soft-allowed (grace) with a lightweight warning banner.
+ *
+ * Children must stay in a stable fragment slot. An early `<>{children}</>`
+ * return that later becomes `<>{banner}{children}</>` remounts New Project
+ * (and Capture) and drops in-flight Organise state.
  */
 import { useEffect, useState, type ReactNode } from "react";
 import { TrialExpiredPanel } from "@/components/billing/TrialExpiredPanel";
@@ -49,27 +53,20 @@ export function EntitlementGate({ children }: { children: ReactNode }) {
     };
   }, [needsBillingCheck]);
 
-  if (!hydrated) return <>{children}</>;
-  if (persistenceMode !== "supabase") return <>{children}</>;
-  if (!checked) return <>{children}</>;
-  if (billingEnabled && entitlement && !entitlement.canUseLume) {
-    return (
-      <div className="login-page">
-        <div className="login-card auth-card">
-          <TrialExpiredPanel
-            billingConfigured={billingConfigured}
-            status={entitlement.status}
-          />
-        </div>
-      </div>
-    );
-  }
+  const billingReady = needsBillingCheck && checked;
+  const blocked = Boolean(
+    billingReady && billingEnabled && entitlement && !entitlement.canUseLume,
+  );
+  const showGrace = Boolean(
+    billingReady &&
+      billingEnabled &&
+      entitlement?.status === "past_due" &&
+      entitlement.canUseLume,
+  );
 
   return (
     <>
-      {billingEnabled &&
-      entitlement?.status === "past_due" &&
-      entitlement.canUseLume ? (
+      {showGrace ? (
         <div className="billing-grace-banner" role="status">
           <p>
             Payment issue on your subscription — Lume still works during a short
@@ -79,7 +76,18 @@ export function EntitlementGate({ children }: { children: ReactNode }) {
           </p>
         </div>
       ) : null}
-      {children}
+      {blocked ? (
+        <div className="login-page">
+          <div className="login-card auth-card">
+            <TrialExpiredPanel
+              billingConfigured={billingConfigured}
+              status={entitlement?.status}
+            />
+          </div>
+        </div>
+      ) : (
+        children
+      )}
     </>
   );
 }
