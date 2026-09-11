@@ -23,7 +23,6 @@ import {
   passCell,
   provenanceNote,
   recordedCalls,
-  requireHostedConfig,
   reviewCardByName,
   reviewCards,
   reviewFamilies,
@@ -63,7 +62,6 @@ const FULL_NOTES = [
 test.describe.configure({ mode: "serial" });
 
 test.beforeEach(async ({ page }, testInfo) => {
-  requireHostedConfig();
   installApiRecorder(page);
   testInfo.annotations.push({ type: "runId", description: RUN_ID });
   await signIn(page);
