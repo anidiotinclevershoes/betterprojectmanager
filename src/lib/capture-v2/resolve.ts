@@ -410,7 +410,10 @@ function asString(value: unknown): string | undefined {
 function evidenceQuotedInCapture(transcript: string, evidence: string): boolean {
   const source = transcript.replace(/\s+/g, " ").trim().toLowerCase();
   const quote = evidence.replace(/\s+/g, " ").trim().toLowerCase();
-  return Boolean(source && quote && source.includes(quote));
+  if (!source || !quote) return false;
+  if (source.includes(quote)) return true;
+  const loosened = quote.replace(/[.,;:!?]+$/g, "").trim();
+  return Boolean(loosened && source.includes(loosened));
 }
 
 function identityEvidenceText(
