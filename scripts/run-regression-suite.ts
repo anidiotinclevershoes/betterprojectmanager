@@ -30,6 +30,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "people-context-ui", script: "scripts/verify-people-context-ui.ts" },
   { name: "capture-trust-boundary", script: "scripts/verify-capture-trust-boundary.ts" },
   { name: "phase3b-capture-boundary", script: "scripts/verify-phase3b-capture-boundary.ts" },
+  { name: "apply-authoritative-first-paint", script: "scripts/verify-apply-authoritative-first-paint.ts" },
   { name: "phase0-capture-baseline", script: "scripts/verify-phase0-capture-baseline.ts" },
   { name: "capture-v2", script: "scripts/verify-capture-v2.ts" },
   { name: "capture-intelligence-diagnostic", script: "scripts/verify-capture-intelligence-diagnostic.ts" },

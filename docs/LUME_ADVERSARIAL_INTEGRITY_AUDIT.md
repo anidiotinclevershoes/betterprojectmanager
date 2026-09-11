@@ -25,7 +25,7 @@ These were the four dogfood blockers. They stay in the findings table as **CLOSE
 | **Fix architecture** | After `executed.kind === "wrote"`, production Apply returns reloaded workspace state only. If `reloadWorkspace` throws and persist hooks are present, return `{ executed, reconcileFailed: true }` and **omit `state`**. Never return the pre-write snapshot as success. |
 | **Enforcement** | `applyApprovedCaptureSuggestion`; HTTP `/api/capture/apply` exposes `reconcileFailed`; client `applyOne` adopts `data.state` only when present; on write + reconcileFailed it calls `reconcileDurableWorkspace()` (`GET /api/workspace/state`). If that fails, it announces save + refresh. Memory path without hooks may still return `box.state`. |
 | **Production regression** | `verify-adversarial-integrity` A-001; `verify-dogfood-integrity-gate` D-045 (receipted create + knowledge retry). |
-| **Residual** | The write is not rolled back. A failed reload can leave the UI briefly behind the database until hydrate/refresh. History persist remains best-effort after the write. Paint cache is still not written by `adoptAppliedState` (N-10). |
+| **Residual** | The write is not rolled back. A failed reload can leave the UI briefly behind the database until hydrate/refresh. History persist remains best-effort after the write. |
 
 ### D-046 / A-002 / A-004 / N-07 fingerprint — CLOSED / VERIFIED
 
@@ -72,7 +72,7 @@ See also `docs/LUME_V1_KNOWN_DISCOVERIES.md` § Future hardening backlog.
 
 - ~~Hydrate 24 vs structured vs UI 8 (D-049 / N-03)~~ closed as D-R44
 - Durable `analysesThisMonth` (N-04 / D-024)
-- Paint cache after confirmed Apply (N-10)
+- ~~Paint cache after confirmed Apply (N-10)~~ closed — `adoptAppliedState` writes `lume-mission-supabase-cache-v1` from Apply `reloadWorkspace` state; `persistTimelineUpdate` rederives `projects.next_milestone_on` when that pointer names the updated row
 - `source_recommendation_id` if product still wants the link (N-08)
 - Same-project `supersedes_id` (N-13)
 - Date/time normalisation (`T12:00:00.000Z` date-only hydrate)
@@ -127,7 +127,7 @@ Remaining confirmed or high-confidence paths:
 
 Closed 9 September 2026: New Project create and project delete are one DB transaction each (`create_project_bundle` / `delete_project_bundle`). A crash mid-create rolls back the whole bundle. The app cannot report success on a partial create.
 
-Not silent canonical corruption: Meeting Prep leftover does **not** write current surfaces; hard-refresh paint-cache lag is **temporary UI** (N-10).
+Not silent canonical corruption: Meeting Prep leftover does **not** write current surfaces.
 
 ## Could two parts of Lume disagree about the same project fact?
 
@@ -235,7 +235,7 @@ Apply production reload: `reloadWorkspace` → `loadAuthenticatedWorkspace()` (f
 
 `loadMissionStateFromSupabase` is the hydrate spine. MissionState is the client bag. Surfaces re-project: Timeline (dated truth), Knowledge Centre (sections + structured), Catch Me Up / Tell Me (serialized canonical truth), Capture context (project-scoped extract + capped cross-project names).
 
-Paint cache: `lume-mission-supabase-cache-v1` written on hydrate and `saveStatus === "saved"`. `adoptAppliedState` does **not** write it.
+Paint cache: `lume-mission-supabase-cache-v1` written on hydrate, confirmed persist, and confirmed Apply reload (`adoptAppliedState` / N-10 closed).
 
 Date-only columns hydrate as `{date}T12:00:00.000Z`.
 
@@ -286,7 +286,7 @@ Corrections are intended as state transitions on canonical rows, not a second st
 | N-07 | MEDIUM | **CLOSED / VERIFIED** (fingerprint). Residual: Apply still does not re-bind | Responsibility replace | Fingerprint gap closed | Source; inverted | `replacePersonId` + owner set in expected-target; Apply does not `bindResolvedReplacement` (by design) | fingerprint closed with D-046 |
 | N-08 | LOW | DOCUMENTED / ACCEPTED V1 LIMITATION | Todo provenance | Link never persisted | Source | No `source_recommendation_id` writes | HARDEN DURING V1 |
 | N-09 | MEDIUM | DEFENCE-IN-DEPTH GAP | RLS | Same-workspace mis-attribution | Source | recommendations / history / capture_sessions membership-only | FIX BEFORE EXTERNAL USERS |
-| N-10 | LOW | DEFENCE-IN-DEPTH GAP | Paint cache | Temporary UI | Source | `adoptAppliedState` is `setState` only | HARDEN DURING V1 |
+| N-10 | LOW | **CLOSED / VERIFIED** | Paint cache | Was temporary stale first paint | Hosted trace + inverted | `adoptAppliedState` writes confirmed Apply reload into `lume-mission-supabase-cache-v1`; milestone update rederives `projects.next_milestone_on` | closed |
 | N-11 | — | FALSE ALARM (current product) | Memory-only APIs | No on mounted UI | Source | `ProjectWidgetGrid` / `updateMeeting(` unused | ACCEPT; do not remount |
 | N-12 | MEDIUM | DEFENCE-IN-DEPTH GAP | Apply API | Writes without Review UI | Source | No readiness attestation | HARDEN / document |
 | N-13 | LOW | DEFENCE-IN-DEPTH GAP | Knowledge FK | Cross-project supersede representable | Source | `supersedes_id` → `knowledge_items(id)` only | HARDEN DURING V1 |
@@ -336,7 +336,7 @@ Production `/api/capture/apply` always passes `reloadWorkspace`. Client `adoptAp
 | 7 | Replace-owner pin is fingerprinted | `replacePersonId` + owner set in expected-target; Apply does not re-bind | **CLOSED / VERIFIED** fingerprint (N-07). Re-bind remains Review-only |
 | 8 | Suggestion→To Do provenance survives persist | no `source_recommendation` writes | **CONFIRMED** never written (N-08) |
 | 9 | All child RLS re-checks project↔workspace | recommendations/history/sessions membership-only | **CONFIRMED** gap (N-09) |
-| 10 | Apply refreshes paint cache | `adoptAppliedState` | **CONFIRMED** does not (N-10) |
+| 10 | Apply refreshes paint cache | `adoptAppliedState` | **CLOSED** writes confirmed Apply reload (N-10 / D-R45) |
 | 11 | Memory-only meeting/suggestion APIs are live | no `ProjectWidgetGrid` import; no `updateMeeting(` | **FALSE ALARM** on current pages (N-11) |
 | 12 | Apply requires Review Ready | apply route | **CONFIRMED** planner-only (N-12) |
 | 13 | Supersede cannot cross projects | FK is table-global | **CONFIRMED** representable (N-13) |
@@ -437,7 +437,7 @@ Do not treat a green helper suite as proof the production caller is safe. That i
 
 - ~~Hydrate 24 vs structured vs UI 8 (N-03 / D-049)~~ closed as D-R44
 - `analysesThisMonth` from durable usage (N-04)
-- Write paint cache after confirmed Apply (N-10)
+- Paint cache after confirmed Apply (N-10) — closed as D-R45
 - `source_recommendation_id` on todo create if product still wants the link (N-08)
 - `supersedes_id` same-project check (N-13)
 - ISO date validation beyond regex

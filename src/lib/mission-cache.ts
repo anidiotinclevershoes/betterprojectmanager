@@ -74,6 +74,34 @@ export function shouldWriteDurableMissionCache(input: {
   return input.reason === "hydrate" || input.reason === "confirmed-persist";
 }
 
+/**
+ * Confirmed Apply reload (or hydrate) may refresh the paint cache.
+ * Never call this with speculative client-authored state.
+ */
+export function writeConfirmedAppliedWorkspaceCache(input: {
+  persistenceMode: "local" | "supabase";
+  workspaceId: string | null;
+  userId: string | null;
+  state: MissionState;
+}): boolean {
+  if (
+    !shouldWriteDurableMissionCache({
+      reason: "confirmed-persist",
+      persistenceMode: input.persistenceMode,
+      workspaceId: input.workspaceId,
+      userId: input.userId,
+    })
+  ) {
+    return false;
+  }
+  writeMissionSupabaseCache({
+    userId: input.userId!,
+    workspaceId: input.workspaceId!,
+    state: input.state,
+  });
+  return true;
+}
+
 export function writeMissionSupabaseCache(input: {
   userId: string;
   workspaceId: string;

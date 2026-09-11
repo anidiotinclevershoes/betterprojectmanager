@@ -152,21 +152,43 @@ export function applyCaptureOperationInMemory(
         ],
       };
     }
-    case "update_milestone":
+    case "update_milestone": {
+      const previous = (state.timeline ?? []).find((t) => t.id === op.milestoneId);
+      const timeline = (state.timeline ?? []).map((t) =>
+        t.id === op.milestoneId
+          ? {
+              ...t,
+              label: op.label ?? t.label,
+              startAt: op.startAt ?? t.startAt,
+              endAt: op.endAt ?? t.endAt,
+              notes: op.notes ?? t.notes,
+            }
+          : t,
+      );
+      const updated = timeline.find((t) => t.id === op.milestoneId);
+      const previousDay = previous?.startAt?.slice(0, 10);
       return {
         ...state,
-        timeline: (state.timeline ?? []).map((t) =>
-          t.id === op.milestoneId
-            ? {
-                ...t,
-                label: op.label ?? t.label,
-                startAt: op.startAt ?? t.startAt,
-                endAt: op.endAt ?? t.endAt,
-                notes: op.notes ?? t.notes,
-              }
-            : t,
-        ),
+        timeline,
+        projects: state.projects.map((project) => {
+          if (project.id !== op.projectId) return project;
+          const pointer = project.nextMilestone?.trim().toLowerCase();
+          const followsLabel =
+            Boolean(pointer) &&
+            (pointer === previous?.label?.trim().toLowerCase() ||
+              pointer === updated?.label?.trim().toLowerCase());
+          const followsDate =
+            Boolean(project.nextMilestoneAt && previousDay) &&
+            project.nextMilestoneAt.slice(0, 10) === previousDay;
+          if (!followsLabel && !followsDate) return project;
+          return {
+            ...project,
+            nextMilestone: op.label ?? project.nextMilestone,
+            nextMilestoneAt: op.startAt ?? project.nextMilestoneAt,
+          };
+        }),
       };
+    }
     case "ensure_person": {
       const result = ensurePersonOnProject(
         state.projects,
