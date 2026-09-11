@@ -344,16 +344,27 @@ function asString(value: unknown): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+function evidenceQuotedInCapture(transcript: string, evidence: string): boolean {
+  const source = transcript.replace(/\s+/g, " ").trim().toLowerCase();
+  const quote = evidence.replace(/\s+/g, " ").trim().toLowerCase();
+  return Boolean(source && quote && source.includes(quote));
+}
+
 function identityEvidenceText(
   observation: CaptureObservationV2,
   transcript: string,
 ): string {
-  // Capture text the user supplied, plus the observation's verbatim evidence
-  // quote. The model statement is not identity proof — it can echo a UUID's
+  // Observation-local quote only. The whole Capture must not contribute
+  // sibling names (D-051 / convergence cross-observation contamination).
+  // The model statement is not identity proof — it can echo a UUID's
   // recorded name that the transcript never established.
-  return [transcript, observation.evidence]
-    .filter((part) => typeof part === "string" && part.trim())
-    .join("\n");
+  // If evidence is missing or not a quote from the user Capture, fail closed
+  // (empty) rather than scanning the rest of the paste.
+  const evidence =
+    typeof observation.evidence === "string" ? observation.evidence.trim() : "";
+  if (!evidence) return "";
+  if (evidenceQuotedInCapture(transcript, evidence)) return evidence;
+  return "";
 }
 
 function uncertainPersonIdentity(

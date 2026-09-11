@@ -626,6 +626,101 @@ function main() {
     assertNeedsYou(row, "Sarah owns UAT must stay ambiguous");
   });
 
+  check("sibling recorded names in the same Capture do not poison an incomplete-name observation", () => {
+    const evidence = "Morgan will take ownership of Legacy.";
+    const transcript = [
+      evidence,
+      "Jordan Hale and Sam Patel discussed the UAT handover.",
+    ].join("\n\n");
+    const { row } = resolveObs(haleWorld(), transcript, {
+      id: "obs-morgan",
+      domain: "responsibility",
+      disposition: "create_new",
+      truthIntent: "current",
+      statement: evidence,
+      evidence,
+      proposedValues: {
+        personName: "Morgan",
+        scope: "Legacy",
+        ownershipSemantics: "replace",
+      },
+    });
+    assertNeedsYou(row, "incomplete Morgan must stay Needs you");
+    const reason = row?.decision.kind === "needs_you" ? row.decision.reason : "";
+    assert.match(
+      reason,
+      /Person identity is not established|cannot tell which person|needs a name|not a recorded/i,
+    );
+    assert.doesNotMatch(
+      reason,
+      /More than one existing person matches/i,
+      "sibling Jordan Hale + Sam Patel must not become a multiple-match on Morgan",
+    );
+  });
+
+  check("observation-local evidence still binds the named person when siblings appear elsewhere in the paste", () => {
+    const evidence = "Jordan Hale is responsible for UAT.";
+    const transcript = [evidence, "Sam Patel is responsible for Release."].join("\n\n");
+    const { row } = resolveObs(haleWorld(), transcript, {
+      id: "obs-hale-uat",
+      domain: "responsibility",
+      disposition: "create_new",
+      truthIntent: "current",
+      statement: evidence,
+      evidence,
+      candidateTargetId: HALE,
+      candidateTargetTitle: "Jordan Hale",
+      proposedValues: {
+        personName: "Jordan Hale",
+        scope: "UAT",
+        ownershipSemantics: "share",
+      },
+    });
+    assert.equal(row?.decision.kind, "write");
+    if (row?.decision.kind === "write") {
+      assert.equal(row.decision.domain, "responsibility");
+      if (row.decision.operation.type === "confirm_responsibility") {
+        assert.equal(row.decision.operation.personId, HALE);
+        assert.equal(row.decision.operation.personName, "Jordan Hale");
+      }
+    }
+  });
+
+  check("pronoun evidence that itself names two recorded people stays Needs you", () => {
+    const evidence =
+      "Jordan Hale and Sam Patel discussed the UAT handover. She will own UAT going forward.";
+    const { row } = resolveObs(haleWorld(), evidence, {
+      id: "obs-she",
+      domain: "responsibility",
+      disposition: "ambiguous",
+      truthIntent: "current",
+      statement: "She will own UAT going forward.",
+      evidence,
+      proposedValues: {
+        personName: "She",
+        scope: "UAT",
+        ownershipSemantics: "replace",
+      },
+    });
+    assertNeedsYou(row, "pronoun + two named people in the same evidence");
+  });
+
+  check("invented evidence that is not a quote from the Capture cannot bind a recorded person", () => {
+    const transcript = "He is away next week.";
+    const { row } = resolveObs(haleWorld(), transcript, {
+      id: "obs-invented-evidence",
+      domain: "availability",
+      disposition: "update_existing",
+      truthIntent: "current",
+      statement: "Jordan Hale is away next week.",
+      evidence: "Jordan Hale is away next week.",
+      candidateTargetId: HALE,
+      candidateTargetTitle: "Jordan Hale",
+      proposedValues: { awayFromIso: "2026-10-03" },
+    });
+    assertNeedsYou(row, "non-quoted evidence must fail closed");
+  });
+
   check("after both Sarahs exist, Sarah Kim owns UAT resolves Sarah Kim", () => {
     const transcript = "Sarah Kim owns UAT.";
     const { row } = resolveObs(bothSarahsWorld(), transcript, {

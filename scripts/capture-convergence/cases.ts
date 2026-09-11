@@ -186,14 +186,14 @@ function historicalCases(): ConvergenceCase[] {
       baseScenario: "aurora-andris-full-paste",
       perturbation: "transcript also names Olga Petrov and Sarah Kim",
       expectedInvariant:
-        "LOCK of current D-051 behaviour: Andris in a paste that names Olga+Sarah is Needs You (multiple match)",
+        "Andris in a paste that also names Olga+Sarah stays incomplete-name Needs You; sibling names must not become a multiple-match",
       world: "aurora",
       projectId: AURORA_ID,
       focusIds: ["obs-andris"],
       ...pack([ANDRIS], OLGA_SARAH_PASTE),
       expect: {
         decisionById: { "obs-andris": "needs_you" },
-        reasonClassById: { "obs-andris": "needs_you_identity_multiple" },
+        reasonClassById: { "obs-andris": "needs_you_identity_incomplete" },
       },
     }),
     makeCase({
