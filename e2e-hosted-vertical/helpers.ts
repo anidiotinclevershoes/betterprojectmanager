@@ -157,17 +157,34 @@ export async function captureFailureArtifacts(args: {
   const dir = args.testInfo.outputPath("diagnostics");
   fs.mkdirSync(dir, { recursive: true });
   const screenshotPath = path.join(dir, `${slug(args.journey)}-failure.png`);
-  await args.page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => undefined);
+  await args.page
+    .screenshot({ path: screenshotPath, fullPage: false, timeout: 8_000 })
+    .catch(() => undefined);
   const url = args.page.url();
-  const visibleState = {
-    url,
-    title: await args.page.title().catch(() => ""),
-    people: await collectPeopleNames(args.page),
-    framePeople: await frameLines(args.page, "np-frame-people"),
-    frameKnowledge: await frameLines(args.page, "np-frame-knowledge"),
-    needsYou: await collectNeedsYou(args.page),
-    bodyTextPreview: ((await args.page.locator("body").innerText().catch(() => "")) || "").slice(0, 2500),
-  };
+  const sso = await detectVercelSso(args.page);
+  const visibleState = sso
+    ? {
+        url,
+        title: await args.page.title().catch(() => ""),
+        vercelSso: true,
+        people: [],
+        framePeople: [],
+        frameKnowledge: [],
+        needsYou: [],
+        bodyTextPreview: "Vercel Deployment Protection SSO — Lume UI not reachable",
+      }
+    : {
+        url,
+        title: await args.page.title().catch(() => ""),
+        people: await collectPeopleNames(args.page),
+        framePeople: await frameLines(args.page, "np-frame-people"),
+        frameKnowledge: await frameLines(args.page, "np-frame-knowledge"),
+        needsYou: await collectNeedsYou(args.page),
+        bodyTextPreview: ((await args.page.locator("body").innerText().catch(() => "")) || "").slice(
+          0,
+          2500,
+        ),
+      };
   const payload = {
     journey: args.journey,
     runId: RUN_ID,
@@ -275,14 +292,15 @@ function stripQuerySecrets(url: string): string {
 
 export async function detectVercelSso(page: Page): Promise<boolean> {
   const url = page.url();
-  if (/vercel\.com\/login|sso\.vercel|authentication required/i.test(url)) return true;
-  const title = await page.title().catch(() => "");
-  const body = ((await page.locator("body").innerText().catch(() => "")) || "").slice(0, 800);
-  return (
-    (/authentication required|deployment protection|vercel/i.test(title) ||
-      /authentication required|deployment protection/i.test(body)) &&
-    (await page.getByLabel("Email").count()) === 0
-  );
+  if (/vercel\.com\/(?:login|sso|sso-api)|sso\.vercel|authentication required/i.test(url)) {
+    return true;
+  }
+  const title = await Promise.race([
+    page.title(),
+    new Promise<string>((resolve) => setTimeout(() => resolve(""), 2000)),
+  ]).catch(() => "");
+  if (/authentication required|deployment protection/i.test(title)) return true;
+  return false;
 }
 
 export async function signIn(page: Page): Promise<void> {
@@ -295,10 +313,11 @@ export async function signIn(page: Page): Promise<void> {
   const email = e2eEmail();
   const password = e2ePassword();
   const bypass = vercelBypassSecret();
-  await page.goto("/login", { waitUntil: "domcontentloaded" });
+  await page.goto("/login", { waitUntil: "domcontentloaded", timeout: 20_000 });
   if ((await detectVercelSso(page)) && bypass) {
     await page.goto(`/login?x-vercel-protection-bypass=${encodeURIComponent(bypass)}`, {
       waitUntil: "domcontentloaded",
+      timeout: 20_000,
     });
   }
   if (await detectVercelSso(page)) {

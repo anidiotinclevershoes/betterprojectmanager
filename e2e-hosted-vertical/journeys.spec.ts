@@ -59,7 +59,8 @@ const FULL_NOTES = [
   "Cutover runbook v2 is the current procedure.",
 ].join("\n");
 
-test.describe.configure({ mode: "serial" });
+// One worker + fullyParallel:false already serialises load. Do not use
+// describe serial mode: a first AUTH failure would skip the other journeys.
 
 test.beforeEach(async ({ page }, testInfo) => {
   installApiRecorder(page);
@@ -68,13 +69,24 @@ test.beforeEach(async ({ page }, testInfo) => {
 });
 
 test.afterEach(async ({ page }, testInfo) => {
+  const message = testInfo.error?.message || "";
+  if (/AUTH:/i.test(message) && !testInfo.annotations.some((item) => item.type === "boundary")) {
+    testInfo.annotations.push({ type: "boundary", description: "AUTH" });
+    testInfo.annotations.push({ type: "hostedApi", description: "BLOCKED" });
+    testInfo.annotations.push({ type: "liveOpenAi", description: "BLOCKED" });
+    testInfo.annotations.push({ type: "uiInterpretation", description: "BLOCKED" });
+    testInfo.annotations.push({ type: "notes", description: message.split("\n")[0] });
+  }
   if (testInfo.status !== testInfo.expectedStatus) {
-    await captureFailureArtifacts({
-      page,
-      testInfo,
-      journey: testInfo.title,
-      calls: recordedCalls(page),
-    });
+    await Promise.race([
+      captureFailureArtifacts({
+        page,
+        testInfo,
+        journey: testInfo.title,
+        calls: recordedCalls(page),
+      }),
+      new Promise<void>((resolve) => setTimeout(resolve, 10_000)),
+    ]).catch(() => undefined);
   }
 });
 

@@ -29,8 +29,8 @@ class HostedVerticalReporter implements Reporter {
       review: cell(annotation(test, "review"), "n/a"),
       apply: cell(annotation(test, "apply"), "n/a"),
       reload: cell(annotation(test, "reload"), "n/a"),
-      result: result.status === "skipped" ? "BLOCKED" : failed ? "FAIL" : "PASS",
-      earliestBoundary: boundary,
+      result: result.status === "skipped" || result.status === "interrupted" ? "BLOCKED" : failed ? "FAIL" : "PASS",
+      earliestBoundary: boundary || (result.status === "skipped" || result.status === "interrupted" ? "AUTH" : undefined),
       notes: annotation(test, "notes") || result.error?.message?.split("\n")[0],
     });
   }
