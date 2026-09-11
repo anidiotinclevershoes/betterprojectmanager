@@ -689,7 +689,11 @@ export async function applyReady(page: Page): Promise<HostedApiCall | undefined>
 }
 
 export async function expectNoCaptureError(page: Page): Promise<void> {
-  await expect(page.locator(".error-banner.capture-error")).toHaveCount(0);
+  const banner = page.locator(".error-banner.capture-error");
+  const count = await banner.count();
+  if (count === 0) return;
+  const text = ((await banner.first().innerText().catch(() => "")) || "").replace(/\s+/g, " ").trim();
+  throw new Error(`APPLY: Capture error banner: ${text.slice(0, 400)}`);
 }
 
 export function reviewCards(page: Page) {
