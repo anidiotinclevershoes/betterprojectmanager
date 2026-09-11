@@ -1,11 +1,11 @@
 {
   "sourceSha": "90dfb6cb1f67939358ba3fa3c878f2749d3e4b5b",
-  "experimentSha": "5cc7a993a2c311e52a364fddfab70ffab1277c08",
-  "generatedAt": "2026-09-11T23:20:42.295Z",
-  "elapsedMs": 105,
+  "experimentSha": "009b4fab7d71b264cc8b4faec6e87a49112f071f",
+  "generatedAt": "2026-09-11T23:21:55.416Z",
+  "elapsedMs": 118,
   "total": 538,
-  "pass": 534,
-  "fail": 4,
+  "pass": 535,
+  "fail": 3,
   "families": {
     "historical_regression": {
       "pass": 17,
@@ -58,8 +58,8 @@
       "total": 19
     },
     "contradiction": {
-      "pass": 3,
-      "fail": 1,
+      "pass": 4,
+      "fail": 0,
       "total": 4
     },
     "product_model_gap": {
@@ -76,16 +76,6 @@
   "clusters": [
     {
       "id": "cluster-01",
-      "label": "Contradictory sibling observations both stay Apply-eligible writes",
-      "classification": "PLANNER",
-      "earliestStage": "PLANNER",
-      "caseIds": [
-        "contra-risk-open-and-closed"
-      ],
-      "note": "Same observed semantic transition. Not a proven single root cause."
-    },
-    {
-      "id": "cluster-02",
       "label": "Product-model gap: cab-cancelled",
       "classification": "PRODUCT MODEL GAP",
       "earliestStage": "PLANNER",
@@ -95,7 +85,7 @@
       "note": "Same observed semantic transition. Not a proven single root cause."
     },
     {
-      "id": "cluster-03",
+      "id": "cluster-02",
       "label": "Product-model gap: runbook-v3",
       "classification": "PRODUCT MODEL GAP",
       "earliestStage": "PLANNER",
@@ -105,7 +95,7 @@
       "note": "Same observed semantic transition. Not a proven single root cause."
     },
     {
-      "id": "cluster-04",
+      "id": "cluster-03",
       "label": "Product-model gap: cab-as-knowledge",
       "classification": "PRODUCT MODEL GAP",
       "earliestStage": "PLANNER",
@@ -116,21 +106,6 @@
     }
   ],
   "failures": [
-    {
-      "id": "contra-risk-open-and-closed",
-      "family": "contradiction",
-      "seed": 1678779826,
-      "baseScenario": "bridge-open-closed",
-      "perturbation": "same risk open and resolved",
-      "expectedInvariant": "Opposite risk statuses stay local / Needs You; no silent last-write-wins Apply Ready pair",
-      "ok": false,
-      "expected": "Opposite risk statuses stay local / Needs You; no silent last-write-wins Apply Ready pair",
-      "actual": "contradiction locality: 2 focus writes and 0 Needs You (expected conflict to stay local)",
-      "earliestStage": "PLANNER",
-      "classification": "PLANNER",
-      "productModelGap": false,
-      "heldOut": false
-    },
     {
       "id": "gap-cab-cancel-remove",
       "family": "product_model_gap",
@@ -182,7 +157,7 @@
   "historicalNewProjectBehaviours": 8,
   "perturbationCaseCount": 463,
   "heldOutCount": 39,
-  "uniqueFailureFamilies": 4,
+  "uniqueFailureFamilies": 3,
   "combinedOnlyBreaks": [],
   "orderChangesSemantics": [],
   "unrelatedContextChanges": [],
@@ -195,7 +170,6 @@
   "architectureJudgement": "A",
   "architectureNote": "A small number of clusters account for most failures. Bounded defects are plausible; confirm before treating as a rewrite.",
   "reproduce": [
-    "npx tsx scripts/verify-capture-convergence.ts --id contra-risk-open-and-closed",
     "npx tsx scripts/verify-capture-convergence.ts --id gap-cab-cancel-remove",
     "npx tsx scripts/verify-capture-convergence.ts --id gap-runbook-v3-retire-v2",
     "npx tsx scripts/verify-capture-convergence.ts --id gap-cab-as-knowledge"

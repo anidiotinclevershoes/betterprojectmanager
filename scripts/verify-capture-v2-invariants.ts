@@ -446,6 +446,58 @@ function main() {
     assert.ok(decision.operation.startAt?.startsWith("2026-10-09"));
   });
 
+  check("contradictory risk statuses on the same record stay Needs You", () => {
+    const resolved = resolveCandy([
+      {
+        id: "obs-bridge-open",
+        statement: "Gumdrop Bridge icing is still open",
+        evidence: "Gumdrop Bridge icing is still open.",
+        domain: "risk",
+        disposition: "update_existing",
+        truthIntent: "current",
+        candidateTargetId: "risk-bridge",
+        candidateTargetTitle: "Gumdrop Bridge icing",
+        proposedValues: { status: "open" },
+      },
+      {
+        id: "obs-bridge-closed",
+        statement: "Gumdrop Bridge icing is resolved",
+        evidence: "The icing on Gumdrop Bridge has melted; that risk is closed.",
+        domain: "risk",
+        disposition: "update_existing",
+        truthIntent: "current",
+        candidateTargetId: "risk-bridge",
+        candidateTargetTitle: "Gumdrop Bridge icing",
+        proposedValues: { status: "resolved" },
+      },
+    ]);
+    assert.equal(resolved.length, 2);
+    for (const row of resolved) {
+      assert.equal(row.decision.kind, "needs_you");
+      assert.equal(row.suggestion, null);
+      if (row.decision.kind === "needs_you") {
+        assert.match(row.decision.reason, /contradictory updates/i);
+      }
+    }
+  });
+
+  check("solo risk resolve remains a write", () => {
+    const resolved = resolveCandy([
+      {
+        id: "obs-bridge-closed",
+        statement: "Gumdrop Bridge icing is resolved",
+        evidence: "The icing on Gumdrop Bridge has melted; that risk is closed.",
+        domain: "risk",
+        disposition: "update_existing",
+        truthIntent: "current",
+        candidateTargetId: "risk-bridge",
+        candidateTargetTitle: "Gumdrop Bridge icing",
+        proposedValues: { status: "resolved" },
+      },
+    ]);
+    assert.equal(resolved[0]?.decision.kind, "write");
+  });
+
   check("malformed envelopes fail closed", () => {
     fc.assert(
       fc.property(
