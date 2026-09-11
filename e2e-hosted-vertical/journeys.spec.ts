@@ -439,8 +439,12 @@ test("Ambiguity stays local", async ({ page }, testInfo) => {
     row.result = "PASS";
   } catch (error) {
     row.result = "FAIL";
+    const message = error instanceof Error ? error.message : String(error);
     row.earliestBoundary = boundary || classifyThrown(error);
-    row.notes = [row.notes, error instanceof Error ? error.message : String(error)].filter(Boolean).join(" | ");
+    if (/APPLY:|schema cache|persist_/i.test(message)) {
+      row.classification = "PRODUCT_DEFECT";
+    }
+    row.notes = [row.notes, message].filter(Boolean).join(" | ");
     annotate(testInfo, row);
     throw error;
   }
