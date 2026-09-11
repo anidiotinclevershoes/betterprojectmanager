@@ -1,0 +1,147 @@
+{
+  "journey": "Ambiguous they plus safe date",
+  "projectId": "5fc82b04-bb7e-4414-9e08-073d7ec17feb",
+  "calls": [
+    {
+      "url": "/api/capture",
+      "status": 200,
+      "provenance": {
+        "provider": "openai",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "promptId": "capture-v2-observations",
+        "promptVersion": "capture-v2-eval-baseline-v1",
+        "path": "capture-v2/extractObservationsWithOpenAI",
+        "fallback": false
+      },
+      "capturePipeline": "v2",
+      "observationAccount": {
+        "total": 2,
+        "proposedChanges": 1,
+        "alreadyKnown": 1,
+        "merged": 0,
+        "needsYou": 0,
+        "commentary": 0,
+        "rejected": 0
+      },
+      "findingsValidation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "invalidTargetCount": 0
+      },
+      "findings": [
+        {
+          "id": "find-4c666bf9-7f99-485a-b897-e5968ebf411c",
+          "fact": "Elena Voss and Tomos Reed agreed that one of them will chair the weekly mobilisation huddle.",
+          "evidence": "they agreed one of them will chair the weekly mobilisation huddle.",
+          "findingType": "NO_CHANGE",
+          "confidence": 0,
+          "requiresClarification": false,
+          "reasoningSummary": "Elena Voss and Tomos Reed agreed that one of them will chair the weekly mobilisation huddle.",
+          "invalidTarget": false,
+          "projectId": "5fc82b04-bb7e-4414-9e08-073d7ec17feb",
+          "projectName": "HO isolate ho-fix3-1"
+        },
+        {
+          "id": "find-7c43c89e-d298-4b02-9dff-8efed78e793b",
+          "fact": "A task to collect the void keys from the depot is scheduled for 16 October 2026.",
+          "evidence": "collect the void keys from the depot on 16 October 2026.",
+          "findingType": "NEW_INFORMATION",
+          "target": {
+            "entityType": "todo",
+            "title": "Collect void keys from the depot"
+          },
+          "changes": {
+            "value": {
+              "proposed": "A task to collect the void keys from the depot is scheduled for 16 October 2026."
+            }
+          },
+          "confidence": 0,
+          "requiresClarification": false,
+          "reasoningSummary": "A task to collect the void keys from the depot is scheduled for 16 October 2026.",
+          "invalidTarget": false,
+          "projectId": "5fc82b04-bb7e-4414-9e08-073d7ec17feb",
+          "projectName": "HO isolate ho-fix3-1"
+        }
+      ],
+      "proposedOperations": [
+        {
+          "id": "op-4c666bf9-7f99-485a-b897-e5968ebf411c",
+          "sourceFindingId": "find-4c666bf9-7f99-485a-b897-e5968ebf411c",
+          "operation": "NO_CHANGE",
+          "entityType": "stakeholder",
+          "targetTitle": "Elena Voss and Tomos Reed agreed that one of them will chair the weekly mobilisation huddle.",
+          "proposedValues": {
+            "personName": "Elena Voss",
+            "scope": "weekly mobilisation huddle",
+            "ownershipSemantics": "ambiguous"
+          },
+          "reason": "Already known \u2014 no mutation.",
+          "evidence": "they agreed one of them will chair the weekly mobilisation huddle.",
+          "confidence": 0,
+          "destructive": false,
+          "requiresClarification": false,
+          "projectId": "5fc82b04-bb7e-4414-9e08-073d7ec17feb",
+          "projectName": "HO isolate ho-fix3-1"
+        },
+        {
+          "id": "op-7c43c89e-d298-4b02-9dff-8efed78e793b",
+          "sourceFindingId": "find-7c43c89e-d298-4b02-9dff-8efed78e793b",
+          "operation": "CREATE",
+          "entityType": "todo",
+          "targetTitle": "Collect void keys from the depot",
+          "proposedValues": {
+            "title": "Collect void keys from the depot",
+            "date": "2026-10-16"
+          },
+          "reason": "A task to collect the void keys from the depot is scheduled for 16 October 2026.",
+          "evidence": "collect the void keys from the depot on 16 October 2026.",
+          "confidence": 0,
+          "destructive": false,
+          "requiresClarification": false,
+          "projectId": "5fc82b04-bb7e-4414-9e08-073d7ec17feb",
+          "projectName": "HO isolate ho-fix3-1"
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "rec-729a2mh1",
+          "kind": "leadership",
+          "urgency": "this_week",
+          "title": "Collect void keys from the depot",
+          "action": "A task to collect the void keys from the depot is scheduled for 16 October 2026.",
+          "why": "collect the void keys from the depot on 16 October 2026.",
+          "leadershipImpact": "Act on validated Capture findings without inventing duplicate work.",
+          "projectId": "5fc82b04-bb7e-4414-9e08-073d7ec17feb",
+          "relatedMemoryIds": [
+            "mem-mtxltijy-3c4q28"
+          ],
+          "createdAt": "2026-09-11T23:45:30.670Z",
+          "status": "active",
+          "operation": "create",
+          "itemType": "action",
+          "targetTitle": "Collect void keys from the depot",
+          "sourceFindingId": "find-7c43c89e-d298-4b02-9dff-8efed78e793b",
+          "proposedOperationId": "op-7c43c89e-d298-4b02-9dff-8efed78e793b",
+          "confidence": 0
+        }
+      ],
+      "resultKeys": [
+        "memory",
+        "insights",
+        "assumptions",
+        "recommendations",
+        "rawContent",
+        "tidied",
+        "provider",
+        "knowledgeProjectId",
+        "findingsValidation",
+        "capturePipeline",
+        "observationAccount",
+        "findings",
+        "proposedOperations"
+      ]
+    }
+  ]
+}
