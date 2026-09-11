@@ -79,6 +79,7 @@
     "eval:capture-v2-scorer-v3-replay": "npx --yes tsx scripts/replay-capture-v2-scorer-v3.ts",
     "eval:stacked-capture": "npx --yes tsx scripts/eval-stacked-capture.ts",
     "test:e2e": "playwright test",
+    "e2e:hosted-vertical": "playwright test -c e2e-hosted-vertical/playwright.config.ts",
     "test:stacked-capture": "playwright test e2e/stacked-capture.spec.ts",
     "verify:stacked-capture": "npx --yes tsx scripts/verify-stacked-capture.ts",
     "verify:stable-object-identity": "npx --yes tsx scripts/verify-stable-object-identity.ts",
