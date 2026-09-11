@@ -1,0 +1,83 @@
+{
+  "elapsedMs": 75219,
+  "rows": [
+    {
+      "journey": "New Project partial people",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "n/a",
+      "apply": "n/a",
+      "reload": "n/a",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false"
+    },
+    {
+      "journey": "Full New Project + Create + hard reload",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "n/a",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false"
+    },
+    {
+      "journey": "Capture date update → Apply → reload",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "PASS",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false"
+    },
+    {
+      "journey": "New person / responsibility",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "PASS",
+      "apply": "n/a",
+      "reload": "n/a",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | Andris review family=needs_you; families=needs_you"
+    },
+    {
+      "journey": "Ambiguity stays local",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "PASS",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "Seeded via New Project UI (no Organise). name=E2E ambiguity hv-after-holdout-6of6 code=GOLDOUT6OF6 | provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false"
+    },
+    {
+      "journey": "Mixed realistic paste",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "PASS",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false"
+    }
+  ]
+}
