@@ -699,6 +699,70 @@ function main() {
     assert.equal(todo?.targetTodoId, undefined);
   });
 
+  check("ambiguous they-chair restatement stays Needs You, not silent no_change", () => {
+    const harbourWorld = {
+      ...world,
+      projects: world.projects.map((project) =>
+        project.id === CANDYLAND_ID
+          ? {
+              ...project,
+              stakeholders: [
+                ...project.stakeholders,
+                { id: "person-elena", name: "Elena Voss", role: "Resident liaison" },
+                { id: "person-tomos", name: "Tomos Reed", role: "Voids" },
+              ],
+            }
+          : project,
+      ),
+    };
+    const transcript =
+      "After the call with Elena Voss and Tomos Reed, they agreed one of them will chair the weekly mobilisation huddle. I could not hear who.";
+    const run = runCaptureV2FromModelJson({
+      transcript,
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-chair",
+            statement:
+              "Elena Voss and Tomos Reed agreed that one of them will chair the weekly mobilisation huddle.",
+            evidence: "they agreed one of them will chair the weekly mobilisation huddle.",
+            domain: "responsibility",
+            disposition: "no_change",
+            truthIntent: "current",
+            proposedValues: {
+              personName: "Elena Voss",
+              scope: "weekly mobilisation huddle",
+              ownershipSemantics: "ambiguous",
+            },
+          },
+          {
+            id: "obs-keys",
+            statement: "Collect the void keys from the depot on 16 October 2026",
+            evidence: "Separately: collect the void keys from the depot on 16 October 2026.",
+            domain: "todo",
+            disposition: "create_new",
+            truthIntent: "current",
+            proposedValues: {
+              title: "Collect void keys from the depot",
+              date: "2026-10-16",
+            },
+          },
+        ],
+      },
+      world: harbourWorld,
+      projectId: CANDYLAND_ID,
+    });
+    const chair = run.resolved.find((row) => /chair|huddle/i.test(row.observation.statement));
+    const keys = run.resolved.find((row) => /void keys/i.test(row.observation.statement));
+    assert.equal(chair?.decision.kind, "needs_you");
+    assert.equal(keys?.decision.kind, "write");
+    const ops = run.result.proposedOperations ?? [];
+    const chairOp = ops.find((op) => /chair|huddle/i.test(`${op.targetTitle} ${op.reason}`));
+    const keysOp = ops.find((op) => op.entityType === "todo");
+    assert.equal(chairOp?.requiresClarification, true);
+    assert.equal(keysOp?.operation, "CREATE");
+  });
+
   check("observation projectId cannot retarget another project", () => {
     const validated = validateObservations(
       [

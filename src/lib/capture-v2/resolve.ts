@@ -151,6 +151,31 @@ function resolveOne(
   }
 
   if (observation.disposition === "no_change") {
+    if (PERSON_LINKED_DOMAINS.has(observation.domain)) {
+      const ownership = observation.proposedValues?.ownershipSemantics;
+      if (ownership === "ambiguous") {
+        return {
+          observation,
+          suggestion: null,
+          decision: {
+            kind: "needs_you",
+            domain: DOMAIN_TO_LEGAL[observation.domain],
+            reason:
+              observation.commentary?.trim() ||
+              "Lume cannot safely choose between competing interpretations.",
+          },
+        };
+      }
+      const identityGate = personLinkedIdentityGate(
+        observation,
+        args.world,
+        projectId,
+        args.transcript,
+      );
+      if (identityGate?.kind === "block" && identityGate.decision.kind === "needs_you") {
+        return { observation, suggestion: null, decision: identityGate.decision };
+      }
+    }
     return {
       observation,
       suggestion: null,
