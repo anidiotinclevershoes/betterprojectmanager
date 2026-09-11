@@ -153,6 +153,7 @@ test("Full New Project + Create + hard reload", async ({ page }, testInfo) => {
     const knowledge = await frameLines(page, "np-frame-knowledge");
     const issues = await frameLines(page, "np-frame-issues");
     const composed = [...people, ...knowledge, ...issues].join("\n");
+    const bodyText = ((await page.locator("body").innerText()) || "");
     const visibleBeforeCreate = [
       /Olga Petrov/i,
       /Sarah Kim/i,
@@ -162,7 +163,7 @@ test("Full New Project + Create + hard reload", async ({ page }, testInfo) => {
       /15 September 2026|15 Sep 2026|Sep 15|2026-09-15/i,
       /UAT environment|unavailable/i,
       /Cutover runbook v2/i,
-    ].every((re) => re.test(composed) || re.test(((await page.locator("body").innerText()) || "")));
+    ].every((re) => re.test(composed) || re.test(bodyText));
     row.uiInterpretation = passCell(visibleBeforeCreate);
     if (!visibleBeforeCreate) {
       boundary = classifyNewProjectLoss(call, people);
