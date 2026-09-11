@@ -1,16 +1,17 @@
 export const VERTICAL_BOUNDARIES = [
   "AUTH",
-  "UI INPUT",
-  "HOSTED API",
+  "VERCEL_PROTECTION",
+  "UI_INPUT",
+  "HOSTED_API",
   "OPENAI",
-  "NEW PROJECT ADAPTER",
+  "NEW_PROJECT_ADAPTER",
   "VALIDATION",
   "IDENTITY",
   "PLANNER",
-  "REVIEW UI",
+  "REVIEW_UI",
   "APPLY",
   "PERSISTENCE",
-  "PROJECTION/RELOAD",
+  "PROJECTION_RELOAD",
   "UNKNOWN",
 ] as const;
 
@@ -37,6 +38,8 @@ export type HostedApiCall = {
 
 export type JourneyMatrixRow = {
   journey: string;
+  vercelAccess: MatrixCell;
+  lumeAuth: MatrixCell;
   hostedApi: MatrixCell;
   liveOpenAi: MatrixCell;
   uiInterpretation: MatrixCell;

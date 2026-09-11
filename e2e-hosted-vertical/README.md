@@ -152,7 +152,7 @@ On failure the harness records (sanitized):
 
 Never stored: passwords, cookies, auth tokens, OpenAI keys, Vercel bypass secrets.
 
-Artifacts: `test-results/hosted-vertical/` (`matrix.md`, `matrix.json`, HTML report, per-test diagnostics).
+Artifacts: `test-results/hosted-vertical/` (`matrix.md`, `matrix.json`, HTML report, per-test diagnostics). Playwright traces are off so bypass/auth headers are not written to disk.
 
 ## Journeys
 
@@ -162,7 +162,7 @@ Artifacts: `test-results/hosted-vertical/` (`matrix.md`, `matrix.json`, HTML rep
 | Full New Project + Create + hard reload | Olga Petrov / Sarah Kim / Production release 12 Sep 2026 / CAB 15 Sep 2026 / UAT unavailable / Cutover runbook v2 survive Organise, Create, and reload. |
 | Capture date update → Apply → reload | Live OpenAI; ordinary Update included by default; Apply via real UI; no error banner; 20 Sep persists after reload. Also exercises hosted `capture_apply_receipts`. |
 | New person / responsibility | “Andris is responsible for Legacy.” Unrelated people must not steal identity. Andris must not vanish. First-name-only **Needs You is acceptable**. Do not force an unsafe Create. |
-| Ambiguity stays local | “She will own UAT” + a clear date sibling. Ambiguous → Needs You. Clear sibling stays independently actionable. |
+| Ambiguity stays local | Seed Olga/Sarah. Capture “She will own UAT going forward” plus Production release 21 Sep 2026. Pronoun stays Needs You. Clear date remains independently actionable, is Applied, and survives reload. |
 | Mixed realistic paste | Clear update, new fact, Person, genuine ambiguity, unrelated context. Clear items keep disposition; ambiguity stays local; Apply-ready can apply; reload shows only applied truth. |
 
 Do **not** change expectations to make the current build green. Do **not** fix product defects from this harness.
