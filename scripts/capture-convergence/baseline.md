@@ -1,9 +1,9 @@
 CAPTURE CONVERGENCE GATE — BASELINE MAP
 Observe-only. Do not treat this as a green/red product gate.
-Source SHA:     58b15c8fd5552dc07a2139632b683a9ca3c61df9
-Experiment SHA: 4452bcbd1b43d6c5d06325f1754978654371d1e0
-Generated at:   2026-09-11T16:12:44.562Z
-Runtime:        99 ms
+Source SHA:     90dfb6cb1f67939358ba3fa3c878f2749d3e4b5b
+Experiment SHA: 6efcfed144c70a9ddacf482290d2a39d1a86c384
+Generated at:   2026-09-11T23:17:17.893Z
+Runtime:        121 ms
 
 TOTAL CASES  538
 PASS         526
