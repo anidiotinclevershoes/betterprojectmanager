@@ -34,20 +34,22 @@ export function e2ePassword(): string {
   return process.env.LUME_E2E_PASSWORD || "";
 }
 
-export function requireHostedConfig(): { baseUrl: string; email: string; password: string } {
-  const baseUrl = hostedBaseUrl();
-  const email = e2eEmail();
-  const password = e2ePassword();
+export function missingHostedConfig(): string[] {
   const missing: string[] = [];
-  if (!baseUrl) missing.push("LUME_E2E_BASE_URL");
-  if (!email) missing.push("LUME_E2E_EMAIL");
-  if (!password) missing.push("LUME_E2E_PASSWORD");
+  if (!hostedBaseUrl()) missing.push("LUME_E2E_BASE_URL");
+  if (!e2eEmail()) missing.push("LUME_E2E_EMAIL");
+  if (!e2ePassword()) missing.push("LUME_E2E_PASSWORD");
+  return missing;
+}
+
+export function requireHostedConfig(): { baseUrl: string; email: string; password: string } {
+  const missing = missingHostedConfig();
   if (missing.length) {
     throw new Error(
       `AUTH: Hosted vertical journeys are opt-in and require ${missing.join(", ")}. See e2e-hosted-vertical/README.md.`,
     );
   }
-  return { baseUrl, email, password };
+  return { baseUrl: hostedBaseUrl(), email: e2eEmail(), password: e2ePassword() };
 }
 
 export function sanitizeValue(value: unknown): unknown {
@@ -284,7 +286,14 @@ export async function detectVercelSso(page: Page): Promise<boolean> {
 }
 
 export async function signIn(page: Page): Promise<void> {
-  const { email, password } = requireHostedConfig();
+  const missing = missingHostedConfig();
+  if (missing.includes("LUME_E2E_BASE_URL")) {
+    throw new Error(
+      "AUTH: Hosted vertical journeys are opt-in and require LUME_E2E_BASE_URL. See e2e-hosted-vertical/README.md.",
+    );
+  }
+  const email = e2eEmail();
+  const password = e2ePassword();
   const bypass = vercelBypassSecret();
   await page.goto("/login", { waitUntil: "domcontentloaded" });
   if ((await detectVercelSso(page)) && bypass) {
@@ -295,6 +304,11 @@ export async function signIn(page: Page): Promise<void> {
   if (await detectVercelSso(page)) {
     throw new Error(
       "AUTH: Preview is behind Vercel Deployment Protection. Enable Protection Bypass for Automation and set LUME_E2E_VERCEL_BYPASS_SECRET. See e2e-hosted-vertical/README.md.",
+    );
+  }
+  if (!email || !password) {
+    throw new Error(
+      `AUTH: Hosted vertical journeys require ${[!email && "LUME_E2E_EMAIL", !password && "LUME_E2E_PASSWORD"].filter(Boolean).join(" and ")} after reaching ${page.url()}. See e2e-hosted-vertical/README.md.`,
     );
   }
   if (!/\/login/.test(page.url()) && (await page.getByLabel("Email").count()) === 0) {
