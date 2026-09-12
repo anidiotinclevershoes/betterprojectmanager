@@ -1,0 +1,19 @@
+{
+  "n": 11,
+  "summary": "Chris joining — first name only",
+  "expectedOps": "create person Chris",
+  "review": "none",
+  "result": "FAIL",
+  "needsYouObserved": [
+    "NEEDS YOU ? STAKEHOLDER Which record does this refer to? Chris Chris is mentioned, but Lume cannot represent this as a stakeholder change. Lume needs clarificat"
+  ],
+  "applyCountBefore": 0,
+  "applyCountAfterExclude": 0,
+  "notes": "",
+  "unexpectedCreates": [],
+  "unexpectedRemoves": [],
+  "missingWrites": [
+    "create:Chris"
+  ],
+  "earliestBoundary": "AI_EXTRACT"
+}

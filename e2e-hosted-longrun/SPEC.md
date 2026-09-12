@@ -38,6 +38,23 @@ browser
 
 Frozen envelopes, resolver calls, mocked providers, and API-only writes cannot make a journey pass. They are diagnosis-only after a failure.
 
+## Canonical database verification (mandatory)
+
+Do not infer database correctness from a successful-looking UI.
+
+At planned checkpoints (New Project, captures 5 / 10 / 15 / 20 / 25 / 30 / 35 / 40 / 45 / 50, final reload, and any high-risk Apply) compare:
+
+1. frozen expected-truth ledger
+2. hosted canonical snapshot (load API)
+3. independent **read-only** production SQL scoped to the dedicated E2E project
+4. UI after authoritative reload
+
+Allowed SQL: `SELECT`, `information_schema`, `pg_catalog`, scoped aggregates. Forbidden: `INSERT` / `UPDATE` / `DELETE` / RPC mutation / migrations / repairing test truth.
+
+Before the first New Project, prove the production origin's public Supabase URL is the same project being inspected. If that correspondence cannot be established: **STOP**.
+
+The first official run (`lr-20260912T2212Z`) completed before this cadence was added; its post-run SQL audit is in `baselines/first-complete-run/db-audit.json`. Future runs must not skip live SQL checkpoints.
+
 ## Standing product contracts (current main)
 
 Source: constitution, Capture status, Review/Apply code — not historical handovers.

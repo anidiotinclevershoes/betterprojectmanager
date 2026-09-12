@@ -1,0 +1,18 @@
+{
+  "n": 28,
+  "summary": "Chris Ward full name — not Helen Ward",
+  "expectedOps": "create person Chris Ward; create responsibility client communications",
+  "review": "none",
+  "result": "FAIL",
+  "needsYouObserved": [],
+  "applyCountBefore": 1,
+  "applyCountAfterExclude": 1,
+  "notes": "",
+  "applyHttp": 200,
+  "unexpectedCreates": [],
+  "unexpectedRemoves": [],
+  "missingWrites": [
+    "create:client communications"
+  ],
+  "earliestBoundary": "AI_EXTRACT"
+}

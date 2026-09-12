@@ -59,3 +59,5 @@ Optional: `LUME_LONGRUN_BASE_URL` if you must point at a non-production host. Th
 - `screens/`
 
 The dedicated project is left in place until investigation no longer needs it. Cleanup is ordinary Delete Project on that project only.
+
+Independent read-only production SQL (never canonical writes) is mandatory at programme checkpoints. See `SPEC.md` § Canonical database verification. Official first-run post-hoc audit: [`baselines/first-complete-run/FIRST-RUN.md`](./baselines/first-complete-run/FIRST-RUN.md).
