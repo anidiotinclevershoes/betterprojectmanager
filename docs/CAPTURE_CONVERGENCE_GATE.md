@@ -1,0 +1,29 @@
+# Capture convergence gate (experiment)
+
+**Status:** Observe-only harness on post-#167 `main` (`91fabf8d1627e89538f26e00b9b3343b9d577cdb`) as `cursor/capture-prompt-e-6709`.  
+Salvage source: `cursor/experiment-capture-convergence-30ae` / PR #156. **Do not merge that experiment branch wholesale.**
+
+The 538-case corpus is observe-only. Failures are the map. Do **not** add `verify:capture-convergence` to ordinary `npm test`. Do **not** retune Prompt A against the corpus.
+
+This reconstruction **does** carry unique production rules that were not superseded by the hosted holdout:
+
+- observation-local identity evidence;
+- contradictory same-record sibling writes stay Needs You;
+- New Project Organise recovers name-only people from VALIDATE rejects (D-052).
+
+Holdout identity/dated-create/persist rules on `main` stay authoritative where they overlap.
+
+```bash
+npm run verify:capture-convergence
+```
+
+Optional live sample (never CI): `LUME_CAPTURE_LIVE=1 npm run eval:capture-live`.
+Prompt-experiment tooling is present and **off**. Production still uses Prompt A.
+
+Fresh unchanged 538-case map on this reconstruct (do not treat as a green/red product gate):
+
+- prior #156: 526/538
+- prior experiment on pre-holdout main: 535/538
+- **fresh post-holdout reconstruct: 534/538**
+
+The same three product-model gaps remain (milestone cancel/remove, knowledge supersede/retire, cancellation-as-knowledge). The extra fail is `id-pippa-first-on-candy`: holdout now identity-gates person-linked `no_change`, so a first-name-only restatement is Needs You instead of silent `no_change`. Corpus expectations were not rewritten to keep 535.
