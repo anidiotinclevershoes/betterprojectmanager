@@ -2,7 +2,7 @@
 
 Do **not** merge `cursor/capture-convergence-finalise-30ae` or `cursor/experiment-capture-convergence-30ae` wholesale.
 
-`origin/main` (`90dfb6c`) still lacks PR #164. Final product merge waits until holdout is on `main`, then cherry-pick only the production slice.
+`origin/main` is now `17a3e41` (PR #164 merged). Cherry-pick only the production slice onto that main. Do **not** merge this reconstruction wholesale.
 
 ## A. Production deterministic fixes
 

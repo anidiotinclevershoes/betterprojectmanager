@@ -4,7 +4,7 @@ Not a wholesale merge. Holdout PR #164 was still open when this was built.
 
 ## 1. latest origin/main SHA
 
-`90dfb6cb1f67939358ba3fa3c878f2749d3e4b5b` (PR #162). Unchanged.
+`17a3e413282b6c7014c3bada09527c22426654c0` — merge of holdout PR #164 (2026-09-12). Programme-start main was `90dfb6c` (PR #162).
 
 ## 2. convergence integration branch / SHA
 
