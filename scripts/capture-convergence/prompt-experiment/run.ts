@@ -1,11 +1,12 @@
 /**
- * Opt-in live A/B/C/D prompt comparison on the frozen holdout.
+ * Opt-in live prompt comparison on the frozen holdout.
  *
  *   LUME_CAPTURE_LIVE=1 npx tsx scripts/capture-convergence/prompt-experiment/run.ts
+ *   LUME_CAPTURE_LIVE=1 npx tsx scripts/capture-convergence/prompt-experiment/run.ts --variant A,E --repeat 3
  *   LUME_CAPTURE_LIVE=1 npx tsx scripts/capture-convergence/prompt-experiment/run.ts --variant C
  *
  * Never CI. Production extract path is unchanged. Exits 2 without a key.
- * Variants B/C/D are called from this runner only — not /api/capture.
+ * Variants B/C/D/E are called from this runner only — not /api/capture.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -26,17 +27,29 @@ import { FROZEN_PROMPT_HOLDOUT, PROMPT_HOLDOUT_FROZEN_AT } from "./holdout";
 import { PROMPT_VARIANT_META, type PromptVariantId } from "./prompts";
 import { addToTotals, emptyTotals, scoreHoldoutCase } from "./score";
 
-const ALL_VARIANTS: PromptVariantId[] = ["A", "B", "C", "D"];
+const ALL_VARIANTS: PromptVariantId[] = ["A", "B", "C", "D", "E"];
 
 function requestedVariants(): PromptVariantId[] {
   const idx = process.argv.indexOf("--variant");
   if (idx < 0) return ALL_VARIANTS;
   const raw = (process.argv[idx + 1] ?? "").toUpperCase();
   if (raw === "ALL") return ALL_VARIANTS;
-  if (!ALL_VARIANTS.includes(raw as PromptVariantId)) {
-    throw new Error(`Unknown --variant ${raw}. Use A, B, C, D, or ALL.`);
+  const parts = raw.split(",").map((part) => part.trim()).filter(Boolean);
+  const unknown = parts.filter((part) => !ALL_VARIANTS.includes(part as PromptVariantId));
+  if (unknown.length || parts.length === 0) {
+    throw new Error(`Unknown --variant ${raw}. Use A, B, C, D, E, A,E, or ALL.`);
   }
-  return [raw as PromptVariantId];
+  return parts as PromptVariantId[];
+}
+
+function requestedRepeats(): number {
+  const idx = process.argv.indexOf("--repeat");
+  if (idx < 0) return 1;
+  const n = Number(process.argv[idx + 1]);
+  if (!Number.isInteger(n) || n < 1 || n > 8) {
+    throw new Error("--repeat must be an integer from 1 to 8.");
+  }
+  return n;
 }
 
 function redact(message: string): string {
@@ -65,21 +78,26 @@ async function main() {
   }
 
   const variants = requestedVariants();
+  const repeats = requestedRepeats();
   const wanted = new Set(FROZEN_PROMPT_HOLDOUT.map((row) => row.id));
   const sample = heldOutTranscripts().filter((row) => wanted.has(row.id));
 
   console.log(`Frozen holdout ${PROMPT_HOLDOUT_FROZEN_AT}`);
   console.log(
-    `model=${PINNED_OPENAI_CHAT_MODEL} temperature=${PROMPT_EXPERIMENT_TEMPERATURE} variants=${variants.join(",")}`,
+    `model=${PINNED_OPENAI_CHAT_MODEL} temperature=${PROMPT_EXPERIMENT_TEMPERATURE} variants=${variants.join(",")} repeats=${repeats}`,
   );
   console.log(`cases=${sample.length} (production prompt.ts unchanged)\n`);
 
   const variantResults: Record<string, unknown> = {};
+  const trialResults: Array<{ trial: number; variants: Record<string, unknown> }> = [];
+  for (let trial = 1; trial <= repeats; trial += 1) {
+    if (repeats > 1) console.log(`\n===== trial ${trial}/${repeats} =====\n`);
+    const thisTrial: Record<string, unknown> = {};
   for (const variant of variants) {
     const meta = PROMPT_VARIANT_META[variant];
     const totals = emptyTotals();
     const rows: unknown[] = [];
-    console.log(`--- variant ${variant} (${meta.label}) ---`);
+    console.log(`--- variant ${variant} (${meta.label}) trial ${trial} ---`);
 
     for (const item of sample) {
       const holdout = FROZEN_PROMPT_HOLDOUT.find((row) => row.id === item.id)!;
@@ -144,14 +162,18 @@ async function main() {
       }
     }
 
-    variantResults[variant] = {
+    const packed = {
       meta,
       totals,
       rows,
     };
+    variantResults[variant] = packed;
+    thisTrial[variant] = packed;
     console.log(
-      `totals ${variant}: recall=${totals.recallHits}/${totals.recallPossible} invent=${totals.inventions} foreign_id=${totals.foreignId} contam=${totals.identityContamination} pronoun=${totals.unsafePronounResolution} writes=${totals.writes} needs_you=${totals.needsYou} obs=${totals.observationCount} errors=${totals.errors}\n`,
+      `totals ${variant} trial ${trial}: recall=${totals.recallHits}/${totals.recallPossible} invent=${totals.inventions} foreign_id=${totals.foreignId} contam=${totals.identityContamination} pronoun=${totals.unsafePronounResolution} writes=${totals.writes} needs_you=${totals.needsYou} obs=${totals.observationCount} errors=${totals.errors}\n`,
     );
+  }
+    trialResults.push({ trial, variants: thisTrial });
   }
 
   const out = {
@@ -159,16 +181,23 @@ async function main() {
     holdoutFrozenAt: PROMPT_HOLDOUT_FROZEN_AT,
     requestedModel: PINNED_OPENAI_CHAT_MODEL,
     temperature: PROMPT_EXPERIMENT_TEMPERATURE,
-    note: "Frozen holdout live comparison. No raw transcripts. Production prompt.ts unchanged.",
+    repeats,
+    note: "Frozen holdout live comparison. No raw transcripts. Production prompt.ts unchanged. Bad runs are kept. When repeats>1, variants is the last trial; trials keeps every run.",
     variants: variantResults,
+    trials: repeats > 1 ? trialResults : undefined,
   };
   const dir = join(process.cwd(), "test-results");
   mkdirSync(dir, { recursive: true });
   const livePath = join(dir, "prompt-experiment-holdout.json");
   writeFileSync(livePath, JSON.stringify(out, null, 2));
+  const committedName =
+    variants.includes("E") && !variants.includes("B")
+      ? "holdout-results-ae.json"
+      : "holdout-results.json";
   const committedPath = join(
     process.cwd(),
-    "scripts/capture-convergence/prompt-experiment/holdout-results.json",
+    "scripts/capture-convergence/prompt-experiment",
+    committedName,
   );
   writeFileSync(committedPath, JSON.stringify(out, null, 2));
   console.log(`Wrote ${livePath}`);

@@ -1,6 +1,6 @@
 /**
  * Experiment-only prompt variants. Production `src/lib/capture-v2/prompt.ts`
- * is Prompt A and is not imported for B/C/D at runtime in the app.
+ * is Prompt A and is not imported for B/C/D/E at runtime in the app.
  */
 import {
   buildObservationExtractionPrompt,
@@ -8,7 +8,7 @@ import {
   CAPTURE_V2_OBSERVATION_SCHEMA,
 } from "../../../src/lib/capture-v2/prompt";
 
-export type PromptVariantId = "A" | "B" | "C" | "D";
+export type PromptVariantId = "A" | "B" | "C" | "D" | "E";
 
 export const PROMPT_VARIANT_META: Record<
   PromptVariantId,
@@ -18,11 +18,15 @@ export const PROMPT_VARIANT_META: Record<
   B: { label: "stronger typed schema guidance", promptVersion: "exp-prompt-b-typed-v1" },
   C: { label: "uncertainty / reference discipline", promptVersion: "exp-prompt-c-discipline-v1" },
   D: { label: "example-guided", promptVersion: "exp-prompt-d-examples-v1" },
+  E: {
+    label: "reference discipline + create-ID discipline",
+    promptVersion: "exp-prompt-e-ref-create-v1",
+  },
 };
 
 export function systemMessageFor(variant: PromptVariantId): string {
   if (variant === "A") return CAPTURE_V2_EXTRACT_SYSTEM_MESSAGE;
-  if (variant === "C") {
+  if (variant === "C" || variant === "E") {
     return "You extract atomic project observations as JSON. You do not mutate a database. You never invent record IDs. You do not guess identity. You preserve pronouns and unresolved references. You do not resolve contradictions.";
   }
   return "You extract atomic project observations as JSON. You do not mutate a database. You never invent record IDs.";
@@ -33,6 +37,7 @@ export function userPromptFor(
   args: { transcript: string; projectBlock: string },
 ): string {
   if (variant === "A") return buildObservationExtractionPrompt(args);
+  if (variant === "E") return buildPromptE(args);
   return `${coreContract(variant)}
 
 Current authoritative project state:
@@ -45,6 +50,32 @@ ${args.transcript}
 
 Return JSON only, matching:
 ${CAPTURE_V2_OBSERVATION_SCHEMA}`;
+}
+
+/**
+ * Prompt E = production A plus the two proven constraints from C and D.
+ * Not a rewrite of the extraction contract. No example library.
+ */
+function buildPromptE(args: { transcript: string; projectBlock: string }): string {
+  const base = buildObservationExtractionPrompt(args);
+  const addendum = `Reference discipline:
+- Do not guess which person a pronoun refers to.
+- Do not attach a named person merely because they appear elsewhere in the transcript.
+- Preserve unresolved pronouns and references as unresolved (disposition=ambiguous, omit candidateTargetId).
+- If two sentences contradict, emit both. Do not silently choose one.
+- Distinguish explicit evidence from inferred identity. Do not import sibling names into another observation's evidence quote.
+
+Create target-ID discipline:
+- For create_new, do not invent candidateTargetId. Omit it.
+- Do not use a project UUID as an entity target id.
+- Only emit candidateTargetId when the text/context clearly establishes an existing canonical record from current project state.
+- A legitimate new Person / To Do / Milestone / Risk / Knowledge item stays create_new without a fabricated target.
+
+`;
+  return base.replace(
+    "Current authoritative project state:",
+    `${addendum}Current authoritative project state:`,
+  );
 }
 
 function coreContract(variant: PromptVariantId): string {
