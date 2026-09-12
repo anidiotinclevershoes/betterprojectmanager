@@ -95,6 +95,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "harbourline-h1-identity", script: "scripts/verify-harbourline-h1-identity.ts" },
   { name: "wrong-target-identity", script: "scripts/verify-wrong-target-identity.ts" },
   { name: "empty-capture-honesty", script: "scripts/verify-empty-capture-honesty.ts" },
+  { name: "responsibility-canonical-path", script: "scripts/verify-responsibility-canonical-path.ts" },
   { name: "np-organise-observation-loss", script: "scripts/verify-np-organise-observation-loss.ts" },
   { name: "stranger-polish", script: "scripts/verify-stranger-polish.ts" },
   { name: "phase2-auth", script: "scripts/verify-phase2-auth.ts" },
