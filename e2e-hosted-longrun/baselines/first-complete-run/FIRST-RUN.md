@@ -43,6 +43,7 @@ Playwright reported `1 passed` because the harness records product FAILs without
 | Date restatement vs move | D-018, D-020 | C3 moved; C21/C48 restated; C33 third move omitted |
 | Late people | D-049 | C11 Chris (false NY); C34 Jamie / C45 Leo silent |
 | Mixed batch | D-009, D-019 | C7 biscuits excluded by AI; C18 mixed write |
+| Specialist misses (post-freeze) | Phase 19 | KC-edit-before-Apply, mid-Review project switch, duplicate names — **not in this run**; see `PHASE19-SPECIALIST-CHALLENGE.md` |
 
 ## C. Scenario
 

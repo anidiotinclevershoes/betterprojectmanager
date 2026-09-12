@@ -16,6 +16,7 @@ It is expensive, slow, stateful, and production-dependent. Invoke it deliberatel
 | [`frozen-manifest.ts`](./frozen-manifest.ts) | 50 source captures, expected semantics, Review plan |
 | [`new-project.ts`](./new-project.ts) | State 0 paste |
 | [`ATTACK-MATRIX.md`](./ATTACK-MATRIX.md) | Historical weakness → probe map |
+| [`baselines/first-complete-run/PHASE19-SPECIALIST-CHALLENGE.md`](./baselines/first-complete-run/PHASE19-SPECIALIST-CHALLENGE.md) | Post-freeze specialist challenge (do not rewrite the frozen 50) |
 | [`ledger.ts`](./ledger.ts) | Before / allowed delta / after accounting |
 
 **Do not edit the frozen manifest after seeing Lume's answers.** Flag `TEST_EXPECTATION` instead.

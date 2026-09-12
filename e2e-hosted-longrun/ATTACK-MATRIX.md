@@ -56,6 +56,8 @@ These were designed so the 6+6 suites cannot see them:
 9. **Sibling-project fingerprint** after every Apply — D-035 remainder the 6+6 never measured.
 10. **Browser-context restart at C50** — D-013 / D-047 under a large world.
 
+Specialists returned after freeze: [`baselines/first-complete-run/PHASE19-SPECIALIST-CHALLENGE.md`](./baselines/first-complete-run/PHASE19-SPECIALIST-CHALLENGE.md). Highest misses for a later run (not this frozen story): KC edit before Apply; mid-Review project switch; duplicate recorded names.
+
 ## What we deliberately did not copy
 
 Original six markers and holdout Harbour/Priya/Kwame/void-keys language are forbidden in [`new-project.ts`](./new-project.ts).
