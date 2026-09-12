@@ -473,7 +473,7 @@ function main() {
     console.log("    CLASS: LUME CATCH (Andris is not a recorded full name on the project)");
   });
 
-  check("Andris in the full paste is blocked by Olga+Sarah names in sibling sentences — LUME TRANSFORMATION/RESOLUTION FAILURE", () => {
+  check("Andris in the full paste stays incomplete-name Needs You — sibling Olga+Sarah names must not poison", () => {
     const [row] = summariseResolved(CAPTURE_TRANSCRIPT, {
       observations: [
         {
@@ -492,8 +492,12 @@ function main() {
       ],
     });
     assert.equal(row!.decision, "needs_you");
-    assert.match(String(row!.reason), /More than one existing person matches/i);
-    console.log("    CLASS: LUME TRANSFORMATION/RESOLUTION FAILURE (identity gate uses the whole Capture, so Olga and Sarah poison Andris)");
+    assert.match(
+      String(row!.reason),
+      /Person identity is not established|cannot tell which person|needs a name|not a recorded/i,
+    );
+    assert.doesNotMatch(String(row!.reason), /More than one existing person matches/i);
+    console.log("    CLASS: LUME CATCH (Andris remains an incomplete recorded name; sibling names stay local)");
   });
 
   check("UAT pronoun: two named people without a bind stays Needs You — LUME CATCH / EXPECTED PRODUCT BEHAVIOUR", () => {
