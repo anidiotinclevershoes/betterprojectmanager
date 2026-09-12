@@ -59,7 +59,8 @@ function obsName(row: ReturnType<typeof observationsOf>[number]): string | null 
   return (
     asUsableString(values.name) ||
     asUsableString(values.personName) ||
-    asUsableString(row.candidateTargetTitle)
+    asUsableString(row.candidateTargetTitle) ||
+    null
   );
 }
 
