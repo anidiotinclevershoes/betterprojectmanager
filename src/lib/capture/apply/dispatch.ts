@@ -366,29 +366,32 @@ function resolvePerson(
 
   // Reviewed identity is authoritative. `text` is evidence that the
   // reviewed name appears — not a second scan of unrelated transcript names.
+  // A supplied id that is not a stakeholder on this project is not identity —
+  // fall through to name resolution instead of claiming the person is absent.
   if (personId) {
     const byId = project.stakeholders.find((s) => s.id === personId);
-    if (!byId) return { status: "unknown" as const };
-    if (named) {
-      const namedMatchesOther = project.stakeholders.some(
-        (s) => s.id !== byId.id && namesMatchExact(s.name, named),
+    if (byId) {
+      if (named) {
+        const namedMatchesOther = project.stakeholders.some(
+          (s) => s.id !== byId.id && namesMatchExact(s.name, named),
+        );
+        const namedTokens = named.split(/\s+/).filter(Boolean);
+        if (
+          namedMatchesOther ||
+          (namedTokens.length >= 2 && !namesMatchExact(named, byId.name))
+        ) {
+          return { status: "unknown" as const };
+        }
+      }
+      const sameName = project.stakeholders.filter((s) =>
+        namesMatchExact(s.name, byId.name),
       );
-      const namedTokens = named.split(/\s+/).filter(Boolean);
-      if (
-        namedMatchesOther ||
-        (namedTokens.length >= 2 && !namesMatchExact(named, byId.name))
-      ) {
+      if (sameName.length > 1) return { status: "ambiguous" as const };
+      if (!recordedPersonNameAppearsInText(text, byId.name)) {
         return { status: "unknown" as const };
       }
+      return { status: "known" as const, person: byId };
     }
-    const sameName = project.stakeholders.filter((s) =>
-      namesMatchExact(s.name, byId.name),
-    );
-    if (sameName.length > 1) return { status: "ambiguous" as const };
-    if (!recordedPersonNameAppearsInText(text, byId.name)) {
-      return { status: "unknown" as const };
-    }
-    return { status: "known" as const, person: byId };
   }
 
   if (named) {
@@ -403,10 +406,12 @@ function resolvePerson(
       return { status: "known" as const, person: exact[0]! };
     }
     const tokens = named.split(/\s+/).filter(Boolean);
-    if (tokens.length >= 2 && recordedPersonNameAppearsInText(text, named)) {
+    // A leftover / wrong-type claimed id is not authority to mint a Person.
+    // Only a name-only create (no claimed id) may become new_named.
+    if (!personId && tokens.length >= 2 && recordedPersonNameAppearsInText(text, named)) {
       return { status: "new_named" as const, name: named, personId };
     }
-    if (tokens.length === 1 && recordedPersonNameAppearsInText(text, named)) {
+    if (!personId && tokens.length === 1 && recordedPersonNameAppearsInText(text, named)) {
       const first = tokens[0]!.toLowerCase();
       const firstMatches = project.stakeholders.filter((person) => {
         const recordedFirst = person.name.trim().split(/\s+/)[0]?.toLowerCase();
@@ -557,10 +562,23 @@ function planResponsibility(
   const claimedId = item.personId?.trim() || targetId(item);
   const person = resolvePerson(projectId, world, item, text);
   const personId = person.status === "known" ? person.person.id : undefined;
-  if (claimedId && person.status !== "known") {
+  if (person.status === "ambiguous") {
     return needsYou(
       "responsibility",
-      "This person is not on this project. Lume will not change ownership.",
+      "More than one existing person matches this Capture. Choose who it refers to.",
+    );
+  }
+  if (claimedId && person.status !== "known") {
+    const project = world.projects.find((p) => p.id === projectId);
+    const namedExists = Boolean(
+      personName &&
+        project?.stakeholders.some((s) => namesMatchExact(s.name, personName)),
+    );
+    return needsYou(
+      "responsibility",
+      namedExists
+        ? "Lume cannot tell which person this ownership refers to, so it will not change ownership."
+        : "This person is not on this project. Lume will not change ownership.",
     );
   }
 

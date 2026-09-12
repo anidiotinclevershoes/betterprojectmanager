@@ -12,6 +12,7 @@ import {
   peopleEvidencedByRecordedNameInText,
   recordedPersonNameAppearsInText,
 } from "@/lib/people/identity";
+import { scopeFromResponsiblePhrase } from "@/lib/people/responsibility-scope";
 import { missingReadySemantics, newReviewOperationId } from "./contract";
 import {
   isTruthIntent,
@@ -272,6 +273,12 @@ function resolveOne(
     };
   }
 
+  const ownershipAsResponsibility =
+    rematerializeOwnershipAsResponsibility(observation);
+  if (ownershipAsResponsibility !== observation) {
+    return resolveOne(ownershipAsResponsibility, args);
+  }
+
   const kind = DOMAIN_TO_KIND[observation.domain];
   if (!kind) {
     return {
@@ -480,6 +487,49 @@ function uniqueTitledRecord(
     return hits.length === 1 ? { id: hits[0]!.id, title: hits[0]!.title } : null;
   }
   return null;
+}
+
+/**
+ * A Person observation that states explicit ownership is a responsibility
+ * write, not a new stakeholder. Role-only lines ("is the QS") stay Person.
+ */
+function rematerializeOwnershipAsResponsibility(
+  observation: CaptureObservationV2,
+): CaptureObservationV2 {
+  if (observation.domain !== "person") return observation;
+  const values = observation.proposedValues ?? {};
+  const name =
+    asString(values.personName) ||
+    asString(values.name) ||
+    observation.candidateTargetTitle?.trim() ||
+    "";
+  const scope =
+    asString(values.scope) || scopeFromResponsiblePhrase(observation.statement);
+  if (!name || !scope || namesMatchExact(name, scope)) return observation;
+  if (
+    !asString(values.scope) &&
+    !/\b(responsible for|owns|will own)\b/i.test(observation.statement)
+  ) {
+    return observation;
+  }
+  const ownership = values.ownershipSemantics;
+  return {
+    ...observation,
+    domain: "responsibility",
+    proposedValues: {
+      ...values,
+      personName: name,
+      name,
+      scope,
+      ownershipSemantics:
+        ownership === "share" ||
+        ownership === "replace" ||
+        ownership === "continue" ||
+        ownership === "ambiguous"
+          ? ownership
+          : "share",
+    },
+  };
 }
 
 function rematerializeTitle(observation: CaptureObservationV2): string | undefined {
@@ -815,23 +865,22 @@ function personLinkedIdentityGate(
 
   if (candidateId) {
     const byId = people.find((p) => p.id === candidateId);
-    if (!byId) {
-      return uncertain(
-        "This person is not on this project. Lume will not write.",
-      );
+    if (byId) {
+      const sameName = people.filter((p) => namesMatchExact(p.name, byId.name));
+      if (sameName.length > 1) {
+        return uncertain(
+          "More than one existing person matches this Capture. Choose who it refers to.",
+        );
+      }
+      if (!recordedPersonNameAppearsInText(text, byId.name)) {
+        return uncertain(
+          "This Person identity is not established in the Capture. A supplied record id is not enough.",
+        );
+      }
+      return { kind: "bound", person: { id: byId.id, name: byId.name } };
     }
-    const sameName = people.filter((p) => namesMatchExact(p.name, byId.name));
-    if (sameName.length > 1) {
-      return uncertain(
-        "More than one existing person matches this Capture. Choose who it refers to.",
-      );
-    }
-    if (!recordedPersonNameAppearsInText(text, byId.name)) {
-      return uncertain(
-        "This Person identity is not established in the Capture. A supplied record id is not enough.",
-      );
-    }
-    return { kind: "bound", person: { id: byId.id, name: byId.name } };
+    // Wrong-type or unknown id is not proof the person is absent.
+    // Fall through to evidenced-name bind. Do not write to a substitute.
   }
 
   if (evidenced.length > 1) {
