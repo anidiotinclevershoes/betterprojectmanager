@@ -1,11 +1,11 @@
 {
   "sourceSha": "90dfb6cb1f67939358ba3fa3c878f2749d3e4b5b",
-  "experimentSha": "ea18cb4d02bbd10324e7983cc9405a169641f06b",
-  "generatedAt": "2026-09-11T23:23:35.413Z",
-  "elapsedMs": 102,
+  "experimentSha": "7be5de1b11ca1148a8858d2e6191682b827a5f24",
+  "generatedAt": "2026-09-12T03:46:47.067Z",
+  "elapsedMs": 120,
   "total": 538,
-  "pass": 535,
-  "fail": 3,
+  "pass": 534,
+  "fail": 4,
   "families": {
     "historical_regression": {
       "pass": 17,
@@ -43,8 +43,8 @@
       "total": 70
     },
     "identity_matrix": {
-      "pass": 13,
-      "fail": 0,
+      "pass": 12,
+      "fail": 1,
       "total": 13
     },
     "composition": {
@@ -76,6 +76,16 @@
   "clusters": [
     {
       "id": "cluster-01",
+      "label": "Planner / write-eligibility divergence at PLANNER",
+      "classification": "PLANNER",
+      "earliestStage": "PLANNER",
+      "caseIds": [
+        "id-pippa-first-on-candy"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    },
+    {
+      "id": "cluster-02",
       "label": "Product-model gap: cab-cancelled",
       "classification": "PRODUCT MODEL GAP",
       "earliestStage": "PLANNER",
@@ -85,7 +95,7 @@
       "note": "Same observed semantic transition. Not a proven single root cause."
     },
     {
-      "id": "cluster-02",
+      "id": "cluster-03",
       "label": "Product-model gap: runbook-v3",
       "classification": "PRODUCT MODEL GAP",
       "earliestStage": "PLANNER",
@@ -95,7 +105,7 @@
       "note": "Same observed semantic transition. Not a proven single root cause."
     },
     {
-      "id": "cluster-03",
+      "id": "cluster-04",
       "label": "Product-model gap: cab-as-knowledge",
       "classification": "PRODUCT MODEL GAP",
       "earliestStage": "PLANNER",
@@ -106,6 +116,21 @@
     }
   ],
   "failures": [
+    {
+      "id": "id-pippa-first-on-candy",
+      "family": "identity_matrix",
+      "seed": 504018082,
+      "baseScenario": "pippa-first-name",
+      "perturbation": "unique first name Pippa on Candyland",
+      "expectedInvariant": "Disposition no_change with a first-name-only statement must not write; Lume currently short-circuits no_change before the identity gate",
+      "ok": false,
+      "expected": "Disposition no_change with a first-name-only statement must not write; Lume currently short-circuits no_change before the identity gate",
+      "actual": "obs-pippa-first: decision needs_you (expected no_change)",
+      "earliestStage": "PLANNER",
+      "classification": "PLANNER",
+      "productModelGap": false,
+      "heldOut": false
+    },
     {
       "id": "gap-cab-cancel-remove",
       "family": "product_model_gap",
@@ -157,7 +182,7 @@
   "historicalNewProjectBehaviours": 8,
   "perturbationCaseCount": 463,
   "heldOutCount": 39,
-  "uniqueFailureFamilies": 3,
+  "uniqueFailureFamilies": 4,
   "combinedOnlyBreaks": [],
   "orderChangesSemantics": [],
   "unrelatedContextChanges": [],
@@ -170,6 +195,7 @@
   "architectureJudgement": "A",
   "architectureNote": "A small number of clusters account for most failures. Bounded defects are plausible; confirm before treating as a rewrite.",
   "reproduce": [
+    "npx tsx scripts/verify-capture-convergence.ts --id id-pippa-first-on-candy",
     "npx tsx scripts/verify-capture-convergence.ts --id gap-cab-cancel-remove",
     "npx tsx scripts/verify-capture-convergence.ts --id gap-runbook-v3-retire-v2",
     "npx tsx scripts/verify-capture-convergence.ts --id gap-cab-as-knowledge"

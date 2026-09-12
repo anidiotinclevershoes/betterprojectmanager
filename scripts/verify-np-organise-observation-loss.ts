@@ -17,7 +17,8 @@
  *
  * Does not call live OpenAI. Does not retune prompts/models.
  * Adapter recovers name-only people from VALIDATE rejects (D-052).
- * Capture scoped foreign_id fail-closed is unchanged.
+ * Holdout rematerializes create_new + unknown target id as an accepted create.
+ * Schema near-misses still reject, then recover.
  *
  * Run: npx tsx scripts/verify-np-organise-observation-loss.ts
  */
@@ -319,12 +320,38 @@ async function main() {
       assert.equal((body.provisionalItems ?? []).length, 2);
     });
 
+    await check(
+      "invented create target ids rematerialize as name-only people (holdout)",
+      () => {
+        const staged = trace(FOREIGN_ID);
+        assert.equal(staged.observationCount, 2);
+        assert.equal(staged.envelopeMalformed, false);
+        assert.deepEqual(staged.acceptedIds, ["obs-bob", "obs-mike"]);
+        assert.equal(staged.rejectedIds.length, 0);
+        assert.equal(staged.rejectCodes.length, 2);
+        assert.ok(
+          staged.rejectCodes.every((code) => code === "foreign_id"),
+          `expected foreign_id notes, got ${staged.rejectCodes.join(",")}`,
+        );
+        assert.equal(staged.provisionalCount, 2);
+        assert.deepEqual(staged.draftNames, ["bob", "mike"]);
+      },
+    );
+
+    await check("POST /api/new-project keeps people after invented create ids", async () => {
+      const { status, body, calledOpenAI } = await organise(FOREIGN_ID);
+      assert.equal(calledOpenAI, true);
+      assert.equal(status, 200, body.error);
+      const names = (body.draft?.stakeholders ?? []).map((row) => row.name);
+      assert.deepEqual(names, ["bob", "mike"]);
+      assert.equal((body.provisionalItems ?? []).length, 2);
+    });
+
     const lossEnvelopes: Array<{
       label: string;
       raw: unknown;
       code: string;
     }> = [
-      { label: "invented candidateTargetId", raw: FOREIGN_ID, code: "foreign_id" },
       { label: "missing truthIntent", raw: MISSING_TRUTH_INTENT, code: "missing_truth_intent" },
       { label: "unknown disposition create", raw: UNKNOWN_DISPOSITION, code: "unknown_disposition" },
     ];

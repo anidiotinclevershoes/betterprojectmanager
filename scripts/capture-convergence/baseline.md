@@ -1,13 +1,13 @@
 CAPTURE CONVERGENCE GATE — BASELINE MAP
 Observe-only. Do not treat this as a green/red product gate.
 Source SHA:     90dfb6cb1f67939358ba3fa3c878f2749d3e4b5b
-Experiment SHA: ea18cb4d02bbd10324e7983cc9405a169641f06b
-Generated at:   2026-09-11T23:23:35.413Z
-Runtime:        102 ms
+Experiment SHA: 7be5de1b11ca1148a8858d2e6191682b827a5f24
+Generated at:   2026-09-12T03:46:47.067Z
+Runtime:        120 ms
 
 TOTAL CASES  538
-PASS         535
-FAIL         3
+PASS         534
+FAIL         4
 
 By family:
   historical_regression              17/17 pass   0 fail
@@ -17,7 +17,7 @@ By family:
   irrelevant_context                 210/210 pass   0 fail
   ambiguity_isolation                56/56 pass   0 fail
   malformed_isolation                70/70 pass   0 fail
-  identity_matrix                    13/13 pass   0 fail
+  identity_matrix                    12/13 pass   1 fail
   composition                        20/20 pass   0 fail
   duplication                        19/19 pass   0 fail
   contradiction                      4/4 pass   0 fail
@@ -27,16 +27,18 @@ By family:
 Historical catalogue behaviours: 35 (capture 27, new-project 8)
 Perturbation/metamorphic cases:  463
 Held-out scenarios:              39
-UNIQUE failure families:         3
+UNIQUE failure families:         4
 Architecture judgement:          A
 A small number of clusters account for most failures. Bounded defects are plausible; confirm before treating as a rewrite.
 
 Failure clusters (same observed transition; not proven one root cause):
-  [cluster-01] Product-model gap: cab-cancelled  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
+  [cluster-01] Planner / write-eligibility divergence at PLANNER  n=1  class=PLANNER  stage=PLANNER
+      id-pippa-first-on-candy
+  [cluster-02] Product-model gap: cab-cancelled  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
       gap-cab-cancel-remove
-  [cluster-02] Product-model gap: runbook-v3  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
+  [cluster-03] Product-model gap: runbook-v3  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
       gap-runbook-v3-retire-v2
-  [cluster-03] Product-model gap: cab-as-knowledge  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
+  [cluster-04] Product-model gap: cab-as-knowledge  n=1  class=PRODUCT MODEL GAP  stage=PLANNER
       gap-cab-as-knowledge
 
 Combined-only breaks:
@@ -53,6 +55,14 @@ Product-model gaps (not coding bugs):
   gap-cab-as-knowledge
 
 Failures:
+--- id-pippa-first-on-candy  seed=504018082  family=identity_matrix
+    base: pippa-first-name
+    perturbation: unique first name Pippa on Candyland
+    expected: Disposition no_change with a first-name-only statement must not write; Lume currently short-circuits no_change before the identity gate
+    actual: obs-pippa-first: decision needs_you (expected no_change)
+    earliest stage: PLANNER
+    class: PLANNER
+    reproduce: npx tsx scripts/verify-capture-convergence.ts --id id-pippa-first-on-candy
 --- gap-cab-cancel-remove  seed=2359560588  family=product_model_gap
     base: cab-cancelled
     perturbation: none
@@ -79,6 +89,7 @@ Failures:
     reproduce: npx tsx scripts/verify-capture-convergence.ts --id gap-cab-as-knowledge
 
 Reproduce all failures:
+  npx tsx scripts/verify-capture-convergence.ts --id id-pippa-first-on-candy
   npx tsx scripts/verify-capture-convergence.ts --id gap-cab-cancel-remove
   npx tsx scripts/verify-capture-convergence.ts --id gap-runbook-v3-retire-v2
   npx tsx scripts/verify-capture-convergence.ts --id gap-cab-as-knowledge
