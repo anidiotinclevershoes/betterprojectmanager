@@ -116,7 +116,11 @@
     "evals:estimate-tokens": "npx --yes tsx scripts/estimate-model-tidy-tokens.ts",
     "evals:pre-baseline": "npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
     "evals:model-tidy": "LUME_EVAL_RUN_LABEL='Model Tidy - Same Model Control' npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
-    "evals:canonical-slice1": "LUME_CANONICAL_TRUTH=1 LUME_EVAL_RUN_LABEL='Canonical Truth Slice 1' npx --yes tsx scripts/run-pre-intelligence-baseline.ts"
+    "evals:canonical-slice1": "LUME_CANONICAL_TRUTH=1 LUME_EVAL_RUN_LABEL='Canonical Truth Slice 1' npx --yes tsx scripts/run-pre-intelligence-baseline.ts",
+    "verify:capture-convergence": "npx --yes tsx scripts/verify-capture-convergence.ts",
+    "verify:capture-convergence:smoke": "npx --yes tsx scripts/verify-capture-convergence.ts --smoke",
+    "eval:capture-live": "npx --yes tsx scripts/eval-capture-live.ts",
+    "eval:capture-prompt-holdout": "npx --yes tsx scripts/capture-convergence/prompt-experiment/run.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

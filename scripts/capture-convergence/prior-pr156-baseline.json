@@ -1,0 +1,367 @@
+{
+  "sourceSha": "58b15c8fd5552dc07a2139632b683a9ca3c61df9",
+  "experimentSha": "4452bcbd1b43d6c5d06325f1754978654371d1e0",
+  "generatedAt": "2026-09-11T16:12:44.562Z",
+  "elapsedMs": 99,
+  "total": 538,
+  "pass": 526,
+  "fail": 12,
+  "families": {
+    "historical_regression": {
+      "pass": 17,
+      "fail": 0,
+      "total": 17
+    },
+    "information_preservation": {
+      "pass": 18,
+      "fail": 3,
+      "total": 21
+    },
+    "cross_observation_contamination": {
+      "pass": 13,
+      "fail": 5,
+      "total": 18
+    },
+    "order_invariance": {
+      "pass": 48,
+      "fail": 0,
+      "total": 48
+    },
+    "irrelevant_context": {
+      "pass": 210,
+      "fail": 0,
+      "total": 210
+    },
+    "ambiguity_isolation": {
+      "pass": 56,
+      "fail": 0,
+      "total": 56
+    },
+    "malformed_isolation": {
+      "pass": 70,
+      "fail": 0,
+      "total": 70
+    },
+    "identity_matrix": {
+      "pass": 13,
+      "fail": 0,
+      "total": 13
+    },
+    "composition": {
+      "pass": 20,
+      "fail": 0,
+      "total": 20
+    },
+    "duplication": {
+      "pass": 19,
+      "fail": 0,
+      "total": 19
+    },
+    "contradiction": {
+      "pass": 3,
+      "fail": 1,
+      "total": 4
+    },
+    "product_model_gap": {
+      "pass": 0,
+      "fail": 3,
+      "total": 3
+    },
+    "held_out": {
+      "pass": 39,
+      "fail": 0,
+      "total": 39
+    }
+  },
+  "clusters": [
+    {
+      "id": "cluster-02",
+      "label": "Transcript-wide identity gate (identityEvidenceText uses the whole Capture)",
+      "classification": "IDENTITY RESOLUTION",
+      "earliestStage": "IDENTITY",
+      "caseIds": [
+        "cross-andris-olga-uat",
+        "cross-andris-sarah-rel",
+        "cross-olga-sarah",
+        "cross-olga-sarah-rev",
+        "cross-andris-transcript-olga-sarah"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    },
+    {
+      "id": "cluster-01",
+      "label": "New Project adapter silently drops schema-rejected people (Capture keeps them visible)",
+      "classification": "INFORMATION LOSS",
+      "earliestStage": "PRESERVE",
+      "caseIds": [
+        "pres-np-adapter-foreign-id",
+        "pres-np-adapter-missing-truth-intent",
+        "pres-np-adapter-unknown-disposition"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    },
+    {
+      "id": "cluster-03",
+      "label": "Contradictory sibling observations both stay Apply-eligible writes",
+      "classification": "PLANNER",
+      "earliestStage": "PLANNER",
+      "caseIds": [
+        "contra-risk-open-and-closed"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    },
+    {
+      "id": "cluster-04",
+      "label": "Product-model gap: cab-cancelled",
+      "classification": "PRODUCT MODEL GAP",
+      "earliestStage": "PLANNER",
+      "caseIds": [
+        "gap-cab-cancel-remove"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    },
+    {
+      "id": "cluster-05",
+      "label": "Product-model gap: runbook-v3",
+      "classification": "PRODUCT MODEL GAP",
+      "earliestStage": "PLANNER",
+      "caseIds": [
+        "gap-runbook-v3-retire-v2"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    },
+    {
+      "id": "cluster-06",
+      "label": "Product-model gap: cab-as-knowledge",
+      "classification": "PRODUCT MODEL GAP",
+      "earliestStage": "PLANNER",
+      "caseIds": [
+        "gap-cab-as-knowledge"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    }
+  ],
+  "failures": [
+    {
+      "id": "pres-np-adapter-foreign-id",
+      "family": "information_preservation",
+      "seed": 556293963,
+      "baseScenario": "np-informal-people-foreign-id",
+      "perturbation": "unscoped New Project; model invented candidateTargetId",
+      "expectedInvariant": "Name-only Bob/Mike must survive the New Project adapter even when the extractor invents target ids",
+      "ok": false,
+      "expected": "Name-only Bob/Mike must survive the New Project adapter even when the extractor invents target ids",
+      "actual": "NP missing person bob | NP missing person mike",
+      "earliestStage": "PRESERVE",
+      "classification": "INFORMATION LOSS",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "pres-np-adapter-missing-truth-intent",
+      "family": "information_preservation",
+      "seed": 1992160512,
+      "baseScenario": "np-informal-people-missing-truth-intent",
+      "perturbation": "extractor omitted truthIntent",
+      "expectedInvariant": "Named people in a structurally valid observations array must not vanish from New Project Organise",
+      "ok": false,
+      "expected": "Named people in a structurally valid observations array must not vanish from New Project Organise",
+      "actual": "NP missing person bob | NP missing person mike",
+      "earliestStage": "PRESERVE",
+      "classification": "INFORMATION LOSS",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "pres-np-adapter-unknown-disposition",
+      "family": "information_preservation",
+      "seed": 2924620871,
+      "baseScenario": "np-informal-people-unknown-disposition",
+      "perturbation": "extractor used disposition create instead of create_new",
+      "expectedInvariant": "Named people must not vanish from New Project Organise because of a near-miss disposition enum",
+      "ok": false,
+      "expected": "Named people must not vanish from New Project Organise because of a near-miss disposition enum",
+      "actual": "NP missing person bob | NP missing person mike",
+      "earliestStage": "PRESERVE",
+      "classification": "INFORMATION LOSS",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "cross-andris-olga-uat",
+      "family": "cross_observation_contamination",
+      "seed": 3247213658,
+      "baseScenario": "andris",
+      "perturbation": "Andris + Olga UAT observations together",
+      "expectedInvariant": "Andris decision/reasonClass stays the solo incomplete-name Needs You; Olga must not retarget Andris",
+      "ok": false,
+      "expected": "Andris decision/reasonClass stays the solo incomplete-name Needs You; Olga must not retarget Andris",
+      "actual": "obs-andris: responsibility|create_new|current|needs_you||responsibility||andris|legacy||kept||needs_you_identity_incomplete → responsibility|create_new|current|needs_you||responsibility|person-olga|olga petrov|legacy||kept||needs_you_identity_mismatch",
+      "earliestStage": "IDENTITY",
+      "classification": "IDENTITY RESOLUTION",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "cross-andris-sarah-rel",
+      "family": "cross_observation_contamination",
+      "seed": 1844617163,
+      "baseScenario": "andris",
+      "perturbation": "Andris + Sarah Release together",
+      "expectedInvariant": "Andris stays independent of Sarah",
+      "ok": false,
+      "expected": "Andris stays independent of Sarah",
+      "actual": "obs-andris: responsibility|create_new|current|needs_you||responsibility||andris|legacy||kept||needs_you_identity_incomplete → responsibility|create_new|current|needs_you||responsibility|person-sarah|sarah kim|legacy||kept||needs_you_identity_mismatch",
+      "earliestStage": "IDENTITY",
+      "classification": "IDENTITY RESOLUTION",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "cross-olga-sarah",
+      "family": "cross_observation_contamination",
+      "seed": 1877637763,
+      "baseScenario": "olga-uat",
+      "perturbation": "Olga UAT + Sarah Release",
+      "expectedInvariant": "Each person's scope stays on that person",
+      "ok": false,
+      "expected": "Each person's scope stays on that person",
+      "actual": "obs-olga-uat: responsibility|create_new|current|write|confirm_responsibility|responsibility|person-olga|olga petrov|uat||kept||write → responsibility|create_new|current|needs_you||responsibility||olga petrov|uat||kept||needs_you_identity_multiple",
+      "earliestStage": "IDENTITY",
+      "classification": "IDENTITY RESOLUTION",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "cross-olga-sarah-rev",
+      "family": "cross_observation_contamination",
+      "seed": 981617523,
+      "baseScenario": "sarah-release",
+      "perturbation": "Olga UAT + Sarah Release (reversed order)",
+      "expectedInvariant": "Each person's scope stays on that person",
+      "ok": false,
+      "expected": "Each person's scope stays on that person",
+      "actual": "obs-sarah-rel: responsibility|create_new|current|write|confirm_responsibility|responsibility|person-sarah|sarah kim|release||kept||write → responsibility|create_new|current|needs_you||responsibility||sarah kim|release||kept||needs_you_identity_multiple",
+      "earliestStage": "IDENTITY",
+      "classification": "IDENTITY RESOLUTION",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "cross-andris-transcript-olga-sarah",
+      "family": "cross_observation_contamination",
+      "seed": 2154363882,
+      "baseScenario": "andris",
+      "perturbation": "Andris envelope only; transcript also names Olga Petrov and Sarah Kim",
+      "expectedInvariant": "Sibling names in the Capture text must not change Andris from incomplete-name to multiple-match",
+      "ok": false,
+      "expected": "Sibling names in the Capture text must not change Andris from incomplete-name to multiple-match",
+      "actual": "obs-andris: responsibility|create_new|current|needs_you||responsibility||andris|legacy||kept||needs_you_identity_incomplete → responsibility|create_new|current|needs_you||responsibility||andris|legacy||kept||needs_you_identity_multiple",
+      "earliestStage": "IDENTITY",
+      "classification": "IDENTITY RESOLUTION",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "contra-risk-open-and-closed",
+      "family": "contradiction",
+      "seed": 1678779826,
+      "baseScenario": "bridge-open-closed",
+      "perturbation": "same risk open and resolved",
+      "expectedInvariant": "Opposite risk statuses stay local / Needs You; no silent last-write-wins Apply Ready pair",
+      "ok": false,
+      "expected": "Opposite risk statuses stay local / Needs You; no silent last-write-wins Apply Ready pair",
+      "actual": "contradiction locality: 2 focus writes and 0 Needs You (expected conflict to stay local)",
+      "earliestStage": "PLANNER",
+      "classification": "PLANNER",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "gap-cab-cancel-remove",
+      "family": "product_model_gap",
+      "seed": 2359560588,
+      "baseScenario": "cab-cancelled",
+      "perturbation": "none",
+      "expectedInvariant": "PRODUCT MODEL: a cancelled dated item should be a cancel/remove write, not Needs You-as-complete",
+      "ok": false,
+      "expected": "PRODUCT MODEL: a cancelled dated item should be a cancel/remove write, not Needs You-as-complete",
+      "actual": "obs-cab: decision needs_you (expected write) | obs-cab: writeType null (expected cancel_milestone)",
+      "earliestStage": "PLANNER",
+      "classification": "PRODUCT MODEL GAP",
+      "productModelGap": true,
+      "heldOut": false
+    },
+    {
+      "id": "gap-runbook-v3-retire-v2",
+      "family": "product_model_gap",
+      "seed": 1225982585,
+      "baseScenario": "runbook-v3",
+      "perturbation": "none",
+      "expectedInvariant": "PRODUCT MODEL: superseding runbook v3 should retire v2, not only create another knowledge fact",
+      "ok": false,
+      "expected": "PRODUCT MODEL: superseding runbook v3 should retire v2, not only create another knowledge fact",
+      "actual": "obs-runbook: writeType write_knowledge (expected replace_knowledge)",
+      "earliestStage": "PLANNER",
+      "classification": "PRODUCT MODEL GAP",
+      "productModelGap": true,
+      "heldOut": false
+    },
+    {
+      "id": "gap-cab-as-knowledge",
+      "family": "product_model_gap",
+      "seed": 1462307686,
+      "baseScenario": "cab-as-knowledge",
+      "perturbation": "cancelled date extracted as knowledge",
+      "expectedInvariant": "PRODUCT MODEL: cancelling a date must not become a note that leaves the date standing",
+      "ok": false,
+      "expected": "PRODUCT MODEL: cancelling a date must not become a note that leaves the date standing",
+      "actual": "obs-cab-know: writeType write_knowledge (expected cancel_milestone)",
+      "earliestStage": "PLANNER",
+      "classification": "PRODUCT MODEL GAP",
+      "productModelGap": true,
+      "heldOut": false
+    }
+  ],
+  "historicalScenarioCount": 35,
+  "historicalCaptureBehaviours": 27,
+  "historicalNewProjectBehaviours": 8,
+  "perturbationCaseCount": 463,
+  "heldOutCount": 39,
+  "uniqueFailureFamilies": 6,
+  "combinedOnlyBreaks": [
+    "cross-andris-olga-uat",
+    "cross-andris-sarah-rel",
+    "cross-olga-sarah",
+    "cross-olga-sarah-rev",
+    "cross-andris-transcript-olga-sarah"
+  ],
+  "orderChangesSemantics": [],
+  "unrelatedContextChanges": [],
+  "informationLossCases": [
+    "pres-np-adapter-foreign-id",
+    "pres-np-adapter-missing-truth-intent",
+    "pres-np-adapter-unknown-disposition"
+  ],
+  "productModelGapCases": [
+    "gap-cab-cancel-remove",
+    "gap-runbook-v3-retire-v2",
+    "gap-cab-as-knowledge"
+  ],
+  "architectureJudgement": "B",
+  "architectureNote": "Independent observations change identity reasonClass / bind when sibling names appear in the same Capture. Strong evidence of transcript-wide identity coupling. Product-model gaps are separate and should not be treated as the same defect.",
+  "reproduce": [
+    "npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-foreign-id",
+    "npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-missing-truth-intent",
+    "npx tsx scripts/verify-capture-convergence.ts --id pres-np-adapter-unknown-disposition",
+    "npx tsx scripts/verify-capture-convergence.ts --id cross-andris-olga-uat",
+    "npx tsx scripts/verify-capture-convergence.ts --id cross-andris-sarah-rel",
+    "npx tsx scripts/verify-capture-convergence.ts --id cross-olga-sarah",
+    "npx tsx scripts/verify-capture-convergence.ts --id cross-olga-sarah-rev",
+    "npx tsx scripts/verify-capture-convergence.ts --id cross-andris-transcript-olga-sarah",
+    "npx tsx scripts/verify-capture-convergence.ts --id contra-risk-open-and-closed",
+    "npx tsx scripts/verify-capture-convergence.ts --id gap-cab-cancel-remove",
+    "npx tsx scripts/verify-capture-convergence.ts --id gap-runbook-v3-retire-v2",
+    "npx tsx scripts/verify-capture-convergence.ts --id gap-cab-as-knowledge"
+  ]
+}
