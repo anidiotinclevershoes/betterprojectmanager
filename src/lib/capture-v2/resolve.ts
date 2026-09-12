@@ -273,8 +273,11 @@ function resolveOne(
     };
   }
 
-  const ownershipAsResponsibility =
-    rematerializeOwnershipAsResponsibility(observation);
+  const ownershipAsResponsibility = rematerializeOwnershipAsResponsibility(
+    observation,
+    args.world,
+    projectId,
+  );
   if (ownershipAsResponsibility !== observation) {
     return resolveOne(ownershipAsResponsibility, args);
   }
@@ -495,6 +498,8 @@ function uniqueTitledRecord(
  */
 function rematerializeOwnershipAsResponsibility(
   observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
 ): CaptureObservationV2 {
   if (observation.domain !== "person") return observation;
   const values = observation.proposedValues ?? {};
@@ -512,6 +517,15 @@ function rematerializeOwnershipAsResponsibility(
   ) {
     return observation;
   }
+  const project = projectId
+    ? world.projects.find((p) => p.id === projectId)
+    : undefined;
+  const existing = (project?.stakeholders ?? []).some((person) =>
+    namesMatchExact(person.name, name),
+  );
+  // A new Person + ownership language is still a Person create first.
+  // Only rematerialize ownership onto an existing recorded identity.
+  if (!existing) return observation;
   const ownership = values.ownershipSemantics;
   return {
     ...observation,

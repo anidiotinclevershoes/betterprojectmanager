@@ -100,6 +100,7 @@ export function reconcileExpectedTarget(
   item: PendingSuggestion,
   world?: CaptureApplyWorld | null,
 ): PendingSuggestion {
+  if (!item) return item;
   if (item.op === "create") {
     return item.expectedTarget ? { ...item, expectedTarget: null } : item;
   }

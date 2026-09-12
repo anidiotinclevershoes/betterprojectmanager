@@ -187,7 +187,7 @@ async function main() {
     );
     assert.match(
       storeSrc,
-      /intendedProjectId = before\.projectId \?\? null/,
+      /intendedProjectId = seed\.projectId \?\? null/,
     );
     assert.match(
       storeSrc,

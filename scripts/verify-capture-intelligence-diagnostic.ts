@@ -544,7 +544,10 @@ function main() {
       ],
     });
     assert.equal(row!.decision, "needs_you");
-    assert.match(String(row!.reason), /not on this project/i);
+    assert.match(
+      String(row!.reason),
+      /cannot tell which person|not on this project/i,
+    );
     console.log("    CLASS: MODEL FAILURE (guessed Olga for 'she')");
     console.log("    CLASS: LUME CATCH (planner requires the reviewed statement to contain Olga Petrov, so the UUID does not write)");
   });
