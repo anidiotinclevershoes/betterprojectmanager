@@ -1,0 +1,17 @@
+{
+  "n": 1,
+  "summary": "Induction time on mobilisation day",
+  "expectedOps": "create knowledge site induction 09:00",
+  "review": "none",
+  "result": "FAIL",
+  "needsYouObserved": [],
+  "applyCountBefore": 0,
+  "applyCountAfterExclude": 0,
+  "notes": "",
+  "unexpectedCreates": [],
+  "unexpectedRemoves": [],
+  "missingWrites": [
+    "create:site induction 09:00"
+  ],
+  "earliestBoundary": "AI_EXTRACT"
+}

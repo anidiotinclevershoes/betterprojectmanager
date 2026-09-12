@@ -1,0 +1,21 @@
+{
+  "n": 24,
+  "summary": "Explicit split ownership of the two snag lists",
+  "expectedOps": "create responsibility Hall snag list; create responsibility Cafe snag list",
+  "review": "none",
+  "result": "FAIL",
+  "needsYouObserved": [
+    "NEEDS YOU JO STAKEHOLDER Should Lume apply this change? James Okonkwo This Person identity is not established in the Capture. A supplied record id is not enough",
+    "NEEDS YOU NR STAKEHOLDER Lume needs a decision from you. Nadia Rahman Someone already owns Cafe snag list. What should happen? Why this Share with Nadia Rahman "
+  ],
+  "applyCountBefore": 0,
+  "applyCountAfterExclude": 0,
+  "notes": "",
+  "unexpectedCreates": [],
+  "unexpectedRemoves": [],
+  "missingWrites": [
+    "create:Hall snag list",
+    "create:Cafe snag list"
+  ],
+  "earliestBoundary": "AI_EXTRACT"
+}

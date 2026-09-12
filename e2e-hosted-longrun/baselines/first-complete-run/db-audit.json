@@ -1,0 +1,119 @@
+{
+  "auditedAt": "2026-09-12T22:20:00Z",
+  "method": "read-only SELECT via Supabase MCP execute_sql",
+  "mutations": "none",
+  "timingNote": "Independent SQL was performed after the official 50-capture run completed. Intra-run checkpoints during lr-20260912T2212Z were hosted-API snapshots plus UI reload, not live SQL. This file is the post-run forensic audit against the same production database the browser wrote.",
+  "environment": {
+    "productionOrigin": "https://betterprojectmanager.vercel.app",
+    "productionPublicSupabaseUrl": "https://exfftrxxinhduogcluce.supabase.co",
+    "proof": "NEXT_PUBLIC_SUPABASE_URL is embedded in production JS chunk /_next/static/chunks/17u872hbxanb5.js and equals this ref.",
+    "supabaseProjectName": "Lume",
+    "supabaseProjectRef": "exfftrxxinhduogcluce",
+    "databaseHost": "db.exfftrxxinhduogcluce.supabase.co",
+    "region": "eu-west-1",
+    "status": "ACTIVE_HEALTHY",
+    "otherAccessibleSupabaseProjectsNotUsed": ["ev-stop-finder", "neurodiverseapp"]
+  },
+  "dedicatedProject": {
+    "id": "8537b7cf-1b50-453e-af64-2b21e2d29e90",
+    "workspaceId": "3d1a9359-6ff9-43b1-ab2d-925c939a71d2",
+    "createdBy": "9c7f0a7b-519b-48ad-902c-4bbd96424de4",
+    "name": "E2E-LONGRUN-Riverside Civic Hall Fit-Out lr-20260912T2212Z",
+    "code": "LR12T2212Z",
+    "status": "watch",
+    "kind": "delivery",
+    "createdAt": "2026-09-12T22:03:56.399Z"
+  },
+  "counts": {
+    "people": 6,
+    "todos": 12,
+    "todosDone": 0,
+    "risks": 2,
+    "milestones": 6,
+    "knowledge": 15,
+    "availability": 2,
+    "responsibilityLike": 0,
+    "receipts": 16,
+    "history": 21,
+    "captureSessions": 0,
+    "memories": 1
+  },
+  "stableIdCheck": {
+    "state0PeopleStillPresent": [
+      "ba188f34-f2e9-493d-91c9-c08fe4078a7c",
+      "cb05efca-6e25-4d0d-a701-1fb67b8e6572",
+      "f2e5e5cc-1466-4ebf-acb6-0f78758c7c37",
+      "55fb9792-8c74-4657-b94a-256ad93e5b0e",
+      "a303cc66-f4f3-4207-b269-899058229330"
+    ],
+    "state0TodosStillPresent": [
+      "3364d3c7-d0fb-4f37-8982-38cfd60e636b",
+      "c485d22e-e82f-4675-bde0-664469088026",
+      "f17811ef-50f9-4c08-8cad-b00552862d87"
+    ],
+    "state0RisksStillPresent": [
+      "1c682215-ef53-4c94-8e0a-1979b002a433",
+      "fb74aa0f-dc7f-4fba-a5c5-838a1dd7acf3"
+    ],
+    "state0MilestonesStillPresent": [
+      "657ec837-f0d4-45dc-a9ce-f08c935ddff9",
+      "8e622129-e1ae-4906-af9b-94661d5a3172",
+      "c0deb9c6-b7f5-4671-b705-ef734a0e51b3"
+    ],
+    "idReplacements": 0,
+    "duplicatePeople": 0,
+    "foreignIdHitsOnOtherProjects": 0,
+    "unexpectedDeletes": 0
+  },
+  "integrityHitsConfirmedInSql": {
+    "ddaRiskWrongResolve": {
+      "id": "fb74aa0f-dc7f-4fba-a5c5-838a1dd7acf3",
+      "state0Status": "open",
+      "dbStatus": "resolved",
+      "updatedAt": "2026-09-12T22:07:36.252Z",
+      "receiptPresent": false,
+      "historyEvent": "Capture updated a risk"
+    },
+    "pcThirdMoveMissing": {
+      "id": "8e622129-e1ae-4906-af9b-94661d5a3172",
+      "state0Start": "2026-12-12",
+      "dbStart": "2026-12-18",
+      "expectedAfterC33": "2027-01-08",
+      "receiptForUpdate": false
+    },
+    "saturdayCatchupNotDeleted": {
+      "id": "7c30dc1b-787c-4a04-903b-2687e2b9992d",
+      "startOn": "2026-10-17",
+      "stillPresent": true
+    },
+    "asbestosStillOpen": {
+      "id": "f17811ef-50f9-4c08-8cad-b00552862d87",
+      "done": false
+    },
+    "missingPeople": ["Jamie", "Jamie Okoye", "Leo Mensah"],
+    "knowledgeRiskBodiesNotUpdatedWhenDdaResolved": true
+  },
+  "receiptCoverage": {
+    "createReceipts": 16,
+    "updateReceiptsForState0Entities": 0,
+    "note": "Creates are receipted. Updates to existing Practical completion, Client walk-through, DDA risk, and FF&E sample review have history_events but no capture_apply_receipts rows."
+  },
+  "isolation": {
+    "workspaceProjectsUpdatedDuringOfficialRunWindow": [
+      "8537b7cf-1b50-453e-af64-2b21e2d29e90"
+    ],
+    "leftoverLongrunProjectsUntouched": [
+      "469539ae-599f-4bc1-840e-26116d90d023",
+      "afe2bee4-67c1-40bf-a1f2-a0ce5944b07c"
+    ],
+    "crossProjectMutation": false
+  },
+  "threeWay": {
+    "expectedLedgerVsDatabase": "DIFFERS — missing writes, C18 wrong-target resolve, late empty Reviews",
+    "databaseVsHarnessApiSnapshot": "MATCH — same IDs and semantic values as state-final.json",
+    "databaseVsUiProjection": "MATCH on inspected domains; Knowledge risk prose still current after DDA resolve (D-030 class)"
+  },
+  "finalQuestion": {
+    "wasCanonicalDatabaseExactlyTheExpectedApprovedState": false
+  }
+}

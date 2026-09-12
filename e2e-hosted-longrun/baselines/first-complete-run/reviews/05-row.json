@@ -1,0 +1,21 @@
+{
+  "n": 5,
+  "summary": "Asbestos chase closed; timber-floor services risk",
+  "expectedOps": "complete todo asbestos; create risk timber floor",
+  "review": "none",
+  "result": "FAIL",
+  "needsYouObserved": [
+    "NEEDS YOU RISK Which record does this refer to? Hall timber floor services risk Lume couldn't confidently identify which existing record this refers to. Why thi"
+  ],
+  "applyCountBefore": 0,
+  "applyCountAfterExclude": 0,
+  "notes": "",
+  "unexpectedCreates": [],
+  "unexpectedRemoves": [],
+  "missingWrites": [
+    "complete:asbestos",
+    "create:timber floor"
+  ],
+  "earliestBoundary": "AI_EXTRACT",
+  "projectionMismatches": []
+}

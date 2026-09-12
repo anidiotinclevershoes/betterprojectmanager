@@ -1,0 +1,20 @@
+{
+  "n": 50,
+  "summary": "Close-out: new fact, cancel walk-through, cafe waiting, PC inspection",
+  "expectedOps": "create knowledge defects liability; product_model_gap_needs_you milestone walk-through; update todo Cafe snag list; create milestone PC inspection",
+  "review": "none",
+  "result": "FAIL",
+  "needsYouObserved": [],
+  "applyCountBefore": 0,
+  "applyCountAfterExclude": 0,
+  "notes": "",
+  "unexpectedCreates": [],
+  "unexpectedRemoves": [],
+  "missingWrites": [
+    "create:defects liability",
+    "update:Cafe snag list",
+    "create:PC inspection"
+  ],
+  "earliestBoundary": "AI_EXTRACT",
+  "projectionMismatches": []
+}

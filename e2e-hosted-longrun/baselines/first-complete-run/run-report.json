@@ -1,0 +1,1066 @@
+{
+  "suite": "hosted-longrun-v1",
+  "seed": "lume-longrun-v1-20260912-a3db",
+  "runId": "lr-20260912T2212Z",
+  "startedAt": "2026-09-12T22:03:38.662Z",
+  "originMainSha": "9f24a65c7ea38d1dabb2d513a87503fb9e7a4cd6",
+  "productionOrigin": "https://betterprojectmanager.vercel.app",
+  "playwrightBaseUrl": "https://betterprojectmanager.vercel.app",
+  "projectName": "E2E-LONGRUN-Riverside Civic Hall Fit-Out lr-20260912T2212Z",
+  "projectCode": "LR12T2212Z",
+  "isolation": {
+    "ok": true,
+    "emailDomainOk": true,
+    "projectCount": 134,
+    "projectNames": [
+      "E2E Capture Update hv-20260911T185955Z",
+      "E2E Andris hv-20260911T185955Z",
+      "E2E Mixed hv-20260911T185955Z",
+      "E2E full hv-cal-20260911T193400Z",
+      "E2E capture hv-cal-20260911T193400Z",
+      "E2E andris hv-cal-20260911T193400Z",
+      "E2E ambiguity hv-cal-20260911T193400Z",
+      "E2E mixed hv-cal-20260911T193400Z",
+      "E2E full hv-cal-20260911T194000Z",
+      "E2E capture hv-cal-20260911T194000Z",
+      "E2E andris hv-cal-20260911T194000Z",
+      "E2E ambiguity hv-cal-20260911T194000Z",
+      "E2E mixed hv-cal-20260911T194000Z",
+      "E2E capture hv-trace-20260911T201500Z",
+      "E2E ambiguity hv-trace-20260911T201500Z",
+      "E2E full hv-n10-20260911T212200Z",
+      "E2E capture hv-n10-20260911T212200Z",
+      "E2E andris hv-n10-20260911T212200Z",
+      "E2E ambiguity hv-n10-20260911T212200Z",
+      "E2E mixed hv-n10-20260911T212200Z",
+      "E2E slice2 slice2-20260911T220728Z",
+      "E2E full hv-slice2-20260911T220927Z",
+      "E2E capture hv-slice2-20260911T220927Z",
+      "E2E andris hv-slice2-20260911T220927Z",
+      "E2E ambiguity hv-slice2-20260911T220927Z",
+      "E2E mixed hv-slice2-20260911T220927Z",
+      "E2E full hv-int-20260911T224022Z",
+      "E2E capture hv-int-20260911T224022Z",
+      "E2E andris hv-int-20260911T224022Z",
+      "E2E mixed hv-int-20260911T224022Z",
+      "E2E full hv-int2-20260911T224345Z",
+      "E2E capture hv-int2-20260911T224345Z",
+      "E2E andris hv-int2-20260911T224345Z",
+      "E2E ambiguity hv-int2-20260911T224345Z",
+      "E2E mixed hv-int2-20260911T224345Z",
+      "E2E full hv-int3-20260911T224547Z",
+      "E2E capture hv-int3-20260911T224547Z",
+      "E2E andris hv-int3-20260911T224547Z",
+      "E2E ambiguity hv-int3-20260911T224547Z",
+      "E2E mixed hv-int3-20260911T224547Z",
+      "HO issues ho-baseline-1",
+      "HO create ho-baseline-1",
+      "HO update ho-baseline-1",
+      "HO identity ho-baseline-1",
+      "HO isolate ho-baseline-1",
+      "HO messy ho-baseline-1",
+      "HO issues ho-fix1-1",
+      "HO create ho-fix1-1",
+      "HO update ho-fix1-1",
+      "HO identity ho-fix1-1",
+      "HO messy ho-fix1-1",
+      "HO issues ho-fix2-1",
+      "HO create ho-fix2-1",
+      "HO update ho-fix2-1",
+      "HO identity ho-fix2-1",
+      "HO messy ho-fix2-1",
+      "E2E full hv-holdout-check-1",
+      "E2E capture hv-holdout-check-1",
+      "E2E andris hv-holdout-check-1",
+      "E2E ambiguity hv-holdout-check-1",
+      "E2E mixed hv-holdout-check-1",
+      "HO issues ho-fix3-1",
+      "HO create ho-fix3-1",
+      "HO update ho-fix3-1",
+      "HO identity ho-fix3-1",
+      "HO isolate ho-fix3-1",
+      "HO messy ho-fix3-1",
+      "HO issues ho-fix4-1",
+      "HO create ho-fix4-1",
+      "HO update ho-fix4-1",
+      "HO identity ho-fix4-1",
+      "HO isolate ho-fix4-1",
+      "HO messy ho-fix4-1",
+      "HO issues ho-fix5-1",
+      "HO create ho-fix5-1",
+      "HO update ho-fix5-1",
+      "HO identity ho-fix5-1",
+      "HO isolate ho-fix5-1",
+      "HO messy ho-fix5-1",
+      "HO issues ho-fix5-2",
+      "HO create ho-fix5-2",
+      "HO update ho-fix5-2",
+      "HO identity ho-fix5-2",
+      "HO isolate ho-fix5-2",
+      "HO messy ho-fix5-2",
+      "E2E full hv-after-holdout-6of6",
+      "E2E capture hv-after-holdout-6of6",
+      "E2E andris hv-after-holdout-6of6",
+      "E2E ambiguity hv-after-holdout-6of6",
+      "E2E mixed hv-after-holdout-6of6",
+      "E2E full conv-final-orig-1",
+      "E2E capture conv-final-orig-1",
+      "E2E andris conv-final-orig-1",
+      "E2E ambiguity conv-final-orig-1",
+      "E2E mixed conv-final-orig-1",
+      "HO issues conv-final-holdout-1",
+      "HO create conv-final-holdout-1",
+      "HO update conv-final-holdout-1",
+      "HO identity conv-final-holdout-1",
+      "HO isolate conv-final-holdout-1",
+      "HO messy conv-final-holdout-1",
+      "E2E full hv-166-gate-1",
+      "E2E capture hv-166-gate-1",
+      "E2E andris hv-166-gate-1",
+      "E2E ambiguity hv-166-gate-1",
+      "E2E mixed hv-166-gate-1",
+      "E2E andris hv-166-andris-r1",
+      "HO issues ho-166-gate-1",
+      "HO create ho-166-gate-1",
+      "HO update ho-166-gate-1",
+      "HO identity ho-166-gate-1",
+      "HO isolate ho-166-gate-1",
+      "HO messy ho-166-gate-1",
+      "HO messy ho-166-h6-r1",
+      "E2E full hv-166-gate-2",
+      "E2E capture hv-166-gate-2",
+      "E2E andris hv-166-gate-2",
+      "E2E ambiguity hv-166-gate-2",
+      "E2E mixed hv-166-gate-2",
+      "HO issues ho-166-gate-2",
+      "HO create ho-166-gate-2",
+      "HO update ho-166-gate-2",
+      "HO identity ho-166-gate-2",
+      "HO isolate ho-166-gate-2",
+      "HO messy ho-166-gate-2",
+      "E2E andris hv-166-sens-1",
+      "E2E ambiguity hv-166-sens-1",
+      "E2E mixed hv-166-sens-1",
+      "HO issues ho-166-sens-1",
+      "HO identity ho-166-sens-1",
+      "HO isolate ho-166-sens-1",
+      "HO messy ho-166-sens-1",
+      "E2E-LONGRUN-Riverside Civic Hall Fit-Out lr-20260912T2155Z",
+      "E2E-LONGRUN-Riverside Civic Hall Fit-Out lr-20260912T2208Z"
+    ],
+    "suspiciousNames": [],
+    "userIdPresent": true,
+    "workspaceIdPresent": true
+  },
+  "state0Gaps": [
+    "missing knowledge snag"
+  ],
+  "composerAdds": [],
+  "rows": [
+    {
+      "n": 0,
+      "summary": "New Project State 0",
+      "expectedOps": "people + issues + todos + dates + knowledge",
+      "review": "organise only",
+      "result": "FAIL",
+      "earliestBoundary": "VALIDATE",
+      "notes": "missing knowledge snag",
+      "projectionMismatches": []
+    },
+    {
+      "n": 1,
+      "summary": "Induction time on mobilisation day",
+      "expectedOps": "create knowledge site induction 09:00",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU KNOWLEDGE Which record does this refer to? unknown Lume couldn't confidently identify which existing record this refers to. KNOWLEDGE Site induction i"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:site induction 09:00"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 2,
+      "summary": "Weekly dashboard to-do for Helen",
+      "expectedOps": "create todo weekly dashboard",
+      "review": "none",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 1,
+      "applyCountAfterExclude": 1,
+      "notes": "",
+      "applyHttp": 200,
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 3,
+      "summary": "First PC date move",
+      "expectedOps": "update milestone practical completion",
+      "review": "none",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 1,
+      "applyCountAfterExclude": 1,
+      "notes": "",
+      "applyHttp": 200,
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [],
+      "projectionMismatches": []
+    },
+    {
+      "n": 4,
+      "summary": "Nadia cafe FF&E + sample review date",
+      "expectedOps": "create responsibility cafe FF&E; update todo FF&E sample review",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU NR STAKEHOLDER Lume needs a decision from you. Nadia Rahman Someone already owns cafe FF&E. What should happen? Why this Share with Nadia Rahman Repla"
+      ],
+      "applyCountBefore": 1,
+      "applyCountAfterExclude": 1,
+      "notes": "",
+      "applyHttp": 200,
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:cafe FF&E"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 5,
+      "summary": "Asbestos chase closed; timber-floor services risk",
+      "expectedOps": "complete todo asbestos; create risk timber floor",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU RISK Which record does this refer to? Hall timber floor services risk Lume couldn't confidently identify which existing record this refers to. Why thi"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "complete:asbestos",
+        "create:timber floor"
+      ],
+      "earliestBoundary": "AI_EXTRACT",
+      "projectionMismatches": []
+    },
+    {
+      "n": 6,
+      "summary": "Mei Chen is the QS — person update not a legal write",
+      "expectedOps": "create responsibility quantity survey",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU MC STAKEHOLDER Should Lume apply this change? Mei Chen Mei Chen is mentioned, but Lume cannot represent this as a stakeholder change. Lume needs clari"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:quantity survey"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 7,
+      "summary": "RAMS review create; exclude biscuits",
+      "expectedOps": "create todo RAMS review; exclude_no_write todo biscuits",
+      "review": "exclude",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 1,
+      "applyCountAfterExclude": 1,
+      "notes": "exclude: no card matching /biscuit/",
+      "applyHttp": 200,
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 8,
+      "summary": "Tomos owns DDA ramp sign-off",
+      "expectedOps": "create responsibility DDA ramp",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU OD STAKEHOLDER Should Lume apply this change? Outstanding DDA access ramp detail This person is not on this project. Lume will not write. Why this Dis"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:DDA ramp"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 9,
+      "summary": "She will own walk-through agenda (two women present)",
+      "expectedOps": "needs_you responsibility walk-through agenda; no_change issue DDA access ramp",
+      "review": "needs_you_resolve",
+      "result": "PASS",
+      "needsYouObserved": [
+        "NEEDS YOU CW STAKEHOLDER Should Lume apply this change? Client walk-through This person is not on this project. Lume will not write. Why this Dismiss"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "needs_you_resolve: no card matching /walk-through agenda|She will own|agenda/",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 10,
+      "summary": "Week-one email paste plus they-chair huddle",
+      "expectedOps": "create milestone M&E first-fix; create todo timber floor photo; create milestone water isolate; needs_you responsibility huddle; no_change knowledge timber floor",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 3,
+      "applyCountAfterExclude": 3,
+      "notes": " | reload delta {\"createdPeople\":[],\"createdTodos\":[\"Obtain ceiling void RAMS\"],\"createdRisks\":[],\"createdMilestones\":[],\"createdKnowledge\":[],\"createdResponsibilities\":[],\"updatedTodos\":[],\"updatedRisks\":[],\"updatedMilestones\":[],\"removedPeople\":[],\"removedTodos\":[],\"removedRisks\":[],\"removedMilestones\":[],\"removedKnowledge\":[],\"removedResponsibilities\":[],\"idReplacements\":[],\"duplicatePeople\":[]}",
+      "applyHttp": 200,
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:timber floor photo",
+        "create:water isolate"
+      ],
+      "earliestBoundary": "AI_EXTRACT",
+      "projectionMismatches": []
+    },
+    {
+      "n": 11,
+      "summary": "Chris joining — first name only",
+      "expectedOps": "create person Chris",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU ? STAKEHOLDER Which record does this refer to? Chris Chris is mentioned, but Lume cannot represent this as a stakeholder change. Lume needs clarificat"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:Chris"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 12,
+      "summary": "Vague second-fix week — provide date if asked",
+      "expectedOps": "needs_you milestone M&E second-fix",
+      "review": "edit_date",
+      "result": "PASS",
+      "needsYouObserved": [
+        "NEEDS YOU TO DO Which record does this refer to? Schedule M&E second-fix inspection Lume couldn't confidently identify which existing record this refers to. Why",
+        "NEEDS YOU KNOWLEDGE Which record does this refer to? The week of the 10th is being considered for the M&E second-fix inspection. Lume couldn't confidently ident"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "edit_date: no date field on matching card",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [],
+      "projectionMismatches": []
+    },
+    {
+      "n": 13,
+      "summary": "Saturday catch-up dated",
+      "expectedOps": "create milestone Saturday catch-up",
+      "review": "none",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 1,
+      "applyCountAfterExclude": 1,
+      "notes": "",
+      "applyHttp": 200,
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 14,
+      "summary": "Timber floor is now a decision",
+      "expectedOps": "create knowledge timber floor",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU KNOWLEDGE Which record does this refer to? unknown Lume couldn't confidently identify which existing record this refers to. KNOWLEDGE The existing tim"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:timber floor"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 15,
+      "summary": "She wants the photo; RAMS still unapproved — exclude pronoun",
+      "expectedOps": "needs_you todo photo; update risk RAMS",
+      "review": "needs_you_exclude",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 1,
+      "applyCountAfterExclude": 0,
+      "notes": "needs_you_exclude: clicked on /She wants|photo/",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "update:RAMS"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 16,
+      "summary": "Two distinct snag lists",
+      "expectedOps": "create todo Cafe snag list; create todo Hall snag list",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU TO DO Which record does this refer to? Create Cafe snag list Lume cannot safely apply this finding to a maintained record. Why this Choose another Cre",
+        "NEEDS YOU TO DO Which record does this refer to? Create Hall snag list Lume cannot safely apply this finding to a maintained record. Why this Choose another Cre"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:Cafe snag list",
+        "create:Hall snag list"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 17,
+      "summary": "Site WhatsApp dump",
+      "expectedOps": "create risk extra containment; update todo FF&E sample review; create knowledge DDA ramp drawing; create todo cost report; exclude_no_write todo biscuits",
+      "review": "exclude",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 3,
+      "applyCountAfterExclude": 3,
+      "notes": "exclude: no card matching /biscuit/",
+      "applyHttp": 200,
+      "unexpectedCreates": [
+        "todo:Issue delay notice"
+      ],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:extra containment",
+        "update:FF&E sample review",
+        "create:DDA ramp drawing",
+        "create:cost report"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 18,
+      "summary": "Resolve timber-floor risk; ceiling void risk stays",
+      "expectedOps": "complete risk timber floor; no_change risk M&E first-fix",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 1,
+      "applyCountAfterExclude": 1,
+      "notes": " | pre-Apply canonical writes: [[\"createdTodos\",[\"Prepare cost report\"]]]",
+      "earliestBoundary": "REVIEW_UI",
+      "applyHttp": 200,
+      "unexpectedCreates": [
+        "todo:Prepare cost report"
+      ],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "complete:timber floor"
+      ],
+      "projectionMismatches": []
+    },
+    {
+      "n": 19,
+      "summary": "Helen away dates",
+      "expectedOps": "create availability Helen Ward",
+      "review": "none",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 1,
+      "applyCountAfterExclude": 1,
+      "notes": "",
+      "applyHttp": 200,
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 20,
+      "summary": "Mixed Review: date + exclude badges + they/RAMS + urn",
+      "expectedOps": "update milestone walk-through; exclude_no_write todo visitor badges; needs_you risk RAMS; create knowledge temporary urn",
+      "review": "exclude, needs_you_exclude",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU RISK Which record does this refer to? Temporary urn needed for cafe if water isolate slips Lume couldn't confidently identify which existing record th"
+      ],
+      "applyCountBefore": 2,
+      "applyCountAfterExclude": 1,
+      "notes": "exclude: clicked on /badge/ | needs_you_exclude: no card matching /They still|RAMS/",
+      "applyHttp": 200,
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:temporary urn"
+      ],
+      "earliestBoundary": "AI_EXTRACT",
+      "projectionMismatches": []
+    },
+    {
+      "n": 21,
+      "summary": "PC restated — no change",
+      "expectedOps": "no_change milestone practical completion",
+      "review": "none",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 22,
+      "summary": "Second walk-through; exclude tape then try re-include",
+      "expectedOps": "create milestone second walk-through; exclude_no_write todo tape",
+      "review": "exclude_then_reinclude",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 2,
+      "applyCountAfterExclude": 1,
+      "notes": "reinclude: PRODUCT_MODEL_GAP — no re-include control after Exclude",
+      "applyHttp": 200,
+      "unexpectedCreates": [
+        "milestone:Second client walk-through"
+      ],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:second walk-through"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 23,
+      "summary": "The snag list owned by James — two lists exist",
+      "expectedOps": "needs_you responsibility snag list",
+      "review": "none",
+      "result": "PASS",
+      "needsYouObserved": [
+        "NEEDS YOU JO STAKEHOLDER Lume needs a decision from you. James Okonkwo Someone already owns snag list. What should happen? Why this Share with James Okonkwo Rep"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 24,
+      "summary": "Explicit split ownership of the two snag lists",
+      "expectedOps": "create responsibility Hall snag list; create responsibility Cafe snag list",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU JO STAKEHOLDER Should Lume apply this change? James Okonkwo This Person identity is not established in the Capture. A supplied record id is not enough",
+        "NEEDS YOU NR STAKEHOLDER Lume needs a decision from you. Nadia Rahman Someone already owns Cafe snag list. What should happen? Why this Share with Nadia Rahman "
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:Hall snag list",
+        "create:Cafe snag list"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 25,
+      "summary": "Mei owns monthly cost report",
+      "expectedOps": "create responsibility cost report",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU PR STAKEHOLDER Should Lume apply this change? Prepare cost report This person is not on this project. Lume will not write. Why this Dismiss"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:cost report"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 26,
+      "summary": "Sample review done; banquettes lead-time issue",
+      "expectedOps": "complete todo FF&E sample review; create risk banquettes",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [
+        "NEEDS YOU RISK Which record does this refer to? Cafe banquettes lead time risk Lume couldn't confidently identify which existing record this refers to. Why this"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "complete:FF&E sample review",
+        "create:banquettes"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 27,
+      "summary": "He will own client comms — Chris vs James",
+      "expectedOps": "needs_you responsibility client comms; no_change risk banquettes",
+      "review": "needs_you_resolve",
+      "result": "PASS",
+      "needsYouObserved": [
+        "NEEDS YOU MC STAKEHOLDER Should Lume apply this change? Mei Chen This Person identity is not established in the Capture. A supplied record id is not enough. Why",
+        "NEEDS YOU RISK Is this proposed value right? M&E first-fix coordination risk This Risk update is not specific enough to apply automatically. UPDATE Banquettes l"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "needs_you_resolve: no card matching /client comms|He will own/",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 28,
+      "summary": "Chris Ward full name — not Helen Ward",
+      "expectedOps": "create person Chris Ward; create responsibility client communications",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 1,
+      "applyCountAfterExclude": 1,
+      "notes": "",
+      "applyHttp": 200,
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:client communications"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 29,
+      "summary": "First-name-only Helen variation sign-off",
+      "expectedOps": "needs_you person Helen",
+      "review": "none",
+      "result": "PASS",
+      "needsYouObserved": [
+        "NEEDS YOU HW STAKEHOLDER Should Lume apply this change? Helen Ward This Person identity is not established in the Capture. A supplied record id is not enough. W"
+      ],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 30,
+      "summary": "Mid-project email",
+      "expectedOps": "no_change milestone practical completion; update risk extra containment; create todo cafe ceiling drawing; create milestone DDA mock-up; create availability Nadia Rahman; needs_you milestone programme",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 6,
+      "applyCountAfterExclude": 6,
+      "notes": " | reload delta {\"createdPeople\":[],\"createdTodos\":[\"DDA mock-up\"],\"createdRisks\":[],\"createdMilestones\":[],\"createdKnowledge\":[],\"createdResponsibilities\":[],\"updatedTodos\":[],\"updatedRisks\":[],\"updatedMilestones\":[],\"removedPeople\":[],\"removedTodos\":[],\"removedRisks\":[],\"removedMilestones\":[],\"removedKnowledge\":[],\"removedResponsibilities\":[],\"idReplacements\":[],\"duplicatePeople\":[]}",
+      "applyHttp": 200,
+      "unexpectedCreates": [
+        "todo:New drawing for cafe ceiling"
+      ],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "update:extra containment",
+        "create:cafe ceiling drawing",
+        "create:DDA mock-up",
+        "create:Nadia Rahman"
+      ],
+      "earliestBoundary": "AI_EXTRACT",
+      "projectionMismatches": []
+    },
+    {
+      "n": 31,
+      "summary": "Hall lighting scene plate — prefer Knowledge",
+      "expectedOps": "create knowledge lighting scene plate",
+      "review": "edit_entity_kind",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "edit_entity_kind: no card matching /lighting scene|scene plate/",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:lighting scene plate"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 32,
+      "summary": "Cancel Saturday catch-up — product-model gap",
+      "expectedOps": "product_model_gap_needs_you milestone Saturday catch-up",
+      "review": "none",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 33,
+      "summary": "Third PC date move, many captures later",
+      "expectedOps": "update milestone practical completion",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "update:practical completion"
+      ],
+      "earliestBoundary": "AI_EXTRACT",
+      "projectionMismatches": []
+    },
+    {
+      "n": 34,
+      "summary": "Jamie covers — name-only, not James",
+      "expectedOps": "create person Jamie; needs_you responsibility site programme",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:Jamie"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 35,
+      "summary": "Exclude plant; apply second DDA visit",
+      "expectedOps": "exclude_no_write todo plant; create milestone second DDA visit",
+      "review": "exclude",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "exclude: no card matching /plant/",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:second DDA visit"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 36,
+      "summary": "DDA ramp signed off; mock-up still due",
+      "expectedOps": "complete issue DDA access ramp; create knowledge DDA mock-up",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "complete:DDA access ramp",
+        "create:DDA mock-up"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 37,
+      "summary": "They said huddle chair rotates",
+      "expectedOps": "needs_you knowledge huddle chair",
+      "review": "none",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 38,
+      "summary": "Mixed Review: dates + contradictory banquettes + Nadia lighting",
+      "expectedOps": "update milestone M&E second-fix; create todo power-on; needs_you risk banquettes; create responsibility hall lighting",
+      "review": "needs_you_exclude",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "needs_you_exclude: no card matching /banquette|resolved|blocked/",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "update:M&E second-fix",
+        "create:power-on",
+        "create:hall lighting"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 39,
+      "summary": "Jamie Okoye is not James Okonkwo",
+      "expectedOps": "create person Jamie Okoye; create responsibility deputy site",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:Jamie Okoye",
+        "create:deputy site"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 40,
+      "summary": "Snag start + retire asbestos knowledge",
+      "expectedOps": "update todo Hall snag list; update todo Cafe snag list; no_change milestone practical completion; product_model_gap_needs_you knowledge asbestos",
+      "review": "exclude",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "exclude: no card matching /badge/",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "update:Hall snag list",
+        "update:Cafe snag list"
+      ],
+      "earliestBoundary": "AI_EXTRACT",
+      "projectionMismatches": []
+    },
+    {
+      "n": 41,
+      "summary": "Someone needs to own fire-door certificates",
+      "expectedOps": "needs_you responsibility fire-door",
+      "review": "needs_you_exclude",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "needs_you_exclude: no card matching /Someone|fire-door/",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 42,
+      "summary": "Nadia replaces Helen on cafe FF&E only",
+      "expectedOps": "needs_you responsibility FF&E",
+      "review": "needs_you_resolve",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "needs_you_resolve: no card matching /FF&E|replaces/",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": []
+    },
+    {
+      "n": 43,
+      "summary": "Power-on passed; start cafe snag",
+      "expectedOps": "complete todo power-on; update todo Cafe snag list",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "complete:power-on",
+        "update:Cafe snag list"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 44,
+      "summary": "Hall snag first pass — must not close cafe snag",
+      "expectedOps": "update todo Hall snag list",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "update:Hall snag list"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 45,
+      "summary": "Leo Mensah name-only, late introduction",
+      "expectedOps": "create person Leo Mensah",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:Leo Mensah"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 46,
+      "summary": "Leo owns fire doors + dated reminder",
+      "expectedOps": "create responsibility fire-door; create todo fire-door",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:fire-door",
+        "create:fire-door"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 47,
+      "summary": "Year-end wrap + the Wards cabinet date",
+      "expectedOps": "no_change milestone practical completion; complete risk extra containment; no_change risk banquettes; create milestone cabinet",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "complete:extra containment",
+        "create:cabinet"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 48,
+      "summary": "PC confirmed — must not duplicate",
+      "expectedOps": "no_change milestone practical completion",
+      "review": "none",
+      "result": "PASS",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [],
+      "projectionMismatches": []
+    },
+    {
+      "n": 49,
+      "summary": "PC glossary restated; Leo responsibility idempotent",
+      "expectedOps": "create knowledge practical completion; no_change responsibility fire-door",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:practical completion"
+      ],
+      "earliestBoundary": "AI_EXTRACT"
+    },
+    {
+      "n": 50,
+      "summary": "Close-out: new fact, cancel walk-through, cafe waiting, PC inspection",
+      "expectedOps": "create knowledge defects liability; product_model_gap_needs_you milestone walk-through; update todo Cafe snag list; create milestone PC inspection",
+      "review": "none",
+      "result": "FAIL",
+      "needsYouObserved": [],
+      "applyCountBefore": 0,
+      "applyCountAfterExclude": 0,
+      "notes": "",
+      "unexpectedCreates": [],
+      "unexpectedRemoves": [],
+      "missingWrites": [
+        "create:defects liability",
+        "update:Cafe snag list",
+        "create:PC inspection"
+      ],
+      "earliestBoundary": "AI_EXTRACT",
+      "projectionMismatches": []
+    }
+  ],
+  "stopReason": "",
+  "finishedAt": "2026-09-12T22:13:56.979Z"
+}

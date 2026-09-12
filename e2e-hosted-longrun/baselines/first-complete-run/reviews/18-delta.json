@@ -1,0 +1,23 @@
+{
+  "createdPeople": [],
+  "createdTodos": [
+    "Prepare cost report"
+  ],
+  "createdRisks": [],
+  "createdMilestones": [],
+  "createdKnowledge": [],
+  "createdResponsibilities": [],
+  "updatedTodos": [],
+  "updatedRisks": [
+    "Outstanding DDA access ramp detail open→resolved"
+  ],
+  "updatedMilestones": [],
+  "removedPeople": [],
+  "removedTodos": [],
+  "removedRisks": [],
+  "removedMilestones": [],
+  "removedKnowledge": [],
+  "removedResponsibilities": [],
+  "idReplacements": [],
+  "duplicatePeople": []
+}

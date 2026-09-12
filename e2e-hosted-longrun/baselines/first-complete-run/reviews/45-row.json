@@ -1,0 +1,17 @@
+{
+  "n": 45,
+  "summary": "Leo Mensah name-only, late introduction",
+  "expectedOps": "create person Leo Mensah",
+  "review": "none",
+  "result": "FAIL",
+  "needsYouObserved": [],
+  "applyCountBefore": 0,
+  "applyCountAfterExclude": 0,
+  "notes": "",
+  "unexpectedCreates": [],
+  "unexpectedRemoves": [],
+  "missingWrites": [
+    "create:Leo Mensah"
+  ],
+  "earliestBoundary": "AI_EXTRACT"
+}

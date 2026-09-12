@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 12 September 2026 (documentation reconciliation: D-031/D-032 closed on current `main`; D-033 remainder is Coach-only; Capture position → `docs/LUME_CAPTURE_STATUS.md`)  
+**Last housekeeping:** 12 September 2026 (D-053 added from production long-run dogfood `lr-20260912T2212Z`; prior reconciliation: D-031/D-032 closed on current `main`)  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
@@ -220,6 +220,24 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | `scripts/verify-np-organise-observation-loss.ts` now asserts rematerialized or recovered names. |
 | **Related docs** | D-051; People rules (name-only Person is complete); holdout `#164` |
 | **Notes** | Holdout rematerializes unscoped `create_new` + invented candidate IDs as accepted creates. Adapter recovery remains for schema near-misses (`missing_truth_intent`, `unknown_disposition`). |
+
+### D-053 — Production long-run: wrong-target Ready Apply + empty-Review omission
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | critical (wrong-target write) / high (silent empty Review; responsibility vacuum) |
+| **Domain** | Capture / Apply / Identity / Persistence |
+| **Found in** | Production long-run dogfood `lr-20260912T2212Z` on `origin/main` `9f24a65`; official project `8537b7cf-1b50-453e-af64-2b21e2d29e90`. No product-code change in that programme. |
+| **Failure class** | After a clear create was false-Needs-You (C5 timber-floor risk never written), a later “that risk is resolved; the other stays open” Capture Ready-applied **Outstanding DDA access ramp detail** `open→resolved`. Later/heavier Captures often produced an empty Review (not Needs You). Organise + ownership Captures left `knowledge_items.kind = 'responsibility'` at **0**. Updates of existing State 0 rows wrote `history_events` but no `capture_apply_receipts`. |
+| **Evidence / repro** | `e2e-hosted-longrun/baselines/first-complete-run/FIRST-RUN.md`; C18 Review proposed only the DDA resolve; SQL confirms `risks.fb74aa0f-…` `updated_at` 22:07:36Z `resolved`, no timber-floor row, no receipt on that update. Isolation: only this E2E project moved in the run window. |
+| **Likely files** | `src/lib/capture` validate/resolve/apply; Review Ready path; New Project Organise responsibility map; `capture_apply_receipts` write sites |
+| **Proposed fix direction** | Rematerialize unmatched creates. Do not Ready-apply a *different* same-kind entity when the intended target was never created or when a sibling says another risk remains open. Persist responsibilities. Surface Needs You / unsupported instead of empty Review. Receipt updates of existing rows. |
+| **Explicit non-goals** | Rewriting the frozen long-run manifest to match Lume; SQL repair of the dogfood project; prompt retune as the first move |
+| **Regression test to add** | Keep `e2e:hosted-longrun` opt-in. Do not encode the C18 wrong write as a passing unit. A later unit should refuse Ready on unresolved same-kind ambiguity after a missing create. |
+| **Target resolution / validation point** | Capture hardening / before V1 launch |
+| **Related docs** | D-008; D-013; D-025; D-029; D-030; D-051; `e2e-hosted-longrun/ATTACK-MATRIX.md` |
+| **Notes** | First-run frozen expectations were not rewritten. Dedicated E2E project left in place. Independent SQL on production Lume `exfftrxxinhduogcluce` matches the harness final snapshot. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 

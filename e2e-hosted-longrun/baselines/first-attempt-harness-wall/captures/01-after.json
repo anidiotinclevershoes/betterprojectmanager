@@ -1,0 +1,276 @@
+{
+  "capturedAt": "2026-09-12T21:58:10.364Z",
+  "workspaceId": "3d1a9359-6ff9-43b1-ab2d-925c939a71d2",
+  "userId": "9c7f0a7b-519b-48ad-902c-4bbd96424de4",
+  "projectId": "469539ae-599f-4bc1-840e-26116d90d023",
+  "projectName": "E2E-LONGRUN-Riverside Civic Hall Fit-Out lr-20260912T2155Z",
+  "projectCode": "LR12T2155Z",
+  "people": [
+    {
+      "id": "7a382b38-2a29-43fa-9c43-14a9a484a0ea",
+      "name": "Helen Ward"
+    },
+    {
+      "id": "f24ac8e7-b668-46e0-b9b8-f9a33bc3dcee",
+      "name": "James Okonkwo"
+    },
+    {
+      "id": "5d65b25f-9ef3-4671-bb5a-c107d6d427a3",
+      "name": "Nadia Rahman"
+    },
+    {
+      "id": "e38e41a4-cff5-43c1-9153-23b99a8873fa",
+      "name": "Tomos Ellis"
+    },
+    {
+      "id": "d08630ea-f2da-43cc-8359-0f2a2099b28e",
+      "name": "Mei Chen"
+    }
+  ],
+  "todos": [
+    {
+      "id": "8dd52639-138a-4189-9f14-67caf3ec1676",
+      "title": "Issue RIBA Stage 4 drawing pack",
+      "done": false,
+      "kind": "ACTION"
+    },
+    {
+      "id": "398f0d3e-3297-4041-bf0e-2673978e5b46",
+      "title": "Book FF&E sample review",
+      "done": false,
+      "kind": "ACTION"
+    },
+    {
+      "id": "35894d4d-c7f9-478b-9884-ec7dddcc1dda",
+      "title": "Chase asbestos survey addendum",
+      "done": false,
+      "kind": "ACTION"
+    }
+  ],
+  "risks": [
+    {
+      "id": "0239880a-e292-4579-9cc8-c7a257f736f9",
+      "title": "DDA access ramp detail outstanding",
+      "status": "open"
+    },
+    {
+      "id": "978d26ac-cdc8-436d-b837-a33819477b2a",
+      "title": "M&E first-fix coordination risk",
+      "status": "open"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "9d2098b8-e601-4a32-bc23-f1e9048b8d8b",
+      "label": "Site mobilisation",
+      "startAt": "2026-10-06"
+    },
+    {
+      "id": "992b03bb-6c8d-4b48-8339-d8f6507d3ae4",
+      "label": "Client walk-through",
+      "startAt": "2026-10-20"
+    },
+    {
+      "id": "0c74461f-5605-45b2-b078-1aed66d6a3b3",
+      "label": "Practical completion",
+      "startAt": "2026-12-12"
+    }
+  ],
+  "knowledge": [
+    {
+      "id": "d51da1f5-a102-4a24-b13b-9e83a16854a1",
+      "body": "FF&E means furniture, fixtures and equipment.",
+      "kind": "fact"
+    },
+    {
+      "id": "38728896-a807-426e-b048-5374a2ea55cc",
+      "body": "PC in this project means practical completion.",
+      "kind": "fact"
+    },
+    {
+      "id": "2235a2c3-048d-4a12-a917-13adb5eba4c9",
+      "body": "The hall and the cafe are separate workfaces.",
+      "kind": "fact"
+    },
+    {
+      "id": "77421fa4-ed33-48bd-8328-85efd5217bd5",
+      "body": "Working assumption: the existing timber floor in the hall stays.",
+      "kind": "fact"
+    },
+    {
+      "id": "c53029d8-1403-4d1b-8c2c-afb38db7dcfc",
+      "body": "RAMS must be approved before any ceiling void work.",
+      "kind": "fact"
+    },
+    {
+      "id": "95abc7c4-9c28-4419-9185-85f3f2cd30b4",
+      "body": "DDA access ramp detail outstanding",
+      "kind": "risk"
+    },
+    {
+      "id": "0cf4ded2-172a-4446-8fb9-096866a9c1dd",
+      "body": "M&E first-fix coordination risk",
+      "kind": "risk"
+    },
+    {
+      "id": "b04ac825-a6a0-4dbc-ab22-a271e11bc561",
+      "body": "Helen Ward ()",
+      "kind": "fact"
+    },
+    {
+      "id": "73a922ab-f219-4867-a9ce-d477c85a2549",
+      "body": "James Okonkwo ()",
+      "kind": "fact"
+    },
+    {
+      "id": "63db4215-5809-415e-bc47-027d00378ed8",
+      "body": "Nadia Rahman ()",
+      "kind": "fact"
+    },
+    {
+      "id": "2e44ebe5-530b-4146-b57b-e23043524bfd",
+      "body": "Tomos Ellis ()",
+      "kind": "fact"
+    },
+    {
+      "id": "b325b3ec-7fc4-46c6-b7b2-a6238ef1a2ca",
+      "body": "Mei Chen ()",
+      "kind": "fact"
+    }
+  ],
+  "responsibilities": [],
+  "otherProjectNames": [
+    "E2E Capture Update hv-20260911T185955Z",
+    "E2E Andris hv-20260911T185955Z",
+    "E2E Mixed hv-20260911T185955Z",
+    "E2E full hv-cal-20260911T193400Z",
+    "E2E capture hv-cal-20260911T193400Z",
+    "E2E andris hv-cal-20260911T193400Z",
+    "E2E ambiguity hv-cal-20260911T193400Z",
+    "E2E mixed hv-cal-20260911T193400Z",
+    "E2E full hv-cal-20260911T194000Z",
+    "E2E capture hv-cal-20260911T194000Z",
+    "E2E andris hv-cal-20260911T194000Z",
+    "E2E ambiguity hv-cal-20260911T194000Z",
+    "E2E mixed hv-cal-20260911T194000Z",
+    "E2E capture hv-trace-20260911T201500Z",
+    "E2E ambiguity hv-trace-20260911T201500Z",
+    "E2E full hv-n10-20260911T212200Z",
+    "E2E capture hv-n10-20260911T212200Z",
+    "E2E andris hv-n10-20260911T212200Z",
+    "E2E ambiguity hv-n10-20260911T212200Z",
+    "E2E mixed hv-n10-20260911T212200Z",
+    "E2E slice2 slice2-20260911T220728Z",
+    "E2E full hv-slice2-20260911T220927Z",
+    "E2E capture hv-slice2-20260911T220927Z",
+    "E2E andris hv-slice2-20260911T220927Z",
+    "E2E ambiguity hv-slice2-20260911T220927Z",
+    "E2E mixed hv-slice2-20260911T220927Z",
+    "E2E full hv-int-20260911T224022Z",
+    "E2E capture hv-int-20260911T224022Z",
+    "E2E andris hv-int-20260911T224022Z",
+    "E2E mixed hv-int-20260911T224022Z",
+    "E2E full hv-int2-20260911T224345Z",
+    "E2E capture hv-int2-20260911T224345Z",
+    "E2E andris hv-int2-20260911T224345Z",
+    "E2E ambiguity hv-int2-20260911T224345Z",
+    "E2E mixed hv-int2-20260911T224345Z",
+    "E2E full hv-int3-20260911T224547Z",
+    "E2E capture hv-int3-20260911T224547Z",
+    "E2E andris hv-int3-20260911T224547Z",
+    "E2E ambiguity hv-int3-20260911T224547Z",
+    "E2E mixed hv-int3-20260911T224547Z",
+    "HO issues ho-baseline-1",
+    "HO create ho-baseline-1",
+    "HO update ho-baseline-1",
+    "HO identity ho-baseline-1",
+    "HO isolate ho-baseline-1",
+    "HO messy ho-baseline-1",
+    "HO issues ho-fix1-1",
+    "HO create ho-fix1-1",
+    "HO update ho-fix1-1",
+    "HO identity ho-fix1-1",
+    "HO messy ho-fix1-1",
+    "HO issues ho-fix2-1",
+    "HO create ho-fix2-1",
+    "HO update ho-fix2-1",
+    "HO identity ho-fix2-1",
+    "HO messy ho-fix2-1",
+    "E2E full hv-holdout-check-1",
+    "E2E capture hv-holdout-check-1",
+    "E2E andris hv-holdout-check-1",
+    "E2E ambiguity hv-holdout-check-1",
+    "E2E mixed hv-holdout-check-1",
+    "HO issues ho-fix3-1",
+    "HO create ho-fix3-1",
+    "HO update ho-fix3-1",
+    "HO identity ho-fix3-1",
+    "HO isolate ho-fix3-1",
+    "HO messy ho-fix3-1",
+    "HO issues ho-fix4-1",
+    "HO create ho-fix4-1",
+    "HO update ho-fix4-1",
+    "HO identity ho-fix4-1",
+    "HO isolate ho-fix4-1",
+    "HO messy ho-fix4-1",
+    "HO issues ho-fix5-1",
+    "HO create ho-fix5-1",
+    "HO update ho-fix5-1",
+    "HO identity ho-fix5-1",
+    "HO isolate ho-fix5-1",
+    "HO messy ho-fix5-1",
+    "HO issues ho-fix5-2",
+    "HO create ho-fix5-2",
+    "HO update ho-fix5-2",
+    "HO identity ho-fix5-2",
+    "HO isolate ho-fix5-2",
+    "HO messy ho-fix5-2",
+    "E2E full hv-after-holdout-6of6",
+    "E2E capture hv-after-holdout-6of6",
+    "E2E andris hv-after-holdout-6of6",
+    "E2E ambiguity hv-after-holdout-6of6",
+    "E2E mixed hv-after-holdout-6of6",
+    "E2E full conv-final-orig-1",
+    "E2E capture conv-final-orig-1",
+    "E2E andris conv-final-orig-1",
+    "E2E ambiguity conv-final-orig-1",
+    "E2E mixed conv-final-orig-1",
+    "HO issues conv-final-holdout-1",
+    "HO create conv-final-holdout-1",
+    "HO update conv-final-holdout-1",
+    "HO identity conv-final-holdout-1",
+    "HO isolate conv-final-holdout-1",
+    "HO messy conv-final-holdout-1",
+    "E2E full hv-166-gate-1",
+    "E2E capture hv-166-gate-1",
+    "E2E andris hv-166-gate-1",
+    "E2E ambiguity hv-166-gate-1",
+    "E2E mixed hv-166-gate-1",
+    "E2E andris hv-166-andris-r1",
+    "HO issues ho-166-gate-1",
+    "HO create ho-166-gate-1",
+    "HO update ho-166-gate-1",
+    "HO identity ho-166-gate-1",
+    "HO isolate ho-166-gate-1",
+    "HO messy ho-166-gate-1",
+    "HO messy ho-166-h6-r1",
+    "E2E full hv-166-gate-2",
+    "E2E capture hv-166-gate-2",
+    "E2E andris hv-166-gate-2",
+    "E2E ambiguity hv-166-gate-2",
+    "E2E mixed hv-166-gate-2",
+    "HO issues ho-166-gate-2",
+    "HO create ho-166-gate-2",
+    "HO update ho-166-gate-2",
+    "HO identity ho-166-gate-2",
+    "HO isolate ho-166-gate-2",
+    "HO messy ho-166-gate-2",
+    "E2E andris hv-166-sens-1",
+    "E2E ambiguity hv-166-sens-1",
+    "E2E mixed hv-166-sens-1",
+    "HO issues ho-166-sens-1",
+    "HO identity ho-166-sens-1",
+    "HO isolate ho-166-sens-1",
+    "HO messy ho-166-sens-1"
+  ]
+}

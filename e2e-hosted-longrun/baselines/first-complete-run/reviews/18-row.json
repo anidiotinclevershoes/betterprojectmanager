@@ -1,0 +1,21 @@
+{
+  "n": 18,
+  "summary": "Resolve timber-floor risk; ceiling void risk stays",
+  "expectedOps": "complete risk timber floor; no_change risk M&E first-fix",
+  "review": "none",
+  "result": "FAIL",
+  "needsYouObserved": [],
+  "applyCountBefore": 1,
+  "applyCountAfterExclude": 1,
+  "notes": " | pre-Apply canonical writes: [[\"createdTodos\",[\"Prepare cost report\"]]]",
+  "earliestBoundary": "REVIEW_UI",
+  "applyHttp": 200,
+  "unexpectedCreates": [
+    "todo:Prepare cost report"
+  ],
+  "unexpectedRemoves": [],
+  "missingWrites": [
+    "complete:timber floor"
+  ],
+  "projectionMismatches": []
+}

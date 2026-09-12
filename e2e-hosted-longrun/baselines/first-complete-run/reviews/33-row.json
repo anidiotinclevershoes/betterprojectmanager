@@ -1,0 +1,18 @@
+{
+  "n": 33,
+  "summary": "Third PC date move, many captures later",
+  "expectedOps": "update milestone practical completion",
+  "review": "none",
+  "result": "FAIL",
+  "needsYouObserved": [],
+  "applyCountBefore": 0,
+  "applyCountAfterExclude": 0,
+  "notes": "",
+  "unexpectedCreates": [],
+  "unexpectedRemoves": [],
+  "missingWrites": [
+    "update:practical completion"
+  ],
+  "earliestBoundary": "AI_EXTRACT",
+  "projectionMismatches": []
+}

@@ -1,0 +1,14 @@
+{
+  "n": 32,
+  "summary": "Cancel Saturday catch-up — product-model gap",
+  "expectedOps": "product_model_gap_needs_you milestone Saturday catch-up",
+  "review": "none",
+  "result": "PASS",
+  "needsYouObserved": [],
+  "applyCountBefore": 0,
+  "applyCountAfterExclude": 0,
+  "notes": "",
+  "unexpectedCreates": [],
+  "unexpectedRemoves": [],
+  "missingWrites": []
+}

@@ -1,0 +1,21 @@
+{
+  "n": 16,
+  "summary": "Two distinct snag lists",
+  "expectedOps": "create todo Cafe snag list; create todo Hall snag list",
+  "review": "none",
+  "result": "FAIL",
+  "needsYouObserved": [
+    "NEEDS YOU TO DO Which record does this refer to? Create Cafe snag list Lume cannot safely apply this finding to a maintained record. Why this Choose another Cre",
+    "NEEDS YOU TO DO Which record does this refer to? Create Hall snag list Lume cannot safely apply this finding to a maintained record. Why this Choose another Cre"
+  ],
+  "applyCountBefore": 0,
+  "applyCountAfterExclude": 0,
+  "notes": "",
+  "unexpectedCreates": [],
+  "unexpectedRemoves": [],
+  "missingWrites": [
+    "create:Cafe snag list",
+    "create:Hall snag list"
+  ],
+  "earliestBoundary": "AI_EXTRACT"
+}
