@@ -93,6 +93,8 @@ Test evidence / model comparison: `docs/TEST_DASHBOARD.md`. Engineering Issue + 
 
 Hosted live-OpenAI vertical journeys (opt-in, never `npm test`): [`e2e-hosted-vertical/README.md`](../e2e-hosted-vertical/README.md).
 
+Production long-run dogfood (opt-in, never `npm test`): [`e2e-hosted-longrun/README.md`](../e2e-hosted-longrun/README.md).
+
 Integrity probes (read-only / in-memory; no production daemon):
 
 ```bash
