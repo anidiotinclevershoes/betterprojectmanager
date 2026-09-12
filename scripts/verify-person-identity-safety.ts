@@ -721,6 +721,27 @@ function main() {
     assertNeedsYou(row, "non-quoted evidence must fail closed");
   });
 
+  check("paraphrased evidence still creates when the full name is in the Capture", () => {
+    const transcript =
+      "New stakeholder: Quinn Adler, scanning QA lead, joining Helix on site.";
+    const { row } = resolveObs(haleWorld(), transcript, {
+      domain: "person",
+      disposition: "create_new",
+      truthIntent: "current",
+      statement: "Quinn Adler is scanning QA lead joining Helix on site",
+      evidence: "Quinn Adler is scanning QA lead joining Helix on site",
+      candidateTargetTitle: "Quinn Adler",
+      proposedValues: { name: "Quinn Adler", role: "Scanning QA lead (Helix)" },
+    });
+    assert.equal(row?.decision.kind, "write");
+    if (row?.decision.kind === "write") {
+      assert.equal(row.decision.operation.type, "ensure_person");
+      if (row.decision.operation.type === "ensure_person") {
+        assert.equal(row.decision.operation.name, "Quinn Adler");
+      }
+    }
+  });
+
   check("after both Sarahs exist, Sarah Kim owns UAT resolves Sarah Kim", () => {
     const transcript = "Sarah Kim owns UAT.";
     const { row } = resolveObs(bothSarahsWorld(), transcript, {

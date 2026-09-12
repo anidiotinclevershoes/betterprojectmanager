@@ -552,16 +552,24 @@ function identityEvidenceText(
   observation: CaptureObservationV2,
   transcript: string,
 ): string {
-  // Observation-local quote only. The whole Capture must not contribute
-  // sibling names (D-051 / convergence cross-observation contamination).
+  // Observation-local only. The whole Capture must not contribute sibling
+  // names (D-051 / convergence cross-observation contamination).
   // The model statement is not identity proof — it can echo a UUID's
   // recorded name that the transcript never established.
-  // If evidence is missing or not a quote from the user Capture, fail closed
-  // (empty) rather than scanning the rest of the paste.
+  // Quoted evidence is preferred. Paraphrased evidence is common on frozen
+  // and live envelopes; then only the proposed/titled name may stand in,
+  // and only if that name itself appears in the Capture. Never scan the
+  // rest of the paste for other people.
   const evidence =
     typeof observation.evidence === "string" ? observation.evidence.trim() : "";
-  if (!evidence) return "";
-  if (evidenceQuotedInCapture(transcript, evidence)) return evidence;
+  if (evidence && evidenceQuotedInCapture(transcript, evidence)) return evidence;
+
+  const name =
+    asString(observation.proposedValues?.name) ||
+    asString(observation.proposedValues?.personName) ||
+    observation.candidateTargetTitle?.trim() ||
+    "";
+  if (name && recordedPersonNameAppearsInText(transcript, name)) return name;
   return "";
 }
 
