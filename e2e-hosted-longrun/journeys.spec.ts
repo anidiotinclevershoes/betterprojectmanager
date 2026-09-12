@@ -16,7 +16,9 @@ import {
   hardReload,
   installApiRecorder,
   longrunRunId,
-  openCapture,
+  startFreshCapture,
+  collectRememberTexts,
+  rememberExpectedKnowledge,
   openDedicatedProject,
   openKnowledge,
   openNewProject,
@@ -180,16 +182,21 @@ test("production long-run dogfood — New Project + 50 captures", async ({ page,
       const before = await snapshotProject(pageRef, dedicatedProjectId);
       writeJson(`captures/${String(capture.n).padStart(2, "0")}-before.json`, before);
 
-      await openCapture(pageRef);
+      await startFreshCapture(pageRef);
       const analyse = await analyseCapture(pageRef, capture.source);
       assertHostedAiSuccess(analyse, `Capture ${capture.n}`);
       const cards = await collectReviewCards(pageRef);
-      writeJson(`captures/${String(capture.n).padStart(2, "0")}-review.json`, cards);
+      const remember = await collectRememberTexts(pageRef);
+      writeJson(`captures/${String(capture.n).padStart(2, "0")}-review.json`, { cards, remember });
       await screenshot(pageRef, `c${String(capture.n).padStart(2, "0")}-review`);
 
       row.needsYouObserved = cards.filter((c) => c.family === "needs_you").map((c) => c.text.slice(0, 160));
       row.applyCountBefore = await readyApplyCount(pageRef);
       const reviewNotes = await applyReviewSteps(pageRef, capture.review);
+      const knowledgeTitles = capture.expected
+        .filter((e) => e.domain === "knowledge" && (e.op === "create" || e.op === "update"))
+        .map((e) => e.title);
+      reviewNotes.push(...(await rememberExpectedKnowledge(pageRef, knowledgeTitles)));
       row.applyCountAfterExclude = await readyApplyCount(pageRef);
       row.notes = reviewNotes.join(" | ");
 

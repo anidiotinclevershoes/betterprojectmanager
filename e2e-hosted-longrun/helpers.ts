@@ -21,7 +21,7 @@ import {
   signIn,
 } from "../e2e-hosted-vertical/helpers";
 import { textRepresentsYmd } from "../e2e-hosted-vertical/dates";
-import { projectSlice } from "./ledger";
+import { mentions, projectSlice } from "./ledger";
 import { readWorkspaceState } from "./isolation";
 import { NP_WORKING_TITLE, STATE0_MUST_INCLUDE } from "./new-project";
 import type { CanonicalSlice, ReviewStep } from "./types";
@@ -48,6 +48,47 @@ export {
 };
 
 export const ARTIFACT_DIR = path.join(process.cwd(), "test-results", "hosted-longrun");
+
+export async function startFreshCapture(page: Page): Promise<void> {
+  await openCapture(page);
+  const input = page.getByTestId("ocean-capture-input");
+  if (await input.isVisible().catch(() => false)) return;
+  const neu = page.getByRole("button", { name: /^New Capture$/i });
+  if (await neu.count()) await neu.click();
+  await expect(input).toBeVisible({ timeout: 15_000 });
+}
+
+export async function collectRememberTexts(page: Page): Promise<string[]> {
+  const items = page.locator(".capture-remember-text");
+  const count = await items.count().catch(() => 0);
+  const out: string[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const text = ((await items.nth(i).innerText().catch(() => "")) || "").replace(/\s+/g, " ").trim();
+    if (text) out.push(text);
+  }
+  return out;
+}
+
+export async function rememberExpectedKnowledge(page: Page, titles: string[]): Promise<string[]> {
+  const notes: string[] = [];
+  if (!titles.length) return notes;
+  const rememberAll = page.getByRole("button", { name: /^Remember All$/i });
+  const remember = page.getByRole("button", { name: /^Remember$/i });
+  const texts = await collectRememberTexts(page);
+  const hit = texts.some((text) => titles.some((title) => mentions(text, title)));
+  if (hit && (await rememberAll.count())) {
+    await rememberAll.click();
+    notes.push(`Remember All (${texts.join(" | ")})`);
+    return notes;
+  }
+  if (hit && (await remember.count())) {
+    await remember.first().click();
+    notes.push(`Remember (${texts[0]})`);
+    return notes;
+  }
+  if (texts.length) notes.push(`remember panel present but no title match: ${texts.join(" | ")}`);
+  return notes;
+}
 
 export function longrunRunId(): string {
   return (process.env.LUME_E2E_RUN_ID || `lr${Date.now().toString(36)}`).replace(/[^a-zA-Z0-9-]/g, "");
