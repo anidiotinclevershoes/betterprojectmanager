@@ -126,7 +126,9 @@ Do not casually “fix” them as extraction bugs.
 
 A later untouched production 50-Capture E2E (`lr-20260912T2212Z`, D-053) demonstrated wrong-target Apply, silent empty Reviews, zero persisted responsibilities, unmatched Creates, and first-paint lag.
 
-The 534/538 routing score and Prompt A decision still stand. They are **not** V1 trust clearance. Current families: [`docs/LUME_V1_TRUST_ISSUE_MAP.md`](./LUME_V1_TRUST_ISSUE_MAP.md).
+The 534/538 routing score and Prompt A decision still stand. They are **not** V1 trust clearance.
+
+Deterministic guards for those families now live on `cursor/v1-trust-convergence-df02` (see the issue map). They are **not** production-E2E proof. Current families: [`docs/LUME_V1_TRUST_ISSUE_MAP.md`](./LUME_V1_TRUST_ISSUE_MAP.md).
 
 ---
 
