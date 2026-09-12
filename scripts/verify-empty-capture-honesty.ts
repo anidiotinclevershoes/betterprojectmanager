@@ -135,6 +135,38 @@ check("retire-knowledge language is explicit unsupported, still no write", () =>
   assert.match(finding!.clarificationQuestion ?? "", /cannot retire/i);
 });
 
+check("commentary-only Capture is not rewritten as extraction failure", () => {
+  const transcript =
+    "The lobby coffee machine is still broken. That is not this project.";
+  const run = runCaptureV2FromModelJson({
+    transcript,
+    rawModelJson: {
+      observations: [
+        {
+          id: "obs-chat",
+          statement: "The lobby coffee machine is still broken",
+          evidence: "The lobby coffee machine is still broken. That is not this project.",
+          domain: "commentary",
+          disposition: "commentary",
+          truthIntent: "current",
+        },
+      ],
+    },
+    world: world(),
+    projectId: PROJECT,
+  });
+  assert.ok((run.result.observationAccount?.commentary ?? 0) >= 1);
+  assert.equal(run.result.observationAccount?.proposedChanges, 0);
+  assert.equal(
+    (run.result.findings ?? []).some((f) => f.fact === EMPTY_REVIEW_FACT),
+    false,
+    "accounted commentary must not grow a synthetic empty-Review card",
+  );
+  assert.ok(
+    (run.result.proposedOperations ?? []).every((op) => op.operation === "NO_CHANGE"),
+  );
+});
+
 check("already-known no_change is not rewritten as extraction failure", () => {
   const transcript = "Practical completion is still targeted for 12 December 2026.";
   const run = runCaptureV2FromModelJson({

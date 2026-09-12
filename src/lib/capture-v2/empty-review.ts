@@ -46,7 +46,8 @@ export function emptyReviewNeedsYouReason(transcript: string): string {
 
 /**
  * True when the pipeline produced no write, no Needs You, no reject,
- * and no explicit already-known / merge account — i.e. the Capture vanished.
+ * and no explicit already-known / merge / commentary account — i.e. the
+ * Capture vanished. Accounted commentary is not a silent empty Review.
  */
 export function shouldSurfaceEmptyReviewNeedsYou(
   account: ObservationAccount,
@@ -58,5 +59,6 @@ export function shouldSurfaceEmptyReviewNeedsYou(
   if (account.rejected > 0) return false;
   if (account.alreadyKnown > 0) return false;
   if (account.merged > 0) return false;
+  if (account.commentary > 0) return false;
   return true;
 }
