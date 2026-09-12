@@ -1,0 +1,88 @@
+{
+  "suite": "hosted-holdout-v1",
+  "elapsedMs": 92093,
+  "rows": [
+    {
+      "journey": "New Project issues and dated todos",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "n/a",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false"
+    },
+    {
+      "journey": "Capture create dated action",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "PASS",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | executed.kind=wrote reason="
+    },
+    {
+      "journey": "Capture ISO date update",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "PASS",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | executed.kind=wrote reason="
+    },
+    {
+      "journey": "Multi-person identity isolation",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "PASS",
+      "review": "PASS",
+      "apply": "PASS",
+      "reload": "PASS",
+      "result": "PASS",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | executed.kind=wrote reason="
+    },
+    {
+      "journey": "Ambiguous they plus safe date",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "FAIL",
+      "review": "n/a",
+      "apply": "n/a",
+      "reload": "n/a",
+      "result": "FAIL",
+      "earliestBoundary": "REVIEW_UI",
+      "classification": "PRODUCT_DEFECT",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | Safe depot date was not independently actionable: [{\"family\":\"needs_you\",\"text\":\"NEEDS YOU ? STAKEHOLDER Which record does this refer to? HO isolate ho-baseline-1 Lume couldn't confidently identify which existing record this refers to. Why this Choose another Create a new stakeholder Dismiss\"},{\"family\":\"needs_you\",\"text\":\"NEEDS YOU TO DO Which record does this refer to? HO isolate ho-baseline-1 Lume couldn't confidently identify which existing record this refers to. DATE Oct 16 Why this Choose another Create a new to do Dismiss\"}]"
+    },
+    {
+      "journey": "Messy ops paste",
+      "vercelAccess": "PASS",
+      "lumeAuth": "PASS",
+      "hostedApi": "PASS",
+      "liveOpenAi": "PASS",
+      "uiInterpretation": "FAIL",
+      "review": "n/a",
+      "apply": "n/a",
+      "reload": "n/a",
+      "result": "FAIL",
+      "earliestBoundary": "REVIEW_UI",
+      "classification": "PRODUCT_DEFECT",
+      "notes": "provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | provider=openai requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false | Messy paste lost or transformed observations incorrectly: workshopReady=true keysReady=false kwame=true plantsWritten=false speculativeDhpWritten=false. Cards=[{\"family\":\"needs_you\",\"text\":\"NEEDS YOU TO DO Which record does this refer to? Collect void keys from depot Is this a new to do or the existing “Collect void keys from depot” to do? Why this Update Collect void keys from depot Choose another Create a new to do Dismiss\"},{\"family\":\"needs_you\",\"text\":\"NEEDS YOU RISK Which record does this refer to? Tomos mentioned Priya might take DHP if housing insist. Lume couldn't confidently identify which existing record this refers to. Why this Choose another Create a new risk Dismiss\"},{\"family\":\"update\",\"text\":\"UPDATE MILESTONE Mobilisation Workshop RELEASE DATE Oct 22 Why this Exclude change\"},{\"family\":\"create\",\"text\":\"CREATE KB STAKEHOLDER Kwame Boateng Why this Exclude change\"}]"
+    }
+  ]
+}

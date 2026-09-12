@@ -123,6 +123,14 @@ function resolveOne(
   }
 
   if (observation.truthIntent === "uncertain") {
+    const rematerialized = rematerializeIndependentDatedCreate(
+      observation,
+      args.world,
+      projectId,
+    );
+    if (rematerialized !== observation) {
+      return resolveOne(rematerialized, args);
+    }
     return {
       observation,
       suggestion: null,
@@ -151,6 +159,31 @@ function resolveOne(
   }
 
   if (observation.disposition === "no_change") {
+    if (PERSON_LINKED_DOMAINS.has(observation.domain)) {
+      const ownership = observation.proposedValues?.ownershipSemantics;
+      if (ownership === "ambiguous") {
+        return {
+          observation,
+          suggestion: null,
+          decision: {
+            kind: "needs_you",
+            domain: DOMAIN_TO_LEGAL[observation.domain],
+            reason:
+              observation.commentary?.trim() ||
+              "Lume cannot safely choose between competing interpretations.",
+          },
+        };
+      }
+      const identityGate = personLinkedIdentityGate(
+        observation,
+        args.world,
+        projectId,
+        args.transcript,
+      );
+      if (identityGate?.kind === "block" && identityGate.decision.kind === "needs_you") {
+        return { observation, suggestion: null, decision: identityGate.decision };
+      }
+    }
     return {
       observation,
       suggestion: null,
@@ -190,6 +223,14 @@ function resolveOne(
   }
 
   if (observation.disposition === "update_existing" && !observation.candidateTargetId) {
+    const rematerialized = rematerializeIndependentDatedCreate(
+      observation,
+      args.world,
+      projectId,
+    );
+    if (rematerialized !== observation) {
+      return resolveOne(rematerialized, args);
+    }
     return {
       observation,
       suggestion: null,
@@ -330,6 +371,97 @@ function suggestionFromObservation(
     },
     truthIntent: observation.truthIntent,
   };
+}
+
+function uniqueDatedRecord(
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  domain: ObservationDomain,
+  title: string,
+): { id: string; title: string } | null {
+  const needle = title.trim().toLowerCase();
+  if (!needle) return null;
+  if (domain === "todo") {
+    const hits = world.todos.filter(
+      (todo) =>
+        (!projectId || !todo.projectId || todo.projectId === projectId) &&
+        !todo.done &&
+        todo.title.trim().toLowerCase() === needle,
+    );
+    return hits.length === 1 ? { id: hits[0]!.id, title: hits[0]!.title } : null;
+  }
+  if (domain === "milestone") {
+    const hits = world.timeline.filter(
+      (item) =>
+        (!projectId || item.projectId === projectId) &&
+        item.label.trim().toLowerCase() === needle,
+    );
+    return hits.length === 1 ? { id: hits[0]!.id, title: hits[0]!.label } : null;
+  }
+  return null;
+}
+
+/**
+ * A dated To Do / milestone with a complete title+date is independently
+ * actionable. Model uncertainty or a missing target id must not hide a
+ * legal create when no in-project record matches. A unique title match
+ * becomes an update only when truthIntent is already current.
+ */
+function rematerializeIndependentDatedCreate(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+): CaptureObservationV2 {
+  if (observation.domain !== "todo" && observation.domain !== "milestone") {
+    return observation;
+  }
+  const values = observation.proposedValues ?? {};
+  const title = asString(values.title) || asString(values.label);
+  const date = asIso(values.date) || asIso(values.startAt) || asIso(values.dueAt);
+  if (!title || !date) return observation;
+
+  const match = uniqueDatedRecord(world, projectId, observation.domain, title);
+
+  if (observation.candidateTargetId) {
+    if (
+      observation.disposition === "create_new" &&
+      observation.truthIntent === "uncertain"
+    ) {
+      return {
+        ...observation,
+        truthIntent: "current",
+        candidateTargetId: null,
+        candidateTargetTitle: title,
+      };
+    }
+    return observation;
+  }
+
+  if (match) {
+    if (observation.truthIntent === "uncertain") return observation;
+    if (observation.disposition === "update_existing") {
+      return {
+        ...observation,
+        candidateTargetId: match.id,
+        candidateTargetTitle: match.title,
+      };
+    }
+    return observation;
+  }
+
+  if (
+    observation.disposition === "create_new" ||
+    observation.disposition === "update_existing"
+  ) {
+    return {
+      ...observation,
+      disposition: "create_new",
+      truthIntent: "current",
+      candidateTargetId: null,
+      candidateTargetTitle: title,
+    };
+  }
+  return observation;
 }
 
 function asIso(value: unknown): string | null {

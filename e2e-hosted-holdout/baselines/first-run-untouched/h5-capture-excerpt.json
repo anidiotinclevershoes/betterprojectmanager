@@ -1,0 +1,126 @@
+{
+  "journey": "Ambiguous they plus safe date",
+  "runId": "ho-baseline-1",
+  "projectId": "41cebac1-744f-4dbf-87f7-009c8baa489a",
+  "url": "/projects/41cebac1-744f-4dbf-87f7-009c8baa489a",
+  "calls": [
+    {
+      "url": "/api/capture",
+      "status": 200,
+      "provenance": {
+        "provider": "openai",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "promptId": "capture-v2-observations",
+        "promptVersion": "capture-v2-eval-baseline-v1",
+        "path": "capture-v2/extractObservationsWithOpenAI",
+        "fallback": false
+      },
+      "observationAccount": {
+        "total": 2,
+        "proposedChanges": 0,
+        "alreadyKnown": 0,
+        "merged": 0,
+        "needsYou": 0,
+        "commentary": 0,
+        "rejected": 2
+      },
+      "findingsValidation": {
+        "ok": false,
+        "errors": [],
+        "warnings": [
+          "Elena Voss and Tomos Reed agreed one of them will chair the weekly mobilisation huddle.",
+          "The void keys need to be collected from the depot."
+        ],
+        "invalidTargetCount": 2
+      },
+      "findings": [
+        {
+          "id": "find-6cae8e68-0aff-4211-943e-3f143247071a",
+          "fact": "Elena Voss and Tomos Reed agreed one of them will chair the weekly mobilisation huddle.",
+          "evidence": "After the call with Elena Voss and Tomos Reed, they agreed one of them will chair the weekly mobilisation huddle.",
+          "findingType": "AMBIGUOUS",
+          "confidence": 0,
+          "requiresClarification": true,
+          "clarificationQuestion": "Lume needs you to confirm this.",
+          "reasoningSummary": "Elena Voss and Tomos Reed agreed one of them will chair the weekly mobilisation huddle.",
+          "invalidTarget": true,
+          "projectId": "41cebac1-744f-4dbf-87f7-009c8baa489a",
+          "projectName": "HO isolate ho-baseline-1"
+        },
+        {
+          "id": "find-4cce846d-eae6-44bb-b1fa-83273257d334",
+          "fact": "The void keys need to be collected from the depot.",
+          "evidence": "Separately: collect the void keys from the depot on 16 October 2026.",
+          "findingType": "AMBIGUOUS",
+          "confidence": 0,
+          "requiresClarification": true,
+          "clarificationQuestion": "Lume needs you to confirm this.",
+          "reasoningSummary": "The void keys need to be collected from the depot.",
+          "invalidTarget": true,
+          "projectId": "41cebac1-744f-4dbf-87f7-009c8baa489a",
+          "projectName": "HO isolate ho-baseline-1"
+        }
+      ],
+      "proposedOperations": [
+        {
+          "id": "op-6cae8e68-0aff-4211-943e-3f143247071a",
+          "sourceFindingId": "find-6cae8e68-0aff-4211-943e-3f143247071a",
+          "operation": "NO_CHANGE",
+          "entityType": "stakeholder",
+          "targetTitle": "HO isolate ho-baseline-1",
+          "proposedValues": {
+            "personName": "Elena Voss",
+            "scope": "chair the weekly mobilisation huddle",
+            "ownershipSemantics": "share"
+          },
+          "reason": "Elena Voss and Tomos Reed agreed one of them will chair the weekly mobilisation huddle.",
+          "evidence": "After the call with Elena Voss and Tomos Reed, they agreed one of them will chair the weekly mobilisation huddle.",
+          "confidence": 0,
+          "destructive": false,
+          "requiresClarification": true,
+          "projectId": "41cebac1-744f-4dbf-87f7-009c8baa489a",
+          "projectName": "HO isolate ho-baseline-1"
+        },
+        {
+          "id": "op-4cce846d-eae6-44bb-b1fa-83273257d334",
+          "sourceFindingId": "find-4cce846d-eae6-44bb-b1fa-83273257d334",
+          "operation": "NO_CHANGE",
+          "entityType": "todo",
+          "targetTitle": "HO isolate ho-baseline-1",
+          "proposedValues": {
+            "title": "Collect void keys from the depot",
+            "date": "2026-10-16"
+          },
+          "reason": "The void keys need to be collected from the depot.",
+          "evidence": "Separately: collect the void keys from the depot on 16 October 2026.",
+          "confidence": 0,
+          "destructive": false,
+          "requiresClarification": true,
+          "projectId": "41cebac1-744f-4dbf-87f7-009c8baa489a",
+          "projectName": "HO isolate ho-baseline-1"
+        }
+      ],
+      "contextManifest": {
+        "projectId": "41cebac1-744f-4dbf-87f7-009c8baa489a",
+        "projectName": "HO isolate ho-baseline-1",
+        "counts": {
+          "To Dos": 0,
+          "Completed To Dos": 0,
+          "Nudges": 2,
+          "Meetings": 0,
+          "Milestones": 0,
+          "Risks": 0,
+          "Stakeholders": 2,
+          "Knowledge": 2,
+          "History": 1,
+          "Releases": 0
+        }
+      }
+    }
+  ],
+  "visibleNeedsYou": [
+    "NEEDS YOU ? STAKEHOLDER Which record does this refer to? HO isolate ho-baseline-1 Lume couldn't confidently identify which existing record this refers to. Why this Choose another Create a new stakeholder Dismiss",
+    "NEEDS YOU TO DO Which record does this refer to? HO isolate ho-baseline-1 Lume couldn't confidently identify which existing record this refers to. DATE Oct 16 Why this Choose another Create a new to do Dismiss"
+  ]
+}

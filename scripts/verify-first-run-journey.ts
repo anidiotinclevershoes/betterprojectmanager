@@ -243,6 +243,8 @@ function main() {
     assert.match(experience, /createLockRef/);
     assert.match(experience, /Give the project a name/);
     assert.doesNotMatch(experience, /Talk It Through/);
+    assert.match(experience, /createProject, state, hydrated/);
+    assert.match(experience, /!hydrated/);
   });
 
   console.log("verify-first-run-journey: OK");

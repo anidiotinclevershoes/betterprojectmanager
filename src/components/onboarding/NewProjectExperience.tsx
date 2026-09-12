@@ -42,7 +42,7 @@ export function NewProjectExperience({
   variant?: "first-run" | "page";
 }) {
   const router = useRouter();
-  const { createProject, state } = useMission();
+  const { createProject, state, hydrated } = useMission();
   const [draft, setDraft] = useState<CreateProjectInput>(emptyDraft);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -379,6 +379,7 @@ export function NewProjectExperience({
             className="primary-btn"
             disabled={
               busy ||
+              !hydrated ||
               !draft.name.trim() ||
               Boolean(draft.code.trim() && isProjectCodeTaken(state.projects, draft.code))
             }

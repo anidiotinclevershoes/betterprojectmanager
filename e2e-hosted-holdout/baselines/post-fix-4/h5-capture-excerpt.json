@@ -1,0 +1,95 @@
+{
+  "journey": "Ambiguous they plus safe date",
+  "projectId": "b76dca3c-bce9-4877-9090-4651977b2bd7",
+  "account": {
+    "total": 2,
+    "proposedChanges": 0,
+    "alreadyKnown": 0,
+    "merged": 0,
+    "needsYou": 2,
+    "commentary": 0,
+    "rejected": 0
+  },
+  "findings": [
+    {
+      "id": "find-d9991645-0c22-43fe-b8c8-917e621f57df",
+      "fact": "Elena Voss and Tomos Reed agreed one of them will chair the weekly mobilisation huddle.",
+      "evidence": "they agreed one of them will chair the weekly mobilisation huddle.",
+      "findingType": "AMBIGUOUS",
+      "target": {
+        "entityType": "stakeholder",
+        "entityId": "7cc96462-98fc-4a5a-991e-3dff1240c255",
+        "title": "Elena Voss"
+      },
+      "confidence": 0,
+      "requiresClarification": true,
+      "clarificationQuestion": "Lume cannot safely choose between competing interpretations.",
+      "reasoningSummary": "Elena Voss and Tomos Reed agreed one of them will chair the weekly mobilisation huddle.",
+      "invalidTarget": false,
+      "projectId": "b76dca3c-bce9-4877-9090-4651977b2bd7",
+      "projectName": "HO isolate ho-fix4-1"
+    },
+    {
+      "id": "find-783728d6-e32d-425a-82b3-9a1c37faa988",
+      "fact": "The void keys need to be collected from the depot on 16 October 2026.",
+      "evidence": "collect the void keys from the depot on 16 October 2026.",
+      "findingType": "AMBIGUOUS",
+      "target": {
+        "entityType": "todo",
+        "title": "Collect void keys from the depot"
+      },
+      "changes": {
+        "value": {
+          "proposed": "The void keys need to be collected from the depot on 16 October 2026."
+        }
+      },
+      "confidence": 0,
+      "requiresClarification": true,
+      "clarificationQuestion": "It is unclear whether this should change current project truth.",
+      "reasoningSummary": "The void keys need to be collected from the depot on 16 October 2026.",
+      "invalidTarget": false,
+      "projectId": "b76dca3c-bce9-4877-9090-4651977b2bd7",
+      "projectName": "HO isolate ho-fix4-1"
+    }
+  ],
+  "proposedOperations": [
+    {
+      "id": "op-d9991645-0c22-43fe-b8c8-917e621f57df",
+      "sourceFindingId": "find-d9991645-0c22-43fe-b8c8-917e621f57df",
+      "operation": "NO_CHANGE",
+      "entityType": "stakeholder",
+      "targetId": "7cc96462-98fc-4a5a-991e-3dff1240c255",
+      "targetTitle": "Elena Voss",
+      "proposedValues": {
+        "personName": "Elena Voss",
+        "scope": "chair the weekly mobilisation huddle",
+        "ownershipSemantics": "ambiguous"
+      },
+      "reason": "Lume cannot safely choose between competing interpretations.",
+      "evidence": "they agreed one of them will chair the weekly mobilisation huddle.",
+      "confidence": 0,
+      "destructive": false,
+      "requiresClarification": true,
+      "projectId": "b76dca3c-bce9-4877-9090-4651977b2bd7",
+      "projectName": "HO isolate ho-fix4-1"
+    },
+    {
+      "id": "op-783728d6-e32d-425a-82b3-9a1c37faa988",
+      "sourceFindingId": "find-783728d6-e32d-425a-82b3-9a1c37faa988",
+      "operation": "NO_CHANGE",
+      "entityType": "todo",
+      "targetTitle": "Collect void keys from the depot",
+      "proposedValues": {
+        "title": "Collect void keys from the depot",
+        "date": "2026-10-16"
+      },
+      "reason": "It is unclear whether this should change current project truth.",
+      "evidence": "collect the void keys from the depot on 16 October 2026.",
+      "confidence": 0,
+      "destructive": false,
+      "requiresClarification": true,
+      "projectId": "b76dca3c-bce9-4877-9090-4651977b2bd7",
+      "projectName": "HO isolate ho-fix4-1"
+    }
+  ]
+}
