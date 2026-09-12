@@ -226,8 +226,8 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
-| **Severity** | critical (wrong-target write) / high (silent empty Review; responsibility vacuum) |
+| **Status** | partial — Family A/D deterministic root fixed on `cursor/v1-trust-convergence-df02`; empty Review and responsibility vacuum remain |
+| **Severity** | critical (wrong-target write; deterministic guard landed) / high (silent empty Review; responsibility vacuum) |
 | **Domain** | Capture / Apply / Identity / Persistence |
 | **Found in** | Production long-run dogfood `lr-20260912T2212Z` on `origin/main` `9f24a65`; official project `8537b7cf-1b50-453e-af64-2b21e2d29e90`. No product-code change in that programme. |
 | **Failure class** | After a clear create was false-Needs-You (C5 timber-floor risk never written), a later “that risk is resolved; the other stays open” Capture Ready-applied **Outstanding DDA access ramp detail** `open→resolved`. Later/heavier Captures often produced an empty Review (not Needs You). Organise + ownership Captures left `knowledge_items.kind = 'responsibility'` at **0**. Updates of existing State 0 rows wrote `history_events` but no `capture_apply_receipts`. |
@@ -238,7 +238,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Keep `e2e:hosted-longrun` opt-in. Do not encode the C18 wrong write as a passing unit. A later unit should refuse Ready on unresolved same-kind ambiguity after a missing create. |
 | **Target resolution / validation point** | Capture hardening / before V1 launch |
 | **Related docs** | D-008; D-013; D-025; D-029; D-030; D-051; `e2e-hosted-longrun/ATTACK-MATRIX.md` |
-| **Notes** | First-run frozen expectations were not rewritten. Dedicated E2E project left in place. Independent SQL on production Lume `exfftrxxinhduogcluce` matches the harness final snapshot. |
+| **Notes** | First-run frozen expectations were not rewritten. Dedicated E2E project left in place. Independent SQL on production Lume `exfftrxxinhduogcluce` matches the harness final snapshot. **12 Sep trust-convergence:** unmatched risk/todo Creates rematerialize; resolve/complete of a model UUID requires observation-local title evidence and must not substitute a different same-domain row (`scripts/verify-wrong-target-identity.ts`). Production After-run still required. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 
