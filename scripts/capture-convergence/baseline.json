@@ -1,0 +1,203 @@
+{
+  "sourceSha": "17a3e413282b6c7014c3bada09527c22426654c0",
+  "experimentSha": "3e98d9c7916832cb2f3550f406fa18720ea96e54",
+  "generatedAt": "2026-09-12T03:55:56.791Z",
+  "elapsedMs": 107,
+  "total": 538,
+  "pass": 534,
+  "fail": 4,
+  "families": {
+    "historical_regression": {
+      "pass": 17,
+      "fail": 0,
+      "total": 17
+    },
+    "information_preservation": {
+      "pass": 21,
+      "fail": 0,
+      "total": 21
+    },
+    "cross_observation_contamination": {
+      "pass": 18,
+      "fail": 0,
+      "total": 18
+    },
+    "order_invariance": {
+      "pass": 48,
+      "fail": 0,
+      "total": 48
+    },
+    "irrelevant_context": {
+      "pass": 210,
+      "fail": 0,
+      "total": 210
+    },
+    "ambiguity_isolation": {
+      "pass": 56,
+      "fail": 0,
+      "total": 56
+    },
+    "malformed_isolation": {
+      "pass": 70,
+      "fail": 0,
+      "total": 70
+    },
+    "identity_matrix": {
+      "pass": 12,
+      "fail": 1,
+      "total": 13
+    },
+    "composition": {
+      "pass": 20,
+      "fail": 0,
+      "total": 20
+    },
+    "duplication": {
+      "pass": 19,
+      "fail": 0,
+      "total": 19
+    },
+    "contradiction": {
+      "pass": 4,
+      "fail": 0,
+      "total": 4
+    },
+    "product_model_gap": {
+      "pass": 0,
+      "fail": 3,
+      "total": 3
+    },
+    "held_out": {
+      "pass": 39,
+      "fail": 0,
+      "total": 39
+    }
+  },
+  "clusters": [
+    {
+      "id": "cluster-01",
+      "label": "Planner / write-eligibility divergence at PLANNER",
+      "classification": "PLANNER",
+      "earliestStage": "PLANNER",
+      "caseIds": [
+        "id-pippa-first-on-candy"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    },
+    {
+      "id": "cluster-02",
+      "label": "Product-model gap: cab-cancelled",
+      "classification": "PRODUCT MODEL GAP",
+      "earliestStage": "PLANNER",
+      "caseIds": [
+        "gap-cab-cancel-remove"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    },
+    {
+      "id": "cluster-03",
+      "label": "Product-model gap: runbook-v3",
+      "classification": "PRODUCT MODEL GAP",
+      "earliestStage": "PLANNER",
+      "caseIds": [
+        "gap-runbook-v3-retire-v2"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    },
+    {
+      "id": "cluster-04",
+      "label": "Product-model gap: cab-as-knowledge",
+      "classification": "PRODUCT MODEL GAP",
+      "earliestStage": "PLANNER",
+      "caseIds": [
+        "gap-cab-as-knowledge"
+      ],
+      "note": "Same observed semantic transition. Not a proven single root cause."
+    }
+  ],
+  "failures": [
+    {
+      "id": "id-pippa-first-on-candy",
+      "family": "identity_matrix",
+      "seed": 504018082,
+      "baseScenario": "pippa-first-name",
+      "perturbation": "unique first name Pippa on Candyland",
+      "expectedInvariant": "Disposition no_change with a first-name-only statement must not write; Lume currently short-circuits no_change before the identity gate",
+      "ok": false,
+      "expected": "Disposition no_change with a first-name-only statement must not write; Lume currently short-circuits no_change before the identity gate",
+      "actual": "obs-pippa-first: decision needs_you (expected no_change)",
+      "earliestStage": "PLANNER",
+      "classification": "PLANNER",
+      "productModelGap": false,
+      "heldOut": false
+    },
+    {
+      "id": "gap-cab-cancel-remove",
+      "family": "product_model_gap",
+      "seed": 2359560588,
+      "baseScenario": "cab-cancelled",
+      "perturbation": "none",
+      "expectedInvariant": "PRODUCT MODEL: a cancelled dated item should be a cancel/remove write, not Needs You-as-complete",
+      "ok": false,
+      "expected": "PRODUCT MODEL: a cancelled dated item should be a cancel/remove write, not Needs You-as-complete",
+      "actual": "obs-cab: decision needs_you (expected write) | obs-cab: writeType null (expected cancel_milestone)",
+      "earliestStage": "PLANNER",
+      "classification": "PRODUCT MODEL GAP",
+      "productModelGap": true,
+      "heldOut": false
+    },
+    {
+      "id": "gap-runbook-v3-retire-v2",
+      "family": "product_model_gap",
+      "seed": 1225982585,
+      "baseScenario": "runbook-v3",
+      "perturbation": "none",
+      "expectedInvariant": "PRODUCT MODEL: superseding runbook v3 should retire v2, not only create another knowledge fact",
+      "ok": false,
+      "expected": "PRODUCT MODEL: superseding runbook v3 should retire v2, not only create another knowledge fact",
+      "actual": "obs-runbook: writeType write_knowledge (expected replace_knowledge)",
+      "earliestStage": "PLANNER",
+      "classification": "PRODUCT MODEL GAP",
+      "productModelGap": true,
+      "heldOut": false
+    },
+    {
+      "id": "gap-cab-as-knowledge",
+      "family": "product_model_gap",
+      "seed": 1462307686,
+      "baseScenario": "cab-as-knowledge",
+      "perturbation": "cancelled date extracted as knowledge",
+      "expectedInvariant": "PRODUCT MODEL: cancelling a date must not become a note that leaves the date standing",
+      "ok": false,
+      "expected": "PRODUCT MODEL: cancelling a date must not become a note that leaves the date standing",
+      "actual": "obs-cab-know: writeType write_knowledge (expected cancel_milestone)",
+      "earliestStage": "PLANNER",
+      "classification": "PRODUCT MODEL GAP",
+      "productModelGap": true,
+      "heldOut": false
+    }
+  ],
+  "historicalScenarioCount": 35,
+  "historicalCaptureBehaviours": 27,
+  "historicalNewProjectBehaviours": 8,
+  "perturbationCaseCount": 463,
+  "heldOutCount": 39,
+  "uniqueFailureFamilies": 4,
+  "combinedOnlyBreaks": [],
+  "orderChangesSemantics": [],
+  "unrelatedContextChanges": [],
+  "informationLossCases": [],
+  "productModelGapCases": [
+    "gap-cab-cancel-remove",
+    "gap-runbook-v3-retire-v2",
+    "gap-cab-as-knowledge"
+  ],
+  "architectureJudgement": "A",
+  "architectureNote": "A small number of clusters account for most failures. Bounded defects are plausible; confirm before treating as a rewrite.",
+  "reproduce": [
+    "npx tsx scripts/verify-capture-convergence.ts --id id-pippa-first-on-candy",
+    "npx tsx scripts/verify-capture-convergence.ts --id gap-cab-cancel-remove",
+    "npx tsx scripts/verify-capture-convergence.ts --id gap-runbook-v3-retire-v2",
+    "npx tsx scripts/verify-capture-convergence.ts --id gap-cab-as-knowledge"
+  ]
+}
