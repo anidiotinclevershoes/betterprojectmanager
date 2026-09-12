@@ -39,15 +39,31 @@ Not implemented in this task.
 
 ## 7–12. Prompt A vs E live
 
-This reconstruction VM has no `OPENAI_API_KEY`. Production Prompt A is unchanged. Prior Checkpoint 3/4 on the old experiment line kept A. E is built and runnable; do not promote without live A vs E on this baseline.
+Frozen 10-case holdout, `gpt-4o-mini-2024-07-18`, temperature `0.2`, **3 trials**, no discarded runs. Record: `prompt-experiment/CHECKPOINT_5.md`.
+
+Median-ish last-trial totals (trial 3 also in table):
+
+| Trial | A recall | A fid | A pronoun | A writes | A Needs You | E recall | E fid | E pronoun | E writes | E Needs You |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 18/18 | 5 | 2 | 8 | 7 | 18/18 | 0 | 2 | 10 | 12 |
+| 2 | 18/18 | 1 | 2 | 10 | 8 | 18/18 | 0 | 2 | 9 | 10 |
+| 3 | 18/18 | 5 | 2 | 8 | 8 | 18/18 | 0 | 2 | 9 | 11 |
+
+- **E beats A:** mixed-domain foreign ids; cross-project mention ids (`fid=0` every trial).
+- **A beats E:** extra Needs You on named-person cases; E never wrote Captain Buttons on T1.
+- **New E modes:** pronoun case unchanged (`unsafe=2`); more false Needs You; ID hygiene only.
+- Errors: 0/0/0 both variants.
 
 ## 13. recommended production prompt
 
-**Prompt A.**
+**Prompt A.** E fails the promote rule (reference handling not improved; Needs You up).
 
 ## 14–15. hosted
 
-Required against a Preview of this reconstruction (or of #164 + cherry-pick). See hosted logs under `/opt/cursor/artifacts/` when run.
+Run on this PR Preview with production Prompt A (E not in `prompt.ts`):
+
+- Original hosted six: **6/6** (`hosted-finalise/original-six.md`)
+- Independent holdout six: **6/6** (`hosted-finalise/holdout-six.md`)
 
 ## 16. npm test
 

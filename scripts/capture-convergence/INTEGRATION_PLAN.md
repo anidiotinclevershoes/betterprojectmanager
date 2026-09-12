@@ -51,8 +51,8 @@ Keep with A:
 
 ## Floor after product cherry-pick
 
-- Original hosted six: 6/6
-- Independent holdout six: 6/6
+- Original hosted six: 6/6 on this reconstruction Preview
+- Independent holdout six: 6/6 on this reconstruction Preview
 - Deterministic corpus: 534/538 on this reconstruction (3 product-model gaps + first-name `no_change` → Needs You from holdout identity gate)
 - `npm test` 82/82
 - `npm run typecheck` pass
