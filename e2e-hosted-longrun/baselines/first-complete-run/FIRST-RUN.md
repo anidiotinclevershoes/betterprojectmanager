@@ -117,7 +117,7 @@ Lead-adjusted (not raw harness):
 | Expected writes (frozen, approx) | ~70 domain ops across 50 captures |
 | Missing writes | High — responsibilities 0; late-cycle empty Reviews; C5/C16 creates not rematerialized |
 | Wrong writes | **1 class: C18 DDA ramp resolved** |
-| Unexpected writes | C18 extra “Prepare cost report”; C26 new delayed-samples todo instead of update |
+| Unexpected writes | C26 new `FF&E samples delay` instead of completing the sample-review todo. C17 `Prepare cost report` was an expected C17 write that the harness attributed to the C18 window (hydrate lag), not a C18 invent. |
 | Unexpected deletes | **0** |
 | Duplicate people | **0** |
 | ID / relationship corruption | **0** (IDs stable) |
@@ -136,12 +136,12 @@ Responsibilities: **0**.
 
 | Metric | Count / note |
 | --- | --- |
-| Genuine ambiguity planned | C9, C12, C17, C23, C27, C32, C37, C40, C41, C49, C50 |
-| Correct Needs You (card shown) | C9, C12, C17, C23, C27 |
-| False Needs You | C5, C8, C11, C16, C24, C29 |
-| Ambiguity guessed incorrectly | C18 (guessed DDA ramp) |
+| Genuine ambiguity planned (frozen `ambiguous` / mixed NY ops) | C9, C10 huddle, C12, C15, C20, C23, C27, C29, C30 programme, C32, C37, C38 banquettes, C40 retire, C41, C42, C50 cancel |
+| Correct Needs You (card shown) | C9, C12, C23, C27, C29 |
+| False Needs You | C5 timber-floor create; C11 Chris create; C16 snag-list creates; C8 Tomos known person |
+| Ambiguity guessed incorrectly | **C18** Ready-applied DDA instead of Needs You / unmatched create |
 | Safe siblings blocked | C16 both creates blocked as NY; C50 entire paste empty |
-| Expected NY with empty Review | C32, C37, C40, C41, C49 — **not fail-closed, silent** |
+| Expected NY with empty Review | C32, C37, C40, C41, C42 — **not fail-closed, silent** |
 
 ## G. Review behaviour
 
