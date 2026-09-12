@@ -25,6 +25,12 @@ import { mentions, projectSlice } from "./ledger";
 import { readWorkspaceState } from "./isolation";
 import { NP_WORKING_TITLE, STATE0_MUST_INCLUDE } from "./new-project";
 import type { CanonicalSlice, ReviewStep } from "./types";
+import { proveProductionSupabaseCorrespondence } from "./db-environment";
+import { hashCanonicalSlice, isDbCheckpoint, sliceCounts } from "./db-verify";
+import { fetchReadOnlySqlSnapshot, hasReadOnlySqlCredentials } from "./db-sql";
+
+export { proveProductionSupabaseCorrespondence, hashCanonicalSlice, isDbCheckpoint, sliceCounts };
+export { fetchReadOnlySqlSnapshot, hasReadOnlySqlCredentials };
 
 export {
   analyseCapture,

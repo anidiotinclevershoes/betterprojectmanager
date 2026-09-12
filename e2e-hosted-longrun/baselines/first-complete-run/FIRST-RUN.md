@@ -210,7 +210,8 @@ Harness recorded **0** formal projection mismatches (token search is coarse). Ma
 
 ## Canonical Database Audit
 
-Machine snapshot: [`db-audit.json`](./db-audit.json).
+Full cadence write-up: [`CANONICAL-DB-AUDIT.md`](./CANONICAL-DB-AUDIT.md).  
+Machine snapshots: [`db-audit.json`](./db-audit.json), [`db-checkpoints.json`](./db-checkpoints.json), [`sql-dump.json`](./sql-dump.json).
 
 Independent SQL was run **after** the official 50-capture run (the live-SQL cadence requirement arrived as a follow-up). Intra-run checkpoints used the hosted load API + UI reload. This audit proves those API snapshots match production Postgres, and that the production app and the inspected database are the same project.
 
@@ -231,14 +232,17 @@ Intra-run hosted-API snapshots exist for State 0 and every Capture. Post-run SQL
 
 | Checkpoint | Expected (ledger) | Actual (SQL) | Unexpected delta | Result |
 | --- | --- | --- | --- | --- |
-| After New Project | 5 people, 3 todos, 2 open risks, 3 dates, responsibilities | 5 people, 3 todos, 2 open risks, 3 dates, 0 responsibilities | responsibilities missing; `Helen Ward ()` people prose | FAIL (D-051/D-007 class) |
-| After C5 | timber-floor risk created | still 2 State 0 risks | missing create | FAIL |
-| After C10 | ceiling-void RAMS todo | row `93bb74b6-…` exists | hydrate lag in UI, row in DB | PASS db / HYDRATE ui |
-| After C18 | timber-floor resolved; DDA unchanged | **DDA `fb74aa0f-…` open→resolved**; no timber-floor row | wrong-target update; cost-report todo nearby | **FAIL integrity** |
-| After C20 | walk-through 23 Oct | `c0deb9c6-…` start_on `2026-10-23` | none on that row | PASS |
-| After C33 | PC 8 Jan 2027 | PC still `2026-12-18` | missing third date move | FAIL |
-| After C50 / final | full accumulated ledger | 6 people, 12 open todos, 2 risks (DDA resolved), 6 milestones, 15 knowledge, 0 responsibilities | see discrepancies below | FAIL vs ledger |
-| Final hard reload | same as DB | harness `state-final.json` **equals** SQL IDs/values | none between API snapshot and SQL | PASS B=C |
+| After New Project | 5 people, 3 todos, 2 open risks, 3 dates, responsibilities | 5 / 3 / 2 open / 3 / 0 resp | responsibilities missing | FAIL |
+| After first reload | same | State 0 API IDs = SQL | none vs API | PASS B=C |
+| After C5 | timber-floor risk; asbestos done | still 2 open risks; asbestos open; +dashboard todo | missing create/complete | FAIL |
+| After C10 | M&E date + isolate + photo | M&E date + 7 todos (isolate as todo) | domain mismatch | FAIL |
+| After C15 | Saturday + asbestos done | Saturday present; asbestos open | missing complete | FAIL |
+| After C18 (high-risk) | timber-floor resolved; DDA open | **DDA `fb74aa0f-…` resolved**; no timber-floor | wrong-target update | **FAIL integrity** |
+| After C20 | walk-through 23 Oct | `c0deb9c6-…` `2026-10-23` | DDA already wrong | date PASS |
+| After C25 | snag resp; banquettes; sample done | 10 todos; extra FF&E-delay todo; 0 resp | update-as-create | FAIL |
+| After C30 | Chris + drawing + mock-up + Nadia away | 6 / 12 / 2 / 6 / 0 — those rows exist | 0 resp | PARTIAL |
+| After C35 / 40 / 45 / 50 | further creates / NY / close-out | **SQL hash identical to C30** (`c1347c9b3c48`) | no writes after 22:10:11Z | FAIL silent |
+| Final hard reload | same as C50 SQL | `state-final.json` IDs match live SQL | none | PASS B=C |
 
 ### Integrity totals (SQL, official project only)
 

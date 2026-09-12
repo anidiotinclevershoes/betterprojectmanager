@@ -37,7 +37,9 @@ Seed: `lume-longrun-v1-20260912-a3db`
 ```bash
 npx playwright install chromium   # once
 npm run verify:hosted-longrun-precommit
+npm run audit:hosted-longrun-db -- --prove-env
 LUME_E2E_RUN_ID=lr-$(date -u +%Y%m%dT%H%M%SZ) npm run e2e:hosted-longrun
+npm run audit:hosted-longrun-db -- --first-run
 ```
 
 Required secrets (environment only — never commit or paste into chat):

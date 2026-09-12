@@ -9,6 +9,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { CAPTURES, LONGRUN_SEED, LONGRUN_SUITE_ID } from "../e2e-hosted-longrun/frozen-manifest";
 import { FORBIDDEN_SUITE_MARKERS, NEW_PROJECT_NOTES } from "../e2e-hosted-longrun/new-project";
+import { hashCanonicalSlice, LONGRUN_DB_CHECKPOINTS } from "../e2e-hosted-longrun/db-verify";
 
 const ROOT = process.cwd();
 
@@ -96,6 +97,39 @@ check("not wired into npm test or the regression suite", () => {
 check("docs entry points at the programme", () => {
   assert.match(docs, /e2e-hosted-longrun/);
   assert.match(readme, /not.*npm test/);
+});
+
+check("canonical DB verification is mandatory and off CI", () => {
+  assert.match(spec, /Canonical database verification/);
+  assert.match(spec, /SELECT/);
+  assert.match(spec, /information_schema/);
+  assert.deepEqual([...LONGRUN_DB_CHECKPOINTS], [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+  assert.match(pkg, /"audit:hosted-longrun-db"/);
+  assert.doesNotMatch(regression, /audit-hosted-longrun-db/);
+  const journeys = read("e2e-hosted-longrun/journeys.spec.ts");
+  assert.match(journeys, /proveProductionSupabaseCorrespondence/);
+  assert.match(journeys, /isDbCheckpoint/);
+});
+
+check("canonical hash ignores row order", () => {
+  const base = {
+    projectId: "p",
+    projectName: "n",
+    projectCode: "c",
+    people: [
+      { id: "b", name: "B" },
+      { id: "a", name: "A" },
+    ],
+    todos: [],
+    risks: [],
+    milestones: [],
+    knowledge: [],
+    responsibilities: [],
+  };
+  assert.equal(
+    hashCanonicalSlice(base),
+    hashCanonicalSlice({ ...base, people: [...base.people].reverse() }),
+  );
 });
 
 console.log("\nhosted-longrun precommit: all checks passed");

@@ -36,6 +36,12 @@ import {
   writeJson,
   analyseCapture,
   assertHostedAiSuccess,
+  proveProductionSupabaseCorrespondence,
+  hashCanonicalSlice,
+  isDbCheckpoint,
+  sliceCounts,
+  fetchReadOnlySqlSnapshot,
+  hasReadOnlySqlCredentials,
 } from "./helpers";
 import { proveIsolation, readWorkspaceState, siblingFingerprint } from "./isolation";
 import { NEW_PROJECT_NOTES, STATE0_MUST_INCLUDE } from "./new-project";
@@ -121,6 +127,14 @@ test("production long-run dogfood — New Project + 50 captures", async ({ page,
     throw new Error(`STOP CROSS_PROJECT_ISOLATION: ${isolation.reason}`);
   }
 
+  const dbEnv = await proveProductionSupabaseCorrespondence(String(report.playwrightBaseUrl || LONGRUN_PRODUCTION_ORIGIN));
+  writeJson("db-environment.json", dbEnv);
+  if (!dbEnv.ok) {
+    report.stopReason = dbEnv.reason || "production database correspondence failed";
+    persist();
+    throw new Error(`STOP: production app does not map to expected Supabase project: ${dbEnv.reason}`);
+  }
+
   await openNewProject(pageRef);
   await fillProjectName(pageRef, identity.name);
   await pageRef.getByTestId("np-code").fill(identity.code);
@@ -138,7 +152,15 @@ test("production long-run dogfood — New Project + 50 captures", async ({ page,
   await hardReload(pageRef);
   let slice = await snapshotProject(pageRef, dedicatedProjectId);
   writeJson("state-0.json", slice);
+  writeJson("db/00-api.json", { n: 0, hash: hashCanonicalSlice(slice), counts: sliceCounts(slice) });
   report.state0Gaps = state0Gaps(slice);
+  if (hasReadOnlySqlCredentials()) {
+    const sql0 = await fetchReadOnlySqlSnapshot(dedicatedProjectId);
+    writeJson("db/00-sql.json", sql0);
+    if (sql0.hash !== hashCanonicalSlice(slice)) {
+      report.state0Gaps.push("State 0 API hash !== SQL hash");
+    }
+  }
   const proj0 = await projectionCheck(pageRef, slice);
   writeJson("state-0-projection.json", { gaps: report.state0Gaps, projection: proj0 });
   const ws0 = await readWorkspaceState(pageRef);
@@ -351,6 +373,23 @@ test("production long-run dogfood — New Project + 50 captures", async ({ page,
           row.earliestBoundary = "STOP";
           report.stopReason = `unexpected destructive mutation on C${capture.n}: ${row.unexpectedRemoves.join(", ")}`;
           stop = true;
+        }
+      }
+
+      if (isDbCheckpoint(capture.n) || capture.highRisk || capture.checkpoint?.includes("reload")) {
+        writeJson(`db/${String(capture.n).padStart(2, "0")}-api.json`, {
+          n: capture.n,
+          hash: hashCanonicalSlice(after),
+          counts: sliceCounts(after),
+        });
+        if (hasReadOnlySqlCredentials()) {
+          const sql = await fetchReadOnlySqlSnapshot(dedicatedProjectId);
+          writeJson(`db/${String(capture.n).padStart(2, "0")}-sql.json`, sql);
+          if (sql.hash !== hashCanonicalSlice(after)) {
+            row.result = "FAIL";
+            row.earliestBoundary = row.earliestBoundary || "PERSIST";
+            row.notes = `${row.notes || ""} | API hash !== SQL hash`;
+          }
         }
       }
 

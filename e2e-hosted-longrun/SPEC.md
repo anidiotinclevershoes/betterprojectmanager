@@ -53,7 +53,13 @@ Allowed SQL: `SELECT`, `information_schema`, `pg_catalog`, scoped aggregates. Fo
 
 Before the first New Project, prove the production origin's public Supabase URL is the same project being inspected. If that correspondence cannot be established: **STOP**.
 
-The first official run (`lr-20260912T2212Z`) completed before this cadence was added; its post-run SQL audit is in `baselines/first-complete-run/db-audit.json`. Future runs must not skip live SQL checkpoints.
+The first official run (`lr-20260912T2212Z`) completed before live intra-run SQL was wired. Reconstruct that run from the timestamped read-only dump (`baselines/first-complete-run/sql-dump.json` + `sql-later.json`) via `npm run audit:hosted-longrun-db -- --first-run`. Future Playwright runs **must**:
+
+1. prove production JS embeds Supabase `exfftrxxinhduogcluce` **before** New Project (STOP if not);
+2. write API hashes at every cadence checkpoint;
+3. when `SUPABASE_SERVICE_ROLE_KEY` is present, take a live read-only SQL snapshot at those checkpoints and compare hashes.
+
+Do not skip the environment proof. Do not treat UI as sufficient.
 
 ## Standing product contracts (current main)
 
