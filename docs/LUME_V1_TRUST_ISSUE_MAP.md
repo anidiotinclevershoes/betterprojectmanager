@@ -1,0 +1,94 @@
+# Lume V1 — Trust issue map
+
+**Status:** Living reconciliation (12 September 2026)  
+**Integration line:** `cursor/v1-trust-convergence-df02`  
+**Clean main this map starts from:** `e0f140d67b3be7ecc51dd5c4056338a12b4d244c` (PR #170 merged onto `9f24a65`)  
+**Immutable Before baseline:** `e2e-hosted-longrun/baselines/first-complete-run/` run `lr-20260912T2212Z`  
+**Docs entry:** [`docs/README.md`](./README.md)
+
+This is the **one** current issue map for V1 trust. It reconciles prior parallel diagnosis, D-053 production long-run, Known Discoveries, current code, and current tests.
+
+It is **not** a second architecture constitution. High-order rules stay in [`LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md) and the specialist contracts.
+
+---
+
+## Evidence hierarchy (when sources conflict)
+
+1. Current production evidence (`lr-20260912T2212Z` + SQL audit)
+2. Current production code on `main`
+3. Authoritative Lume contracts
+4. Latest deterministic / hosted tests
+5. Historical diagnoses and handoffs
+
+The earlier parallel conclusion «no remaining P0 integrity blockers / mostly hardening» is **superseded** by the untouched production 50-Capture E2E. Individual investigations from that diagnosis remain useful where not contradicted.
+
+---
+
+## Repository authority (this checkpoint)
+
+| Item | Value |
+| --- | --- |
+| `origin/main` | `e0f140d` — PR #169 docs + PR #170 long-run programme |
+| Open implementation PRs | none (competing experiment / stale visual / reconstruct PRs closed) |
+| Retained historical branches | experiment / salvage only (`#156` `#163` `#165` `#166` `#168` `#155` families). Do not merge wholesale. |
+| One integration line | this branch. Specialists investigate; implementation lands serially here. |
+
+---
+
+## Families
+
+| Family | Evidence | Current behaviour | Root boundary (working) | Severity | Product decision? | Fix required? | Verification |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **A. Wrong-target / entity resolution** | C18 Ready-applied DDA ramp `fb74aa0f` open→resolved after timber-floor create never existed | Same-domain substitute became executable | Identity + resolve + Apply target bind. `rematerializeIndependentDatedCreate` covers todo/milestone only, **not risk**. C5 Needs You left no timber-floor row; C18 bound “that risk” to DDA. | **P0** | No | Yes — never substitute an unrelated same-domain entity | Deterministic C18-class fixture + identity-safety suite + long-run After |
+| **B. Silent empty Capture / Review** | C31–C50: SQL hash frozen after C30; empty Review not Needs You | Meaningful input disappears | Extract / validate / resolve drop + Review empty-state honesty. Product-model gaps (C32 cancel, C40 retire) currently silent. | **P0** | Partial (cancel/retire semantics deferred) | Yes — fail loud and safe; do not invent candidates | Classify each empty-Review drop; unit + long-run After |
+| **C. Responsibility canonical path** | State 0 + ownership Captures → `0` `knowledge_items.kind=responsibility` | People look ownerless | New Project adapter + Capture apply/persist for responsibility. Schema already supports the kind. | **P0** | No (responsibilities are optional but must persist when stated) | Yes — one canonical path | NP Person+resp; existing Person+resp; reload; People projection |
+| **D. Clear Create / false Needs You** | C5, C11, C16 — “Which existing item?” + Create-new offered | Clear absent entity treated as unresolved update | Same family as A: unmatched create not rematerialized for risk/todo/person | **P1** | No | Yes — shared root with A | C5/C11/C16 fixtures; Pippa-class must stay Needs You |
+| **E. Update receipts / idempotency** | Creates had receipts; updates of existing State 0 rows had history only | Possible retry hole on uncertain Apply response | Receipt write sites vs intended contract | **P2** until contract proven | No | Investigate first; add protection if replay can duplicate | Risk/date/todo update retry + reload |
+| **F. Persist-trust remainder (D-005)** | Known: Confirm Owner / some To Do still optimistic-then-persist | Failed persist can look saved until reload | `store.tsx` optimistic paths | **P1** | No | Yes — persist-first on mounted V1 edits | Force persist error; UI must not show durable success |
+| **G. Projection authority** | D-030 leftover Knowledge still `current` after DDA resolve; D-008/D-021 waiting + open_loop | Historical prose can masquerade as current | Presentation precedence already partial in KC | **P2** | Yes for general Knowledge supersede — **deferred** | Apply existing authority rules only | KC / Search / Ask / Catch Me Up after resolve |
+| **H. Hydration / first paint** | C10/C30 thin first paint, correct after reload/SQL | User can conclude truth disappeared | Family 1 / N-10 (`adoptAppliedState`) may be incomplete | **P1** | No | Yes if still present | Apply then first paint vs SQL |
+| **Harbourline / Quinn CI** | `e2e/stress-journeys` h1: Quinn not painted | Frozen envelope used paraphrased evidence; D-051 fail-closed | Fixture, not identity weakening | **P1 CI** | No | Yes — verbatim quote in fixture | `verify:eval-stress` + Harbourline e2e |
+| **D-050 hosted schema** | Later long-run SQL proved runtime | Not an active hosted mystery | Operator docs only | closed | No | Docs only | Audit optional; do not replay history |
+
+Clustered roots:
+
+1. **Unmatched create → false Needs You → later same-domain bind** (A + D, C18 depends on C5)
+2. **Responsibility never written** (C; D-051/D-007 remainder)
+3. **Empty Review honesty** (B; plus deferred product-model gaps)
+4. **Persist / paint confirmation** (F + H)
+5. **Projection precedence** (G; no new supersede semantics)
+
+---
+
+## What the earlier “0 P0” diagnosis still got right
+
+- D-045–D-048 Apply reload / fingerprint / session bind / create receipts remain closed.
+- Observation-local identity (D-051) is a real protection; C18 is not licence to weaken it.
+- Prompt A stays production; Prompt E stays rejected.
+- Milestone cancel / Knowledge retire / cancellation-as-Knowledge remain product-model gaps, not extraction bugs.
+- Hosted runtime objects were already aligned despite ledger drift (D-050).
+
+## What production E2E superseded
+
+- “No remaining P0 integrity blockers”
+- Confidence that Ready→Apply cannot write a wrong same-domain target
+- Confidence that unmatched creates rematerialize for every domain
+- Confidence that responsibilities persist from Organise or Capture
+- Confidence that empty Review is an acceptable fail-closed
+
+---
+
+## Product decisions (do not invent)
+
+See [`LUME_PRODUCT_DECISIONS.md`](./LUME_PRODUCT_DECISIONS.md). These do **not** block Families A–D engineering.
+
+---
+
+## Shared-file ownership (this line)
+
+While this branch is open, it owns:
+
+- `src/lib/capture/**` and `src/lib/capture-v2/**`
+- persist / load paths and `src/lib/store.tsx` if a slice needs them
+- shared authoritative types
+- no schema/migrations unless a later slice answers the ten durable-truth questions with #10 = NO

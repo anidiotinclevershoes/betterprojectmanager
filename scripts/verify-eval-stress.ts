@@ -452,7 +452,49 @@ function evaluateDeepCreation() {
   };
 }
 
+function evidenceQuotedInTranscript(transcript: string, evidence: string): boolean {
+  const source = transcript.replace(/\s+/g, " ").trim().toLowerCase();
+  const quote = evidence.replace(/\s+/g, " ").trim().toLowerCase();
+  if (!source || !quote) return false;
+  if (source.includes(quote)) return true;
+  const loosened = quote.replace(/[.,;:!?]+$/g, "").trim();
+  return Boolean(loosened && source.includes(loosened));
+}
+
+function observationsFromStep(step: { rawModelJson: unknown }): Array<{
+  domain?: string;
+  disposition?: string;
+  evidence?: string;
+}> {
+  const raw = step.rawModelJson;
+  if (!raw || typeof raw !== "object") return [];
+  const observations = (raw as { observations?: unknown }).observations;
+  return Array.isArray(observations) ? observations : [];
+}
+
+function assertApplyPersonCreatesUseQuotedEvidence() {
+  // Harbourline handover is the CI fixture that must obey D-051 quotes.
+  // Marathon Quinn (m21) already uses a statement that is a transcript substring.
+  // Do not rewrite the whole marathon pack in this slice.
+  const steps = HANDOVER_STEPS;
+  for (const step of steps) {
+    if (step.expectedReview !== "apply") continue;
+    for (const observation of observationsFromStep(step)) {
+      if (observation.domain !== "person" || observation.disposition !== "create_new") {
+        continue;
+      }
+      const evidence =
+        typeof observation.evidence === "string" ? observation.evidence.trim() : "";
+      assert.ok(
+        evidenceQuotedInTranscript(step.transcript, evidence),
+        `Frozen ${step.id} person-create evidence is not a verbatim Capture quote (D-051). Do not weaken identity safety to make CI green.`,
+      );
+    }
+  }
+}
+
 async function main() {
+  assertApplyPersonCreatesUseQuotedEvidence();
   const deep = evaluateDeepCreation();
   const marathon = await runJourney({
     id: MARATHON_ID,
@@ -487,6 +529,15 @@ async function main() {
       id: "m13",
       classification: "genuine_lume_failure",
       detail: `Spec freeze ended at ${specAfterMarathon.startAt}, expected 9 October after the move.`,
+    });
+  }
+
+  const quinnAfterHandover = handover.final.people.filter((n) => n === "Quinn Adler").length;
+  if (quinnAfterHandover !== 1) {
+    handover.findings.push({
+      id: "h1",
+      classification: quinnAfterHandover === 0 ? "silent_failure" : "genuine_lume_failure",
+      detail: `Quinn Adler after handover create: ${quinnAfterHandover} (expected 1). Frozen h1 evidence must be a verbatim Capture quote (D-051).`,
     });
   }
 
