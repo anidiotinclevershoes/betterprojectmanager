@@ -17,7 +17,8 @@ import {
 } from "../src/lib/capture-v2";
 import { contextRecordsFromWorld } from "../src/lib/capture-v2/context";
 import type { CaptureObservationV2 } from "../src/lib/capture-v2/types";
-import type { CaptureApplyWorld } from "../src/lib/capture/apply";
+import { planCaptureApply, type CaptureApplyWorld } from "../src/lib/capture/apply";
+import type { PendingSuggestion } from "../src/lib/capture/suggestions";
 
 const PROJECT = "proj-riverside";
 const DDA = "fb74aa0f-dc7f-4fba-a5c5-838a1dd7acf3";
@@ -244,6 +245,88 @@ function main() {
     assert.equal(row?.decision.kind, "write");
     assert.equal(writeType(row), "update_risk_status");
     assert.equal(writeRiskId(row), DDA);
+  });
+
+  check("Apply planner: wrong in-project risk UUID + timber evidence must not write DDA", () => {
+    const decision = planCaptureApply({
+      item: {
+        id: "apply-c18",
+        kind: "risk",
+        op: "complete",
+        content: "The hall timber floor services risk is resolved",
+        destination: "project",
+        projectId: PROJECT,
+        legalDomain: "risk",
+        targetEntityId: DDA,
+        proposedValues: {
+          status: "resolved",
+          evidence: "The hall timber floor services risk is resolved",
+        },
+      } satisfies PendingSuggestion,
+      text: "The hall timber floor services risk is resolved — they opened a trial panel and it is clear. Outstanding DDA access ramp detail is still mentioned in an earlier note.",
+      world,
+      captureEntryProjectId: PROJECT,
+    });
+    assert.equal(decision.kind, "needs_you");
+    if (decision.kind === "write") {
+      assert.notEqual(
+        "riskId" in decision.operation ? decision.operation.riskId : "",
+        DDA,
+      );
+    }
+  });
+
+  check("Apply planner: legal DDA resolve still writes when content names DDA", () => {
+    const decision = planCaptureApply({
+      item: {
+        id: "apply-legal-dda",
+        kind: "risk",
+        op: "complete",
+        content: "Outstanding DDA access ramp detail is now resolved",
+        destination: "project",
+        projectId: PROJECT,
+        legalDomain: "risk",
+        targetEntityId: DDA,
+        proposedValues: {
+          status: "resolved",
+          evidence: "Outstanding DDA access ramp detail is now resolved.",
+        },
+      } satisfies PendingSuggestion,
+      text: "Outstanding DDA access ramp detail is now resolved.",
+      world,
+      captureEntryProjectId: PROJECT,
+    });
+    assert.equal(decision.kind, "write");
+    if (decision.kind === "write") {
+      assert.equal(decision.operation.type, "update_risk_status");
+      assert.equal(
+        "riskId" in decision.operation ? decision.operation.riskId : "",
+        DDA,
+      );
+    }
+  });
+
+  check("Apply planner: todo complete with a sibling title must not write", () => {
+    const decision = planCaptureApply({
+      item: {
+        id: "apply-wrong-todo",
+        kind: "action",
+        op: "complete",
+        content: "Cafe snag list is done",
+        destination: "project",
+        projectId: PROJECT,
+        legalDomain: "todo",
+        targetEntityId: ASBESTOS,
+        targetTodoId: ASBESTOS,
+        proposedValues: {
+          evidence: "Cafe snag list is done",
+        },
+      } satisfies PendingSuggestion,
+      text: "Cafe snag list is done",
+      world,
+      captureEntryProjectId: PROJECT,
+    });
+    assert.equal(decision.kind, "needs_you");
   });
 
   check("similar-title risk does not bind the other open risk", () => {

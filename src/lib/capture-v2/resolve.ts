@@ -6,6 +6,10 @@ import {
   type CaptureLegalOperation,
 } from "@/lib/capture/apply";
 import { fingerprintExpectedTarget } from "@/lib/capture/apply/expected-target";
+import {
+  recordedTitleEvidencedInText,
+  titlesCompatible,
+} from "@/lib/capture/apply/recorded-title-evidence";
 import type { PendingSuggestion, SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
 import {
   namesMatchExact,
@@ -633,49 +637,6 @@ function rematerializeIndependentDatedCreate(
   return observation;
 }
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/** Recorded title as a whole phrase in observation-local evidence. Exact phrase only. */
-function recordedTitleAppearsInText(text: string, recordedTitle: string): boolean {
-  const title = recordedTitle.trim().replace(/\s+/g, " ");
-  if (!title || !text.trim()) return false;
-  const re = new RegExp(`\\b${escapeRegExp(title)}\\b`, "i");
-  return re.test(text);
-}
-
-const TITLE_EVIDENCE_STOP = new Set([
-  "the",
-  "a",
-  "an",
-  "of",
-  "and",
-  "or",
-  "to",
-  "for",
-  "on",
-  "in",
-  "at",
-  "is",
-  "risk",
-  "detail",
-  "outstanding",
-]);
-
-function recordedTitleEvidencedInText(text: string, recordedTitle: string): boolean {
-  if (recordedTitleAppearsInText(text, recordedTitle)) return true;
-  const words = recordedTitle
-    .trim()
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((word) => word && !TITLE_EVIDENCE_STOP.has(word));
-  if (words.length === 0) return false;
-  const hay = text.toLowerCase();
-  const hits = words.filter((word) => hay.includes(word));
-  return hits.length >= Math.min(2, words.length);
-}
-
 function findScopedEntity(
   observation: CaptureObservationV2,
   world: CaptureApplyWorld,
@@ -708,13 +669,6 @@ function findScopedEntity(
  * Observation-local quoted evidence must contain the recorded title.
  * Otherwise fail closed — never substitute an unrelated same-domain row.
  */
-function titlesCompatible(proposed: string, recorded: string): boolean {
-  const a = proposed.trim().replace(/\s+/g, " ").toLowerCase();
-  const b = recorded.trim().replace(/\s+/g, " ").toLowerCase();
-  if (!a || !b) return false;
-  return a === b || a.includes(b) || b.includes(a);
-}
-
 function scopedEntityIdentityGate(
   observation: CaptureObservationV2,
   world: CaptureApplyWorld,

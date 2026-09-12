@@ -28,7 +28,11 @@ import {
   type OwnershipSemantics,
   type PlanCaptureApplyInput,
 } from "./types";
+import { recordedTitleEvidencedInText } from "./recorded-title-evidence";
 import { reviewedCreateIdentity } from "./reviewed-identity";
+
+const EXISTING_RECORD_UNBOUND =
+  "This does not identify that existing record. Lume will not apply the change to a different item.";
 
 function needsYou(
   domain: CaptureLegalDomain,
@@ -80,6 +84,24 @@ function targetId(item: PendingSuggestion): string | undefined {
   return undefined;
 }
 
+function observationLocalApplyText(item: PendingSuggestion, text: string): string {
+  const quoted = asString(proposedValues(item).evidence);
+  if (quoted) return quoted;
+  if (item.content.trim()) return item.content;
+  return text;
+}
+
+function existingTitledRecordBound(
+  item: PendingSuggestion,
+  text: string,
+  recordedTitle: string,
+): boolean {
+  return recordedTitleEvidencedInText(
+    observationLocalApplyText(item, text),
+    recordedTitle,
+  );
+}
+
 function requireTodoOnProject(
   world: CaptureApplyWorld,
   projectId: string,
@@ -103,8 +125,12 @@ function planTodo(
     if (!todoId) {
       return needsYou("todo", "This To Do cannot be completed — the target item is missing.");
     }
-    if (!requireTodoOnProject(world, projectId, todoId)) {
+    const existing = requireTodoOnProject(world, projectId, todoId);
+    if (!existing) {
       return needsYou("todo", "This To Do cannot be completed — the target is not on this project.");
+    }
+    if (!existingTitledRecordBound(item, text, existing.title)) {
+      return needsYou("todo", EXISTING_RECORD_UNBOUND);
     }
     return write("todo", { type: "complete_todo", projectId, todoId });
   }
@@ -198,6 +224,9 @@ function planRisk(
         "risk",
         "This Risk cannot be updated — the existing Risk could not be identified.",
       );
+    }
+    if (!existingTitledRecordBound(item, text, existing.title)) {
+      return needsYou("risk", EXISTING_RECORD_UNBOUND);
     }
     if (item.op === "complete") {
       return write("risk", {
