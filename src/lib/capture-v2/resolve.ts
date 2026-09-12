@@ -3,6 +3,7 @@ import {
   type CaptureApplyDecision,
   type CaptureApplyWorld,
   type CaptureLegalDomain,
+  type CaptureLegalOperation,
 } from "@/lib/capture/apply";
 import { fingerprintExpectedTarget } from "@/lib/capture/apply/expected-target";
 import type { PendingSuggestion, SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
@@ -66,9 +67,71 @@ export function resolveObservations(args: {
   transcript: string;
   captureEntryProjectId?: string | null;
 }): ResolvedObservation[] {
-  return args.observations.map((observation) =>
+  const resolved = args.observations.map((observation) =>
     resolveOne(observation, args),
   );
+  return applyContradictorySiblingNeedsYou(resolved);
+}
+
+function conflictingWritePayload(
+  op: CaptureLegalOperation,
+): { group: string; payload: string } | null {
+  switch (op.type) {
+    case "update_risk_status":
+      return {
+        group: `risk:${op.projectId}:${op.riskId}`,
+        payload: `status:${op.status}`,
+      };
+    case "update_milestone":
+      return {
+        group: `milestone:${op.projectId}:${op.milestoneId}`,
+        payload: `date:${op.startAt ?? ""}|end:${op.endAt ?? ""}|label:${op.label ?? ""}`,
+      };
+    default:
+      return null;
+  }
+}
+
+/**
+ * Same-record sibling writes with incompatible payloads stay Needs You.
+ * Independent observations are unchanged. Duplicates of the same payload
+ * are not a contradiction.
+ */
+function applyContradictorySiblingNeedsYou(
+  rows: ResolvedObservation[],
+): ResolvedObservation[] {
+  const groups = new Map<string, { payloads: Set<string>; indexes: number[] }>();
+  rows.forEach((row, index) => {
+    if (row.decision.kind !== "write") return;
+    const ident = conflictingWritePayload(row.decision.operation);
+    if (!ident) return;
+    const cur = groups.get(ident.group) ?? { payloads: new Set(), indexes: [] };
+    cur.payloads.add(ident.payload);
+    cur.indexes.push(index);
+    groups.set(ident.group, cur);
+  });
+
+  const blocked = new Set<number>();
+  for (const cur of groups.values()) {
+    if (cur.payloads.size > 1) {
+      for (const i of cur.indexes) blocked.add(i);
+    }
+  }
+  if (blocked.size === 0) return rows;
+
+  return rows.map((row, index) => {
+    if (!blocked.has(index)) return row;
+    return {
+      observation: row.observation,
+      suggestion: null,
+      decision: {
+        kind: "needs_you",
+        domain: row.decision.domain,
+        reason:
+          "This Capture contains contradictory updates to the same record. Choose which is current.",
+      },
+    };
+  });
 }
 
 function resolveOne(
@@ -476,16 +539,30 @@ function asString(value: unknown): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+function evidenceQuotedInCapture(transcript: string, evidence: string): boolean {
+  const source = transcript.replace(/\s+/g, " ").trim().toLowerCase();
+  const quote = evidence.replace(/\s+/g, " ").trim().toLowerCase();
+  if (!source || !quote) return false;
+  if (source.includes(quote)) return true;
+  const loosened = quote.replace(/[.,;:!?]+$/g, "").trim();
+  return Boolean(loosened && source.includes(loosened));
+}
+
 function identityEvidenceText(
   observation: CaptureObservationV2,
   transcript: string,
 ): string {
-  // Capture text the user supplied, plus the observation's verbatim evidence
-  // quote. The model statement is not identity proof — it can echo a UUID's
+  // Observation-local quote only. The whole Capture must not contribute
+  // sibling names (D-051 / convergence cross-observation contamination).
+  // The model statement is not identity proof — it can echo a UUID's
   // recorded name that the transcript never established.
-  return [transcript, observation.evidence]
-    .filter((part) => typeof part === "string" && part.trim())
-    .join("\n");
+  // If evidence is missing or not a quote from the user Capture, fail closed
+  // (empty) rather than scanning the rest of the paste.
+  const evidence =
+    typeof observation.evidence === "string" ? observation.evidence.trim() : "";
+  if (!evidence) return "";
+  if (evidenceQuotedInCapture(transcript, evidence)) return evidence;
+  return "";
 }
 
 function uncertainPersonIdentity(
