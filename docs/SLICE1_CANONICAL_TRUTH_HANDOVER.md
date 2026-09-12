@@ -1,5 +1,7 @@
 # Slice 1 Handover — Canonical Truth + Knowledge Centre Foundation
 
+> **HISTORICAL slice handover.** Current canonical-truth contract: [`docs/LUME_CANONICAL_PROJECT_TRUTH.md`](./LUME_CANONICAL_PROJECT_TRUTH.md). Start at [`docs/README.md`](./README.md).
+
 **Branch:** `cursor/slice1-canonical-truth-c9f3`  
 **Plan:** `docs/SLICE1_CANONICAL_TRUTH_IMPLEMENTATION_PLAN.md`  
 **Date:** 2026-08-18  

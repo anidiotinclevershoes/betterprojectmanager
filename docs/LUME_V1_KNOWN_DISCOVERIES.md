@@ -2,11 +2,13 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 12 September 2026 (D-052 New Project Organise name-only recovery; D-051 identity evidence is observation-local; D-050 hosted schema catch-up; D-049 hydrate completeness)  
-**Product/trust constitution:** `docs/v1-reference-pack/`  
-**Current implementation map:** the code on current `main` + `docs/LUME_V09_TO_V1_HANDOFF.md`. The 26 Aug architecture memory handoff is historical.  
+**Last housekeeping:** 12 September 2026 (documentation reconciliation: D-031/D-032 closed on current `main`; D-033 remainder is Coach-only; Capture position → `docs/LUME_CAPTURE_STATUS.md`)  
+**Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
+**Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
+**Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
 **Docs entry point:** `docs/README.md`  
 **Integrity audit:** `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md`  
+**Current Capture position:** `docs/LUME_CAPTURE_STATUS.md` (534/538; Prompt A; Prompt E rejected)  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
 
@@ -564,19 +566,16 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | closed |
 | **Severity** | low |
 | **Domain** | Ocean / Coach |
 | **Found in** | Phase 3B visual pass (25 Aug 2026) |
-| **Failure class** | On project load the Coach dialog overlays Capture and KC, including the Capture Analyse control. Close is outside the default viewport in some layouts. |
-| **Evidence / repro** | Open `/projects/:id` in local mode; Coach “Ready when you are” dialog is present before any Capture action |
-| **Likely files** | Coach drawer / Ocean shell |
-| **Proposed fix direction** | Do not auto-open Coach on Capture/KC entry; keep it opt-in. Do not redesign Ocean in 3B. |
-| **Explicit non-goals** | Coach product revival; Ocean redesign |
-| **Regression test to add** | Capture mode is usable without dismissing Coach |
-| **Target resolution / validation point** | Ocean/QOL — not Phase 3B or 3D Capture session |
-| **Related docs** | D-025 |
-| **Notes** | 3B testing dismissed the overlay; it did not cause a wrong-domain write. **v0.9 UX slice:** `CoachDrawer` / `CoachResultsCard` are unmounted from `AppShell`. The drawer cannot auto-open over Capture/KC. Coach logic remains in-repo but is not a product surface. |
+| **Failure class** | On project load the Coach dialog overlaid Capture and KC, including the Capture Analyse control. |
+| **Evidence / repro** | `AppShell` does not mount `CoachDrawer`. `openCoachDrawer` remains as a leftover export. Verified on `91fabf8` (12 Sep 2026 documentation reconciliation). |
+| **Fix summary** | Coach drawer unmounted from the product shell. Auto-open cannot occur. Coach is not a V1 mode. |
+| **Explicit non-goals** | Coach product revival; deleting leftover Coach API / files |
+| **Related docs** | v0.9 handoff §4; D-033 remainder (Coach HTTP still accepts client MissionState) |
+| **Notes** | Closed as a product-surface defect. Leftover `/api/coach` client-truth path is D-033 remainder, not this overlay. |
 
 ---
 
@@ -584,19 +583,16 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | closed |
 | **Severity** | medium |
 | **Domain** | Capture / New Project |
 | **Found in** | Experimental Programme (25 Aug 2026) |
-| **Failure class** | `LUME_CAPTURE_V2` and `LUME_NEW_PROJECT_V2` keep legacy OpenAI/local paths alongside observation pipelines. Permanent dual engines would reintroduce matching/heuristic drift. |
-| **Evidence / repro** | Unset flags → `/api/capture` uses findings + `tidyAndCoachWithOpenAI` / local regex; flags `=1` + OpenAI → `src/lib/capture-v2` / `src/lib/new-project-v2`. Phase 3B apply is shared. |
-| **Likely files** | `src/app/api/capture/route.ts`; `src/app/api/new-project/route.ts`; `src/lib/capture-v2`; `src/lib/new-project-v2`; `docs/EXPERIMENTAL_PROGRAMME.md` |
-| **Proposed fix direction** | **Convergence decision:** Capture V2 is the V1 Capture engine. After the required server-backed/manual/automated V2 gates, default V2 on and **delete** the legacy OpenAI findings path (git is rollback). Keep Phase 3B. Local/no-OpenAI Capture remains a fallback — V2 does not add regex. Same pattern for New Project V2 vs Talk assemble. |
-| **Explicit non-goals** | A second NLP/matching engine; weakening 3A/3B; permanent dual engines |
-| **Regression test to add** | `verify-capture-v2`; `verify-new-project-v2`; phase 3B suite still green |
-| **Target resolution / validation point** | Close to V2 default-on (not a terminal cleanup PR) |
-| **Related docs** | `docs/EXPERIMENTAL_PROGRAMME.md`; D-011; D-R13; handoff Part C §C8 |
-| **Notes** | Desert is not flagged. Ocean remains the default appearance. Immediate-merge `captureWithAI` / unmounted `CaptureBar` were **deleted in Slice 1A**. D-032 remaining scope is the live legacy `/api/capture` findings path vs V2. |
+| **Failure class** | Dual live OpenAI understanding engines (legacy findings vs Capture V2; Talk assemble vs New Project V2) would reintroduce matching/heuristic drift. |
+| **Evidence / repro** | `isCaptureV2Enabled()` always returns true. `POST /api/capture` always calls `postCaptureV2`. `POST /api/new-project` always uses shared Capture extract + New Project adapter. `isNewProjectV2Enabled` is a leftover helper and is not consulted by the live routes. Verified on `91fabf8`. |
+| **Fix summary** | Capture V2 is the sole live Analyse engine. New Project Organise is the shared extractor plus adapter. Legacy findings library may still exist in-repo; it is not the HTTP path. |
+| **Explicit non-goals** | Deleting leftover findings files or the unused NP V2 flag in this documentation slice |
+| **Related docs** | `docs/LUME_CAPTURE_STATUS.md`; D-011 remainder (NP regex leftovers) |
+| **Notes** | Closed as a live dual-engine defect. Leftover library code is cleanup, not a second production engine. |
 
 ---
 
@@ -604,19 +600,19 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | partial — Tell Me HTTP resolved (Slice 1B); Capture V2 Analyse+Apply resolved (Slice 1C); Coach and legacy Capture still open |
-| **Severity** | high |
-| **Domain** | Ask/Tell Me · Capture · Infra |
+| **Status** | remainder only — Coach / leftover client-truth path. Capture and Ask are closed. |
+| **Severity** | medium (Coach is hidden; not a live product mode) |
+| **Domain** | Coach leftover |
 | **Found in** | V1 Architectural Convergence (26 Aug 2026) |
-| **Failure class** | `/api/coach` still treats client-posted `MissionState` as the project truth the model sees. Workspace RLS already prevents cross-tenant reads; this is not primarily IDOR. Harm is stale/forged *own-session* context, unpredictable prompts, unbounded payloads, and a second “truth” besides durable tables. |
-| **Evidence / repro** | **Tell Me (fixed):** `POST /api/tell-me` requires `projectId` + `question`; leftover `state`/`snapshot` are ignored; truth is `loadMissionStateFromSupabase` → `serializeCanonicalTruth`. **Capture V2 (fixed, Slice 1C):** `POST /api/capture` with `LUME_CAPTURE_V2=1` loads `loadServerCaptureWorld` (same durable loader as Tell Me, then `worldFromCaptureState` / `captureApplyWorldFromState`). Leftover `body.state` is ignored. Failure is 401/404/503/500 — no client fallback. Apply is `POST /api/capture/apply` against a fresh load. **Still open:** legacy `/api/capture` (flag off) still builds context from `body.state`; `/api/coach` still accepts client MissionState. |
-| **Likely files** | `src/app/api/coach/route.ts`; legacy branch of `src/app/api/capture/route.ts` |
-| **Proposed fix direction** | Same Tell Me / Capture V2 pattern for Coach, then delete the legacy Capture understanding path after the V2 default-on gate. |
-| **Explicit non-goals** | Claiming this as an RLS/IDOR repair; a new snapshot architecture; sending client-constructed current-truth JSON |
-| **Regression test to add** | Capture V2 coverage: `scripts/verify-capture-server-truth.ts`. Tell Me coverage: `scripts/verify-tell-me-server-truth.ts`. |
-| **Target resolution / validation point** | Coach (if it remains) then V2 default-on / legacy Capture deletion |
-| **Related docs** | Handoff Part C §C3–C4; D-010; D-032 |
-| **Notes** | Project scoping remains application-layer because RLS is workspace membership. Capture V2 MissionState remains a **client hydrate/cache** after Apply returns server state — it is not HTTP current-truth authority. |
+| **Failure class** | Hidden `/api/coach` still treats client-posted `MissionState` as the project truth the model sees. Harm if Coach returns: stale/forged own-session context and a second “truth” besides durable tables. |
+| **Evidence / repro** | **Closed:** Ask (`/api/tell-me`) and Capture Analyse/Apply load server truth and ignore leftover `body.state`. **Still open:** `src/app/api/coach/route.ts` still requires `body.state` and passes it to `streamPmCoaching`. Verified on `91fabf8`. |
+| **Likely files** | `src/app/api/coach/route.ts` |
+| **Proposed fix direction** | If Coach returns, use the Tell Me / Capture server-load pattern. Do not treat this as a Capture unfreeze. |
+| **Explicit non-goals** | Rebuilding Coach; claiming this as an RLS/IDOR repair |
+| **Regression test to add** | Already present for Capture / Tell Me. Coach coverage only if Coach returns. |
+| **Target resolution / validation point** | If Coach returns as a product surface — not ordinary Capture work |
+| **Related docs** | D-031 (drawer closed); v0.9 handoff §4 |
+| **Notes** | Project scoping remains application-layer because RLS is workspace membership. Do not file this remainder as “Capture still accepts client truth.” |
 
 ---
 
@@ -940,9 +936,9 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 2. ~~**D-001 + D-002**~~ — fixed in Slice 1C  
 3. ~~**D-019**~~ — fixed in Slice 2D (D-R10)  
 4. ~~**Dead Capture merge path**~~ — unmounted `CaptureBar` / `captureWithAI` / `applyCaptureResult` **deleted in Slice 1A**  
-5. **D-033** — ~~Tell Me server-load~~ (Slice 1B); ~~Capture V2 Analyse+Apply~~ (Slice 1C) → Coach + legacy Capture remain
+5. **D-033 remainder** — Coach leftover client MissionState only (Capture / Ask closed)  
 6. **D-010** — canonical production default after eval evidence  
-7. **D-032** — default Capture V2 / New Project V2 then delete legacy OpenAI understanding paths (after Test workstream gates)  
+7. ~~**D-032**~~ — Capture V2 is the sole live engine; New Project uses the shared extractor + adapter  
 8. ~~**D-045 + D-046 + D-047 + D-048**~~ — closed in the dogfood integrity gate (D-R40–D-R43)  
 9. **D-034 remainder** — fingerprints now cover dueAt/detail/notes/endAt/replace pin; schema `version` columns only if that still fails in production  
 10. ~~**D-035 remainder**~~ — history/session/memory/todo create now prove the project is in the workspace; Capture membership already live  
@@ -956,7 +952,7 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 18. **D-004** remainder — history persist gaps outside New Project create  
 19. **D-026** — product decision on project-code uniqueness  
 20. **D-027** — Archive/undo only if product asks  
-21. **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030**, **D-031** — as scheduled (D-031: hide/retire Coach rather than rewrite)  
+21. **D-012–D-015**, **D-020** Ask remainder, **D-024**, **D-029**, **D-030** — as scheduled. ~~D-031~~ closed (Coach unmounted).  
 
 Do **not** treat this order as a mandate to broaden an in-flight slice. Do **not** begin implementation from the architecture review PR.
 
@@ -975,7 +971,7 @@ Canonical categories for the later large hardening pass. Details live in the aud
 - ~~D-041 / D-042~~ — Account delete + JSON export (individual-first)
 - Read-only integrity observer for operators (scanner + SQL already exist; classified ACCEPTED BOUNDED V1 LIMITATION)
 - D-044 lawyer Privacy/Terms — Tom / legal, not invented in code
-- D-033 remainder — Coach must not treat client MissionState as truth if Coach returns
+- D-033 remainder — hidden `/api/coach` must not treat client MissionState as truth if Coach returns. Not a Capture defect.
 
 ### HARDEN DURING V1
 

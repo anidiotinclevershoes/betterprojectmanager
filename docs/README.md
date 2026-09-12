@@ -1,21 +1,19 @@
 # Lume documentation
 
-**Status:** Documentation authority map (6 September 2026)  
-**Scope:** How to read Lume docs. This file does not replace product philosophy or current architecture.
+**Status:** Documentation authority map (12 September 2026)  
+**Scope:** What to read, and what is allowed to govern implementation.  
+**Current integration line:** `main`.  
+**Baseline this map was reconciled against:** `91fabf8d1627e89538f26e00b9b3343b9d577cdb`.
 
 **Use this page first.** Then read only what the task needs.
 
-**Current integration line:** `main`.  
-**Mainline recovery complete.** Product surfaces that were stranded on the desert experiment stack now live on `main` (#126–#133).  
-**Not a development base:** `cursor/capture-v2-desert-new-project-56c9` and historical experiment PRs #119–#123 / #120. Those are salvage/reference only. Do not merge them.
+A new Cursor agent should recover Lume’s product, architecture, safety and data-durability rules from this hierarchy without external conversation history.
 
-**v0.9 operating picture:** [`docs/LUME_V09_TO_V1_HANDOFF.md`](./LUME_V09_TO_V1_HANDOFF.md). Product constitution: [`docs/v1-reference-pack/`](./v1-reference-pack/). If those files and older PHASE / SLICE / experimental docs disagree, **this map + the code win**.
+`cursor/capture-v2-desert-new-project-56c9` and historical experiment PRs #119–#123 / #120 are salvage/reference only. Do not merge them.
 
 Before substantial implementation: `npm run git:preflight`. **MATERIALLY STALE = STOP.**
 
-# LUME v0.9 CLOSED — mainline recovery complete
-
-v0.9 Capture remains frozen as the Analyse engine. Wanted product surfaces have been rebuilt on current `main`. The next development phase starts only from this `main`. Do not resume work on desert-era branches.
+Before material schema / domain / persistence work: answer the ten questions in [`docs/LUME_DURABLE_PROJECT_TRUTH.md`](./LUME_DURABLE_PROJECT_TRUTH.md) §6. If a real user could lose data, need to recreate a project, or have truth silently reinterpreted: **STOP AND ESCALATE TO PRODUCT OWNER.**
 
 ---
 
@@ -23,78 +21,77 @@ v0.9 Capture remains frozen as the Analyse engine. Wanted product surfaces have 
 
 Later files do **not** automatically win. “Newest file wins” is **not** the rule.
 
-### 0. v0.9 operating picture (closed alpha → V1)
+There is **one** current architecture constitution. Specialist contracts own detail for one subject. Historical files keep history.
 
-`docs/LUME_V09_TO_V1_HANDOFF.md`
+### 1. Concise entry (this file)
 
-Governs:
+What to read. What is authoritative. What is historical.
 
-- what v0.9 actually is;
-- Capture freeze and qualification SHA;
-- parked surfaces (Coach hidden, Advise coming soon);
-- live two-account isolation evidence (D-036 CLOSED on production `0e68384`);
-- remaining debt classifications;
-- tester-learning questions;
-- the compact v0.9 → V1 roadmap.
+### 2. Product / architecture constitution
 
-If this file and an older PHASE / SLICE / experimental / architecture-flag table disagree on *current product reality*, **this file + the code win**.
+[`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md)
 
-### 1. Stable product / trust / UI constitution
+Durable high-order rules: thesis, core V1 modes, the two peer invariants, Capture AI/deterministic boundary, Review vs domain, tags, New Project rules, operating principles, data-model preflight, destructive-change STOP.
 
-`docs/v1-reference-pack/`
+Longer product / trust / Ocean UI philosophy remains in [`docs/v1-reference-pack/`](./v1-reference-pack/). For V1 KC scan order / Desert / first-run / Coach / Timeline / Accept-as-known UX, [`docs/v1-convergence-mp/SPIDERMAN_AMENDMENT.md`](./v1-convergence-mp/SPIDERMAN_AMENDMENT.md) supersedes older Ocean-only wording. The amendment is not a licence to implement a UX overhaul.
 
-Governs:
+### 3. Specialist contracts
 
-- what Lume is;
-- V1 product scope;
-- trust principles;
-- Capture review-before-write;
-- Known / ✦ Lume noticed / Needs you;
-- Ocean visual/interaction principles;
-- development/evaluation governance, including the Plain-English standard for completion reports and checkpoints.
+| Subject | Document |
+| --- | --- |
+| Canonical Project Truth (write then project) | [`docs/LUME_CANONICAL_PROJECT_TRUTH.md`](./LUME_CANONICAL_PROJECT_TRUTH.md) |
+| Durable Project Truth (existing-project compatibility) | [`docs/LUME_DURABLE_PROJECT_TRUTH.md`](./LUME_DURABLE_PROJECT_TRUTH.md) |
+| Current Capture position | [`docs/LUME_CAPTURE_STATUS.md`](./LUME_CAPTURE_STATUS.md) |
+| Ask / eval scoring | [`docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`](./LUME_INTELLIGENCE_CONTRACT_V0.2.md) |
 
-Stable product principles override historical *implementation* descriptions. They do **not** invent current code paths.
+### 4. Living status / discoveries
 
-### 2. Current implementation (code first)
+[`docs/LUME_V1_KNOWN_DISCOVERIES.md`](./LUME_V1_KNOWN_DISCOVERIES.md) — open vs resolved debt.
 
-The code on current `main` is the implementation map.
+[`docs/LUME_V09_TO_V1_HANDOFF.md`](./LUME_V09_TO_V1_HANDOFF.md) — v0.9 closure operating picture: what shipped, parked surfaces, leftover inventory, isolation evidence. High-order invariants now live in the constitution and specialist contracts. If they disagree, **constitution + specialist contracts + current code win**.
 
-`docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` is **HISTORICAL** (26 Aug desert-era snapshot). Part C still records useful V1 *target* decisions. Part A/B flag tables are stale (they still describe optional Capture V2 and unmerged #66). **Do not start work from that file.**
+The code on current `main` is the implementation map. [`docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`](./LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md) is **HISTORICAL**.
 
-Current contracts to honour:
+### 5. Historical / experimental
 
-- Capture V2 is the sole Analyse → Review → Apply engine.
-- Ready means the same production Apply path can execute that reviewed change. Apply still revalidates.
-- One authoritative project-truth spine (Supabase). No parallel stores.
-- **Actions create or update that canonical truth, then surfaces re-project it.** A product surface must not become its own data authority. Full rule: `docs/LUME_V09_TO_V1_HANDOFF.md` §3.1–§3.5.
-- Tags, when present, are retrieval metadata only.
-- Timeline is a read-only projection of dated truth. Future Timeline Add writes canonical dated records, not `timeline_item` storage.
-- Legacy writable Gantt is **retired from the intended product**. The write surface is unmounted from production Timeline. Do not delete shared date infrastructure or stored Gantt/`timeline` rows until proven unused.
-- Meeting-scoped Catch Me Up is generated from stored project truth, not generic advice. Stored `Meeting.prep` hydrates for compatibility and must not drive Catch Me Up or Capture context.
-- After a successful Apply, never adopt pre-write state. Capture session binds to the open project. Knowledge/availability Apply is receipted. Fingerprints include the fields Apply writes. Details: `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` (closed D-045–D-048).
+Slice, phase, current-state, experimental-programme, old qualification and architecture-review files. Useful context. They must not drive implementation.
 
-### 3. Living Known Discoveries
+---
 
-`docs/LUME_V1_KNOWN_DISCOVERIES.md`
+## Current contracts to honour (short)
 
-Governs:
+- **Canonical truth:** UI action → canonical truth → projections refresh. No parallel stores.
+- **Durable truth:** never strand persisted project truth. Prefer additive evolution; otherwise an explicit deterministic migration.
+- **Capture:** AI extracts; deterministic Lume validates; Review stages; Apply writes. Prompt A is production. Deterministic routing accepted at **534/538**. See Capture status.
+- **Timeline / Catch Me Up:** projections over project truth. Catch Me Up is a derived briefing surface (it may appear as a project-page tab). Neither is a source of truth.
+- **Tags:** retrieval metadata only.
+- **Ready → Apply:** Ready means the same production Apply path can execute that change. Apply still revalidates.
+- After a successful Apply, never adopt pre-write state. Capture session binds to the open project.
 
-- what is currently open;
-- what is resolved;
-- known defects/debt;
-- target resolution / validation points.
+---
 
-### 4. Relevant current operational / test documents
+## Normal first-read set
 
-Use only when the task needs them (for example test safety-net, Supabase setup, Vercel production, Intelligence Contract, the Lume Test Dashboard, or the V1 human-action checklist).
+For ordinary development:
 
-Human-only dashboard/credential actions: [`docs/V1_USER_ACTIONS.md`](./V1_USER_ACTIONS.md). It is not an architecture map.
+1. `docs/README.md` (this file)
+2. `npm run git:preflight` and `AGENTS.md`
+3. `docs/LUME_CONSTITUTION.md`
+4. the specialist contract the task touches (canonical / durable / Capture)
+5. `docs/LUME_V1_KNOWN_DISCOVERIES.md`
+6. the code on current `main`
+7. `docs/LUME_V09_TO_V1_HANDOFF.md` when you need leftovers, isolation evidence, or v0.9 shipped scope
+8. `docs/v1-reference-pack/` when you need product/trust/UI philosophy
+9. only the relevant historical `SLICE*` / `PHASE*` handover when extending that seam
+10. Intelligence Contract when doing Ask / eval / scoring work
 
-They do not override (1)–(3) unless they are the specific contract for that seam (Ask/eval scoring → Intelligence Contract).
+Then open operational docs only if the task is about tests, deploy, or persistence setup.
 
-Test evidence / model comparison: `docs/TEST_DASHBOARD.md`. This is an engineering Issue + Actions summary, not a Lume product surface.
+Human-only dashboard/credential actions: [`docs/V1_USER_ACTIONS.md`](./V1_USER_ACTIONS.md). Not an architecture map.
 
-Hosted live-OpenAI vertical journeys (opt-in, never `npm test`): [`e2e-hosted-vertical/README.md`](../e2e-hosted-vertical/README.md). Command: `npm run e2e:hosted-vertical`.
+Test evidence / model comparison: `docs/TEST_DASHBOARD.md`. Engineering Issue + Actions summary, not a Lume product surface.
+
+Hosted live-OpenAI vertical journeys (opt-in, never `npm test`): [`e2e-hosted-vertical/README.md`](../e2e-hosted-vertical/README.md).
 
 Integrity probes (read-only / in-memory; no production daemon):
 
@@ -105,64 +102,20 @@ npm run verify:dogfood-integrity-gate
 
 SQL printed by the adversarial script is for operators on a copy of dogfood data. Do not run it as a migration.
 
-### 5. Active plans
-
-Plans describe **intended future work**. They do not override current architecture or code.
-
-`docs/v1-convergence-mp/` is the Magic Patterns / V1 UX convergence **reference** (Workstream C). Live MP v8 is dumped unaltered under `docs/v1-convergence-mp/mp-source/`. V1 product decisions are in `docs/v1-convergence-mp/SPIDERMAN_AMENDMENT.md`. This pack does not replace the visual constitution in `docs/v1-reference-pack/` and it is not a licence to implement a UX overhaul. For V1 themes and KC scan order, the Spiderman amendment supersedes older Ocean-only / Current-position-first constitution wording.
-
-### 6. Historical handovers / audits / screenshots
-
-These explain why a change was made, previous architecture, historical testing/evaluation, and previous UI state.
-
-They must **not** override current implementation reality.
-
-> Historical documentation may explain why the implementation evolved but must not be treated as current implementation authority unless current code/current architecture documentation confirms it.
-
----
-
-## Cursor / future-agent rule
-
-Start with the documentation authority map. Read canonical product intent, current implementation architecture and Known Discoveries first. Read historical handovers only when relevant to the seam being extended. If historical documentation conflicts with current architecture or code, do not silently choose the historical description.
-
-Product/trust constitution governs intended behaviour; current code/architecture handoff governs implementation reality; Known Discoveries governs known debt.
-
-Completion reports, PR checkpoints, and slice handovers must include a Plain-English section written for the product owner. See `docs/v1-reference-pack/LUME_DEVELOPMENT_AND_EVALUATION_ROADMAP_V1.md` §19. Do not rewrite historical reports to match.
-
----
-
-## Normal first-read set
-
-For ordinary development:
-
-1. `docs/README.md` (this file) — **start here**
-2. `npm run git:preflight` and `AGENTS.md` Git rules
-3. `docs/LUME_V09_TO_V1_HANDOFF.md` (what v0.9 is, freeze, isolation, remaining debt, V1 path)
-4. `docs/v1-reference-pack/README.md`
-5. `docs/LUME_V1_KNOWN_DISCOVERIES.md`
-6. the code on current `main` (not the 26 Aug architecture handoff)
-7. only the relevant historical `SLICE*` handover when extending that particular seam
-8. Intelligence Contract (`docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`) when doing Ask / eval / intelligence-scoring work
-9. `docs/v1-convergence/V09_QUALIFICATION.md` when citing Capture eval evidence (scorer **v3**)
-10. `docs/v1-convergence-mp/README.md` (and `SPIDERMAN_AMENDMENT.md`) when reconciling Magic Patterns / V1 UX (reference only)
-
-`docs/EXPERIMENTAL_PROGRAMME.md` and `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` are **HISTORICAL**. Capture V2 is the sole live engine. New Project is four-frame compose on the shared Capture extract.
-
-Then open operational docs only if the task is about tests, deploy, or persistence setup.
-
 ---
 
 ## If documents conflict
 
 | Kind of question | Trust this | Do not silently prefer |
 | --- | --- | --- |
-| What should the product do? (trust, Capture, Ocean, V1 scope) | `docs/v1-reference-pack/`, except V1 KC scan order / Desert / first-run / Coach / Timeline / Accept-as-known UX rule → `docs/v1-convergence-mp/SPIDERMAN_AMENDMENT.md` | Historical handovers, old UI snapshots, root README product copy |
-| What does the code do now? | The code on current `main`, then the v0.9 handoff | Architecture Memory Handoff (26 Aug desert snapshot); 19 Aug Project Truth Audit; `docs/current-state/`; SLICE/PHASE bodies; `docs/EXPERIMENTAL_PROGRAMME.md` |
-| What is in v0.9 / what is frozen / what is next? | `docs/LUME_V09_TO_V1_HANDOFF.md` | Phase 3 “unfinished programme” language; old scorer-v1 counts; Coach-as-live-surface docs |
-| What debt is open vs fixed? | Known Discoveries (open vs resolved sections) + v0.9 handoff §10 | Duplicate headings, historical “still missing” notes, plans |
-| How should Ask/evals score? | Intelligence Contract, reconciled with the pack | Benchmark-chasing notes in old phase handovers |
-
-A newer historical handover does **not** outrank the constitution, the current architecture handoff, or Known Discoveries.
+| High-order product / architecture rule | `docs/LUME_CONSTITUTION.md` + the named specialist contract | Historical handovers, root README, `MISSION.md` |
+| Product / trust / Ocean UI philosophy | `docs/v1-reference-pack/`, except the Spiderman amendment deltas | Historical UI snapshots |
+| Current Capture position | `docs/LUME_CAPTURE_STATUS.md` | `V09_QUALIFICATION.md` “Stage 2 BLOCKED”; experiment PRs; Prompt E |
+| What the code does now | The code on current `main` | Architecture Memory Handoff (26 Aug); 19 Aug Project Truth Audit; `docs/current-state/`; SLICE/PHASE bodies |
+| What shipped in v0.9 / leftovers / isolation | `docs/LUME_V09_TO_V1_HANDOFF.md` | Phase 3 “unfinished programme” language; Coach-as-live-surface docs |
+| What debt is open vs fixed | Known Discoveries | Duplicate headings, historical “still missing” notes |
+| Ask / eval scoring | Intelligence Contract | Benchmark-chasing notes in old phase handovers |
+| Existing-project compatibility | `docs/LUME_DURABLE_PROJECT_TRUTH.md` | “Start again”; backups-as-migration |
 
 ---
 
@@ -172,17 +125,28 @@ Left in place on purpose. They record *why* the architecture evolved.
 
 | Area | Examples | Role |
 | --- | --- | --- |
-| Pre-slice architecture snapshot | `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` (19 Aug 2026) | Original failure analysis; **superseded as an implementation map** |
-| Adversarial integrity audit | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` (6 Sep 2026; remediations same day) | Findings on `f737f8a` plus CLOSED / VERIFIED D-045–D-048. **Not** a second architecture map. Code wins if they later disagree. Run `npm run verify:adversarial-integrity` and `npm run verify:dogfood-integrity-gate` (non-mutating). |
-| UI/application snapshot | `docs/current-state/` (11 Aug 2026) | Screenshots and pre-Ocean / pre-Supabase UI evidence |
-| Slice / phase handovers | `docs/SLICE*.md`, `docs/PHASE*.md`, completion reports, `docs/V1_CONVERGENCE_ARCHITECTURE_COMPLETION.md` | Seam history when extending that slice; architecture review checkpoint |
-| Older product copy | repository root `README.md` (corrected enough to point here; remaining Mission Control copy is historical) | Setup remnants; not current product/architecture authority |
-| Experimental programme | `docs/EXPERIMENTAL_PROGRAMME.md` | Decision record from 25 Aug 2026. **Capture V2 is no longer experimental.** |
-| Desert programme branch | `cursor/capture-v2-desert-new-project-56c9` | **Obsolete integration candidate.** Reference/salvage only. Do not merge. |
+| Pre-slice architecture snapshot | `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` (19 Aug 2026) | Original failure analysis |
 | Architecture memory handoff | `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` | 26 Aug desert-era snapshot. **HISTORICAL.** Part C targets may still inform V1. |
-| Capture qualification (pre-freeze) | Historical “Stage 2 blocked” sections inside `docs/v1-convergence/V09_QUALIFICATION.md` | Chronology only; current status is at the top of that file |
+| Adversarial integrity audit | `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md` | Findings plus CLOSED D-045–D-048. Not a second architecture map. |
+| UI/application snapshot | `docs/current-state/` (11 Aug 2026) | Pre-Ocean / pre-Supabase UI evidence |
+| Slice / phase handovers | `docs/SLICE*.md`, `docs/PHASE*.md`, `docs/V1_CONVERGENCE_ARCHITECTURE_COMPLETION.md` | Seam history |
+| Older product copy | root `README.md`, `docs/MISSION.md` | Mission Control framing. Not current product definition. |
+| Experimental programme | `docs/EXPERIMENTAL_PROGRAMME.md` | 25 Aug 2026 decision record. Capture V2 is no longer experimental. |
+| Capture qualification (pre-freeze) | `docs/v1-convergence/V09_QUALIFICATION.md` | Chronology. “Stage 2 BLOCKED” is not current. |
+| v0.9 test / UX convergence packs | `docs/v1-convergence/`, `docs/v1-convergence-mp/` | Test foundation and UX reference. Not implementation licences. |
+| Desert / experiment branches | `cursor/capture-v2-desert-new-project-56c9`; PRs #156 #163 #165 #166 #168 | Salvage / observe-only. Do not merge wholesale. |
 
 Do not move or delete these in ordinary work. Do not rewrite them to pretend they always described today’s system.
+
+---
+
+## Cursor / future-agent rule
+
+Start here. Read the constitution, the specialist contract you are touching, Known Discoveries, then code. Read historical handovers only when relevant to that seam.
+
+If historical documentation conflicts with the constitution, a specialist contract, or current code, do not silently choose the historical description.
+
+Completion reports, PR checkpoints, and slice handovers must include a Plain-English section for the product owner. See `docs/v1-reference-pack/LUME_DEVELOPMENT_AND_EVALUATION_ROADMAP_V1.md` §19.
 
 ---
 
@@ -190,11 +154,14 @@ Do not move or delete these in ordinary work. Do not rewrite them to pretend the
 
 Not every PR must touch every document.
 
-When a **substantive development slice** changes architecture:
+When a **substantive development slice** changes architecture or product rules:
 
-- update `LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` if the current architecture map materially changed (including Part C if a convergence decision is completed or reversed);
-- update `LUME_V1_KNOWN_DISCOVERIES.md` if open/resolved debt changed;
-- create/update that slice’s handover, with a Plain-English section for the product owner (Roadmap §19);
-- avoid copying mutable implementation status (feature flags, “not yet persisted”, Capture promotion state) into stable philosophy documents.
+- update `docs/LUME_CONSTITUTION.md` or the owning specialist contract if a durable rule changed;
+- update `docs/LUME_CAPTURE_STATUS.md` if the accepted Capture position changed;
+- update `docs/LUME_V1_KNOWN_DISCOVERIES.md` if open/resolved debt changed;
+- update `docs/LUME_V09_TO_V1_HANDOFF.md` only if leftover inventory / shipped v0.9 reality changed;
+- create/update that slice’s handover, with a Plain-English section (Roadmap §19);
+- do **not** revive `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` as the current architecture map;
+- avoid copying mutable implementation status into the constitution or the v1-reference-pack philosophy.
 
-The goal is to minimise future documentation drift.
+The goal is one spine, not many documents each claiming to be current architecture.

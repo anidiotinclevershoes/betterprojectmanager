@@ -3,6 +3,8 @@
 **Status:** Operating roadmap / anti-whack-a-mole governance  
 **Date:** 19 August 2026 (Plain-English report standard added 26 August 2026)
 
+High-order invariants and the data-model STOP preflight live in `docs/LUME_CONSTITUTION.md` and `docs/LUME_DURABLE_PROJECT_TRUTH.md`. This file does not replace them.
+
 This document describes **how Lume should be developed and evaluated from here**, not a fixed PR sequence.
 
 There is no arbitrary limit on the number of legitimate fixes. There is a hard requirement that fixes remain evidence-driven, correctly layered and scoped.

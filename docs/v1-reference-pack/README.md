@@ -1,9 +1,10 @@
 # Lume V1 Reference Pack
 
 **Date:** 19 August 2026  
-**Location:** `docs/v1-reference-pack/`
+**Location:** `docs/v1-reference-pack/`  
+**Role:** Product / trust / Ocean UI / development-evaluation constitution. High-order architectural invariants now live in `docs/LUME_CONSTITUTION.md` and the specialist contracts named from `docs/README.md`.
 
-This folder contains the canonical product, UI, development and evaluation references for the next phase of Lume.
+This folder contains the canonical product, UI, development and evaluation references for Lume V1.
 
 ## Files
 
@@ -21,21 +22,27 @@ This folder contains the canonical product, UI, development and evaluation refer
 
 ## Relationship to other docs
 
-This pack is the **product / trust / UI constitution**. It is not replaced by the architecture handoff.
+This pack is the **product / trust / UI constitution**. High-order architectural invariants are in `docs/LUME_CONSTITUTION.md` and the specialist contracts. This pack is not a second current-architecture map.
 
-The architecture handoff describes **implementation reality**. It does not replace this constitution.
+Implementation reality is the code on current `main`. The 26 Aug architecture memory handoff is historical.
 
 Start at `docs/README.md` for the full authority map.
 
 | Document | Role |
 | --- | --- |
-| This pack | Canonical authority for V1 product philosophy, Ocean UI baseline, and development/evaluation process |
-| `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` | **CURRENT** implementation architecture map (stores, paths, flags, seams as of Slice 2D / 21 Aug 2026) |
-| `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` | **HISTORICAL** architecture snapshot from 19 August 2026, before Slices 1A–2D. Keep for original failure analysis. Do **not** use as the current implementation map. |
+| `docs/README.md` | Authority map. Start here. |
+| `docs/LUME_CONSTITUTION.md` | Durable high-order product / architecture rules |
+| `docs/LUME_CANONICAL_PROJECT_TRUTH.md` | Write-then-project contract |
+| `docs/LUME_DURABLE_PROJECT_TRUTH.md` | Existing-project compatibility / migration STOP rules |
+| `docs/LUME_CAPTURE_STATUS.md` | Current accepted Capture position |
+| This pack | Product philosophy, Ocean UI baseline, development/evaluation process |
 | `docs/LUME_V1_KNOWN_DISCOVERIES.md` | Living defect/debt authority (open vs resolved) |
-| `docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md` | Existing behavioural contract for intelligence/eval work; do not silently replace it — reconcile conflicts by stopping and reporting |
+| `docs/LUME_V09_TO_V1_HANDOFF.md` | v0.9 closure operating picture (shipped scope, leftovers, isolation) |
+| `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` | **HISTORICAL** 26 Aug desert-era snapshot. Do not start work from it. |
+| `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` | **HISTORICAL** 19 Aug 2026 snapshot. Keep for original failure analysis. |
+| `docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md` | Ask / eval scoring contract; do not silently replace it |
 | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` | Regression safety-net audit, coverage map, and commands |
-| Historical phase/slice handovers under `docs/` | Context only; prefer this pack for product intent and the Current Architecture Handoff for what the code does now |
+| Historical phase/slice handovers under `docs/` | Context only; prefer this pack for product intent and current `main` for what the code does now |
 
 ## How to use this pack with Cursor
 

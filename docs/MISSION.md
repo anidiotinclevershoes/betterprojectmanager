@@ -1,5 +1,9 @@
 # Mission Control — Core Mission
 
+> **HISTORICAL product copy.** This is the pre-Lume Mission Control manifesto.  
+> Current product definition: [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md).  
+> Start at [`docs/README.md`](./README.md). Do not treat this file as current product or architecture authority.
+
 Mission Control is not a project management application.
 
 Mission Control is an AI Chief Project Officer, Executive Coach and Second Brain.

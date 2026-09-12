@@ -8,6 +8,15 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Start at `docs/README.md`. That is the only current-docs entry point.
 
+Durable high-order rules: `docs/LUME_CONSTITUTION.md`.  
+Canonical writes: `docs/LUME_CANONICAL_PROJECT_TRUTH.md`.  
+Existing-project compatibility: `docs/LUME_DURABLE_PROJECT_TRUTH.md`.  
+Current Capture position: `docs/LUME_CAPTURE_STATUS.md`.  
+Living debt: `docs/LUME_V1_KNOWN_DISCOVERIES.md`.  
+Implementation map: the code on current `main`.
+
+Do not invent a second architecture memory file. `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` is historical.
+
 ## Git / integration (must)
 
 `main` is the only integration line.
@@ -57,30 +66,37 @@ Completion reports must state whether the branch contains current `main` and is 
 
 Do not merge or rebase #119–#123 / #120 wholesale. They are salvage sources only.
 
-## Current post-programme truth (6 Sep 2026)
+## Data-model / persistence preflight (must)
 
-`origin/main` at programme start: `f737f8a88442bff9e850d91de55c9afd82cda630`. After this programme merges, that SHA moves.
+Before material work on schema, canonical entity shapes, domain semantics, persistence contracts, migrations, canonical readers, or projection logic, answer:
 
-Read `docs/README.md` → `docs/LUME_V09_TO_V1_HANDOFF.md` → `docs/LUME_V1_KNOWN_DISCOVERIES.md` → code. Integrity history: `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md`. Do not invent a second memory file.
+1. What existing persisted project data could this affect?
+2. Can this be additive / backwards-compatible?
+3. If migration is required, is it deterministic?
+4. Are stable IDs preserved?
+5. Are relationships preserved?
+6. Is history / audit preserved?
+7. Is semantic meaning preserved?
+8. Is uncertainty preserved correctly?
+9. What old-project regression proves compatibility?
+10. Could a real user lose data, need to recreate a project, or have truth silently reinterpreted?
 
-**Architecture now**
+If **#10 is YES or UNCERTAIN: STOP AND ESCALATE TO PRODUCT OWNER.**
 
-- Durable truth is Supabase. Surfaces re-project it. Actions must not create parallel stores (handoff §3.1).
-- Capture V2 is the only Analyse → Review → Apply engine. Ready means the same production Apply path can execute that change. Apply still revalidates.
-- Timeline is a read-only projection. Legacy writable Gantt is unmounted. Meeting Catch Me Up is meeting-scoped from stored project truth; `Meeting.prep` hydrates for compatibility only.
+Full contract: `docs/LUME_DURABLE_PROJECT_TRUTH.md`.
 
-**Integrity contracts closed by the dogfood gate (D-045–D-048)**
+If a change could destroy existing project truth, require project recreation, irreversibly reinterpret stored truth, orphan history, invalidate stable IDs, break relationships, or make historical projects unreadable: **STOP.** Do not autonomously implement the destructive path.
 
-- Apply reload: after a successful write, never adopt pre-write state. Production omits `state` and sets `reconcileFailed`; the client hydrates or asks for refresh.
-- Fingerprint / concurrency: Analyse fingerprints the fields Apply writes (todo dueAt/detail, milestone endAt/notes, replace pin + owner set). Concurrent edits of those fields fail closed.
-- Capture session binds to the open project (`lume-capture-session-v1:${projectId}`). Apply refuses a session/project mismatch.
-- Knowledge, availability, person, and responsibility Apply writes use `capture_apply_receipts`. Retry is `no_change`. No second receipt system.
+## Architecture now
 
-**Still open (later hardening — see Known Discoveries backlog)**
+- Durable truth is Supabase. Surfaces re-project it. Actions must not create parallel stores.
+- Capture V2 is the only Analyse → Review → Apply engine. Prompt A is production. Deterministic routing is accepted at 534/538. Live model imperfections are guarded by deterministic safety.
+- Ready means the same production Apply path can execute that change. Apply still revalidates.
+- Timeline is a read-only projection. Legacy writable Gantt is unmounted. Catch Me Up is a derived briefing from stored project truth; `Meeting.prep` hydrates for compatibility only.
 
-New Project create is one `create_project_bundle` transaction. Project delete is one `delete_project_bundle` transaction. Same-workspace RLS now requires `project_belongs_to_workspace` on recommendations / history / capture_sessions (N-09). No production integrity observer. Apply refreshes the paint cache from confirmed `reloadWorkspace` state (N-10 closed).
+Integrity contracts closed by the dogfood gate (D-045–D-048): Apply reload must not adopt pre-write state; fingerprints cover the fields Apply writes; Capture session binds to the open project; knowledge / availability / person / responsibility Apply uses `capture_apply_receipts`.
 
-**How to re-run integrity probes (read-only / in-memory)**
+How to re-run integrity probes (read-only / in-memory):
 
 ```bash
 npm run verify:adversarial-integrity
@@ -88,4 +104,6 @@ npm run verify:dogfood-integrity-gate
 npm test
 ```
 
-SQL printed by the adversarial script is operator-only. Do not run it as a migration. Do not start New Project TX, broader RLS, Timeline Add, Gantt, or Keep Open unless a later programme names them.
+SQL printed by the adversarial script is operator-only. Do not run it as a migration.
+
+Do not start work from a historical “do not start X” list in an old handoff. Current open work lives in Known Discoveries and in the task that names it.

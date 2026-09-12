@@ -1,7 +1,7 @@
 # Lume Current-State Evidence Pack
 
 > **HISTORICAL — not current product or architecture authority.**  
-> This is an **11 August 2026** UI/application snapshot. It predates the current Supabase / Ocean implementation. It is retained as visual and development history. Do not use it as current product, architecture, or “what the app looks like now” authority. See `docs/README.md` and `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`.
+> This is an **11 August 2026** UI/application snapshot. It predates the current Supabase / Ocean implementation. It is retained as visual and development history. Do not use it as current product, architecture, or “what the app looks like now” authority. See `docs/README.md`. The 26 Aug architecture memory handoff is also historical.
 
 Read-only audit artifacts. **No application code was changed** to produce this pack.
 
