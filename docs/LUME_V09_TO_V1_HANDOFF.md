@@ -1,6 +1,9 @@
 # Lume v0.9 → V1 handoff
 
-**Status:** Canonical operating picture for closed alpha and the path to public V1  
+> **v0.9 closure operating picture.** High-order invariants now live in [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md), [`docs/LUME_CANONICAL_PROJECT_TRUTH.md`](./LUME_CANONICAL_PROJECT_TRUTH.md) and [`docs/LUME_DURABLE_PROJECT_TRUTH.md`](./LUME_DURABLE_PROJECT_TRUTH.md). Current Capture position: [`docs/LUME_CAPTURE_STATUS.md`](./LUME_CAPTURE_STATUS.md).  
+> This file still owns what v0.9 shipped, parked surfaces, leftover inventory, and live isolation evidence. If it disagrees with the constitution or specialist contracts on a durable rule, **those files + current code win**.
+
+**Status:** v0.9 closure operating picture (closed alpha → V1 leftovers)  
 **Date:** 6 September 2026 (dogfood integrity gate D-045–D-048; Ready → Apply remains closed)  
 **Merged main (this update):** `f737f8a88442bff9e850d91de55c9afd82cda630` (PR #139 leftover `/meetings` redirect). Integrity remediations land in the dogfood-gate PR onto this baseline.  
 **Prior Ready → Apply SHA:** `64171cde93e837f1f755c79b0c4c43aca502bd03` (PR #126)  
@@ -54,9 +57,11 @@ It should earn confidence that it:
 
 ## 2. What exactly is in v0.9?
 
-Top-level project modes:
+Visible project-page surfaces in v0.9:
 
 > **Capture | Knowledge Centre | Catch Me Up | Advise (coming soon)**
+
+Core V1 product modes remain **Capture · Knowledge Centre · Advise**. Catch Me Up is a derived briefing surface that appears as a project-page tab. See [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md) §2.
 
 | Surface | v0.9 reality |
 | --- | --- |
@@ -429,9 +434,9 @@ Landing, pricing, onboarding, Stripe — only to the level needed to acquire use
 
 | Class | Documents |
 | --- | --- |
-| **CURRENT AUTHORITATIVE** | This file (including **§3.1–§3.5** for canonical actions / Timeline / Gantt, and **§3.6** leftover inventory); `docs/v1-reference-pack/`; `docs/LUME_V1_KNOWN_DISCOVERIES.md` (open vs resolved); `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` **except** stale Part A flag tables — **code wins** |
-| **HISTORICAL — KEEP** | `docs/SLICE*`, `docs/PHASE*`, `docs/current-state/`, `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md`, `docs/v1-convergence-mp/` (UX reference, not an implementation licence) |
-| **SUPERSEDED — keep, do not follow** | `docs/EXPERIMENTAL_PROGRAMME.md` (Capture V2 is no longer experimental); qualification “Stage 2 blocked” text (updated); root README Mission Control copy |
+| **CURRENT AUTHORITATIVE** | `docs/LUME_CONSTITUTION.md`; specialist contracts (`LUME_CANONICAL_PROJECT_TRUTH.md`, `LUME_DURABLE_PROJECT_TRUTH.md`, `LUME_CAPTURE_STATUS.md`); `docs/v1-reference-pack/`; `docs/LUME_V1_KNOWN_DISCOVERIES.md`. This file owns v0.9 shipped scope, leftovers (§3.6) and isolation evidence. |
+| **HISTORICAL — KEEP** | `docs/SLICE*`, `docs/PHASE*`, `docs/current-state/`, `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md`, `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`, `docs/v1-convergence-mp/` (UX reference, not an implementation licence) |
+| **SUPERSEDED — keep, do not follow** | `docs/EXPERIMENTAL_PROGRAMME.md` (Capture V2 is no longer experimental); qualification “Stage 2 blocked” text; root README / `docs/MISSION.md` Mission Control copy |
 | **DEAD / MISLEADING if treated as current** | Any claim that `LUME_CAPTURE_V2` selects engines; Coach auto-opens; Catch Me Up does not exist / is search; production localStorage is truth; v0.9 is an unfinished Phase 3 programme |
 
 ---
@@ -483,7 +488,7 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | D-024 Actions left | Local meter, not billing | ACCEPTED v0.9 | Strip UI | Wire when Stripe exists |
 | D-025 Capture visual §16 | Coarse vs Ocean checklist | ACCEPTED v0.9 | CaptureWorkspace | Polish only |
 | D-026 project-code uniqueness | No unique constraint | ACCEPTED v0.9 | Schema | Product decision first |
-| D-032 NP V2 flag | Still env-gated; on in Production | ACCEPTED v0.9 | `new-project-v2/flag.ts` | Pin like Capture if drift |
+| D-032 dual engines | Capture V2 sole live path; NP uses shared extract + adapter | CLOSED | `flag.ts` always true; `/api/new-project` does not consult NP V2 flag | Leftover flag/library cleanup only |
 | Leftover `/memory` `/releases` `/coaching` | Not in primary nav | ACCEPTED v0.9 | Routes exist | Hide if testers find them. `/meetings` now redirects. |
 | `assertProductionConfigOrThrow` unused at boot | Defined, never called | ACCEPTED v0.9 | `runtime-config.ts` | Small V1 ops |
 | In-memory rate limit | Per process | ACCEPTED v0.9 | `rate-limit.ts` | Enough for alpha |

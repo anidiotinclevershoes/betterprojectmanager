@@ -14,7 +14,7 @@
 **Convergence completion report:** `docs/V1_CONVERGENCE_ARCHITECTURE_COMPLETION.md`  
 **Historical (not current implementation map):** `docs/LUME_V1_PROJECT_TRUTH_ARCHITECTURE_AUDIT.md` (19 Aug 2026 — written before Slices 1A–2D; several claims are now false; see Part B § discrepancies)
 
-**How to read this file after 26 August 2026:** Part A/B remain the current-implementation map. **Part C is the binding V1 convergence delta** (one-authority decisions, deletion points, migration order). Part C does not re-audit the world. If Part A/B and Part C disagree on a *target*, Part C wins. If they disagree on *what the code does now*, the code wins and this file should be updated.
+**How to read this file after 12 September 2026:** This entire file is **HISTORICAL**. Part A/B flag tables are not the current-implementation map. Part C V1 *target* decisions may still inform later work. Current architecture: `docs/LUME_CONSTITUTION.md` + specialist contracts + current `main`. If this file and those sources disagree, **do not start work from this file**.
 
 This document has three parts:
 

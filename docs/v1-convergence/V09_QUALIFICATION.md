@@ -1,5 +1,10 @@
 # v0.9 Capture engine qualification
 
+> **HISTORICAL — pre-freeze qualification chronology. Not current Capture authority.**  
+> Current accepted Capture position: [`docs/LUME_CAPTURE_STATUS.md`](../LUME_CAPTURE_STATUS.md).  
+> v0.9 freeze evidence also remains in [`docs/LUME_V09_TO_V1_HANDOFF.md`](../LUME_V09_TO_V1_HANDOFF.md).  
+> The “Stage 2 BLOCKED” heading below is the record of this pack at the time it was written. Do not treat it as current `main`.
+
 Hulk evidence pack. Test and classify only. No production tuning.
 
 The v0.9 safety standard is **not** “every difficult Capture automatically resolves.”
@@ -10,11 +15,11 @@ Needs-you is success. Category E (unsafe / silent durable write) is the blocker.
 
 ---
 
-## Status
+## Status (historical — this pack)
 
-**Stage 2 (authoritative live qualification) is BLOCKED.**
+**Stage 2 (authoritative live qualification) was BLOCKED when this pack was written.**
 
-Do not treat this document, this branch, or current `main` as a freeze.
+Do not treat this document as the current freeze or the current 534/538 routing position.
 
 Authoritative `gpt-4o-mini-2024-07-18` runs happen only after Thor’s:
 

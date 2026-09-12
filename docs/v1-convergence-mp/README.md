@@ -1,5 +1,8 @@
 # Lume V1 UX / Magic Patterns convergence
 
+> **UX reference pack — not current architecture and not an implementation licence.**  
+> V1 product decisions in this folder live in [`SPIDERMAN_AMENDMENT.md`](./SPIDERMAN_AMENDMENT.md). Start at [`docs/README.md`](../README.md).
+
 **Workstream C** — target-state clarification. Not the UX overhaul.
 
 | Frozen HEAD | Isolated branch |

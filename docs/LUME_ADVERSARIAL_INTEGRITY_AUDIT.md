@@ -2,7 +2,7 @@
 
 **Status:** Durable engineering asset. Original audit of `main` at `f737f8a88442bff9e850d91de55c9afd82cda630`; remediations for D-045–D-048 closed and regression-proven on `cursor/dogfood-integrity-gate-cedc`.  
 **Dates:** Audit 6 September 2026; remediations 6 September 2026  
-**Mode:** findings + remediations. This file is **not** a second architecture map. If it and the code disagree later, **the code wins**.
+**Mode:** findings + remediations. This file is **not** a second architecture map. Current architecture: `docs/LUME_CONSTITUTION.md` + specialist contracts + current `main`. If this file and the code disagree later, **the code wins**.
 
 Probes (non-mutating by default):
 

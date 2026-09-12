@@ -1,5 +1,8 @@
 # Lume Intelligence Contract v0.2
 
+**Role:** Specialist contract for Ask / eval / intelligence scoring. Not the current architecture map and not the current Capture position.  
+**Start:** [`docs/README.md`](./README.md). Capture status: [`docs/LUME_CAPTURE_STATUS.md`](./LUME_CAPTURE_STATUS.md).
+
 ## Purpose
 
 This document defines how Lume should behave when interpreting, recalling and reasoning over project information.

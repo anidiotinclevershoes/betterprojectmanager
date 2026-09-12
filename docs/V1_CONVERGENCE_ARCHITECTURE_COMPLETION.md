@@ -1,5 +1,8 @@
 # V1 Architectural Convergence — Workstream A completion report
 
+> **HISTORICAL completion report (26 August 2026).** Not current architecture authority.  
+> Start at [`docs/README.md`](./README.md). High-order rules: [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md).
+
 **Workstream:** Architecture, authority & deletion review  
 **Branch:** `cursor/v1-convergence-architecture-9524`  
 **Base SHA:** `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4` (`cursor/capture-v2-desert-new-project-56c9`)  

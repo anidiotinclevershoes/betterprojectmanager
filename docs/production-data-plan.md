@@ -1,5 +1,8 @@
 # Lume Production Data Plan (Phase 1)
 
+> **HISTORICAL Phase 1 persistence plan (12 August 2026).** Not the current schema or compatibility contract.  
+> Current durable-truth rules: [`docs/LUME_DURABLE_PROJECT_TRUTH.md`](./LUME_DURABLE_PROJECT_TRUTH.md). Hosted schema catch-up: Known Discovery D-050. Start at [`docs/README.md`](./README.md).
+
 **Date:** 2026-08-12  
 **Goal:** Introduce Supabase Postgres + workspace ownership + RLS without rewriting Capture or removing localStorage.
 

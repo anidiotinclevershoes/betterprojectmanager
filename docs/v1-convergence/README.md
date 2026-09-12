@@ -1,5 +1,8 @@
 # V1 convergence — Workstream B (test foundation)
 
+> **Historical test / evaluation pack.** Current Capture position: [`docs/LUME_CAPTURE_STATUS.md`](../LUME_CAPTURE_STATUS.md).  
+> `V09_QUALIFICATION.md` “Stage 2 BLOCKED” is chronology, not current `main`.
+
 This folder is the Capture V2 **test / evaluation** workstream. Architecture (PR #69) is now on `main`; this pack records the landed test foundation.
 
 - Historical programme base (obsolete; do not develop on it): `cursor/capture-v2-desert-new-project-56c9` @ `3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4`

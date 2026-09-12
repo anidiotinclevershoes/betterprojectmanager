@@ -1,12 +1,14 @@
 # Lume Product & Intelligence Philosophy v1
 
-**Status:** Canonical product/engineering philosophy  
+**Status:** Canonical product / trust / intelligence philosophy  
 **Date:** 19 August 2026  
 **Purpose:** Stable reference for Lume V1 product decisions, intelligence behaviour, trust model, scope and implementation philosophy.
 
+High-order architectural invariants (canonical truth, durable project truth, Capture AI/deterministic boundary, data-model STOP rules) are owned by `docs/LUME_CONSTITUTION.md` and the specialist contracts named from `docs/README.md`. This pack must not be read as a second current-architecture map.
+
 This is **not** an implementation plan. Individual PRs should comply with it rather than reinterpret Lume from scratch.
 
-Mutable implementation status (what the code does now, which flags are on, which persistence gaps remain) lives in `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` and `docs/LUME_V1_KNOWN_DISCOVERIES.md`, not in this constitution. See `docs/README.md`.
+Mutable implementation status lives in `docs/LUME_V1_KNOWN_DISCOVERIES.md` and current `main`, not in this constitution. The 26 Aug architecture memory handoff is historical.
 
 ---
 
@@ -70,7 +72,7 @@ The intended project-page model is:
 
 # **Capture | Knowledge Centre | Advise**
 
-All three occupy the **same selected-project page**.
+All three occupy the **same selected-project page**. Catch Me Up may appear as a project-page tab; it is a derived briefing over canonical truth, not a fourth core mode and not a source of truth (see `docs/LUME_CONSTITUTION.md` §2).
 
 - Selecting **Capture** expands the Capture working frame across the available content width and pushes normal project frames down.
 - Selecting **Knowledge Centre** expands the Knowledge Centre working frame across the same space and pushes normal project frames down.

@@ -1,7 +1,9 @@
 # Mission Control
 
-> **Current Lume development documentation begins at [`docs/README.md`](docs/README.md).**  
-> This root README still describes an older Overview / localStorage-era product surface. Do not treat it as current product or architecture authority.
+> **HISTORICAL setup / product copy.** Current Lume documentation begins at [`docs/README.md`](docs/README.md).  
+> Current product definition: [`docs/LUME_CONSTITUTION.md`](docs/LUME_CONSTITUTION.md).  
+> This root README still describes an older Overview / localStorage-era Mission Control surface. Do not treat it as current product or architecture authority.  
+> Quick-start commands below may still be useful for local setup; persistence, auth and product modes have moved on.
 
 **AI Chief Project Officer · Executive Coach · Second Brain**
 
