@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 10 September 2026 (D-051 Capture intelligence diagnostic on Preview; D-050 hosted schema catch-up merged; D-049 hydrate completeness: authoritative Knowledge section lists no longer `.slice(0, 24)`)  
+**Last housekeeping:** 12 September 2026 (D-052 New Project Organise name-only recovery; D-051 identity evidence is observation-local; D-050 hosted schema catch-up; D-049 hydrate completeness)  
 **Product/trust constitution:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main` + `docs/LUME_V09_TO_V1_HANDOFF.md`. The 26 Aug architecture memory handoff is historical.  
 **Docs entry point:** `docs/README.md`  
@@ -194,12 +194,30 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Failure class** | `capture.v2_analysed` proved the live OpenAI extract path ran (`ignoredClientTruth: true`) but did not record provider, requested/response model, prompt id/version, path, or whether fallback occurred. New Project Organise uses the shared Capture extractor then a separate adapter (`parse` + `draftFromProvisional`) — not Capture resolve/plan. On the 22:07 mapper, explicit “is responsible for X” scope never reached `responsibilities[]`, so People showed names only and Needs You re-asked the same fact. |
 | **Evidence / repro** | `scripts/verify-capture-intelligence-diagnostic.ts`. Hosted `POST /api/capture` at 22:09:36 completed ~11s with `capture.v2_analysed`. Local fallback is unreachable when `NODE_ENV=production`. Pronoun “She will own UAT” with Olga Petrov and Sarah Kim both named stays Needs You (ambiguous, or UUID guess refused because the reviewed statement is only “She…”). Milestone cancel/complete has no legal write. A model `create_new` for a moved date would mint a second milestone. |
 | **Likely files** | `src/app/api/capture/route.ts`; `src/app/api/new-project/route.ts`; `src/lib/capture-v2/extract.ts`; `src/lib/capture-v2/resolve.ts`; `src/lib/new-project-v2/map.ts`; `src/lib/new-project/needs-you.ts` |
-| **Proposed fix direction** | Do not retune prompts in this slice. Keep provenance logs. Later Capture hardening: identity-gate evidence should be observation-local so sibling names do not poison Andris; decide whether cancelled dates are a legal remove; keep the planner catch that a pronoun statement cannot write via UUID. |
+| **Proposed fix direction** | Do not retune prompts in this slice. Keep provenance logs. Observation-local identity evidence is now in production (sibling names no longer poison Andris). Remaining later hardening: decide whether cancelled dates are a legal remove; keep the planner catch that a pronoun statement cannot write via UUID. |
 | **Explicit non-goals** | Prompt/model upgrade; weakening Apply receipts; a second New Project extractor |
 | **Regression test to add** | `scripts/verify-capture-intelligence-diagnostic.ts`; hosted logs must include `requestedModel` / `responseModel` / `fallback` |
 | **Target resolution / validation point** | Capture hardening after Preview re-inspection; do not treat this as a prompt rewrite licence |
 | **Related docs** | Intelligence Contract; this file D-R14 (UUID is not identity); PR #155 Preview remediation |
-| **Notes** | Cockpit metrics already stored model in development only (`NODE_ENV=development`). Vercel Preview is production runtime, so cockpit was silent. The 22:34 Preview mapper recovers statement-only “is responsible for” scope; that does not retune the model. Person-linked identity uses the whole Capture transcript, so naming two existing people in one paste can Needs You unrelated statements (Andris blocked because Olga and Sarah were also named). |
+| **Notes** | Cockpit metrics already stored model in development only (`NODE_ENV=development`). Vercel Preview is production runtime, so cockpit was silent. The 22:34 Preview mapper recovers statement-only “is responsible for” scope; that does not retune the model. **Identity evidence is now observation-local** (quoted `evidence` only; sibling names in the same Capture no longer poison Andris). Pronoun evidence that itself names two people still Needs You. Invented evidence that is not a quote from the Capture fails closed. Contradictory same-record sibling writes stay Needs You. |
+
+### D-052 — New Project Organise silently drops schema-rejected observations
+
+| Field | Value |
+| --- | --- |
+| **Status** | fixed |
+| **Fixed in** | clean production integration from post-holdout reconstruct `#166` onto `cursor/capture-convergence-production-6709` |
+| **Severity** | high |
+| **Domain** | New Project / People |
+| **Found in** | Hosted Preview on PR #155, 11 Sep 2026. Input: “bob is the ba” / “mike handles the legacy builds”. |
+| **Failure class** | Shared extractor returned a structurally valid envelope (`observationCount: 2`, `envelopeMalformed: false`). `parseNewProjectV2Envelope` mapped only accepted VALIDATE rows, so rejected named people vanished from Organise. |
+| **Evidence / repro** | `scripts/verify-np-organise-observation-loss.ts`. Remaining VALIDATE rejects: `missing_truth_intent`, `unknown_disposition`. |
+| **Likely files** | `src/lib/new-project-v2/parse.ts` |
+| **Fix summary** | Adapter recovers a usable person name from VALIDATE-rejected raw rows as a name-only Person. Does not invent responsibilities. Unscoped `create_new` + invented id is rematerialized as an accepted create by holdout VALIDATE (not adapter recovery). Capture scoped `foreign_id` fail-closed is unchanged for non-create updates. |
+| **Explicit non-goals** | Prompt/model changes; Bob/Mike special cases; changing Capture `foreign_id` fail-closed on a scoped project; inventing responsibilities; merging the 538-case experiment corpus |
+| **Regression test to add** | `scripts/verify-np-organise-observation-loss.ts` now asserts rematerialized or recovered names. |
+| **Related docs** | D-051; People rules (name-only Person is complete); holdout `#164` |
+| **Notes** | Holdout rematerializes unscoped `create_new` + invented candidate IDs as accepted creates. Adapter recovery remains for schema near-misses (`missing_truth_intent`, `unknown_disposition`). |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 
