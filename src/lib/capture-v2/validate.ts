@@ -19,10 +19,26 @@ function createPayloadPresent(
   domain: string,
   obj: Record<string, unknown>,
 ): boolean {
-  if (domain !== "todo" && domain !== "milestone") return false;
   const proposed = asObject(obj.proposedValues);
+  const title =
+    (proposed && (asString(proposed.title) || asString(proposed.label))) ||
+    asString(obj.candidateTargetTitle);
+  if (domain === "risk") {
+    const status = proposed
+      ? (asString(proposed.status) || asString(proposed.proposedStatus) || "")
+          .toLowerCase()
+      : "";
+    // A resolve/complete of a missing row must not become a substitute write.
+    if (status === "resolved" || status === "complete" || status === "completed") {
+      return false;
+    }
+    return Boolean(title);
+  }
+  if (domain === "todo") {
+    return Boolean(title);
+  }
+  if (domain !== "milestone") return false;
   if (!proposed) return false;
-  const title = asString(proposed.title) || asString(proposed.label);
   const date =
     asString(proposed.date) || asString(proposed.startAt) || asString(proposed.dueAt);
   return Boolean(title && date);

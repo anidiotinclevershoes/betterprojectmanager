@@ -328,6 +328,16 @@ function resolveOne(
     return { observation, suggestion: null, decision: identityGate.decision };
   }
 
+  const entityIdentity = scopedEntityIdentityGate(
+    observation,
+    args.world,
+    projectId,
+    args.transcript,
+  );
+  if (entityIdentity) {
+    return { observation, suggestion: null, decision: entityIdentity };
+  }
+
   const op = operationFor(observation);
   const suggestion = suggestionFromObservation(observation, {
     kind,
@@ -436,7 +446,7 @@ function suggestionFromObservation(
   };
 }
 
-function uniqueDatedRecord(
+function uniqueTitledRecord(
   world: CaptureApplyWorld,
   projectId: string | null,
   domain: ObservationDomain,
@@ -461,29 +471,61 @@ function uniqueDatedRecord(
     );
     return hits.length === 1 ? { id: hits[0]!.id, title: hits[0]!.label } : null;
   }
+  if (domain === "risk") {
+    const hits = world.risks.filter(
+      (risk) =>
+        (!projectId || risk.projectId === projectId) &&
+        risk.title.trim().toLowerCase() === needle,
+    );
+    return hits.length === 1 ? { id: hits[0]!.id, title: hits[0]!.title } : null;
+  }
   return null;
 }
 
+function rematerializeTitle(observation: CaptureObservationV2): string | undefined {
+  const values = observation.proposedValues ?? {};
+  return (
+    asString(values.title) ||
+    asString(values.label) ||
+    observation.candidateTargetTitle?.trim() ||
+    undefined
+  );
+}
+
+function isResolveOrComplete(observation: CaptureObservationV2): boolean {
+  const values = observation.proposedValues ?? {};
+  const status = String(values.status ?? values.proposedStatus ?? "").toLowerCase();
+  return status === "resolved" || status === "complete" || status === "completed";
+}
+
 /**
- * A dated To Do / milestone with a complete title+date is independently
- * actionable. Model uncertainty or a missing target id must not hide a
- * legal create when no in-project record matches. A unique title match
- * becomes an update only when truthIntent is already current.
+ * A titled To Do / milestone / risk is independently actionable when no
+ * in-project record matches. Model uncertainty or a missing target id must
+ * not hide a legal create. A unique title match becomes an update only when
+ * truthIntent is already current. Resolve/complete of a missing row stays
+ * fail-closed — never substitute a different same-domain entity.
  */
 function rematerializeIndependentDatedCreate(
   observation: CaptureObservationV2,
   world: CaptureApplyWorld,
   projectId: string | null,
 ): CaptureObservationV2 {
-  if (observation.domain !== "todo" && observation.domain !== "milestone") {
+  if (
+    observation.domain !== "todo" &&
+    observation.domain !== "milestone" &&
+    observation.domain !== "risk"
+  ) {
     return observation;
   }
-  const values = observation.proposedValues ?? {};
-  const title = asString(values.title) || asString(values.label);
-  const date = asIso(values.date) || asIso(values.startAt) || asIso(values.dueAt);
-  if (!title || !date) return observation;
+  const title = rematerializeTitle(observation);
+  const date = asIso(observation.proposedValues?.date) ||
+    asIso(observation.proposedValues?.startAt) ||
+    asIso(observation.proposedValues?.dueAt);
+  if (!title) return observation;
+  if (observation.domain === "milestone" && !date) return observation;
+  if (isResolveOrComplete(observation)) return observation;
 
-  const match = uniqueDatedRecord(world, projectId, observation.domain, title);
+  const match = uniqueTitledRecord(world, projectId, observation.domain, title);
 
   if (observation.candidateTargetId) {
     if (
@@ -525,6 +567,126 @@ function rematerializeIndependentDatedCreate(
     };
   }
   return observation;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Recorded title as a whole phrase in observation-local evidence. Exact phrase only. */
+function recordedTitleAppearsInText(text: string, recordedTitle: string): boolean {
+  const title = recordedTitle.trim().replace(/\s+/g, " ");
+  if (!title || !text.trim()) return false;
+  const re = new RegExp(`\\b${escapeRegExp(title)}\\b`, "i");
+  return re.test(text);
+}
+
+const TITLE_EVIDENCE_STOP = new Set([
+  "the",
+  "a",
+  "an",
+  "of",
+  "and",
+  "or",
+  "to",
+  "for",
+  "on",
+  "in",
+  "at",
+  "is",
+  "risk",
+  "detail",
+  "outstanding",
+]);
+
+function recordedTitleEvidencedInText(text: string, recordedTitle: string): boolean {
+  if (recordedTitleAppearsInText(text, recordedTitle)) return true;
+  const words = recordedTitle
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((word) => word && !TITLE_EVIDENCE_STOP.has(word));
+  if (words.length === 0) return false;
+  const hay = text.toLowerCase();
+  const hits = words.filter((word) => hay.includes(word));
+  return hits.length >= Math.min(2, words.length);
+}
+
+function findScopedEntity(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  id: string,
+): { id: string; title: string } | null {
+  if (observation.domain === "risk") {
+    const hit = world.risks.find(
+      (risk) => risk.id === id && (!projectId || risk.projectId === projectId),
+    );
+    return hit ? { id: hit.id, title: hit.title } : null;
+  }
+  if (observation.domain === "todo") {
+    const hit = world.todos.find(
+      (todo) => todo.id === id && (!projectId || !todo.projectId || todo.projectId === projectId),
+    );
+    return hit ? { id: hit.id, title: hit.title } : null;
+  }
+  if (observation.domain === "milestone") {
+    const hit = world.timeline.find(
+      (item) => item.id === id && (!projectId || item.projectId === projectId),
+    );
+    return hit ? { id: hit.id, title: hit.label } : null;
+  }
+  return null;
+}
+
+/**
+ * Model-supplied Risk / To Do / milestone UUIDs are not identity.
+ * Observation-local quoted evidence must contain the recorded title.
+ * Otherwise fail closed — never substitute an unrelated same-domain row.
+ */
+function titlesCompatible(proposed: string, recorded: string): boolean {
+  const a = proposed.trim().replace(/\s+/g, " ").toLowerCase();
+  const b = recorded.trim().replace(/\s+/g, " ").toLowerCase();
+  if (!a || !b) return false;
+  return a === b || a.includes(b) || b.includes(a);
+}
+
+function scopedEntityIdentityGate(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  transcript: string,
+): CaptureApplyDecision | null {
+  if (
+    observation.domain !== "risk" &&
+    observation.domain !== "todo" &&
+    observation.domain !== "milestone"
+  ) {
+    return null;
+  }
+  const id = observation.candidateTargetId?.trim();
+  if (!id) return null;
+  const entity = findScopedEntity(observation, world, projectId, id);
+  if (!entity) return null;
+  const values = observation.proposedValues ?? {};
+  const proposedTitle = asString(values.title) || asString(values.label);
+  if (proposedTitle && !titlesCompatible(proposedTitle, entity.title)) {
+    return {
+      kind: "needs_you",
+      domain: DOMAIN_TO_LEGAL[observation.domain],
+      reason:
+        "This does not identify that existing record. Lume will not apply the change to a different item.",
+    };
+  }
+  if (!isResolveOrComplete(observation)) return null;
+  const evidence = identityEvidenceText(observation, transcript);
+  if (recordedTitleEvidencedInText(evidence, entity.title)) return null;
+  return {
+    kind: "needs_you",
+    domain: DOMAIN_TO_LEGAL[observation.domain],
+    reason:
+      "This does not identify that existing record. Lume will not apply the change to a different item.",
+  };
 }
 
 function asIso(value: unknown): string | null {
@@ -626,15 +788,24 @@ function personLinkedIdentityGate(
       };
     }
     const tokens = name.split(/\s+/).filter(Boolean);
-    if (tokens.length < 2 && people.length > 0) {
-      return uncertain(
-        "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder.",
-      );
-    }
-    if (tokens.length >= 2 && !recordedPersonNameAppearsInText(text, name)) {
+    if (!recordedPersonNameAppearsInText(text, name)) {
       return uncertain(
         "This Person identity is not established in the Capture, so Lume will not create a stakeholder.",
       );
+    }
+    if (tokens.length < 2 && people.length > 0) {
+      const first = tokens[0]!.toLowerCase();
+      const firstMatches = people.filter((person) => {
+        const recordedFirst = person.name.trim().split(/\s+/)[0]?.toLowerCase();
+        return recordedFirst === first;
+      });
+      if (firstMatches.length > 0) {
+        return uncertain(
+          "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder.",
+        );
+      }
+      // No existing first-name collision: a name-only Person is complete.
+      return null;
     }
     return null;
   }

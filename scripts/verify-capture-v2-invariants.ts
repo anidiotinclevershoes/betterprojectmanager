@@ -462,7 +462,7 @@ function main() {
       {
         id: "obs-bridge-closed",
         statement: "Gumdrop Bridge icing is resolved",
-        evidence: "The icing on Gumdrop Bridge has melted; that risk is closed.",
+        evidence: "Gumdrop Bridge icing is resolved",
         domain: "risk",
         disposition: "update_existing",
         truthIntent: "current",
@@ -486,7 +486,7 @@ function main() {
       {
         id: "obs-bridge-closed",
         statement: "Gumdrop Bridge icing is resolved",
-        evidence: "The icing on Gumdrop Bridge has melted; that risk is closed.",
+        evidence: "Gumdrop Bridge icing is resolved",
         domain: "risk",
         disposition: "update_existing",
         truthIntent: "current",

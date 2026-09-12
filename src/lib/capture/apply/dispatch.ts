@@ -406,6 +406,19 @@ function resolvePerson(
     if (tokens.length >= 2 && recordedPersonNameAppearsInText(text, named)) {
       return { status: "new_named" as const, name: named, personId };
     }
+    if (tokens.length === 1 && recordedPersonNameAppearsInText(text, named)) {
+      const first = tokens[0]!.toLowerCase();
+      const firstMatches = project.stakeholders.filter((person) => {
+        const recordedFirst = person.name.trim().split(/\s+/)[0]?.toLowerCase();
+        return recordedFirst === first;
+      });
+      // Name-only Person is complete when no existing first-name collision.
+      // A first-name restatement of someone already on the project stays unknown
+      // (Needs You / Pippa-class).
+      if (firstMatches.length === 0) {
+        return { status: "new_named" as const, name: named, personId };
+      }
+    }
     return { status: "unknown" as const };
   }
 

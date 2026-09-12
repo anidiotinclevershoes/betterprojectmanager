@@ -93,6 +93,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "rpc-schema-contract", script: "scripts/verify-rpc-schema-contract.ts" },
   { name: "hosted-holdout-precommit", script: "scripts/verify-hosted-holdout-precommit.ts" },
   { name: "harbourline-h1-identity", script: "scripts/verify-harbourline-h1-identity.ts" },
+  { name: "wrong-target-identity", script: "scripts/verify-wrong-target-identity.ts" },
   { name: "np-organise-observation-loss", script: "scripts/verify-np-organise-observation-loss.ts" },
   { name: "stranger-polish", script: "scripts/verify-stranger-polish.ts" },
   { name: "phase2-auth", script: "scripts/verify-phase2-auth.ts" },
