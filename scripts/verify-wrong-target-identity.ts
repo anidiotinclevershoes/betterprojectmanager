@@ -268,12 +268,6 @@ function main() {
       captureEntryProjectId: PROJECT,
     });
     assert.equal(decision.kind, "needs_you");
-    if (decision.kind === "write") {
-      assert.notEqual(
-        "riskId" in decision.operation ? decision.operation.riskId : "",
-        DDA,
-      );
-    }
   });
 
   check("Apply planner: legal DDA resolve still writes when content names DDA", () => {

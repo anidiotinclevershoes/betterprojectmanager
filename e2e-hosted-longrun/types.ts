@@ -4,7 +4,7 @@ export const LONGRUN_SUITE_ID = "hosted-longrun-v1";
 export const LONGRUN_SEED = "lume-longrun-v1-20260912-a3db";
 export const LONGRUN_PRODUCTION_ORIGIN = "https://betterprojectmanager.vercel.app";
 
-export type CaptureSize = "single" | "mixed" | "heavy";
+export type CaptureSize = "single" | "mixed" | "heavy" | "ambiguous";
 export type CaptureClass = "safe" | "ambiguous" | "mixed_safe_ambiguous";
 
 export type Domain =
