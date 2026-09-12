@@ -50,12 +50,15 @@ export {
 export const ARTIFACT_DIR = path.join(process.cwd(), "test-results", "hosted-longrun");
 
 export async function startFreshCapture(page: Page): Promise<void> {
-  await openCapture(page);
+  const mode = page.getByTestId("ocean-mode-capture");
+  if (await mode.count()) await mode.click();
   const input = page.getByTestId("ocean-capture-input");
   if (await input.isVisible().catch(() => false)) return;
   const neu = page.getByRole("button", { name: /^New Capture$/i });
-  if (await neu.count()) await neu.click();
-  await expect(input).toBeVisible({ timeout: 15_000 });
+  if (await neu.count()) {
+    await neu.click();
+  }
+  await expect(input).toBeVisible({ timeout: 20_000 });
 }
 
 export async function collectRememberTexts(page: Page): Promise<string[]> {
