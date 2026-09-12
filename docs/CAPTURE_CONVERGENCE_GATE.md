@@ -19,3 +19,11 @@ npm run verify:capture-convergence
 
 Optional live sample (never CI): `LUME_CAPTURE_LIVE=1 npm run eval:capture-live`.
 Prompt-experiment tooling is present and **off**. Production still uses Prompt A.
+
+Fresh unchanged 538-case map on this reconstruct (do not treat as a green/red product gate):
+
+- prior #156: 526/538
+- prior experiment on pre-holdout main: 535/538
+- **fresh post-holdout reconstruct: 534/538**
+
+The same three product-model gaps remain (milestone cancel/remove, knowledge supersede/retire, cancellation-as-knowledge). The extra fail is `id-pippa-first-on-candy`: holdout now identity-gates person-linked `no_change`, so a first-name-only restatement is Needs You instead of silent `no_change`. Corpus expectations were not rewritten to keep 535.
