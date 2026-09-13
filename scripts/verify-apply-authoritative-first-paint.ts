@@ -8,7 +8,14 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { applyApprovedCaptureSuggestion } from "../src/lib/capture/apply/apply-approved";
+import {
+  applyApprovedCaptureSuggestion,
+  appliedStateContainsAllWrites,
+  confirmAuthoritativeWrites,
+} from "../src/lib/capture/apply/apply-approved";
+import type { CaptureLegalOperation } from "../src/lib/capture/apply/types";
+import { applyPendingReadyQueue } from "../src/lib/capture/review/applyReadyQueue";
+import type { ReviewChangeViewModel } from "../src/lib/capture/review/viewModel";
 import { supabaseCaptureApplyHooks } from "../src/lib/capture/apply/persist-execute";
 import { fingerprintExpectedTarget } from "../src/lib/capture/apply/expected-target";
 import { captureApplyWorldFromState } from "../src/lib/capture/apply/world";
@@ -338,7 +345,8 @@ async function main() {
       join(process.cwd(), "src/components/capture/CaptureWorkspace.tsx"),
       "utf8",
     );
-    assert.match(workspace, /reconcileDurableWorkspace\(\)/);
+    assert.match(workspace, /confirmAuthoritativeWrites/);
+    assert.match(workspace, /settle: "defer"/);
   });
 
   await check("adoptAppliedState writes confirmed Apply state into the paint cache", () => {
@@ -365,6 +373,186 @@ async function main() {
     });
     assert.equal(wrote, false);
     assert.equal(readMissionSupabaseCache(), null);
+  });
+
+  const asbestosId = "9a270838-4cd0-453a-9583-ef648c537518";
+  const completeAsbestos: CaptureLegalOperation = {
+    type: "complete_todo",
+    projectId: PROJECT,
+    todoId: asbestosId,
+  };
+  const createTimber: CaptureLegalOperation = {
+    type: "create_risk",
+    projectId: PROJECT,
+    title: "Hall timber floor services risk",
+  };
+  const createRams: CaptureLegalOperation = {
+    type: "create_todo",
+    projectId: PROJECT,
+    title: "Obtain ceiling void RAMS",
+  };
+
+  function c5World(opts: { asbestosDone: boolean; timber: boolean; rams?: boolean }): MissionState {
+    const empty = emptyMissionState();
+    return {
+      ...empty,
+      todos: [
+        {
+          id: asbestosId,
+          projectId: PROJECT,
+          title: "Close out remaining asbestos queries",
+          done: opts.asbestosDone,
+          createdAt: "2026-09-13T09:50:00.000Z",
+        },
+        ...(opts.rams
+          ? [
+              {
+                id: "todo-rams",
+                projectId: PROJECT,
+                title: "Obtain ceiling void RAMS",
+                done: false,
+                createdAt: "2026-09-13T09:56:47.862Z",
+              },
+            ]
+          : []),
+      ],
+      risks: opts.timber
+        ? [
+            {
+              id: "64f58dc8-efa2-4779-8da0-4c973b8be111",
+              projectId: PROJECT,
+              title: "Hall timber floor services risk",
+              status: "open",
+              createdAt: "2026-09-13T09:55:49.046Z",
+            },
+          ]
+        : [],
+    };
+  }
+
+  function readyModel(id: string, content: string): ReviewChangeViewModel {
+    return {
+      id,
+      suggestion: {
+        id,
+        kind: "action",
+        op: "create",
+        content,
+        destination: "project",
+        projectId: PROJECT,
+      },
+      entityKind: "action",
+      entityLabel: "To-do",
+      recordName: content,
+      operation: "create",
+      operationLabel: "Add",
+      readiness: "ready",
+      evidence: [],
+      interpretation: content,
+      confidence: 1,
+    };
+  }
+
+  await check("C5/C10 delayed batch: incomplete first snapshot is not settled", async () => {
+    let reads = 0;
+    const confirmed = await confirmAuthoritativeWrites({
+      operations: [completeAsbestos, createTimber],
+      reloadWorkspace: async () => {
+        reads += 1;
+        if (reads === 1) return c5World({ asbestosDone: true, timber: false });
+        return c5World({ asbestosDone: true, timber: true });
+      },
+    });
+    assert.equal(confirmed.reconcileFailed, undefined);
+    assert.ok(confirmed.state);
+    assert.equal(
+      appliedStateContainsAllWrites(confirmed.state, [completeAsbestos, createTimber]),
+      true,
+    );
+    assert.ok(reads >= 2, "must reread after the incomplete first snapshot");
+  });
+
+  await check("batch immediate visibility adopts the first proven snapshot", async () => {
+    let reads = 0;
+    const confirmed = await confirmAuthoritativeWrites({
+      operations: [completeAsbestos, createTimber],
+      reloadWorkspace: async () => {
+        reads += 1;
+        return c5World({ asbestosDone: true, timber: true });
+      },
+    });
+    assert.ok(confirmed.state);
+    assert.equal(reads, 1);
+  });
+
+  await check("batch reconciliation failure does not adopt an incomplete snapshot", async () => {
+    const confirmed = await confirmAuthoritativeWrites({
+      operations: [completeAsbestos, createTimber],
+      reloadWorkspace: async () => c5World({ asbestosDone: true, timber: false }),
+    });
+    assert.equal(confirmed.reconcileFailed, true);
+    assert.equal(confirmed.state, undefined);
+  });
+
+  await check("partial Apply failure is not required in the proven set", async () => {
+    const adopted: MissionState[] = [];
+    const queued = await applyPendingReadyQueue({
+      models: [
+        readyModel("c5-asbestos", "Close asbestos"),
+        readyModel("c5-timber", "Hall timber floor services risk"),
+        readyModel("c5-fail", "This write failed"),
+      ],
+      applyOne: async (item) => {
+        if (item.id === "c5-fail") {
+          return {
+            kind: "needs_you",
+            domain: "todo",
+            reason: "Could not save this change.",
+          };
+        }
+        if (item.id === "c5-asbestos") {
+          return {
+            kind: "write",
+            domain: "todo",
+            operation: completeAsbestos,
+          };
+        }
+        return {
+          kind: "write",
+          domain: "risk",
+          operation: createTimber,
+        };
+      },
+      confirmWrites: async (operations) => {
+        assert.equal(operations.length, 2);
+        assert.equal(
+          operations.some((op) => op.type === "create_todo" && op.title === "This write failed"),
+          false,
+        );
+        const confirmed = await confirmAuthoritativeWrites({
+          operations,
+          reloadWorkspace: async () => c5World({ asbestosDone: true, timber: true }),
+        });
+        if (confirmed.state) adopted.push(confirmed.state);
+        return confirmed;
+      },
+    });
+    assert.equal(queued.failures.length, 1);
+    assert.equal(queued.succeededWrites.length, 2);
+    assert.equal(queued.reconcileFailed, false);
+    assert.equal(adopted.length, 1);
+    assert.equal(
+      appliedStateContainsAllWrites(adopted[0]!, [completeAsbestos, createTimber]),
+      true,
+    );
+  });
+
+  await check("batch prove checks the successful set, not merely that the workspace changed", async () => {
+    const confirmed = await confirmAuthoritativeWrites({
+      operations: [completeAsbestos, createTimber, createRams],
+      reloadWorkspace: async () => c5World({ asbestosDone: true, timber: true, rams: false }),
+    });
+    assert.equal(confirmed.reconcileFailed, true);
   });
 
   console.log(`\n${passed} apply-authoritative-first-paint checks passed.`);
