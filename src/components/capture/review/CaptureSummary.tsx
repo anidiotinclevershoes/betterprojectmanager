@@ -43,7 +43,9 @@ export function CaptureSummary({
                     {obs.actionStatus === "needs_review" ||
                     obs.actionStatus === "unmatched"
                       ? "⚠"
-                      : "✓"}
+                      : obs.actionStatus === "left_untouched"
+                        ? "○"
+                        : "✓"}
                   </span>
                   <span className="capture-observation-text">{obs.text}</span>
                 </span>

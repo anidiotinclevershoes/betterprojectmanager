@@ -20,8 +20,10 @@ export type ReviewCountSummary = {
   needsAttention: number;
   /** Cards already approved or dismissed. */
   reviewed: number;
-  /** Total review cards (pending + reviewed). */
+  /** Total review cards (pending + reviewed). Excludes Left untouched. */
   total: number;
+  /** Review-only leftovers. Never Apply-eligible. */
+  leftUntouched: number;
 };
 
 const PROJECT_CHANGE_TYPES = new Set([
@@ -42,6 +44,7 @@ function factCategory(_fact: string): string | null {
 
 /** Validated finding that changes project state (or Review Required with a likely change). */
 export function findingRepresentsProjectChange(finding: CaptureFinding): boolean {
+  if (finding.leftUntouched) return false;
   if (finding.findingType === "NO_CHANGE") return false;
 
   // Invalid-target findings are still project changes — they surface as Unmatched.
@@ -144,7 +147,10 @@ export function computeReviewCounts(args: {
 }): ReviewCountSummary {
   const added = args.added ?? {};
   const dismissed = args.dismissed ?? {};
-  const pending = args.models.filter((m) => !added[m.id] && !dismissed[m.id]);
+  const actionableModels = args.models.filter(
+    (m) => m.readiness !== "left_untouched",
+  );
+  const pending = actionableModels.filter((m) => !added[m.id] && !dismissed[m.id]);
   const ready = pending.filter(
     (m) =>
       m.readiness === "ready" &&
@@ -153,11 +159,14 @@ export function computeReviewCounts(args: {
   ).length;
   const needsReview = pending.filter((m) => m.readiness === "needs_review").length;
   const unmatched = pending.filter((m) => m.readiness === "unmatched").length;
-  const reviewed = args.models.filter((m) => added[m.id] || dismissed[m.id]).length;
+  const reviewed = actionableModels.filter((m) => added[m.id] || dismissed[m.id]).length;
+  const leftUntouched = args.models.filter(
+    (m) => m.readiness === "left_untouched" && !added[m.id] && !dismissed[m.id],
+  ).length;
 
   let changesDetected = countProjectChangesDetected(args.result);
-  if (changesDetected === 0 && args.models.length > 0) {
-    changesDetected = args.models.length;
+  if (changesDetected === 0 && actionableModels.length > 0) {
+    changesDetected = actionableModels.length;
   }
 
   // Never imply "nothing to review" when unresolved actionable cards exist.
@@ -170,7 +179,8 @@ export function computeReviewCounts(args: {
     unmatched,
     needsAttention,
     reviewed,
-    total: args.models.length,
+    total: actionableModels.length,
+    leftUntouched,
   };
 }
 

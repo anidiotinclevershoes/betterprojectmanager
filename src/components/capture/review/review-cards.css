@@ -41,6 +41,11 @@
   --lume-review-op-text: var(--lume-op-needs-you-text, #f5cc7e);
 }
 
+.lume-review-card.is-left-untouched {
+  --lume-review-op: var(--lume-op-left-untouched, #8a93a0);
+  --lume-review-op-text: var(--lume-op-left-untouched-text, #c5ccd6);
+}
+
 .lume-review-card.is-flash,
 .suggested-change-item.is-highlighted .lume-review-card {
   border-color: var(--lume-border-hover, #4a525e);

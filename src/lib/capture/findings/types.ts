@@ -52,6 +52,10 @@ export type CaptureFinding = {
   projectCode?: string;
   /** Candidate projects when PROJECT_UNCERTAIN. */
   projectCandidates?: Array<{ id: string; name: string; code?: string }>;
+  /** Review-only. Never canonical truth and never Apply-eligible. */
+  leftUntouched?: boolean;
+  leftUntouchedReason?: string;
+  leftUntouchedSource?: "model" | "coverage";
 };
 
 export type ProposedOperation = {

@@ -420,7 +420,10 @@ function buildSuggestionsFromProposedOps(
   for (const op of result.proposedOperations ?? []) {
     const clarifyingNoChange =
       op.operation === "NO_CHANGE" && Boolean(op.requiresClarification);
-    if (op.operation === "NO_CHANGE" && !clarifyingNoChange) continue;
+    const leftUntouched = op.proposedValues?.leftUntouched === true;
+    if (op.operation === "NO_CHANGE" && !clarifyingNoChange && !leftUntouched) {
+      continue;
+    }
     const availabilityHint =
       op.proposedValues?.kind === "availability" ||
       typeof op.proposedValues?.awayFromIso === "string";
@@ -563,7 +566,7 @@ function buildSuggestionsFromProposedOps(
     items.push({
       id: `op-${op.id}`,
       kind,
-      op: suggestionOp,
+      op: leftUntouched ? "update" : suggestionOp,
       content: proposedText,
       projectId: pid,
       projectName,
@@ -589,10 +592,11 @@ function buildSuggestionsFromProposedOps(
           : undefined,
       knowledgeBullet:
         isRemember || kind === "risk" ? proposedText : undefined,
-      isKnowledgeRemember: isRemember && suggestionOp === "create",
+      isKnowledgeRemember:
+        !leftUntouched && isRemember && suggestionOp === "create",
       todoKind,
       waitingOn,
-      legalDomain,
+      legalDomain: leftUntouched ? ("unsupported" as const) : legalDomain,
       personId,
       personName,
       ownershipSemantics,

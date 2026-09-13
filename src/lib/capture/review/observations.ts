@@ -24,7 +24,8 @@ export type ObservationActionStatus =
   | "no_change"
   | "needs_review"
   | "unmatched"
-  | "ignored";
+  | "ignored"
+  | "left_untouched";
 
 export type CaptureObservation = {
   id: string;
@@ -96,6 +97,17 @@ function preferredPhrase(_category: ObservationCategory, raw: string): string {
 }
 
 function candidateFromFinding(finding: CaptureFinding): ObservationCandidate | null {
+  if (finding.leftUntouched) {
+    const raw = finding.fact?.trim() || finding.evidence?.trim();
+    if (!raw) return null;
+    return {
+      text: preferredPhrase("other", raw),
+      category: "other",
+      confidence: finding.confidence ?? 0,
+      source: "finding",
+      findingId: finding.id,
+    };
+  }
   if (finding.findingType === "NO_CHANGE") return null;
   const raw = finding.fact?.trim();
   if (!raw || isNoise(raw)) return null;
@@ -204,6 +216,12 @@ function actionFromFinding(
     return { status: "no_change", label: "No Change" };
   }
 
+  if (finding.leftUntouched) {
+    return {
+      status: "left_untouched",
+      label: "Left untouched",
+    };
+  }
   if (finding.findingType === "NO_CHANGE") {
     return { status: "no_change", label: "No Change" };
   }

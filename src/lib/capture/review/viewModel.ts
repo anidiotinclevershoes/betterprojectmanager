@@ -19,6 +19,7 @@ import {
   type SuggestionOp,
 } from "@/lib/capture/suggestions";
 import { unsupportedApplyReason } from "@/lib/capture/apply/executability";
+import { isLeftUntouchedValues } from "@/lib/capture-v2/left-untouched";
 import {
   assessApplyReadiness,
   attachReviewExpectedTarget,
@@ -32,7 +33,11 @@ import {
   type ReviewReason,
 } from "./reviewReason";
 
-export type ReviewReadiness = "ready" | "needs_review" | "unmatched";
+export type ReviewReadiness =
+  | "ready"
+  | "needs_review"
+  | "unmatched"
+  | "left_untouched";
 export type { ReviewReason };
 
 export type ChangeDiffLayout = "from_to" | "create" | "remove" | "suggested_only";
@@ -463,6 +468,21 @@ function assessReadiness(
     preflight,
   });
 
+  if (finding?.leftUntouched || isLeftUntouchedValues(item.proposedValues)) {
+    if (!options?.userAccepted) {
+      return {
+        readiness: "left_untouched",
+        reason:
+          finding?.leftUntouchedReason ||
+          (typeof item.proposedValues?.leftUntouchedReason === "string"
+            ? item.proposedValues.leftUntouchedReason
+            : undefined),
+        executableApply: false,
+        canApprove: false,
+      };
+    }
+  }
+
   if (options?.demoted === "unmatched" || options?.demoted === "needs_review") {
     return {
       readiness: options.demoted,
@@ -833,7 +853,7 @@ function applyOverride(
   const op = override.op ?? model.operation;
   const content = override.content ?? model.suggestion.content;
   const recordName = override.recordName ?? model.recordName;
-  const suggestion: PendingSuggestion = attachReviewExpectedTarget(
+  let suggestion: PendingSuggestion = attachReviewExpectedTarget(
     {
       ...model.suggestion,
       kind,
@@ -862,9 +882,33 @@ function applyOverride(
     override.readiness === "needs_review" || override.readiness === "unmatched"
       ? override.readiness
       : undefined;
+  const repairingLeftUntouched =
+    Boolean(override.accepted) &&
+    !demoted &&
+    (model.readiness === "left_untouched" ||
+      model.finding?.leftUntouched ||
+      isLeftUntouchedValues(model.suggestion.proposedValues));
+  if (repairingLeftUntouched) {
+    const proposedValues = { ...(suggestion.proposedValues ?? {}) };
+    delete proposedValues.leftUntouched;
+    delete proposedValues.leftUntouchedSource;
+    delete proposedValues.leftUntouchedReason;
+    suggestion = {
+      ...suggestion,
+      proposedValues,
+      legalDomain:
+        suggestion.legalDomain === "unsupported"
+          ? undefined
+          : suggestion.legalDomain,
+    };
+  }
   const assessed = assessReadiness(
     suggestion,
-    model.finding,
+    repairingLeftUntouched && model.finding
+      ? { ...model.finding, leftUntouched: false, requiresClarification: false }
+      : repairingLeftUntouched
+        ? undefined
+        : model.finding,
     model.operationSource,
     undefined,
     capturePipeline,
@@ -1005,6 +1049,47 @@ export function buildReviewChangeViewModels(
       capturePipeline: result.capturePipeline,
     });
     const executableApply = assessedExecutable;
+    if (readiness === "left_untouched") {
+      const leftReason =
+        finding?.leftUntouchedReason ||
+        reason ||
+        (typeof item.proposedValues?.leftUntouchedReason === "string"
+          ? item.proposedValues.leftUntouchedReason
+          : undefined);
+      const model: ReviewChangeViewModel = {
+        id: item.id,
+        suggestion: item,
+        entityKind: item.kind,
+        entityLabel: KIND_LABEL[item.kind],
+        recordName:
+          finding?.fact ||
+          finding?.evidence ||
+          item.content ||
+          recordName,
+        operation: item.op,
+        operationLabel: "Left untouched",
+        readiness: "left_untouched",
+        executableApply: false,
+        canApprove: false,
+        needsReviewReason: leftReason,
+        evidence: evidenceExcerpts(finding, captureText),
+        interpretation: leftReason || item.content,
+        confidence: null,
+        finding,
+        operationSource,
+        spansColumns: true,
+        projectId,
+        projectName,
+        projectCode: item.projectCode,
+      };
+      return applyOverride(
+        model,
+        override,
+        captureText,
+        preflight,
+        result.capturePipeline,
+      );
+    }
     const friendly = friendlierNeedsYouCopy(
       reason || finding?.clarificationQuestion,
     );

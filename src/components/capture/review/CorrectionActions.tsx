@@ -88,6 +88,62 @@ export function CorrectionActions({
       <p className="compact-change-review-copy">{text}</p>
     ) : null;
 
+  const LEFT_UNTOUCHED_TYPES: SuggestionKind[] = [
+    "risk",
+    "stakeholder",
+    "action",
+    "knowledge",
+  ];
+
+  if (model.readiness === "left_untouched") {
+    return (
+      <div className="compact-change-correction" data-testid="left-untouched-actions">
+        {prompt(
+          model.needsReviewReason ||
+            "Lume could not safely turn this part of the capture into a project change, so it left it alone.",
+        )}
+        <p className="meta">
+          If this should become an Issue, Person, To Do, or Knowledge item, choose
+          a type. Lume will use the existing Review path — it will not write this
+          leftover as-is.
+        </p>
+        <div className="compact-change-action-row compact-change-entity-row">
+          <label className="compact-change-entity-select-label">
+            <span className="sr-only">Create as</span>
+            <select
+              className="compact-change-entity-select"
+              defaultValue=""
+              aria-label="Create leftover as"
+              data-testid="left-untouched-create-as"
+              onChange={(e) => {
+                const kind = e.target.value as SuggestionKind;
+                if (!kind) return;
+                handlers.onChangeEntityKind(kind);
+                handlers.onCreateNew();
+              }}
+            >
+              <option value="" disabled>
+                Create as…
+              </option>
+              {LEFT_UNTOUCHED_TYPES.map((kind) => (
+                <option key={kind} value={kind}>
+                  {KIND_LABEL[kind] === "Risk"
+                    ? "Issue"
+                    : KIND_LABEL[kind] === "Stakeholder"
+                      ? "Person"
+                      : KIND_LABEL[kind]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+            Dismiss
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!applyExecutable && !userCanRepair) {
     const copy =
       model.needsReviewReason ||

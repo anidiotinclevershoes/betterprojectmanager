@@ -72,6 +72,24 @@ function ReviewTruth({
   needsYouHeadline?: string;
   needsYouDetail?: string | null;
 }) {
+  if (family === "left_untouched") {
+    return (
+      <div className="lume-review-truth">
+        <h4 className="lume-review-hero">Left untouched</h4>
+        {recordName ? (
+          <p className="lume-review-subject" data-testid="left-untouched-original">
+            {recordName}
+          </p>
+        ) : null}
+        {needsYouDetail ? (
+          <p className="lume-review-quote" data-testid="left-untouched-reason">
+            {needsYouDetail}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
   if (family === "needs_you") {
     const showCompare =
       diff &&
@@ -157,7 +175,7 @@ export function CompactChangeCard({
   diff?: ChangeDiff;
   why?: ReactNode;
   actions: ReactNode;
-  readiness?: "needs_review" | "unmatched";
+  readiness?: "needs_review" | "unmatched" | "left_untouched";
   /** @deprecated Prefer readiness */
   emphasized?: boolean;
   state?: "pending" | "approved" | "dismissed";
@@ -170,7 +188,9 @@ export function CompactChangeCard({
   const family = reviewOpFamily(operation, attention, reviewReason);
 
   const articleLabel =
-    family === "needs_you"
+    family === "left_untouched"
+      ? `Left untouched: ${recordName}`
+      : family === "needs_you"
       ? `${needsYouHeadline || "Needs you"}, ${entityLabel}${
           recordName ? `: ${recordName}` : ""
         }`
@@ -200,6 +220,7 @@ export function CompactChangeCard({
       </header>
 
       <div className="lume-review-body">
+        {family === "left_untouched" ? null : (
         <DomainRow
           entityKind={entityKind}
           entityLabel={entityLabel}
@@ -212,6 +233,7 @@ export function CompactChangeCard({
               reviewReason === "TARGET_UNCERTAIN")
           }
         />
+        )}
 
         <ReviewTruth
           family={family}

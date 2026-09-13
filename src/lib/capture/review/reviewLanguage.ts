@@ -7,17 +7,24 @@ import type { SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
 import { OP_LABEL } from "@/lib/capture/suggestions";
 import type { ReviewReason } from "./reviewReason";
 
-export type ReviewOpFamily = "create" | "update" | "remove" | "needs_you";
+export type ReviewOpFamily =
+  | "create"
+  | "update"
+  | "remove"
+  | "needs_you"
+  | "left_untouched";
 
 export function reviewOpFamily(
   operation: SuggestionOp,
-  readiness?: "ready" | "needs_review" | "unmatched" | null,
+  readiness?: "ready" | "needs_review" | "unmatched" | "left_untouched" | null,
   reviewReason?: ReviewReason | null,
 ): ReviewOpFamily {
   const isRemove =
     operation === "remove" ||
     operation === "archive" ||
     operation === "delete";
+
+  if (readiness === "left_untouched") return "left_untouched";
 
   if (readiness === "unmatched") return "needs_you";
 
@@ -43,6 +50,7 @@ export function reviewOpWord(
   operation: SuggestionOp = "update",
 ): string {
   if (family === "needs_you") return "Needs You";
+  if (family === "left_untouched") return "Left untouched";
   if (family === "create") return "Create";
   if (family === "remove") return OP_LABEL[operation];
   return "Update";
@@ -52,12 +60,14 @@ export type ReviewOpIcon =
   | "circle-plus"
   | "pencil"
   | "circle-minus"
-  | "circle-help";
+  | "circle-help"
+  | "circle-dot";
 
 export function reviewOpIcon(family: ReviewOpFamily): ReviewOpIcon {
   if (family === "create") return "circle-plus";
   if (family === "remove") return "circle-minus";
   if (family === "needs_you") return "circle-help";
+  if (family === "left_untouched") return "circle-dot";
   return "pencil";
 }
 
@@ -92,6 +102,7 @@ export function reviewDomainLabel(kind: SuggestionKind): string {
 
 export function reviewFamilyClass(family: ReviewOpFamily): string {
   if (family === "needs_you") return "is-needs-you";
+  if (family === "left_untouched") return "is-left-untouched";
   return `is-${family}`;
 }
 

@@ -573,12 +573,25 @@ export function CaptureWorkspace({
   }
 
   function onChangeEntityKind(id: string, kind: SuggestionKind) {
-    updateSuggestion(id, { kind });
+    const model = reviewModels.find((m) => m.id === id);
+    const fromLeftUntouched = model?.readiness === "left_untouched";
+    updateSuggestion(id, {
+      kind,
+      ...(fromLeftUntouched
+        ? {
+            legalDomain: undefined,
+            op: "create" as const,
+            targetTodoId: undefined,
+            targetEntityId: undefined,
+          }
+        : {}),
+    });
     setReviewOverride(id, {
       kind,
       accepted: true,
       readiness: "ready",
       reviewReason: null,
+      ...(fromLeftUntouched ? { op: "create" as const } : {}),
     });
   }
 

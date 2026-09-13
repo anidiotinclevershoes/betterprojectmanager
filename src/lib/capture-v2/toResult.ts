@@ -20,6 +20,11 @@ import {
   shouldSurfaceEmptyReviewNeedsYou,
 } from "./empty-review";
 import type { ResolvedObservation } from "./resolve";
+import {
+  LEFT_UNTOUCHED_GENERIC_REASON,
+  leftUntouchedReasonFromModel,
+  leftUntouchedSourceFromValues,
+} from "./left-untouched";
 import type { CaptureObservationV2, ObservationDomain } from "./types";
 
 function id(prefix: string) {
@@ -81,10 +86,24 @@ export function captureResultFromResolved(args: {
       observation.disposition === "create_new"
         ? proposedTitle || observation.candidateTargetTitle || observation.statement
         : observation.candidateTargetTitle || proposedTitle || observation.statement;
+    const leftUntouched = observation.disposition === "left_untouched";
+    const leftUntouchedSource =
+      leftUntouchedSourceFromValues(observation.proposedValues) ??
+      (leftUntouched
+        ? observation.id.startsWith("coverage-left-")
+          ? "coverage"
+          : "model"
+        : undefined);
+    const leftUntouchedReason = leftUntouched
+      ? leftUntouchedSource === "coverage"
+        ? observation.commentary?.trim() || LEFT_UNTOUCHED_GENERIC_REASON
+        : leftUntouchedReasonFromModel(observation.commentary)
+      : undefined;
     const requiresClarification =
-      Boolean(row.rejected) ||
-      decision?.kind === "needs_you" ||
-      observation.disposition === "ambiguous";
+      !leftUntouched &&
+      (Boolean(row.rejected) ||
+        decision?.kind === "needs_you" ||
+        observation.disposition === "ambiguous");
     const findingType = findingTypeFor(observation, decision?.kind, row.rejected);
     const proposedValues = {
       ...(observation.proposedValues ?? {}),
@@ -100,6 +119,13 @@ export function captureResultFromResolved(args: {
         : {}),
       ...(row.resolved?.suggestion?.expectedTarget
         ? { expectedTarget: row.resolved.suggestion.expectedTarget }
+        : {}),
+      ...(leftUntouched
+        ? {
+            leftUntouched: true,
+            leftUntouchedSource,
+            leftUntouchedReason,
+          }
         : {}),
     };
 
@@ -131,8 +157,11 @@ export function captureResultFromResolved(args: {
           ? decision.reason
           : observation.commentary ?? "Lume needs you to confirm this."
         : undefined,
-      reasoningSummary: observation.statement,
+      reasoningSummary: leftUntouchedReason ?? observation.statement,
       invalidTarget: row.rejected === true,
+      leftUntouched: leftUntouched || undefined,
+      leftUntouchedReason,
+      leftUntouchedSource,
       projectId,
       projectName: args.projectName ?? undefined,
     });
@@ -257,6 +286,7 @@ function findingTypeFor(
     observation.disposition === "commentary" ||
     observation.disposition === "ignore" ||
     observation.disposition === "merge" ||
+    observation.disposition === "left_untouched" ||
     observation.domain === "commentary"
   ) {
     return "NO_CHANGE";
@@ -285,6 +315,7 @@ function operationCode(
     observation.disposition === "ignore" ||
     observation.disposition === "merge" ||
     observation.disposition === "ambiguous" ||
+    observation.disposition === "left_untouched" ||
     observation.domain === "commentary"
   ) {
     return "NO_CHANGE";

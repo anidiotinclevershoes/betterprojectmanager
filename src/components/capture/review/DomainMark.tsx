@@ -230,6 +230,14 @@ function OperationGlyph({ family }: { family: ReviewOpFamily }) {
           <path d="M12 17h.01" />
         </>
       );
+    case "left_untouched":
+      // CircleDot — present, not a write
+      return (
+        <>
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="3" />
+        </>
+      );
     default:
       // Pencil — Update, including Complete-as-status-update
       return (

@@ -27,6 +27,7 @@ export const OBSERVATION_DISPOSITIONS = [
   "merge",
   "commentary",
   "ignore",
+  "left_untouched",
 ] as const;
 
 export type ObservationDisposition = (typeof OBSERVATION_DISPOSITIONS)[number];

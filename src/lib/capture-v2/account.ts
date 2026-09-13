@@ -9,6 +9,7 @@ export type ObservationAccount = {
   needsYou: number;
   commentary: number;
   rejected: number;
+  leftUntouched: number;
 };
 
 export function accountObservations(args: {
@@ -21,9 +22,14 @@ export function accountObservations(args: {
   let merged = 0;
   let needsYou = 0;
   let commentary = 0;
+  let leftUntouched = 0;
 
   for (const row of resolved) {
     const { observation, decision } = row;
+    if (observation.disposition === "left_untouched") {
+      leftUntouched += 1;
+      continue;
+    }
     if (
       observation.disposition === "commentary" ||
       observation.disposition === "ignore" ||
@@ -56,6 +62,7 @@ export function accountObservations(args: {
     merged,
     needsYou,
     commentary,
+    leftUntouched,
     rejected: args.rejectedCount ?? 0,
   };
 }
