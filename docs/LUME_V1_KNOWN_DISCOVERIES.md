@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 13 September 2026 (focused remediation after After-run `lr-20260913T000838Z`: model `no_change` is not authority; Capture-time responsibilities; clear Create; authoritative first-paint retry)  
+**Last housekeeping:** 13 September 2026 (systemic thin-envelope `no_change` + first-paint prove-write after Run 3 `lr-20260913T095407Z`)  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
@@ -238,7 +238,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Keep `e2e:hosted-longrun` opt-in. Do not encode the C18 wrong write as a passing unit. A later unit should refuse Ready on unresolved same-kind ambiguity after a missing create. |
 | **Target resolution / validation point** | Capture hardening / before V1 launch |
 | **Related docs** | D-008; D-013; D-025; D-029; D-030; D-051; `e2e-hosted-longrun/ATTACK-MATRIX.md` |
-| **Notes** | First-run frozen expectations were not rewritten. Dedicated E2E project left in place. Independent SQL on production Lume `exfftrxxinhduogcluce` matches the harness final snapshot. **12 Sep trust-convergence:** Family A/D rematerialize + observation-local title evidence at Review and Apply (`verify-wrong-target-identity`). Family B empty Review is Needs You / unsupported, never silent (`verify-empty-capture-honesty`). Family C NP notes keep explicit scopes; wrong-type person ids bind evidenced names (`verify-responsibility-canonical-path`). Family E: existing-row updates are identity-idempotent; receipts stay create/mint protection (`verify-update-idempotency`). Family F mounted persist-first (`verify-mounted-persist-trust`). Family G D-030 presentation proved for KC/Search (`verify-projection-authority`). **13 Sep After-run `lr-20260913T000838Z` on `ece3e9a` / #171:** wrong canonical targets 0; unexplained empty Reviews 0; unexpected destructive mutations 0; State 0 structured responsibilities 4; last meaningful SQL write ~C17; later Captures Limited analysis / accounted `no_change`. Frozen ledger not rewritten. Extra Creates classified in D-054. C6 role-only (“quantity surveyor”) must not invent a scope. Production After-After of the unchanged frozen 50 is still required after this remediation merges. Do not start the Assurance Framework from this note. |
+| **Notes** | First-run frozen expectations were not rewritten. Dedicated E2E project left in place. Independent SQL on production Lume `exfftrxxinhduogcluce` matches the harness final snapshot. **12 Sep trust-convergence:** Family A/D rematerialize + observation-local title evidence at Review and Apply (`verify-wrong-target-identity`). Family B empty Review is Needs You / unsupported, never silent (`verify-empty-capture-honesty`). Family C NP notes keep explicit scopes; wrong-type person ids bind evidenced names (`verify-responsibility-canonical-path`). Family E: existing-row updates are identity-idempotent; receipts stay create/mint protection (`verify-update-idempotency`). Family F mounted persist-first (`verify-mounted-persist-trust`). Family G D-030 presentation proved for KC/Search (`verify-projection-authority`). **13 Sep After-run `lr-20260913T000838Z` on `ece3e9a` / #171:** wrong canonical targets 0; unexplained empty Reviews 0; unexpected destructive mutations 0; State 0 structured responsibilities 4; last meaningful SQL write ~C17; later Captures Limited analysis / accounted `no_change`. **13 Sep Run 3 `lr-20260913T095407Z` on `16f7a5d` / #172:** integrity still held; last Ready write ~C13; live Prompt A `no_change` without structured fields stayed silent. Thin-envelope hydrate + “prove already-current or Needs You” is D-055. Production frozen 50 still required after merge/deploy. Do not start the Assurance Framework from this note. |
 
 ### D-054 — After-run extra Creates and incomplete frozen ledger (not product defects)
 
@@ -257,6 +257,24 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Target resolution / validation point** | After-After frozen 50 after this remediation merges — score against source truth, not harness PASS count |
 | **Related docs** | D-053; `e2e-hosted-longrun/SPEC.md` |
 | **Notes** | **Ceiling void RAMS needed:** ACCEPTABLE INTERPRETATION / CORRECT ADDITIONAL EXTRACTION. Source states the need; representing it as a risk (C7 already has a RAMS date) does not distort truth. **Issue delay notice:** CORRECT ADDITIONAL EXTRACTION / ACCEPTABLE INTERPRETATION. Source states James will issue a delay notice. Neither is DUPLICATE / WRONG DOMAIN, OVER-EXTRACTION, or UNSAFE INVENTION. |
+
+### D-055 — Live Prompt A `no_change` without structured fields silently drops supported truth
+
+| Field | Value |
+| --- | --- |
+| **Status** | open — deterministic hydrate + human-safe fallback landed; production frozen 50 after deploy still required |
+| **Severity** | high (capability / trust) |
+| **Domain** | Capture |
+| **Found in** | Run 3 `lr-20260913T095407Z` on production `16f7a5d` (#172); project `ef5a8050-9cd0-40b6-8e8a-2db125246ec1` |
+| **Failure class** | Extraction survives as checkmarks. Model marks `disposition=no_change` and omits `proposedValues` / titles. `#172` rematerialize required those fields, so resolve returned “Already known”. Review showed Limited analysis + 0 Ready / 0 Needs You. Ordinary Creates/Updates/responsibilities from C14–C50 disappeared. First-paint still adopted a reload that predates the write (C5 ~216ms). |
+| **Evidence / repro** | `/opt/cursor/artifacts/run-3/RUN-3.md`; `scripts/verify-run3-production-envelope.ts` fails on pre-fix `16f7a5d` for thin C16/C18/C24/C33/C45 envelopes |
+| **Likely files** | `src/lib/capture-v2/resolve.ts`; `src/lib/capture/apply/apply-approved.ts`; `src/components/capture/CaptureSessionContext.tsx` |
+| **Proposed fix direction** | One shared rule: hydrate missing fields from observation-local evidence + canonical world; rematerialize; if still not a write and not *proven* already-current → Needs You in PM language. Separate first-paint family: prove `appliedStateContainsWrite` on reload or `reconcileFailed` without adopting stale state. |
+| **Explicit non-goals** | Prompt A retune; vocabulary-specific C16 split; weakening C18 / first-name / foreign-ID; Assurance Framework; another production 50 before merge/deploy |
+| **Regression test to add** | `scripts/verify-run3-production-envelope.ts`; delayed-visibility case in `verify-apply-authoritative-first-paint.ts` |
+| **Target resolution / validation point** | Capture hardening / before V1 launch — close only after an unchanged frozen 50 on the deployed SHA |
+| **Related docs** | D-053; D-054 |
+| **Notes** | Structured `#172` fixtures were green while production was not. Needs You count may rise; that is success when automation is unsafe. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 
