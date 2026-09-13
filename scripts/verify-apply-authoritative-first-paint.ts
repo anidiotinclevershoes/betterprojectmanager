@@ -346,7 +346,7 @@ async function main() {
       "utf8",
     );
     assert.match(workspace, /confirmAuthoritativeWrites/);
-    assert.match(workspace, /settle: "defer"/);
+    assert.match(workspace, /durableBatch \? "defer" : "now"/);
   });
 
   await check("adoptAppliedState writes confirmed Apply state into the paint cache", () => {

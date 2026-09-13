@@ -84,6 +84,7 @@ export function CaptureWorkspace({
     openaiConfigured,
     adoptAppliedState,
     peekDurableWorkspace,
+    persistenceMode,
   } = useMission();
   const usage = analysesRemaining(state);
   const session = useCaptureSession();
@@ -434,30 +435,36 @@ export function CaptureWorkspace({
   }
 
   async function approveReady() {
+    const durableBatch = persistenceMode === "supabase";
     const { confirmOwner, failures, reconcileFailed, succeededWrites } =
       await applyPendingReadyQueue({
       models: pendingReadyModels(reviewModels, added, dismissed),
-      applyOne: (item) => applyOne(item, defaultProjectId, { settle: "defer" }),
-      confirmWrites: async (operations) => {
-        try {
-          const confirmed = await confirmAuthoritativeWrites({
-            operations,
-            reloadWorkspace: async () => {
-              const peeked = await peekDurableWorkspace();
-              if (!peeked) {
-                throw new Error("Could not reload project truth.");
+      applyOne: (item) =>
+        applyOne(item, defaultProjectId, {
+          settle: durableBatch ? "defer" : "now",
+        }),
+      confirmWrites: durableBatch
+        ? async (operations) => {
+            try {
+              const confirmed = await confirmAuthoritativeWrites({
+                operations,
+                reloadWorkspace: async () => {
+                  const peeked = await peekDurableWorkspace();
+                  if (!peeked) {
+                    throw new Error("Could not reload project truth.");
+                  }
+                  return peeked;
+                },
+              });
+              if (confirmed.state) {
+                adoptAppliedState(confirmed.state);
               }
-              return peeked;
-            },
-          });
-          if (confirmed.state) {
-            adoptAppliedState(confirmed.state);
+              return confirmed;
+            } catch {
+              return { reconcileFailed: true as const };
+            }
           }
-          return confirmed;
-        } catch {
-          return { reconcileFailed: true as const };
-        }
-      },
+        : undefined,
     });
     if (reconcileFailed) {
       announce("Applied — refreshing project truth…");
