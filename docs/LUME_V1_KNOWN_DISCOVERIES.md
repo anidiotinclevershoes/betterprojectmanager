@@ -274,7 +274,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | `scripts/verify-run3-production-envelope.ts`; delayed-visibility case in `verify-apply-authoritative-first-paint.ts` |
 | **Target resolution / validation point** | Capture hardening / before V1 launch — close only after an unchanged frozen 50 on the deployed SHA |
 | **Related docs** | D-053; D-054 |
-| **Notes** | Structured `#172` fixtures were green while production was not. Needs You count may rise; that is success when automation is unsafe. **First-paint remainder:** per-write prove-write (`appliedStateContainsWrite` / `reconcileFailed`) covers a single Apply adopting stale reload. Run 3 C5/C10 misses were batch coordination — harness/`applyReady` waited for the first `/api/capture/apply` 200 while later writes were still in flight. `approveReady` already reconciles after the queue. Do not close first-paint on prove-write alone. Do not add a second Capture responsibility path. Do not start a batch-RPC rewrite from this note. |
+| **Notes** | Structured `#172` fixtures were green while production was not. Needs You count may rise; that is success when automation is unsafe. **First-paint:** per-write prove-write and batch-final `confirmAuthoritativeWrites` share one helper. Ready batch defers adopt until every successful write is visible. Do not add a second Capture responsibility path. Do not start a batch-RPC rewrite from this note. Close only after Run 4 production evidence. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 
