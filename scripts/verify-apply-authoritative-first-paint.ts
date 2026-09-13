@@ -241,6 +241,52 @@ async function main() {
     assert.ok(laterDates.some((row) => /Production release · 20 Sep/i.test(row.title)));
   });
 
+  await check("Apply retries authoritative reload when first paint misses the write", async () => {
+    const { appliedStateContainsWrite } = await import(
+      "../src/lib/capture/apply/apply-approved"
+    );
+    const empty = emptyMissionState();
+    const withRisk: MissionState = {
+      ...empty,
+      risks: [
+        {
+          id: "risk-1",
+          projectId: PROJECT,
+          title: "Hall timber floor may still hide services",
+          status: "open",
+          createdAt: "2026-09-13T00:10:22.000Z",
+        },
+      ],
+    };
+    assert.equal(
+      appliedStateContainsWrite(empty, {
+        type: "create_risk",
+        projectId: PROJECT,
+        title: "Hall timber floor may still hide services",
+      }),
+      false,
+    );
+    assert.equal(
+      appliedStateContainsWrite(withRisk, {
+        type: "create_risk",
+        projectId: PROJECT,
+        title: "Hall timber floor may still hide services",
+      }),
+      true,
+    );
+    const approved = readFileSync(
+      join(process.cwd(), "src/lib/capture/apply/apply-approved.ts"),
+      "utf8",
+    );
+    assert.match(approved, /appliedStateContainsWrite/);
+    assert.match(approved, /reloadWorkspace\(\)/);
+    const workspace = readFileSync(
+      join(process.cwd(), "src/components/capture/CaptureWorkspace.tsx"),
+      "utf8",
+    );
+    assert.match(workspace, /reconcileDurableWorkspace\(\)/);
+  });
+
   await check("adoptAppliedState writes confirmed Apply state into the paint cache", () => {
     const store = readFileSync(join(process.cwd(), "src/lib/store.tsx"), "utf8");
     const adopt = store.slice(store.indexOf("const adoptAppliedState"));

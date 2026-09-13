@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 12 September 2026 (V1 trust-convergence: Families A–D deterministic guards + empty-Review honesty + responsibility path + mounted persist-first; D-053 After-run still required)  
+**Last housekeeping:** 13 September 2026 (focused remediation after After-run `lr-20260913T000838Z`: model `no_change` is not authority; Capture-time responsibilities; clear Create; authoritative first-paint retry)  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
@@ -226,7 +226,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | partial — Families A–D + empty-Review honesty + responsibility path landed on `cursor/v1-trust-convergence-df02`; production After-run still required |
+| **Status** | partial — #171 After-run `lr-20260913T000838Z` cleared wrong-target / empty-Review / State 0 responsibilities; remaining capability collapse is this slice; After-After frozen 50 still required |
 | **Severity** | critical (wrong-target write; deterministic guard landed) / high (silent empty Review; responsibility vacuum) |
 | **Domain** | Capture / Apply / Identity / Persistence |
 | **Found in** | Production long-run dogfood `lr-20260912T2212Z` on `origin/main` `9f24a65`; official project `8537b7cf-1b50-453e-af64-2b21e2d29e90`. No product-code change in that programme. |
@@ -238,7 +238,25 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Keep `e2e:hosted-longrun` opt-in. Do not encode the C18 wrong write as a passing unit. A later unit should refuse Ready on unresolved same-kind ambiguity after a missing create. |
 | **Target resolution / validation point** | Capture hardening / before V1 launch |
 | **Related docs** | D-008; D-013; D-025; D-029; D-030; D-051; `e2e-hosted-longrun/ATTACK-MATRIX.md` |
-| **Notes** | First-run frozen expectations were not rewritten. Dedicated E2E project left in place. Independent SQL on production Lume `exfftrxxinhduogcluce` matches the harness final snapshot. **12 Sep trust-convergence:** Family A/D rematerialize + observation-local title evidence at Review and Apply (`verify-wrong-target-identity`). Family B empty Review is Needs You / unsupported, never silent (`verify-empty-capture-honesty`). Family C NP notes keep explicit scopes; wrong-type person ids bind evidenced names (`verify-responsibility-canonical-path`). Family E: existing-row updates are identity-idempotent; receipts stay create/mint protection (`verify-update-idempotency`). Family F mounted persist-first (`verify-mounted-persist-trust`). Family G D-030 presentation proved for KC/Search (`verify-projection-authority`). Production After-run of the frozen 50 still required before Assurance Framework execution. |
+| **Notes** | First-run frozen expectations were not rewritten. Dedicated E2E project left in place. Independent SQL on production Lume `exfftrxxinhduogcluce` matches the harness final snapshot. **12 Sep trust-convergence:** Family A/D rematerialize + observation-local title evidence at Review and Apply (`verify-wrong-target-identity`). Family B empty Review is Needs You / unsupported, never silent (`verify-empty-capture-honesty`). Family C NP notes keep explicit scopes; wrong-type person ids bind evidenced names (`verify-responsibility-canonical-path`). Family E: existing-row updates are identity-idempotent; receipts stay create/mint protection (`verify-update-idempotency`). Family F mounted persist-first (`verify-mounted-persist-trust`). Family G D-030 presentation proved for KC/Search (`verify-projection-authority`). **13 Sep After-run `lr-20260913T000838Z` on `ece3e9a` / #171:** wrong canonical targets 0; unexplained empty Reviews 0; unexpected destructive mutations 0; State 0 structured responsibilities 4; last meaningful SQL write ~C17; later Captures Limited analysis / accounted `no_change`. Frozen ledger not rewritten. Extra Creates classified in D-054. C6 role-only (“quantity surveyor”) must not invent a scope. Production After-After of the unchanged frozen 50 is still required after this remediation merges. Do not start the Assurance Framework from this note. |
+
+### D-054 — After-run extra Creates and incomplete frozen ledger (not product defects)
+
+| Field | Value |
+| --- | --- |
+| **Status** | closed as classification — do not “fix” the Creates; do not rewrite frozen evidence |
+| **Severity** | low (ledger completeness) |
+| **Domain** | Capture / long-run harness |
+| **Found in** | After-run `lr-20260913T000838Z` on production containing #171 (`ece3e9a`); project `a79ddc95-857f-4b38-897e-2a6dbe6b4fce` |
+| **Failure class** | Two canonical Creates were unexpected vs the frozen expected ledger. Classification against source + model evidence shows they are additional extraction, not invention. |
+| **Evidence / repro** | C10 source: “Ceiling void RAMS is still needed before we open that void.” SQL risk `22e625df` **Ceiling void RAMS needed**. C7 already booked a RAMS **date**. C17 WhatsApp: “I will issue a delay notice.” SQL todo `211688ca` **Issue delay notice**. Ledger expected containment / FF&E / DDA drawing / cost report, not that todo. |
+| **Likely files** | `e2e-hosted-longrun/frozen-manifest.ts` (immutable); `e2e-hosted-longrun/baselines/first-complete-run/`; `/opt/cursor/artifacts/AFTER-RUN.md` |
+| **Proposed fix direction** | None in product. Preserve the frozen run. Treat the ledger as incomplete for those two statements. |
+| **Explicit non-goals** | Rewriting `frozen-manifest.ts`; deleting the two rows; weakening Create identity; calling them over-extraction without source support |
+| **Regression test to add** | None that encodes the frozen ledger as the only legal Creates |
+| **Target resolution / validation point** | After-After frozen 50 after this remediation merges — score against source truth, not harness PASS count |
+| **Related docs** | D-053; `e2e-hosted-longrun/SPEC.md` |
+| **Notes** | **Ceiling void RAMS needed:** ACCEPTABLE INTERPRETATION / CORRECT ADDITIONAL EXTRACTION. Source states the need; representing it as a risk (C7 already has a RAMS date) does not distort truth. **Issue delay notice:** CORRECT ADDITIONAL EXTRACTION / ACCEPTABLE INTERPRETATION. Source states James will issue a delay notice. Neither is DUPLICATE / WRONG DOMAIN, OVER-EXTRACTION, or UNSAFE INVENTION. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 
