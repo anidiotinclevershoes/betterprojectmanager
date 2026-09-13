@@ -3,7 +3,7 @@
 **Status:** Living accepted position for Capture V2  
 **Date:** 12 September 2026  
 **Production SHA this position was accepted against:** `91fabf8d1627e89538f26e00b9b3343b9d577cdb` (PR #167)  
-**Current `main` this living file was last reconciled against:** `e0f140d67b3be7ecc51dd5c4056338a12b4d244c` (PR #170 dogfood programme; Capture rules unchanged)  
+**Current `main` this living file was last reconciled against:** `7f94ec4e3901ead66fca077ff43a15bf5fa8dd24` (PR #173; Capture rules unchanged except Review-only Left untouched safety net)  
 **Owned by:** [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md) §4  
 **Docs entry:** [`docs/README.md`](./README.md)
 
@@ -35,6 +35,7 @@ human language
 - Production prompt: **Prompt A** (`src/lib/capture-v2/prompt.ts`, id `capture-v2-observations`, version `capture-v2-eval-baseline-v1`).
 - AI does not write project truth. Apply does, and still revalidates.
 - Ready means the same production Apply path can execute that reviewed change.
+- **Left untouched** is Review-only. It is never canonical truth, never Apply-eligible, and never a substitute write. Prompt A is unchanged; the disposition is accepted when present. A deterministic evidence-span coverage backstop can surface leftover source text the model did not account for, with generic wording. Rematerialise / hydrate stay in place.
 
 New Project Organise uses the **same extractor**, then a New Project adapter (`parse` + `draftFromProvisional`). It is not a second Capture engine.
 

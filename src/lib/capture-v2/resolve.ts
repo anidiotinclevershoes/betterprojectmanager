@@ -18,6 +18,7 @@ import {
 } from "@/lib/people/identity";
 import { scopeFromResponsiblePhrase } from "@/lib/people/responsibility-scope";
 import { missingReadySemantics, newReviewOperationId } from "./contract";
+import { LEFT_UNTOUCHED_MODEL_FALLBACK_REASON } from "./left-untouched";
 import {
   isTruthIntent,
   type CaptureObservationV2,
@@ -148,6 +149,20 @@ function resolveOne(
   },
 ): ResolvedObservation {
   const projectId = args.captureEntryProjectId || null;
+
+  if (observation.disposition === "left_untouched") {
+    return {
+      observation,
+      suggestion: null,
+      decision: {
+        kind: "no_change",
+        domain: "unsupported",
+        reason:
+          observation.commentary?.trim() ||
+          LEFT_UNTOUCHED_MODEL_FALLBACK_REASON,
+      },
+    };
+  }
 
   if (
     observation.disposition === "commentary" ||

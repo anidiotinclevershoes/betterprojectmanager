@@ -60,5 +60,6 @@ export function shouldSurfaceEmptyReviewNeedsYou(
   if (account.alreadyKnown > 0) return false;
   if (account.merged > 0) return false;
   if (account.commentary > 0) return false;
+  if (account.leftUntouched > 0) return false;
   return true;
 }

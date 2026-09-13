@@ -209,6 +209,7 @@ check("short chatter is not forced into Needs You", () => {
         merged: 0,
         needsYou: 0,
         commentary: 0,
+        leftUntouched: 0,
         rejected: 0,
       },
       "ok thanks",

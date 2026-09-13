@@ -2536,6 +2536,9 @@ body {
 .capture-observation-action.is-status-unmatched {
   color: var(--accent-timeline);
 }
+.capture-observation-action.is-status-left_untouched {
+  color: var(--text-muted, #8a93a0);
+}
 
 .capture-summary-line {
   display: flex;

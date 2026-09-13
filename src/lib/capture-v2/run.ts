@@ -11,6 +11,7 @@ import type {
   CaptureObservationV2,
   ObservationValidationResult,
 } from "./types";
+import { leftoverObservationsFromCoverage } from "./source-coverage";
 import { parseObservationEnvelope, validateObservations } from "./validate";
 
 export type CaptureV2Run = {
@@ -49,8 +50,12 @@ export function runCaptureV2FromModelJson(args: {
     records,
     args.projectId,
   );
+  const leftovers = leftoverObservationsFromCoverage({
+    transcript: args.transcript,
+    observations: [...validation.observations, ...validation.rejected],
+  });
   const resolved = resolveObservations({
-    observations: validation.observations,
+    observations: [...validation.observations, ...leftovers],
     world: args.world,
     transcript: args.transcript,
     captureEntryProjectId: args.projectId,

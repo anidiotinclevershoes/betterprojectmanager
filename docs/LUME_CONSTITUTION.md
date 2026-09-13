@@ -121,7 +121,10 @@ These are different concepts. Do not conflate them.
 | Update | Person |
 | Remove | To Do |
 | Needs You | Knowledge |
-| | and other canonical kinds |
+| Left untouched | |
+| No change | |
+
+Domain identity also includes other canonical kinds. Left untouched is Review-only: never persisted as Issue / Person / To Do / Knowledge merely because it was unhandled, and never Apply-eligible.
 
 A card may read `Create · To Do`. That names an **operation** on a **domain**. Changing one does not change the other.
 

@@ -96,6 +96,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "wrong-target-identity", script: "scripts/verify-wrong-target-identity.ts" },
   { name: "run3-production-envelope", script: "scripts/verify-run3-production-envelope.ts" },
   { name: "empty-capture-honesty", script: "scripts/verify-empty-capture-honesty.ts" },
+  { name: "left-untouched-safety", script: "scripts/verify-left-untouched-safety.ts" },
   { name: "responsibility-canonical-path", script: "scripts/verify-responsibility-canonical-path.ts" },
   { name: "mounted-persist-trust", script: "scripts/verify-mounted-persist-trust.ts" },
   { name: "update-idempotency", script: "scripts/verify-update-idempotency.ts" },

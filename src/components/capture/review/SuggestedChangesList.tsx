@@ -21,7 +21,9 @@ const FILTERS: { id: QueueFilter; label: string }[] = [
 
 function familyOf(model: ReviewChangeViewModel) {
   const attention =
-    model.readiness === "needs_review" || model.readiness === "unmatched"
+    model.readiness === "needs_review" ||
+    model.readiness === "unmatched" ||
+    model.readiness === "left_untouched"
       ? model.readiness
       : undefined;
   return reviewOpFamily(model.operation, attention, model.reviewReason);
@@ -94,7 +96,12 @@ export function SuggestedChangesList({
   const [filter, setFilter] = useState<QueueFilter>("all");
   const [queueCollapsed, setQueueCollapsed] = useState(false);
   const rememberModels = models.filter(isKnowledgeRemember);
-  const operationModels = models.filter((m) => !isKnowledgeRemember(m));
+  const leftUntouchedModels = models.filter(
+    (m) => m.readiness === "left_untouched" && !isKnowledgeRemember(m),
+  );
+  const operationModels = models.filter(
+    (m) => !isKnowledgeRemember(m) && m.readiness !== "left_untouched",
+  );
   const pending = operationModels.filter(
     (m) => !added[m.id] && !dismissed[m.id],
   );
@@ -218,9 +225,11 @@ export function SuggestedChangesList({
           </button>
         </div>
 
-        {opTotal === 0 ? (
+        {opTotal === 0 && leftUntouchedModels.length === 0 ? (
           <p className="empty-copy">Nothing to apply.</p>
-        ) : visiblePending.length === 0 && visibleReviewed.length === 0 ? (
+        ) : visiblePending.length === 0 &&
+          visibleReviewed.length === 0 &&
+          leftUntouchedModels.length === 0 ? (
           <p className="empty-copy">Nothing of this kind in this capture.</p>
         ) : (
           <div className="lume-queue-groups">
@@ -248,6 +257,31 @@ export function SuggestedChangesList({
                 <ul className="suggested-change-list">
                   {proposed.map(renderCard)}
                   {visibleReviewed.map(renderCard)}
+                </ul>
+              </section>
+            ) : null}
+            {leftUntouchedModels.some((m) => !added[m.id] && !dismissed[m.id]) ? (
+              <section
+                className="lume-queue-group"
+                aria-labelledby="group-left-untouched"
+                data-testid="review-left-untouched"
+              >
+                <div className="lume-queue-rule">
+                  <h4 id="group-left-untouched" className="lume-queue-heading">
+                    Left untouched
+                  </h4>
+                  <span className="lume-queue-count">
+                    {
+                      leftUntouchedModels.filter(
+                        (m) => !added[m.id] && !dismissed[m.id],
+                      ).length
+                    }
+                  </span>
+                </div>
+                <ul className="suggested-change-list">
+                  {leftUntouchedModels
+                    .filter((m) => !added[m.id] && !dismissed[m.id])
+                    .map(renderCard)}
                 </ul>
               </section>
             ) : null}

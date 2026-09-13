@@ -69,6 +69,7 @@
     "verify:apply-authoritative-first-paint": "npx --yes tsx scripts/verify-apply-authoritative-first-paint.ts",
     "verify:run3-production-envelope": "npx --yes tsx scripts/verify-run3-production-envelope.ts",
     "verify:capture-v2": "npx --yes tsx scripts/verify-capture-v2.ts",
+    "verify:left-untouched-safety": "npx --yes tsx scripts/verify-left-untouched-safety.ts",
     "verify:capture-intelligence-diagnostic": "npx --yes tsx scripts/verify-capture-intelligence-diagnostic.ts",
     "diagnose:capture-intelligence": "npx --yes tsx scripts/diagnose-capture-intelligence.ts",
     "verify:eval-capture-v2": "npx --yes tsx scripts/verify-eval-capture-v2.ts",

@@ -49,6 +49,18 @@ export {
 } from "./prompt";
 export { captureResultFromResolved } from "./toResult";
 export {
+  LEFT_UNTOUCHED_GENERIC_REASON,
+  LEFT_UNTOUCHED_MODEL_FALLBACK_REASON,
+  isLeftUntouchedDisposition,
+  isLeftUntouchedValues,
+  leftUntouchedReasonFromModel,
+} from "./left-untouched";
+export {
+  leftoverObservationsFromCoverage,
+  leftoverSourceSpans,
+  isMeaningfulLeftover,
+} from "./source-coverage";
+export {
   runCaptureV2FromModelJson,
   worldFromCaptureState,
   emptyV2Result,

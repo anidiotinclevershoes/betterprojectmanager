@@ -47,6 +47,7 @@ const SKIP_DISPOSITIONS = new Set<ObservationDisposition>([
   "no_change",
   "merge",
   "ambiguous",
+  "left_untouched",
 ]);
 
 /**
@@ -199,7 +200,8 @@ export function reviewSafetyGap(
 ): string | null {
   if (
     observation.disposition === "commentary" ||
-    observation.disposition === "ignore"
+    observation.disposition === "ignore" ||
+    observation.disposition === "left_untouched"
   ) {
     return null;
   }

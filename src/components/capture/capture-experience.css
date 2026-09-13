@@ -34,6 +34,10 @@
   color: var(--accent-timeline);
 }
 
+.capture-observation-check.is-status-left_untouched {
+  color: var(--text-muted, #8a93a0);
+}
+
 .annotated-transcript {
   margin: 0;
   padding: 0.85rem 0.95rem 0.75rem;

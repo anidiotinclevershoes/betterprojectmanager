@@ -26,7 +26,7 @@ export type ReviewOwnerHit = {
 };
 
 export function deriveReviewReason(args: {
-  readiness: "ready" | "needs_review" | "unmatched";
+  readiness: "ready" | "needs_review" | "unmatched" | "left_untouched";
   finding?: CaptureFinding;
   operation?: ProposedOperation;
   coverage?: FindingCoverageItem;
@@ -43,7 +43,7 @@ export function deriveReviewReason(args: {
     needsReviewReason,
     capturePipeline,
   } = args;
-  if (readiness === "ready") return undefined;
+  if (readiness === "ready" || readiness === "left_untouched") return undefined;
 
   if (
     (finding?.projectCandidates &&

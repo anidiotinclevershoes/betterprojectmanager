@@ -28,7 +28,13 @@ function recoverablePersonName(raw: unknown): string | null {
   const obj = asObject(raw);
   if (!obj) return null;
   const disposition = asUsableString(obj.disposition)?.toLowerCase();
-  if (disposition === "ignore" || disposition === "commentary") return null;
+  if (
+    disposition === "ignore" ||
+    disposition === "commentary" ||
+    disposition === "left_untouched"
+  ) {
+    return null;
+  }
   const domain = asUsableString(obj.domain)?.toLowerCase();
   if (domain === "commentary") return null;
   const values = asObject(obj.proposedValues) ?? {};
@@ -131,7 +137,9 @@ function categoryFromDisposition(
   domain: ProvisionalItem["modelDomain"],
   disposition: ObservationDisposition,
 ): ProvisionalCategory {
-  if (disposition === "ignore") return "ignored";
+  if (disposition === "ignore" || disposition === "left_untouched") {
+    return "ignored";
+  }
   if (disposition === "commentary") return "commentary";
   return categoryFromDomain(domain);
 }

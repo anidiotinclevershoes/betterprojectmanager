@@ -68,14 +68,17 @@ export function SuggestedChangeCard({
 }) {
   const [whyOpen, setWhyOpen] = useState(initialWhyOpen);
   const whyId = useId();
-  const applyBlocked = model.executableApply === false;
+  const leftUntouched = model.readiness === "left_untouched";
+  const applyBlocked = model.executableApply === false && !leftUntouched;
   const needsReview = model.readiness === "needs_review" || applyBlocked;
   const unmatched = model.readiness === "unmatched";
   const attentionReadiness =
-    state === "pending" && (needsReview || unmatched)
-      ? applyBlocked
-        ? "needs_review"
-        : (model.readiness as "needs_review" | "unmatched")
+    state === "pending" && (needsReview || unmatched || leftUntouched)
+      ? leftUntouched
+        ? "left_untouched"
+        : applyBlocked
+          ? "needs_review"
+          : (model.readiness as "needs_review" | "unmatched")
       : undefined;
 
   const handlers: CorrectionHandlers = {
@@ -115,14 +118,18 @@ export function SuggestedChangeCard({
         }).question
       : null;
   const detail =
-    family === "needs_you"
-      ? ownershipQuestion ??
-        needsYouSupporting(
-          headline || "",
-          model.needsReviewReason,
-          model.recordName,
-        )
-      : null;
+    family === "left_untouched"
+      ? model.needsReviewReason ||
+        model.finding?.leftUntouchedReason ||
+        null
+      : family === "needs_you"
+        ? ownershipQuestion ??
+          needsYouSupporting(
+            headline || "",
+            model.needsReviewReason,
+            model.recordName,
+          )
+        : null;
 
   if (state !== "pending") {
     const resolvedLabel = state === "approved" ? "Applied" : "Excluded";

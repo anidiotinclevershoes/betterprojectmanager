@@ -290,6 +290,7 @@ export interface CaptureResult {
     needsYou: number;
     commentary: number;
     rejected: number;
+    leftUntouched?: number;
   };
 }
 
