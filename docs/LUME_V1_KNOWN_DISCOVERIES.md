@@ -266,7 +266,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Severity** | high (capability / trust) |
 | **Domain** | Capture |
 | **Found in** | Run 3 `lr-20260913T095407Z` on production `16f7a5d` (#172); project `ef5a8050-9cd0-40b6-8e8a-2db125246ec1` |
-| **Failure class** | Extraction survives as checkmarks. Model marks `disposition=no_change` and omits `proposedValues` / titles. `#172` rematerialize required those fields, so resolve returned “Already known”. Review showed Limited analysis + 0 Ready / 0 Needs You. Ordinary Creates/Updates/responsibilities from C14–C50 disappeared. First-paint still adopted a reload that predates the write (C5 ~216ms). |
+| **Failure class** | Extraction survives as checkmarks. Model marks `disposition=no_change` and omits `proposedValues` / titles. `#172` rematerialize required those fields, so resolve returned “Already known”. Review showed Limited analysis + 0 Ready / 0 Needs You. Ordinary Creates/Updates/responsibilities from C14–C50 disappeared. First-paint is a **separate** family: C5/C10 immediate snapshots landed **between sequential Applies** (timber create 216ms after `05-after`; RAMS todo 151ms after `10-after`), not a single-write visibility miss. |
 | **Evidence / repro** | `/opt/cursor/artifacts/run-3/RUN-3.md`; `scripts/verify-run3-production-envelope.ts` fails on pre-fix `16f7a5d` for thin C16/C18/C24/C33/C45 envelopes |
 | **Likely files** | `src/lib/capture-v2/resolve.ts`; `src/lib/capture/apply/apply-approved.ts`; `src/components/capture/CaptureSessionContext.tsx` |
 | **Proposed fix direction** | One shared rule: hydrate missing fields from observation-local evidence + canonical world; rematerialize; if still not a write and not *proven* already-current → Needs You in PM language. Separate first-paint family: prove `appliedStateContainsWrite` on reload or `reconcileFailed` without adopting stale state. |
@@ -274,7 +274,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | `scripts/verify-run3-production-envelope.ts`; delayed-visibility case in `verify-apply-authoritative-first-paint.ts` |
 | **Target resolution / validation point** | Capture hardening / before V1 launch — close only after an unchanged frozen 50 on the deployed SHA |
 | **Related docs** | D-053; D-054 |
-| **Notes** | Structured `#172` fixtures were green while production was not. Needs You count may rise; that is success when automation is unsafe. |
+| **Notes** | Structured `#172` fixtures were green while production was not. Needs You count may rise; that is success when automation is unsafe. **First-paint remainder:** per-write prove-write (`appliedStateContainsWrite` / `reconcileFailed`) covers a single Apply adopting stale reload. Run 3 C5/C10 misses were batch coordination — harness/`applyReady` waited for the first `/api/capture/apply` 200 while later writes were still in flight. `approveReady` already reconciles after the queue. Do not close first-paint on prove-write alone. Do not add a second Capture responsibility path. Do not start a batch-RPC rewrite from this note. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 
