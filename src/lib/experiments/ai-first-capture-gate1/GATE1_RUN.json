@@ -1,0 +1,349 @@
+{
+  "branch": "experiment/ai-first-capture-gate1",
+  "commit": "7914d706a0f6a973960f207b8cc5016c3e309596",
+  "model": "gpt-6-astra",
+  "cases": [
+    {
+      "id": "gate1-create-new-person",
+      "snapshot": "CANONICAL PROJECT TRUTH SNAPSHOT\nMechanical dump of current stored rows. Not a summary. Not ranked.\nproject.id=\"proj-toy\"\nproject.name=\"Toyworld\"\nproject.code=\"TOY\"\n\nPEOPLE\nid=\"person-brick\" name=\"Brick Oakley\" role=\"Sponsor\"\nid=\"person-buttons\" name=\"Captain Buttons\" role=\"Assembly lead\"\n\nISSUES\nid=\"risk-packaging\" title=\"Packaging delay\" status=\"open\"\n\nTO_DO\nid=\"todo-track\" title=\"Print the track map\" done=false dueAt= detail=\n\nKNOWLEDGE\n(none)\n\nMILESTONES\nid=\"ms-freeze\" label=\"Track freeze\" startAt=\"2026-09-01T12:00:00.000Z\" endAt= notes=",
+      "snapshotSizes": {
+        "characters": 547,
+        "approxTokensCl100k": 168
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 3879,
+        "usage": {
+          "prompt_tokens": 684,
+          "completion_tokens": 136,
+          "total_tokens": 820,
+          "reasoning_tokens": 0
+        },
+        "interpretation": {
+          "observations": [
+            {
+              "domain": "person",
+              "subject": "Velvet Sprocket",
+              "referencedCanonicalId": null,
+              "referenceKind": "new",
+              "assertion": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+              "proposedValue": "Paint lead for the wooden-track refresh",
+              "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+              "ambiguity": null
+            }
+          ],
+          "overallUncertainty": null
+        }
+      },
+      "existingLume": {
+        "source": "live-production-extract+current-resolve",
+        "label": "Current Capture V2 extract (gpt-4o-mini-2024-07-18) + current resolve",
+        "text": "requestedModel=gpt-4o-mini-2024-07-18 responseModel=gpt-4o-mini-2024-07-18 fallback=false\nusage={\"prompt_tokens\":965,\"completion_tokens\":305,\"total_tokens\":1270,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"audio_tokens\":0,\"accepted_prediction_tokens\":0,\"rejected_prediction_tokens\":0}}\naccount={\"total\":2,\"proposedChanges\":0,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":1,\"commentary\":0,\"leftUntouched\":0,\"rejected\":1}\nlumeSafetyTotals={\"applyReady\":0,\"needsYou\":1,\"noChange\":0,\"rejected\":1,\"illegalOperationsBlocked\":1,\"foreignProjectTargetsBlocked\":0,\"duplicatePersonCreationsBlocked\":0,\"unresolvedTargetConvertedToCreate\":0,\"wrongDomainLegalWrite\":0,\"projectIsolationViolation\":0,\"modelFailures\":0,\"lumeCatches\":2,\"lumeFailures\":0}\nresolved:\n- responsibility/create_new target=none decision=needs_you :: Velvet Sprocket is the paint lead for the wooden-track refresh.\nrejected:\n- rejected unknown/ignore Velvet Sprocket is joining as paint lead for the wooden-track refresh."
+      },
+      "comparison": {
+        "materialFactsExpected": [
+          "Velvet Sprocket is a new person / paint lead."
+        ],
+        "materialFactsFound": [
+          "Velvet Sprocket is a new person / paint lead."
+        ],
+        "materialFactsMissed": [],
+        "unsupportedOrInvented": [],
+        "existingEntityReferences": "correct — velvet-new: unbound / new",
+        "ambiguityHandling": "no ambiguity-required fact",
+        "evidenceGrounding": "grounded — velvet-new: evidence grounded"
+      }
+    },
+    {
+      "id": "gate1-change-existing-risk",
+      "snapshot": "CANONICAL PROJECT TRUTH SNAPSHOT\nMechanical dump of current stored rows. Not a summary. Not ranked.\nproject.id=\"proj-toy\"\nproject.name=\"Toyworld\"\nproject.code=\"TOY\"\n\nPEOPLE\nid=\"person-brick\" name=\"Brick Oakley\" role=\"Sponsor\"\nid=\"person-buttons\" name=\"Captain Buttons\" role=\"Assembly lead\"\n\nISSUES\nid=\"risk-packaging\" title=\"Packaging delay\" status=\"open\"\n\nTO_DO\nid=\"todo-track\" title=\"Print the track map\" done=false dueAt= detail=\n\nKNOWLEDGE\n(none)\n\nMILESTONES\nid=\"ms-freeze\" label=\"Track freeze\" startAt=\"2026-09-01T12:00:00.000Z\" endAt= notes=",
+      "snapshotSizes": {
+        "characters": 547,
+        "approxTokensCl100k": 168
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 2655,
+        "usage": {
+          "prompt_tokens": 679,
+          "completion_tokens": 95,
+          "total_tokens": 774,
+          "reasoning_tokens": 0
+        },
+        "interpretation": {
+          "observations": [
+            {
+              "domain": "risk",
+              "subject": "Packaging delay",
+              "referencedCanonicalId": "risk-packaging",
+              "referenceKind": "existing",
+              "assertion": "The packaging delay is worsening following flooding at the cardboard mill.",
+              "proposedValue": "Worsening after the cardboard mill flooded",
+              "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+              "ambiguity": null
+            }
+          ],
+          "overallUncertainty": null
+        }
+      },
+      "existingLume": {
+        "source": "live-production-extract+current-resolve",
+        "label": "Current Capture V2 extract (gpt-4o-mini-2024-07-18) + current resolve",
+        "text": "requestedModel=gpt-4o-mini-2024-07-18 responseModel=gpt-4o-mini-2024-07-18 fallback=false\nusage={\"prompt_tokens\":960,\"completion_tokens\":127,\"total_tokens\":1087,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"audio_tokens\":0,\"accepted_prediction_tokens\":0,\"rejected_prediction_tokens\":0}}\naccount={\"total\":1,\"proposedChanges\":0,\"alreadyKnown\":1,\"merged\":0,\"needsYou\":0,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nlumeSafetyTotals={\"applyReady\":0,\"needsYou\":0,\"noChange\":1,\"rejected\":0,\"illegalOperationsBlocked\":0,\"foreignProjectTargetsBlocked\":0,\"duplicatePersonCreationsBlocked\":0,\"unresolvedTargetConvertedToCreate\":0,\"wrongDomainLegalWrite\":0,\"projectIsolationViolation\":0,\"modelFailures\":0,\"lumeCatches\":0,\"lumeFailures\":0}\nresolved:\n- risk/no_change target=risk-packaging decision=no_change :: The packaging delay is worsening."
+      },
+      "comparison": {
+        "materialFactsExpected": [
+          "Existing Packaging delay risk is worsening and still open."
+        ],
+        "materialFactsFound": [
+          "Existing Packaging delay risk is worsening and still open."
+        ],
+        "materialFactsMissed": [],
+        "unsupportedOrInvented": [],
+        "existingEntityReferences": "correct — packaging-worse: correct risk-packaging",
+        "ambiguityHandling": "no ambiguity-required fact",
+        "evidenceGrounding": "grounded — packaging-worse: evidence grounded"
+      }
+    },
+    {
+      "id": "gate1-messy-mixed-domains",
+      "snapshot": "CANONICAL PROJECT TRUTH SNAPSHOT\nMechanical dump of current stored rows. Not a summary. Not ranked.\nproject.id=\"proj-candy\"\nproject.name=\"Candyland\"\nproject.code=\"CANDY\"\n\nPEOPLE\nid=\"person-gumdrop\" name=\"Pippa Gumdrop\" role=\"UAT lead\"\nid=\"person-fizz\" name=\"Fizz Caramel\" role=\"Designer\"\n\nISSUES\nid=\"risk-bridge\" title=\"Gumdrop Bridge icing\" status=\"open\"\n\nTO_DO\nid=\"todo-pack\" title=\"Prepare the jelly pack\" done=false dueAt= detail=\n\nKNOWLEDGE\nlegacy_people_bullets:\n- Pippa Gumdrop — UAT lead\nid=\"resp-uat\" kind=\"responsibility\" lifecycle=\"current\" body=\"Pippa Gumdrop — UAT lead\" personId=\"person-gumdrop\" responsibility.personId=\"person-gumdrop\" responsibility.personName=\"Pippa Gumdrop\" responsibility.scope=\"UAT lead\" responsibility.ownerConfirmed=true availability.personId= availability.personName= availability.awayFromIso= availability.awayToIso=\n\nMILESTONES\nid=\"ms-parade\" label=\"Parade day\" startAt=\"2026-10-15T12:00:00.000Z\" endAt= notes=",
+      "snapshotSizes": {
+        "characters": 952,
+        "approxTokensCl100k": 275
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 6469,
+        "usage": {
+          "prompt_tokens": 801,
+          "completion_tokens": 333,
+          "total_tokens": 1134,
+          "reasoning_tokens": 0
+        },
+        "interpretation": {
+          "observations": [
+            {
+              "domain": "responsibility",
+              "subject": "Pippa Gumdrop — UAT lead",
+              "referencedCanonicalId": "resp-uat",
+              "referenceKind": "existing",
+              "assertion": "Confirms Pippa Gumdrop remains UAT lead.",
+              "proposedValue": "UAT lead",
+              "evidence": "Pippa Gumdrop remains UAT lead.",
+              "ambiguity": null
+            },
+            {
+              "domain": "milestone",
+              "subject": "Parade day",
+              "referencedCanonicalId": "ms-parade",
+              "referenceKind": "existing",
+              "assertion": "Parade day has moved to 22 October 2026.",
+              "proposedValue": "2026-10-22",
+              "evidence": "Parade day moved to 22 October 2026.",
+              "ambiguity": "The new date is explicit, but no time is stated; whether the existing 12:00 UTC time is retained is unspecified."
+            },
+            {
+              "domain": "risk",
+              "subject": "Chocolate fountain pump overheating",
+              "referencedCanonicalId": null,
+              "referenceKind": "new",
+              "assertion": "The chocolate fountain pump is overheating.",
+              "proposedValue": "Overheating",
+              "evidence": "The chocolate fountain pump is overheating.",
+              "ambiguity": null
+            }
+          ],
+          "overallUncertainty": null
+        }
+      },
+      "existingLume": {
+        "source": "live-production-extract+current-resolve",
+        "label": "Current Capture V2 extract (gpt-4o-mini-2024-07-18) + current resolve",
+        "text": "requestedModel=gpt-4o-mini-2024-07-18 responseModel=gpt-4o-mini-2024-07-18 fallback=false\nusage={\"prompt_tokens\":985,\"completion_tokens\":337,\"total_tokens\":1322,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"audio_tokens\":0,\"accepted_prediction_tokens\":0,\"rejected_prediction_tokens\":0}}\naccount={\"total\":3,\"proposedChanges\":2,\"alreadyKnown\":1,\"merged\":0,\"needsYou\":0,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nlumeSafetyTotals={\"applyReady\":2,\"needsYou\":0,\"noChange\":1,\"rejected\":0,\"illegalOperationsBlocked\":0,\"foreignProjectTargetsBlocked\":0,\"duplicatePersonCreationsBlocked\":0,\"unresolvedTargetConvertedToCreate\":0,\"wrongDomainLegalWrite\":0,\"projectIsolationViolation\":0,\"modelFailures\":0,\"lumeCatches\":0,\"lumeFailures\":0}\nresolved:\n- person/no_change target=person-gumdrop decision=no_change :: Pippa Gumdrop remains UAT lead.\n- milestone/update_existing target=ms-parade decision=write :: Parade day moved to 22 October 2026.\n- risk/create_new target=none decision=write :: The chocolate fountain pump is overheating."
+      },
+      "comparison": {
+        "materialFactsExpected": [
+          "Pippa remains UAT lead (existing person / responsibility).",
+          "Parade day moves to 22 October 2026.",
+          "New risk: chocolate fountain pump overheating."
+        ],
+        "materialFactsFound": [
+          "Pippa remains UAT lead (existing person / responsibility).",
+          "Parade day moves to 22 October 2026.",
+          "New risk: chocolate fountain pump overheating."
+        ],
+        "materialFactsMissed": [],
+        "unsupportedOrInvented": [],
+        "existingEntityReferences": "incorrect — pippa-still: expected person-gumdrop, got resp-uat; parade-22: correct ms-parade; fountain-new: unbound / new",
+        "ambiguityHandling": "no ambiguity-required fact",
+        "evidenceGrounding": "grounded — pippa-still: evidence grounded; parade-22: evidence grounded; fountain-new: evidence grounded"
+      }
+    },
+    {
+      "id": "gate1-ambiguous-brick",
+      "snapshot": "CANONICAL PROJECT TRUTH SNAPSHOT\nMechanical dump of current stored rows. Not a summary. Not ranked.\nproject.id=\"proj-toy\"\nproject.name=\"Toyworld\"\nproject.code=\"TOY\"\n\nPEOPLE\nid=\"person-brick\" name=\"Brick Oakley\" role=\"Sponsor\"\nid=\"person-buttons\" name=\"Captain Buttons\" role=\"Assembly lead\"\n\nISSUES\nid=\"risk-packaging\" title=\"Packaging delay\" status=\"open\"\n\nTO_DO\nid=\"todo-track\" title=\"Print the track map\" done=false dueAt= detail=\n\nKNOWLEDGE\n(none)\n\nMILESTONES\nid=\"ms-freeze\" label=\"Track freeze\" startAt=\"2026-09-01T12:00:00.000Z\" endAt= notes=",
+      "snapshotSizes": {
+        "characters": 547,
+        "approxTokensCl100k": 168
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 6881,
+        "usage": {
+          "prompt_tokens": 681,
+          "completion_tokens": 252,
+          "total_tokens": 933,
+          "reasoning_tokens": 93
+        },
+        "interpretation": {
+          "observations": [
+            {
+              "domain": "responsibility",
+              "subject": "Brick from the warehouse",
+              "referencedCanonicalId": null,
+              "referenceKind": "ambiguous",
+              "assertion": "Brick expressed interest in helping with assembly; no assignment or ownership was confirmed.",
+              "proposedValue": "Wants to help with assembly",
+              "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+              "ambiguity": "It is unclear whether Brick from the warehouse is the existing sponsor, Brick Oakley, or a different person."
+            }
+          ],
+          "overallUncertainty": null
+        }
+      },
+      "existingLume": {
+        "source": "live-production-extract+current-resolve",
+        "label": "Current Capture V2 extract (gpt-4o-mini-2024-07-18) + current resolve",
+        "text": "requestedModel=gpt-4o-mini-2024-07-18 responseModel=gpt-4o-mini-2024-07-18 fallback=false\nusage={\"prompt_tokens\":962,\"completion_tokens\":129,\"total_tokens\":1091,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"audio_tokens\":0,\"accepted_prediction_tokens\":0,\"rejected_prediction_tokens\":0}}\naccount={\"total\":1,\"proposedChanges\":0,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":1,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nlumeSafetyTotals={\"applyReady\":0,\"needsYou\":1,\"noChange\":0,\"rejected\":0,\"illegalOperationsBlocked\":0,\"foreignProjectTargetsBlocked\":0,\"duplicatePersonCreationsBlocked\":0,\"unresolvedTargetConvertedToCreate\":0,\"wrongDomainLegalWrite\":0,\"projectIsolationViolation\":0,\"modelFailures\":0,\"lumeCatches\":0,\"lumeFailures\":0}\nresolved:\n- availability/update_existing target=person-brick decision=needs_you :: Brick wants to help with assembly."
+      },
+      "comparison": {
+        "materialFactsExpected": [
+          "A Brick was mentioned who may not be Brick Oakley — preserve ambiguity."
+        ],
+        "materialFactsFound": [
+          "A Brick was mentioned who may not be Brick Oakley — preserve ambiguity."
+        ],
+        "materialFactsMissed": [],
+        "unsupportedOrInvented": [],
+        "existingEntityReferences": "none required",
+        "ambiguityHandling": "safe — which-brick: ambiguity surfaced (ambiguous)",
+        "evidenceGrounding": "grounded — which-brick: evidence grounded"
+      }
+    },
+    {
+      "id": "gate1-holdout-h6-messy",
+      "snapshot": "CANONICAL PROJECT TRUTH SNAPSHOT\nMechanical dump of current stored rows. Not a summary. Not ranked.\nproject.id=\"proj-harbour-holdout-seed\"\nproject.name=\"Harbour repairs mobilisation\"\nproject.code=\"HARBOUR\"\n\nPEOPLE\nid=\"person-priya\" name=\"Priya Nair\" role=\"contractor liaison\"\nid=\"person-tomos\" name=\"Tomos Reed\" role=\"voids\"\nid=\"person-elena\" name=\"Elena Voss\" role=\"resident liaison\"\n\nISSUES\n(none)\n\nTO_DO\n(none)\n\nKNOWLEDGE\nlegacy_people_bullets:\n- Priya Nair owns contractor liaison.\n- Tomos Reed owns voids.\n- Elena Voss owns resident liaison.\nid=\"know-policy-v3\" kind=\"fact\" lifecycle=\"current\" body=\"Repairs policy v3 is the current working version.\" personId= responsibility.personId= responsibility.personName= responsibility.scope= responsibility.ownerConfirmed= availability.personId= availability.personName= availability.awayFromIso= availability.awayToIso=\nid=\"resp-priya\" kind=\"responsibility\" lifecycle=\"current\" body=\"Priya Nair owns contractor liaison.\" personId=\"person-priya\" responsibility.personId=\"person-priya\" responsibility.personName=\"Priya Nair\" responsibility.scope=\"contractor liaison\" responsibility.ownerConfirmed=true availability.personId= availability.personName= availability.awayFromIso= availability.awayToIso=\nid=\"resp-tomos\" kind=\"responsibility\" lifecycle=\"current\" body=\"Tomos Reed owns voids.\" personId=\"person-tomos\" responsibility.personId=\"person-tomos\" responsibility.personName=\"Tomos Reed\" responsibility.scope=\"voids\" responsibility.ownerConfirmed=true availability.personId= availability.personName= availability.awayFromIso= availability.awayToIso=\nid=\"resp-elena\" kind=\"responsibility\" lifecycle=\"current\" body=\"Elena Voss owns resident liaison.\" personId=\"person-elena\" responsibility.personId=\"person-elena\" responsibility.personName=\"Elena Voss\" responsibility.scope=\"resident liaison\" responsibility.ownerConfirmed=true availability.personId= availability.personName= availability.awayFromIso= availability.awayToIso=\n\nMILESTONES\nid=\"ms-workshop\" label=\"Mobilisation workshop\" startAt=\"2026-10-08T12:00:00.000Z\" endAt= notes=",
+      "snapshotSizes": {
+        "characters": 2080,
+        "approxTokensCl100k": 510
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 11153,
+        "usage": {
+          "prompt_tokens": 1114,
+          "completion_tokens": 724,
+          "total_tokens": 1838,
+          "reasoning_tokens": 0
+        },
+        "interpretation": {
+          "observations": [
+            {
+              "domain": "milestone",
+              "subject": "Mobilisation workshop",
+              "referencedCanonicalId": "ms-workshop",
+              "referenceKind": "existing",
+              "assertion": "The workshop date has moved from 8 October to 22 October 2026.",
+              "proposedValue": "2026-10-22",
+              "evidence": "22/10/2026 is the new mobilisation workshop date (was 8 Oct).",
+              "ambiguity": "No new start time is stated."
+            },
+            {
+              "domain": "commentary",
+              "subject": "Office plants",
+              "referencedCanonicalId": null,
+              "referenceKind": "none",
+              "assertion": "Office plant watering is explicitly not a project control.",
+              "proposedValue": null,
+              "evidence": "Parking: the office plants need watering; not a control.",
+              "ambiguity": null
+            },
+            {
+              "domain": "responsibility",
+              "subject": "Possible DHP responsibility for Priya Nair",
+              "referencedCanonicalId": "person-priya",
+              "referenceKind": "ambiguous",
+              "assertion": "Tomos speculated that Priya might take DHP if housing insist; no ownership is confirmed.",
+              "proposedValue": null,
+              "evidence": "Tomos mentioned Priya might take DHP if housing insist, but that was just speculation.",
+              "ambiguity": "DHP is not defined in the snapshot, and Priya's possible ownership is explicitly speculative and conditional."
+            },
+            {
+              "domain": "person",
+              "subject": "Kwame Boateng",
+              "referencedCanonicalId": null,
+              "referenceKind": "new",
+              "assertion": "Kwame Boateng is identified as the contractor lead for Harbour.",
+              "proposedValue": "Contractor lead for Harbour",
+              "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+              "ambiguity": null
+            },
+            {
+              "domain": "todo",
+              "subject": "Collect void keys from the depot",
+              "referencedCanonicalId": null,
+              "referenceKind": "new",
+              "assertion": "Void keys remain to be collected from the depot on 16 October 2026.",
+              "proposedValue": "Collect void keys from the depot on 2026-10-16.",
+              "evidence": "Void keys still need collecting from the depot on 16 Oct 2026.",
+              "ambiguity": "No task owner is stated; Tomos's ownership of voids does not explicitly assign this task to him."
+            },
+            {
+              "domain": "knowledge",
+              "subject": "Repairs policy v3",
+              "referencedCanonicalId": "know-policy-v3",
+              "referenceKind": "existing",
+              "assertion": "Elena reaffirmed that repairs policy v3 remains current.",
+              "proposedValue": "Repairs policy v3 remains current.",
+              "evidence": "Elena said the repairs policy v3 remains current.",
+              "ambiguity": null
+            }
+          ],
+          "overallUncertainty": "The revised workshop time and the key-collection task owner are unstated. The DHP ownership suggestion is explicitly speculation, not a confirmed assignment."
+        }
+      },
+      "existingLume": {
+        "source": "hosted-holdout-baseline-post-fix-3",
+        "label": "Published hosted holdout H6 excerpt (post-fix-3). Not re-run. Production path was gpt-4o-mini-2024-07-18.",
+        "text": "observationAccount={\"total\":5,\"proposedChanges\":1,\"alreadyKnown\":1,\"merged\":0,\"needsYou\":3,\"commentary\":0,\"rejected\":0}\nfindings:\n- ENTITY_UPDATED  :: The new mobilisation workshop date is 22/10/2026. → milestone Mobilisation Workshop b81368c8-111b-4014-b6ef-2a8abf1daded\n- AMBIGUOUS NeedsYou :: Void keys need collecting from the depot on 16 Oct 2026. → todo Collect void keys from the depot\n- NO_CHANGE  :: Elena said the repairs policy v3 remains current. → untargeted\n- AMBIGUOUS NeedsYou :: Tomos mentioned Priya might take DHP if housing insist. → risk Priya might take DHP if housing insist\n- AMBIGUOUS NeedsYou :: Kwame Boateng is the contractor lead for Harbour. → stakeholder Kwame Boateng\nKnown pipeline weakness on this paste: void-key create and Kwame create were Needs You / AMBIGUOUS rather than independently actionable creates; workshop date update was found."
+      },
+      "comparison": {
+        "materialFactsExpected": [
+          "Mobilisation workshop date moves to 22 October 2026.",
+          "Collect void keys from the depot on 16 October 2026 — new dated action.",
+          "Kwame Boateng is a new contractor lead.",
+          "Repairs policy v3 remains current already-known knowledge.",
+          "Priya/DHP ownership is speculation — must not be asserted as decided."
+        ],
+        "materialFactsFound": [
+          "Mobilisation workshop date moves to 22 October 2026.",
+          "Collect void keys from the depot on 16 October 2026 — new dated action.",
+          "Kwame Boateng is a new contractor lead.",
+          "Repairs policy v3 remains current already-known knowledge.",
+          "Priya/DHP ownership is speculation — must not be asserted as decided."
+        ],
+        "materialFactsMissed": [],
+        "unsupportedOrInvented": [],
+        "existingEntityReferences": "correct — workshop-22: correct ms-workshop; void-keys: unbound / new; kwame-new: unbound / new; policy-v3: correct know-policy-v3",
+        "ambiguityHandling": "safe — dhp-speculation: ambiguity surfaced (ambiguous)",
+        "evidenceGrounding": "grounded — workshop-22: evidence grounded; void-keys: evidence grounded; kwame-new: evidence grounded; policy-v3: evidence grounded; dhp-speculation: evidence grounded"
+      }
+    }
+  ]
+}
