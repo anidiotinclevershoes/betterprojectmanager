@@ -241,6 +241,60 @@ async function main() {
     assert.ok(laterDates.some((row) => /Production release · 20 Sep/i.test(row.title)));
   });
 
+  await check("delayed visibility: two stale reloads must not adopt a missing write", async () => {
+    const fake = new FakeWorkspaceClient();
+    seedCaptureDateProject(fake);
+    const before = await loadMissionStateFromSupabase(asClient(fake));
+    const suggestion: PendingSuggestion = {
+      id: "op-date-stale-reload",
+      kind: "milestone",
+      op: "update",
+      content: "Production release",
+      destination: "project",
+      projectId: PROJECT,
+      date: "2026-09-20",
+      legalDomain: "milestone",
+      targetEntityId: MS_PROD,
+    };
+    suggestion.expectedTarget = fingerprintExpectedTarget(
+      captureApplyWorldFromState(before.state),
+      suggestion,
+    );
+    let reloads = 0;
+    const applied = await applyApprovedCaptureSuggestion({
+      item: suggestion,
+      text: "The Production release is now scheduled for 20 September 2026.",
+      projectId: PROJECT,
+      expectedTarget: suggestion.expectedTarget,
+      loadWorkspace: async () => before,
+      hooks: supabaseCaptureApplyHooks({
+        client: asClient(fake),
+        workspaceId: fake.workspaceId,
+        userId: fake.userId,
+        state: before.state,
+      }),
+      reloadWorkspace: async () => {
+        reloads += 1;
+        if (reloads <= 2) return before.state;
+        return (await loadMissionStateFromSupabase(asClient(fake))).state;
+      },
+    });
+    assert.equal(applied.executed.kind, "wrote");
+    if (applied.state) {
+      assert.equal(
+        productionRow(applied.state)?.startAt,
+        "2026-09-20T12:00:00.000Z",
+        "must not adopt pre-write first paint after Apply 200",
+      );
+    } else {
+      assert.equal(
+        applied.reconcileFailed,
+        true,
+        "if the write is not yet visible, do not lie — mark reconcile failed",
+      );
+    }
+  });
+
   await check("Apply retries authoritative reload when first paint misses the write", async () => {
     const { appliedStateContainsWrite } = await import(
       "../src/lib/capture/apply/apply-approved"
