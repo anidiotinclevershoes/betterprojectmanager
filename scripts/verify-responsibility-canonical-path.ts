@@ -295,6 +295,58 @@ check("Pippa-class first-name Helen restatement stays Needs You", () => {
   assert.equal(row?.decision.kind, "needs_you");
 });
 
+check("model no_change ownership still persists a new responsibility", () => {
+  const transcript = "Mei Chen is responsible for the monthly cost report.";
+  const { row } = resolveObs(riversideWorld(), transcript, {
+    domain: "person",
+    disposition: "no_change",
+    statement: transcript,
+    evidence: transcript,
+    candidateTargetTitle: "Mei Chen",
+    proposedValues: { name: "Mei Chen" },
+  });
+  assert.equal(row?.decision.kind, "write", row?.decision.kind === "needs_you" ? row.decision.reason : "");
+  if (row?.decision.kind === "write") {
+    assert.equal(row.decision.operation.type, "confirm_responsibility");
+  }
+});
+
+check("new named Person + explicit ownership uses confirm_responsibility", () => {
+  const transcript = "Leo Mensah will own fire-door certificates.";
+  const { row } = resolveObs(riversideWorld(), transcript, {
+    domain: "person",
+    disposition: "create_new",
+    statement: transcript,
+    evidence: transcript,
+    candidateTargetTitle: "Leo Mensah",
+    proposedValues: { name: "Leo Mensah" },
+  });
+  assert.equal(row?.decision.kind, "write", row?.decision.kind === "needs_you" ? row.decision.reason : "");
+  if (row?.decision.kind === "write") {
+    assert.equal(row.decision.operation.type, "confirm_responsibility");
+    if (row.decision.operation.type === "confirm_responsibility") {
+      assert.match(row.decision.operation.scope, /fire-door certificates/i);
+      assert.equal(row.decision.operation.personName, "Leo Mensah");
+    }
+  }
+});
+
+check("role-only no_change does not invent a responsibility from a job title", () => {
+  const transcript = "Mei Chen is the quantity surveyor.";
+  const { row } = resolveObs(riversideWorld(), transcript, {
+    domain: "person",
+    disposition: "no_change",
+    statement: transcript,
+    evidence: transcript,
+    candidateTargetTitle: "Mei Chen",
+    proposedValues: { name: "Mei Chen", role: "quantity surveyor" },
+  });
+  assert.ok(row);
+  if (row?.decision.kind === "write") {
+    assert.notEqual(row.decision.operation.type, "confirm_responsibility");
+  }
+});
+
 check("existing Person + new responsibility is a legal write", () => {
   const transcript = "Mei Chen is responsible for the monthly cost report.";
   const { row } = resolveObs(riversideWorld(), transcript, {

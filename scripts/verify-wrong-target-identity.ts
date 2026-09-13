@@ -177,6 +177,23 @@ function main() {
     assert.equal(row?.decision.kind, "needs_you");
   });
 
+  check("C16-class: guessed in-project To Do UUID rematerializes as Create", () => {
+    const transcript =
+      "Create two separate snag lists: Cafe snag list and Hall snag list. Do not combine them.";
+    const cafe = resolveObs(world, transcript, {
+      id: "c16-cafe-wrong-id",
+      domain: "todo",
+      disposition: "update_existing",
+      statement: "Create Cafe snag list",
+      evidence: "Create two separate snag lists: Cafe snag list and Hall snag list.",
+      candidateTargetId: ASBESTOS,
+      candidateTargetTitle: "Cafe snag list",
+      proposedValues: { title: "Cafe snag list" },
+    });
+    assert.equal(cafe.row?.decision.kind, "write", cafe.row?.decision.kind === "needs_you" ? cafe.row.decision.reason : "");
+    assert.equal(writeType(cafe.row), "create_todo");
+  });
+
   check("C16-class: two untitled-date snag-list Creates rematerialize", () => {
     const transcript =
       "Create two separate snag lists: Cafe snag list and Hall snag list. Do not combine them.";
@@ -321,6 +338,138 @@ function main() {
       captureEntryProjectId: PROJECT,
     });
     assert.equal(decision.kind, "needs_you");
+  });
+
+  check("model no_change restatement of an evidenced open risk is not a Create", () => {
+    const transcript =
+      "M&E first-fix coordination with the hall ceiling void remains open.";
+    const { row } = resolveObs(world, transcript, {
+      id: "c18-me-stay",
+      domain: "risk",
+      disposition: "no_change",
+      statement: transcript,
+      evidence: transcript,
+      candidateTargetTitle: "M&E first-fix coordination with the hall ceiling void",
+      proposedValues: { title: "M&E first-fix coordination with the hall ceiling void" },
+    });
+    assert.equal(row?.decision.kind, "no_change");
+  });
+
+  check("model no_change resolve binds the evidenced risk, never the sibling", () => {
+    const timberWorld: CaptureApplyWorld = {
+      ...world,
+      risks: [
+        ...world.risks,
+        {
+          id: "risk-timber",
+          projectId: PROJECT,
+          title: "Hall timber floor may still hide services",
+          status: "open",
+        },
+      ],
+    };
+    const transcript =
+      "The hall timber floor services risk is resolved — they opened a trial panel and it is clear. M&E first-fix coordination with the hall ceiling void remains open.";
+    const resolved = resolveObs(timberWorld, transcript, {
+      id: "c18-no-change",
+      domain: "risk",
+      disposition: "no_change",
+      statement: "The hall timber floor services risk is resolved",
+      evidence: "The hall timber floor services risk is resolved — they opened a trial panel and it is clear.",
+      candidateTargetId: DDA,
+      candidateTargetTitle: "Outstanding DDA access ramp detail",
+      proposedValues: { status: "resolved" },
+    });
+    assert.equal(resolved.row?.decision.kind, "write");
+    assert.equal(writeType(resolved.row), "update_risk_status");
+    assert.equal(writeRiskId(resolved.row), "risk-timber");
+  });
+
+  check("model no_change of an absent titled To Do rematerializes as Create", () => {
+    const transcript = "Add a to-do to reprint the visitor badges.";
+    const { row } = resolveObs(world, transcript, {
+      id: "no-change-todo",
+      domain: "todo",
+      disposition: "no_change",
+      statement: transcript,
+      evidence: transcript,
+      candidateTargetTitle: "Reprint the visitor badges",
+      proposedValues: { title: "Reprint the visitor badges" },
+    });
+    assert.equal(row?.decision.kind, "write");
+    assert.equal(writeType(row), "create_todo");
+  });
+
+  check("model no_change date move binds the uniquely evidenced milestone", () => {
+    const dated: CaptureApplyWorld = {
+      ...world,
+      timeline: [
+        ...world.timeline,
+        {
+          id: "ms-walk",
+          projectId: PROJECT,
+          label: "Client walk-through",
+          startAt: "2026-10-20",
+        },
+      ],
+    };
+    const transcript = "Move the client walk-through to 23 October 2026.";
+    const { row } = resolveObs(dated, transcript, {
+      id: "no-change-date",
+      domain: "milestone",
+      disposition: "no_change",
+      statement: transcript,
+      evidence: transcript,
+      candidateTargetTitle: "Client walk-through",
+      proposedValues: { date: "2026-10-23", title: "Client walk-through" },
+    });
+    assert.equal(row?.decision.kind, "write");
+    assert.equal(writeType(row), "update_milestone");
+    if (row?.decision.kind === "write" && row.decision.operation.type === "update_milestone") {
+      assert.equal(row.decision.operation.milestoneId, "ms-walk");
+      assert.match(String(row.decision.operation.startAt ?? ""), /2026-10-23/);
+    }
+  });
+
+  check("model no_change restatement of the same milestone date stays no_change", () => {
+    const transcript = "Practical completion is still 18 December 2026 — no change.";
+    const sameDate: CaptureApplyWorld = {
+      ...world,
+      timeline: [
+        {
+          id: "ms-pc",
+          projectId: PROJECT,
+          label: "Practical completion",
+          startAt: "2026-12-18",
+        },
+      ],
+    };
+    const { row } = resolveObs(sameDate, transcript, {
+      id: "pc-restated",
+      domain: "milestone",
+      disposition: "no_change",
+      statement: transcript,
+      evidence: transcript,
+      candidateTargetId: "ms-pc",
+      candidateTargetTitle: "Practical completion",
+      proposedValues: { date: "2026-12-18", title: "Practical completion" },
+    });
+    assert.equal(row?.decision.kind, "no_change");
+  });
+
+  check("model no_change of an absent two-token Person rematerializes as Create", () => {
+    const transcript = "Add Leo Mensah as the fire officer. Name only for now.";
+    const { row } = resolveObs(world, transcript, {
+      id: "leo-no-change",
+      domain: "person",
+      disposition: "no_change",
+      statement: transcript,
+      evidence: transcript,
+      candidateTargetTitle: "Leo Mensah",
+      proposedValues: { name: "Leo Mensah" },
+    });
+    assert.equal(row?.decision.kind, "write", row?.decision.kind === "needs_you" ? row.decision.reason : "");
+    assert.equal(writeType(row), "ensure_person");
   });
 
   check("similar-title risk does not bind the other open risk", () => {

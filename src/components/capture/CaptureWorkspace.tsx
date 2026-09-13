@@ -78,7 +78,7 @@ export function CaptureWorkspace({
   /** Ocean project-mode embed — presentation only; lifecycle unchanged. */
   variant?: "legacy" | "ocean";
 }) {
-  const { state, openaiConfigured } = useMission();
+  const { state, openaiConfigured, reconcileDurableWorkspace } = useMission();
   const usage = analysesRemaining(state);
   const session = useCaptureSession();
   const {
@@ -432,6 +432,7 @@ export function CaptureWorkspace({
       models: pendingReadyModels(reviewModels, added, dismissed),
       applyOne: (item) => applyOne(item, defaultProjectId),
     });
+    await reconcileDurableWorkspace();
     if (confirmOwner) {
       setConfirmOwner(confirmOwner);
     }

@@ -227,6 +227,15 @@ function resolveOne(
   }
 
   if (observation.disposition === "no_change") {
+    const rematerialized = rematerializeTrustedNoChange(
+      observation,
+      args.world,
+      projectId,
+      args.transcript,
+    );
+    if (rematerialized !== observation) {
+      return resolveOne(rematerialized, args);
+    }
     if (PERSON_LINKED_DOMAINS.has(observation.domain)) {
       const ownership = observation.proposedValues?.ownershipSemantics;
       if (ownership === "ambiguous") {
@@ -299,7 +308,10 @@ function resolveOne(
     };
   }
 
-  if (observation.disposition === "update_existing" && !observation.candidateTargetId) {
+  if (
+    observation.disposition === "update_existing" ||
+    observation.disposition === "create_new"
+  ) {
     const rematerialized = rematerializeIndependentDatedCreate(
       observation,
       args.world,
@@ -308,15 +320,17 @@ function resolveOne(
     if (rematerialized !== observation) {
       return resolveOne(rematerialized, args);
     }
-    return {
-      observation,
-      suggestion: null,
-      decision: {
-        kind: "needs_you",
-        domain: DOMAIN_TO_LEGAL[observation.domain],
-        reason: "Update requires a valid existing identity.",
-      },
-    };
+    if (observation.disposition === "update_existing" && !observation.candidateTargetId) {
+      return {
+        observation,
+        suggestion: null,
+        decision: {
+          kind: "needs_you",
+          domain: DOMAIN_TO_LEGAL[observation.domain],
+          reason: "Update requires a valid existing identity.",
+        },
+      };
+    }
   }
 
   const readyGap = missingReadySemantics(observation);
@@ -521,19 +535,18 @@ function rematerializeOwnershipAsResponsibility(
   ) {
     return observation;
   }
-  const project = projectId
-    ? world.projects.find((p) => p.id === projectId)
-    : undefined;
-  const existing = (project?.stakeholders ?? []).some((person) =>
-    namesMatchExact(person.name, name),
-  );
-  // A new Person + ownership language is still a Person create first.
-  // Only rematerialize ownership onto an existing recorded identity.
-  if (!existing) return observation;
+  // Existing person: ownership is a responsibility write, not a duplicate
+  // stakeholder. New named person: same canonical confirm_responsibility
+  // path — Apply ensures the person. Role-only lines never reach here.
   const ownership = values.ownershipSemantics;
   return {
     ...observation,
     domain: "responsibility",
+    disposition:
+      observation.disposition === "no_change"
+        ? "create_new"
+        : observation.disposition,
+    truthIntent: "current",
     proposedValues: {
       ...values,
       personName: name,
@@ -573,6 +586,216 @@ function isResolveOrComplete(observation: CaptureObservationV2): boolean {
  * truthIntent is already current. Resolve/complete of a missing row stays
  * fail-closed — never substitute a different same-domain entity.
  */
+/**
+ * Model `no_change` is an opinion, not authority. If proposed values
+ * disagree with canonical truth and bind safely, rematerialize. If they
+ * describe a clear absent entity, rematerialize as Create. Otherwise keep
+ * no_change — do not invent a write from the statement alone.
+ */
+function rematerializeTrustedNoChange(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  transcript: string,
+): CaptureObservationV2 {
+  const ownership = rematerializeOwnershipAsResponsibility(
+    observation,
+    world,
+    projectId,
+  );
+  if (ownership !== observation) return ownership;
+
+  const titled = rematerializeIndependentDatedCreate(
+    observation,
+    world,
+    projectId,
+  );
+  if (titled !== observation) return titled;
+
+  const values = observation.proposedValues ?? {};
+  const status = String(values.status ?? values.proposedStatus ?? "").toLowerCase();
+  const date = asIso(values.date) || asIso(values.startAt) || asIso(values.dueAt);
+  const evidence = identityEvidenceText(observation, transcript);
+
+  if (
+    (observation.domain === "risk" || observation.domain === "todo") &&
+    (status === "resolved" || status === "complete" || status === "completed")
+  ) {
+    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
+    if (hits.length === 1) {
+      const hit = hits[0]!;
+      if (observation.domain === "risk") {
+        const row = world.risks.find((r) => r.id === hit.id);
+        if (row && row.status !== "resolved" && row.status !== "accepted") {
+          return {
+            ...observation,
+            disposition: "update_existing",
+            truthIntent: "current",
+            candidateTargetId: hit.id,
+            candidateTargetTitle: hit.title,
+            proposedValues: { ...values, status: "resolved" },
+          };
+        }
+      }
+      if (observation.domain === "todo") {
+        const row = world.todos.find((t) => t.id === hit.id);
+        if (row && !row.done) {
+          return {
+            ...observation,
+            disposition: "update_existing",
+            truthIntent: "current",
+            candidateTargetId: hit.id,
+            candidateTargetTitle: hit.title,
+            proposedValues: { ...values, status: "complete" },
+          };
+        }
+      }
+    }
+    if (hits.length > 1) {
+      return {
+        ...observation,
+        disposition: "ambiguous",
+        commentary:
+          observation.commentary?.trim() ||
+          "More than one existing record matches this Capture. Lume will not guess.",
+      };
+    }
+    return observation;
+  }
+
+  if (observation.domain === "milestone" && date) {
+    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
+    if (hits.length === 1) {
+      const row = world.timeline.find((item) => item.id === hits[0]!.id);
+      const current = row?.startAt?.slice(0, 10);
+      if (row && current && current !== date.slice(0, 10)) {
+        return {
+          ...observation,
+          disposition: "update_existing",
+          truthIntent: "current",
+          candidateTargetId: row.id,
+          candidateTargetTitle: row.label,
+          proposedValues: { ...values, date, startAt: date },
+        };
+      }
+    }
+    // A no_change date restatement is not a licence to mint a milestone
+    // when no evidenced row exists. Uncertain/update_existing Creates
+    // still rematerialize through rematerializeIndependentDatedCreate.
+  }
+
+  if (observation.domain === "availability") {
+    const from = asIso(values.awayFromIso) || asIso(values.date);
+    if (from) {
+      return {
+        ...observation,
+        disposition: "create_new",
+        truthIntent: "current",
+      };
+    }
+  }
+
+  const title = rematerializeTitle(observation);
+  if (
+    title &&
+    (observation.domain === "todo" || observation.domain === "risk") &&
+    !isResolveOrComplete(observation)
+  ) {
+    const evidenced = uniquelyEvidencedRecords(
+      observation,
+      world,
+      projectId,
+      evidence,
+    );
+    if (evidenced.length === 0 && !uniqueTitledRecord(world, projectId, observation.domain, title)) {
+      return {
+        ...observation,
+        disposition: "create_new",
+        truthIntent: "current",
+        candidateTargetId: null,
+        candidateTargetTitle: title,
+      };
+    }
+  }
+
+  return rematerializeAbsentPerson(observation, world, projectId, transcript);
+}
+
+/**
+ * Model `no_change` on a named Person is an opinion. A two-token name
+ * evidenced in observation-local text, with no exact-name collision, is a
+ * legal Create. First-name collisions stay closed (Pippa-class).
+ */
+function rematerializeAbsentPerson(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  transcript: string,
+): CaptureObservationV2 {
+  if (observation.domain !== "person") return observation;
+  const values = observation.proposedValues ?? {};
+  const name =
+    asString(values.name) ||
+    asString(values.personName) ||
+    observation.candidateTargetTitle?.trim() ||
+    "";
+  if (!name) return observation;
+  const project = projectId
+    ? world.projects.find((row) => row.id === projectId)
+    : undefined;
+  const people = project?.stakeholders ?? [];
+  if (people.some((person) => namesMatchExact(person.name, name))) {
+    return observation;
+  }
+  const evidence = identityEvidenceText(observation, transcript);
+  if (!recordedPersonNameAppearsInText(evidence, name)) return observation;
+  const tokens = name.split(/\s+/).filter(Boolean);
+  if (tokens.length < 2 && people.length > 0) {
+    const first = tokens[0]!.toLowerCase();
+    const firstMatches = people.filter((person) => {
+      const recordedFirst = person.name.trim().split(/\s+/)[0]?.toLowerCase();
+      return recordedFirst === first;
+    });
+    if (firstMatches.length > 0) return observation;
+  }
+  return {
+    ...observation,
+    disposition: "create_new",
+    truthIntent: "current",
+    candidateTargetId: null,
+    candidateTargetTitle: name,
+    proposedValues: { ...values, name },
+  };
+}
+
+function uniquelyEvidencedRecords(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  evidence: string,
+): Array<{ id: string; title: string }> {
+  if (!evidence.trim()) return [];
+  if (observation.domain === "risk") {
+    return world.risks
+      .filter((risk) => !projectId || risk.projectId === projectId)
+      .filter((risk) => recordedTitleEvidencedInText(evidence, risk.title))
+      .map((risk) => ({ id: risk.id, title: risk.title }));
+  }
+  if (observation.domain === "todo") {
+    return world.todos
+      .filter((todo) => !projectId || !todo.projectId || todo.projectId === projectId)
+      .filter((todo) => recordedTitleEvidencedInText(evidence, todo.title))
+      .map((todo) => ({ id: todo.id, title: todo.title }));
+  }
+  if (observation.domain === "milestone") {
+    return world.timeline
+      .filter((item) => !projectId || item.projectId === projectId)
+      .filter((item) => recordedTitleEvidencedInText(evidence, item.label))
+      .map((item) => ({ id: item.id, title: item.label }));
+  }
+  return [];
+}
+
 function rematerializeIndependentDatedCreate(
   observation: CaptureObservationV2,
   world: CaptureApplyWorld,
@@ -594,14 +817,48 @@ function rematerializeIndependentDatedCreate(
   if (isResolveOrComplete(observation)) return observation;
 
   const match = uniqueTitledRecord(world, projectId, observation.domain, title);
+  const boundId = observation.candidateTargetId?.trim();
+  const bound = boundId
+    ? findScopedEntity(observation, world, projectId, boundId)
+    : null;
+  const proposedTitle = rematerializeTitle(observation);
+  const boundTitleCompatible =
+    !bound ||
+    !proposedTitle ||
+    titlesCompatible(proposedTitle, bound.title) ||
+    recordedTitleEvidencedInText(
+      identityEvidenceText(observation, observation.statement),
+      bound.title,
+    );
 
-  if (observation.candidateTargetId) {
+  if (boundId) {
     if (
       observation.disposition === "create_new" &&
       observation.truthIntent === "uncertain"
     ) {
       return {
         ...observation,
+        truthIntent: "current",
+        candidateTargetId: null,
+        candidateTargetTitle: title,
+      };
+    }
+    // A model UUID is not identity. Wrong-type / missing / title-incompatible
+    // ids must not block a clear titled Create. Resolve/complete stays
+    // fail-closed — never substitute a different same-domain row.
+    if (!isResolveOrComplete(observation) && (!bound || !boundTitleCompatible)) {
+      if (match) {
+        return {
+          ...observation,
+          disposition: "update_existing",
+          truthIntent: "current",
+          candidateTargetId: match.id,
+          candidateTargetTitle: match.title,
+        };
+      }
+      return {
+        ...observation,
+        disposition: "create_new",
         truthIntent: "current",
         candidateTargetId: null,
         candidateTargetTitle: title,
@@ -617,6 +874,17 @@ function rematerializeIndependentDatedCreate(
         ...observation,
         candidateTargetId: match.id,
         candidateTargetTitle: match.title,
+      };
+    }
+    return observation;
+  }
+
+  if (observation.disposition === "create_new" && !boundId) {
+    if (observation.truthIntent === "uncertain") {
+      return {
+        ...observation,
+        truthIntent: "current",
+        candidateTargetTitle: title,
       };
     }
     return observation;
@@ -861,6 +1129,22 @@ function personLinkedIdentityGate(
       kind: "bound",
       person: { id: evidenced[0]!.id, name: evidenced[0]!.name },
     };
+  }
+
+  if (observation.domain === "responsibility") {
+    const name =
+      asString(observation.proposedValues?.personName) ||
+      asString(observation.proposedValues?.name) ||
+      observation.candidateTargetTitle?.trim() ||
+      "";
+    const tokens = name.split(/\s+/).filter(Boolean);
+    if (
+      tokens.length >= 2 &&
+      recordedPersonNameAppearsInText(text, name) &&
+      !people.some((person) => namesMatchExact(person.name, name))
+    ) {
+      return null;
+    }
   }
 
   return uncertain(
