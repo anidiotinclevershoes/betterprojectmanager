@@ -19,7 +19,7 @@ import {
   pendingReadyModels,
 } from "@/lib/capture/review/viewModel";
 import { applyPendingReadyQueue } from "@/lib/capture/review/applyReadyQueue";
-import { confirmAuthoritativeWrites } from "@/lib/capture/apply/apply-approved";
+import { confirmAuthoritativeWrites } from "@/lib/capture/apply/confirm-writes";
 import {
   CaptureSummary,
   SuggestedChangesList,

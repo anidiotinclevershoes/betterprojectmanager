@@ -3,10 +3,7 @@
  * skip later Ready items. Batch completion owns the final
  * authoritative reconciliation for the successful write set.
  */
-import {
-  confirmAuthoritativeWrites,
-  type ConfirmAuthoritativeWritesResult,
-} from "@/lib/capture/apply/apply-approved";
+import type { ConfirmAuthoritativeWritesResult } from "@/lib/capture/apply/confirm-writes";
 import type { CaptureApplyDecision, CaptureConfirmOwnerRequest, CaptureLegalOperation } from "@/lib/capture/apply/types";
 import type { PendingSuggestion } from "@/lib/capture/suggestions";
 import type { ReviewChangeViewModel } from "./viewModel";
