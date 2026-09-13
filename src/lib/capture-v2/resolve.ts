@@ -227,47 +227,66 @@ function resolveOne(
   }
 
   if (observation.disposition === "no_change") {
-    const rematerialized = rematerializeTrustedNoChange(
+    const hydrated = hydrateFromLocalEvidence(
       observation,
       args.world,
       projectId,
       args.transcript,
     );
-    if (rematerialized !== observation) {
+    const rematerialized = rematerializeTrustedNoChange(
+      hydrated,
+      args.world,
+      projectId,
+      args.transcript,
+    );
+    if (rematerialized !== hydrated) {
       return resolveOne(rematerialized, args);
     }
-    if (PERSON_LINKED_DOMAINS.has(observation.domain)) {
-      const ownership = observation.proposedValues?.ownershipSemantics;
+    if (PERSON_LINKED_DOMAINS.has(hydrated.domain)) {
+      const ownership = hydrated.proposedValues?.ownershipSemantics;
       if (ownership === "ambiguous") {
         return {
-          observation,
+          observation: hydrated,
           suggestion: null,
           decision: {
             kind: "needs_you",
-            domain: DOMAIN_TO_LEGAL[observation.domain],
+            domain: DOMAIN_TO_LEGAL[hydrated.domain],
             reason:
-              observation.commentary?.trim() ||
+              hydrated.commentary?.trim() ||
               "Lume cannot safely choose between competing interpretations.",
           },
         };
       }
       const identityGate = personLinkedIdentityGate(
-        observation,
+        hydrated,
         args.world,
         projectId,
         args.transcript,
       );
       if (identityGate?.kind === "block" && identityGate.decision.kind === "needs_you") {
-        return { observation, suggestion: null, decision: identityGate.decision };
+        return { observation: hydrated, suggestion: null, decision: identityGate.decision };
       }
     }
+    if (
+      isProvenAlreadyCurrent(hydrated, args.world, projectId, args.transcript)
+    ) {
+      return {
+        observation: hydrated,
+        suggestion: null,
+        decision: {
+          kind: "no_change",
+          domain: DOMAIN_TO_LEGAL[hydrated.domain],
+          reason: "Already known — no mutation.",
+        },
+      };
+    }
     return {
-      observation,
+      observation: hydrated,
       suggestion: null,
       decision: {
-        kind: "no_change",
-        domain: DOMAIN_TO_LEGAL[observation.domain],
-        reason: "Already known — no mutation.",
+        kind: "needs_you",
+        domain: DOMAIN_TO_LEGAL[hydrated.domain],
+        reason: unexplainedCurrentNoChangeReason(hydrated),
       },
     };
   }
@@ -586,6 +605,308 @@ function isResolveOrComplete(observation: CaptureObservationV2): boolean {
  * truthIntent is already current. Resolve/complete of a missing row stays
  * fail-closed — never substitute a different same-domain entity.
  */
+const MONTH_TO_ISO: Record<string, string> = {
+  january: "01",
+  february: "02",
+  march: "03",
+  april: "04",
+  may: "05",
+  june: "06",
+  july: "07",
+  august: "08",
+  september: "09",
+  october: "10",
+  november: "11",
+  december: "12",
+};
+
+const NAME_EXTRACT_STOP = new Set([
+  "add",
+  "create",
+  "update",
+  "move",
+  "book",
+  "send",
+  "issue",
+  "the",
+  "this",
+  "that",
+  "hall",
+  "cafe",
+  "site",
+  "client",
+  "practical",
+  "name",
+  "from",
+  "with",
+  "after",
+  "before",
+  "january",
+  "february",
+  "march",
+  "april",
+  "june",
+  "july",
+  "august",
+  "september",
+  "october",
+  "november",
+  "december",
+]);
+
+function isoDateFromLocalText(text: string): string | null {
+  const iso = text.match(/\b(20\d{2}-\d{2}-\d{2})\b/);
+  if (iso?.[1]) return iso[1];
+  const named = text.match(
+    /\b(\d{1,2})(?:st|nd|rd|th)?\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(20\d{2})\b/i,
+  );
+  if (!named) return null;
+  const month = MONTH_TO_ISO[named[2]!.toLowerCase()];
+  if (!month) return null;
+  return `${named[3]}-${month}-${named[1]!.padStart(2, "0")}`;
+}
+
+function looksLikeRestatement(text: string): boolean {
+  return /\b(remains?|still|continues?|already|unchanged|no change)\b/i.test(text);
+}
+
+function looksLikeNewAssignment(text: string): boolean {
+  if (looksLikeRestatement(text)) return false;
+  return /\b(owns?|owning|will own|is responsible|responsible for|assign(?:ed|s)?)\b/i.test(
+    text,
+  );
+}
+
+function existingEvidencedPerson(
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  evidence: string,
+  identity: string | null,
+): boolean {
+  const project = projectId
+    ? world.projects.find((row) => row.id === projectId)
+    : undefined;
+  const people = project?.stakeholders ?? [];
+  const evidenced = peopleEvidencedByRecordedNameInText(people, evidence);
+  if (evidenced.length === 1) return true;
+  if (!identity) return false;
+  const byId = people.find((person) => person.id === identity);
+  return Boolean(
+    byId && recordedPersonNameAppearsInText(evidence, byId.name),
+  );
+}
+
+function twoTokenNameFromLocalText(text: string): string | undefined {
+  const matches = text.match(/\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b/g) ?? [];
+  for (const raw of matches) {
+    const [first, second] = raw.split(/\s+/);
+    if (!first || !second) continue;
+    if (NAME_EXTRACT_STOP.has(first.toLowerCase())) continue;
+    if (NAME_EXTRACT_STOP.has(second.toLowerCase())) continue;
+    return `${first} ${second}`;
+  }
+  return undefined;
+}
+
+function statusTokenFromLocalText(text: string): string | undefined {
+  if (/\b(resolved|complete|completed)\b/i.test(text)) return "resolved";
+  if (/\bdone\b/i.test(text)) return "complete";
+  return undefined;
+}
+
+/**
+ * Live Prompt A often marks real updates `no_change` and omits structured
+ * fields. Fill missing values from observation-local quoted evidence and
+ * canonical world only. The model envelope is not authority.
+ */
+function hydrateFromLocalEvidence(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  transcript: string,
+): CaptureObservationV2 {
+  const evidence = identityEvidenceText(observation, transcript);
+  if (!evidence.trim()) return observation;
+  const values = { ...(observation.proposedValues ?? {}) };
+  let title =
+    asString(values.title) ||
+    asString(values.label) ||
+    observation.candidateTargetTitle?.trim() ||
+    "";
+  let name =
+    asString(values.personName) ||
+    asString(values.name) ||
+    (observation.domain === "person" || observation.domain === "responsibility"
+      ? observation.candidateTargetTitle?.trim() || ""
+      : "");
+  let scope = asString(values.scope) || "";
+  let date = asIso(values.date) || asIso(values.startAt) || asIso(values.dueAt);
+  let status = asString(values.status) || asString(values.proposedStatus) || "";
+
+  if (!date) date = isoDateFromLocalText(evidence);
+  if (!status && (observation.domain === "risk" || observation.domain === "todo")) {
+    status = statusTokenFromLocalText(evidence) ?? "";
+  }
+  if (!scope) scope = scopeFromResponsiblePhrase(evidence) ?? "";
+
+  if (!title) {
+    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
+    if (hits.length === 1) title = hits[0]!.title;
+  }
+
+  if (
+    !name &&
+    (observation.domain === "person" ||
+      observation.domain === "responsibility" ||
+      observation.domain === "availability")
+  ) {
+    const project = projectId
+      ? world.projects.find((row) => row.id === projectId)
+      : undefined;
+    const evidenced = peopleEvidencedByRecordedNameInText(
+      project?.stakeholders ?? [],
+      evidence,
+    );
+    if (evidenced.length === 1) name = evidenced[0]!.name;
+    else if (evidenced.length === 0 && observation.domain === "person") {
+      name = twoTokenNameFromLocalText(evidence) ?? "";
+    }
+  }
+
+  const nextTitle = title || observation.candidateTargetTitle || null;
+  const changed =
+    (title && title !== (observation.candidateTargetTitle ?? "")) ||
+    (name && name !== asString(values.personName) && name !== asString(values.name)) ||
+    (scope && scope !== asString(values.scope)) ||
+    (date && date !== asIso(values.date) && date !== asIso(values.startAt)) ||
+    (status && status !== asString(values.status));
+  if (!changed) return observation;
+
+  return {
+    ...observation,
+    candidateTargetTitle: nextTitle,
+    proposedValues: {
+      ...values,
+      ...(title ? { title, label: asString(values.label) || title } : {}),
+      ...(name ? { name, personName: name } : {}),
+      ...(scope ? { scope } : {}),
+      ...(date ? { date, startAt: asIso(values.startAt) || date } : {}),
+      ...(status ? { status } : {}),
+    },
+  };
+}
+
+function isProvenAlreadyCurrent(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  transcript: string,
+): boolean {
+  const evidence = identityEvidenceText(observation, transcript);
+  if (!evidence.trim()) return false;
+  const values = observation.proposedValues ?? {};
+  const date = asIso(values.date) || asIso(values.startAt) || isoDateFromLocalText(evidence);
+  const status = (
+    asString(values.status) ||
+    asString(values.proposedStatus) ||
+    statusTokenFromLocalText(evidence) ||
+    ""
+  ).toLowerCase();
+
+  if (observation.domain === "milestone") {
+    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
+    if (hits.length !== 1) return false;
+    const row = world.timeline.find((item) => item.id === hits[0]!.id);
+    if (!row) return false;
+    if (date) return (row.startAt ?? "").slice(0, 10) === date.slice(0, 10);
+    return !status;
+  }
+  if (observation.domain === "risk") {
+    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
+    if (hits.length !== 1) return false;
+    const row = world.risks.find((item) => item.id === hits[0]!.id);
+    if (!row) return false;
+    if (status === "resolved" || status === "complete" || status === "completed") {
+      return row.status === "resolved" || row.status === "accepted";
+    }
+    return true;
+  }
+  if (observation.domain === "todo") {
+    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
+    if (hits.length !== 1) return false;
+    const row = world.todos.find((item) => item.id === hits[0]!.id);
+    if (!row) return false;
+    if (status === "complete" || status === "completed" || status === "resolved") {
+      return Boolean(row.done);
+    }
+    return true;
+  }
+  if (observation.domain === "person") {
+    const project = projectId
+      ? world.projects.find((row) => row.id === projectId)
+      : undefined;
+    const evidenced = peopleEvidencedByRecordedNameInText(
+      project?.stakeholders ?? [],
+      evidence,
+    );
+    if (evidenced.length !== 1) return false;
+    return !scopeFromResponsiblePhrase(evidence);
+  }
+  if (observation.domain === "responsibility") {
+    if (
+      looksLikeRestatement(evidence) &&
+      existingEvidencedPerson(
+        world,
+        projectId,
+        evidence,
+        observation.candidateTargetId ?? null,
+      )
+    ) {
+      return true;
+    }
+    const name =
+      asString(values.personName) ||
+      asString(values.name) ||
+      observation.candidateTargetTitle?.trim() ||
+      "";
+    const scope =
+      asString(values.scope) || scopeFromResponsiblePhrase(evidence) || "";
+    if (!name || !scope) return false;
+    return world.knowledge.some((entry) => {
+      if (projectId && entry.projectId !== projectId) return false;
+      return (entry.structured ?? []).some((row) => {
+        const responsibility = row.meta?.responsibility;
+        if (row.kind !== "responsibility" || !responsibility) return false;
+        return (
+          namesMatchExact(responsibility.personName ?? "", name) &&
+          String(responsibility.scope ?? "").trim().toLowerCase() ===
+            scope.toLowerCase()
+        );
+      });
+    });
+  }
+  return false;
+}
+
+function unexplainedCurrentNoChangeReason(
+  observation: CaptureObservationV2,
+): string {
+  switch (observation.domain) {
+    case "todo":
+      return "Lume understood a to-do here, but needs you to confirm whether to add it or update an existing one.";
+    case "risk":
+      return "Lume understood a risk change here, but needs you to confirm which risk it refers to.";
+    case "milestone":
+      return "Lume understood a date change here, but needs you to confirm which date to update.";
+    case "person":
+      return "Lume understood a person here, but needs you to confirm who it refers to.";
+    case "responsibility":
+      return "Lume understood an ownership change, but needs you to confirm who owns what.";
+    default:
+      return "Lume understood this, but cannot safely decide what to change without a small confirmation.";
+  }
+}
+
 /**
  * Model `no_change` is an opinion, not authority. If proposed values
  * disagree with canonical truth and bind safely, rematerialize. If they
@@ -604,6 +925,26 @@ function rematerializeTrustedNoChange(
     projectId,
   );
   if (ownership !== observation) return ownership;
+
+  if (observation.domain === "responsibility") {
+    const values = observation.proposedValues ?? {};
+    const localText = identityEvidenceText(observation, transcript) || observation.statement;
+    const name =
+      asString(values.personName) ||
+      asString(values.name) ||
+      observation.candidateTargetTitle?.trim() ||
+      "";
+    const scope =
+      asString(values.scope) || scopeFromResponsiblePhrase(observation.statement);
+    if (name && scope && looksLikeNewAssignment(localText)) {
+      return {
+        ...observation,
+        disposition: "create_new",
+        truthIntent: "current",
+        proposedValues: { ...values, personName: name, name, scope },
+      };
+    }
+  }
 
   const titled = rematerializeIndependentDatedCreate(
     observation,

@@ -228,12 +228,21 @@ export async function applyApprovedCaptureSuggestion(args: {
 
   if (args.reloadWorkspace) {
     try {
-      let state = await args.reloadWorkspace();
-      if (
-        decision.kind === "write" &&
-        !appliedStateContainsWrite(state, decision.operation)
-      ) {
+      const maxAttempts = 4;
+      let state: MissionState | undefined;
+      let proven = decision.kind !== "write";
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
         state = await args.reloadWorkspace();
+        if (
+          decision.kind !== "write" ||
+          appliedStateContainsWrite(state, decision.operation)
+        ) {
+          proven = true;
+          break;
+        }
+      }
+      if (decision.kind === "write" && !proven) {
+        return { decision, executed, reconcileFailed: true };
       }
       return {
         decision,

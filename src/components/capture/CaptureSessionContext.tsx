@@ -715,7 +715,7 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           const recovered = await reconcileDurableWorkspace();
           if (!recovered) {
             announce(
-              "Saved. Refresh the page to see the latest project — Lume could not reload it automatically.",
+              "Applied — refreshing project truth…",
             );
           }
         }
