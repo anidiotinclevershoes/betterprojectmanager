@@ -925,36 +925,37 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleTodo = useCallback((todoId: string) => {
-    let nextDone = false;
-    let projectId: string | null | undefined;
-    let title = "";
-    let found = false;
-    setState((prev) => {
-      const todo = (prev.todos ?? []).find((t) => t.id === todoId);
-      if (!todo) return prev;
-      found = true;
-      nextDone = !todo.done;
-      projectId = todo.projectId;
-      title = todo.title;
-      return pushHistory(
-        {
-          ...prev,
-          todos: (prev.todos ?? []).map((t) =>
-            t.id === todoId ? { ...t, done: nextDone } : t,
-          ),
-        },
-        makeHistoryEvent({
-          type: nextDone ? "task_completed" : "task_updated",
-          title: nextDone ? "You completed a To Do" : "You reopened a To Do",
-          detail: todo.title,
-          projectId: todo.projectId,
-          source: "user",
-        }),
-      );
-    });
+    const current = (stateRef.current.todos ?? []).find((t) => t.id === todoId);
+    if (!current) return;
+    const nextDone = !current.done;
+    const projectId = current.projectId;
+    const title = current.title;
+    const applyLocal = () => {
+      setState((prev) => {
+        const todo = (prev.todos ?? []).find((t) => t.id === todoId);
+        if (!todo) return prev;
+        return pushHistory(
+          {
+            ...prev,
+            todos: (prev.todos ?? []).map((t) =>
+              t.id === todoId ? { ...t, done: nextDone } : t,
+            ),
+          },
+          makeHistoryEvent({
+            type: nextDone ? "task_completed" : "task_updated",
+            title: nextDone ? "You completed a To Do" : "You reopened a To Do",
+            detail: todo.title,
+            projectId: todo.projectId,
+            source: "user",
+          }),
+        );
+      });
+    };
     const meta = persistMetaRef.current;
-    if (found && meta.mode === "supabase" && meta.workspaceId) {
+    if (meta.mode === "supabase" && meta.workspaceId) {
       void (async () => {
+        setSaveStatus("saving");
+        setSaveError(null);
         try {
           const client = createBrowserSupabaseClient();
           await persistTodoUpdate(
@@ -971,31 +972,36 @@ export function MissionProvider({ children }: { children: ReactNode }) {
             projectId,
             source: "user",
           });
+          applyLocal();
           markPersistSaved();
         } catch (err) {
           console.error("[toggleTodo] persist failed", err);
           reportPersistFailure(err, "Could not save To Do");
         }
       })();
+      return;
     }
+    applyLocal();
   }, []);
 
   const removeTodo = useCallback((todoId: string) => {
-    let projectId: string | null | undefined;
-    let found = false;
-    setState((prev) => {
-      const todo = (prev.todos ?? []).find((t) => t.id === todoId);
-      if (!todo) return prev;
-      found = true;
-      projectId = todo.projectId;
-      return {
-        ...prev,
-        todos: (prev.todos ?? []).filter((t) => t.id !== todoId),
-      };
-    });
+    const current = (stateRef.current.todos ?? []).find((t) => t.id === todoId);
+    if (!current) return;
+    const projectId = current.projectId;
+    const applyLocal = () => {
+      setState((prev) => {
+        if (!(prev.todos ?? []).some((t) => t.id === todoId)) return prev;
+        return {
+          ...prev,
+          todos: (prev.todos ?? []).filter((t) => t.id !== todoId),
+        };
+      });
+    };
     const meta = persistMetaRef.current;
-    if (found && meta.mode === "supabase" && meta.workspaceId) {
+    if (meta.mode === "supabase" && meta.workspaceId) {
       void (async () => {
+        setSaveStatus("saving");
+        setSaveError(null);
         try {
           const client = createBrowserSupabaseClient();
           await persistTodoDelete(
@@ -1004,13 +1010,16 @@ export function MissionProvider({ children }: { children: ReactNode }) {
             projectId ?? null,
             todoId,
           );
+          applyLocal();
           markPersistSaved();
         } catch (err) {
           console.error("[removeTodo] persist failed", err);
           reportPersistFailure(err, "Could not delete To Do");
         }
       })();
+      return;
     }
+    applyLocal();
   }, []);
 
   const addTodo = useCallback((input: AddTodoInput) => {
@@ -1108,13 +1117,12 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateTodo = useCallback((todoId: string, patch: UpdateTodoInput) => {
-    let intendedProjectId: string | null | undefined;
-    let found = false;
-    setState((prev) => {
+    const seed = (stateRef.current.todos ?? []).find((t) => t.id === todoId);
+    if (!seed) return;
+    const intendedProjectId = seed.projectId ?? null;
+    const compute = (prev: MissionState): MissionState => {
       const before = (prev.todos ?? []).find((t) => t.id === todoId);
       if (!before) return prev;
-      found = true;
-      intendedProjectId = before.projectId ?? null;
       const projectId =
         patch.projectId !== undefined ? patch.projectId : before.projectId;
       const project = projectId
@@ -1202,10 +1210,13 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           source: "user",
         }),
       );
-    });
+    };
+    const applyLocal = () => setState(compute);
     const meta = persistMetaRef.current;
-    if (found && meta.mode === "supabase" && meta.workspaceId) {
+    if (meta.mode === "supabase" && meta.workspaceId) {
       void (async () => {
+        setSaveStatus("saving");
+        setSaveError(null);
         try {
           const client = createBrowserSupabaseClient();
           await persistTodoUpdate(
@@ -1223,13 +1234,16 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               waitingOn: patch.waitingOn,
             },
           );
+          applyLocal();
           markPersistSaved();
         } catch (err) {
           console.error("[updateTodo] persist failed", err);
           reportPersistFailure(err, "Could not save To Do");
         }
       })();
+      return;
     }
+    applyLocal();
   }, []);
 
   const resolveNudge = useCallback(
@@ -1688,68 +1702,65 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       sectionId: KnowledgeSectionId,
       bullets: string[],
     ) => {
-      let nextKnowledge: ProjectKnowledge | null = null;
-      setState((prev) => {
-        const current =
-          (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
-          emptyKnowledge(projectId);
-        const cleaned = bullets
-          .map((b) => b.trim())
-          .filter(Boolean);
-        const sections = { ...current.sections, [sectionId]: cleaned };
-        const next: ProjectKnowledge = {
-          ...current,
-          updatedAt: new Date().toISOString(),
-          sections,
-          sectionItemIds: alignSectionItemIds(current, sections, [sectionId]),
-          structured: remapStructuredForSections(current, sections, [
-            sectionId,
-          ]),
-        };
-        nextKnowledge = next;
-        return pushHistory(
-          {
-            ...prev,
-            knowledge: [
-              ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
-              next,
-            ],
-          },
-          makeHistoryEvent({
-            type: "knowledge_updated",
-            title: "You updated Knowledge",
-            detail: `${sectionId} updated`,
-            projectId,
-            source: "user",
-          }),
+      const prev = stateRef.current;
+      const current =
+        (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
+        emptyKnowledge(projectId);
+      const cleaned = bullets.map((b) => b.trim()).filter(Boolean);
+      const sections = { ...current.sections, [sectionId]: cleaned };
+      const next: ProjectKnowledge = {
+        ...current,
+        updatedAt: new Date().toISOString(),
+        sections,
+        sectionItemIds: alignSectionItemIds(current, sections, [sectionId]),
+        structured: remapStructuredForSections(current, sections, [sectionId]),
+      };
+      const applyLocal = () => {
+        setState((latest) =>
+          pushHistory(
+            {
+              ...latest,
+              knowledge: [
+                ...(latest.knowledge ?? []).filter((k) => k.projectId !== projectId),
+                next,
+              ],
+            },
+            makeHistoryEvent({
+              type: "knowledge_updated",
+              title: "You updated Knowledge",
+              detail: `${sectionId} updated`,
+              projectId,
+              source: "user",
+            }),
+          ),
         );
-      });
+      };
 
       const meta = persistMetaRef.current;
-      if (
-        meta.mode === "supabase" &&
-        meta.workspaceId &&
-        nextKnowledge
-      ) {
-        const desired = nextKnowledge;
+      if (meta.mode === "supabase" && meta.workspaceId) {
         void (async () => {
+          setSaveStatus("saving");
+          setSaveError(null);
           try {
             const client = createBrowserSupabaseClient();
             await persistKnowledgeReconcile(
               client,
               meta.workspaceId!,
               projectId,
-              desired,
+              next,
               meta.userId,
               [sectionId],
             );
+            applyLocal();
             markPersistSaved();
           } catch (err) {
             console.error("[updateKnowledgeSection] persist failed", err);
             reportPersistFailure(err, "Could not save knowledge correction");
           }
         })();
+        return;
       }
+      applyLocal();
     },
     [],
   );
@@ -1759,39 +1770,43 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       const trimmed = bullet.trim();
       if (!trimmed) return;
       const riskId = sectionId === "risks" ? newClientId() : null;
-      setState((prev) => {
-        const current =
-          (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
-          emptyKnowledge(projectId);
-        const merged = mergeKnowledge(current, projectId, {
-          [sectionId]: [trimmed],
+      const applyLocal = () => {
+        setState((prev) => {
+          const current =
+            (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
+            emptyKnowledge(projectId);
+          const merged = mergeKnowledge(current, projectId, {
+            [sectionId]: [trimmed],
+          });
+          const nextRisks =
+            sectionId === "risks" && riskId
+              ? [
+                  ...(prev.risks ?? []),
+                  {
+                    id: riskId,
+                    projectId,
+                    title: trimmed,
+                    status: "open" as const,
+                    source: "manual" as const,
+                    createdAt: new Date().toISOString(),
+                  },
+                ]
+              : prev.risks ?? [];
+          return {
+            ...prev,
+            knowledge: [
+              ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
+              merged,
+            ],
+            risks: nextRisks,
+          };
         });
-        const nextRisks =
-          sectionId === "risks" && riskId
-            ? [
-                ...(prev.risks ?? []),
-                {
-                  id: riskId,
-                  projectId,
-                  title: trimmed,
-                  status: "open" as const,
-                  source: "manual" as const,
-                  createdAt: new Date().toISOString(),
-                },
-              ]
-            : prev.risks ?? [];
-        return {
-          ...prev,
-          knowledge: [
-            ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
-            merged,
-          ],
-          risks: nextRisks,
-        };
-      });
+      };
       const meta = persistMetaRef.current;
       if (meta.mode === "supabase" && meta.workspaceId) {
         void (async () => {
+          setSaveStatus("saving");
+          setSaveError(null);
           try {
             const client = createBrowserSupabaseClient();
             await persistKnowledgeBullet(
@@ -1803,45 +1818,52 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               meta.userId,
               riskId ? { riskId } : undefined,
             );
+            applyLocal();
             markPersistSaved();
           } catch (err) {
             console.error("[addKnowledgeBullet] persist failed", err);
             reportPersistFailure(err, "Could not save knowledge");
           }
         })();
+        return;
       }
+      applyLocal();
     },
     [],
   );
 
   const setRiskStatus = useCallback(
     (riskId: string, status: RiskStatus, projectId: string) => {
-      let syncedKnowledge: ProjectKnowledge | null = null;
-      setState((prev) => {
-        const existing = findProjectRisk(prev.risks, riskId, projectId);
-        if (!existing) return prev;
-        const updatedRisk = { ...existing, status, updatedAt: new Date().toISOString() };
-        const risks = (prev.risks ?? []).map((r) =>
-          r.id === riskId && r.projectId === projectId ? updatedRisk : r,
-        );
-        const current =
-          (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
-          emptyKnowledge(projectId);
-        const nextKnowledge = syncKnowledgeRiskProjection(current, updatedRisk);
-        syncedKnowledge = nextKnowledge;
-        return {
-          ...prev,
-          risks,
+      const prev = stateRef.current;
+      const existing = findProjectRisk(prev.risks, riskId, projectId);
+      if (!existing) return;
+      const updatedRisk = {
+        ...existing,
+        status,
+        updatedAt: new Date().toISOString(),
+      };
+      const current =
+        (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
+        emptyKnowledge(projectId);
+      const nextKnowledge = syncKnowledgeRiskProjection(current, updatedRisk);
+      const applyLocal = () => {
+        setState((latest) => ({
+          ...latest,
+          risks: (latest.risks ?? []).map((r) =>
+            r.id === riskId && r.projectId === projectId ? updatedRisk : r,
+          ),
           knowledge: [
-            ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
+            ...(latest.knowledge ?? []).filter((k) => k.projectId !== projectId),
             nextKnowledge,
           ],
-        };
-      });
+        }));
+      };
 
       const meta = persistMetaRef.current;
       if (meta.mode === "supabase" && meta.workspaceId) {
         void (async () => {
+          setSaveStatus("saving");
+          setSaveError(null);
           try {
             const client = createBrowserSupabaseClient();
             await persistRiskStatus(
@@ -1851,91 +1873,92 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               riskId,
               status,
             );
-            if (syncedKnowledge) {
-              await persistKnowledgeReconcile(
-                client,
-                meta.workspaceId!,
-                projectId,
-                syncedKnowledge,
-                meta.userId,
-                ["risks"],
-              );
-            }
+            await persistKnowledgeReconcile(
+              client,
+              meta.workspaceId!,
+              projectId,
+              nextKnowledge,
+              meta.userId,
+              ["risks"],
+            );
+            applyLocal();
             markPersistSaved();
           } catch (err) {
             console.error("[setRiskStatus] persist failed", err);
             reportPersistFailure(err, "Could not save risk status");
           }
         })();
+        return;
       }
+      applyLocal();
     },
     [],
   );
 
   const setKnowledgeOnlyRiskResolved = useCallback(
     (projectId: string, title: string, resolved: boolean) => {
-      let nextKnowledge: ProjectKnowledge | null = null;
-      setState((prev) => {
-        const current =
-          (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
-          emptyKnowledge(projectId);
-        const next = resolved
-          ? resolveKnowledgeOnlyRiskBullet(current, title)
-          : reopenKnowledgeOnlyRiskBullet(current, title);
-        nextKnowledge = next;
-        return {
-          ...prev,
+      const prev = stateRef.current;
+      const current =
+        (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
+        emptyKnowledge(projectId);
+      const next = resolved
+        ? resolveKnowledgeOnlyRiskBullet(current, title)
+        : reopenKnowledgeOnlyRiskBullet(current, title);
+      const applyLocal = () => {
+        setState((latest) => ({
+          ...latest,
           knowledge: [
-            ...(prev.knowledge ?? []).filter((k) => k.projectId !== projectId),
+            ...(latest.knowledge ?? []).filter((k) => k.projectId !== projectId),
             next,
           ],
-        };
-      });
+        }));
+      };
 
       const meta = persistMetaRef.current;
-      if (meta.mode === "supabase" && meta.workspaceId && nextKnowledge) {
-        const desired = nextKnowledge;
+      if (meta.mode === "supabase" && meta.workspaceId) {
         void (async () => {
+          setSaveStatus("saving");
+          setSaveError(null);
           try {
             const client = createBrowserSupabaseClient();
             await persistKnowledgeReconcile(
               client,
               meta.workspaceId!,
               projectId,
-              desired,
+              next,
               meta.userId,
               ["risks"],
             );
+            applyLocal();
             markPersistSaved();
           } catch (err) {
             console.error("[setKnowledgeOnlyRiskResolved] persist failed", err);
             reportPersistFailure(err, "Could not save knowledge risk");
           }
         })();
+        return;
       }
+      applyLocal();
     },
     [],
   );
 
   const replaceKnowledge = useCallback((knowledge: ProjectKnowledge) => {
-    let nextKnowledge: ProjectKnowledge | null = null;
-    setState((prev) => {
-      const previous =
-        (prev.knowledge ?? []).find((k) => k.projectId === knowledge.projectId) ??
-        emptyKnowledge(knowledge.projectId);
-      const sections = knowledge.sections;
-      const next: ProjectKnowledge = {
-        ...knowledge,
-        updatedAt: new Date().toISOString(),
-        sectionItemIds:
-          knowledge.sectionItemIds ??
-          alignSectionItemIds(previous, sections),
-        structured:
-          knowledge.structured ??
-          remapStructuredForSections(previous, sections),
-      };
-      nextKnowledge = next;
-      return {
+    const previous =
+      (stateRef.current.knowledge ?? []).find(
+        (k) => k.projectId === knowledge.projectId,
+      ) ?? emptyKnowledge(knowledge.projectId);
+    const sections = knowledge.sections;
+    const next: ProjectKnowledge = {
+      ...knowledge,
+      updatedAt: new Date().toISOString(),
+      sectionItemIds:
+        knowledge.sectionItemIds ?? alignSectionItemIds(previous, sections),
+      structured:
+        knowledge.structured ?? remapStructuredForSections(previous, sections),
+    };
+    const applyLocal = () => {
+      setState((prev) => ({
         ...prev,
         knowledge: [
           ...(prev.knowledge ?? []).filter(
@@ -1943,29 +1966,33 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           ),
           next,
         ],
-      };
-    });
+      }));
+    };
 
     const meta = persistMetaRef.current;
-    if (meta.mode === "supabase" && meta.workspaceId && nextKnowledge) {
-      const desired = nextKnowledge;
+    if (meta.mode === "supabase" && meta.workspaceId) {
       void (async () => {
+        setSaveStatus("saving");
+        setSaveError(null);
         try {
           const client = createBrowserSupabaseClient();
           await persistKnowledgeReconcile(
             client,
             meta.workspaceId!,
             knowledge.projectId,
-            desired,
+            next,
             meta.userId,
           );
+          applyLocal();
           markPersistSaved();
         } catch (err) {
           console.error("[replaceKnowledge] persist failed", err);
           reportPersistFailure(err, "Could not save knowledge correction");
         }
       })();
+      return;
     }
+    applyLocal();
   }, []);
 
   const confirmResponsibilityOwner = useCallback(
@@ -2007,30 +2034,30 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         responsibilityCreated: false,
       };
 
-      setState((prev) => {
-        const result = applyConfirmResponsibilityOwner({
-          state: prev,
-          ...input,
-        });
-        bag.peopleBullet = result.peopleBullet;
-        bag.itemId = result.item.id;
-        bag.kind = result.item.kind;
-        bag.epistemic = result.item.epistemic ?? "confirmed";
-        bag.lifecycle = result.item.lifecycle;
-        bag.supersedesId = result.item.supersedesId ?? null;
-        bag.meta = (result.item.meta as Record<string, unknown>) ?? {};
-        bag.provenance = result.item.provenance ?? [];
-        bag.personId = result.person.id;
-        bag.personName = result.person.name;
-        bag.personRole = result.person.role;
-        bag.supersededIds = result.supersededIds;
-        bag.responsibilityCreated = result.responsibilityCreated;
-        return result.state;
+      const result = applyConfirmResponsibilityOwner({
+        state: stateRef.current,
+        ...input,
       });
+      bag.peopleBullet = result.peopleBullet;
+      bag.itemId = result.item.id;
+      bag.kind = result.item.kind;
+      bag.epistemic = result.item.epistemic ?? "confirmed";
+      bag.lifecycle = result.item.lifecycle;
+      bag.supersedesId = result.item.supersedesId ?? null;
+      bag.meta = (result.item.meta as Record<string, unknown>) ?? {};
+      bag.provenance = result.item.provenance ?? [];
+      bag.personId = result.person.id;
+      bag.personName = result.person.name;
+      bag.personRole = result.person.role;
+      bag.supersededIds = result.supersededIds;
+      bag.responsibilityCreated = result.responsibilityCreated;
+      const applyLocal = () => setState(result.state);
 
       const meta = persistMetaRef.current;
       if (meta.mode === "supabase" && meta.workspaceId && bag.peopleBullet) {
         void (async () => {
+          setSaveStatus("saving");
+          setSaveError(null);
           try {
             const client = createBrowserSupabaseClient();
             await persistEnsureStakeholder(
@@ -2075,13 +2102,16 @@ export function MissionProvider({ children }: { children: ReactNode }) {
                 },
               );
             }
+            applyLocal();
             markPersistSaved();
           } catch (err) {
             console.error("[confirmResponsibilityOwner] persist failed", err);
             reportPersistFailure(err, "Could not save confirmed owner");
           }
         })();
+        return;
       }
+      applyLocal();
     },
     [],
   );

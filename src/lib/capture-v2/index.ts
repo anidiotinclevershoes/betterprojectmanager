@@ -32,6 +32,13 @@ export {
   accountObservations,
   formatObservationAccount,
 } from "./account";
+export {
+  EMPTY_REVIEW_FACT,
+  emptyReviewNeedsYouReason,
+  isMeaningfulCaptureTranscript,
+  shouldSurfaceEmptyReviewNeedsYou,
+  unsupportedProductGapReason,
+} from "./empty-review";
 export { buildObservationExtractionPrompt } from "./prompt";
 export {
   CAPTURE_V2_EXTRACT_PATH,

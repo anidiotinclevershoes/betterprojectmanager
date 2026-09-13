@@ -80,13 +80,15 @@ After you know the Vercel URL:
 
 ## External-V1 deploy order
 
-PR #150 is already merged and deployed. The remaining production SQL is the hosted schema catch-up. Do **not** edit the already-applied V1 RPC files.
+PR #150 is deployed. D-050 is **closed as operator hygiene** (12 Sep 2026): production Lume `exfftrxxinhduogcluce` accepted live New Project + Capture Apply writes during `lr-20260912T2212Z`. Do **not** edit already-applied V1 RPC files. Do **not** blindly replay historical migrations.
 
-1. Read-only audit: `scripts/hosted-schema-audit.sql`
-2. Additive catch-up: `supabase/migrations/20260910120000_hosted_canonical_schema_catchup.sql`
-3. Re-run the audit, then repeat New Project smoke.
+Existing hosted:
 
-Those files are additive. New Project stays on `create_project_bundle`. Click-by-click steps: [`docs/V1_USER_ACTIONS.md`](./V1_USER_ACTIONS.md).
+1. Optional read-only audit: `scripts/hosted-schema-audit.sql`
+2. Apply additive catch-up / receipts **only** if that audit shows a required object missing
+3. Stop when present
+
+Greenfield: apply every `supabase/migrations/` file in timestamp order (`npx supabase db push`). Click-by-click: [`docs/V1_USER_ACTIONS.md`](./V1_USER_ACTIONS.md) and [`docs/SUPABASE_SETUP_FOR_TOM.md`](./SUPABASE_SETUP_FOR_TOM.md).
 
 ## First deploy smoke checklist
 

@@ -60,45 +60,13 @@ Rules:
 
 ### Step 3 — Apply the database migrations
 
-**Later lesson (D-050, 10 Sep 2026):** pasting only the files named in this original Phase-1 list is not enough. Hosted production can lag the repository. Every file in `supabase/migrations/` must be applied in timestamp order. The original Option A list below is historical (schema + RLS + grants only). Do not treat it as the full current schema.
+**D-050 (closed as operator hygiene, 12 Sep 2026).** Production Lume `exfftrxxinhduogcluce` is **not** an active hosted-schema mystery. The 50-Capture long-run wrote through the live app; SQL matched hosted snapshots. Do **not** blindly replay historical migrations on that project.
 
-You have two easy options.
+Choose the path that matches the environment.
 
-#### Option A (recommended): Supabase SQL Editor
+#### Greenfield (new empty Supabase project)
 
-1. In Supabase, open **SQL Editor**
-2. Click **New query**
-3. Open this file on your computer:
-
-   `supabase/migrations/20260812002748_workspace_schema.sql`
-
-4. Copy **all** of its contents into the SQL Editor
-5. Click **Run**
-6. Confirm it succeeds
-7. Open a second new query
-8. Open this file:
-
-   `supabase/migrations/20260812002749_tenant_rls.sql`
-
-9. Copy **all** of its contents into the SQL Editor
-10. Click **Run**
-11. Confirm it succeeds
-12. Open a third new query
-13. Open this file:
-
-   `supabase/migrations/20260812195500_fix_grants_and_membership_helper.sql`
-
-14. Copy **all** of its contents into the SQL Editor
-15. Click **Run**
-16. Confirm it succeeds
-
-> If you already ran the first two migrations earlier and hit
-> `permission denied for table workspace_members`, you only need to run this
-> third file, then re-run `npm run verify:tenant-isolation`.
-
-#### Option B: Supabase CLI (if you are comfortable)
-
-From the project folder:
+Apply **every** file in `supabase/migrations/` in timestamp order. Preferred:
 
 ```bash
 npx supabase login
@@ -106,9 +74,22 @@ npx supabase link --project-ref YOUR_PROJECT_REF
 npx supabase db push
 ```
 
-`YOUR_PROJECT_REF` is the short id in your project URL, for example:
+`YOUR_PROJECT_REF` is the short id in the project URL (`https://abcdxyz.supabase.co` → `abcdxyz`).
 
-`https://abcdxyz.supabase.co` → `abcdxyz`
+If you must use SQL Editor, paste **each** migration file in timestamp order. The original three-file Phase-1 list (schema + RLS + grants) is **historical**. It is not the current schema.
+
+#### Existing hosted environment (already has Lume tables)
+
+1. **Audit first** (read-only): paste `scripts/hosted-schema-audit.sql` in SQL Editor.
+2. If a required object is `MISSING`, apply only the matching **additive** catch-up file (`20260910120000_hosted_canonical_schema_catchup.sql` and/or `20260829120000_capture_apply_receipts.sql`).
+3. Re-run the audit. Stop when required columns/tables are `present`.
+4. **Do not** replay already-applied V1 SQL. **Do not** run the whole migrations folder “to be sure”. **Do not** strip `kind` or weaken receipts.
+
+Forward catch-up only. Ledger drift (migration history table vs files on disk) is bookkeeping unless a fresh audit shows a missing runtime object.
+
+#### Receipts
+
+`capture_apply_receipts` is created by `supabase/migrations/20260829120000_capture_apply_receipts.sql`. The catch-up file does **not** create it. Never bypass receipts in application code.
 
 ### Step 4 — Confirm Auth email confirmations for tests (optional)
 

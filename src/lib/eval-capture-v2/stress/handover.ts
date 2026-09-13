@@ -54,6 +54,10 @@ export const HANDOVER_STEPS: StressStep[] = [
       hcaObs({
         id: "h1-quinn",
         statement: "Quinn Adler is scanning QA lead joining Helix on site",
+        // D-051: identity evidence must be a verbatim Capture quote.
+        // The model statement may paraphrase; the fixture must not.
+        evidence:
+          "New stakeholder: Quinn Adler, scanning QA lead, joining Helix on site.",
         domain: "person",
         disposition: "create_new",
         truthIntent: "current",

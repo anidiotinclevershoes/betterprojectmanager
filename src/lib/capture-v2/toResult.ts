@@ -14,6 +14,11 @@ import {
 import type { CaptureResult } from "@/lib/types";
 import { accountObservations } from "./account";
 import { newReviewOperationId } from "./contract";
+import {
+  EMPTY_REVIEW_FACT,
+  emptyReviewNeedsYouReason,
+  shouldSurfaceEmptyReviewNeedsYou,
+} from "./empty-review";
 import type { ResolvedObservation } from "./resolve";
 import type { CaptureObservationV2, ObservationDomain } from "./types";
 
@@ -160,6 +165,40 @@ export function captureResultFromResolved(args: {
     resolved: args.resolved,
     rejectedCount: args.rejected?.length ?? 0,
   });
+  if (shouldSurfaceEmptyReviewNeedsYou(account, args.transcript)) {
+    const reason = emptyReviewNeedsYouReason(args.transcript);
+    const systemId = newReviewOperationId();
+    const findingId = `find-${systemId}`;
+    findings.push({
+      id: findingId,
+      fact: EMPTY_REVIEW_FACT,
+      evidence: args.transcript.trim().slice(0, 280),
+      findingType: "AMBIGUOUS",
+      confidence: 0,
+      requiresClarification: true,
+      clarificationQuestion: reason,
+      reasoningSummary: reason,
+      projectId,
+      projectName: args.projectName ?? undefined,
+    });
+    operations.push({
+      id: `op-${systemId}`,
+      sourceFindingId: findingId,
+      operation: "NO_CHANGE",
+      entityType: "knowledge",
+      targetTitle: EMPTY_REVIEW_FACT,
+      proposedValues: { emptyReview: true },
+      reason,
+      evidence: args.transcript.trim().slice(0, 280),
+      confidence: 0,
+      destructive: false,
+      requiresClarification: true,
+      projectId,
+      projectName: args.projectName ?? undefined,
+    });
+    account.needsYou += 1;
+    account.total += 1;
+  }
   const recommendations = recommendationsFromOperations(
     operations,
     projectId,

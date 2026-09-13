@@ -1,6 +1,6 @@
 # V1 human-action checklist
 
-**Status:** Living operator checklist (10 September 2026)  
+**Status:** Living operator checklist (12 September 2026)  
 **Scope:** Things Tom must do in a dashboard or as a product decision. Not an architecture map.
 
 Start with `docs/README.md` for product/architecture truth. This file only tracks human actions.
@@ -11,17 +11,22 @@ Statuses: **pending** · **completed** · **blocked** · **before external users
 
 ## Production deploy order (current)
 
-The two external-V1 SQL files are already on production. Production Vercel is on merged `main` (PR #150). **Stop the invite rollout.** Hosted New Project failed because production is missing later additive columns/tables the canonical model requires (`knowledge_items.kind`, then likely `project_tags`).
+Production Vercel is on current `main`. Production JS talks to Supabase **Lume** `exfftrxxinhduogcluce`. D-050 is **closed as operator hygiene**: the 50-Capture long-run (`lr-20260912T2212Z`) wrote through the live app; SQL matched hosted snapshots. This is **not** an active hosted-schema mystery.
 
-Do not edit already-applied V1 SQL. Do not strip `kind` from `create_project_bundle`.
+Do not edit already-applied V1 SQL. Do not strip `kind` from `create_project_bundle`. **Do not blindly replay historical migrations.**
 
-1. SQL Editor → New query → paste **all** of `scripts/hosted-schema-audit.sql` → Run. Send the full result.
-2. New query → paste **all** of `supabase/migrations/20260910120000_hosted_canonical_schema_catchup.sql` → Run.
-3. New query → paste **all** of `supabase/migrations/20260829120000_capture_apply_receipts.sql` → Run. Preview Apply 500 is this missing table. Do not skip it. The catch-up file does not create it.
-4. Re-run the audit until every `required_column` is `present` and `project_tags` / `item_tags` / `capture_apply_receipts` are `present`.
-5. Repeat New Project / Capture Apply smoke from scratch only after that.
+### Existing hosted (current production)
 
-The catch-up file is additive (`IF NOT EXISTS`). It replays canonical knowledge metadata plus retrieval tag tables. If duplicate project codes exist, it still creates the tag tables and skips the unique code index (D-026) with a warning.
+1. Optional read-only audit: `scripts/hosted-schema-audit.sql`. Useful bookkeeping. A clean long-run already proved required runtime objects exist.
+2. If — and only if — a **fresh** audit shows a required object `MISSING`, apply the matching **additive** file only (`20260910120000_hosted_canonical_schema_catchup.sql` and/or `20260829120000_capture_apply_receipts.sql`).
+3. Re-run the audit. Stop when present.
+4. Never run the whole `supabase/migrations/` folder on this project “to be sure”.
+
+### Greenfield (new empty project)
+
+Apply every migration in timestamp order. Prefer `npx supabase db push`. See [`docs/SUPABASE_SETUP_FOR_TOM.md`](./SUPABASE_SETUP_FOR_TOM.md).
+
+The catch-up file is additive (`IF NOT EXISTS`). It does **not** create `capture_apply_receipts`. Never bypass receipts in application code.
 
 ---
 
@@ -29,16 +34,11 @@ The catch-up file is additive (`IF NOT EXISTS`). It replays canonical knowledge 
 
 ### Hosted schema catch-up after New Project smoke failure
 
-- **Status:** pending
-- **When:** NOW — before repeating smoke / before invites
-- **Blocking external use?** YES
+- **Status:** completed (runtime proven 12 Sep 2026; optional audit remains hygiene)
+- **When:** only if a fresh `hosted-schema-audit.sql` shows a required object missing
+- **Blocking external use?** NO as a standing D-050 mystery. Trust defects in D-053 still block V1.
 - **Secret?:** NO
-- **Do this:**
-  1. SQL Editor → New query → paste all of `scripts/hosted-schema-audit.sql` → Run. Send the full result (every `MISSING` row, plus `recent_project` / `leftover_children`).
-  2. New query → paste all of `supabase/migrations/20260910120000_hosted_canonical_schema_catchup.sql` → Run.
-  3. New query → paste all of `supabase/migrations/20260829120000_capture_apply_receipts.sql` → Run. Hosted Preview Apply 500 is this missing table.
-  4. Re-run the audit until `knowledge_items.kind`, `project_tags.slug`, and `capture_apply_receipts` are `present`.
-  5. Retry New Project / Capture Apply on a **fresh** attempt. Match `recent_project` names against the failed smoke. If a surprise project + children exist from the failed save, stop — that is an integrity defect.
+- **Do this:** See Production deploy order above. Do not replay historical migrations.
 
 ### Confirm trial length for when billing is later turned on
 
@@ -85,7 +85,7 @@ The catch-up file is additive (`IF NOT EXISTS`). It replays canonical knowledge 
 
 | Action | Status | Why |
 | --- | --- | --- |
-| Hosted schema catch-up (`20260910120000_hosted_canonical_schema_catchup.sql` + `20260829120000_capture_apply_receipts.sql`) | pending | New Project missing `knowledge_items.kind`; Preview Apply 500 missing `capture_apply_receipts` |
+| Hosted schema catch-up (`20260910120000_hosted_canonical_schema_catchup.sql` + `20260829120000_capture_apply_receipts.sql`) | completed | Runtime proven by production long-run; do not replay historical migrations |
 | Leave `LUME_BILLING_ENABLED` unset or `false` on Production | pending | First cohort is free early access |
 | Confirm `SUPABASE_SERVICE_ROLE_KEY` is already on Vercel (needed for account delete) | pending | Delete cannot run without it |
 | Own `support@lume.app` or change the address | pending | Users are told to email it |

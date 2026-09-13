@@ -24,7 +24,10 @@ export function CaptureSummary({
       </h3>
 
       {observations.length === 0 ? (
-        <p className="meta">Nothing clear enough to act on yet.</p>
+        <p className="meta" data-testid="capture-empty-review">
+          Lume could not turn this Capture into a safe change. Nothing was
+          written. This is Needs You, not a silent skip.
+        </p>
       ) : (
         <ul className="capture-observation-list">
           {observations.map((obs) => {

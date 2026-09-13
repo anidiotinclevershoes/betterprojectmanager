@@ -3,7 +3,7 @@
 **Status:** Documentation authority map (12 September 2026)  
 **Scope:** What to read, and what is allowed to govern implementation.  
 **Current integration line:** `main`.  
-**Baseline this map was reconciled against:** `91fabf8d1627e89538f26e00b9b3343b9d577cdb`.
+**Baseline this map was reconciled against:** `e0f140d67b3be7ecc51dd5c4056338a12b4d244c` (PR #170 on `9f24a65`).
 
 **Use this page first.** Then read only what the task needs.
 
@@ -42,6 +42,8 @@ Longer product / trust / Ocean UI philosophy remains in [`docs/v1-reference-pack
 | Canonical Project Truth (write then project) | [`docs/LUME_CANONICAL_PROJECT_TRUTH.md`](./LUME_CANONICAL_PROJECT_TRUTH.md) |
 | Durable Project Truth (existing-project compatibility) | [`docs/LUME_DURABLE_PROJECT_TRUTH.md`](./LUME_DURABLE_PROJECT_TRUTH.md) |
 | Current Capture position | [`docs/LUME_CAPTURE_STATUS.md`](./LUME_CAPTURE_STATUS.md) |
+| V1 trust families (reconciled) | [`docs/LUME_V1_TRUST_ISSUE_MAP.md`](./LUME_V1_TRUST_ISSUE_MAP.md) |
+| Deferred product semantics | [`docs/LUME_PRODUCT_DECISIONS.md`](./LUME_PRODUCT_DECISIONS.md) |
 | Ask / eval scoring | [`docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`](./LUME_INTELLIGENCE_CONTRACT_V0.2.md) |
 
 ### 4. Living status / discoveries

@@ -6,12 +6,17 @@ import {
   type CaptureLegalOperation,
 } from "@/lib/capture/apply";
 import { fingerprintExpectedTarget } from "@/lib/capture/apply/expected-target";
+import {
+  recordedTitleEvidencedInText,
+  titlesCompatible,
+} from "@/lib/capture/apply/recorded-title-evidence";
 import type { PendingSuggestion, SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
 import {
   namesMatchExact,
   peopleEvidencedByRecordedNameInText,
   recordedPersonNameAppearsInText,
 } from "@/lib/people/identity";
+import { scopeFromResponsiblePhrase } from "@/lib/people/responsibility-scope";
 import { missingReadySemantics, newReviewOperationId } from "./contract";
 import {
   isTruthIntent,
@@ -272,6 +277,15 @@ function resolveOne(
     };
   }
 
+  const ownershipAsResponsibility = rematerializeOwnershipAsResponsibility(
+    observation,
+    args.world,
+    projectId,
+  );
+  if (ownershipAsResponsibility !== observation) {
+    return resolveOne(ownershipAsResponsibility, args);
+  }
+
   const kind = DOMAIN_TO_KIND[observation.domain];
   if (!kind) {
     return {
@@ -326,6 +340,16 @@ function resolveOne(
   );
   if (identityGate?.kind === "block") {
     return { observation, suggestion: null, decision: identityGate.decision };
+  }
+
+  const entityIdentity = scopedEntityIdentityGate(
+    observation,
+    args.world,
+    projectId,
+    args.transcript,
+  );
+  if (entityIdentity) {
+    return { observation, suggestion: null, decision: entityIdentity };
   }
 
   const op = operationFor(observation);
@@ -436,7 +460,7 @@ function suggestionFromObservation(
   };
 }
 
-function uniqueDatedRecord(
+function uniqueTitledRecord(
   world: CaptureApplyWorld,
   projectId: string | null,
   domain: ObservationDomain,
@@ -461,29 +485,115 @@ function uniqueDatedRecord(
     );
     return hits.length === 1 ? { id: hits[0]!.id, title: hits[0]!.label } : null;
   }
+  if (domain === "risk") {
+    const hits = world.risks.filter(
+      (risk) =>
+        (!projectId || risk.projectId === projectId) &&
+        risk.title.trim().toLowerCase() === needle,
+    );
+    return hits.length === 1 ? { id: hits[0]!.id, title: hits[0]!.title } : null;
+  }
   return null;
 }
 
 /**
- * A dated To Do / milestone with a complete title+date is independently
- * actionable. Model uncertainty or a missing target id must not hide a
- * legal create when no in-project record matches. A unique title match
- * becomes an update only when truthIntent is already current.
+ * A Person observation that states explicit ownership is a responsibility
+ * write, not a new stakeholder. Role-only lines ("is the QS") stay Person.
+ */
+function rematerializeOwnershipAsResponsibility(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+): CaptureObservationV2 {
+  if (observation.domain !== "person") return observation;
+  const values = observation.proposedValues ?? {};
+  const name =
+    asString(values.personName) ||
+    asString(values.name) ||
+    observation.candidateTargetTitle?.trim() ||
+    "";
+  const scope =
+    asString(values.scope) || scopeFromResponsiblePhrase(observation.statement);
+  if (!name || !scope || namesMatchExact(name, scope)) return observation;
+  if (
+    !asString(values.scope) &&
+    !/\b(responsible for|owns|will own)\b/i.test(observation.statement)
+  ) {
+    return observation;
+  }
+  const project = projectId
+    ? world.projects.find((p) => p.id === projectId)
+    : undefined;
+  const existing = (project?.stakeholders ?? []).some((person) =>
+    namesMatchExact(person.name, name),
+  );
+  // A new Person + ownership language is still a Person create first.
+  // Only rematerialize ownership onto an existing recorded identity.
+  if (!existing) return observation;
+  const ownership = values.ownershipSemantics;
+  return {
+    ...observation,
+    domain: "responsibility",
+    proposedValues: {
+      ...values,
+      personName: name,
+      name,
+      scope,
+      ownershipSemantics:
+        ownership === "share" ||
+        ownership === "replace" ||
+        ownership === "continue" ||
+        ownership === "ambiguous"
+          ? ownership
+          : "share",
+    },
+  };
+}
+
+function rematerializeTitle(observation: CaptureObservationV2): string | undefined {
+  const values = observation.proposedValues ?? {};
+  return (
+    asString(values.title) ||
+    asString(values.label) ||
+    observation.candidateTargetTitle?.trim() ||
+    undefined
+  );
+}
+
+function isResolveOrComplete(observation: CaptureObservationV2): boolean {
+  const values = observation.proposedValues ?? {};
+  const status = String(values.status ?? values.proposedStatus ?? "").toLowerCase();
+  return status === "resolved" || status === "complete" || status === "completed";
+}
+
+/**
+ * A titled To Do / milestone / risk is independently actionable when no
+ * in-project record matches. Model uncertainty or a missing target id must
+ * not hide a legal create. A unique title match becomes an update only when
+ * truthIntent is already current. Resolve/complete of a missing row stays
+ * fail-closed — never substitute a different same-domain entity.
  */
 function rematerializeIndependentDatedCreate(
   observation: CaptureObservationV2,
   world: CaptureApplyWorld,
   projectId: string | null,
 ): CaptureObservationV2 {
-  if (observation.domain !== "todo" && observation.domain !== "milestone") {
+  if (
+    observation.domain !== "todo" &&
+    observation.domain !== "milestone" &&
+    observation.domain !== "risk"
+  ) {
     return observation;
   }
-  const values = observation.proposedValues ?? {};
-  const title = asString(values.title) || asString(values.label);
-  const date = asIso(values.date) || asIso(values.startAt) || asIso(values.dueAt);
-  if (!title || !date) return observation;
+  const title = rematerializeTitle(observation);
+  const date = asIso(observation.proposedValues?.date) ||
+    asIso(observation.proposedValues?.startAt) ||
+    asIso(observation.proposedValues?.dueAt);
+  if (!title) return observation;
+  if (observation.domain === "milestone" && !date) return observation;
+  if (isResolveOrComplete(observation)) return observation;
 
-  const match = uniqueDatedRecord(world, projectId, observation.domain, title);
+  const match = uniqueTitledRecord(world, projectId, observation.domain, title);
 
   if (observation.candidateTargetId) {
     if (
@@ -525,6 +635,76 @@ function rematerializeIndependentDatedCreate(
     };
   }
   return observation;
+}
+
+function findScopedEntity(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  id: string,
+): { id: string; title: string } | null {
+  if (observation.domain === "risk") {
+    const hit = world.risks.find(
+      (risk) => risk.id === id && (!projectId || risk.projectId === projectId),
+    );
+    return hit ? { id: hit.id, title: hit.title } : null;
+  }
+  if (observation.domain === "todo") {
+    const hit = world.todos.find(
+      (todo) => todo.id === id && (!projectId || !todo.projectId || todo.projectId === projectId),
+    );
+    return hit ? { id: hit.id, title: hit.title } : null;
+  }
+  if (observation.domain === "milestone") {
+    const hit = world.timeline.find(
+      (item) => item.id === id && (!projectId || item.projectId === projectId),
+    );
+    return hit ? { id: hit.id, title: hit.label } : null;
+  }
+  return null;
+}
+
+/**
+ * Model-supplied Risk / To Do / milestone UUIDs are not identity.
+ * Observation-local quoted evidence must contain the recorded title.
+ * Otherwise fail closed — never substitute an unrelated same-domain row.
+ */
+function scopedEntityIdentityGate(
+  observation: CaptureObservationV2,
+  world: CaptureApplyWorld,
+  projectId: string | null,
+  transcript: string,
+): CaptureApplyDecision | null {
+  if (
+    observation.domain !== "risk" &&
+    observation.domain !== "todo" &&
+    observation.domain !== "milestone"
+  ) {
+    return null;
+  }
+  const id = observation.candidateTargetId?.trim();
+  if (!id) return null;
+  const entity = findScopedEntity(observation, world, projectId, id);
+  if (!entity) return null;
+  const values = observation.proposedValues ?? {};
+  const proposedTitle = asString(values.title) || asString(values.label);
+  if (proposedTitle && !titlesCompatible(proposedTitle, entity.title)) {
+    return {
+      kind: "needs_you",
+      domain: DOMAIN_TO_LEGAL[observation.domain],
+      reason:
+        "This does not identify that existing record. Lume will not apply the change to a different item.",
+    };
+  }
+  if (!isResolveOrComplete(observation)) return null;
+  const evidence = identityEvidenceText(observation, transcript);
+  if (recordedTitleEvidencedInText(evidence, entity.title)) return null;
+  return {
+    kind: "needs_you",
+    domain: DOMAIN_TO_LEGAL[observation.domain],
+    reason:
+      "This does not identify that existing record. Lume will not apply the change to a different item.",
+  };
 }
 
 function asIso(value: unknown): string | null {
@@ -626,15 +806,24 @@ function personLinkedIdentityGate(
       };
     }
     const tokens = name.split(/\s+/).filter(Boolean);
-    if (tokens.length < 2 && people.length > 0) {
-      return uncertain(
-        "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder.",
-      );
-    }
-    if (tokens.length >= 2 && !recordedPersonNameAppearsInText(text, name)) {
+    if (!recordedPersonNameAppearsInText(text, name)) {
       return uncertain(
         "This Person identity is not established in the Capture, so Lume will not create a stakeholder.",
       );
+    }
+    if (tokens.length < 2 && people.length > 0) {
+      const first = tokens[0]!.toLowerCase();
+      const firstMatches = people.filter((person) => {
+        const recordedFirst = person.name.trim().split(/\s+/)[0]?.toLowerCase();
+        return recordedFirst === first;
+      });
+      if (firstMatches.length > 0) {
+        return uncertain(
+          "This name is not a confirmed existing Person identity, so Lume will not create a stakeholder.",
+        );
+      }
+      // No existing first-name collision: a name-only Person is complete.
+      return null;
     }
     return null;
   }
@@ -644,23 +833,22 @@ function personLinkedIdentityGate(
 
   if (candidateId) {
     const byId = people.find((p) => p.id === candidateId);
-    if (!byId) {
-      return uncertain(
-        "This person is not on this project. Lume will not write.",
-      );
+    if (byId) {
+      const sameName = people.filter((p) => namesMatchExact(p.name, byId.name));
+      if (sameName.length > 1) {
+        return uncertain(
+          "More than one existing person matches this Capture. Choose who it refers to.",
+        );
+      }
+      if (!recordedPersonNameAppearsInText(text, byId.name)) {
+        return uncertain(
+          "This Person identity is not established in the Capture. A supplied record id is not enough.",
+        );
+      }
+      return { kind: "bound", person: { id: byId.id, name: byId.name } };
     }
-    const sameName = people.filter((p) => namesMatchExact(p.name, byId.name));
-    if (sameName.length > 1) {
-      return uncertain(
-        "More than one existing person matches this Capture. Choose who it refers to.",
-      );
-    }
-    if (!recordedPersonNameAppearsInText(text, byId.name)) {
-      return uncertain(
-        "This Person identity is not established in the Capture. A supplied record id is not enough.",
-      );
-    }
-    return { kind: "bound", person: { id: byId.id, name: byId.name } };
+    // Wrong-type or unknown id is not proof the person is absent.
+    // Fall through to evidenced-name bind. Do not write to a substitute.
   }
 
   if (evidenced.length > 1) {

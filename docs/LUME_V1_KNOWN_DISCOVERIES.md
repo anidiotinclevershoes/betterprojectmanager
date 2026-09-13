@@ -2,13 +2,15 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 12 September 2026 (D-053 added from production long-run dogfood `lr-20260912T2212Z`; prior reconciliation: D-031/D-032 closed on current `main`)  
+**Last housekeeping:** 12 September 2026 (V1 trust-convergence: Families A–D deterministic guards + empty-Review honesty + responsibility path + mounted persist-first; D-053 After-run still required)  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
 **Docs entry point:** `docs/README.md`  
 **Integrity audit:** `docs/LUME_ADVERSARIAL_INTEGRITY_AUDIT.md`  
 **Current Capture position:** `docs/LUME_CAPTURE_STATUS.md` (534/538; Prompt A; Prompt E rejected)  
+**Trust families (reconciled):** [`docs/LUME_V1_TRUST_ISSUE_MAP.md`](./LUME_V1_TRUST_ISSUE_MAP.md)  
+**Deferred product semantics:** [`docs/LUME_PRODUCT_DECISIONS.md`](./LUME_PRODUCT_DECISIONS.md)  
 
 This file records **project-truth and persistence defects** discovered during V1 foundation work that were **not fixed in the slice that found them** (or remain partially fixed).
 
@@ -111,7 +113,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | partial |
+| **Status** | partial — mounted V1 edits persist-first; Capture Apply already persist-first |
 | **Severity** | high |
 | **Domain** | Infra / UX trust |
 | **Found in** | Test safety net trust-critical gaps; store `console.error` + `setSaveStatus("error")` patterns |
@@ -123,7 +125,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Hard without UI; at least ensure error paths set `saveStatus` and do not claim success |
 | **Target resolution / validation point** | V1 product hardening; must be checked before V1 launch (incremental per write path is OK) |
 | **Related docs** | `docs/LUME_TEST_SAFETY_NET_AUDIT.md` §C.4 |
-| **Notes** | **Phase 3A (partial):** Ocean chrome now shows `saveStatus=error` via `ocean-save-error` (does not require opening a drawer or devtools). Failed persist paths call `reportPersistFailure`, which reconciles MissionState from `/api/workspace/state` and does not write dirty state to the paint cache. Success of a later persist clears the banner (`markPersistSaved`). **Phase 3A.1:** project deletion is persist-first (same failure banner; MissionState is not stripped until the server confirms). **Phase 3B:** Capture apply for Risk create/status, milestone create/update, Person ensure, and structured availability is persist-first (failed persist is Needs you / visible failure, not a false Apply). Todo create/update/complete and Confirm Owner remain optimistic-then-persist with the Phase 3A save-error + reconcile path. **Still open:** most other mutations remain optimistic-then-persist; concurrent in-flight mutations can be overwritten by a coarse rehydrate. App-wide per-field “not saved” badges remain out of scope. |
+| **Notes** | **Phase 3A (partial):** Ocean chrome now shows `saveStatus=error` via `ocean-save-error`. Failed persist paths call `reportPersistFailure` and do not write dirty state to the paint cache. **Phase 3A.1:** project deletion is persist-first. **Phase 3B:** Capture apply for Risk/milestone/Person/availability is persist-first. **12 Sep trust-convergence:** mounted V1 edits (To Do toggle/update/delete, Confirm Owner, Knowledge correction, manual risk resolve) persist before paint. Failed persist leaves the previous UI state. Concurrent in-flight mutations can still be overwritten by a coarse rehydrate. App-wide per-field “not saved” badges remain out of scope. No offline-sync architecture. Proof: `scripts/verify-mounted-persist-trust.ts`. |
 
 ---
 
@@ -167,23 +169,22 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 ---
 
-### D-050 — Hosted production schema is not the full migration reconstruction
+### D-050 — Hosted schema ledger can drift from runtime (operator hygiene)
 
 | Field | Value |
 | --- | --- |
-| **Status** | open (hosted catch-up) |
-| **Severity** | high (blocked external-V1 smoke) |
+| **Status** | closed (runtime proven) — remaining work is operator / documentation hygiene |
+| **Fixed in** | Hosted catch-up SQL + receipts already applied on production Lume `exfftrxxinhduogcluce`. Independent proof: production long-run `lr-20260912T2212Z` (PR #170) wrote through the live app to that database; SQL matched hosted snapshots. |
+| **Severity** | low (docs) — was high when New Project / Apply 500s were live |
 | **Domain** | Infra / Schema |
 | **Found in** | External-V1 hosted New Project smoke (10 Sep 2026) |
-| **Failure class** | Disposable Postgres applied every `supabase/migrations` file. Hosted production was built by pasting selected SQL Editor files over time. After `create_project_bundle` deployed, New Project failed: `column "kind" of relation "knowledge_items" does not exist`. The app did not treat the change as maintained truth. |
-| **Evidence / repro** | Phase-1 `knowledge_items` has `section/body/position` only. Canonical `kind/epistemic/lifecycle/meta/provenance` are added by `20260818230000_knowledge_canonical_metadata.sql`. Current persist, Capture Apply, hydrate structured overlay, and New Project compose all write `kind` (responsibilities are `knowledge_items.kind = 'responsibility'`). The RPC is not inventing a stale column. |
-| **Likely files** | `supabase/migrations/20260818230000_knowledge_canonical_metadata.sql`; later files such as `20260831160000_project_retrieval_tags.sql` may also be absent on hosted |
-| **Fix summary** | Do not strip `kind` from `create_project_bundle`. Catch hosted schema up with additive `20260910120000_hosted_canonical_schema_catchup.sql` (replays canonical knowledge metadata + retrieval tag tables). Operator audit: `scripts/hosted-schema-audit.sql`. Contract: `scripts/verify-rpc-schema-contract.ts`. Real Postgres hosted-lag proof: `scripts/prove-hosted-schema-lag.ts`. |
-| **Explicit non-goals** | A second New Project path; editing already-applied V1 SQL files in place |
-| **Regression test to add** | `scripts/verify-rpc-schema-contract.ts` |
-| **Target resolution / validation point** | Hosted audit shows required columns present; New Project smoke repeated |
-| **Related docs** | `docs/V1_USER_ACTIONS.md`; `docs/SUPABASE_SETUP_FOR_TOM.md` (original SQL Editor only named the first three files) |
-| **Notes** | Original Tom setup listed schema + RLS + grants only. Later slices each asked for one more paste. Hosted can therefore lag repo reconstruction without any migration file being wrong. **10 Sep Preview (PR #155):** hosted `POST /api/capture/apply` 500 — `Could not find the table 'public.capture_apply_receipts'`. Same hosted-lag class. The existing catch-up SQL does **not** create this table. Canonical create is `supabase/migrations/20260829120000_capture_apply_receipts.sql`. Operator must apply that file on hosted. Do not bypass receipts or weaken idempotency in application code. |
+| **Failure class** | Disposable Postgres applied every `supabase/migrations` file. Early hosted production was built by pasting selected SQL Editor files. At one point New Project failed (`knowledge_items.kind` missing) and Preview Apply 500'd (`capture_apply_receipts` missing). |
+| **Evidence / repro (historical)** | Phase-1 `knowledge_items` had `section/body/position` only. Canonical metadata and receipts arrived in later migrations. |
+| **Current position (12 Sep 2026)** | Do **not** treat this as an active hosted-schema mystery. Production application maps to Supabase **Lume** `exfftrxxinhduogcluce`. Required runtime objects are present. Direct SQL inspection matched the long-run snapshots. Migration-ledger drift may still exist as bookkeeping; that is not a runtime blocker. |
+| **Operator rule** | **Do not blindly replay historical migrations** on an existing hosted project. Greenfield: apply every file in timestamp order (CLI `db push` preferred). Existing hosted: audit (`scripts/hosted-schema-audit.sql`) then apply only missing **additive** catch-up / receipts files. Forward catch-up only. Never edit already-applied V1 SQL in place. Never strip `kind` or weaken receipts. |
+| **Explicit non-goals** | A second New Project path; replaying the entire migration folder on production; treating ledger drift as proof the live schema is wrong |
+| **Related docs** | `docs/V1_USER_ACTIONS.md`; `docs/SUPABASE_SETUP_FOR_TOM.md`; `docs/VERCEL_PRODUCTION_SETUP.md` |
+| **Notes** | Close/retitle: this is operator honesty, not a Capture or Apply defect. If a **fresh** audit shows a required object missing, treat that as a new incident — do not reopen this as a standing mystery. |
 
 ### D-051 — Hosted Capture telemetry could not prove provider/model; New Project shares extract then diverges
 
@@ -225,8 +226,8 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
-| **Severity** | critical (wrong-target write) / high (silent empty Review; responsibility vacuum) |
+| **Status** | partial — Families A–D + empty-Review honesty + responsibility path landed on `cursor/v1-trust-convergence-df02`; production After-run still required |
+| **Severity** | critical (wrong-target write; deterministic guard landed) / high (silent empty Review; responsibility vacuum) |
 | **Domain** | Capture / Apply / Identity / Persistence |
 | **Found in** | Production long-run dogfood `lr-20260912T2212Z` on `origin/main` `9f24a65`; official project `8537b7cf-1b50-453e-af64-2b21e2d29e90`. No product-code change in that programme. |
 | **Failure class** | After a clear create was false-Needs-You (C5 timber-floor risk never written), a later “that risk is resolved; the other stays open” Capture Ready-applied **Outstanding DDA access ramp detail** `open→resolved`. Later/heavier Captures often produced an empty Review (not Needs You). Organise + ownership Captures left `knowledge_items.kind = 'responsibility'` at **0**. Updates of existing State 0 rows wrote `history_events` but no `capture_apply_receipts`. |
@@ -237,7 +238,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Keep `e2e:hosted-longrun` opt-in. Do not encode the C18 wrong write as a passing unit. A later unit should refuse Ready on unresolved same-kind ambiguity after a missing create. |
 | **Target resolution / validation point** | Capture hardening / before V1 launch |
 | **Related docs** | D-008; D-013; D-025; D-029; D-030; D-051; `e2e-hosted-longrun/ATTACK-MATRIX.md` |
-| **Notes** | First-run frozen expectations were not rewritten. Dedicated E2E project left in place. Independent SQL on production Lume `exfftrxxinhduogcluce` matches the harness final snapshot. |
+| **Notes** | First-run frozen expectations were not rewritten. Dedicated E2E project left in place. Independent SQL on production Lume `exfftrxxinhduogcluce` matches the harness final snapshot. **12 Sep trust-convergence:** Family A/D rematerialize + observation-local title evidence at Review and Apply (`verify-wrong-target-identity`). Family B empty Review is Needs You / unsupported, never silent (`verify-empty-capture-honesty`). Family C NP notes keep explicit scopes; wrong-type person ids bind evidenced names (`verify-responsibility-canonical-path`). Family E: existing-row updates are identity-idempotent; receipts stay create/mint protection (`verify-update-idempotency`). Family F mounted persist-first (`verify-mounted-persist-trust`). Family G D-030 presentation proved for KC/Search (`verify-projection-authority`). Production After-run of the frozen 50 still required before Assurance Framework execution. |
 
 ### D-028 — Project delete is sequential, not a single database transaction
 
@@ -983,7 +984,7 @@ Canonical categories for the later large hardening pass. Details live in the aud
 ### BEFORE EXTERNAL USERS
 
 - ~~D-028 / A-003~~ — `create_project_bundle` + `delete_project_bundle`
-- **D-050** — hosted schema must catch up to full migrations (`knowledge_items.kind` missing on production)
+- ~~**D-050**~~ — hosted runtime proven by production long-run; remaining work is operator/docs hygiene (do not replay historical migrations blindly)
 - ~~N-09~~ — RLS `project_belongs_to_workspace` on recommendations / history / capture_sessions
 - ~~D-035 remainder (named write helpers)~~ — `requireProjectInWorkspace` on history/session/memory/todo/stakeholder/knowledge/timeline creates
 - ~~D-041 / D-042~~ — Account delete + JSON export (individual-first)

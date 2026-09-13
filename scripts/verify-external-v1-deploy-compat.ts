@@ -82,7 +82,7 @@ check("catch-up remains the hosted SQL — do not edit the already-applied RPC f
   const actions = read("docs/V1_USER_ACTIONS.md");
   assert.match(actions, /20260910120000_hosted_canonical_schema_catchup\.sql/);
   assert.match(actions, /hosted-schema-audit\.sql/);
-  assert.match(actions, /Stop the invite rollout/);
+  assert.match(actions, /Do not blindly replay historical migrations/);
   assert.match(actions, /Do not edit already-applied V1 SQL/);
 });
 

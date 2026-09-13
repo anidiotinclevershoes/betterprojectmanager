@@ -6,7 +6,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { CAPTURES } from "./frozen-manifest";
-import { hashCanonicalSlice, LONGRUN_DB_CHECKPOINTS, sliceCounts, threeWay } from "./db-verify";
+import { hashCanonicalSlice, LONGRUN_DB_CHECKPOINTS, threeWay } from "./db-verify";
 import type { CanonicalSlice } from "./types";
 
 type DumpRow = {
@@ -52,14 +52,20 @@ function asOfValue(row: DumpRow, asOfIso: string): DumpRow {
   return row;
 }
 
-export function reconstructAsOf(rows: DumpRow[], asOfIso: string, meta: CanonicalSlice): ReturnType<typeof sliceCounts> & {
+type ReconstructedAsOf = {
   hash: string;
   people: string[];
   todos: string[];
   risks: string[];
   milestones: string[];
   responsibilityCount: number;
-} {
+};
+
+export function reconstructAsOf(
+  rows: DumpRow[],
+  asOfIso: string,
+  meta: CanonicalSlice,
+): ReconstructedAsOf {
   const cut = ts(asOfIso);
   const visible = rows
     .filter((r) => ts(r.created_at) <= cut)
@@ -86,7 +92,6 @@ export function reconstructAsOf(rows: DumpRow[], asOfIso: string, meta: Canonica
     responsibilities: [] as Array<{ scope: string }>,
   };
   return {
-    ...sliceCounts(slice),
     hash: hashCanonicalSlice(slice),
     people: people.map((p) => p.title).sort(),
     todos: todos.map((t) => `${t.title}|${t.status}|${t.extra || ""}`).sort(),

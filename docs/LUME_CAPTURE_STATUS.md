@@ -3,6 +3,7 @@
 **Status:** Living accepted position for Capture V2  
 **Date:** 12 September 2026  
 **Production SHA this position was accepted against:** `91fabf8d1627e89538f26e00b9b3343b9d577cdb` (PR #167)  
+**Current `main` this living file was last reconciled against:** `e0f140d67b3be7ecc51dd5c4056338a12b4d244c` (PR #170 dogfood programme; Capture rules unchanged)  
 **Owned by:** [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md) §4  
 **Docs entry:** [`docs/README.md`](./README.md)
 
@@ -121,7 +122,17 @@ Do not casually “fix” them as extraction bugs.
 
 ---
 
-## 7. Related closed integrity (do not reopen as Capture work)
+## 7. Production long-run supersedes “0 P0 blockers”
+
+A later untouched production 50-Capture E2E (`lr-20260912T2212Z`, D-053) demonstrated wrong-target Apply, silent empty Reviews, zero persisted responsibilities, unmatched Creates, and first-paint lag.
+
+The 534/538 routing score and Prompt A decision still stand. They are **not** V1 trust clearance.
+
+Deterministic guards for those families now live on `cursor/v1-trust-convergence-df02` (see the issue map). They are **not** production-E2E proof. Current families: [`docs/LUME_V1_TRUST_ISSUE_MAP.md`](./LUME_V1_TRUST_ISSUE_MAP.md).
+
+---
+
+## 8. Related closed integrity (do not reopen as Capture work)
 
 - Ready → Apply (D-037 / PR #126)
 - Apply reload (D-045), fingerprint completeness (D-046), session/project bind (D-047), apply receipts (D-048)
