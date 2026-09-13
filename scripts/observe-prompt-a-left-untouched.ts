@@ -119,6 +119,7 @@ const PHASE0_SYSTEM =
 
 type JourneyFamily =
   | "ordinary"
+  | "remove"
   | "no_change"
   | "needs_you"
   | "left_untouched"
@@ -158,6 +159,12 @@ const JOURNEYS: Array<{
     transcript: "Parade day is now 29 October 2026.",
   },
   {
+    id: "ordinary-remove-todo",
+    family: "remove",
+    projectId: CANDYLAND_ID,
+    transcript: "Please remove the Prepare the jelly pack to-do.",
+  },
+  {
     id: "no-change-person",
     family: "no_change",
     projectId: CANDYLAND_ID,
@@ -168,6 +175,12 @@ const JOURNEYS: Array<{
     family: "needs_you",
     projectId: TOYWORLD_ID,
     transcript: "Brick from the warehouse called; he wants to help with assembly.",
+  },
+  {
+    id: "needs-you-ambiguous-date",
+    family: "needs_you",
+    projectId: CANDYLAND_ID,
+    transcript: "Move Parade day to Friday.",
   },
   {
     id: "needs-you-share-replace",
@@ -181,6 +194,12 @@ const JOURNEYS: Array<{
     family: "left_untouched",
     projectId: CANDYLAND_ID,
     transcript: "Security seem worried about it.",
+  },
+  {
+    id: "left-untouched-unsupported-cancel",
+    family: "left_untouched",
+    projectId: CANDYLAND_ID,
+    transcript: "Cancel Parade day.",
   },
   {
     id: "mixed-clear-and-unclear",
