@@ -308,7 +308,10 @@ function resolveOne(
     };
   }
 
-  if (observation.disposition === "update_existing" && !observation.candidateTargetId) {
+  if (
+    observation.disposition === "update_existing" ||
+    observation.disposition === "create_new"
+  ) {
     const rematerialized = rematerializeIndependentDatedCreate(
       observation,
       args.world,
@@ -317,15 +320,17 @@ function resolveOne(
     if (rematerialized !== observation) {
       return resolveOne(rematerialized, args);
     }
-    return {
-      observation,
-      suggestion: null,
-      decision: {
-        kind: "needs_you",
-        domain: DOMAIN_TO_LEGAL[observation.domain],
-        reason: "Update requires a valid existing identity.",
-      },
-    };
+    if (observation.disposition === "update_existing" && !observation.candidateTargetId) {
+      return {
+        observation,
+        suggestion: null,
+        decision: {
+          kind: "needs_you",
+          domain: DOMAIN_TO_LEGAL[observation.domain],
+          reason: "Update requires a valid existing identity.",
+        },
+      };
+    }
   }
 
   const readyGap = missingReadySemantics(observation);
@@ -674,18 +679,9 @@ function rematerializeTrustedNoChange(
         };
       }
     }
-    if (hits.length === 0) {
-      const title = rematerializeTitle(observation);
-      if (title) {
-        return {
-          ...observation,
-          disposition: "create_new",
-          truthIntent: "current",
-          candidateTargetId: null,
-          candidateTargetTitle: title,
-        };
-      }
-    }
+    // A no_change date restatement is not a licence to mint a milestone
+    // when no evidenced row exists. Uncertain/update_existing Creates
+    // still rematerialize through rematerializeIndependentDatedCreate.
   }
 
   if (observation.domain === "availability") {
@@ -878,6 +874,17 @@ function rematerializeIndependentDatedCreate(
         ...observation,
         candidateTargetId: match.id,
         candidateTargetTitle: match.title,
+      };
+    }
+    return observation;
+  }
+
+  if (observation.disposition === "create_new" && !boundId) {
+    if (observation.truthIntent === "uncertain") {
+      return {
+        ...observation,
+        truthIntent: "current",
+        candidateTargetTitle: title,
       };
     }
     return observation;
