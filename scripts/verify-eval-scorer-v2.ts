@@ -137,7 +137,7 @@ async function main() {
     assert.equal(CAPTURE_V2_EVAL_SCORER_V2, "capture-v2-eval-scorer-v2");
     assert.equal(CAPTURE_V2_EVAL_SCORER_VERSION, "capture-v2-eval-scorer-v3");
     assert.equal(FROZEN_CORPUS_COMPOSITION.version, "capture-v2-eval-corpus-v1-hulk");
-    assert.equal(FROZEN_V2_BASELINE.version, "capture-v2-eval-baseline-v1");
+    assert.equal(FROZEN_V2_BASELINE.version, "capture-v2-eval-baseline-v2");
     assert.notEqual(CAPTURE_V2_EVAL_SCORER_VERSION, FROZEN_CORPUS_COMPOSITION.version);
     assert.notEqual(CAPTURE_V2_EVAL_SCORER_VERSION, FROZEN_V2_BASELINE.version);
     const lume = readFileSync(join(process.cwd(), "src/lib/eval-capture-v2/lume-safety.ts"), "utf8");

@@ -1,21 +1,23 @@
 /**
  * Frozen Capture V2 model baseline.
  *
- * Recorded against HEAD 3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4
- * (cursor/capture-v2-desert-new-project-56c9). Do not retune the prompt
- * or schema from benchmark failures. If production prompt/schema/model
- * drift, the foundation verify script must fail until the freeze is
- * deliberately revised.
+ * Originally recorded against HEAD 3926b649e267e7fd5cc4aa09d18d4a0a4f3d9ef4
+ * (cursor/capture-v2-desert-new-project-56c9). Deliberately revised to
+ * capture-v2-eval-baseline-v2 so Prompt A can emit left_untouched.
+ * Do not retune the prompt or schema from benchmark failures. If
+ * production prompt/schema/model drift, the foundation verify script
+ * must fail until the freeze is deliberately revised.
  */
 
 import {
   CAPTURE_V2_OBSERVATION_SCHEMA,
   CAPTURE_V2_EXTRACT_SYSTEM_MESSAGE,
+  CAPTURE_V2_PROMPT_RULES,
   buildObservationExtractionPrompt,
 } from "@/lib/capture-v2/prompt";
 import { PINNED_OPENAI_CHAT_MODEL } from "@/lib/openai-model";
 
-export const FROZEN_V2_BASELINE_VERSION = "capture-v2-eval-baseline-v1";
+export const FROZEN_V2_BASELINE_VERSION = "capture-v2-eval-baseline-v2";
 
 /**
  * Corpus composition freeze (Hulk amendment).
@@ -63,23 +65,7 @@ export const FROZEN_OPENAI_MODEL_OVERRIDE = {
 
 export const FROZEN_SCHEMA = CAPTURE_V2_OBSERVATION_SCHEMA;
 
-export const FROZEN_PROMPT_RULES = `Rules:
-- Split the transcript into the smallest project-relevant facts (multiple observations per sentence are expected).
-- Every observation needs a verbatim evidence quote from the transcript.
-- candidateTargetId MUST be copied from the supplied current records. Never invent IDs.
-- If a person/risk/date/todo already exists, prefer update_existing or no_change over create_new.
-- If share vs replace (or two plausible targets) cannot be decided from the transcript, disposition=ambiguous.
-- truthIntent=current only when the user is asserting this as current authoritative project truth (including explicit corrections, agreed dates/ownership, and agreed future milestones). truthIntent=non_current for historical, quoted, superseded, considered-but-not-agreed, or rejected alternatives. truthIntent=uncertain when it is unclear whether current truth should change.
-- Restating existing current truth without a change is disposition=no_change. Do not mark historical or quoted material as truthIntent=current.
-- Put domain-required values in proposedValues. Do not invent missing values. If a required value is unknown, omit it (Lume will Needs You) rather than guessing.
-- Person create: proposedValues.name must be the explicit usable person name.
-- Milestone create: proposedValues.label and proposedValues.date (ISO YYYY-MM-DD).
-- Availability: proposedValues.personName (or name) and proposedValues.awayFromIso (ISO). Optional awayToIso.
-- Responsibility: proposedValues.personName, proposedValues.scope, and proposedValues.ownershipSemantics (share|replace|continue|ambiguous).
-- Todo create: proposedValues.title. Risk create: proposedValues.title. Knowledge/decision: proposedValues.text or a clear statement.
-- Project-irrelevant chatter is domain=commentary and disposition=commentary.
-- Duplicate restatements: keep one observation and mark others disposition=merge.
-- Do not output operations, SQL, or Apply Ready. Confidence is informational only.`;
+export const FROZEN_PROMPT_RULES = CAPTURE_V2_PROMPT_RULES;
 
 export const FROZEN_PROJECT_CONTEXT_SHAPE = [
   "Current project: {name} ({code}) id={id}",
@@ -107,6 +93,7 @@ export const SUGGESTED_EVAL_CHALLENGERS = {
 export const FROZEN_V2_BASELINE = {
   version: FROZEN_V2_BASELINE_VERSION,
   frozenAt: "2026-08-26",
+  revisedAt: "2026-09-13",
   programme: FROZEN_PROGRAMME_BASE,
   defaultProvider: "openai" as const,
   defaultModel: FROZEN_DEFAULT_OPENAI_MODEL,

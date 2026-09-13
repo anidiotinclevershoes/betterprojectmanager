@@ -1,13 +1,13 @@
 /** Stable id for hosted provenance logs. Not a prompt rewrite. */
 export const CAPTURE_V2_PROMPT_ID = "capture-v2-observations";
 /** Matches the frozen eval baseline version. Do not bump without a deliberate freeze. */
-export const CAPTURE_V2_PROMPT_VERSION = "capture-v2-eval-baseline-v1";
+export const CAPTURE_V2_PROMPT_VERSION = "capture-v2-eval-baseline-v2";
 export const CAPTURE_V2_EXTRACT_PATH = "capture-v2/extractObservationsWithOpenAI";
 export const NEW_PROJECT_ADAPTER_PATH =
   "new-project-v2/parseObservationEnvelope+draftFromProvisional";
 
 export const CAPTURE_V2_EXTRACT_SYSTEM_MESSAGE =
-  "You extract atomic project observations as JSON. You do not mutate a database. You never invent record IDs.";
+  "You extract explicitly stated atomic project observations as JSON. You do not infer, advise, or mutate a database. You never invent record IDs.";
 
 export const CAPTURE_V2_OBSERVATION_SCHEMA = `{
   "observations": [
@@ -16,7 +16,7 @@ export const CAPTURE_V2_OBSERVATION_SCHEMA = `{
       "statement": "short atomic fact",
       "evidence": "verbatim quote from the transcript",
       "domain": "person | responsibility | risk | milestone | todo | availability | knowledge | decision | commentary | unknown",
-      "disposition": "update_existing | create_new | no_change | ambiguous | merge | commentary | ignore",
+      "disposition": "update_existing | create_new | no_change | ambiguous | merge | commentary | ignore | left_untouched",
       "truthIntent": "current | non_current | uncertain",
       "projectId": "only an id supplied in current project state",
       "candidateTargetId": "only an id supplied in current project state, or omit",
@@ -36,19 +36,14 @@ export const CAPTURE_V2_OBSERVATION_SCHEMA = `{
         "status": "risk/todo update: open | watch | resolved | accepted | complete",
         "text": "knowledge/decision body when statement is not enough"
       },
-      "commentary": "optional note when disposition is commentary or ambiguous",
+      "commentary": "optional note when disposition is commentary, ambiguous, or left_untouched",
       "modelConfidence": 0
     }
   ]
 }`;
 
-export function buildObservationExtractionPrompt(args: {
-  transcript: string;
-  projectBlock: string;
-}): string {
-  return `You extract atomic project observations. You do not mutate a database.
-
-Rules:
+export const CAPTURE_V2_PROMPT_RULES = `Rules:
+- Extract explicitly stated project facts only. Do not infer unstated project truth. Do not advise, recommend, diagnose, predict, or invent project meaning.
 - Split the transcript into the smallest project-relevant facts (multiple observations per sentence are expected).
 - Every observation needs a verbatim evidence quote from the transcript.
 - candidateTargetId MUST be copied from the supplied current records. Never invent IDs.
@@ -64,7 +59,16 @@ Rules:
 - Todo create: proposedValues.title. Risk create: proposedValues.title. Knowledge/decision: proposedValues.text or a clear statement.
 - Project-irrelevant chatter is domain=commentary and disposition=commentary.
 - Duplicate restatements: keep one observation and mark others disposition=merge.
-- Do not output operations, SQL, or Apply Ready. Confidence is informational only.
+- If a supported project operation cannot be safely identified from the explicit wording, disposition=left_untouched. Put a short plain-English reason in commentary that describes the uncertainty (what is unclear), not advice. Example: "It isn't clear what Security is concerned about or what project information should change." Not: "You should create a risk for Security."
+- Do not output operations, SQL, or Apply Ready. Confidence is informational only.`;
+
+export function buildObservationExtractionPrompt(args: {
+  transcript: string;
+  projectBlock: string;
+}): string {
+  return `You extract atomic project observations. You do not mutate a database.
+
+${CAPTURE_V2_PROMPT_RULES}
 
 Current authoritative project state:
 ${args.projectBlock}

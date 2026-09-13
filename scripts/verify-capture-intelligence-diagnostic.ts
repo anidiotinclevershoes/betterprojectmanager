@@ -230,7 +230,7 @@ function main() {
     assert.equal(NEW_PROJECT_ADAPTER_PATH.includes("draftFromProvisional"), true);
     assert.equal(CAPTURE_V2_EXTRACT_PATH.includes("extractObservationsWithOpenAI"), true);
     assert.equal(CAPTURE_V2_PROMPT_ID, "capture-v2-observations");
-    assert.equal(CAPTURE_V2_PROMPT_VERSION, "capture-v2-eval-baseline-v1");
+    assert.equal(CAPTURE_V2_PROMPT_VERSION, "capture-v2-eval-baseline-v2");
   });
 
   check("future hosted captures record provider/model/prompt/fallback without secrets or raw content", () => {

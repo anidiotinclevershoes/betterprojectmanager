@@ -1,9 +1,9 @@
 # Current Capture status
 
 **Status:** Living accepted position for Capture V2  
-**Date:** 12 September 2026  
+**Date:** 13 September 2026  
 **Production SHA this position was accepted against:** `91fabf8d1627e89538f26e00b9b3343b9d577cdb` (PR #167)  
-**Current `main` this living file was last reconciled against:** `7f94ec4e3901ead66fca077ff43a15bf5fa8dd24` (PR #173; Capture rules unchanged except Review-only Left untouched safety net)  
+**Current `main` this living file was last reconciled against:** `92d61d13c4407d04a8e20960e7eb38efa0b103c3` (PR #174 Left untouched safety net; Prompt A freeze revised to `capture-v2-eval-baseline-v2` on this branch)  
 **Owned by:** [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md) §4  
 **Docs entry:** [`docs/README.md`](./README.md)
 
@@ -32,10 +32,10 @@ human language
 
 - Production engine: Capture V2 only (`isCaptureV2Enabled()` always returns true).
 - Production model: `gpt-4o-mini-2024-07-18`.
-- Production prompt: **Prompt A** (`src/lib/capture-v2/prompt.ts`, id `capture-v2-observations`, version `capture-v2-eval-baseline-v1`).
+- Production prompt: **Prompt A** (`src/lib/capture-v2/prompt.ts`, id `capture-v2-observations`, version `capture-v2-eval-baseline-v2`).
 - AI does not write project truth. Apply does, and still revalidates.
 - Ready means the same production Apply path can execute that reviewed change.
-- **Left untouched** is Review-only. It is never canonical truth, never Apply-eligible, and never a substitute write. Prompt A is unchanged; the disposition is accepted when present. A deterministic evidence-span coverage backstop can surface leftover source text the model did not account for, with generic wording. Rematerialise / hydrate stay in place.
+- **Left untouched** is Review-only. It is never canonical truth, never Apply-eligible, and never a substitute write. Prompt A now includes `left_untouched` as the escape hatch when a supported operation cannot be safely identified from explicit wording. A deterministic evidence-span coverage backstop can still surface leftover source text the model did not account for, with generic wording. Rematerialise / hydrate stay in place.
 
 New Project Organise uses the **same extractor**, then a New Project adapter (`parse` + `draftFromProvisional`). It is not a second Capture engine.
 
@@ -66,7 +66,7 @@ Earlier maps (526/538 on #156; 535/538 on a pre-holdout experiment) are chronolo
 
 ## 3. Production prompt — A retained, E rejected
 
-**Prompt A remains production.**
+**Prompt A remains production.** The v2 freeze only adds the Left untouched escape hatch and explicit-facts wording. It is not a Prompt E revival and is not a retune against the 538-case corpus.
 
 A live Prompt E experiment was run on post-#167 `main` (PR #168, `cursor/capture-prompt-e-6709`). It is **not** a merge candidate.
 
