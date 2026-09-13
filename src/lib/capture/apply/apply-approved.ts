@@ -78,6 +78,41 @@ export function appliedStateContainsWrite(
   }
 }
 
+export function appliedStateContainsAllWrites(
+  state: MissionState,
+  operations: CaptureLegalOperation[],
+): boolean {
+  return operations.every((operation) => appliedStateContainsWrite(state, operation));
+}
+
+export type ConfirmAuthoritativeWritesResult =
+  | { state: MissionState; reconcileFailed?: false }
+  | { state?: undefined; reconcileFailed: true };
+
+/**
+ * Bounded prove-write for one Apply or a completed Ready batch.
+ * Reloads immediately until every successful operation is visible.
+ * Does not sleep, invent rows, or adopt an incomplete snapshot.
+ */
+export async function confirmAuthoritativeWrites(args: {
+  operations: CaptureLegalOperation[];
+  reloadWorkspace: () => Promise<MissionState>;
+  maxAttempts?: number;
+}): Promise<ConfirmAuthoritativeWritesResult> {
+  const operations = args.operations;
+  const maxAttempts = args.maxAttempts ?? 4;
+  if (operations.length === 0) {
+    return { state: await args.reloadWorkspace() };
+  }
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const state = await args.reloadWorkspace();
+    if (appliedStateContainsAllWrites(state, operations)) {
+      return { state };
+    }
+  }
+  return { reconcileFailed: true };
+}
+
 export type ApplyApprovedCaptureResult = {
   decision: CaptureApplyDecision;
   executed: CaptureExecuteResult;
@@ -228,26 +263,24 @@ export async function applyApprovedCaptureSuggestion(args: {
 
   if (args.reloadWorkspace) {
     try {
-      const maxAttempts = 4;
-      let state: MissionState | undefined;
-      let proven = decision.kind !== "write";
-      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-        state = await args.reloadWorkspace();
-        if (
-          decision.kind !== "write" ||
-          appliedStateContainsWrite(state, decision.operation)
-        ) {
-          proven = true;
-          break;
-        }
+      if (decision.kind !== "write") {
+        return {
+          decision,
+          executed,
+          state: await args.reloadWorkspace(),
+        };
       }
-      if (decision.kind === "write" && !proven) {
+      const confirmed = await confirmAuthoritativeWrites({
+        operations: [decision.operation],
+        reloadWorkspace: args.reloadWorkspace,
+      });
+      if (confirmed.reconcileFailed) {
         return { decision, executed, reconcileFailed: true };
       }
       return {
         decision,
         executed,
-        state,
+        state: confirmed.state,
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

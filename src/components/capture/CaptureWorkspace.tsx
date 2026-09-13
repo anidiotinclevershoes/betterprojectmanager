@@ -19,6 +19,7 @@ import {
   pendingReadyModels,
 } from "@/lib/capture/review/viewModel";
 import { applyPendingReadyQueue } from "@/lib/capture/review/applyReadyQueue";
+import { confirmAuthoritativeWrites } from "@/lib/capture/apply/apply-approved";
 import {
   CaptureSummary,
   SuggestedChangesList,
@@ -78,7 +79,12 @@ export function CaptureWorkspace({
   /** Ocean project-mode embed — presentation only; lifecycle unchanged. */
   variant?: "legacy" | "ocean";
 }) {
-  const { state, openaiConfigured, reconcileDurableWorkspace } = useMission();
+  const {
+    state,
+    openaiConfigured,
+    adoptAppliedState,
+    peekDurableWorkspace,
+  } = useMission();
   const usage = analysesRemaining(state);
   const session = useCaptureSession();
   const {
@@ -428,11 +434,36 @@ export function CaptureWorkspace({
   }
 
   async function approveReady() {
-    const { confirmOwner, failures } = await applyPendingReadyQueue({
+    const { confirmOwner, failures, reconcileFailed, succeededWrites } =
+      await applyPendingReadyQueue({
       models: pendingReadyModels(reviewModels, added, dismissed),
-      applyOne: (item) => applyOne(item, defaultProjectId),
+      applyOne: (item) => applyOne(item, defaultProjectId, { settle: "defer" }),
+      confirmWrites: async (operations) => {
+        try {
+          const confirmed = await confirmAuthoritativeWrites({
+            operations,
+            reloadWorkspace: async () => {
+              const peeked = await peekDurableWorkspace();
+              if (!peeked) {
+                throw new Error("Could not reload project truth.");
+              }
+              return peeked;
+            },
+          });
+          if (confirmed.state) {
+            adoptAppliedState(confirmed.state);
+          }
+          return confirmed;
+        } catch {
+          return { reconcileFailed: true as const };
+        }
+      },
     });
-    await reconcileDurableWorkspace();
+    if (reconcileFailed) {
+      announce("Applied — refreshing project truth…");
+    } else if (succeededWrites.length > 0) {
+      announce("Applied");
+    }
     if (confirmOwner) {
       setConfirmOwner(confirmOwner);
     }

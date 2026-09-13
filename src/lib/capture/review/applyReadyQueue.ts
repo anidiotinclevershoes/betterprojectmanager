@@ -1,8 +1,13 @@
 /**
  * Bulk Apply Ready queue. One item needing Confirm Owner must not
- * skip later Ready items.
+ * skip later Ready items. Batch completion owns the final
+ * authoritative reconciliation for the successful write set.
  */
-import type { CaptureApplyDecision, CaptureConfirmOwnerRequest } from "@/lib/capture/apply/types";
+import {
+  confirmAuthoritativeWrites,
+  type ConfirmAuthoritativeWritesResult,
+} from "@/lib/capture/apply/apply-approved";
+import type { CaptureApplyDecision, CaptureConfirmOwnerRequest, CaptureLegalOperation } from "@/lib/capture/apply/types";
 import type { PendingSuggestion } from "@/lib/capture/suggestions";
 import type { ReviewChangeViewModel } from "./viewModel";
 
@@ -13,14 +18,31 @@ export type ApplyReadyOwnerPrompt = CaptureConfirmOwnerRequest & {
 export async function applyPendingReadyQueue(args: {
   models: ReviewChangeViewModel[];
   applyOne: (item: PendingSuggestion) => Promise<CaptureApplyDecision>;
-}): Promise<{ confirmOwner: ApplyReadyOwnerPrompt | null; failures: string[] }> {
+  /**
+   * After every approved item has been sent, prove the successful
+   * writes on one authoritative reload. Omit for tests that only
+   * exercise queue order / Confirm Owner.
+   */
+  confirmWrites?: (
+    operations: CaptureLegalOperation[],
+  ) => Promise<ConfirmAuthoritativeWritesResult>;
+}): Promise<{
+  confirmOwner: ApplyReadyOwnerPrompt | null;
+  failures: string[];
+  succeededWrites: CaptureLegalOperation[];
+  reconcileFailed: boolean;
+}> {
   let confirmOwner: ApplyReadyOwnerPrompt | null = null;
   const failures: string[] = [];
+  const succeededWrites: CaptureLegalOperation[] = [];
   for (const model of args.models) {
     if (model.canApprove === false || model.executableApply === false) {
       continue;
     }
     const decision = await args.applyOne(model.suggestion);
+    if (decision.kind === "write") {
+      succeededWrites.push(decision.operation);
+    }
     if (decision.kind === "needs_you" && decision.confirmOwner && !confirmOwner) {
       confirmOwner = {
         suggestionId: model.id,
@@ -30,5 +52,12 @@ export async function applyPendingReadyQueue(args: {
       failures.push(decision.reason);
     }
   }
-  return { confirmOwner, failures };
+
+  let reconcileFailed = false;
+  if (args.confirmWrites && succeededWrites.length > 0) {
+    const confirmed = await args.confirmWrites(succeededWrites);
+    reconcileFailed = confirmed.reconcileFailed === true;
+  }
+
+  return { confirmOwner, failures, succeededWrites, reconcileFailed };
 }
