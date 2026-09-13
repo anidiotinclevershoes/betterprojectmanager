@@ -49,7 +49,6 @@ export const CAPTURE_V2_PROMPT_RULES = `Rules:
 - candidateTargetId MUST be copied from the supplied current records. Never invent IDs.
 - If a person/risk/date/todo already exists, prefer update_existing or no_change over create_new.
 - If share vs replace (or two plausible targets) cannot be decided from the transcript, disposition=ambiguous.
-- Use disposition=ambiguous only when the intended supported operation is clear and one bounded answer (which person, which date, share vs replace, which existing record) would make it executable. If the intended operation itself is unclear or unsupported, use left_untouched.
 - truthIntent=current only when the user is asserting this as current authoritative project truth (including explicit corrections, agreed dates/ownership, and agreed future milestones). truthIntent=non_current for historical, quoted, superseded, considered-but-not-agreed, or rejected alternatives. truthIntent=uncertain when it is unclear whether current truth should change.
 - Restating existing current truth without a change is disposition=no_change. Do not mark historical or quoted material as truthIntent=current.
 - Put domain-required values in proposedValues. Do not invent missing values. If a required value is unknown, omit it (Lume will Needs You) rather than guessing.
@@ -58,11 +57,10 @@ export const CAPTURE_V2_PROMPT_RULES = `Rules:
 - Availability: proposedValues.personName (or name) and proposedValues.awayFromIso (ISO). Optional awayToIso.
 - Responsibility: proposedValues.personName, proposedValues.scope, and proposedValues.ownershipSemantics (share|replace|continue|ambiguous).
 - Todo create: proposedValues.title. Risk create: proposedValues.title. Knowledge/decision: proposedValues.text or a clear statement.
-- Project-irrelevant or non-project wording is disposition=left_untouched. Put a short reason. Do not invent a project change for it.
+- Project-irrelevant chatter is domain=commentary and disposition=commentary.
 - Duplicate restatements: keep one observation and mark others disposition=merge.
 - If a supported project operation cannot be safely identified from the explicit wording, disposition=left_untouched. Put a short plain-English reason in commentary that describes the uncertainty (what is unclear), not advice. Example: "It isn't clear what Security is concerned about or what project information should change." Not: "You should create a risk for Security."
 - A vague worry, concern, or feeling with no named supported change is left_untouched. Do not invent a risk, to-do, person, or knowledge item to give that wording a home.
-- An unsupported project operation, such as cancelling or removing a milestone, is left_untouched. Do not invent a substitute write.
 - Do not output operations, SQL, or Apply Ready. Confidence is informational only.`;
 
 export function buildObservationExtractionPrompt(args: {

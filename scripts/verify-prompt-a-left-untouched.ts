@@ -131,18 +131,6 @@ function main() {
       CAPTURE_V2_PROMPT_RULES,
       /Do not invent a risk, to-do, person, or knowledge item/,
     );
-    assert.match(
-      CAPTURE_V2_PROMPT_RULES,
-      /Use disposition=ambiguous only when the intended supported operation is clear/,
-    );
-    assert.match(
-      CAPTURE_V2_PROMPT_RULES,
-      /An unsupported project operation/,
-    );
-    assert.match(
-      CAPTURE_V2_PROMPT_RULES,
-      /Project-irrelevant or non-project wording is disposition=left_untouched/,
-    );
   });
 
   check("existing Needs You / create / no_change prompt rules remain", () => {
@@ -353,44 +341,6 @@ function main() {
         (row) =>
           row.decision.kind === "write" || row.decision.kind === "needs_you",
       ),
-    );
-  });
-
-  check("unsupported cancel stays Left untouched and does not write", () => {
-    const run = runFromObservations("Cancel Parade day.", [
-      {
-        id: "obs-left",
-        statement: "Cancel Parade day",
-        evidence: "Cancel Parade day.",
-        domain: "milestone",
-        disposition: "left_untouched",
-        truthIntent: "uncertain",
-        commentary:
-          "Lume cannot cancel a milestone from this wording, so it left it alone.",
-      },
-    ]);
-    assert.equal(run.resolved[0]?.observation.disposition, "left_untouched");
-    assert.notEqual(run.resolved[0]?.decision.kind, "write");
-  });
-
-  check("bounded date ambiguity stays Needs You", () => {
-    const run = runFromObservations("Move Parade day to Friday.", [
-      {
-        id: "obs-date",
-        statement: "Move Parade day to Friday",
-        evidence: "Move Parade day to Friday.",
-        domain: "milestone",
-        disposition: "ambiguous",
-        truthIntent: "current",
-        candidateTargetId: "ms-parade",
-        candidateTargetTitle: "Parade day",
-        proposedValues: { label: "Parade day" },
-        commentary: "It is not clear which Friday Parade day should move to.",
-      },
-    ]);
-    assert.equal(run.resolved[0]?.decision.kind, "needs_you");
-    assert.ok(
-      !run.resolved.some((row) => row.observation.disposition === "left_untouched"),
     );
   });
 
