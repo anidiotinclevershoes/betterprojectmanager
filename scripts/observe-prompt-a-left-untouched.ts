@@ -254,8 +254,16 @@ function summariseRun(transcript: string, projectId: string, raw: unknown) {
     world: experimentalApplyWorld(),
     projectId,
   });
-  const dispositions = run.resolved.map((row) => row.observation.disposition);
-  const decisions = run.resolved.map((row) => row.decision.kind);
+  const observations = run.resolved.map((row) => ({
+    disposition: row.observation.disposition,
+    domain: row.observation.domain,
+    statement: row.observation.statement,
+    commentary: row.observation.commentary,
+    proposedValues: row.observation.proposedValues,
+    decision: row.decision.kind,
+  }));
+  const dispositions = observations.map((row) => row.disposition);
+  const decisions = observations.map((row) => row.decision);
   const leftovers = run.resolved.filter(
     (row) => row.observation.disposition === "left_untouched",
   );
@@ -264,6 +272,7 @@ function summariseRun(transcript: string, projectId: string, raw: unknown) {
     /you should|create a risk|recommend|I suggest/i.test(reason),
   );
   return {
+    observations,
     dispositions,
     decisions,
     writes: decisions.filter((kind) => kind === "write").length,

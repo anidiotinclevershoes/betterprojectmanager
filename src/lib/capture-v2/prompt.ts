@@ -60,6 +60,7 @@ export const CAPTURE_V2_PROMPT_RULES = `Rules:
 - Project-irrelevant chatter is domain=commentary and disposition=commentary.
 - Duplicate restatements: keep one observation and mark others disposition=merge.
 - If a supported project operation cannot be safely identified from the explicit wording, disposition=left_untouched. Put a short plain-English reason in commentary that describes the uncertainty (what is unclear), not advice. Example: "It isn't clear what Security is concerned about or what project information should change." Not: "You should create a risk for Security."
+- A vague worry, concern, or feeling with no named supported change is left_untouched. Do not invent a risk, to-do, person, or knowledge item to give that wording a home.
 - Do not output operations, SQL, or Apply Ready. Confidence is informational only.`;
 
 export function buildObservationExtractionPrompt(args: {

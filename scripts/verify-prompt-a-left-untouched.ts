@@ -127,6 +127,10 @@ function main() {
       CAPTURE_V2_PROMPT_RULES,
       /Not: "You should create a risk for Security\."/,
     );
+    assert.match(
+      CAPTURE_V2_PROMPT_RULES,
+      /Do not invent a risk, to-do, person, or knowledge item/,
+    );
   });
 
   check("existing Needs You / create / no_change prompt rules remain", () => {
