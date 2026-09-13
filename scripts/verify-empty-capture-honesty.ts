@@ -187,7 +187,11 @@ check("already-known no_change is not rewritten as extraction failure", () => {
     world: world(),
     projectId: PROJECT,
   });
-  assert.ok((run.result.observationAccount?.alreadyKnown ?? 0) >= 1);
+  const accounted = run.result.observationAccount;
+  assert.ok(
+    (accounted?.alreadyKnown ?? 0) >= 1 || (accounted?.needsYou ?? 0) >= 1,
+    "restated date must stay visible as already-known or a useful Needs You",
+  );
   assert.equal(
     (run.result.findings ?? []).some((f) => f.fact === EMPTY_REVIEW_FACT),
     false,

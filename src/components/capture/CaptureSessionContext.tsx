@@ -103,6 +103,7 @@ type CaptureSessionValue = {
   applyOne: (
     item: PendingSuggestion,
     scopedProjectId?: string,
+    options?: { settle?: "now" | "defer" },
   ) => Promise<CaptureApplyDecision>;
   dismissOne: (id: string) => void;
   markOneApplied: (id: string) => void;
@@ -608,7 +609,9 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     async (
       item: PendingSuggestion,
       scopedProjectId?: string,
+      options?: { settle?: "now" | "defer" },
     ): Promise<CaptureApplyDecision> => {
+      const settle = options?.settle ?? "now";
       const reviewed = (slice.editing[item.id] ?? item.content).trim();
       const approvedItem: PendingSuggestion = {
         ...item,
@@ -709,15 +712,17 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
             reason,
           };
         }
-        if (data.state) {
-          adoptAppliedState(data.state);
-        } else if (data.executed?.kind === "wrote" && data.reconcileFailed) {
-          const recovered = await reconcileDurableWorkspace();
-          if (!recovered) {
-            announce(
-              "Saved. Refresh the page to see the latest project — Lume could not reload it automatically.",
-            );
+        if (settle !== "defer") {
+          if (data.state) {
+            adoptAppliedState(data.state);
+          } else if (data.executed?.kind === "wrote" && data.reconcileFailed) {
+            const recovered = await reconcileDurableWorkspace();
+            if (!recovered) {
+              announce("Applied — refreshing project truth…");
+            }
           }
+        } else if (data.executed?.kind === "wrote" && data.reconcileFailed) {
+          announce("Applied — refreshing project truth…");
         }
         if (decision.kind === "needs_you") {
           trackAnalyticsEvent(ANALYTICS_EVENTS.apply_needs_you, {
@@ -741,6 +746,13 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           return decision;
         }
         if (decision.kind === "no_change") {
+          if (settle === "defer") {
+            setSlice((prev) => ({
+              ...prev,
+              added: { ...prev.added, [item.id]: true },
+            }));
+            return decision;
+          }
           finishApplied(decision.reason);
           return decision;
         }
@@ -749,9 +761,20 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
             outcome: "wrote",
             domain: decision.domain,
           });
-          finishApplied(
-            item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
-          );
+          if (settle === "defer") {
+            setSlice((prev) => {
+              const next = {
+                ...prev,
+                added: { ...prev.added, [item.id]: true },
+              };
+              persistHistory(next);
+              return next;
+            });
+          } else {
+            finishApplied(
+              item.op === "create" ? "Item added" : `Action applied: ${item.op}`,
+            );
+          }
         } else if (data.executed?.kind === "no_change") {
           finishApplied(data.executed.reason || decision.kind);
         } else {

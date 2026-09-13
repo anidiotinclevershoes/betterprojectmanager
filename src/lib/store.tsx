@@ -314,6 +314,8 @@ type MissionContextValue = {
   adoptAppliedState: (next: MissionState) => void;
   /** Reload MissionState from durable workspace after a confirmed write. */
   reconcileDurableWorkspace: () => Promise<boolean>;
+  /** Authoritative workspace read. Does not adopt. */
+  peekDurableWorkspace: () => Promise<MissionState | null>;
   refreshCoaching: () => void;
   /** Development: restore seeded demo baseline; preserve non-seeded data. */
   resetDemo: () => SeedResetResult;
@@ -443,6 +445,24 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  const peekDurableWorkspace = useCallback(async (): Promise<MissionState | null> => {
+    if (persistMetaRef.current.mode !== "supabase") return null;
+    try {
+      const serverRes = await fetch("/api/workspace/state", {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      if (!serverRes.ok) return null;
+      const payload = (await serverRes.json()) as {
+        state: MissionState;
+      };
+      return payload.state ?? null;
+    } catch (err) {
+      console.error("[MissionProvider] durable peek failed", err);
+      return null;
+    }
+  }, []);
 
   const reconcileFromDurableAuthority = useCallback(async (): Promise<boolean> => {
     if (persistMetaRef.current.mode !== "supabase") return false;
@@ -2748,6 +2768,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       addCaptureMemory,
       adoptAppliedState,
       reconcileDurableWorkspace: reconcileFromDurableAuthority,
+      peekDurableWorkspace,
       refreshCoaching,
       resetDemo,
       persistenceMode,
@@ -2794,6 +2815,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       addCaptureMemory,
       adoptAppliedState,
       reconcileFromDurableAuthority,
+      peekDurableWorkspace,
       refreshCoaching,
       resetDemo,
     ],

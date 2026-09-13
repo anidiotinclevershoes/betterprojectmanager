@@ -67,6 +67,7 @@
     "verify:people-context-ui": "npx --yes tsx scripts/verify-people-context-ui.ts",
     "verify:phase3b-capture-boundary": "npx --yes tsx scripts/verify-phase3b-capture-boundary.ts",
     "verify:apply-authoritative-first-paint": "npx --yes tsx scripts/verify-apply-authoritative-first-paint.ts",
+    "verify:run3-production-envelope": "npx --yes tsx scripts/verify-run3-production-envelope.ts",
     "verify:capture-v2": "npx --yes tsx scripts/verify-capture-v2.ts",
     "verify:capture-intelligence-diagnostic": "npx --yes tsx scripts/verify-capture-intelligence-diagnostic.ts",
     "diagnose:capture-intelligence": "npx --yes tsx scripts/diagnose-capture-intelligence.ts",
