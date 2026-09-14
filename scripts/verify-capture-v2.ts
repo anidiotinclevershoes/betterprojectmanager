@@ -184,6 +184,10 @@ function main() {
           disposition: "no_change",
           truthIntent: "current",
           candidateTargetId: "person-gumdrop",
+          proposedValues: {
+            personName: "Pippa Gumdrop",
+            scope: "UAT lead",
+          },
         },
         {
           id: "obs-b",
@@ -599,7 +603,7 @@ function main() {
     assert.doesNotMatch(barrel, /extractObservationsWithOpenAI/);
   });
 
-  check("project UUID as dated todo target rematerializes to create", () => {
+  check("project UUID as dated todo target is rejected, not rescued into create", () => {
     const run = runCaptureV2FromModelJson({
       transcript:
         "Separately: collect the void keys from the depot on 16 October 2026.",
@@ -626,19 +630,19 @@ function main() {
       projectId: CANDYLAND_ID,
     });
     assert.ok(run.validation.issues.some((issue) => issue.code === "foreign_id"));
-    assert.equal(run.validation.observations[0]?.disposition, "create_new");
-    assert.equal(run.validation.observations[0]?.candidateTargetId, null);
-    assert.equal(run.resolved[0]?.decision.kind, "write");
-    assert.equal(
-      run.resolved[0]?.decision.kind === "write"
-        ? run.resolved[0].decision.operation.type
-        : "",
-      "create_todo",
+    assert.equal(run.validation.observations.length, 0);
+    assert.equal(run.validation.rejected.length, 1);
+    assert.equal(run.validation.rejected[0]?.disposition, "ambiguous");
+    assert.equal(run.resolved.length, 0);
+    assert.ok(
+      (run.result.proposedOperations ?? []).every(
+        (op) => op.operation === "NO_CHANGE" && op.requiresClarification,
+      ),
     );
+    assert.equal(run.result.findings?.[0]?.invalidTarget, true);
+    assert.equal(run.result.findings?.[0]?.requiresClarification, true);
     const created = buildSuggestions(run.result);
-    const todo = created.find((item) => item.kind === "action");
-    assert.match(todo?.content || "", /void keys|depot/i);
-    assert.doesNotMatch(todo?.content || "", /Harbour isolate/i);
+    assert.ok(created.every((item) => item.op !== "create"));
   });
 
   check("foreign person update still fails closed", () => {
@@ -699,7 +703,7 @@ function main() {
     assert.equal(todo?.targetTodoId, undefined);
   });
 
-  check("independently complete dated create survives uncertain truthIntent", () => {
+  check("independently complete dated create with uncertain truthIntent is Needs You, not a write", () => {
     const run = runCaptureV2FromModelJson({
       transcript:
         "After the call with Elena Voss and Tomos Reed, they agreed one of them will chair the weekly mobilisation huddle. I could not hear who.\nSeparately: collect the void keys from the depot on 16 October 2026.",
@@ -739,24 +743,52 @@ function main() {
     const chair = run.resolved.find((row) => /chair|huddle/i.test(row.observation.statement));
     const keys = run.resolved.find((row) => /void keys/i.test(row.observation.statement));
     assert.equal(chair?.decision.kind, "needs_you");
-    assert.equal(keys?.decision.kind, "write");
-    assert.equal(
-      keys?.decision.kind === "write" ? keys.decision.operation.type : "",
-      "create_todo",
+    assert.equal(keys?.decision.kind, "needs_you");
+    assert.equal(keys?.suggestion, null);
+    const keysOp = (run.result.proposedOperations ?? []).find((op) =>
+      /void keys/i.test(op.reason ?? op.targetTitle ?? ""),
     );
-    const keysOp = (run.result.proposedOperations ?? []).find((op) => op.entityType === "todo");
-    assert.equal(keysOp?.operation, "CREATE");
-    assert.equal(keysOp?.requiresClarification, false);
-    assert.equal(keysOp?.proposedValues?.date, "2026-10-16");
+    assert.ok(!keysOp || keysOp.operation === "NO_CHANGE" || keysOp.requiresClarification);
   });
 
-  check("update without id rematerializes to create when no in-project title matches", () => {
+  check("update without id stays Needs You when current and no in-project title matches", () => {
     const run = runCaptureV2FromModelJson({
       transcript: "Void keys still need collecting from the depot on 16 Oct 2026.",
       rawModelJson: {
         observations: [
           {
             id: "obs-keys-update",
+            statement: "Void keys need collecting from the depot on 16 Oct 2026.",
+            evidence: "Void keys still need collecting from the depot on 16 Oct 2026.",
+            domain: "todo",
+            disposition: "update_existing",
+            truthIntent: "current",
+            proposedValues: {
+              title: "Collect void keys from the depot",
+              date: "2026-10-16",
+            },
+          },
+        ],
+      },
+      world,
+      projectId: CANDYLAND_ID,
+    });
+    assert.equal(run.resolved[0]?.decision.kind, "needs_you");
+    assert.equal(run.resolved[0]?.suggestion, null);
+    assert.ok(
+      (run.result.proposedOperations ?? []).every(
+        (op) => op.operation === "NO_CHANGE" || op.requiresClarification,
+      ),
+    );
+  });
+
+  check("update without id stays Needs You when truthIntent is uncertain", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript: "Void keys still need collecting from the depot on 16 Oct 2026.",
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-keys-update-uncertain",
             statement: "Void keys need collecting from the depot on 16 Oct 2026.",
             evidence: "Void keys still need collecting from the depot on 16 Oct 2026.",
             domain: "todo",
@@ -772,13 +804,8 @@ function main() {
       world,
       projectId: CANDYLAND_ID,
     });
-    assert.equal(run.resolved[0]?.decision.kind, "write");
-    assert.equal(
-      run.resolved[0]?.decision.kind === "write"
-        ? run.resolved[0].decision.operation.type
-        : "",
-      "create_todo",
-    );
+    assert.equal(run.resolved[0]?.decision.kind, "needs_you");
+    assert.equal(run.resolved[0]?.suggestion, null);
   });
 
   check("ambiguous they-chair restatement stays Needs You, not silent no_change", () => {

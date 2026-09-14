@@ -221,7 +221,7 @@ export const STACKED_STORIES: StackedStory[] = [
     world: "candyland",
     projectId: CANDYLAND_ID,
     steps: [
-      fromCorpus("existing-person", "no_change", "Existing Person remains responsible"),
+      fromCorpus("existing-person", "needs_you", "Existing Person remains responsible"),
       fromCorpus("risk-resolution", "apply", "Existing Risk resolves"),
       fromCorpus("milestone-move", "apply", "Milestone date moves"),
       fromCorpus("availability", "apply", "Person availability changes"),
@@ -232,7 +232,7 @@ export const STACKED_STORIES: StackedStory[] = [
       ),
       fromCorpus("todo-create", "apply", "Genuine new Todo"),
       {
-        ...fromCorpus("existing-person", "no_change", "Repeated / no-change Person"),
+        ...fromCorpus("existing-person", "needs_you", "Repeated / no-change Person"),
         id: "existing-person-repeat",
       },
       {
@@ -270,7 +270,7 @@ export const STACKED_STORIES: StackedStory[] = [
     world: "gamingstudio5000",
     projectId: GAMING_ID,
     steps: [
-      fromCorpus("responsibility-continues", "no_change", "Responsibility continuation"),
+      fromCorpus("responsibility-continues", "needs_you", "Responsibility continuation"),
       fromCorpus("responsibility-replacement", "needs_you", "Replacement stays Needs you"),
       fromCorpus("correction-of-wording", "apply", "Spoken correction → audio bus risk"),
       fromCorpus("pronoun-ambiguity", "needs_you", "Pronoun ambiguity"),

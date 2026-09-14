@@ -443,7 +443,7 @@ check("thin no_change with zero Ready ops must not be the only accounted outcome
   }
 });
 
-check("structured #172 fixtures still resolve (control — must stay green on main)", () => {
+check("structured no_change Person is Needs You, not a rematerialised Create", () => {
   const world = run3MatureWorld();
   const transcript = "Add Leo Mensah as the fire officer. Name only for now.";
   const records = contextRecordsFromWorld(world, PROJECT);
@@ -469,7 +469,8 @@ check("structured #172 fixtures still resolve (control — must stay green on ma
     transcript,
     captureEntryProjectId: PROJECT,
   });
-  assert.equal(resolved[0]?.decision.kind, "write");
+  assert.equal(resolved[0]?.decision.kind, "needs_you");
+  assert.equal(resolved[0]?.suggestion, null);
 });
 
 console.log(`\n${passed} run3-production-envelope checks passed.`);

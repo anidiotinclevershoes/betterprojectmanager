@@ -3,7 +3,7 @@
  *
  * Invariant: intended entity unresolved must never become Ready Apply on a
  * different same-domain record. Model-supplied IDs are not identity.
- * Clear absent entities rematerialize as Create. Unsafe identity → Needs You.
+ * Invalid identity plus a title is not rescued into Create. Unsafe identity → Needs You.
  *
  * Do not weaken D-051 observation-local quotes or Pippa-class first-name
  * restatements of existing people.
@@ -121,7 +121,7 @@ function writeRiskId(row: ReturnType<typeof resolveObs>["row"]): string | undefi
 function main() {
   const world = riversideWorld();
 
-  check("C5-class: unmatched timber-floor risk rematerializes as Create, not Needs You", () => {
+  check("C5-class: unmatched timber-floor risk is Needs You, not a manufactured Create", () => {
     const transcript =
       "The asbestos survey addendum came back clean. Close that chase. Raise a risk that the hall timber floor may still hide services.";
     const { row } = resolveObs(world, transcript, {
@@ -133,8 +133,8 @@ function main() {
       candidateTargetTitle: "Hall timber floor services risk",
       proposedValues: { title: "Hall timber floor services risk" },
     });
-    assert.equal(row?.decision.kind, "write", "C5 must be Ready Create");
-    assert.equal(writeType(row), "create_risk");
+    assert.equal(row?.decision.kind, "needs_you", "C5 must not invent a Create");
+    assert.equal(row?.suggestion, null);
     assert.notEqual(writeRiskId(row), DDA);
     assert.notEqual(writeRiskId(row), ME);
   });
@@ -177,7 +177,7 @@ function main() {
     assert.equal(row?.decision.kind, "needs_you");
   });
 
-  check("C16-class: guessed in-project To Do UUID rematerializes as Create", () => {
+  check("C16-class: guessed in-project To Do UUID is Needs You, not a Create", () => {
     const transcript =
       "Create two separate snag lists: Cafe snag list and Hall snag list. Do not combine them.";
     const cafe = resolveObs(world, transcript, {
@@ -190,11 +190,13 @@ function main() {
       candidateTargetTitle: "Cafe snag list",
       proposedValues: { title: "Cafe snag list" },
     });
-    assert.equal(cafe.row?.decision.kind, "write", cafe.row?.decision.kind === "needs_you" ? cafe.row.decision.reason : "");
-    assert.equal(writeType(cafe.row), "create_todo");
+    assert.equal(cafe.row?.decision.kind, "needs_you");
+    assert.equal(cafe.row?.suggestion, null);
+    assert.notEqual(writeType(cafe.row), "create_todo");
+    assert.notEqual(writeType(cafe.row), "update_todo");
   });
 
-  check("C16-class: two untitled-date snag-list Creates rematerialize", () => {
+  check("C16-class: untitled snag-list Updates without identity stay Needs You", () => {
     const transcript =
       "Create two separate snag lists: Cafe snag list and Hall snag list. Do not combine them.";
     const cafe = resolveObs(world, transcript, {
@@ -215,10 +217,10 @@ function main() {
       candidateTargetTitle: "Hall snag list",
       proposedValues: { title: "Hall snag list" },
     });
-    assert.equal(cafe.row?.decision.kind, "write");
-    assert.equal(writeType(cafe.row), "create_todo");
-    assert.equal(hall.row?.decision.kind, "write");
-    assert.equal(writeType(hall.row), "create_todo");
+    assert.equal(cafe.row?.decision.kind, "needs_you");
+    assert.equal(hall.row?.decision.kind, "needs_you");
+    assert.equal(writeType(cafe.row), "");
+    assert.equal(writeType(hall.row), "");
   });
 
   check("C11-class: first-name Chris with no existing Chris Creates; Helen stays Pippa", () => {
@@ -352,7 +354,8 @@ function main() {
       candidateTargetTitle: "M&E first-fix coordination with the hall ceiling void",
       proposedValues: { title: "M&E first-fix coordination with the hall ceiling void" },
     });
-    assert.equal(row?.decision.kind, "no_change");
+    assert.equal(row?.decision.kind, "needs_you");
+    assert.equal(row?.suggestion, null);
   });
 
   check("model no_change resolve binds the evidenced risk, never the sibling", () => {
@@ -380,12 +383,11 @@ function main() {
       candidateTargetTitle: "Outstanding DDA access ramp detail",
       proposedValues: { status: "resolved" },
     });
-    assert.equal(resolved.row?.decision.kind, "write");
-    assert.equal(writeType(resolved.row), "update_risk_status");
-    assert.equal(writeRiskId(resolved.row), "risk-timber");
+    assert.equal(resolved.row?.decision.kind, "needs_you");
+    assert.equal(resolved.row?.suggestion, null);
   });
 
-  check("model no_change of an absent titled To Do rematerializes as Create", () => {
+  check("model no_change of an absent titled To Do is Needs You, not a Create", () => {
     const transcript = "Add a to-do to reprint the visitor badges.";
     const { row } = resolveObs(world, transcript, {
       id: "no-change-todo",
@@ -396,11 +398,11 @@ function main() {
       candidateTargetTitle: "Reprint the visitor badges",
       proposedValues: { title: "Reprint the visitor badges" },
     });
-    assert.equal(row?.decision.kind, "write");
-    assert.equal(writeType(row), "create_todo");
+    assert.equal(row?.decision.kind, "needs_you");
+    assert.equal(row?.suggestion, null);
   });
 
-  check("model no_change date move binds the uniquely evidenced milestone", () => {
+  check("model no_change date move is Needs You, not a rematerialised write", () => {
     const dated: CaptureApplyWorld = {
       ...world,
       timeline: [
@@ -423,12 +425,8 @@ function main() {
       candidateTargetTitle: "Client walk-through",
       proposedValues: { date: "2026-10-23", title: "Client walk-through" },
     });
-    assert.equal(row?.decision.kind, "write");
-    assert.equal(writeType(row), "update_milestone");
-    if (row?.decision.kind === "write" && row.decision.operation.type === "update_milestone") {
-      assert.equal(row.decision.operation.milestoneId, "ms-walk");
-      assert.match(String(row.decision.operation.startAt ?? ""), /2026-10-23/);
-    }
+    assert.equal(row?.decision.kind, "needs_you");
+    assert.equal(row?.suggestion, null);
   });
 
   check("model no_change restatement of the same milestone date stays no_change", () => {
@@ -457,7 +455,7 @@ function main() {
     assert.equal(row?.decision.kind, "no_change");
   });
 
-  check("model no_change of an absent two-token Person rematerializes as Create", () => {
+  check("model no_change of an absent two-token Person is Needs You, not a Create", () => {
     const transcript = "Add Leo Mensah as the fire officer. Name only for now.";
     const { row } = resolveObs(world, transcript, {
       id: "leo-no-change",
@@ -468,8 +466,8 @@ function main() {
       candidateTargetTitle: "Leo Mensah",
       proposedValues: { name: "Leo Mensah" },
     });
-    assert.equal(row?.decision.kind, "write", row?.decision.kind === "needs_you" ? row.decision.reason : "");
-    assert.equal(writeType(row), "ensure_person");
+    assert.equal(row?.decision.kind, "needs_you");
+    assert.equal(row?.suggestion, null);
   });
 
   check("similar-title risk does not bind the other open risk", () => {

@@ -2,12 +2,15 @@
  * Family B — meaningful Capture must not become a silent empty Review.
  *
  * A non-trivial user Capture ends in one of:
- *   executable candidate | Needs You | explicit unsupported | extraction failure
+ *   executable candidate | Needs You | Left untouched | No change
  *
- * Never manufacture a write. Fail loud and safe.
+ * Empty extraction and unsupported product gaps are Left untouched:
+ * no bounded answer can produce a legal write. Never manufacture a write.
+ * The surface gate still exists so vanished Capture stays visible.
  */
 
 import type { ObservationAccount } from "./account";
+import { LEFT_UNTOUCHED_GENERIC_REASON } from "./left-untouched";
 
 export const EMPTY_REVIEW_FACT =
   "Lume could not turn this Capture into a safe change.";
@@ -29,19 +32,16 @@ export function unsupportedProductGapReason(
 ): string | null {
   const text = transcript.replace(/\s+/g, " ").trim();
   if (CANCEL_MILESTONE.test(text)) {
-    return "Lume cannot cancel or remove a dated item yet. Nothing was changed. This needs a product decision, not a silent skip.";
+    return "Lume cannot cancel or remove a dated item yet, so it left this alone.";
   }
   if (RETIRE_KNOWLEDGE.test(text)) {
-    return "Lume cannot retire or supersede Knowledge yet. The historical note stays. This needs a product decision, not a silent skip.";
+    return "Lume cannot retire or supersede Knowledge yet, so it left this alone.";
   }
   return null;
 }
 
 export function emptyReviewNeedsYouReason(transcript: string): string {
-  return (
-    unsupportedProductGapReason(transcript) ??
-    "Lume could not extract a safe, executable change from this Capture. Nothing was written. Try a more specific statement, or Lume will keep this as Needs You rather than guessing."
-  );
+  return unsupportedProductGapReason(transcript) ?? LEFT_UNTOUCHED_GENERIC_REASON;
 }
 
 /**

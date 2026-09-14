@@ -198,15 +198,19 @@ export function captureResultFromResolved(args: {
     const reason = emptyReviewNeedsYouReason(args.transcript);
     const systemId = newReviewOperationId();
     const findingId = `find-${systemId}`;
+    const statement = args.transcript.trim();
+    const evidence = statement.slice(0, 280);
     findings.push({
       id: findingId,
-      fact: EMPTY_REVIEW_FACT,
-      evidence: args.transcript.trim().slice(0, 280),
-      findingType: "AMBIGUOUS",
+      fact: statement || EMPTY_REVIEW_FACT,
+      evidence,
+      findingType: "NO_CHANGE",
       confidence: 0,
-      requiresClarification: true,
-      clarificationQuestion: reason,
+      requiresClarification: false,
       reasoningSummary: reason,
+      leftUntouched: true,
+      leftUntouchedReason: reason,
+      leftUntouchedSource: "coverage",
       projectId,
       projectName: args.projectName ?? undefined,
     });
@@ -215,17 +219,22 @@ export function captureResultFromResolved(args: {
       sourceFindingId: findingId,
       operation: "NO_CHANGE",
       entityType: "knowledge",
-      targetTitle: EMPTY_REVIEW_FACT,
-      proposedValues: { emptyReview: true },
+      targetTitle: statement.slice(0, 72) || EMPTY_REVIEW_FACT,
+      proposedValues: {
+        emptyReview: true,
+        leftUntouched: true,
+        leftUntouchedSource: "coverage",
+        leftUntouchedReason: reason,
+      },
       reason,
-      evidence: args.transcript.trim().slice(0, 280),
+      evidence,
       confidence: 0,
       destructive: false,
-      requiresClarification: true,
+      requiresClarification: false,
       projectId,
       projectName: args.projectName ?? undefined,
     });
-    account.needsYou += 1;
+    account.leftUntouched += 1;
     account.total += 1;
   }
   const recommendations = recommendationsFromOperations(
