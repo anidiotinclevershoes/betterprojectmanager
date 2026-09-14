@@ -1,0 +1,79 @@
+{
+  "caseId": "new-person",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8120,
+  "usage": {
+    "prompt_tokens": 822,
+    "completion_tokens": 272,
+    "total_tokens": 1094,
+    "reasoning_tokens": 113
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "person",
+          "targetCanonicalId": null,
+          "subject": "Velvet Sprocket",
+          "proposedValues": {
+            "name": "Velvet Sprocket",
+            "personName": "Velvet Sprocket",
+            "title": "Paint lead",
+            "date": null,
+            "status": null,
+            "scope": "wooden-track refresh",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+          "understood": "Velvet Sprocket is joining the project as paint lead for the wooden-track refresh.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "needs_you",
+        "reason": "This looks like an ownership change, not a new person. Lume will not write a stakeholder.",
+        "plannerKind": "needs_you",
+        "plannerWriteType": null,
+        "intercepted": true
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Velvet Sprocket",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Velvet Sprocket",
+        "personName": "Velvet Sprocket",
+        "title": "Paint lead",
+        "date": null,
+        "status": null,
+        "scope": "wooden-track refresh",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+      "ambiguity": "This looks like an ownership change, not a new person. Lume will not write a stakeholder.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

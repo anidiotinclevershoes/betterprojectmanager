@@ -1,0 +1,5656 @@
+[
+  {
+    "caseId": "existing-person",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 7446,
+    "usage": {
+      "prompt_tokens": 878,
+      "completion_tokens": 240,
+      "total_tokens": 1118,
+      "reasoning_tokens": 60
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "Pippa Gumdrop’s UAT responsibility",
+            "proposedValues": {
+              "name": null,
+              "personName": "Pippa Gumdrop",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead for the licorice stands",
+              "ownershipSemantics": null,
+              "text": "Pippa Gumdrop — UAT lead for the licorice stands",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+            "understood": "Pippa remains the UAT lead; the Capture specifies the scope as the licorice stands.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "left_untouched",
+          "reason": "The planner would write a different record than the one Astra named.",
+          "plannerKind": "write",
+          "plannerWriteType": "confirm_responsibility",
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "Pippa Gumdrop’s UAT responsibility",
+        "referencedCanonicalId": "resp-uat",
+        "assertedValue": {
+          "name": null,
+          "personName": "Pippa Gumdrop",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "UAT lead for the licorice stands",
+          "ownershipSemantics": null,
+          "text": "Pippa Gumdrop — UAT lead for the licorice stands",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+        "ambiguity": "The planner would write a different record than the one Astra named.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "new-person",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 7761,
+    "usage": {
+      "prompt_tokens": 822,
+      "completion_tokens": 237,
+      "total_tokens": 1059,
+      "reasoning_tokens": 72
+    },
+    "raw": {
+      "snapshotChars": 490,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Velvet Sprocket",
+            "proposedValues": {
+              "name": "Velvet Sprocket",
+              "personName": "Velvet Sprocket",
+              "title": "paint lead",
+              "date": null,
+              "status": null,
+              "scope": "wooden-track refresh",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+            "understood": "Velvet Sprocket is joining as paint lead for the wooden-track refresh and is not in the current people list.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "needs_you",
+          "reason": "This looks like an ownership change, not a new person. Lume will not write a stakeholder.",
+          "plannerKind": "needs_you",
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Velvet Sprocket",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Velvet Sprocket",
+          "personName": "Velvet Sprocket",
+          "title": "paint lead",
+          "date": null,
+          "status": null,
+          "scope": "wooden-track refresh",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "ambiguity": "This looks like an ownership change, not a new person. Lume will not write a stakeholder.",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "ambiguous-same-first-name",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 9227,
+    "usage": {
+      "prompt_tokens": 819,
+      "completion_tokens": 306,
+      "total_tokens": 1125,
+      "reasoning_tokens": 131
+    },
+    "raw": {
+      "snapshotChars": 490,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Brick from the warehouse",
+            "proposedValues": {
+              "name": "Brick",
+              "personName": "Brick",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Wants to help with assembly.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+            "understood": "Brick expressed interest in helping with assembly, but it is unclear whether he is the existing Brick Oakley or a different person. No responsibility assignment was stated.",
+            "question": "Is Brick from the warehouse Brick Oakley, or a different person?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Brick from the warehouse",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Brick",
+          "personName": "Brick",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Wants to help with assembly.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+        "ambiguity": "Is Brick from the warehouse Brick Oakley, or a different person?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "responsibility-continues",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 6965,
+    "usage": {
+      "prompt_tokens": 805,
+      "completion_tokens": 218,
+      "total_tokens": 1023,
+      "reasoning_tokens": 79
+    },
+    "raw": {
+      "snapshotChars": 454,
+      "envelope": {
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "person",
+            "targetCanonicalId": "person-pixel",
+            "subject": "Pixel Ramos remains Producer",
+            "proposedValues": {
+              "name": "Pixel Ramos",
+              "personName": "Pixel Ramos",
+              "title": "Producer",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there.",
+            "understood": "Pixel Ramos’s Producer role is unchanged.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Pixel Ramos remains Producer",
+        "referencedCanonicalId": "person-pixel",
+        "assertedValue": {
+          "name": "Pixel Ramos",
+          "personName": "Pixel Ramos",
+          "title": "Producer",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there.",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "responsibility-replacement",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 10483,
+    "usage": {
+      "prompt_tokens": 804,
+      "completion_tokens": 322,
+      "total_tokens": 1126,
+      "reasoning_tokens": 150
+    },
+    "raw": {
+      "snapshotChars": 454,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Producer handover from Pixel Ramos to Nova Quill",
+            "proposedValues": {
+              "name": null,
+              "personName": "Nova Quill",
+              "title": "Producer",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": "replace",
+              "text": "Nova Quill will replace Pixel Ramos as Producer.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+            "understood": "Nova Quill is to replace Pixel Ramos as Producer, but the effective date is not explicit.",
+            "question": "What exact date should the Producer handover take effect?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "Producer handover from Pixel Ramos to Nova Quill",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": "Nova Quill",
+          "title": "Producer",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": "replace",
+          "text": "Nova Quill will replace Pixel Ramos as Producer.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+        "ambiguity": "What exact date should the Producer handover take effect?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "share-vs-replace-ambiguous",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5682,
+    "usage": {
+      "prompt_tokens": 886,
+      "completion_tokens": 193,
+      "total_tokens": 1079,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "UAT lead ownership",
+            "proposedValues": {
+              "name": null,
+              "personName": "Fizz Caramel",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+            "understood": "A possible UAT ownership change is described, but it is unclear whether Fizz replaces Pippa or shares responsibility with her.",
+            "question": "Is Fizz Caramel replacing Pippa Gumdrop as UAT lead, sharing the responsibility with her, or is the change still undecided?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "UAT lead ownership",
+        "referencedCanonicalId": "resp-uat",
+        "assertedValue": {
+          "name": null,
+          "personName": "Fizz Caramel",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "UAT lead",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+        "ambiguity": "Is Fizz Caramel replacing Pippa Gumdrop as UAT lead, sharing the responsibility with her, or is the change still undecided?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "existing-risk-update",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5362,
+    "usage": {
+      "prompt_tokens": 817,
+      "completion_tokens": 141,
+      "total_tokens": 958,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 490,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "risk",
+            "targetCanonicalId": "risk-packaging",
+            "subject": "Packaging delay",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Packaging delay",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Packaging delay is getting worse after the cardboard mill flooded.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+            "understood": "The existing packaging delay risk is worsening following flooding at the cardboard mill.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "needs_you",
+          "reason": "This Risk update is not specific enough to apply automatically.",
+          "plannerKind": "needs_you",
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Packaging delay",
+        "referencedCanonicalId": "risk-packaging",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Packaging delay",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Packaging delay is getting worse after the cardboard mill flooded.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+        "ambiguity": "This Risk update is not specific enough to apply automatically.",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "new-risk",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 7779,
+    "usage": {
+      "prompt_tokens": 807,
+      "completion_tokens": 278,
+      "total_tokens": 1085,
+      "reasoning_tokens": 50
+    },
+    "raw": {
+      "snapshotChars": 454,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Shader compile stalling the cert build",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Shader compile stalls cert build and threatens nightlies",
+              "date": null,
+              "status": "open",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "The shader compile is stalling the cert build and could miss the nightlies.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The shader compile is stalling the cert build and could miss the nightlies.",
+            "understood": "A specific shader compilation problem is stalling the cert build and putting nightlies at risk.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_risk",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Shader compile stalling the cert build",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Shader compile stalls cert build and threatens nightlies",
+          "date": null,
+          "status": "open",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "The shader compile is stalling the cert build and could miss the nightlies.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "The shader compile is stalling the cert build and could miss the nightlies.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "risk-resolution",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4489,
+    "usage": {
+      "prompt_tokens": 875,
+      "completion_tokens": 134,
+      "total_tokens": 1009,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "risk",
+            "targetCanonicalId": "risk-bridge",
+            "subject": "Gumdrop Bridge icing",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": "closed",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The icing on Gumdrop Bridge has melted; that risk is closed.",
+            "understood": "The existing Gumdrop Bridge icing risk is now closed.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "needs_you",
+          "reason": "This Risk update is not specific enough to apply automatically.",
+          "plannerKind": "needs_you",
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Gumdrop Bridge icing",
+        "referencedCanonicalId": "risk-bridge",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": "closed",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "The icing on Gumdrop Bridge has melted; that risk is closed.",
+        "ambiguity": "This Risk update is not specific enough to apply automatically.",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "milestone-move",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5466,
+    "usage": {
+      "prompt_tokens": 873,
+      "completion_tokens": 146,
+      "total_tokens": 1019,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": "Parade day",
+              "personName": null,
+              "title": null,
+              "date": "2026-10-29",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day is now 29 October 2026.",
+            "understood": "Parade day moves from 15 October 2026 to 29 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_milestone",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Parade day",
+        "referencedCanonicalId": "ms-parade",
+        "assertedValue": {
+          "name": "Parade day",
+          "personName": null,
+          "title": null,
+          "date": "2026-10-29",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Parade day is now 29 October 2026.",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "unchanged-date",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4593,
+    "usage": {
+      "prompt_tokens": 819,
+      "completion_tokens": 139,
+      "total_tokens": 958,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 490,
+      "envelope": {
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-freeze",
+            "subject": "Track freeze",
+            "proposedValues": {
+              "name": "Track freeze",
+              "personName": null,
+              "title": null,
+              "date": "2026-09-01",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Track freeze remains 1 September 2026.",
+            "understood": "Track freeze remains on its current date, 1 September 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Track freeze",
+        "referencedCanonicalId": "ms-freeze",
+        "assertedValue": {
+          "name": "Track freeze",
+          "personName": null,
+          "title": null,
+          "date": "2026-09-01",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Track freeze remains 1 September 2026.",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "todo-create",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4209,
+    "usage": {
+      "prompt_tokens": 878,
+      "completion_tokens": 158,
+      "total_tokens": 1036,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Polish the candy-cane banners",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Polish the candy-cane banners before the float leaves",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+            "understood": "Add a to-do to polish the candy-cane banners before the float leaves; no explicit date was provided.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_todo",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "todo",
+        "subject": "Polish the candy-cane banners",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Polish the candy-cane banners before the float leaves",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "availability",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4105,
+    "usage": {
+      "prompt_tokens": 881,
+      "completion_tokens": 161,
+      "total_tokens": 1042,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "availability",
+            "targetCanonicalId": null,
+            "subject": "Fizz Caramel availability",
+            "proposedValues": {
+              "name": null,
+              "personName": "Fizz Caramel",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": "2026-10-05",
+              "awayToIso": "2026-10-12"
+            },
+            "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+            "understood": "Fizz Caramel is away from 2026-10-05 until 2026-10-12.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "write_availability",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "availability",
+        "subject": "Fizz Caramel availability",
+        "referencedCanonicalId": "person-fizz",
+        "assertedValue": {
+          "name": null,
+          "personName": "Fizz Caramel",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": "2026-10-05",
+          "awayToIso": "2026-10-12"
+        },
+        "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "duplicate-observation",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4009,
+    "usage": {
+      "prompt_tokens": 820,
+      "completion_tokens": 136,
+      "total_tokens": 956,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 490,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "risk",
+            "targetCanonicalId": "risk-packaging",
+            "subject": "Packaging delay",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Packaging delay",
+              "date": null,
+              "status": "resolved",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Packaging delay is resolved. Also, the packaging delay issue is resolved.",
+            "understood": "The existing Packaging delay issue is resolved; both statements describe the same update.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_risk_status",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Packaging delay",
+        "referencedCanonicalId": "risk-packaging",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Packaging delay",
+          "date": null,
+          "status": "resolved",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Packaging delay is resolved. Also, the packaging delay issue is resolved.",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "correction-of-wording",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 7747,
+    "usage": {
+      "prompt_tokens": 814,
+      "completion_tokens": 313,
+      "total_tokens": 1127,
+      "reasoning_tokens": 89
+    },
+    "raw": {
+      "snapshotChars": 454,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Audio bus mixer stalling the cert build",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Audio bus mixer stalling the cert build",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "The audio bus mixer is stalling the cert build.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+            "understood": "The corrected blocker is the audio bus mixer, not shader compilation.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_risk",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Audio bus mixer stalling the cert build",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Audio bus mixer stalling the cert build",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "The audio bus mixer is stalling the cert build.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "mixed-domains",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 11054,
+    "usage": {
+      "prompt_tokens": 888,
+      "completion_tokens": 557,
+      "total_tokens": 1445,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "Pippa Gumdrop — UAT lead",
+            "proposedValues": {
+              "name": "Pippa Gumdrop",
+              "personName": "Pippa Gumdrop",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pippa Gumdrop remains UAT lead.",
+            "understood": "Pippa Gumdrop remains the UAT lead; this restates current truth.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Parade day",
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day moved to 22 October 2026.",
+            "understood": "Parade day moves from 15 October 2026 to 22 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Chocolate fountain pump overheating",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Chocolate fountain pump overheating",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "The chocolate fountain pump is overheating.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The chocolate fountain pump is overheating.",
+            "understood": "A new concrete issue is reported: the chocolate fountain pump is overheating.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_milestone",
+          "intercepted": false
+        },
+        {
+          "index": 2,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_risk",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "Pippa Gumdrop — UAT lead",
+        "referencedCanonicalId": "resp-uat",
+        "assertedValue": {
+          "name": "Pippa Gumdrop",
+          "personName": "Pippa Gumdrop",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "UAT lead",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Pippa Gumdrop remains UAT lead.",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      },
+      {
+        "domain": "milestone",
+        "subject": "Parade day",
+        "referencedCanonicalId": "ms-parade",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Parade day",
+          "date": "2026-10-22",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Parade day moved to 22 October 2026.",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      },
+      {
+        "domain": "risk",
+        "subject": "Chocolate fountain pump overheating",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Chocolate fountain pump overheating",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "The chocolate fountain pump is overheating.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "The chocolate fountain pump is overheating.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "pronoun-ambiguity",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 6671,
+    "usage": {
+      "prompt_tokens": 804,
+      "completion_tokens": 155,
+      "total_tokens": 959,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 454,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Ownership of Boss balancing pass",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Boss balancing pass",
+              "date": null,
+              "status": null,
+              "scope": "Boss balancing pass",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "She said she will own the boss balancing pass from now on.",
+            "understood": "The Capture assigns ownership of the existing Boss balancing pass task, but does not identify who “she” is.",
+            "question": "Who does “she” refer to?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "Ownership of Boss balancing pass",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Boss balancing pass",
+          "date": null,
+          "status": null,
+          "scope": "Boss balancing pass",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "She said she will own the boss balancing pass from now on.",
+        "ambiguity": "Who does “she” refer to?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "irrelevant-commentary",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 6834,
+    "usage": {
+      "prompt_tokens": 808,
+      "completion_tokens": 147,
+      "total_tokens": 955,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 454,
+      "envelope": {
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Lobby chiptunes",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+            "understood": "The Capture contains unrelated chatter and no explicit project change.",
+            "question": null,
+            "leftUntouchedReason": "No actionable project information or change to current truth."
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "unsupported",
+        "subject": "Lobby chiptunes",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+        "ambiguity": "No actionable project information or change to current truth.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "explicit-no-change",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4522,
+    "usage": {
+      "prompt_tokens": 822,
+      "completion_tokens": 133,
+      "total_tokens": 955,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 490,
+      "envelope": {
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Toyworld project records",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Nothing has changed on Toyworld this week. Leave the records as they are.",
+            "understood": "No changes to the current project records.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "no_change",
+          "toOperation": "left_untouched",
+          "reason": "This change needs a proven existing record before Lume can apply it.",
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "unsupported",
+        "subject": "Toyworld project records",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "Nothing has changed on Toyworld this week. Leave the records as they are.",
+        "ambiguity": "This change needs a proven existing record before Lume can apply it.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "cross-project-bait",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 18290,
+    "usage": {
+      "prompt_tokens": 887,
+      "completion_tokens": 807,
+      "total_tokens": 1694,
+      "reasoning_tokens": 220
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Pixel Ramos",
+            "proposedValues": {
+              "name": "Pixel Ramos",
+              "personName": "Pixel Ramos",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Pixel Ramos from GamingStudio5000",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pixel Ramos from GamingStudio5000",
+            "understood": "Pixel Ramos is named as a person from GamingStudio5000 and is not in the current people snapshot.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "UAT ownership",
+            "proposedValues": {
+              "name": null,
+              "personName": "Pixel Ramos",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT",
+            "understood": "Pixel is proposed as UAT owner, but current truth names Pippa Gumdrop as UAT lead.",
+            "question": "Should Pixel replace Pippa as UAT owner, or share ownership with Pippa?",
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "needs_you",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Resolve Console certification slip risk",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Console certification slip",
+              "date": null,
+              "status": "resolved",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "please resolve the Console certification slip risk",
+            "understood": "The Capture asks to resolve a named risk, but no matching risk exists in the supplied snapshot.",
+            "question": "Which current risk row does “Console certification slip” refer to?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "ensure_person",
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 2,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Pixel Ramos",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Pixel Ramos",
+          "personName": "Pixel Ramos",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Pixel Ramos from GamingStudio5000",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Pixel Ramos from GamingStudio5000",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "responsibility",
+        "subject": "UAT ownership",
+        "referencedCanonicalId": "resp-uat",
+        "assertedValue": {
+          "name": null,
+          "personName": "Pixel Ramos",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "UAT",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT",
+        "ambiguity": "Should Pixel replace Pippa as UAT owner, or share ownership with Pippa?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      },
+      {
+        "domain": "risk",
+        "subject": "Resolve Console certification slip risk",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Console certification slip",
+          "date": null,
+          "status": "resolved",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "please resolve the Console certification slip risk",
+        "ambiguity": "Which current risk row does “Console certification slip” refer to?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "toyworld-vocabulary-bait",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 13034,
+    "usage": {
+      "prompt_tokens": 879,
+      "completion_tokens": 400,
+      "total_tokens": 1279,
+      "reasoning_tokens": 250
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Toyworld's packaging delay",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Toyworld's packaging delay",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+            "understood": "Record Toyworld's packaging delay as a risk on Candyland as well.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_risk",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Toyworld's packaging delay",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Toyworld's packaging delay",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "contradict-parade",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5153,
+    "usage": {
+      "prompt_tokens": 886,
+      "completion_tokens": 184,
+      "total_tokens": 1070,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day date",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Parade day",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day is now 29 October 2026. Also, keep Parade day on 15 October 2026.",
+            "understood": "The Capture gives contradictory dates for Parade day: 29 October 2026 and its current date, 15 October 2026.",
+            "question": "Should Parade day be on 29 October 2026 or 15 October 2026?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Parade day date",
+        "referencedCanonicalId": "ms-parade",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Parade day",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Parade day is now 29 October 2026. Also, keep Parade day on 15 October 2026.",
+        "ambiguity": "Should Parade day be on 29 October 2026 or 15 October 2026?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "unsupported-remove",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5619,
+    "usage": {
+      "prompt_tokens": 869,
+      "completion_tokens": 167,
+      "total_tokens": 1036,
+      "reasoning_tokens": 33
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "remove",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please delete Parade day from the plan.",
+            "understood": "Remove the existing Parade day milestone from the plan.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "remove",
+          "toOperation": "left_untouched",
+          "reason": "Lume cannot safely apply this type of change.",
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Parade day",
+        "referencedCanonicalId": "ms-parade",
+        "assertedValue": "omitted",
+        "evidence": "Please delete Parade day from the plan.",
+        "ambiguity": "Lume cannot safely apply this type of change.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "holdout-h6",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 20082,
+    "usage": {
+      "prompt_tokens": 1081,
+      "completion_tokens": 1090,
+      "total_tokens": 2171,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 1077,
+      "envelope": {
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Biscuits chatter",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Copied from the WhatsApp thread — ignore the bit about whose turn it is to bring biscuits.",
+            "understood": "The Capture explicitly excludes the biscuits chatter.",
+            "question": null,
+            "leftUntouchedReason": "Irrelevant chatter explicitly marked to ignore."
+          },
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-workshop",
+            "subject": "Mobilisation workshop",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Mobilisation workshop",
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "22/10/2026 is the new mobilisation workshop date (was 8 Oct).",
+            "understood": "The mobilisation workshop moves from 8 October to 22 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Office plants",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parking: the office plants need watering; not a control.",
+            "understood": "The plant-watering comment is parked and explicitly described as not a control.",
+            "question": null,
+            "leftUntouchedReason": "No explicit project operation; incidental office housekeeping."
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Speculative DHP responsibility for Priya",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Tomos mentioned Priya might take DHP if housing insist, but that was just speculation.",
+            "understood": "Priya taking DHP is explicitly speculation, not a confirmed assignment.",
+            "question": null,
+            "leftUntouchedReason": "Speculation does not establish a responsibility change."
+          },
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Kwame Boateng",
+            "proposedValues": {
+              "name": "Kwame Boateng",
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+            "understood": "Kwame Boateng is a named project person not present in the snapshot.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Kwame Boateng — contractor lead",
+            "proposedValues": {
+              "name": null,
+              "personName": "Kwame Boateng",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "contractor lead for Harbour",
+              "ownershipSemantics": null,
+              "text": "Kwame Boateng is the contractor lead for Harbour.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+            "understood": "Kwame Boateng is explicitly identified as contractor lead for Harbour; no replacement of Priya's contractor liaison responsibility is stated.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Collect void keys from the depot",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Collect void keys from the depot",
+              "date": "2026-10-16",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Void keys still need collecting from the depot on 16 October 2026.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Void keys still need collecting from the depot on 16 Oct 2026.",
+            "understood": "Collecting the void keys is an outstanding task for 16 October 2026. No person is assigned in the Capture.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "no_change",
+            "domain": "knowledge",
+            "targetCanonicalId": "know-policy-v3",
+            "subject": "Repairs policy v3",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Repairs policy v3 is the current working version.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Elena said the repairs policy v3 remains current.",
+            "understood": "The Capture restates that repairs policy v3 remains current.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_milestone",
+          "intercepted": false
+        },
+        {
+          "index": 2,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 3,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 4,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "ensure_person",
+          "intercepted": false
+        },
+        {
+          "index": 5,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "confirm_responsibility",
+          "intercepted": false
+        },
+        {
+          "index": 6,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_todo",
+          "intercepted": false
+        },
+        {
+          "index": 7,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "unsupported",
+        "subject": "Biscuits chatter",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "Copied from the WhatsApp thread — ignore the bit about whose turn it is to bring biscuits.",
+        "ambiguity": "Irrelevant chatter explicitly marked to ignore.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      },
+      {
+        "domain": "milestone",
+        "subject": "Mobilisation workshop",
+        "referencedCanonicalId": "ms-workshop",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Mobilisation workshop",
+          "date": "2026-10-22",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "22/10/2026 is the new mobilisation workshop date (was 8 Oct).",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      },
+      {
+        "domain": "unsupported",
+        "subject": "Office plants",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "Parking: the office plants need watering; not a control.",
+        "ambiguity": "No explicit project operation; incidental office housekeeping.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      },
+      {
+        "domain": "responsibility",
+        "subject": "Speculative DHP responsibility for Priya",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "Tomos mentioned Priya might take DHP if housing insist, but that was just speculation.",
+        "ambiguity": "Speculation does not establish a responsibility change.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      },
+      {
+        "domain": "person",
+        "subject": "Kwame Boateng",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Kwame Boateng",
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "responsibility",
+        "subject": "Kwame Boateng — contractor lead",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": "Kwame Boateng",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "contractor lead for Harbour",
+          "ownershipSemantics": null,
+          "text": "Kwame Boateng is the contractor lead for Harbour.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "todo",
+        "subject": "Collect void keys from the depot",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Collect void keys from the depot",
+          "date": "2026-10-16",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Void keys still need collecting from the depot on 16 October 2026.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Void keys still need collecting from the depot on 16 Oct 2026.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "knowledge",
+        "subject": "Repairs policy v3",
+        "referencedCanonicalId": "know-policy-v3",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Repairs policy v3 is the current working version.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Elena said the repairs policy v3 remains current.",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "todo-remove-supported",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4027,
+    "usage": {
+      "prompt_tokens": 872,
+      "completion_tokens": 133,
+      "total_tokens": 1005,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "remove",
+            "domain": "todo",
+            "targetCanonicalId": "todo-pack",
+            "subject": "Prepare the jelly pack",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Prepare the jelly pack",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please delete the To Do titled Prepare the jelly pack.",
+            "understood": "Delete the existing To Do titled Prepare the jelly pack.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "remove",
+          "toOperation": "remove",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "delete_todo",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "todo",
+        "subject": "Prepare the jelly pack",
+        "referencedCanonicalId": "todo-pack",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Prepare the jelly pack",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please delete the To Do titled Prepare the jelly pack.",
+        "ambiguity": "omitted",
+        "disposition": "remove",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "unsupported-remove-person",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5725,
+    "usage": {
+      "prompt_tokens": 871,
+      "completion_tokens": 173,
+      "total_tokens": 1044,
+      "reasoning_tokens": 34
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "remove",
+            "domain": "person",
+            "targetCanonicalId": "person-gumdrop",
+            "subject": "Pippa Gumdrop",
+            "proposedValues": {
+              "name": "Pippa Gumdrop",
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please delete Pippa Gumdrop from the project.",
+            "understood": "Remove Pippa Gumdrop from the project.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "remove",
+          "toOperation": "left_untouched",
+          "reason": "Lume cannot safely apply this type of change.",
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Pippa Gumdrop",
+        "referencedCanonicalId": "person-gumdrop",
+        "assertedValue": {
+          "name": "Pippa Gumdrop",
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please delete Pippa Gumdrop from the project.",
+        "ambiguity": "Lume cannot safely apply this type of change.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "unsupported-remove-risk",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5668,
+    "usage": {
+      "prompt_tokens": 813,
+      "completion_tokens": 166,
+      "total_tokens": 979,
+      "reasoning_tokens": 38
+    },
+    "raw": {
+      "snapshotChars": 490,
+      "envelope": {
+        "items": [
+          {
+            "operation": "remove",
+            "domain": "risk",
+            "targetCanonicalId": "risk-packaging",
+            "subject": "Packaging delay",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please delete the Packaging delay risk.",
+            "understood": "Delete the existing Packaging delay risk.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "remove",
+          "toOperation": "left_untouched",
+          "reason": "Lume cannot safely apply this type of change.",
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Packaging delay",
+        "referencedCanonicalId": "risk-packaging",
+        "assertedValue": "omitted",
+        "evidence": "Please delete the Packaging delay risk.",
+        "ambiguity": "Lume cannot safely apply this type of change.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "knowledge-water-based",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4800,
+    "usage": {
+      "prompt_tokens": 817,
+      "completion_tokens": 139,
+      "total_tokens": 956,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 490,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "knowledge",
+            "targetCanonicalId": null,
+            "subject": "Wooden-track paint requirement",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Wooden-track paint requirement",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "The wooden-track paint must stay water-based.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Remember: the wooden-track paint must stay water-based.",
+            "understood": "Water-based paint is required for the wooden track.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "write_knowledge",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "knowledge",
+        "subject": "Wooden-track paint requirement",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Wooden-track paint requirement",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "The wooden-track paint must stay water-based.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Remember: the wooden-track paint must stay water-based.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "vague-parade",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5564,
+    "usage": {
+      "prompt_tokens": 869,
+      "completion_tokens": 146,
+      "total_tokens": 1015,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Worry about the parade",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "I'm a bit worried about the parade.",
+            "understood": "A general worry is expressed without a specific risk or named change.",
+            "question": null,
+            "leftUntouchedReason": "Vague worry with no named change cannot safely become a project operation."
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "unsupported",
+        "subject": "Worry about the parade",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "I'm a bit worried about the parade.",
+        "ambiguity": "Vague worry with no named change cannot safely become a project operation.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "relative-date-parade",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 9444,
+    "usage": {
+      "prompt_tokens": 868,
+      "completion_tokens": 320,
+      "total_tokens": 1188,
+      "reasoning_tokens": 168
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": "Parade day",
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day is next Friday.",
+            "understood": "Parade day is being rescheduled, but the exact calendar date needs confirmation.",
+            "question": "Which calendar date do you mean by “next Friday”?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Parade day",
+        "referencedCanonicalId": "ms-parade",
+        "assertedValue": {
+          "name": "Parade day",
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Parade day is next Friday.",
+        "ambiguity": "Which calendar date do you mean by “next Friday”?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "historic-parade",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 6659,
+    "usage": {
+      "prompt_tokens": 883,
+      "completion_tokens": 214,
+      "total_tokens": 1097,
+      "reasoning_tokens": 45
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Last June the Parade day used to be the 12th, which is why the banners still say June.",
+            "understood": "The Capture describes a former Parade day date and explains the June wording on the banners.",
+            "question": null,
+            "leftUntouchedReason": "Historical context does not explicitly change the current Parade day date."
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Parade day",
+        "referencedCanonicalId": "ms-parade",
+        "assertedValue": "omitted",
+        "evidence": "Last June the Parade day used to be the 12th, which is why the banners still say June.",
+        "ambiguity": "Historical context does not explicitly change the current Parade day date.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "similar-name-exact",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4398,
+    "usage": {
+      "prompt_tokens": 851,
+      "completion_tokens": 137,
+      "total_tokens": 988,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 612,
+      "envelope": {
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "person",
+            "targetCanonicalId": "person-brick",
+            "subject": "Brick Oakley",
+            "proposedValues": {
+              "name": "Brick Oakley",
+              "personName": "Brick Oakley",
+              "title": "Sponsor",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Brick Oakley remains the Toyworld sponsor.",
+            "understood": "Brick Oakley is still the Toyworld sponsor; this matches current truth.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Brick Oakley",
+        "referencedCanonicalId": "person-brick",
+        "assertedValue": {
+          "name": "Brick Oakley",
+          "personName": "Brick Oakley",
+          "title": "Sponsor",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Brick Oakley remains the Toyworld sponsor.",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "similar-name-other-brick",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 7607,
+    "usage": {
+      "prompt_tokens": 852,
+      "completion_tokens": 219,
+      "total_tokens": 1071,
+      "reasoning_tokens": 68
+    },
+    "raw": {
+      "snapshotChars": 612,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Brick Willow helping with warehouse packing",
+            "proposedValues": {
+              "name": null,
+              "personName": "Brick Willow",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "warehouse packing",
+              "ownershipSemantics": "helping",
+              "text": "Brick Willow will help with warehouse packing this week.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Brick Willow will help with warehouse packing this week.",
+            "understood": "Brick Willow will help with warehouse packing this week; ownership is not assigned.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "needs_you",
+          "reason": "Lume cannot safely apply this finding to a maintained record.",
+          "plannerKind": "needs_you",
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "Brick Willow helping with warehouse packing",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": "Brick Willow",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "warehouse packing",
+          "ownershipSemantics": "helping",
+          "text": "Brick Willow will help with warehouse packing this week.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Brick Willow will help with warehouse packing this week.",
+        "ambiguity": "Lume cannot safely apply this finding to a maintained record.",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "similar-name-ambiguous-brick",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 7744,
+    "usage": {
+      "prompt_tokens": 849,
+      "completion_tokens": 226,
+      "total_tokens": 1075,
+      "reasoning_tokens": 72
+    },
+    "raw": {
+      "snapshotChars": 612,
+      "envelope": {
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Call about the track map",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Brick called about the track map.",
+            "understood": "A call about the track map is mentioned, but no project change is stated.",
+            "question": null,
+            "leftUntouchedReason": "No explicit action, outcome, or change to current truth is provided."
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "unsupported",
+        "subject": "Call about the track map",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "Brick called about the track map.",
+        "ambiguity": "No explicit action, outcome, or change to current truth is provided.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "similar-name-spelling",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 6262,
+    "usage": {
+      "prompt_tokens": 851,
+      "completion_tokens": 215,
+      "total_tokens": 1066,
+      "reasoning_tokens": 66
+    },
+    "raw": {
+      "snapshotChars": 612,
+      "envelope": {
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "person",
+            "targetCanonicalId": "person-brick",
+            "subject": "Brick Oakley remains sponsor",
+            "proposedValues": {
+              "name": "Brick Oakley",
+              "personName": "Brick Oakley",
+              "title": "Sponsor",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Brikk Oakley is still the sponsor.",
+            "understood": "“Brikk Oakley” refers to Brick Oakley, whose current role is already Sponsor.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Brick Oakley remains sponsor",
+        "referencedCanonicalId": "person-brick",
+        "assertedValue": {
+          "name": "Brick Oakley",
+          "personName": "Brick Oakley",
+          "title": "Sponsor",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Brikk Oakley is still the sponsor.",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "email-unsupported",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5961,
+    "usage": {
+      "prompt_tokens": 872,
+      "completion_tokens": 188,
+      "total_tokens": 1060,
+      "reasoning_tokens": 34
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Email the parade committee",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please email the whole parade committee about the new date.",
+            "understood": "Request to email the parade committee about a new date.",
+            "question": null,
+            "leftUntouchedReason": "Sending email is not a supported project operation, and no new date is supplied."
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "unsupported",
+        "subject": "Email the parade committee",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "Please email the whole parade committee about the new date.",
+        "ambiguity": "Sending email is not a supported project operation, and no new date is supplied.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "todo-complete-jelly",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4258,
+    "usage": {
+      "prompt_tokens": 869,
+      "completion_tokens": 126,
+      "total_tokens": 995,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "todo",
+            "targetCanonicalId": "todo-pack",
+            "subject": "Prepare the jelly pack",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Prepare the jelly pack",
+              "date": null,
+              "status": "done",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Mark Prepare the jelly pack as done.",
+            "understood": "Mark the existing to-do as done.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "needs_you",
+          "reason": "This To Do update is not specific enough to apply automatically.",
+          "plannerKind": "needs_you",
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "todo",
+        "subject": "Prepare the jelly pack",
+        "referencedCanonicalId": "todo-pack",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Prepare the jelly pack",
+          "date": null,
+          "status": "done",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Mark Prepare the jelly pack as done.",
+        "ambiguity": "This To Do update is not specific enough to apply automatically.",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "person-rename-unsupported",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4607,
+    "usage": {
+      "prompt_tokens": 874,
+      "completion_tokens": 146,
+      "total_tokens": 1020,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "person",
+            "targetCanonicalId": "person-gumdrop",
+            "subject": "Pippa Gumdrop",
+            "proposedValues": {
+              "name": "Pippa Sugarplum",
+              "personName": "Pippa Sugarplum ",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pippa Gumdrop is now called Pippa Sugarplum.",
+            "understood": "Pippa Gumdrop’s name has changed to Pippa Sugarplum.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "left_untouched",
+          "reason": "Lume cannot safely apply this type of change.",
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Pippa Gumdrop",
+        "referencedCanonicalId": "person-gumdrop",
+        "assertedValue": {
+          "name": "Pippa Sugarplum",
+          "personName": "Pippa Sugarplum",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Pippa Gumdrop is now called Pippa Sugarplum.",
+        "ambiguity": "Lume cannot safely apply this type of change.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "contradict-packaging",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5182,
+    "usage": {
+      "prompt_tokens": 818,
+      "completion_tokens": 148,
+      "total_tokens": 966,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 490,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "risk",
+            "targetCanonicalId": "risk-packaging",
+            "subject": "Packaging delay",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Packaging delay",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Packaging delay is resolved. Packaging delay is still getting worse.",
+            "understood": "The Capture contradicts itself about whether Packaging delay is resolved or still worsening.",
+            "question": "Is Packaging delay resolved, or is it still getting worse?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Packaging delay",
+        "referencedCanonicalId": "risk-packaging",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Packaging delay",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Packaging delay is resolved. Packaging delay is still getting worse.",
+        "ambiguity": "Is Packaging delay resolved, or is it still getting worse?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "todo-dated-canes",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4257,
+    "usage": {
+      "prompt_tokens": 880,
+      "completion_tokens": 154,
+      "total_tokens": 1034,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Collect the candy canes",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Collect the candy canes",
+              "date": "2026-10-18",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please add a to-do to collect the candy canes on 18 October 2026.",
+            "understood": "Add a to-do to collect the candy canes on 2026-10-18.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_todo",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "todo",
+        "subject": "Collect the candy canes",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Collect the candy canes",
+          "date": "2026-10-18",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please add a to-do to collect the candy canes on 18 October 2026.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "issue-cert-worse",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 6246,
+    "usage": {
+      "prompt_tokens": 802,
+      "completion_tokens": 202,
+      "total_tokens": 1004,
+      "reasoning_tokens": 59
+    },
+    "raw": {
+      "snapshotChars": 454,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "risk",
+            "targetCanonicalId": "risk-console",
+            "subject": "Console certification slip",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": "open",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Console certification slip is worse this week.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Console certification slip is worse this week and still open.",
+            "understood": "The existing risk has worsened this week; its status remains open.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_risk_status",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Console certification slip",
+        "referencedCanonicalId": "risk-console",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": "open",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Console certification slip is worse this week.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Console certification slip is worse this week and still open.",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "chatter-weather",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4674,
+    "usage": {
+      "prompt_tokens": 875,
+      "completion_tokens": 144,
+      "total_tokens": 1019,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Non-project weather comment",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "I think the weather will be nice on Friday, nothing project related.",
+            "understood": "The Capture contains no explicit project change.",
+            "question": null,
+            "leftUntouchedReason": "Irrelevant chatter explicitly identified as unrelated to the project."
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "unsupported",
+        "subject": "Non-project weather comment",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "I think the weather will be nice on Friday, nothing project related.",
+        "ambiguity": "Irrelevant chatter explicitly identified as unrelated to the project.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "availability-relative",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 6861,
+    "usage": {
+      "prompt_tokens": 867,
+      "completion_tokens": 217,
+      "total_tokens": 1084,
+      "reasoning_tokens": 59
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "availability",
+            "targetCanonicalId": null,
+            "subject": "Fizz Caramel’s absence",
+            "proposedValues": {
+              "name": null,
+              "personName": "Fizz Caramel",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Fizz is off next week.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Fizz is off next week.",
+            "understood": "Fizz Caramel will be away, but the exact date range is not specified.",
+            "question": "What start and end dates does “next week” mean for Fizz’s absence?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "availability",
+        "subject": "Fizz Caramel’s absence",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": "Fizz Caramel",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Fizz is off next week.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Fizz is off next week.",
+        "ambiguity": "What start and end dates does “next week” mean for Fizz’s absence?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "two-token-person-create",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 9947,
+    "usage": {
+      "prompt_tokens": 871,
+      "completion_tokens": 409,
+      "total_tokens": 1280,
+      "reasoning_tokens": 59
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Jordan Hale",
+            "proposedValues": {
+              "name": "Jordan Hale",
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please add Jordan Hale as the new lighting lead.",
+            "understood": "Add Jordan Hale as a new project person.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Jordan Hale — lighting lead",
+            "proposedValues": {
+              "name": null,
+              "personName": "Jordan Hale",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "lighting lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please add Jordan Hale as the new lighting lead.",
+            "understood": "Assign Jordan Hale the lighting lead responsibility.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "ensure_person",
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "confirm_responsibility",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Jordan Hale",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Jordan Hale",
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please add Jordan Hale as the new lighting lead.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "responsibility",
+        "subject": "Jordan Hale — lighting lead",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": "Jordan Hale",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "lighting lead",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please add Jordan Hale as the new lighting lead.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "ownership-competing-owner",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 7912,
+    "usage": {
+      "prompt_tokens": 869,
+      "completion_tokens": 247,
+      "total_tokens": 1116,
+      "reasoning_tokens": 69
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "UAT lead ownership",
+            "proposedValues": {
+              "name": null,
+              "personName": "Fizz Caramel",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Fizz Caramel owns UAT lead.",
+            "understood": "Fizz Caramel is named as owning UAT lead, which is currently owned by Pippa Gumdrop. Whether this replaces or shares ownership is unclear.",
+            "question": "Does Fizz Caramel replace Pippa Gumdrop as UAT lead, or share ownership with her?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "UAT lead ownership",
+        "referencedCanonicalId": "resp-uat",
+        "assertedValue": {
+          "name": null,
+          "personName": "Fizz Caramel",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "UAT lead",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Fizz Caramel owns UAT lead.",
+        "ambiguity": "Does Fizz Caramel replace Pippa Gumdrop as UAT lead, or share ownership with her?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "explicit-ownership-first",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 9487,
+    "usage": {
+      "prompt_tokens": 867,
+      "completion_tokens": 303,
+      "total_tokens": 1170,
+      "reasoning_tokens": 54
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Sarah Kim",
+            "proposedValues": {
+              "name": "Sarah Kim",
+              "personName": "Sarah Kim",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Sarah Kim owns float safety.",
+            "understood": "Sarah Kim is a named person not present in the snapshot.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Float safety ownership",
+            "proposedValues": {
+              "name": null,
+              "personName": "Sarah Kim",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "float safety",
+              "ownershipSemantics": "owns",
+              "text": "Sarah Kim owns float safety.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Sarah Kim owns float safety.",
+            "understood": "Sarah Kim owns float safety; this responsibility is not present in the snapshot.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "ensure_person",
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "create",
+          "toOperation": "needs_you",
+          "reason": "Lume cannot safely apply this finding to a maintained record.",
+          "plannerKind": "needs_you",
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Sarah Kim",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Sarah Kim",
+          "personName": "Sarah Kim",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Sarah Kim owns float safety.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "responsibility",
+        "subject": "Float safety ownership",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": "Sarah Kim",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "float safety",
+          "ownershipSemantics": "owns",
+          "text": "Sarah Kim owns float safety.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Sarah Kim owns float safety.",
+        "ambiguity": "Lume cannot safely apply this finding to a maintained record.",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "mixed-clear-and-unclear",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 6462,
+    "usage": {
+      "prompt_tokens": 880,
+      "completion_tokens": 255,
+      "total_tokens": 1135,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Order extra sprinkles",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Order extra sprinkles",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please add a to-do to order extra sprinkles",
+            "understood": "Add a new to-do to order extra sprinkles.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Possible Security concern",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "I think Security might be worried.",
+            "understood": "A possible Security concern is mentioned without a specific issue or change.",
+            "question": null,
+            "leftUntouchedReason": "Vague worry with no named change cannot become a project operation."
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_todo",
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "todo",
+        "subject": "Order extra sprinkles",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Order extra sprinkles",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please add a to-do to order extra sprinkles",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "unsupported",
+        "subject": "Possible Security concern",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "I think Security might be worried.",
+        "ambiguity": "Vague worry with no named change cannot become a project operation.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "title-only-existing-target",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 3969,
+    "usage": {
+      "prompt_tokens": 873,
+      "completion_tokens": 146,
+      "total_tokens": 1019,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": "Parade day",
+              "personName": null,
+              "title": null,
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day moved to 22 October 2026.",
+            "understood": "Parade day moved from 15 October 2026 to 22 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_milestone",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Parade day",
+        "referencedCanonicalId": "ms-parade",
+        "assertedValue": {
+          "name": "Parade day",
+          "personName": null,
+          "title": null,
+          "date": "2026-10-22",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Parade day moved to 22 October 2026.",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "might-ownership",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5968,
+    "usage": {
+      "prompt_tokens": 870,
+      "completion_tokens": 214,
+      "total_tokens": 1084,
+      "reasoning_tokens": 57
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Float lighting ownership",
+            "proposedValues": {
+              "name": null,
+              "personName": "Fizz Caramel",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "float lighting",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Fizz Caramel might own float lighting now.",
+            "understood": "Fizz Caramel is mentioned as a possible owner of float lighting, but ownership is not confirmed.",
+            "question": "Is Fizz Caramel now confirmed as the owner of float lighting?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "Float lighting ownership",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": "Fizz Caramel",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "float lighting",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Fizz Caramel might own float lighting now.",
+        "ambiguity": "Is Fizz Caramel now confirmed as the owner of float lighting?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "probably-date",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4842,
+    "usage": {
+      "prompt_tokens": 873,
+      "completion_tokens": 167,
+      "total_tokens": 1040,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": "Parade day",
+              "personName": null,
+              "title": null,
+              "date": "2026-10-30",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day is probably 30 October 2026.",
+            "understood": "A possible change to Parade day from 15 October to 30 October 2026 is stated, but the date is not confirmed.",
+            "question": "Should Parade day be changed to 30 October 2026?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Parade day",
+        "referencedCanonicalId": "ms-parade",
+        "assertedValue": {
+          "name": "Parade day",
+          "personName": null,
+          "title": null,
+          "date": "2026-10-30",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Parade day is probably 30 October 2026.",
+        "ambiguity": "Should Parade day be changed to 30 October 2026?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "valid-canonical-id",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4050,
+    "usage": {
+      "prompt_tokens": 877,
+      "completion_tokens": 146,
+      "total_tokens": 1023,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": "Parade day",
+              "personName": null,
+              "title": null,
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Update ms-parade: Parade day moved to 22 October 2026.",
+            "understood": "Move the existing Parade day milestone to 2026-10-22.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_milestone",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Parade day",
+        "referencedCanonicalId": "ms-parade",
+        "assertedValue": {
+          "name": "Parade day",
+          "personName": null,
+          "title": null,
+          "date": "2026-10-22",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Update ms-parade: Parade day moved to 22 October 2026.",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "wrong-type-id",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 8516,
+    "usage": {
+      "prompt_tokens": 878,
+      "completion_tokens": 287,
+      "total_tokens": 1165,
+      "reasoning_tokens": 103
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "milestone",
+            "targetCanonicalId": null,
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": "Parade day",
+              "personName": null,
+              "title": null,
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Update person-gumdrop: Parade day moved to 22 October 2026.",
+            "understood": "The Capture gives a new date for Parade day but explicitly targets person-gumdrop, which identifies Pippa Gumdrop rather than the milestone.",
+            "question": "Should this update target the Parade day milestone (ms-parade) instead of person-gumdrop?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Parade day",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Parade day",
+          "personName": null,
+          "title": null,
+          "date": "2026-10-22",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Update person-gumdrop: Parade day moved to 22 October 2026.",
+        "ambiguity": "Should this update target the Parade day milestone (ms-parade) instead of person-gumdrop?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "foreign-invented-id",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 7916,
+    "usage": {
+      "prompt_tokens": 881,
+      "completion_tokens": 253,
+      "total_tokens": 1134,
+      "reasoning_tokens": 62
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Gumdrop Bridge icing",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Gumdrop Bridge icing is worse.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please attach this update to risk-console-not-in-candyland: Gumdrop Bridge icing is worse.",
+            "understood": "The requested target ID is absent from the snapshot. A risk titled \"Gumdrop Bridge icing\" exists, but it has a different ID.",
+            "question": "Did you mean to attach this update to the existing \"Gumdrop Bridge icing\" risk (risk-bridge)?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Gumdrop Bridge icing",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Gumdrop Bridge icing is worse.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please attach this update to risk-console-not-in-candyland: Gumdrop Bridge icing is worse.",
+        "ambiguity": "Did you mean to attach this update to the existing \"Gumdrop Bridge icing\" risk (risk-bridge)?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "c5-timber-floor",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 10650,
+    "usage": {
+      "prompt_tokens": 1076,
+      "completion_tokens": 575,
+      "total_tokens": 1651,
+      "reasoning_tokens": 34
+    },
+    "raw": {
+      "snapshotChars": 1317,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "knowledge",
+            "targetCanonicalId": null,
+            "subject": "Asbestos survey addendum result",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "The asbestos survey addendum came back clean.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The asbestos survey addendum came back clean.",
+            "understood": "The addendum's clean result is new project knowledge.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "update",
+            "domain": "todo",
+            "targetCanonicalId": "todo-asbestos",
+            "subject": "Chase the asbestos survey addendum",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": "done",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The asbestos survey addendum came back clean. Close that chase.",
+            "understood": "Mark the existing asbestos survey addendum chase as complete.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Hall timber floor may hide services",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Hall timber floor may still hide services",
+              "date": null,
+              "status": "open",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Raise a risk that the hall timber floor may still hide services.",
+            "understood": "Create a risk about potentially concealed services beneath the hall timber floor.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "write_knowledge",
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "update",
+          "toOperation": "needs_you",
+          "reason": "This To Do update is not specific enough to apply automatically.",
+          "plannerKind": "needs_you",
+          "plannerWriteType": null,
+          "intercepted": true
+        },
+        {
+          "index": 2,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_risk",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "knowledge",
+        "subject": "Asbestos survey addendum result",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "The asbestos survey addendum came back clean.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "The asbestos survey addendum came back clean.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "todo",
+        "subject": "Chase the asbestos survey addendum",
+        "referencedCanonicalId": "todo-asbestos",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": "done",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "The asbestos survey addendum came back clean. Close that chase.",
+        "ambiguity": "This To Do update is not specific enough to apply automatically.",
+        "disposition": "needs_you",
+        "writeProposed": false
+      },
+      {
+        "domain": "risk",
+        "subject": "Hall timber floor may hide services",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Hall timber floor may still hide services",
+          "date": null,
+          "status": "open",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Raise a risk that the hall timber floor may still hide services.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "harbourline-sarah-first-name",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4470,
+    "usage": {
+      "prompt_tokens": 1056,
+      "completion_tokens": 138,
+      "total_tokens": 1194,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 1204,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Communications ownership",
+            "proposedValues": {
+              "name": "Sarah",
+              "personName": "Sarah",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "communications",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "I think Sarah owns communications now? Not sure which Sarah.",
+            "understood": "Communications ownership is attributed to Sarah, but the person is not identified.",
+            "question": "Which Sarah owns communications?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "Communications ownership",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Sarah",
+          "personName": "Sarah",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "communications",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "I think Sarah owns communications now? Not sure which Sarah.",
+        "ambiguity": "Which Sarah owns communications?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "harbourline-competing-launch",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5204,
+    "usage": {
+      "prompt_tokens": 1066,
+      "completion_tokens": 178,
+      "total_tokens": 1244,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 1204,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-hca-launch",
+            "subject": "Public launch date",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Public launch",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+            "understood": "The Capture gives two possible launch dates without confirming either. The current date is 2027-04-09.",
+            "question": "Should the public launch be on 2027-03-12 or 2027-04-09?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "milestone",
+        "subject": "Public launch date",
+        "referencedCanonicalId": "ms-hca-launch",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Public launch",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+        "ambiguity": "Should the public launch be on 2027-03-12 or 2027-04-09?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "repeated-fact-wording",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 6410,
+    "usage": {
+      "prompt_tokens": 889,
+      "completion_tokens": 225,
+      "total_tokens": 1114,
+      "reasoning_tokens": 54
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "Pippa Gumdrop — UAT lead",
+            "proposedValues": {
+              "name": null,
+              "personName": "Pippa Gumdrop",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Just to restate what we already know: Pippa Gumdrop continues to be the person leading UAT on the licorice stands.",
+            "understood": "Restates Pippa Gumdrop's existing UAT lead responsibility; no change is requested.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "Pippa Gumdrop — UAT lead",
+        "referencedCanonicalId": "resp-uat",
+        "assertedValue": {
+          "name": null,
+          "personName": "Pippa Gumdrop",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "UAT lead",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Just to restate what we already know: Pippa Gumdrop continues to be the person leading UAT on the licorice stands.",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "already-current-status",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 3995,
+    "usage": {
+      "prompt_tokens": 872,
+      "completion_tokens": 134,
+      "total_tokens": 1006,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "risk",
+            "targetCanonicalId": "risk-bridge",
+            "subject": "Gumdrop Bridge icing",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Gumdrop Bridge icing",
+              "date": null,
+              "status": "open",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Gumdrop Bridge icing is still an open risk.",
+            "understood": "The risk remains open, matching current truth.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Gumdrop Bridge icing",
+        "referencedCanonicalId": "risk-bridge",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Gumdrop Bridge icing",
+          "date": null,
+          "status": "open",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Gumdrop Bridge icing is still an open risk.",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "noisy-conversational",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 11854,
+    "usage": {
+      "prompt_tokens": 931,
+      "completion_tokens": 623,
+      "total_tokens": 1554,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Standup preamble",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "ok so like, quick dump from the standup — ignore me coughing",
+            "understood": "No project change stated.",
+            "question": null,
+            "leftUntouchedReason": "Irrelevant chatter."
+          },
+          {
+            "operation": "no_change",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "Pippa Gumdrop remains UAT lead",
+            "proposedValues": {
+              "name": null,
+              "personName": "Pippa Gumdrop",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "anyway Pippa's still doing UAT, that's fine",
+            "understood": "Restates Pippa Gumdrop's existing UAT responsibility.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Order extra sprinkles",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Order extra sprinkles",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "oh and can someone actually order extra sprinkles? that's a real to-do",
+            "understood": "Adds a to-do to order extra sprinkles, with no owner specified.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "update",
+            "domain": "risk",
+            "targetCanonicalId": "risk-bridge",
+            "subject": "Gumdrop Bridge icing resolved",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": "resolved",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "uhhh the bridge icing thing is resolved now, they salted it",
+            "understood": "Changes Gumdrop Bridge icing from open to resolved.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Biscuits for the cabin",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "biscuits for the cabin, not a control, skip that",
+            "understood": "The Capture explicitly asks to skip this mention.",
+            "question": null,
+            "leftUntouchedReason": "Explicitly excluded from project changes."
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 2,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_todo",
+          "intercepted": false
+        },
+        {
+          "index": 3,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_risk_status",
+          "intercepted": false
+        },
+        {
+          "index": 4,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "unsupported",
+        "subject": "Standup preamble",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "ok so like, quick dump from the standup — ignore me coughing",
+        "ambiguity": "Irrelevant chatter.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      },
+      {
+        "domain": "responsibility",
+        "subject": "Pippa Gumdrop remains UAT lead",
+        "referencedCanonicalId": "resp-uat",
+        "assertedValue": {
+          "name": null,
+          "personName": "Pippa Gumdrop",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "UAT lead",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "anyway Pippa's still doing UAT, that's fine",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      },
+      {
+        "domain": "todo",
+        "subject": "Order extra sprinkles",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Order extra sprinkles",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "oh and can someone actually order extra sprinkles? that's a real to-do",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "risk",
+        "subject": "Gumdrop Bridge icing resolved",
+        "referencedCanonicalId": "risk-bridge",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": "resolved",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "uhhh the bridge icing thing is resolved now, they salted it",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      },
+      {
+        "domain": "unsupported",
+        "subject": "Biscuits for the cabin",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "biscuits for the cabin, not a control, skip that",
+        "ambiguity": "Explicitly excluded from project changes.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": null,
+    "contender": "ai-first",
+    "repeatIndex": 1
+  }
+]

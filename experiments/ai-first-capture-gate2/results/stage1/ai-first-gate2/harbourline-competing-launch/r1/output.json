@@ -1,0 +1,79 @@
+{
+  "caseId": "harbourline-competing-launch",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5511,
+  "usage": {
+    "prompt_tokens": 1066,
+    "completion_tokens": 179,
+    "total_tokens": 1245,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 1204,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-hca-launch",
+          "subject": "Public launch date",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Public launch",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+          "understood": "The Capture gives two possible public launch dates without confirming whether the current date of 2027-04-09 should change.",
+          "question": "Is the public launch date 2027-03-12 or 2027-04-09?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Public launch date",
+      "referencedCanonicalId": "ms-hca-launch",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Public launch",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+      "ambiguity": "Is the public launch date 2027-03-12 or 2027-04-09?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

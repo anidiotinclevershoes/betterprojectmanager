@@ -1,0 +1,149 @@
+{
+  "caseId": "cross-project-bait",
+  "captureText": "Pixel Ramos from GamingStudio5000 should own our UAT, and please resolve the Console certification slip risk while you are here.",
+  "projectId": "proj-candy",
+  "world": {
+    "projectIds": [
+      "proj-candy",
+      "proj-toy",
+      "proj-game"
+    ],
+    "projects": [
+      {
+        "id": "proj-candy",
+        "name": "Candyland",
+        "code": "CANDY",
+        "stakeholders": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ]
+      },
+      {
+        "id": "proj-toy",
+        "name": "Toyworld",
+        "code": "TOY",
+        "stakeholders": [
+          {
+            "id": "person-brick",
+            "name": "Brick Oakley",
+            "role": "Sponsor"
+          },
+          {
+            "id": "person-buttons",
+            "name": "Captain Buttons",
+            "role": "Assembly lead"
+          }
+        ]
+      },
+      {
+        "id": "proj-game",
+        "name": "GamingStudio5000",
+        "code": "GS5K",
+        "stakeholders": [
+          {
+            "id": "person-pixel",
+            "name": "Pixel Ramos",
+            "role": "Producer"
+          }
+        ]
+      }
+    ],
+    "risks": [
+      {
+        "id": "risk-bridge",
+        "projectId": "proj-candy",
+        "title": "Gumdrop Bridge icing",
+        "status": "open"
+      },
+      {
+        "id": "risk-packaging",
+        "projectId": "proj-toy",
+        "title": "Packaging delay",
+        "status": "open"
+      },
+      {
+        "id": "risk-console",
+        "projectId": "proj-game",
+        "title": "Console certification slip",
+        "status": "open"
+      }
+    ],
+    "todos": [
+      {
+        "id": "todo-pack",
+        "projectId": "proj-candy",
+        "title": "Prepare the jelly pack",
+        "done": false
+      },
+      {
+        "id": "todo-track",
+        "projectId": "proj-toy",
+        "title": "Print the track map",
+        "done": false
+      },
+      {
+        "id": "todo-balance",
+        "projectId": "proj-game",
+        "title": "Boss balancing pass",
+        "done": false
+      }
+    ],
+    "timeline": [
+      {
+        "id": "ms-parade",
+        "projectId": "proj-candy",
+        "label": "Parade day",
+        "startAt": "2026-10-15T12:00:00.000Z"
+      },
+      {
+        "id": "ms-freeze",
+        "projectId": "proj-toy",
+        "label": "Track freeze",
+        "startAt": "2026-09-01T12:00:00.000Z"
+      },
+      {
+        "id": "ms-cert",
+        "projectId": "proj-game",
+        "label": "Console certification",
+        "startAt": "2026-11-20T12:00:00.000Z"
+      }
+    ],
+    "knowledge": [
+      {
+        "projectId": "proj-candy",
+        "sections": {
+          "people": [
+            "Pippa Gumdrop — UAT lead"
+          ]
+        },
+        "structured": [
+          {
+            "id": "resp-uat",
+            "kind": "responsibility",
+            "lifecycle": "current",
+            "body": "Pippa Gumdrop — UAT lead",
+            "meta": {
+              "personId": "person-gumdrop",
+              "responsibility": {
+                "personId": "person-gumdrop",
+                "personName": "Pippa Gumdrop",
+                "scope": "UAT lead",
+                "ownerConfirmed": true
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "apply": false,
+  "replayPath": "/tmp/lume-bakeoff/bakeoff/experiments/capture-three-way-bakeoff/results/stage1/ai-first/cross-project-bait/r1/output.json"
+}

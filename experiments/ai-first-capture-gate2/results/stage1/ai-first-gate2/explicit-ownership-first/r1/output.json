@@ -1,0 +1,131 @@
+{
+  "caseId": "explicit-ownership-first",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8175,
+  "usage": {
+    "prompt_tokens": 867,
+    "completion_tokens": 290,
+    "total_tokens": 1157,
+    "reasoning_tokens": 39
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "person",
+          "targetCanonicalId": null,
+          "subject": "Sarah Kim",
+          "proposedValues": {
+            "name": "Sarah Kim",
+            "personName": "Sarah Kim",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Sarah Kim owns float safety.",
+          "understood": "Sarah Kim is a named person not present in the snapshot.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "create",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Float safety ownership",
+          "proposedValues": {
+            "name": null,
+            "personName": "Sarah Kim",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "float safety",
+            "ownershipSemantics": "owner",
+            "text": "Sarah Kim owns float safety.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Sarah Kim owns float safety.",
+          "understood": "Sarah Kim owns float safety, a responsibility not present in the snapshot.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "ensure_person",
+        "intercepted": false
+      },
+      {
+        "index": 1,
+        "fromOperation": "create",
+        "toOperation": "needs_you",
+        "reason": "Lume cannot safely apply this finding to a maintained record.",
+        "plannerKind": "needs_you",
+        "plannerWriteType": null,
+        "intercepted": true
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Sarah Kim",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Sarah Kim",
+        "personName": "Sarah Kim",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Sarah Kim owns float safety.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Float safety ownership",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Sarah Kim",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "float safety",
+        "ownershipSemantics": "owner",
+        "text": "Sarah Kim owns float safety.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Sarah Kim owns float safety.",
+      "ambiguity": "Lume cannot safely apply this finding to a maintained record.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

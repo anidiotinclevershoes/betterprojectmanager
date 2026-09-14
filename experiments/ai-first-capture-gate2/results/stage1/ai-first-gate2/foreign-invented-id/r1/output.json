@@ -1,0 +1,79 @@
+{
+  "caseId": "foreign-invented-id",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8188,
+  "usage": {
+    "prompt_tokens": 881,
+    "completion_tokens": 278,
+    "total_tokens": 1159,
+    "reasoning_tokens": 98
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "risk",
+          "targetCanonicalId": null,
+          "subject": "Gumdrop Bridge icing update",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "Gumdrop Bridge icing is worse.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please attach this update to risk-console-not-in-candyland: Gumdrop Bridge icing is worse.",
+          "understood": "The requested target ID is absent from the snapshot. The snapshot contains a risk titled “Gumdrop Bridge icing” with ID risk-bridge.",
+          "question": "Should this update be attached to risk-bridge instead?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Gumdrop Bridge icing update",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "Gumdrop Bridge icing is worse.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Please attach this update to risk-console-not-in-candyland: Gumdrop Bridge icing is worse.",
+      "ambiguity": "Should this update be attached to risk-bridge instead?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

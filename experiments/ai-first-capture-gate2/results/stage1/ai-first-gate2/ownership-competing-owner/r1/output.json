@@ -1,0 +1,79 @@
+{
+  "caseId": "ownership-competing-owner",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7233,
+  "usage": {
+    "prompt_tokens": 869,
+    "completion_tokens": 250,
+    "total_tokens": 1119,
+    "reasoning_tokens": 68
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "responsibility",
+          "targetCanonicalId": "resp-uat",
+          "subject": "UAT lead ownership",
+          "proposedValues": {
+            "name": null,
+            "personName": "Fizz Caramel",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "UAT lead",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Fizz Caramel owns UAT lead.",
+          "understood": "Fizz Caramel is named as UAT lead owner; Pippa Gumdrop currently owns that responsibility. Whether Fizz replaces Pippa or shares ownership is unclear.",
+          "question": "Does Fizz Caramel replace Pippa Gumdrop as UAT lead owner, or share ownership with Pippa?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "UAT lead ownership",
+      "referencedCanonicalId": "resp-uat",
+      "assertedValue": {
+        "name": null,
+        "personName": "Fizz Caramel",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "UAT lead",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Fizz Caramel owns UAT lead.",
+      "ambiguity": "Does Fizz Caramel replace Pippa Gumdrop as UAT lead owner, or share ownership with Pippa?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,79 @@
+{
+  "caseId": "relative-date-parade",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 9248,
+  "usage": {
+    "prompt_tokens": 868,
+    "completion_tokens": 276,
+    "total_tokens": 1144,
+    "reasoning_tokens": 122
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-parade",
+          "subject": "Parade day",
+          "proposedValues": {
+            "name": "Parade day",
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Parade day is next Friday.",
+          "understood": "Parade day is being rescheduled, but the exact date intended by “next Friday” needs confirmation.",
+          "question": "What calendar date do you mean by next Friday?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "name": "Parade day",
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Parade day is next Friday.",
+      "ambiguity": "What calendar date do you mean by next Friday?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,79 @@
+{
+  "caseId": "knowledge-water-based",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4632,
+  "usage": {
+    "prompt_tokens": 817,
+    "completion_tokens": 145,
+    "total_tokens": 962,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "knowledge",
+          "targetCanonicalId": null,
+          "subject": "Wooden-track paint requirement",
+          "proposedValues": {
+            "name": "Wooden-track paint requirement",
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "The wooden-track paint must stay water-based.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Remember: the wooden-track paint must stay water-based.",
+          "understood": "A new project knowledge note states that the wooden-track paint must remain water-based.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "write_knowledge",
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "knowledge",
+      "subject": "Wooden-track paint requirement",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Wooden-track paint requirement",
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "The wooden-track paint must stay water-based.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Remember: the wooden-track paint must stay water-based.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,24 @@
+{
+  "caseId": "similar-name-ambiguous-brick",
+  "contender": "ai-first",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "which-brick-track",
+      "meaning": "Bare Brick is ambiguous between Oakley and Willow.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": true,
+      "clearAutomationOk": null,
+      "justifiedIntervention": true,
+      "unnecessaryIntervention": false,
+      "note": "left_untouched write=no id=omitted"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

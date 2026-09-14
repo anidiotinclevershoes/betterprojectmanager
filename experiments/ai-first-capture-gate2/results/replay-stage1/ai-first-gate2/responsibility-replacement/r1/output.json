@@ -1,0 +1,79 @@
+{
+  "caseId": "responsibility-replacement",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 10483,
+  "usage": {
+    "prompt_tokens": 804,
+    "completion_tokens": 322,
+    "total_tokens": 1126,
+    "reasoning_tokens": 150
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Producer handover from Pixel Ramos to Nova Quill",
+          "proposedValues": {
+            "name": null,
+            "personName": "Nova Quill",
+            "title": "Producer",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": "replace",
+            "text": "Nova Quill will replace Pixel Ramos as Producer.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+          "understood": "Nova Quill is to replace Pixel Ramos as Producer, but the effective date is not explicit.",
+          "question": "What exact date should the Producer handover take effect?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Producer handover from Pixel Ramos to Nova Quill",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Nova Quill",
+        "title": "Producer",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": "replace",
+        "text": "Nova Quill will replace Pixel Ramos as Producer.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+      "ambiguity": "What exact date should the Producer handover take effect?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

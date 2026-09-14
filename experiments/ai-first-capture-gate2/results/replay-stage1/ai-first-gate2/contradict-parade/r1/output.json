@@ -1,0 +1,79 @@
+{
+  "caseId": "contradict-parade",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5153,
+  "usage": {
+    "prompt_tokens": 886,
+    "completion_tokens": 184,
+    "total_tokens": 1070,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-parade",
+          "subject": "Parade day date",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Parade day",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Parade day is now 29 October 2026. Also, keep Parade day on 15 October 2026.",
+          "understood": "The Capture gives contradictory dates for Parade day: 29 October 2026 and its current date, 15 October 2026.",
+          "question": "Should Parade day be on 29 October 2026 or 15 October 2026?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day date",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Parade day",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Parade day is now 29 October 2026. Also, keep Parade day on 15 October 2026.",
+      "ambiguity": "Should Parade day be on 29 October 2026 or 15 October 2026?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

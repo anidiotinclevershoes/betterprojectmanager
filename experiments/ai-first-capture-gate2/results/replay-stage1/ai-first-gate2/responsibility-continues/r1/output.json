@@ -1,0 +1,79 @@
+{
+  "caseId": "responsibility-continues",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6965,
+  "usage": {
+    "prompt_tokens": 805,
+    "completion_tokens": 218,
+    "total_tokens": 1023,
+    "reasoning_tokens": 79
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "no_change",
+          "domain": "person",
+          "targetCanonicalId": "person-pixel",
+          "subject": "Pixel Ramos remains Producer",
+          "proposedValues": {
+            "name": "Pixel Ramos",
+            "personName": "Pixel Ramos",
+            "title": "Producer",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there.",
+          "understood": "Pixel Ramos’s Producer role is unchanged.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "no_change",
+        "toOperation": "no_change",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Pixel Ramos remains Producer",
+      "referencedCanonicalId": "person-pixel",
+      "assertedValue": {
+        "name": "Pixel Ramos",
+        "personName": "Pixel Ramos",
+        "title": "Producer",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

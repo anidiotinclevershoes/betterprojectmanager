@@ -1,0 +1,120 @@
+{
+  "caseId": "issue-cert-worse",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 10355,
+  "usage": {
+    "prompt_tokens": 802,
+    "completion_tokens": 354,
+    "total_tokens": 1156,
+    "reasoning_tokens": 104
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "risk",
+          "targetCanonicalId": "risk-console",
+          "subject": "Console certification slip",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Console certification slip is worse this week",
+          "understood": "The Capture describes worsening but specifies no concrete change.",
+          "question": null,
+          "leftUntouchedReason": "Vague worsening does not specify a supported change to the existing risk."
+        },
+        {
+          "operation": "no_change",
+          "domain": "risk",
+          "targetCanonicalId": "risk-console",
+          "subject": "Console certification slip",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": "open",
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "still open.",
+          "understood": "The risk remains open, matching current truth.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "left_untouched",
+        "toOperation": "left_untouched",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      },
+      {
+        "index": 1,
+        "fromOperation": "no_change",
+        "toOperation": "no_change",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Console certification slip",
+      "referencedCanonicalId": "risk-console",
+      "assertedValue": "omitted",
+      "evidence": "Console certification slip is worse this week",
+      "ambiguity": "Vague worsening does not specify a supported change to the existing risk.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    },
+    {
+      "domain": "risk",
+      "subject": "Console certification slip",
+      "referencedCanonicalId": "risk-console",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": "open",
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "still open.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,79 @@
+{
+  "caseId": "todo-dated-canes",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5072,
+  "usage": {
+    "prompt_tokens": 880,
+    "completion_tokens": 153,
+    "total_tokens": 1033,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "todo",
+          "targetCanonicalId": null,
+          "subject": "Collect the candy canes",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Collect the candy canes",
+            "date": "2026-10-18",
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please add a to-do to collect the candy canes on 18 October 2026.",
+          "understood": "Add a to-do to collect the candy canes on 18 October 2026.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "create_todo",
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Collect the candy canes",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Collect the candy canes",
+        "date": "2026-10-18",
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Please add a to-do to collect the candy canes on 18 October 2026.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

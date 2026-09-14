@@ -1,0 +1,24 @@
+{
+  "caseId": "chatter-weather",
+  "contender": "ai-first",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "weather",
+      "meaning": "Weather chatter is not a write.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": null,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "left_untouched write=no id=omitted"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

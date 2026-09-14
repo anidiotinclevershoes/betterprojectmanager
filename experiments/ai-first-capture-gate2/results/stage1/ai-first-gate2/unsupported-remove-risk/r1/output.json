@@ -1,0 +1,68 @@
+{
+  "caseId": "unsupported-remove-risk",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6611,
+  "usage": {
+    "prompt_tokens": 813,
+    "completion_tokens": 168,
+    "total_tokens": 981,
+    "reasoning_tokens": 40
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "remove",
+          "domain": "risk",
+          "targetCanonicalId": "risk-packaging",
+          "subject": "Packaging delay",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please delete the Packaging delay risk.",
+          "understood": "Delete the existing Packaging delay risk.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "remove",
+        "toOperation": "left_untouched",
+        "reason": "Lume cannot safely apply this type of change.",
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": true
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": "omitted",
+      "evidence": "Please delete the Packaging delay risk.",
+      "ambiguity": "Lume cannot safely apply this type of change.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

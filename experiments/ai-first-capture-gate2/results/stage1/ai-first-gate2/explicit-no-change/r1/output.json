@@ -1,0 +1,68 @@
+{
+  "caseId": "explicit-no-change",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5411,
+  "usage": {
+    "prompt_tokens": 822,
+    "completion_tokens": 172,
+    "total_tokens": 994,
+    "reasoning_tokens": 32
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "no_change",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Toyworld records",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Nothing has changed on Toyworld this week. Leave the records as they are.",
+          "understood": "No changes requested; all current records remain unchanged.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "no_change",
+        "toOperation": "left_untouched",
+        "reason": "This change needs a proven existing record before Lume can apply it.",
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": true
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Toyworld records",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Nothing has changed on Toyworld this week. Leave the records as they are.",
+      "ambiguity": "This change needs a proven existing record before Lume can apply it.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

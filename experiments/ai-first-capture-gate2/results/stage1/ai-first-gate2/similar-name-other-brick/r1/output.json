@@ -1,0 +1,79 @@
+{
+  "caseId": "similar-name-other-brick",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7969,
+  "usage": {
+    "prompt_tokens": 852,
+    "completion_tokens": 245,
+    "total_tokens": 1097,
+    "reasoning_tokens": 93
+  },
+  "raw": {
+    "snapshotChars": 612,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Brick Willow helping with warehouse packing",
+          "proposedValues": {
+            "name": null,
+            "personName": "Brick Willow",
+            "title": "Warehouse packing",
+            "date": null,
+            "status": null,
+            "scope": "This week",
+            "ownershipSemantics": "Help",
+            "text": "Brick Willow will help with warehouse packing this week.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Brick Willow will help with warehouse packing this week.",
+          "understood": "Brick Willow will help with warehouse packing this week; no ownership replacement is stated.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "needs_you",
+        "reason": "Lume cannot safely apply this finding to a maintained record.",
+        "plannerKind": "needs_you",
+        "plannerWriteType": null,
+        "intercepted": true
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Brick Willow helping with warehouse packing",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Brick Willow",
+        "title": "Warehouse packing",
+        "date": null,
+        "status": null,
+        "scope": "This week",
+        "ownershipSemantics": "Help",
+        "text": "Brick Willow will help with warehouse packing this week.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Brick Willow will help with warehouse packing this week.",
+      "ambiguity": "Lume cannot safely apply this finding to a maintained record.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

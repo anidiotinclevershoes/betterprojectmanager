@@ -1,0 +1,79 @@
+{
+  "caseId": "existing-risk-update",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5362,
+  "usage": {
+    "prompt_tokens": 817,
+    "completion_tokens": 141,
+    "total_tokens": 958,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "update",
+          "domain": "risk",
+          "targetCanonicalId": "risk-packaging",
+          "subject": "Packaging delay",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Packaging delay",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "Packaging delay is getting worse after the cardboard mill flooded.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+          "understood": "The existing packaging delay risk is worsening following flooding at the cardboard mill.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "update",
+        "toOperation": "needs_you",
+        "reason": "This Risk update is not specific enough to apply automatically.",
+        "plannerKind": "needs_you",
+        "plannerWriteType": null,
+        "intercepted": true
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Packaging delay",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "Packaging delay is getting worse after the cardboard mill flooded.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+      "ambiguity": "This Risk update is not specific enough to apply automatically.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

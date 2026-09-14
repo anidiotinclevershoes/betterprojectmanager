@@ -1,0 +1,54 @@
+{
+  "caseId": "noisy-conversational",
+  "contender": "ai-first",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "pippa-still-noisy",
+      "meaning": "Pippa remains UAT lead.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "no_change write=no id=resp-uat"
+    },
+    {
+      "factId": "sprinkles-noisy",
+      "meaning": "New to-do to order extra sprinkles.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "create write=yes id=omitted"
+    },
+    {
+      "factId": "bridge-resolved-noisy",
+      "meaning": "Gumdrop Bridge icing is resolved.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "update write=yes id=risk-bridge"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

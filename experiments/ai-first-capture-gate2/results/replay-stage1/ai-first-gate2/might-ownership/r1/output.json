@@ -1,0 +1,79 @@
+{
+  "caseId": "might-ownership",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5968,
+  "usage": {
+    "prompt_tokens": 870,
+    "completion_tokens": 214,
+    "total_tokens": 1084,
+    "reasoning_tokens": 57
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Float lighting ownership",
+          "proposedValues": {
+            "name": null,
+            "personName": "Fizz Caramel",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "float lighting",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Fizz Caramel might own float lighting now.",
+          "understood": "Fizz Caramel is mentioned as a possible owner of float lighting, but ownership is not confirmed.",
+          "question": "Is Fizz Caramel now confirmed as the owner of float lighting?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Float lighting ownership",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Fizz Caramel",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "float lighting",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Fizz Caramel might own float lighting now.",
+      "ambiguity": "Is Fizz Caramel now confirmed as the owner of float lighting?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

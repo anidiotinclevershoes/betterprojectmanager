@@ -1,0 +1,79 @@
+{
+  "caseId": "similar-name-spelling",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6262,
+  "usage": {
+    "prompt_tokens": 851,
+    "completion_tokens": 215,
+    "total_tokens": 1066,
+    "reasoning_tokens": 66
+  },
+  "raw": {
+    "snapshotChars": 612,
+    "envelope": {
+      "items": [
+        {
+          "operation": "no_change",
+          "domain": "person",
+          "targetCanonicalId": "person-brick",
+          "subject": "Brick Oakley remains sponsor",
+          "proposedValues": {
+            "name": "Brick Oakley",
+            "personName": "Brick Oakley",
+            "title": "Sponsor",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Brikk Oakley is still the sponsor.",
+          "understood": "“Brikk Oakley” refers to Brick Oakley, whose current role is already Sponsor.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "no_change",
+        "toOperation": "no_change",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Brick Oakley remains sponsor",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": {
+        "name": "Brick Oakley",
+        "personName": "Brick Oakley",
+        "title": "Sponsor",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Brikk Oakley is still the sponsor.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

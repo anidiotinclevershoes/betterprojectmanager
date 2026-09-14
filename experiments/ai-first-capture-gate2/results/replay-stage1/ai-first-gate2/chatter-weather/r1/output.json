@@ -1,0 +1,68 @@
+{
+  "caseId": "chatter-weather",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4674,
+  "usage": {
+    "prompt_tokens": 875,
+    "completion_tokens": 144,
+    "total_tokens": 1019,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Non-project weather comment",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "I think the weather will be nice on Friday, nothing project related.",
+          "understood": "The Capture contains no explicit project change.",
+          "question": null,
+          "leftUntouchedReason": "Irrelevant chatter explicitly identified as unrelated to the project."
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "left_untouched",
+        "toOperation": "left_untouched",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Non-project weather comment",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "I think the weather will be nice on Friday, nothing project related.",
+      "ambiguity": "Irrelevant chatter explicitly identified as unrelated to the project.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}
