@@ -43,7 +43,6 @@ function check(name: string, fn: () => void) {
 
 const ROOT = process.cwd();
 const UNCHANGED_VS_MAIN = [
-  "src/lib/capture-v2/resolve.ts",
   "src/lib/capture-v2/run.ts",
   "src/lib/capture-v2/source-coverage.ts",
   "src/lib/capture/apply/dispatch.ts",

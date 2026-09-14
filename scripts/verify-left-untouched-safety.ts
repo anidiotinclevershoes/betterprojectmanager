@@ -283,7 +283,7 @@ async function main() {
     );
   });
 
-  await check("4. Existing Needs You behaviour remains unchanged", () => {
+  await check("4. Bounded Needs You remains; empty extraction is Left untouched", () => {
     const empty = runCaptureV2FromModelJson({
       transcript:
         "Hall lighting scene plate is now the agreed fixture for the stage wash.",
@@ -291,11 +291,11 @@ async function main() {
       world: world(),
       projectId: CANDYLAND_ID,
     });
+    assert.equal(empty.result.observationAccount?.needsYou ?? 0, 0);
     assert.ok(
-      (empty.result.observationAccount?.needsYou ?? 0) >= 1,
-      "empty extraction is still Needs You",
+      (empty.result.observationAccount?.leftUntouched ?? 0) >= 1,
+      "empty extraction is Left untouched, not silent",
     );
-    assert.equal(empty.result.observationAccount?.leftUntouched ?? 0, 0);
     const ambiguous = runCaptureV2FromModelJson({
       transcript: "She will own UAT.",
       rawModelJson: {
@@ -592,8 +592,13 @@ async function main() {
       "Hall lighting scene plate is now the agreed fixture for the stage wash.",
     );
     assert.ok(
-      models.some((m) => m.readiness === "needs_review" || m.readiness === "unmatched"),
-      "empty extraction remains Needs You, not silent",
+      models.some((m) => m.readiness === "left_untouched"),
+      "empty extraction remains Left untouched, not silent",
+    );
+    assert.equal(
+      models.some((m) => m.readiness === "needs_review"),
+      false,
+      "empty extraction must not fake a bounded Needs You",
     );
   });
 
