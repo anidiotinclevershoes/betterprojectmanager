@@ -31,7 +31,6 @@ function check(name: string, fn: () => void) {
 }
 
 const ROOT = process.cwd();
-const INTEGRATION = "origin/integration/capture-simplification-v1";
 
 function world() {
   return experimentalApplyWorld();
@@ -46,8 +45,8 @@ function runFrom(transcript: string, observations: unknown[]) {
   });
 }
 
-function gitDiffAgainstIntegration(rel: string): string {
-  return execFileSync("git", ["diff", INTEGRATION, "--", rel], {
+function gitDiffAgainstMain(rel: string): string {
+  return execFileSync("git", ["diff", "origin/main", "--", rel], {
     cwd: ROOT,
     encoding: "utf8",
   });
@@ -236,8 +235,8 @@ function main() {
   });
 
   check("11. no_change rematerialise / hydrate / Prompt A stay in place", () => {
-    assert.equal(gitDiffAgainstIntegration("src/lib/capture-v2/prompt.ts"), "");
-    assert.equal(gitDiffAgainstIntegration("src/lib/capture-v2/source-coverage.ts"), "");
+    assert.equal(gitDiffAgainstMain("src/lib/capture-v2/prompt.ts"), "");
+    assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
     assert.match(resolve, /function rematerializeTrustedNoChange/);
     assert.match(resolve, /function hydrateFromLocalEvidence/);
