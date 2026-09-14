@@ -3,7 +3,7 @@
 Non-mergeable bounded hardening. Isolated from Simplified Capture.
 Same frozen 43-case / 50-fact corpus as Gate 2. Expectations unchanged.
 
-A. branch `experiment/ai-first-capture-gate2-5` HEAD `rescored-after-partial-update-guard`
+A. branch `experiment/ai-first-capture-gate2-5` HEAD `191d0417328d2a0f4d480e1cfe3c19de52b5544a`
    Gate 2 HEAD `9e04a4d0b289279ec09f0aa2fd7c88cfe6bc6ab1`
    origin/main `920d65d9c0f6e49efca8e26fc8906dbbd11e8f25` (not imported)
 

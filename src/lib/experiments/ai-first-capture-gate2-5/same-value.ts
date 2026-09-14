@@ -12,7 +12,8 @@
  * "continue", label===text). Those are not reused as outcomes.
  *
  * Does not repair partial updates: if no comparable proposed field is set,
- * the UPDATE is left unchanged.
+ * or a write-relevant proposed field was not compared, the UPDATE is left
+ * unchanged.
  */
 import type { CaptureApplyWorld } from "@/lib/capture/apply";
 import { namesMatchExact } from "@/lib/people/identity";
