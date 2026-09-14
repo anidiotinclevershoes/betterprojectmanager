@@ -1,0 +1,195 @@
+{
+  "caseId": "risk-resolution",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6786,
+  "usage": {
+    "prompt_tokens": 1132,
+    "completion_tokens": 306,
+    "total_tokens": 1438,
+    "reasoning_tokens": 33
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The icing on Gumdrop Bridge has melted.",
+          "evidence": "The icing on Gumdrop Bridge has melted",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "risk-bridge",
+          "candidateTargetTitle": "Gumdrop Bridge icing",
+          "proposedValues": {
+            "text": "The icing on Gumdrop Bridge has melted."
+          },
+          "modelConfidence": 1
+        },
+        {
+          "id": "obs-2",
+          "statement": "The Gumdrop Bridge icing risk is closed.",
+          "evidence": "that risk is closed.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "risk-bridge",
+          "candidateTargetTitle": "Gumdrop Bridge icing",
+          "proposedValues": {
+            "status": "resolved"
+          },
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "update_existing",
+        "statement": "The icing on Gumdrop Bridge has melted.",
+        "evidence": "The icing on Gumdrop Bridge has melted",
+        "truthIntent": "current",
+        "candidateTargetId": "risk-bridge",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Risk update is not specific enough to apply automatically."
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "update_existing",
+        "statement": "The Gumdrop Bridge icing risk is closed.",
+        "evidence": "that risk is closed.",
+        "truthIntent": "current",
+        "candidateTargetId": "risk-bridge",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This does not identify that existing record. Lume will not apply the change to a different item."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Gumdrop Bridge icing",
+      "referencedCanonicalId": "risk-bridge",
+      "assertedValue": {
+        "text": "The icing on Gumdrop Bridge has melted."
+      },
+      "evidence": "The icing on Gumdrop Bridge has melted",
+      "ambiguity": "This Risk update is not specific enough to apply automatically.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "risk",
+      "subject": "Gumdrop Bridge icing",
+      "referencedCanonicalId": "risk-bridge",
+      "assertedValue": {
+        "status": "resolved"
+      },
+      "evidence": "that risk is closed.",
+      "ambiguity": "This does not identify that existing record. Lume will not apply the change to a different item.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": {
+    "writesAttempted": 0,
+    "writesExecuted": 0,
+    "before": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    },
+    "after": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    }
+  }
+}

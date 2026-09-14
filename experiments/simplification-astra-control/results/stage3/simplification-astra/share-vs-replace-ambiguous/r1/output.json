@@ -1,0 +1,161 @@
+{
+  "caseId": "share-vs-replace-ambiguous",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 9966,
+  "usage": {
+    "prompt_tokens": 1143,
+    "completion_tokens": 386,
+    "total_tokens": 1529,
+    "reasoning_tokens": 157
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Fizz Caramel might replace Pippa Gumdrop on UAT or share UAT with Pippa Gumdrop; neither arrangement is agreed.",
+          "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-fizz",
+          "candidateTargetTitle": "Fizz Caramel",
+          "proposedValues": {
+            "personName": "Fizz Caramel",
+            "scope": "UAT",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "It is unclear whether Fizz Caramel would replace Pippa Gumdrop or share UAT responsibility.",
+          "modelConfidence": 0.98
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Fizz Caramel might replace Pippa Gumdrop on UAT or share UAT with Pippa Gumdrop; neither arrangement is agreed.",
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+        "truthIntent": "non_current",
+        "candidateTargetId": "person-fizz",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Not asserting current project truth — no mutation."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Fizz Caramel",
+      "referencedCanonicalId": "person-fizz",
+      "assertedValue": {
+        "personName": "Fizz Caramel",
+        "scope": "UAT",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+      "ambiguity": "It is unclear whether Fizz Caramel would replace Pippa Gumdrop or share UAT responsibility.",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": {
+    "writesAttempted": 0,
+    "writesExecuted": 0,
+    "before": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    },
+    "after": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    }
+  }
+}

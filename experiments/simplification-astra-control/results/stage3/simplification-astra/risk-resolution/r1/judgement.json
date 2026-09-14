@@ -1,0 +1,24 @@
+{
+  "caseId": "risk-resolution",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "bridge-closed",
+      "meaning": "Gumdrop Bridge icing is resolved.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": false,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": true,
+      "note": "needs_you write=no id=risk-bridge"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}
