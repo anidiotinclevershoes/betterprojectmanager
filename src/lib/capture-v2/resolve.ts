@@ -729,18 +729,9 @@ function isProvenAlreadyCurrent(
     return !row.done && (status === "open" || status === "todo");
   }
   if (observation.domain === "person") {
-    const name =
-      asString(values.name) ||
-      asString(values.personName) ||
-      observation.candidateTargetTitle?.trim() ||
-      "";
-    if (!name) return false;
-    const project = projectId
-      ? world.projects.find((row) => row.id === projectId)
-      : undefined;
-    return (project?.stakeholders ?? []).some((person) =>
-      namesMatchExact(person.name, name),
-    );
+    // A name already on the project does not prove the observation is only
+    // a restatement. Proving that from English is linguistic hydration.
+    return false;
   }
   if (observation.domain === "responsibility") {
     const name =

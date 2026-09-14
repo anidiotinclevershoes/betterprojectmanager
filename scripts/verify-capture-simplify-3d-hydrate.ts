@@ -131,7 +131,25 @@ function main() {
     assert.equal(writes(run).length, 0);
   });
 
-  check("6. Empty extraction still surfaces — no silent loss", () => {
+  check("6. Existing person name plus unextracted ownership is Needs You, not silent No change", () => {
+    const run = runFrom("Pippa Gumdrop is responsible for the monthly cost report.", [
+      {
+        id: "obs-person-nc",
+        statement: "Pippa Gumdrop is responsible for the monthly cost report",
+        evidence: "Pippa Gumdrop is responsible for the monthly cost report.",
+        domain: "person",
+        disposition: "no_change",
+        truthIntent: "current",
+        candidateTargetTitle: "Pippa Gumdrop",
+        proposedValues: { name: "Pippa Gumdrop" },
+      },
+    ]);
+    assert.equal(run.resolved[0]?.decision.kind, "needs_you");
+    assert.equal(writes(run).length, 0);
+    assert.notEqual(run.resolved[0]?.observation.disposition, "left_untouched");
+  });
+
+  check("7. Empty extraction still surfaces — no silent loss", () => {
     const transcript =
       "Hall lighting scene plate is now the agreed fixture for the stage wash.";
     const run = runFrom(transcript, []);
@@ -139,7 +157,7 @@ function main() {
     assert.equal(run.result.observationAccount?.proposedChanges, 0);
   });
 
-  check("7. Linguistic hydrate helpers are gone; no replacement parser", () => {
+  check("8. Linguistic hydrate helpers are gone; no replacement parser", () => {
     const resolve = readFileSync(
       join(process.cwd(), "src/lib/capture-v2/resolve.ts"),
       "utf8",
@@ -160,7 +178,7 @@ function main() {
     );
   });
 
-  check("8. Ready still means planner-executable; Apply still plans", () => {
+  check("9. Ready still means planner-executable; Apply still plans", () => {
     const item: PendingSuggestion = {
       id: "sug-3d",
       kind: "action",

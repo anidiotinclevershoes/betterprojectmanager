@@ -184,6 +184,10 @@ function main() {
           disposition: "no_change",
           truthIntent: "current",
           candidateTargetId: "person-gumdrop",
+          proposedValues: {
+            personName: "Pippa Gumdrop",
+            scope: "UAT lead",
+          },
         },
         {
           id: "obs-b",
