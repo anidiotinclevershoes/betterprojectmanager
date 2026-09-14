@@ -574,15 +574,12 @@ function rematerializeOwnershipAsResponsibility(
   // Existing person: ownership is a responsibility write, not a duplicate
   // stakeholder. New named person: same canonical confirm_responsibility
   // path — Apply ensures the person. Role-only lines never reach here.
+  // Do not invent share/replace/continue — the planner already Needs You
+  // when other owners exist and the model omitted the mode.
   const ownership = values.ownershipSemantics;
   return {
     ...observation,
     domain: "responsibility",
-    disposition:
-      observation.disposition === "no_change"
-        ? "create_new"
-        : observation.disposition,
-    truthIntent: "current",
     proposedValues: {
       ...values,
       personName: name,
@@ -594,7 +591,7 @@ function rematerializeOwnershipAsResponsibility(
         ownership === "continue" ||
         ownership === "ambiguous"
           ? ownership
-          : "share",
+          : undefined,
     },
   };
 }
