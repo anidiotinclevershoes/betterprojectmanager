@@ -283,15 +283,6 @@ function resolveOne(
       projectId,
       args.transcript,
     );
-    const rematerialized = rematerializeTrustedNoChange(
-      hydrated,
-      args.world,
-      projectId,
-      args.transcript,
-    );
-    if (rematerialized !== hydrated) {
-      return resolveOne(rematerialized, args);
-    }
     if (PERSON_LINKED_DOMAINS.has(hydrated.domain)) {
       const ownership = hydrated.proposedValues?.ownershipSemantics;
       if (ownership === "ambiguous") {
@@ -330,13 +321,35 @@ function resolveOne(
         },
       };
     }
+    if (
+      hydrated.domain === "todo" ||
+      hydrated.domain === "risk" ||
+      hydrated.domain === "milestone" ||
+      PERSON_LINKED_DOMAINS.has(hydrated.domain)
+    ) {
+      return {
+        observation: hydrated,
+        suggestion: null,
+        decision: {
+          kind: "needs_you",
+          domain: DOMAIN_TO_LEGAL[hydrated.domain],
+          reason: unexplainedCurrentNoChangeReason(hydrated),
+        },
+      };
+    }
+    const reason =
+      hydrated.commentary?.trim() || LEFT_UNTOUCHED_GENERIC_REASON;
     return {
-      observation: hydrated,
+      observation: {
+        ...hydrated,
+        disposition: "left_untouched",
+        commentary: reason,
+      },
       suggestion: null,
       decision: {
-        kind: "needs_you",
-        domain: DOMAIN_TO_LEGAL[hydrated.domain],
-        reason: unexplainedCurrentNoChangeReason(hydrated),
+        kind: "no_change",
+        domain: "unsupported",
+        reason,
       },
     };
   }
@@ -961,208 +974,6 @@ function unexplainedCurrentNoChangeReason(
     default:
       return "Lume understood this, but cannot safely decide what to change without a small confirmation.";
   }
-}
-
-/**
- * Model `no_change` is an opinion, not authority. If proposed values
- * disagree with canonical truth and bind safely, rematerialize. If they
- * describe a clear absent entity, rematerialize as Create. Otherwise keep
- * no_change — do not invent a write from the statement alone.
- */
-function rematerializeTrustedNoChange(
-  observation: CaptureObservationV2,
-  world: CaptureApplyWorld,
-  projectId: string | null,
-  transcript: string,
-): CaptureObservationV2 {
-  const ownership = rematerializeOwnershipAsResponsibility(
-    observation,
-    world,
-    projectId,
-  );
-  if (ownership !== observation) return ownership;
-
-  if (observation.domain === "responsibility") {
-    const values = observation.proposedValues ?? {};
-    const localText = identityEvidenceText(observation, transcript) || observation.statement;
-    const name =
-      asString(values.personName) ||
-      asString(values.name) ||
-      observation.candidateTargetTitle?.trim() ||
-      "";
-    const scope =
-      asString(values.scope) || scopeFromResponsiblePhrase(observation.statement);
-    if (name && scope && looksLikeNewAssignment(localText)) {
-      return {
-        ...observation,
-        disposition: "create_new",
-        truthIntent: "current",
-        proposedValues: { ...values, personName: name, name, scope },
-      };
-    }
-  }
-
-  const titled = rematerializeIndependentDatedCreate(
-    observation,
-    world,
-    projectId,
-  );
-  if (titled !== observation) return titled;
-
-  const values = observation.proposedValues ?? {};
-  const status = String(values.status ?? values.proposedStatus ?? "").toLowerCase();
-  const date = asIso(values.date) || asIso(values.startAt) || asIso(values.dueAt);
-  const evidence = identityEvidenceText(observation, transcript);
-
-  if (
-    (observation.domain === "risk" || observation.domain === "todo") &&
-    (status === "resolved" || status === "complete" || status === "completed")
-  ) {
-    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
-    if (hits.length === 1) {
-      const hit = hits[0]!;
-      if (observation.domain === "risk") {
-        const row = world.risks.find((r) => r.id === hit.id);
-        if (row && row.status !== "resolved" && row.status !== "accepted") {
-          return {
-            ...observation,
-            disposition: "update_existing",
-            truthIntent: "current",
-            candidateTargetId: hit.id,
-            candidateTargetTitle: hit.title,
-            proposedValues: { ...values, status: "resolved" },
-          };
-        }
-      }
-      if (observation.domain === "todo") {
-        const row = world.todos.find((t) => t.id === hit.id);
-        if (row && !row.done) {
-          return {
-            ...observation,
-            disposition: "update_existing",
-            truthIntent: "current",
-            candidateTargetId: hit.id,
-            candidateTargetTitle: hit.title,
-            proposedValues: { ...values, status: "complete" },
-          };
-        }
-      }
-    }
-    if (hits.length > 1) {
-      return {
-        ...observation,
-        disposition: "ambiguous",
-        commentary:
-          observation.commentary?.trim() ||
-          "More than one existing record matches this Capture. Lume will not guess.",
-      };
-    }
-    return observation;
-  }
-
-  if (observation.domain === "milestone" && date) {
-    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
-    if (hits.length === 1) {
-      const row = world.timeline.find((item) => item.id === hits[0]!.id);
-      const current = row?.startAt?.slice(0, 10);
-      if (row && current && current !== date.slice(0, 10)) {
-        return {
-          ...observation,
-          disposition: "update_existing",
-          truthIntent: "current",
-          candidateTargetId: row.id,
-          candidateTargetTitle: row.label,
-          proposedValues: { ...values, date, startAt: date },
-        };
-      }
-    }
-    // A no_change date restatement is not a licence to mint a milestone
-    // when no evidenced row exists. Uncertain/update_existing Creates
-    // still rematerialize through rematerializeIndependentDatedCreate.
-  }
-
-  if (observation.domain === "availability") {
-    const from = asIso(values.awayFromIso) || asIso(values.date);
-    if (from) {
-      return {
-        ...observation,
-        disposition: "create_new",
-        truthIntent: "current",
-      };
-    }
-  }
-
-  const title = rematerializeTitle(observation);
-  if (
-    title &&
-    (observation.domain === "todo" || observation.domain === "risk") &&
-    !isResolveOrComplete(observation)
-  ) {
-    const evidenced = uniquelyEvidencedRecords(
-      observation,
-      world,
-      projectId,
-      evidence,
-    );
-    if (evidenced.length === 0 && !uniqueTitledRecord(world, projectId, observation.domain, title)) {
-      return {
-        ...observation,
-        disposition: "create_new",
-        truthIntent: "current",
-        candidateTargetId: null,
-        candidateTargetTitle: title,
-      };
-    }
-  }
-
-  return rematerializeAbsentPerson(observation, world, projectId, transcript);
-}
-
-/**
- * Model `no_change` on a named Person is an opinion. A two-token name
- * evidenced in observation-local text, with no exact-name collision, is a
- * legal Create. First-name collisions stay closed (Pippa-class).
- */
-function rematerializeAbsentPerson(
-  observation: CaptureObservationV2,
-  world: CaptureApplyWorld,
-  projectId: string | null,
-  transcript: string,
-): CaptureObservationV2 {
-  if (observation.domain !== "person") return observation;
-  const values = observation.proposedValues ?? {};
-  const name =
-    asString(values.name) ||
-    asString(values.personName) ||
-    observation.candidateTargetTitle?.trim() ||
-    "";
-  if (!name) return observation;
-  const project = projectId
-    ? world.projects.find((row) => row.id === projectId)
-    : undefined;
-  const people = project?.stakeholders ?? [];
-  if (people.some((person) => namesMatchExact(person.name, name))) {
-    return observation;
-  }
-  const evidence = identityEvidenceText(observation, transcript);
-  if (!recordedPersonNameAppearsInText(evidence, name)) return observation;
-  const tokens = name.split(/\s+/).filter(Boolean);
-  if (tokens.length < 2 && people.length > 0) {
-    const first = tokens[0]!.toLowerCase();
-    const firstMatches = people.filter((person) => {
-      const recordedFirst = person.name.trim().split(/\s+/)[0]?.toLowerCase();
-      return recordedFirst === first;
-    });
-    if (firstMatches.length > 0) return observation;
-  }
-  return {
-    ...observation,
-    disposition: "create_new",
-    truthIntent: "current",
-    candidateTargetId: null,
-    candidateTargetTitle: name,
-    proposedValues: { ...values, name },
-  };
 }
 
 function uniquelyEvidencedRecords(

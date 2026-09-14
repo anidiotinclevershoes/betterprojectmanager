@@ -295,7 +295,7 @@ check("Pippa-class first-name Helen restatement stays Needs You", () => {
   assert.equal(row?.decision.kind, "needs_you");
 });
 
-check("model no_change ownership still persists a new responsibility", () => {
+check("model no_change ownership is Needs You, not a rematerialised write", () => {
   const transcript = "Mei Chen is responsible for the monthly cost report.";
   const { row } = resolveObs(riversideWorld(), transcript, {
     domain: "person",
@@ -305,10 +305,8 @@ check("model no_change ownership still persists a new responsibility", () => {
     candidateTargetTitle: "Mei Chen",
     proposedValues: { name: "Mei Chen" },
   });
-  assert.equal(row?.decision.kind, "write", row?.decision.kind === "needs_you" ? row.decision.reason : "");
-  if (row?.decision.kind === "write") {
-    assert.equal(row.decision.operation.type, "confirm_responsibility");
-  }
+  assert.equal(row?.decision.kind, "needs_you");
+  assert.equal(row?.suggestion, null);
 });
 
 check("new named Person + explicit ownership uses confirm_responsibility", () => {

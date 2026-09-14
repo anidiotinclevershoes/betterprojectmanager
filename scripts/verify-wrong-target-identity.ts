@@ -380,12 +380,11 @@ function main() {
       candidateTargetTitle: "Outstanding DDA access ramp detail",
       proposedValues: { status: "resolved" },
     });
-    assert.equal(resolved.row?.decision.kind, "write");
-    assert.equal(writeType(resolved.row), "update_risk_status");
-    assert.equal(writeRiskId(resolved.row), "risk-timber");
+    assert.equal(resolved.row?.decision.kind, "needs_you");
+    assert.equal(resolved.row?.suggestion, null);
   });
 
-  check("model no_change of an absent titled To Do rematerializes as Create", () => {
+  check("model no_change of an absent titled To Do is Needs You, not a Create", () => {
     const transcript = "Add a to-do to reprint the visitor badges.";
     const { row } = resolveObs(world, transcript, {
       id: "no-change-todo",
@@ -396,11 +395,11 @@ function main() {
       candidateTargetTitle: "Reprint the visitor badges",
       proposedValues: { title: "Reprint the visitor badges" },
     });
-    assert.equal(row?.decision.kind, "write");
-    assert.equal(writeType(row), "create_todo");
+    assert.equal(row?.decision.kind, "needs_you");
+    assert.equal(row?.suggestion, null);
   });
 
-  check("model no_change date move binds the uniquely evidenced milestone", () => {
+  check("model no_change date move is Needs You, not a rematerialised write", () => {
     const dated: CaptureApplyWorld = {
       ...world,
       timeline: [
@@ -423,12 +422,8 @@ function main() {
       candidateTargetTitle: "Client walk-through",
       proposedValues: { date: "2026-10-23", title: "Client walk-through" },
     });
-    assert.equal(row?.decision.kind, "write");
-    assert.equal(writeType(row), "update_milestone");
-    if (row?.decision.kind === "write" && row.decision.operation.type === "update_milestone") {
-      assert.equal(row.decision.operation.milestoneId, "ms-walk");
-      assert.match(String(row.decision.operation.startAt ?? ""), /2026-10-23/);
-    }
+    assert.equal(row?.decision.kind, "needs_you");
+    assert.equal(row?.suggestion, null);
   });
 
   check("model no_change restatement of the same milestone date stays no_change", () => {
@@ -457,7 +452,7 @@ function main() {
     assert.equal(row?.decision.kind, "no_change");
   });
 
-  check("model no_change of an absent two-token Person rematerializes as Create", () => {
+  check("model no_change of an absent two-token Person is Needs You, not a Create", () => {
     const transcript = "Add Leo Mensah as the fire officer. Name only for now.";
     const { row } = resolveObs(world, transcript, {
       id: "leo-no-change",
@@ -468,8 +463,8 @@ function main() {
       candidateTargetTitle: "Leo Mensah",
       proposedValues: { name: "Leo Mensah" },
     });
-    assert.equal(row?.decision.kind, "write", row?.decision.kind === "needs_you" ? row.decision.reason : "");
-    assert.equal(writeType(row), "ensure_person");
+    assert.equal(row?.decision.kind, "needs_you");
+    assert.equal(row?.suggestion, null);
   });
 
   check("similar-title risk does not bind the other open risk", () => {

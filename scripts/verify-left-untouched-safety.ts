@@ -835,7 +835,7 @@ async function main() {
       join(process.cwd(), "src/lib/capture-v2/resolve.ts"),
       "utf8",
     );
-    assert.match(resolve, /rematerializeTrustedNoChange/);
+    assert.match(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /hydrateFromLocalEvidence/);
   });
 

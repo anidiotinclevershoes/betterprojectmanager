@@ -631,7 +631,7 @@ async function main() {
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
     assert.equal(gitDiffAgainstMain("src/lib/capture/apply/dispatch.ts"), "");
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
-    assert.match(resolve, /rematerializeTrustedNoChange/);
+    assert.match(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /applyContradictorySiblingNeedsYou/);
     assert.match(resolve, /personLinkedIdentityGate/);

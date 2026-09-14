@@ -234,11 +234,10 @@ function main() {
     assert.equal(run.resolved[0]?.decision.kind, "write");
   });
 
-  check("11. no_change rematerialise / hydrate / Prompt A stay in place", () => {
+  check("11. hydrate / dated rematerialise / Prompt A stay in place", () => {
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/prompt.ts"), "");
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
-    assert.match(resolve, /function rematerializeTrustedNoChange/);
     assert.match(resolve, /function hydrateFromLocalEvidence/);
     assert.match(resolve, /function rematerializeIndependentDatedCreate/);
     assert.doesNotMatch(
