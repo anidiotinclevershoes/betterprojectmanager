@@ -144,8 +144,7 @@ function main() {
       assert.equal(gitDiffAgainstMain(rel), "", `${rel} must not change in Phase 1`);
     }
     const resolve = read("src/lib/capture-v2/resolve.ts");
-    assert.match(resolve, /rematerializeTrustedNoChange/);
-    assert.match(resolve, /hydrateFromLocalEvidence/);
+    assert.doesNotMatch(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /observation\.disposition === "left_untouched"/);
   });
 

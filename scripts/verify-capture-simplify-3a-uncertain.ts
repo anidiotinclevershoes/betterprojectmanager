@@ -216,7 +216,7 @@ function main() {
     assert.equal(planned.kind, "write");
   });
 
-  check("10. Current update-without-id rematerialise is unchanged", () => {
+  check("10. Current update-without-id is Needs You, not a manufactured Create", () => {
     const run = runFrom("Void keys still need collecting from the depot on 16 Oct 2026.", [
       {
         id: "obs-keys-current",
@@ -231,15 +231,15 @@ function main() {
         },
       },
     ]);
-    assert.equal(run.resolved[0]?.decision.kind, "write");
+    assert.equal(run.resolved[0]?.decision.kind, "needs_you");
+    assert.equal(run.resolved[0]?.suggestion, null);
   });
 
-  check("11. no_change rematerialise / hydrate / Prompt A stay in place", () => {
+  check("11. dated rematerialise / Prompt A stay in place; hydrate is gone", () => {
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/prompt.ts"), "");
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
-    assert.match(resolve, /function rematerializeTrustedNoChange/);
-    assert.match(resolve, /function hydrateFromLocalEvidence/);
+    assert.doesNotMatch(resolve, /function hydrateFromLocalEvidence/);
     assert.match(resolve, /function rematerializeIndependentDatedCreate/);
     assert.doesNotMatch(
       resolve,
