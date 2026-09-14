@@ -1,0 +1,24 @@
+{
+  "caseId": "contradict-parade",
+  "contender": "current",
+  "repeatIndex": 2,
+  "facts": [
+    {
+      "factId": "parade-conflict",
+      "meaning": "Parade day dates contradict — do not write a chosen date.",
+      "recalled": true,
+      "falseMaterialFact": true,
+      "falseUnsafeWrite": true,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": false,
+      "clearAutomationOk": null,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "update write=yes id=ms-parade"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

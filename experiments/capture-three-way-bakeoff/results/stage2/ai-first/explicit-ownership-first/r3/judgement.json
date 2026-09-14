@@ -1,0 +1,26 @@
+{
+  "caseId": "explicit-ownership-first",
+  "contender": "ai-first",
+  "repeatIndex": 3,
+  "facts": [
+    {
+      "factId": "sarah-float",
+      "meaning": "Sarah Kim is a new person with float-safety responsibility.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "create write=yes id=omitted"
+    }
+  ],
+  "extraWrites": [
+    "create:responsibility:Float safety ownership:omitted"
+  ],
+  "malformed": false
+}

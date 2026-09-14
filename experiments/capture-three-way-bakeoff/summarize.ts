@@ -212,7 +212,7 @@ function main() {
   ].join("\n");
 
   mkdirSync(join(here, "results"), { recursive: true });
-  writeFileSync(join(here, "REPORT.md"), md);
+  writeFileSync(join(here, "results/summary.md"), md);
   writeFileSync(
     join(here, "results/summary.json"),
     `${JSON.stringify(
@@ -225,7 +225,7 @@ function main() {
       2,
     )}\n`,
   );
-  console.log("wrote REPORT.md");
+  console.log("wrote results/summary.md and results/summary.json; did not overwrite REPORT.md");
 }
 
 main();

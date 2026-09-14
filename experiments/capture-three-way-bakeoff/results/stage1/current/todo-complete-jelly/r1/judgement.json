@@ -1,0 +1,24 @@
+{
+  "caseId": "todo-complete-jelly",
+  "contender": "current",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "jelly-done",
+      "meaning": "Prepare the jelly pack is done.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "update write=yes id=todo-pack"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

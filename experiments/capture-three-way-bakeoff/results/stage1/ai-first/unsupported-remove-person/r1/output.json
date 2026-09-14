@@ -1,0 +1,68 @@
+{
+  "caseId": "unsupported-remove-person",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5725,
+  "usage": {
+    "prompt_tokens": 871,
+    "completion_tokens": 173,
+    "total_tokens": 1044,
+    "reasoning_tokens": 34
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "remove",
+          "domain": "person",
+          "targetCanonicalId": "person-gumdrop",
+          "subject": "Pippa Gumdrop",
+          "proposedValues": {
+            "name": "Pippa Gumdrop",
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please delete Pippa Gumdrop from the project.",
+          "understood": "Remove Pippa Gumdrop from the project.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Pippa Gumdrop",
+      "referencedCanonicalId": "person-gumdrop",
+      "assertedValue": {
+        "name": "Pippa Gumdrop",
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Please delete Pippa Gumdrop from the project.",
+      "ambiguity": "omitted",
+      "disposition": "remove",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

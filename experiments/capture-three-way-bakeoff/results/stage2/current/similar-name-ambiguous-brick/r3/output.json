@@ -1,0 +1,47 @@
+{
+  "caseId": "similar-name-ambiguous-brick",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1866,
+  "usage": {
+    "prompt_tokens": 1151,
+    "completion_tokens": 148,
+    "total_tokens": 1299,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick called about the track map.",
+          "evidence": "Brick called about the track map.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "projectId": "proj-toy",
+          "candidateTargetId": "omit",
+          "candidateTargetTitle": "omit",
+          "mergeWithObservationId": "omit",
+          "proposedValues": {},
+          "commentary": "The statement does not indicate any specific action or change regarding the track map.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": []
+  },
+  "normalized": [],
+  "apply": null
+}

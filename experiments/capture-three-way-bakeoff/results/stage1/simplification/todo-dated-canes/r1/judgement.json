@@ -1,0 +1,24 @@
+{
+  "caseId": "todo-dated-canes",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "candy-canes",
+      "meaning": "Create dated to-do for candy canes.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "create write=yes id=omitted"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

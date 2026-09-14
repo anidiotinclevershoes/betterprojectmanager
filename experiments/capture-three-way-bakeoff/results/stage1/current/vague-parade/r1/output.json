@@ -1,0 +1,65 @@
+{
+  "caseId": "vague-parade",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1180,
+  "usage": {
+    "prompt_tokens": 1127,
+    "completion_tokens": 109,
+    "total_tokens": 1236,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The speaker is worried about the parade.",
+          "evidence": "I'm a bit worried about the parade.",
+          "domain": "commentary",
+          "disposition": "left_untouched",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "commentary": "The concern is vague and does not specify what should change regarding the parade."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "left_untouched",
+        "statement": "The speaker is worried about the parade.",
+        "evidence": "I'm a bit worried about the parade.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "The concern is vague and does not specify what should change regarding the parade."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "The speaker is worried about the parade.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "I'm a bit worried about the parade.",
+      "ambiguity": "The concern is vague and does not specify what should change regarding the parade.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

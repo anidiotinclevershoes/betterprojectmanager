@@ -1,0 +1,24 @@
+{
+  "caseId": "similar-name-spelling",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "brikk",
+      "meaning": "Brikk Oakley should not become a new person or Brook.",
+      "recalled": false,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": true,
+      "evidenceGrounded": null,
+      "ambiguitySafe": false,
+      "clearAutomationOk": null,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "No matching item"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

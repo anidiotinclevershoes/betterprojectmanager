@@ -1,0 +1,65 @@
+{
+  "caseId": "toyworld-vocabulary-bait",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1411,
+  "usage": {
+    "prompt_tokens": 1137,
+    "completion_tokens": 126,
+    "total_tokens": 1263,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Toyworld's packaging delay should be copied onto Candyland.",
+          "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+          "domain": "commentary",
+          "disposition": "left_untouched",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "commentary": "It isn't clear how the packaging delay should affect the project or what specific changes are needed."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "left_untouched",
+        "statement": "Toyworld's packaging delay should be copied onto Candyland.",
+        "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "It isn't clear how the packaging delay should affect the project or what specific changes are needed."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "Toyworld's packaging delay should be copied onto Candyland.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+      "ambiguity": "It isn't clear how the packaging delay should affect the project or what specific changes are needed.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}
