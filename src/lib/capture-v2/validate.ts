@@ -15,44 +15,6 @@ function asString(value: unknown): string | null {
   return trimmed ? trimmed : null;
 }
 
-function createPayloadPresent(
-  domain: string,
-  obj: Record<string, unknown>,
-): boolean {
-  const proposed = asObject(obj.proposedValues);
-  const title =
-    (proposed && (asString(proposed.title) || asString(proposed.label))) ||
-    asString(obj.candidateTargetTitle);
-  if (domain === "risk") {
-    const status = proposed
-      ? (asString(proposed.status) || asString(proposed.proposedStatus) || "")
-          .toLowerCase()
-      : "";
-    // A resolve/complete of a missing row must not become a substitute write.
-    if (status === "resolved" || status === "complete" || status === "completed") {
-      return false;
-    }
-    return Boolean(title);
-  }
-  if (domain === "todo") {
-    return Boolean(title);
-  }
-  if (domain !== "milestone") return false;
-  if (!proposed) return false;
-  const date =
-    asString(proposed.date) || asString(proposed.startAt) || asString(proposed.dueAt);
-  return Boolean(title && date);
-}
-
-function canAcceptForeignTargetAsCreate(
-  disposition: string,
-  domain: string,
-  obj: Record<string, unknown>,
-): boolean {
-  if (disposition === "create_new") return true;
-  return disposition === "update_existing" && createPayloadPresent(domain, obj);
-}
-
 function asObject(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   return value as Record<string, unknown>;
@@ -206,7 +168,7 @@ export function validateObservations(
           code: "foreign_id",
           message: `Target ${candidateTargetId} is not in supplied project state.`,
         });
-        if (canAcceptForeignTargetAsCreate(dispositionRaw, domainRaw, obj)) {
+        if (!scopedProjectId && dispositionRaw === "create_new") {
           const proposed = asObject(obj.proposedValues);
           accepted.push(
             buildObservation({
@@ -216,7 +178,7 @@ export function validateObservations(
               domain: domainRaw,
               disposition: "create_new",
               truthIntent: truthIntentRaw,
-              projectId: projectId ?? scopedProjectId ?? null,
+              projectId: projectId ?? null,
               candidateTargetId: null,
               candidateTargetTitle:
                 (proposed && (asString(proposed.title) || asString(proposed.label))) ||

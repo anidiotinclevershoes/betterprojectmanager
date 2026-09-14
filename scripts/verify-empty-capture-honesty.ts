@@ -1,8 +1,9 @@
 /**
  * Family B — meaningful Capture must not become a silent empty Review.
  *
- * Do not manufacture write candidates. Fail loud: Needs You / unsupported /
- * extraction failure. Restated already-known observations stay no_change.
+ * Empty extraction and unsupported product gaps are Left untouched, not
+ * Needs You. Do not manufacture write candidates. Restated already-known
+ * observations stay no_change.
  *
  * Run: npx tsx scripts/verify-empty-capture-honesty.ts
  */
@@ -14,6 +15,7 @@ import {
 } from "../src/lib/capture/review/observations";
 import {
   EMPTY_REVIEW_FACT,
+  LEFT_UNTOUCHED_GENERIC_REASON,
   emptyV2Result,
   runCaptureV2FromModelJson,
   shouldSurfaceEmptyReviewNeedsYou,
@@ -62,7 +64,7 @@ function world(): CaptureApplyWorld {
   };
 }
 
-check("empty model envelope on a meaningful Capture is Needs You, not silent", () => {
+check("empty model envelope on a meaningful Capture is Left untouched, not silent", () => {
   const transcript =
     "Hall lighting scene plate is now the agreed fixture for the stage wash.";
   const run = runCaptureV2FromModelJson({
@@ -73,15 +75,17 @@ check("empty model envelope on a meaningful Capture is Needs You, not silent", (
   });
   assert.ok(run.result.observationAccount);
   assert.equal(run.result.observationAccount?.proposedChanges, 0);
+  assert.equal(run.result.observationAccount?.needsYou ?? 0, 0);
   assert.ok(
-    (run.result.observationAccount?.needsYou ?? 0) >= 1,
-    "empty extraction must surface Needs You",
+    (run.result.observationAccount?.leftUntouched ?? 0) >= 1,
+    "empty extraction must surface Left untouched",
   );
   const findings = run.result.findings ?? [];
-  assert.ok(
-    findings.some((f) => f.requiresClarification && f.fact === EMPTY_REVIEW_FACT),
-    "synthetic extraction-failure finding must be present",
-  );
+  const leftover = findings.find((f) => f.leftUntouched);
+  assert.ok(leftover, "synthetic extraction-failure finding must be present");
+  assert.equal(leftover!.requiresClarification, false);
+  assert.match(leftover!.fact, /Hall lighting scene plate/);
+  assert.equal(leftover!.leftUntouchedReason, LEFT_UNTOUCHED_GENERIC_REASON);
   const ops = run.result.proposedOperations ?? [];
   assert.ok(
     ops.every((op) => op.operation === "NO_CHANGE"),
@@ -89,37 +93,40 @@ check("empty model envelope on a meaningful Capture is Needs You, not silent", (
   );
   const observations = buildCaptureObservations(run.result, transcript);
   assert.ok(
-    observations.some((o) => o.actionStatus === "needs_review"),
-    "Review summary must show Needs you",
+    observations.some((o) => o.actionStatus === "left_untouched"),
+    "Review summary must show Left untouched",
   );
 });
 
-check("emptyV2Result on a meaningful Capture is also Needs You", () => {
+check("emptyV2Result on a meaningful Capture is also Left untouched", () => {
   const transcript =
     "Jamie covers site this week because James is on leave from Tuesday.";
   const result = emptyV2Result(transcript, PROJECT);
-  assert.ok((result.observationAccount?.needsYou ?? 0) >= 1);
+  assert.ok((result.observationAccount?.leftUntouched ?? 0) >= 1);
+  assert.equal(result.observationAccount?.needsYou ?? 0, 0);
   assert.equal(result.observationAccount?.proposedChanges, 0);
 });
 
-check("cancel-milestone language is explicit unsupported, still no write", () => {
+check("cancel-milestone language is Left untouched, still no write", () => {
   const transcript =
     "Cancel the Saturday catch-up — we are not meeting this weekend.";
   const reason = unsupportedProductGapReason(transcript);
   assert.ok(reason && /cannot cancel/i.test(reason));
+  assert.doesNotMatch(reason, /product decision/i);
   const run = runCaptureV2FromModelJson({
     transcript,
     rawModelJson: { observations: [] },
     world: world(),
     projectId: PROJECT,
   });
-  const finding = (run.result.findings ?? []).find((f) => f.requiresClarification);
+  const finding = (run.result.findings ?? []).find((f) => f.leftUntouched);
   assert.ok(finding);
-  assert.match(finding!.clarificationQuestion ?? "", /cannot cancel/i);
+  assert.equal(finding!.requiresClarification, false);
+  assert.match(finding!.leftUntouchedReason ?? "", /cannot cancel/i);
   assert.ok((run.result.proposedOperations ?? []).every((op) => op.operation === "NO_CHANGE"));
 });
 
-check("retire-knowledge language is explicit unsupported, still no write", () => {
+check("retire-knowledge language is Left untouched, still no write", () => {
   const transcript =
     "Retire the asbestos knowledge note — that survey addendum is done and no longer current.";
   const reason = unsupportedProductGapReason(transcript);
@@ -130,9 +137,10 @@ check("retire-knowledge language is explicit unsupported, still no write", () =>
     world: world(),
     projectId: PROJECT,
   });
-  const finding = (run.result.findings ?? []).find((f) => f.requiresClarification);
+  const finding = (run.result.findings ?? []).find((f) => f.leftUntouched);
   assert.ok(finding);
-  assert.match(finding!.clarificationQuestion ?? "", /cannot retire/i);
+  assert.equal(finding!.requiresClarification, false);
+  assert.match(finding!.leftUntouchedReason ?? "", /cannot retire/i);
 });
 
 check("commentary-only Capture is not rewritten as extraction failure", () => {

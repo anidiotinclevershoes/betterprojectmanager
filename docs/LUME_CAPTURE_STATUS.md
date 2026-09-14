@@ -1,9 +1,10 @@
 # Current Capture status
 
 **Status:** Living accepted position for Capture V2  
-**Date:** 13 September 2026  
+**Date:** 14 September 2026  
 **Production SHA this position was accepted against:** `91fabf8d1627e89538f26e00b9b3343b9d577cdb` (PR #167)  
-**Current `main` this living file was last reconciled against:** `92d61d13c4407d04a8e20960e7eb38efa0b103c3` (PR #174 Left untouched safety net; Prompt A freeze revised to `capture-v2-eval-baseline-v2` on this branch)  
+**Current `main` this living file was last reconciled against:** `920d65d9c0f6e49efca8e26fc8906dbbd11e8f25`  
+**Simplification production port:** validated candidate `bd76bbf35b60cec2685e9bb106a4d4a4a9dbdab0` applied onto current `main`. Not merged until human review.  
 **Owned by:** [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md) §4  
 **Docs entry:** [`docs/README.md`](./README.md)
 
@@ -35,7 +36,10 @@ human language
 - Production prompt: **Prompt A** (`src/lib/capture-v2/prompt.ts`, id `capture-v2-observations`, version `capture-v2-eval-baseline-v2`).
 - AI does not write project truth. Apply does, and still revalidates.
 - Ready means the same production Apply path can execute that reviewed change.
-- **Left untouched** is Review-only. It is never canonical truth, never Apply-eligible, and never a substitute write. Prompt A now includes `left_untouched` as the escape hatch when a supported operation cannot be safely identified from explicit wording. A deterministic evidence-span coverage backstop can still surface leftover source text the model did not account for, with generic wording. Rematerialise / hydrate stay in place.
+- **Left untouched** is Review-only. It is never canonical truth, never Apply-eligible, and never a substitute write. Prompt A now includes `left_untouched` as the escape hatch when a supported operation cannot be safely identified from explicit wording. A deterministic evidence-span coverage backstop can still surface leftover source text the model did not account for, with generic wording.
+- Capture dispositions: **Create / Update / Remove** (explicit, planner-executable), **Needs You** (known operation + one bounded answer), **Left untouched** (cannot safely determine or support the operation), **No change** (explicit statement already true).
+- The production resolver is the **Simplification** contract. Removed: uncertain→write rematerialisation; suspicious no_change→write rematerialisation; foreign-ID+title Create rescue; linguistic hydration; unique-title identity bind; inferred default responsibility `share`. Retained: explicit ownership mapping, observation-local evidence, identity gates, contradictory siblings, `planCaptureApply`.
+- AI-first Capture is **parked**. Do not import Gate 1/2, Astra-control, or bake-off experiment code into production.
 
 New Project Organise uses the **same extractor**, then a New Project adapter (`parse` + `draftFromProvisional`). It is not a second Capture engine.
 
