@@ -1,0 +1,72 @@
+{
+  "caseId": "pronoun-ambiguity",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 9970,
+  "usage": {
+    "prompt_tokens": 1109,
+    "completion_tokens": 326,
+    "total_tokens": 1435,
+    "reasoning_tokens": 122
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "An unidentified woman reportedly said she will own the boss balancing pass from now on.",
+          "evidence": "She said she will own the boss balancing pass from now on.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-game",
+          "candidateTargetId": "todo-balance",
+          "candidateTargetTitle": "Boss balancing pass",
+          "proposedValues": {
+            "scope": "boss balancing pass",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "It is unclear who 'she' refers to, whether this reported commitment is authoritative, or whether ownership is shared or replaces an existing owner.",
+          "modelConfidence": 0.96
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "An unidentified woman reportedly said she will own the boss balancing pass from now on.",
+        "evidence": "She said she will own the boss balancing pass from now on.",
+        "truthIntent": "uncertain",
+        "candidateTargetId": "todo-balance",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It is unclear who 'she' refers to, whether this reported commitment is authoritative, or whether ownership is shared or replaces an existing owner."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Boss balancing pass",
+      "referencedCanonicalId": "todo-balance",
+      "assertedValue": {
+        "scope": "boss balancing pass",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "She said she will own the boss balancing pass from now on.",
+      "ambiguity": "It is unclear who 'she' refers to, whether this reported commitment is authoritative, or whether ownership is shared or replaces an existing owner.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

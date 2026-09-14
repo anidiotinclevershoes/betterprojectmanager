@@ -1,0 +1,64 @@
+{
+  "caseId": "vague-parade",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 3652,
+  "usage": {
+    "prompt_tokens": 1126,
+    "completion_tokens": 135,
+    "total_tokens": 1261,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The speaker is a bit worried about the parade.",
+          "evidence": "I'm a bit worried about the parade.",
+          "domain": "unknown",
+          "disposition": "left_untouched",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "proposedValues": {},
+          "commentary": "It isn't clear what the concern about the parade is or what project information should change.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "The speaker is a bit worried about the parade.",
+        "evidence": "I'm a bit worried about the parade.",
+        "truthIntent": "uncertain",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "It isn't clear what the concern about the parade is or what project information should change."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "unknown",
+      "subject": "The speaker is a bit worried about the parade.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "I'm a bit worried about the parade.",
+      "ambiguity": "It isn't clear what the concern about the parade is or what project information should change.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

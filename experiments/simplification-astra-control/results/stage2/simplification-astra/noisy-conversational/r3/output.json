@@ -1,0 +1,252 @@
+{
+  "caseId": "noisy-conversational",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 16344,
+  "usage": {
+    "prompt_tokens": 1189,
+    "completion_tokens": 853,
+    "total_tokens": 2042,
+    "reasoning_tokens": 139
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 6,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The standup introduction and coughing aside are commentary.",
+          "evidence": "ok so like, quick dump from the standup — ignore me coughing",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "proposedValues": {},
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "Pippa Gumdrop continues doing UAT.",
+          "evidence": "Pippa's still doing UAT",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-gumdrop",
+          "candidateTargetTitle": "Pippa Gumdrop",
+          "proposedValues": {
+            "personName": "Pippa Gumdrop",
+            "scope": "UAT",
+            "ownershipSemantics": "continue"
+          },
+          "modelConfidence": 0.97
+        },
+        {
+          "id": "obs-3",
+          "statement": "Order extra sprinkles.",
+          "evidence": "oh and can someone actually order extra sprinkles? that's a real to-do",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "title": "Order extra sprinkles"
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-4",
+          "statement": "The Gumdrop Bridge icing risk is resolved.",
+          "evidence": "the bridge icing thing is resolved now",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "risk-bridge",
+          "candidateTargetTitle": "Gumdrop Bridge icing",
+          "proposedValues": {
+            "status": "resolved"
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-5",
+          "statement": "The bridge was salted.",
+          "evidence": "uhhh the bridge icing thing is resolved now, they salted it",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "text": "The bridge was salted."
+          },
+          "modelConfidence": 0.96
+        },
+        {
+          "id": "obs-6",
+          "statement": "The biscuits-for-the-cabin aside is explicitly marked to skip.",
+          "evidence": "biscuits for the cabin, not a control, skip that",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "proposedValues": {},
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "commentary",
+        "statement": "The standup introduction and coughing aside are commentary.",
+        "evidence": "ok so like, quick dump from the standup — ignore me coughing",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      },
+      {
+        "id": "obs-2",
+        "domain": "responsibility",
+        "disposition": "update_existing",
+        "statement": "Pippa Gumdrop continues doing UAT.",
+        "evidence": "Pippa's still doing UAT",
+        "truthIntent": "current",
+        "candidateTargetId": "person-gumdrop",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Person identity is not established in the Capture. A supplied record id is not enough."
+      },
+      {
+        "id": "obs-3",
+        "domain": "todo",
+        "disposition": "create_new",
+        "statement": "Order extra sprinkles.",
+        "evidence": "oh and can someone actually order extra sprinkles? that's a real to-do",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_todo",
+        "reason": null
+      },
+      {
+        "id": "obs-4",
+        "domain": "risk",
+        "disposition": "update_existing",
+        "statement": "The Gumdrop Bridge icing risk is resolved.",
+        "evidence": "the bridge icing thing is resolved now",
+        "truthIntent": "current",
+        "candidateTargetId": "risk-bridge",
+        "decisionKind": "write",
+        "writeType": "update_risk_status",
+        "reason": null
+      },
+      {
+        "id": "obs-5",
+        "domain": "knowledge",
+        "disposition": "create_new",
+        "statement": "The bridge was salted.",
+        "evidence": "uhhh the bridge icing thing is resolved now, they salted it",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Not asserting current project truth — no mutation."
+      },
+      {
+        "id": "obs-6",
+        "domain": "commentary",
+        "disposition": "commentary",
+        "statement": "The biscuits-for-the-cabin aside is explicitly marked to skip.",
+        "evidence": "biscuits for the cabin, not a control, skip that",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "The standup introduction and coughing aside are commentary.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "ok so like, quick dump from the standup — ignore me coughing",
+      "ambiguity": "omitted",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Pippa Gumdrop",
+      "referencedCanonicalId": "person-gumdrop",
+      "assertedValue": {
+        "personName": "Pippa Gumdrop",
+        "scope": "UAT",
+        "ownershipSemantics": "continue"
+      },
+      "evidence": "Pippa's still doing UAT",
+      "ambiguity": "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "todo",
+      "subject": "Order extra sprinkles.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Order extra sprinkles"
+      },
+      "evidence": "oh and can someone actually order extra sprinkles? that's a real to-do",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "risk",
+      "subject": "Gumdrop Bridge icing",
+      "referencedCanonicalId": "risk-bridge",
+      "assertedValue": {
+        "status": "resolved"
+      },
+      "evidence": "the bridge icing thing is resolved now",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "knowledge",
+      "subject": "The bridge was salted.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "text": "The bridge was salted."
+      },
+      "evidence": "uhhh the bridge icing thing is resolved now, they salted it",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    },
+    {
+      "domain": "commentary",
+      "subject": "The biscuits-for-the-cabin aside is explicitly marked to skip.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "biscuits for the cabin, not a control, skip that",
+      "ambiguity": "omitted",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

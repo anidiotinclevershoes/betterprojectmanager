@@ -1,0 +1,26 @@
+{
+  "caseId": "correction-of-wording",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "audio-bus",
+      "meaning": "The intended new risk is the audio bus mixer, after a spoken correction.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "update write=yes id=omitted"
+    }
+  ],
+  "extraWrites": [
+    "update:knowledge:The shader compile was incorrectly identified as the cause of the cert build stall.:omitted"
+  ],
+  "malformed": false
+}

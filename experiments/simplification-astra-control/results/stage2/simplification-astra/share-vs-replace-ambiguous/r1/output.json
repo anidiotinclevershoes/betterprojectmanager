@@ -1,0 +1,74 @@
+{
+  "caseId": "share-vs-replace-ambiguous",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8131,
+  "usage": {
+    "prompt_tokens": 1143,
+    "completion_tokens": 334,
+    "total_tokens": 1477,
+    "reasoning_tokens": 116
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Fizz Caramel might replace Pippa Gumdrop on UAT or share UAT responsibility with Pippa Gumdrop.",
+          "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-fizz",
+          "candidateTargetTitle": "Fizz Caramel",
+          "proposedValues": {
+            "personName": "Fizz Caramel",
+            "scope": "UAT",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "Replacement and shared ownership are alternatives; neither is stated as agreed.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Fizz Caramel might replace Pippa Gumdrop on UAT or share UAT responsibility with Pippa Gumdrop.",
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+        "truthIntent": "non_current",
+        "candidateTargetId": "person-fizz",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Not asserting current project truth — no mutation."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Fizz Caramel",
+      "referencedCanonicalId": "person-fizz",
+      "assertedValue": {
+        "personName": "Fizz Caramel",
+        "scope": "UAT",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+      "ambiguity": "Replacement and shared ownership are alternatives; neither is stated as agreed.",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

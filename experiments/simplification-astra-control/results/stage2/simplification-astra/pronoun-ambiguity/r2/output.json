@@ -1,0 +1,72 @@
+{
+  "caseId": "pronoun-ambiguity",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7612,
+  "usage": {
+    "prompt_tokens": 1109,
+    "completion_tokens": 287,
+    "total_tokens": 1396,
+    "reasoning_tokens": 78
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "An unidentified woman said she would own the boss balancing pass from now on.",
+          "evidence": "She said she will own the boss balancing pass from now on.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "non_current",
+          "projectId": "proj-game",
+          "candidateTargetId": "todo-balance",
+          "candidateTargetTitle": "Boss balancing pass",
+          "proposedValues": {
+            "scope": "boss balancing pass",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "The person referred to as \"she\" is unidentified. It is unclear whether the reported ownership would be shared or replace an existing owner, or whether it has been agreed.",
+          "modelConfidence": 0.94
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "An unidentified woman said she would own the boss balancing pass from now on.",
+        "evidence": "She said she will own the boss balancing pass from now on.",
+        "truthIntent": "non_current",
+        "candidateTargetId": "todo-balance",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Not asserting current project truth — no mutation."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Boss balancing pass",
+      "referencedCanonicalId": "todo-balance",
+      "assertedValue": {
+        "scope": "boss balancing pass",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "She said she will own the boss balancing pass from now on.",
+      "ambiguity": "The person referred to as \"she\" is unidentified. It is unclear whether the reported ownership would be shared or replace an existing owner, or whether it has been agreed.",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

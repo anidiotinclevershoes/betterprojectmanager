@@ -1,0 +1,110 @@
+{
+  "caseId": "contradict-parade",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 9695,
+  "usage": {
+    "prompt_tokens": 1143,
+    "completion_tokens": 427,
+    "total_tokens": 1570,
+    "reasoning_tokens": 68
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Parade day is now 29 October 2026.",
+          "evidence": "Parade day is now 29 October 2026.",
+          "domain": "milestone",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {
+            "date": "2026-10-29"
+          },
+          "commentary": "This conflicts with the instruction to keep Parade day on 15 October 2026; the intended authoritative date is unclear.",
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "Parade day is to remain on 15 October 2026.",
+          "evidence": "Also, keep Parade day on 15 October 2026.",
+          "domain": "milestone",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {
+            "date": "2026-10-15"
+          },
+          "commentary": "This conflicts with the assertion that Parade day is now 29 October 2026; the intended authoritative date is unclear.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "ambiguous",
+        "statement": "Parade day is now 29 October 2026.",
+        "evidence": "Parade day is now 29 October 2026.",
+        "truthIntent": "uncertain",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This conflicts with the instruction to keep Parade day on 15 October 2026; the intended authoritative date is unclear."
+      },
+      {
+        "id": "obs-2",
+        "domain": "milestone",
+        "disposition": "ambiguous",
+        "statement": "Parade day is to remain on 15 October 2026.",
+        "evidence": "Also, keep Parade day on 15 October 2026.",
+        "truthIntent": "uncertain",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This conflicts with the assertion that Parade day is now 29 October 2026; the intended authoritative date is unclear."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "date": "2026-10-29"
+      },
+      "evidence": "Parade day is now 29 October 2026.",
+      "ambiguity": "This conflicts with the instruction to keep Parade day on 15 October 2026; the intended authoritative date is unclear.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "date": "2026-10-15"
+      },
+      "evidence": "Also, keep Parade day on 15 October 2026.",
+      "ambiguity": "This conflicts with the assertion that Parade day is now 29 October 2026; the intended authoritative date is unclear.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

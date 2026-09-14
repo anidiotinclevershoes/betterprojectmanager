@@ -1,0 +1,24 @@
+{
+  "caseId": "existing-risk-update",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "packaging-worse",
+      "meaning": "Existing Packaging delay risk is worsening, still open.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": false,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": true,
+      "note": "needs_you write=no id=risk-packaging"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

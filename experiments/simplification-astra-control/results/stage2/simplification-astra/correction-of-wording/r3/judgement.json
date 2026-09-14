@@ -1,0 +1,26 @@
+{
+  "caseId": "correction-of-wording",
+  "contender": "simplification",
+  "repeatIndex": 3,
+  "facts": [
+    {
+      "factId": "audio-bus",
+      "meaning": "The intended new risk is the audio bus mixer, after a spoken correction.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": false,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": true,
+      "note": "left_untouched write=no id=omitted"
+    }
+  ],
+  "extraWrites": [
+    "update:knowledge:The audio bus mixer, not the shader, is stalling the cert build.:omitted"
+  ],
+  "malformed": false
+}
