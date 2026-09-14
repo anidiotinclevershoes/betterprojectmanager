@@ -3,6 +3,7 @@
 Non-mergeable experiment. Did not modify `main`, Simplification integration, AI-first, or bake-off results. Frozen corpus and expected outcomes were not retuned.
 
 **Branch:** `experiment/simplification-astra-control`  
+**HEAD:** `28f940229adcefae3dcbd53a6b60a324ceccd3fb`  
 **Safe to merge:** NO  
 **Contains current main?:** YES (`920d65d`)
 
