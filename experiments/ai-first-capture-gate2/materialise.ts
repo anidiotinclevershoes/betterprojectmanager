@@ -157,10 +157,12 @@ function operationId(op: CaptureLegalOperation): string | null {
   return null;
 }
 
-function writeDisposition(opType: string): Gate1V2Operation {
+function writeDisposition(opType: string, proposed: Gate1V2Operation): Gate1V2Operation {
   if (opType.startsWith("create_") || opType === "ensure_person") return "create";
   if (opType.startsWith("delete_") || opType === "remove") return "remove";
-  return "update";
+  if (opType.startsWith("update_")) return "update";
+  // write_knowledge / confirm_responsibility: keep the named op the planner accepted.
+  return proposed;
 }
 
 export function suggestionFromItem(
@@ -377,7 +379,7 @@ export function materialiseGate2(args: {
       }
       const next: Gate1V2Item = {
         ...item,
-        operation: writeDisposition(planned.operation.type),
+        operation: writeDisposition(planned.operation.type, mappedOp),
         targetCanonicalId: writeId ?? item.targetCanonicalId,
         question: null,
         leftUntouchedReason: null,
