@@ -24,7 +24,7 @@
             }
           ]
         },
-        "expectedReview": "no_change",
+        "expectedReview": "needs_you",
         "corpusCaseId": "existing-person"
       },
       {
@@ -165,7 +165,7 @@
             }
           ]
         },
-        "expectedReview": "no_change",
+        "expectedReview": "needs_you",
         "corpusCaseId": "existing-person"
       },
       {
@@ -325,7 +325,7 @@
             }
           ]
         },
-        "expectedReview": "no_change",
+        "expectedReview": "needs_you",
         "corpusCaseId": "responsibility-continues"
       },
       {
