@@ -1,0 +1,26 @@
+{
+  "caseId": "historic-parade",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "historic-why",
+      "meaning": "Historic account of Parade day — no date write.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": null,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "left_untouched write=no id=ms-parade"
+    }
+  ],
+  "extraWrites": [
+    "update:knowledge:The banners still say June.:omitted"
+  ],
+  "malformed": false
+}

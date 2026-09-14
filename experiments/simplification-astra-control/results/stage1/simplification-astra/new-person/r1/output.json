@@ -4,12 +4,12 @@
   "error": null,
   "requestedModel": "gpt-6-astra",
   "responseModel": "gpt-6-astra",
-  "latencyMs": 8354,
+  "latencyMs": 8125,
   "usage": {
     "prompt_tokens": 1125,
-    "completion_tokens": 358,
-    "total_tokens": 1483,
-    "reasoning_tokens": 51
+    "completion_tokens": 357,
+    "total_tokens": 1482,
+    "reasoning_tokens": 55
   },
   "raw": {
     "adapter": "omit-temperature-for-gpt-6-astra",
@@ -21,7 +21,7 @@
       "observations": [
         {
           "id": "obs-1",
-          "statement": "Velvet Sprocket is joining the wooden-track refresh.",
+          "statement": "Velvet Sprocket is joining the project.",
           "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
           "domain": "person",
           "disposition": "create_new",
@@ -45,8 +45,8 @@
             "scope": "Paint lead for the wooden-track refresh",
             "ownershipSemantics": "ambiguous"
           },
-          "commentary": "The paint lead role is explicit, but whether Velvet shares or replaces ownership is not stated.",
-          "modelConfidence": 0.99
+          "commentary": "The transcript does not establish whether this responsibility is shared or replaces existing ownership.",
+          "modelConfidence": 0.98
         }
       ]
     },
@@ -55,7 +55,7 @@
         "id": "obs-1",
         "domain": "person",
         "disposition": "create_new",
-        "statement": "Velvet Sprocket is joining the wooden-track refresh.",
+        "statement": "Velvet Sprocket is joining the project.",
         "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
         "truthIntent": "current",
         "candidateTargetId": null,
@@ -73,14 +73,14 @@
         "candidateTargetId": null,
         "decisionKind": "needs_you",
         "writeType": null,
-        "reason": "The paint lead role is explicit, but whether Velvet shares or replaces ownership is not stated."
+        "reason": "The transcript does not establish whether this responsibility is shared or replaces existing ownership."
       }
     ]
   },
   "normalized": [
     {
       "domain": "person",
-      "subject": "Velvet Sprocket is joining the wooden-track refresh.",
+      "subject": "Velvet Sprocket is joining the project.",
       "referencedCanonicalId": "omitted",
       "assertedValue": {
         "name": "Velvet Sprocket"
@@ -100,7 +100,7 @@
         "ownershipSemantics": "ambiguous"
       },
       "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
-      "ambiguity": "The paint lead role is explicit, but whether Velvet shares or replaces ownership is not stated.",
+      "ambiguity": "The transcript does not establish whether this responsibility is shared or replaces existing ownership.",
       "disposition": "needs_you",
       "writeProposed": false
     }

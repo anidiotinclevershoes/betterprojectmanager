@@ -1,0 +1,64 @@
+{
+  "caseId": "toyworld-vocabulary-bait",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7915,
+  "usage": {
+    "prompt_tokens": 1136,
+    "completion_tokens": 255,
+    "total_tokens": 1391,
+    "reasoning_tokens": 84
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick Oakley proposes copying Toyworld's packaging delay onto Candyland as well.",
+          "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+          "domain": "unknown",
+          "disposition": "left_untouched",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "proposedValues": {},
+          "commentary": "The source record is not supplied, and it is unclear what kind of project information should be copied. The transcript reports a proposal, not an agreed change.",
+          "modelConfidence": 0.94
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "Brick Oakley proposes copying Toyworld's packaging delay onto Candyland as well.",
+        "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "The source record is not supplied, and it is unclear what kind of project information should be copied. The transcript reports a proposal, not an agreed change."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "unknown",
+      "subject": "Brick Oakley proposes copying Toyworld's packaging delay onto Candyland as well.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+      "ambiguity": "The source record is not supplied, and it is unclear what kind of project information should be copied. The transcript reports a proposal, not an agreed change.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

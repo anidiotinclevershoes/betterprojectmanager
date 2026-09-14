@@ -1,0 +1,96 @@
+{
+  "caseId": "explicit-no-change",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6564,
+  "usage": {
+    "prompt_tokens": 1125,
+    "completion_tokens": 243,
+    "total_tokens": 1368,
+    "reasoning_tokens": 42
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Nothing has changed on Toyworld this week.",
+          "evidence": "Nothing has changed on Toyworld this week.",
+          "domain": "knowledge",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "proposedValues": {},
+          "modelConfidence": 1
+        },
+        {
+          "id": "obs-2",
+          "statement": "The project records are to remain unchanged.",
+          "evidence": "Leave the records as they are.",
+          "domain": "decision",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "proposedValues": {},
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "knowledge",
+        "disposition": "left_untouched",
+        "statement": "Nothing has changed on Toyworld this week.",
+        "evidence": "Nothing has changed on Toyworld this week.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Lume couldn't safely interpret this part of your capture."
+      },
+      {
+        "id": "obs-2",
+        "domain": "decision",
+        "disposition": "left_untouched",
+        "statement": "The project records are to remain unchanged.",
+        "evidence": "Leave the records as they are.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Lume couldn't safely interpret this part of your capture."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "knowledge",
+      "subject": "Nothing has changed on Toyworld this week.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Nothing has changed on Toyworld this week.",
+      "ambiguity": "Lume couldn't safely interpret this part of your capture.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    },
+    {
+      "domain": "decision",
+      "subject": "The project records are to remain unchanged.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Leave the records as they are.",
+      "ambiguity": "Lume couldn't safely interpret this part of your capture.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

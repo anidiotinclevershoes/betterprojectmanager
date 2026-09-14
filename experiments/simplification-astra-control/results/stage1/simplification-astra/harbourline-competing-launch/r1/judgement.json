@@ -1,0 +1,24 @@
+{
+  "caseId": "harbourline-competing-launch",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "launch-conflict",
+      "meaning": "Two launch dates — do not pick one.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": true,
+      "clearAutomationOk": null,
+      "justifiedIntervention": true,
+      "unnecessaryIntervention": false,
+      "note": "no_change write=no id=ms-hca-launch"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

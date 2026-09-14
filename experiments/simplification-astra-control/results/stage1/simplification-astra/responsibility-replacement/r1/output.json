@@ -1,0 +1,110 @@
+{
+  "caseId": "responsibility-replacement",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8003,
+  "usage": {
+    "prompt_tokens": 1109,
+    "completion_tokens": 342,
+    "total_tokens": 1451,
+    "reasoning_tokens": 64
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Nova Quill is named as an incoming project participant.",
+          "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "proposedValues": {
+            "name": "Nova Quill"
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+          "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "proposedValues": {
+            "personName": "Nova Quill",
+            "scope": "Producer",
+            "ownershipSemantics": "replace",
+            "text": "Nova Quill will replace Pixel Ramos as Producer from next week."
+          },
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "create_new",
+        "statement": "Nova Quill is named as an incoming project participant.",
+        "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "ensure_person",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "responsibility",
+        "disposition": "create_new",
+        "statement": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+        "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "Replacement needs a confirmed current owner. Confirm before Lume changes ownership."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Nova Quill is named as an incoming project participant.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Nova Quill"
+      },
+      "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "personName": "Nova Quill",
+        "scope": "Producer",
+        "ownershipSemantics": "replace",
+        "text": "Nova Quill will replace Pixel Ramos as Producer from next week."
+      },
+      "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+      "ambiguity": "Replacement needs a confirmed current owner. Confirm before Lume changes ownership.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

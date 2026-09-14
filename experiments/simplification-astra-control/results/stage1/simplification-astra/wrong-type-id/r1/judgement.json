@@ -1,0 +1,24 @@
+{
+  "caseId": "wrong-type-id",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "wrong-type",
+      "meaning": "A person id must not receive a milestone date write; fail closed.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": true,
+      "clearAutomationOk": null,
+      "justifiedIntervention": true,
+      "unnecessaryIntervention": false,
+      "note": "needs_you write=no id=ms-parade"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

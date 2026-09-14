@@ -1,0 +1,106 @@
+{
+  "caseId": "existing-risk-update",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 10166,
+  "usage": {
+    "prompt_tokens": 1120,
+    "completion_tokens": 395,
+    "total_tokens": 1515,
+    "reasoning_tokens": 134
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Packaging delay is getting worse.",
+          "evidence": "Packaging delay is getting worse",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "risk-packaging",
+          "candidateTargetTitle": "Packaging delay",
+          "proposedValues": {
+            "text": "Packaging delay is getting worse."
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "The cardboard mill flooded before the reported worsening of packaging delay.",
+          "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "non_current",
+          "projectId": "proj-toy",
+          "proposedValues": {
+            "text": "The cardboard mill flooded before the reported worsening of packaging delay."
+          },
+          "modelConfidence": 0.96
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "update_existing",
+        "statement": "Packaging delay is getting worse.",
+        "evidence": "Packaging delay is getting worse",
+        "truthIntent": "current",
+        "candidateTargetId": "risk-packaging",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Risk update is not specific enough to apply automatically."
+      },
+      {
+        "id": "obs-2",
+        "domain": "knowledge",
+        "disposition": "create_new",
+        "statement": "The cardboard mill flooded before the reported worsening of packaging delay.",
+        "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Not asserting current project truth — no mutation."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": {
+        "text": "Packaging delay is getting worse."
+      },
+      "evidence": "Packaging delay is getting worse",
+      "ambiguity": "This Risk update is not specific enough to apply automatically.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "knowledge",
+      "subject": "The cardboard mill flooded before the reported worsening of packaging delay.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "text": "The cardboard mill flooded before the reported worsening of packaging delay."
+      },
+      "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,73 @@
+{
+  "caseId": "responsibility-continues",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5976,
+  "usage": {
+    "prompt_tokens": 1110,
+    "completion_tokens": 206,
+    "total_tokens": 1316,
+    "reasoning_tokens": 33
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Pixel Ramos continues as Producer on the console sprint.",
+          "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "candidateTargetId": "person-pixel",
+          "candidateTargetTitle": "Pixel Ramos",
+          "proposedValues": {
+            "personName": "Pixel Ramos",
+            "scope": "Producer on the console sprint",
+            "ownershipSemantics": "continue"
+          },
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "no_change",
+        "statement": "Pixel Ramos continues as Producer on the console sprint.",
+        "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there.",
+        "truthIntent": "current",
+        "candidateTargetId": "person-pixel",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "Lume understood an ownership change, but needs you to confirm who owns what."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Pixel Ramos",
+      "referencedCanonicalId": "person-pixel",
+      "assertedValue": {
+        "personName": "Pixel Ramos",
+        "scope": "Producer on the console sprint",
+        "ownershipSemantics": "continue"
+      },
+      "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there.",
+      "ambiguity": "Lume understood an ownership change, but needs you to confirm who owns what.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

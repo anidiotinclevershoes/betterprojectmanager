@@ -1,0 +1,66 @@
+{
+  "caseId": "unsupported-remove-risk",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5118,
+  "usage": {
+    "prompt_tokens": 1116,
+    "completion_tokens": 199,
+    "total_tokens": 1315,
+    "reasoning_tokens": 40
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The user requests deletion of the Packaging delay risk.",
+          "evidence": "Please delete the Packaging delay risk.",
+          "domain": "risk",
+          "disposition": "left_untouched",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "risk-packaging",
+          "candidateTargetTitle": "Packaging delay",
+          "proposedValues": {},
+          "commentary": "Deletion is not a supported disposition, and the request does not state a replacement risk status.",
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "left_untouched",
+        "statement": "The user requests deletion of the Packaging delay risk.",
+        "evidence": "Please delete the Packaging delay risk.",
+        "truthIntent": "current",
+        "candidateTargetId": "risk-packaging",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Deletion is not a supported disposition, and the request does not state a replacement risk status."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": "omitted",
+      "evidence": "Please delete the Packaging delay risk.",
+      "ambiguity": "Deletion is not a supported disposition, and the request does not state a replacement risk status.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

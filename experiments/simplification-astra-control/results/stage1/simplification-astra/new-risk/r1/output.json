@@ -1,0 +1,107 @@
+{
+  "caseId": "new-risk",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 14132,
+  "usage": {
+    "prompt_tokens": 1112,
+    "completion_tokens": 514,
+    "total_tokens": 1626,
+    "reasoning_tokens": 208
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The shader compile is stalling the cert build.",
+          "evidence": "The shader compile is stalling the cert build",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "proposedValues": {
+            "text": "The shader compile is stalling the cert build."
+          },
+          "modelConfidence": 0.97
+        },
+        {
+          "id": "obs-2",
+          "statement": "The shader compile could cause the cert build to miss the nightlies.",
+          "evidence": "The shader compile is stalling the cert build and could miss the nightlies.",
+          "domain": "risk",
+          "disposition": "ambiguous",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "candidateTargetId": "risk-console",
+          "candidateTargetTitle": "Console certification slip",
+          "proposedValues": {
+            "text": "The shader compile could cause the cert build to miss the nightlies."
+          },
+          "commentary": "It isn't clear whether the nightly-build risk belongs to the existing console certification risk or is a separate risk.",
+          "modelConfidence": 0.83
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "knowledge",
+        "disposition": "create_new",
+        "statement": "The shader compile is stalling the cert build.",
+        "evidence": "The shader compile is stalling the cert build",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "write_knowledge",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "ambiguous",
+        "statement": "The shader compile could cause the cert build to miss the nightlies.",
+        "evidence": "The shader compile is stalling the cert build and could miss the nightlies.",
+        "truthIntent": "current",
+        "candidateTargetId": "risk-console",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It isn't clear whether the nightly-build risk belongs to the existing console certification risk or is a separate risk."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "knowledge",
+      "subject": "The shader compile is stalling the cert build.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "text": "The shader compile is stalling the cert build."
+      },
+      "evidence": "The shader compile is stalling the cert build",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "risk",
+      "subject": "Console certification slip",
+      "referencedCanonicalId": "risk-console",
+      "assertedValue": {
+        "text": "The shader compile could cause the cert build to miss the nightlies."
+      },
+      "evidence": "The shader compile is stalling the cert build and could miss the nightlies.",
+      "ambiguity": "It isn't clear whether the nightly-build risk belongs to the existing console certification risk or is a separate risk.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

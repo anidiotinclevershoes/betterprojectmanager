@@ -1,0 +1,151 @@
+{
+  "caseId": "cross-project-bait",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 13128,
+  "usage": {
+    "prompt_tokens": 1144,
+    "completion_tokens": 595,
+    "total_tokens": 1739,
+    "reasoning_tokens": 165
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 3,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Pixel Ramos is from GamingStudio5000.",
+          "evidence": "Pixel Ramos from GamingStudio5000",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "name": "Pixel Ramos",
+            "text": "Pixel Ramos is from GamingStudio5000."
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "Pixel Ramos should own UAT.",
+          "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "personName": "Pixel Ramos",
+            "scope": "UAT",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "It isn't clear whether Pixel Ramos should share UAT ownership or replace another owner.",
+          "modelConfidence": 0.98
+        },
+        {
+          "id": "obs-3",
+          "statement": "The user requests that the Console certification slip risk be resolved.",
+          "evidence": "please resolve the Console certification slip risk while you are here",
+          "domain": "risk",
+          "disposition": "left_untouched",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "title": "Console certification slip",
+            "status": "resolved"
+          },
+          "commentary": "No supplied risk record matches Console certification slip, so the target of the requested resolution cannot be identified.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "create_new",
+        "statement": "Pixel Ramos is from GamingStudio5000.",
+        "evidence": "Pixel Ramos from GamingStudio5000",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "ensure_person",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Pixel Ramos should own UAT.",
+        "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It isn't clear whether Pixel Ramos should share UAT ownership or replace another owner."
+      },
+      {
+        "id": "obs-3",
+        "domain": "risk",
+        "disposition": "left_untouched",
+        "statement": "The user requests that the Console certification slip risk be resolved.",
+        "evidence": "please resolve the Console certification slip risk while you are here",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "No supplied risk record matches Console certification slip, so the target of the requested resolution cannot be identified."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Pixel Ramos is from GamingStudio5000.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Pixel Ramos",
+        "text": "Pixel Ramos is from GamingStudio5000."
+      },
+      "evidence": "Pixel Ramos from GamingStudio5000",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Pixel Ramos should own UAT.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "personName": "Pixel Ramos",
+        "scope": "UAT",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT",
+      "ambiguity": "It isn't clear whether Pixel Ramos should share UAT ownership or replace another owner.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "risk",
+      "subject": "The user requests that the Console certification slip risk be resolved.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Console certification slip",
+        "status": "resolved"
+      },
+      "evidence": "please resolve the Console certification slip risk while you are here",
+      "ambiguity": "No supplied risk record matches Console certification slip, so the target of the requested resolution cannot be identified.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

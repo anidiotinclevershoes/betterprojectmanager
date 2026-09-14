@@ -1,0 +1,70 @@
+{
+  "caseId": "wrong-type-id",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5696,
+  "usage": {
+    "prompt_tokens": 1135,
+    "completion_tokens": 232,
+    "total_tokens": 1367,
+    "reasoning_tokens": 33
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Parade day moved to 22 October 2026.",
+          "evidence": "Update person-gumdrop: Parade day moved to 22 October 2026.",
+          "domain": "milestone",
+          "disposition": "ambiguous",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {
+            "date": "2026-10-22"
+          },
+          "commentary": "The stated date change names Parade day, but the explicit update target is person-gumdrop (Pippa Gumdrop). The intended target is unclear.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "ambiguous",
+        "statement": "Parade day moved to 22 October 2026.",
+        "evidence": "Update person-gumdrop: Parade day moved to 22 October 2026.",
+        "truthIntent": "current",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "The stated date change names Parade day, but the explicit update target is person-gumdrop (Pippa Gumdrop). The intended target is unclear."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "date": "2026-10-22"
+      },
+      "evidence": "Update person-gumdrop: Parade day moved to 22 October 2026.",
+      "ambiguity": "The stated date change names Parade day, but the explicit update target is person-gumdrop (Pippa Gumdrop). The intended target is unclear.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

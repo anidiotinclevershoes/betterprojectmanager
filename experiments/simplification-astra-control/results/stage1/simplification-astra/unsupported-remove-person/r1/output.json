@@ -1,0 +1,66 @@
+{
+  "caseId": "unsupported-remove-person",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6686,
+  "usage": {
+    "prompt_tokens": 1128,
+    "completion_tokens": 249,
+    "total_tokens": 1377,
+    "reasoning_tokens": 82
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Pippa Gumdrop is requested to be removed from the project.",
+          "evidence": "Please delete Pippa Gumdrop from the project.",
+          "domain": "person",
+          "disposition": "left_untouched",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-gumdrop",
+          "candidateTargetTitle": "Pippa Gumdrop",
+          "proposedValues": {},
+          "commentary": "The request explicitly asks for deletion, which is not represented by the supported observation changes.",
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "left_untouched",
+        "statement": "Pippa Gumdrop is requested to be removed from the project.",
+        "evidence": "Please delete Pippa Gumdrop from the project.",
+        "truthIntent": "current",
+        "candidateTargetId": "person-gumdrop",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "The request explicitly asks for deletion, which is not represented by the supported observation changes."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Pippa Gumdrop",
+      "referencedCanonicalId": "person-gumdrop",
+      "assertedValue": "omitted",
+      "evidence": "Please delete Pippa Gumdrop from the project.",
+      "ambiguity": "The request explicitly asks for deletion, which is not represented by the supported observation changes.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

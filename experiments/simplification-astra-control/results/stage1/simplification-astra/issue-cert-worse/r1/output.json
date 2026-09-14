@@ -1,0 +1,104 @@
+{
+  "caseId": "issue-cert-worse",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7787,
+  "usage": {
+    "prompt_tokens": 1107,
+    "completion_tokens": 299,
+    "total_tokens": 1406,
+    "reasoning_tokens": 41
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The Console certification slip risk is worse this week.",
+          "evidence": "Console certification slip is worse this week",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "candidateTargetId": "risk-console",
+          "candidateTargetTitle": "Console certification slip",
+          "proposedValues": {},
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "The Console certification slip risk remains open.",
+          "evidence": "Console certification slip is worse this week and still open.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "candidateTargetId": "risk-console",
+          "candidateTargetTitle": "Console certification slip",
+          "proposedValues": {
+            "status": "open"
+          },
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "update_existing",
+        "statement": "The Console certification slip risk is worse this week.",
+        "evidence": "Console certification slip is worse this week",
+        "truthIntent": "current",
+        "candidateTargetId": "risk-console",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Risk update is not specific enough to apply automatically."
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "update_existing",
+        "statement": "The Console certification slip risk remains open.",
+        "evidence": "Console certification slip is worse this week and still open.",
+        "truthIntent": "current",
+        "candidateTargetId": "risk-console",
+        "decisionKind": "write",
+        "writeType": "update_risk_status",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Console certification slip",
+      "referencedCanonicalId": "risk-console",
+      "assertedValue": "omitted",
+      "evidence": "Console certification slip is worse this week",
+      "ambiguity": "This Risk update is not specific enough to apply automatically.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "risk",
+      "subject": "Console certification slip",
+      "referencedCanonicalId": "risk-console",
+      "assertedValue": {
+        "status": "open"
+      },
+      "evidence": "Console certification slip is worse this week and still open.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,69 @@
+{
+  "caseId": "todo-complete-jelly",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 3784,
+  "usage": {
+    "prompt_tokens": 1126,
+    "completion_tokens": 135,
+    "total_tokens": 1261,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Prepare the jelly pack is complete.",
+          "evidence": "Mark Prepare the jelly pack as done.",
+          "domain": "todo",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "todo-pack",
+          "candidateTargetTitle": "Prepare the jelly pack",
+          "proposedValues": {
+            "status": "complete"
+          },
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "todo",
+        "disposition": "update_existing",
+        "statement": "Prepare the jelly pack is complete.",
+        "evidence": "Mark Prepare the jelly pack as done.",
+        "truthIntent": "current",
+        "candidateTargetId": "todo-pack",
+        "decisionKind": "write",
+        "writeType": "complete_todo",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Prepare the jelly pack",
+      "referencedCanonicalId": "todo-pack",
+      "assertedValue": {
+        "status": "complete"
+      },
+      "evidence": "Mark Prepare the jelly pack as done.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

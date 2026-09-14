@@ -1,0 +1,26 @@
+{
+  "caseId": "issue-cert-worse",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "cert-worse",
+      "meaning": "Console certification slip is worse, still open.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": false,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": true,
+      "note": "needs_you write=no id=risk-console"
+    }
+  ],
+  "extraWrites": [
+    "update:risk:Console certification slip:risk-console"
+  ],
+  "malformed": false
+}

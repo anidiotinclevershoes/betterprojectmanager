@@ -1,0 +1,24 @@
+{
+  "caseId": "duplicate-observation",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "packaging-once",
+      "meaning": "Packaging delay resolved — one durable intent, not two writes.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "update write=yes id=risk-packaging"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}
