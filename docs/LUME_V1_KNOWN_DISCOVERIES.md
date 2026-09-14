@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 14 September 2026 (Capture Simplification production port; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed)  
+**Last housekeeping:** 14 September 2026 (Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked)  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  

@@ -3,6 +3,7 @@
 **Status:** Documentation authority map (12 September 2026)  
 **Scope:** What to read, and what is allowed to govern implementation.  
 **Current integration line:** `main`.  
+**Current production baseline:** `29acea5149c1c56dcb18375fd22025c072931a24` (PR #184 — Capture Simplification).  
 **Baseline this map was reconciled against:** `e0f140d67b3be7ecc51dd5c4056338a12b4d244c` (PR #170 on `9f24a65`).
 
 **Use this page first.** Then read only what the task needs.
