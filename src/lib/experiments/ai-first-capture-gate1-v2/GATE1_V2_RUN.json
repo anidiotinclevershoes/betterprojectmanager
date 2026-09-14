@@ -1,0 +1,1899 @@
+{
+  "branch": "experiment/ai-first-capture-gate1-v2",
+  "commit": "4ac57b10ff7a72f88309c1f7b2b48a6c008ed959",
+  "baseSha": "92d61d13c4407d04a8e20960e7eb38efa0b103c3",
+  "model": "gpt-6-astra",
+  "aiAgg": {
+    "cases": 12,
+    "factsScored": 18,
+    "correctExplicitFacts": 10,
+    "falseWrites": 0,
+    "wrongTargets": 0,
+    "silentLoss": 0,
+    "appropriateHumanFallback": 5,
+    "correctNoChange": 2,
+    "inventedOperations": 1,
+    "malformedCases": 0
+  },
+  "prodAgg": {
+    "cases": 12,
+    "factsScored": 18,
+    "correctExplicitFacts": 7,
+    "falseWrites": 4,
+    "wrongTargets": 0,
+    "silentLoss": 0,
+    "appropriateHumanFallback": 5,
+    "correctNoChange": 2,
+    "inventedOperations": 0,
+    "malformedCases": 0
+  },
+  "cases": [
+    {
+      "id": "create-velvet",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-toy\" name=\"Toyworld\" code=\"TOY\"\n\nPEOPLE\nid=\"person-brick\" name=\"Brick Oakley\" role=\"Sponsor\"\nid=\"person-buttons\" name=\"Captain Buttons\" role=\"Assembly lead\"\n\nISSUES\nid=\"risk-packaging\" title=\"Packaging delay\" status=\"open\"\n\nTO_DO\nid=\"todo-track\" title=\"Print the track map\" done=false\n\nKNOWLEDGE\n(none)\n\nMILESTONES\nid=\"ms-freeze\" label=\"Track freeze\" startAt=\"2026-09-01T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 490,
+        "approxTokensCl100k": 154
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 8890,
+        "usage": {
+          "prompt_tokens": 822,
+          "completion_tokens": 323,
+          "total_tokens": 1145,
+          "reasoning_tokens": 154
+        },
+        "items": [
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Velvet Sprocket",
+            "proposedValues": {
+              "name": "Velvet Sprocket",
+              "personName": "Velvet Sprocket",
+              "title": "Paint lead",
+              "date": null,
+              "status": null,
+              "scope": "wooden-track refresh",
+              "ownershipSemantics": null,
+              "text": "Joining as paint lead for the wooden-track refresh.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+            "understood": "Velvet Sprocket is a new project person joining as paint lead for the wooden-track refresh.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+            "proposedValues": {
+              "name": "Velvet Sprocket",
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+            "understood": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+            "proposedValues": {
+              "name": null,
+              "personName": "Velvet Sprocket",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "paint lead for the wooden-track refresh",
+              "ownershipSemantics": "replace",
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+            "understood": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+            "question": "Replacement needs a confirmed current owner. Confirm before Lume changes ownership.",
+            "leftUntouchedReason": null
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 965,
+          "completion_tokens": 254,
+          "total_tokens": 1219,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":2,\"proposedChanges\":1,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":1,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nmapped items:\n- create person target=none :: Velvet Sprocket is joining as paint lead for the wooden-track refresh.\n- needs_you responsibility target=none :: Velvet Sprocket is joining as paint lead for the wooden-track refresh."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "velvet",
+            "meaning": "Velvet Sprocket is a new paint lead.",
+            "bucket": "correct_explicit_truth",
+            "note": "create person unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "velvet",
+            "meaning": "Velvet Sprocket is a new paint lead.",
+            "bucket": "correct_explicit_truth",
+            "note": "create person unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "update-packaging",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-toy\" name=\"Toyworld\" code=\"TOY\"\n\nPEOPLE\nid=\"person-brick\" name=\"Brick Oakley\" role=\"Sponsor\"\nid=\"person-buttons\" name=\"Captain Buttons\" role=\"Assembly lead\"\n\nISSUES\nid=\"risk-packaging\" title=\"Packaging delay\" status=\"open\"\n\nTO_DO\nid=\"todo-track\" title=\"Print the track map\" done=false\n\nKNOWLEDGE\n(none)\n\nMILESTONES\nid=\"ms-freeze\" label=\"Track freeze\" startAt=\"2026-09-01T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 490,
+        "approxTokensCl100k": 154
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 4346,
+        "usage": {
+          "prompt_tokens": 817,
+          "completion_tokens": 185,
+          "total_tokens": 1002,
+          "reasoning_tokens": 40
+        },
+        "items": [
+          {
+            "operation": "update",
+            "domain": "risk",
+            "targetCanonicalId": "risk-packaging",
+            "subject": "Packaging delay",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Packaging delay is getting worse after the cardboard mill flooded.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+            "understood": "The existing Packaging delay risk is worsening after the cardboard mill flooded.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "risk",
+            "targetCanonicalId": "risk-packaging",
+            "subject": "Packaging delay",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Packaging delay",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+            "understood": "Packaging delay is getting worse.",
+            "question": "This Risk update is not specific enough to apply automatically.",
+            "leftUntouchedReason": null
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 960,
+          "completion_tokens": 131,
+          "total_tokens": 1091,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":1,\"proposedChanges\":0,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":1,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nmapped items:\n- needs_you risk target=risk-packaging :: Packaging delay is getting worse."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "packaging",
+            "meaning": "Packaging delay is worsening and still open.",
+            "bucket": "correct_explicit_truth",
+            "note": "update risk risk-packaging"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "packaging",
+            "meaning": "Packaging delay is worsening and still open.",
+            "bucket": "incorrect_proposed_truth",
+            "note": "expected update, got needs_you"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "nochange-pippa",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-candy\" name=\"Candyland\" code=\"CANDY\"\n\nPEOPLE\nid=\"person-gumdrop\" name=\"Pippa Gumdrop\" role=\"UAT lead\"\nid=\"person-fizz\" name=\"Fizz Caramel\" role=\"Designer\"\n\nISSUES\nid=\"risk-bridge\" title=\"Gumdrop Bridge icing\" status=\"open\"\n\nTO_DO\nid=\"todo-pack\" title=\"Prepare the jelly pack\" done=false\n\nKNOWLEDGE\nid=\"resp-uat\" kind=\"responsibility\" body=\"Pippa Gumdrop — UAT lead\" personId=\"person-gumdrop\" personName=\"Pippa Gumdrop\" scope=\"UAT lead\" ownerConfirmed=true\n\nMILESTONES\nid=\"ms-parade\" label=\"Parade day\" startAt=\"2026-10-15T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 641,
+        "approxTokensCl100k": 210
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 5154,
+        "usage": {
+          "prompt_tokens": 878,
+          "completion_tokens": 226,
+          "total_tokens": 1104,
+          "reasoning_tokens": 46
+        },
+        "items": [
+          {
+            "operation": "update",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "Pippa Gumdrop’s UAT responsibility",
+            "proposedValues": {
+              "name": null,
+              "personName": "Pippa Gumdrop",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead for the licorice stands",
+              "ownershipSemantics": null,
+              "text": "Pippa Gumdrop — UAT lead for the licorice stands",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+            "understood": "Pippa remains the UAT lead; the Capture specifies the scope as the licorice stands.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "responsibility",
+            "targetCanonicalId": "person-gumdrop",
+            "subject": "Pippa Gumdrop",
+            "proposedValues": {
+              "name": null,
+              "personName": "Pippa Gumdrop",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead for the licorice stands",
+              "ownershipSemantics": "continue",
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+            "understood": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 975,
+          "completion_tokens": 179,
+          "total_tokens": 1154,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":1,\"proposedChanges\":0,\"alreadyKnown\":1,\"merged\":0,\"needsYou\":0,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nmapped items:\n- no_change responsibility target=person-gumdrop :: Pippa Gumdrop is still the UAT lead for the licorice stands."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "pippa-same",
+            "meaning": "Pippa remains UAT lead — no second person.",
+            "bucket": "correct_explicit_truth",
+            "note": "update responsibility resp-uat"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "pippa-same",
+            "meaning": "Pippa remains UAT lead — no second person.",
+            "bucket": "correct_no_change",
+            "note": "no_change responsibility person-gumdrop"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "pronoun-she",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-game\" name=\"GamingStudio5000\" code=\"GS5K\"\n\nPEOPLE\nid=\"person-pixel\" name=\"Pixel Ramos\" role=\"Producer\"\n\nISSUES\nid=\"risk-console\" title=\"Console certification slip\" status=\"open\"\n\nTO_DO\nid=\"todo-balance\" title=\"Boss balancing pass\" done=false\n\nKNOWLEDGE\n(none)\n\nMILESTONES\nid=\"ms-cert\" label=\"Console certification\" startAt=\"2026-11-20T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 454,
+        "approxTokensCl100k": 137
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 3936,
+        "usage": {
+          "prompt_tokens": 804,
+          "completion_tokens": 155,
+          "total_tokens": 959,
+          "reasoning_tokens": 0
+        },
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Ownership of the boss balancing pass",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Boss balancing pass",
+              "date": null,
+              "status": null,
+              "scope": "Boss balancing pass",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "She said she will own the boss balancing pass from now on.",
+            "understood": "The Capture assigns ownership of the existing boss balancing pass, but does not identify who “she” is.",
+            "question": "Who does “she” refer to?",
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": "todo-balance",
+            "subject": "Boss balancing pass",
+            "proposedValues": {
+              "name": null,
+              "personName": "Pixel Ramos",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "boss balancing pass",
+              "ownershipSemantics": "replace",
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "She said she will own the boss balancing pass from now on.",
+            "understood": "Pixel Ramos will own the boss balancing pass from now on.",
+            "question": "This Person identity is not established in the Capture. A supplied record id is not enough.",
+            "leftUntouchedReason": null
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 949,
+          "completion_tokens": 159,
+          "total_tokens": 1108,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":1,\"proposedChanges\":0,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":1,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nmapped items:\n- needs_you responsibility target=todo-balance :: Pixel Ramos will own the boss balancing pass from now on."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "who-she",
+            "meaning": "'She' is unnamed — must not assign Pixel Ramos.",
+            "bucket": "appropriate_needs_you",
+            "note": "needs_you responsibility unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "who-she",
+            "meaning": "'She' is unnamed — must not assign Pixel Ramos.",
+            "bucket": "appropriate_needs_you",
+            "note": "needs_you responsibility todo-balance"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "date-parade",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-candy\" name=\"Candyland\" code=\"CANDY\"\n\nPEOPLE\nid=\"person-gumdrop\" name=\"Pippa Gumdrop\" role=\"UAT lead\"\nid=\"person-fizz\" name=\"Fizz Caramel\" role=\"Designer\"\n\nISSUES\nid=\"risk-bridge\" title=\"Gumdrop Bridge icing\" status=\"open\"\n\nTO_DO\nid=\"todo-pack\" title=\"Prepare the jelly pack\" done=false\n\nKNOWLEDGE\nid=\"resp-uat\" kind=\"responsibility\" body=\"Pippa Gumdrop — UAT lead\" personId=\"person-gumdrop\" personName=\"Pippa Gumdrop\" scope=\"UAT lead\" ownerConfirmed=true\n\nMILESTONES\nid=\"ms-parade\" label=\"Parade day\" startAt=\"2026-10-15T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 641,
+        "approxTokensCl100k": 210
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 4338,
+        "usage": {
+          "prompt_tokens": 873,
+          "completion_tokens": 146,
+          "total_tokens": 1019,
+          "reasoning_tokens": 0
+        },
+        "items": [
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": "Parade day",
+              "personName": null,
+              "title": null,
+              "date": "2026-10-29",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day is now 29 October 2026.",
+            "understood": "Parade day moves from 15 October 2026 to 29 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "create",
+            "domain": "milestone",
+            "targetCanonicalId": null,
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Parade day",
+              "date": "2026-10-29",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day is now 29 October 2026.",
+            "understood": "Parade day is now 29 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 970,
+          "completion_tokens": 155,
+          "total_tokens": 1125,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":1,\"proposedChanges\":1,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":0,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nmapped items:\n- create milestone target=none :: Parade day is now 29 October 2026."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "parade-29",
+            "meaning": "Parade day moves to 29 October 2026.",
+            "bucket": "correct_explicit_truth",
+            "note": "update milestone ms-parade"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "parade-29",
+            "meaning": "Parade day moves to 29 October 2026.",
+            "bucket": "incorrect_proposed_truth",
+            "note": "expected update, got create"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "correction-audio",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-game\" name=\"GamingStudio5000\" code=\"GS5K\"\n\nPEOPLE\nid=\"person-pixel\" name=\"Pixel Ramos\" role=\"Producer\"\n\nISSUES\nid=\"risk-console\" title=\"Console certification slip\" status=\"open\"\n\nTO_DO\nid=\"todo-balance\" title=\"Boss balancing pass\" done=false\n\nKNOWLEDGE\n(none)\n\nMILESTONES\nid=\"ms-cert\" label=\"Console certification\" startAt=\"2026-11-20T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 454,
+        "approxTokensCl100k": 137
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 5970,
+        "usage": {
+          "prompt_tokens": 814,
+          "completion_tokens": 266,
+          "total_tokens": 1080,
+          "reasoning_tokens": 98
+        },
+        "items": [
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Audio bus mixer stalling the cert build",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Audio bus mixer stalling the cert build",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "The audio bus mixer is stalling the cert build.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+            "understood": "The corrected blocker is the audio bus mixer, not shader compilation.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Audio bus mixer stall",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Audio bus mixer stall",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "I meant the audio bus mixer, not the shader.",
+            "understood": "The audio bus mixer is stalling the cert build.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "The shader compile is stalling the cert build. Wait —",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The shader compile is stalling the cert build. Wait —",
+            "understood": "The shader compile is stalling the cert build. Wait —",
+            "question": null,
+            "leftUntouchedReason": "Lume couldn't safely interpret this part of your capture."
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 959,
+          "completion_tokens": 129,
+          "total_tokens": 1088,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":2,\"proposedChanges\":1,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":0,\"commentary\":0,\"leftUntouched\":1,\"rejected\":0}\nmapped items:\n- create risk target=none :: The audio bus mixer is stalling the cert build.\n- left_untouched unsupported target=none :: The shader compile is stalling the cert build. Wait —"
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "audio-bus",
+            "meaning": "Intended new risk is the audio bus mixer.",
+            "bucket": "correct_explicit_truth",
+            "note": "create risk unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "audio-bus",
+            "meaning": "Intended new risk is the audio bus mixer.",
+            "bucket": "correct_explicit_truth",
+            "note": "create risk unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "contradict-parade",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-candy\" name=\"Candyland\" code=\"CANDY\"\n\nPEOPLE\nid=\"person-gumdrop\" name=\"Pippa Gumdrop\" role=\"UAT lead\"\nid=\"person-fizz\" name=\"Fizz Caramel\" role=\"Designer\"\n\nISSUES\nid=\"risk-bridge\" title=\"Gumdrop Bridge icing\" status=\"open\"\n\nTO_DO\nid=\"todo-pack\" title=\"Prepare the jelly pack\" done=false\n\nKNOWLEDGE\nid=\"resp-uat\" kind=\"responsibility\" body=\"Pippa Gumdrop — UAT lead\" personId=\"person-gumdrop\" personName=\"Pippa Gumdrop\" scope=\"UAT lead\" ownerConfirmed=true\n\nMILESTONES\nid=\"ms-parade\" label=\"Parade day\" startAt=\"2026-10-15T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 641,
+        "approxTokensCl100k": 210
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 4217,
+        "usage": {
+          "prompt_tokens": 886,
+          "completion_tokens": 181,
+          "total_tokens": 1067,
+          "reasoning_tokens": 0
+        },
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Parade day",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day is now 29 October 2026. Also, keep Parade day on 15 October 2026.",
+            "understood": "The Capture gives contradictory dates for Parade day: 29 October 2026 and 15 October 2026.",
+            "question": "Should Parade day be on 29 October 2026 or remain on 15 October 2026?",
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Parade day",
+              "date": "2026-10-29",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day is now 29 October 2026.",
+            "understood": "Parade day is now 29 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "no_change",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Parade day",
+              "date": "2026-10-15",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Also, keep Parade day on 15 October 2026.",
+            "understood": "Keep Parade day on 15 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 983,
+          "completion_tokens": 281,
+          "total_tokens": 1264,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":2,\"proposedChanges\":1,\"alreadyKnown\":1,\"merged\":0,\"needsYou\":0,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nmapped items:\n- update milestone target=ms-parade :: Parade day is now 29 October 2026.\n- no_change milestone target=ms-parade :: Keep Parade day on 15 October 2026."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "parade-conflict",
+            "meaning": "Parade day dates contradict — do not write a chosen date.",
+            "bucket": "appropriate_needs_you",
+            "note": "needs_you milestone ms-parade"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "parade-conflict",
+            "meaning": "Parade day dates contradict — do not write a chosen date.",
+            "bucket": "incorrect_proposed_truth",
+            "note": "expected needs_you|left_untouched, got update"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "ambiguous-share",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-candy\" name=\"Candyland\" code=\"CANDY\"\n\nPEOPLE\nid=\"person-gumdrop\" name=\"Pippa Gumdrop\" role=\"UAT lead\"\nid=\"person-fizz\" name=\"Fizz Caramel\" role=\"Designer\"\n\nISSUES\nid=\"risk-bridge\" title=\"Gumdrop Bridge icing\" status=\"open\"\n\nTO_DO\nid=\"todo-pack\" title=\"Prepare the jelly pack\" done=false\n\nKNOWLEDGE\nid=\"resp-uat\" kind=\"responsibility\" body=\"Pippa Gumdrop — UAT lead\" personId=\"person-gumdrop\" personName=\"Pippa Gumdrop\" scope=\"UAT lead\" ownerConfirmed=true\n\nMILESTONES\nid=\"ms-parade\" label=\"Parade day\" startAt=\"2026-10-15T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 641,
+        "approxTokensCl100k": 210
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 4607,
+        "usage": {
+          "prompt_tokens": 886,
+          "completion_tokens": 179,
+          "total_tokens": 1065,
+          "reasoning_tokens": 0
+        },
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "UAT lead ownership",
+            "proposedValues": {
+              "name": null,
+              "personName": "Fizz Caramel",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+            "understood": "A possible UAT ownership change is described, but replacement versus shared ownership is unresolved.",
+            "question": "Should Fizz Caramel replace Pippa Gumdrop as UAT lead, or share UAT ownership with her?",
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": "person-fizz",
+            "subject": "Fizz Caramel",
+            "proposedValues": {
+              "name": null,
+              "personName": "Fizz Caramel",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT",
+              "ownershipSemantics": "ambiguous",
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+            "understood": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+            "question": "The responsibility for UAT is unclear.",
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": "person-gumdrop",
+            "subject": "Pippa Gumdrop",
+            "proposedValues": {
+              "name": null,
+              "personName": "Fizz Caramel",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT",
+              "ownershipSemantics": "ambiguous",
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "or they might share it — the parade committee was unclear.",
+            "understood": "Fizz Caramel and Pippa Gumdrop might share UAT.",
+            "question": "The sharing of UAT responsibility is also unclear.",
+            "leftUntouchedReason": null
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 983,
+          "completion_tokens": 331,
+          "total_tokens": 1314,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":2,\"proposedChanges\":0,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":2,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nmapped items:\n- needs_you responsibility target=person-fizz :: Fizz Caramel might take UAT from Pippa Gumdrop.\n- needs_you responsibility target=person-gumdrop :: Fizz Caramel and Pippa Gumdrop might share UAT."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "uat-unclear",
+            "meaning": "UAT share vs replace is undecided.",
+            "bucket": "appropriate_needs_you",
+            "note": "needs_you responsibility resp-uat"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "uat-unclear",
+            "meaning": "UAT share vs replace is undecided.",
+            "bucket": "appropriate_needs_you",
+            "note": "needs_you responsibility person-fizz"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "unsupported-remove",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-candy\" name=\"Candyland\" code=\"CANDY\"\n\nPEOPLE\nid=\"person-gumdrop\" name=\"Pippa Gumdrop\" role=\"UAT lead\"\nid=\"person-fizz\" name=\"Fizz Caramel\" role=\"Designer\"\n\nISSUES\nid=\"risk-bridge\" title=\"Gumdrop Bridge icing\" status=\"open\"\n\nTO_DO\nid=\"todo-pack\" title=\"Prepare the jelly pack\" done=false\n\nKNOWLEDGE\nid=\"resp-uat\" kind=\"responsibility\" body=\"Pippa Gumdrop — UAT lead\" personId=\"person-gumdrop\" personName=\"Pippa Gumdrop\" scope=\"UAT lead\" ownerConfirmed=true\n\nMILESTONES\nid=\"ms-parade\" label=\"Parade day\" startAt=\"2026-10-15T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 641,
+        "approxTokensCl100k": 210
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 5925,
+        "usage": {
+          "prompt_tokens": 869,
+          "completion_tokens": 169,
+          "total_tokens": 1038,
+          "reasoning_tokens": 34
+        },
+        "items": [
+          {
+            "operation": "remove",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please delete Parade day from the plan.",
+            "understood": "Remove the existing Parade day milestone from the plan.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [],
+        "usage": {
+          "prompt_tokens": 966,
+          "completion_tokens": 155,
+          "total_tokens": 1121,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":1,\"proposedChanges\":0,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":0,\"commentary\":0,\"leftUntouched\":0,\"rejected\":1}\nmapped items:\nrejected:\n- rejected milestone/ambiguous Delete Parade day from the plan."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "delete-parade",
+            "meaning": "Milestone delete is unsupported — fallback, do not silently write.",
+            "bucket": "unsupported_invented_operation",
+            "note": "expected left_untouched|needs_you, got remove"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "delete-parade",
+            "meaning": "Milestone delete is unsupported — fallback, do not silently write.",
+            "bucket": "appropriate_left_untouched",
+            "note": "omitted without a write"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "mixed-three",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-candy\" name=\"Candyland\" code=\"CANDY\"\n\nPEOPLE\nid=\"person-gumdrop\" name=\"Pippa Gumdrop\" role=\"UAT lead\"\nid=\"person-fizz\" name=\"Fizz Caramel\" role=\"Designer\"\n\nISSUES\nid=\"risk-bridge\" title=\"Gumdrop Bridge icing\" status=\"open\"\n\nTO_DO\nid=\"todo-pack\" title=\"Prepare the jelly pack\" done=false\n\nKNOWLEDGE\nid=\"resp-uat\" kind=\"responsibility\" body=\"Pippa Gumdrop — UAT lead\" personId=\"person-gumdrop\" personName=\"Pippa Gumdrop\" scope=\"UAT lead\" ownerConfirmed=true\n\nMILESTONES\nid=\"ms-parade\" label=\"Parade day\" startAt=\"2026-10-15T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 641,
+        "approxTokensCl100k": 210
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 6100,
+        "usage": {
+          "prompt_tokens": 888,
+          "completion_tokens": 388,
+          "total_tokens": 1276,
+          "reasoning_tokens": 0
+        },
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "Pippa Gumdrop — UAT lead",
+            "proposedValues": {
+              "name": null,
+              "personName": "Pippa Gumdrop",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pippa Gumdrop remains UAT lead.",
+            "understood": "Pippa Gumdrop continues as UAT lead, matching current truth.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Parade day",
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day moved to 22 October 2026.",
+            "understood": "Parade day moves from 15 October 2026 to 22 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Chocolate fountain pump overheating",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Chocolate fountain pump overheating",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "The chocolate fountain pump is overheating.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The chocolate fountain pump is overheating.",
+            "understood": "A concrete issue is reported: the chocolate fountain pump is overheating.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "person",
+            "targetCanonicalId": "person-gumdrop",
+            "subject": "Pippa Gumdrop",
+            "proposedValues": {
+              "name": "Pippa Gumdrop",
+              "personName": "Pippa Gumdrop",
+              "title": "Pippa Gumdrop",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pippa Gumdrop remains UAT lead.",
+            "understood": "Pippa Gumdrop remains UAT lead.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Parade day",
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day moved to 22 October 2026.",
+            "understood": "Parade day moved to 22 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Chocolate fountain pump overheating",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Chocolate fountain pump overheating",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The chocolate fountain pump is overheating.",
+            "understood": "The chocolate fountain pump is overheating.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 985,
+          "completion_tokens": 337,
+          "total_tokens": 1322,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":3,\"proposedChanges\":2,\"alreadyKnown\":1,\"merged\":0,\"needsYou\":0,\"commentary\":0,\"leftUntouched\":0,\"rejected\":0}\nmapped items:\n- no_change person target=person-gumdrop :: Pippa Gumdrop remains UAT lead.\n- update milestone target=ms-parade :: Parade day moved to 22 October 2026.\n- create risk target=none :: The chocolate fountain pump is overheating."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "pippa-still",
+            "meaning": "Pippa remains UAT lead.",
+            "bucket": "correct_no_change",
+            "note": "no_change responsibility resp-uat"
+          },
+          {
+            "factId": "parade-22",
+            "meaning": "Parade day moves to 22 October 2026.",
+            "bucket": "correct_explicit_truth",
+            "note": "update milestone ms-parade"
+          },
+          {
+            "factId": "fountain",
+            "meaning": "New fountain-pump overheating risk.",
+            "bucket": "correct_explicit_truth",
+            "note": "create risk unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "pippa-still",
+            "meaning": "Pippa remains UAT lead.",
+            "bucket": "correct_no_change",
+            "note": "no_change person person-gumdrop"
+          },
+          {
+            "factId": "parade-22",
+            "meaning": "Parade day moves to 22 October 2026.",
+            "bucket": "correct_explicit_truth",
+            "note": "update milestone ms-parade"
+          },
+          {
+            "factId": "fountain",
+            "meaning": "New fountain-pump overheating risk.",
+            "bucket": "correct_explicit_truth",
+            "note": "create risk unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "chatter",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-game\" name=\"GamingStudio5000\" code=\"GS5K\"\n\nPEOPLE\nid=\"person-pixel\" name=\"Pixel Ramos\" role=\"Producer\"\n\nISSUES\nid=\"risk-console\" title=\"Console certification slip\" status=\"open\"\n\nTO_DO\nid=\"todo-balance\" title=\"Boss balancing pass\" done=false\n\nKNOWLEDGE\n(none)\n\nMILESTONES\nid=\"ms-cert\" label=\"Console certification\" startAt=\"2026-11-20T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 454,
+        "approxTokensCl100k": 137
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 4108,
+        "usage": {
+          "prompt_tokens": 808,
+          "completion_tokens": 150,
+          "total_tokens": 958,
+          "reasoning_tokens": 0
+        },
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Lobby chiptunes",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+            "understood": "The Capture describes lobby noise and explicitly provides no certification sprint information.",
+            "question": null,
+            "leftUntouchedReason": "Irrelevant chatter with no explicit project change."
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "The lobby cabinets were blasting chiptunes all morning.",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The lobby cabinets were blasting chiptunes all morning.",
+            "understood": "The lobby cabinets were blasting chiptunes all morning.",
+            "question": null,
+            "leftUntouchedReason": "This statement does not pertain to the project status or tasks."
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Nothing about the certification sprint was mentioned.",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "nothing about the certification sprint.",
+            "understood": "Nothing about the certification sprint was mentioned.",
+            "question": null,
+            "leftUntouchedReason": "This statement indicates a lack of information regarding the certification sprint."
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 953,
+          "completion_tokens": 263,
+          "total_tokens": 1216,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":2,\"proposedChanges\":0,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":0,\"commentary\":2,\"leftUntouched\":0,\"rejected\":0}\nmapped items:\n- left_untouched unsupported target=none :: The lobby cabinets were blasting chiptunes all morning.\n- left_untouched unsupported target=none :: Nothing about the certification sprint was mentioned."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "chiptune",
+            "meaning": "Irrelevant chatter must not become a write.",
+            "bucket": "appropriate_left_untouched",
+            "note": "left_untouched unsupported unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "chiptune",
+            "meaning": "Irrelevant chatter must not become a write.",
+            "bucket": "appropriate_left_untouched",
+            "note": "left_untouched unsupported unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    },
+    {
+      "id": "holdout-h6",
+      "snapshot": "CURRENT CANONICAL PROJECT TRUTH\nCurrent rows only. Not history. Not Review. Not ranked.\nproject.id=\"proj-harbour-holdout-seed\" name=\"Harbour repairs mobilisation\" code=\"HARBOUR\"\n\nPEOPLE\nid=\"person-priya\" name=\"Priya Nair\" role=\"contractor liaison\"\nid=\"person-tomos\" name=\"Tomos Reed\" role=\"voids\"\nid=\"person-elena\" name=\"Elena Voss\" role=\"resident liaison\"\n\nISSUES\n(none)\n\nTO_DO\n(none)\n\nKNOWLEDGE\nid=\"know-policy-v3\" kind=\"fact\" body=\"Repairs policy v3 is the current working version.\"\nid=\"resp-priya\" kind=\"responsibility\" body=\"Priya Nair owns contractor liaison.\" personId=\"person-priya\" personName=\"Priya Nair\" scope=\"contractor liaison\" ownerConfirmed=true\nid=\"resp-tomos\" kind=\"responsibility\" body=\"Tomos Reed owns voids.\" personId=\"person-tomos\" personName=\"Tomos Reed\" scope=\"voids\" ownerConfirmed=true\nid=\"resp-elena\" kind=\"responsibility\" body=\"Elena Voss owns resident liaison.\" personId=\"person-elena\" personName=\"Elena Voss\" scope=\"resident liaison\" ownerConfirmed=true\n\nMILESTONES\nid=\"ms-workshop\" label=\"Mobilisation workshop\" startAt=\"2026-10-08T12:00:00.000Z\"",
+      "snapshotSizes": {
+        "characters": 1077,
+        "approxTokensCl100k": 324
+      },
+      "astra": {
+        "requestedModel": "gpt-6-astra",
+        "responseModel": "gpt-6-astra",
+        "latencyMs": 16864,
+        "usage": {
+          "prompt_tokens": 1081,
+          "completion_tokens": 1269,
+          "total_tokens": 2350,
+          "reasoning_tokens": 0
+        },
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Biscuit chatter",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "ignore the bit about whose turn it is to bring biscuits.",
+            "understood": "This is irrelevant chatter and an explicit instruction to ignore it.",
+            "question": null,
+            "leftUntouchedReason": "Not project information."
+          },
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-workshop",
+            "subject": "Mobilisation workshop",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Mobilisation workshop",
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "22/10/2026 is the new mobilisation workshop date (was 8 Oct).",
+            "understood": "The existing mobilisation workshop moves from 8 October to 22 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Office plants",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parking: the office plants need watering; not a control.",
+            "understood": "The office-plant note is parked and explicitly described as not a control.",
+            "question": null,
+            "leftUntouchedReason": "No explicit project operation."
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Speculative DHP responsibility",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Tomos mentioned Priya might take DHP if housing insist, but that was just speculation.",
+            "understood": "Priya taking DHP is explicitly speculative, not an assignment.",
+            "question": null,
+            "leftUntouchedReason": "Speculation does not establish current responsibility."
+          },
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Kwame Boateng",
+            "proposedValues": {
+              "name": "Kwame Boateng",
+              "personName": null,
+              "title": "contractor lead",
+              "date": null,
+              "status": null,
+              "scope": "Harbour",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+            "understood": "Kwame Boateng is a new project person identified as contractor lead for Harbour.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Collect void keys",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Collect void keys from the depot",
+              "date": "2026-10-16",
+              "status": "open",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Void keys still need collecting from the depot on 16 Oct 2026.",
+            "understood": "Void keys need collecting from the depot on 16 October 2026. No owner is stated.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "no_change",
+            "domain": "knowledge",
+            "targetCanonicalId": "know-policy-v3",
+            "subject": "Current repairs policy",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Repairs policy v3 is the current working version.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Elena said the repairs policy v3 remains current.",
+            "understood": "The Capture restates that repairs policy v3 remains current.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ],
+        "issues": []
+      },
+      "production": {
+        "label": "Production Prompt A extract (gpt-4o-mini-2024-07-18) + current resolve (hydrate/rematerialise ON)",
+        "requestedModel": "gpt-4o-mini-2024-07-18",
+        "responseModel": "gpt-4o-mini-2024-07-18",
+        "items": [
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-workshop",
+            "subject": "Mobilisation workshop",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Mobilisation workshop",
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "22/10/2026 is the new mobilisation workshop date (was 8 Oct).",
+            "understood": "The new mobilisation workshop date is 22/10/2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Kwame Boateng is the contractor lead for Harbour.",
+            "proposedValues": {
+              "name": "Kwame Boateng",
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+            "understood": "Kwame Boateng is the contractor lead for Harbour.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Void keys need collecting from the depot on 16 Oct 2026.",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Collect void keys from the depot",
+              "date": "2026-10-16",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Void keys still need collecting from the depot on 16 Oct 2026.",
+            "understood": "Void keys need collecting from the depot on 16 Oct 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "needs_you",
+            "domain": "knowledge",
+            "targetCanonicalId": null,
+            "subject": "Elena said the repairs policy v3 remains current.",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Elena said the repairs policy v3 remains current.",
+            "understood": "Elena said the repairs policy v3 remains current.",
+            "question": "Lume understood this, but cannot safely decide what to change without a small confirmation.",
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "needs_you",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Tomos mentioned Priya might take DHP if housing insist.",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Priya might take DHP if housing insist",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Tomos mentioned Priya might take DHP if housing insist, but that was just speculation.",
+            "understood": "Tomos mentioned Priya might take DHP if housing insist.",
+            "question": "It is unclear whether this should change current project truth.",
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "From: housing ops Copied from the WhatsApp thread — ignore the bit about whose turn it is to bring biscuits.",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "From: housing ops Copied from the WhatsApp thread — ignore the bit about whose turn it is to bring biscuits.",
+            "understood": "From: housing ops Copied from the WhatsApp thread — ignore the bit about whose turn it is to bring biscuits.",
+            "question": null,
+            "leftUntouchedReason": "Lume couldn't safely interpret this part of your capture."
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Parking: the office plants need watering; not a control.",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parking: the office plants need watering; not a control.",
+            "understood": "Parking: the office plants need watering; not a control.",
+            "question": null,
+            "leftUntouchedReason": "Lume couldn't safely interpret this part of your capture."
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 1059,
+          "completion_tokens": 640,
+          "total_tokens": 1699,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "text": "requested=gpt-4o-mini-2024-07-18 response=gpt-4o-mini-2024-07-18 fallback=false\naccount={\"total\":7,\"proposedChanges\":3,\"alreadyKnown\":0,\"merged\":0,\"needsYou\":2,\"commentary\":0,\"leftUntouched\":2,\"rejected\":0}\nmapped items:\n- update milestone target=ms-workshop :: The new mobilisation workshop date is 22/10/2026.\n- create person target=none :: Kwame Boateng is the contractor lead for Harbour.\n- create todo target=none :: Void keys need collecting from the depot on 16 Oct 2026.\n- needs_you knowledge target=none :: Elena said the repairs policy v3 remains current.\n- needs_you risk target=none :: Tomos mentioned Priya might take DHP if housing insist.\n- left_untouched unsupported target=none :: From: housing ops Copied from the WhatsApp thread — ignore the bit about whose turn it is to bring biscuits.\n- left_untouched unsupported target=none :: Parking: the office plants need watering; not a control."
+      },
+      "aiScore": {
+        "facts": [
+          {
+            "factId": "workshop",
+            "meaning": "Workshop moves to 22 October 2026.",
+            "bucket": "correct_explicit_truth",
+            "note": "update milestone ms-workshop"
+          },
+          {
+            "factId": "void-keys",
+            "meaning": "Collect void keys 16 Oct — new dated action.",
+            "bucket": "correct_explicit_truth",
+            "note": "create todo unbound"
+          },
+          {
+            "factId": "kwame",
+            "meaning": "Kwame Boateng is a new contractor lead.",
+            "bucket": "correct_explicit_truth",
+            "note": "create person unbound"
+          },
+          {
+            "factId": "policy",
+            "meaning": "Policy v3 remains current.",
+            "bucket": "correct_no_change",
+            "note": "no_change knowledge know-policy-v3"
+          },
+          {
+            "factId": "dhp",
+            "meaning": "DHP ownership is speculation.",
+            "bucket": "appropriate_left_untouched",
+            "note": "left_untouched responsibility unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      },
+      "prodScore": {
+        "facts": [
+          {
+            "factId": "workshop",
+            "meaning": "Workshop moves to 22 October 2026.",
+            "bucket": "correct_explicit_truth",
+            "note": "update milestone ms-workshop"
+          },
+          {
+            "factId": "void-keys",
+            "meaning": "Collect void keys 16 Oct — new dated action.",
+            "bucket": "correct_explicit_truth",
+            "note": "create todo unbound"
+          },
+          {
+            "factId": "kwame",
+            "meaning": "Kwame Boateng is a new contractor lead.",
+            "bucket": "correct_explicit_truth",
+            "note": "create person unbound"
+          },
+          {
+            "factId": "policy",
+            "meaning": "Policy v3 remains current.",
+            "bucket": "incorrect_proposed_truth",
+            "note": "expected no_change, got needs_you"
+          },
+          {
+            "factId": "dhp",
+            "meaning": "DHP ownership is speculation.",
+            "bucket": "appropriate_needs_you",
+            "note": "needs_you risk unbound"
+          }
+        ],
+        "extraInvented": [],
+        "malformed": false
+      }
+    }
+  ]
+}
