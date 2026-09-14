@@ -391,28 +391,18 @@ function resolveOne(
   }
 
   if (
-    observation.disposition === "update_existing" ||
-    observation.disposition === "create_new"
+    observation.disposition === "update_existing" &&
+    !observation.candidateTargetId
   ) {
-    const rematerialized = rematerializeIndependentDatedCreate(
+    return {
       observation,
-      args.world,
-      projectId,
-    );
-    if (rematerialized !== observation) {
-      return resolveOne(rematerialized, args);
-    }
-    if (observation.disposition === "update_existing" && !observation.candidateTargetId) {
-      return {
-        observation,
-        suggestion: null,
-        decision: {
-          kind: "needs_you",
-          domain: DOMAIN_TO_LEGAL[observation.domain],
-          reason: "Update requires a valid existing identity.",
-        },
-      };
-    }
+      suggestion: null,
+      decision: {
+        kind: "needs_you",
+        domain: DOMAIN_TO_LEGAL[observation.domain],
+        reason: "Update requires a valid existing identity.",
+      },
+    };
   }
 
   const readyGap = missingReadySemantics(observation);
@@ -556,42 +546,6 @@ function suggestionFromObservation(
   };
 }
 
-function uniqueTitledRecord(
-  world: CaptureApplyWorld,
-  projectId: string | null,
-  domain: ObservationDomain,
-  title: string,
-): { id: string; title: string } | null {
-  const needle = title.trim().toLowerCase();
-  if (!needle) return null;
-  if (domain === "todo") {
-    const hits = world.todos.filter(
-      (todo) =>
-        (!projectId || !todo.projectId || todo.projectId === projectId) &&
-        !todo.done &&
-        todo.title.trim().toLowerCase() === needle,
-    );
-    return hits.length === 1 ? { id: hits[0]!.id, title: hits[0]!.title } : null;
-  }
-  if (domain === "milestone") {
-    const hits = world.timeline.filter(
-      (item) =>
-        (!projectId || item.projectId === projectId) &&
-        item.label.trim().toLowerCase() === needle,
-    );
-    return hits.length === 1 ? { id: hits[0]!.id, title: hits[0]!.label } : null;
-  }
-  if (domain === "risk") {
-    const hits = world.risks.filter(
-      (risk) =>
-        (!projectId || risk.projectId === projectId) &&
-        risk.title.trim().toLowerCase() === needle,
-    );
-    return hits.length === 1 ? { id: hits[0]!.id, title: hits[0]!.title } : null;
-  }
-  return null;
-}
-
 /**
  * A Person observation that states explicit ownership is a responsibility
  * write, not a new stakeholder. Role-only lines ("is the QS") stay Person.
@@ -643,16 +597,6 @@ function rematerializeOwnershipAsResponsibility(
           : "share",
     },
   };
-}
-
-function rematerializeTitle(observation: CaptureObservationV2): string | undefined {
-  const values = observation.proposedValues ?? {};
-  return (
-    asString(values.title) ||
-    asString(values.label) ||
-    observation.candidateTargetTitle?.trim() ||
-    undefined
-  );
 }
 
 function isResolveOrComplete(observation: CaptureObservationV2): boolean {
@@ -802,76 +746,6 @@ function uniquelyEvidencedRecords(
       .map((item) => ({ id: item.id, title: item.label }));
   }
   return [];
-}
-
-function rematerializeIndependentDatedCreate(
-  observation: CaptureObservationV2,
-  world: CaptureApplyWorld,
-  projectId: string | null,
-): CaptureObservationV2 {
-  if (
-    observation.domain !== "todo" &&
-    observation.domain !== "milestone" &&
-    observation.domain !== "risk"
-  ) {
-    return observation;
-  }
-  const title = rematerializeTitle(observation);
-  const date = asIso(observation.proposedValues?.date) ||
-    asIso(observation.proposedValues?.startAt) ||
-    asIso(observation.proposedValues?.dueAt);
-  if (!title) return observation;
-  if (observation.domain === "milestone" && !date) return observation;
-  if (isResolveOrComplete(observation)) return observation;
-
-  const match = uniqueTitledRecord(world, projectId, observation.domain, title);
-  const boundId = observation.candidateTargetId?.trim();
-  const bound = boundId
-    ? findScopedEntity(observation, world, projectId, boundId)
-    : null;
-  const proposedTitle = rematerializeTitle(observation);
-  const boundTitleCompatible =
-    !bound ||
-    !proposedTitle ||
-    titlesCompatible(proposedTitle, bound.title) ||
-    recordedTitleEvidencedInText(
-      identityEvidenceText(observation, observation.statement),
-      bound.title,
-    );
-
-  if (boundId) {
-    // Unique-title bind of an invalid model id stays (Phase 3E). Do not
-    // manufacture a Create merely because the invalid id also had a title.
-    if (!isResolveOrComplete(observation) && (!bound || !boundTitleCompatible)) {
-      if (match) {
-        return {
-          ...observation,
-          disposition: "update_existing",
-          truthIntent: "current",
-          candidateTargetId: match.id,
-          candidateTargetTitle: match.title,
-        };
-      }
-      return observation;
-    }
-    return observation;
-  }
-
-  if (match) {
-    if (observation.truthIntent === "uncertain") return observation;
-    if (observation.disposition === "update_existing") {
-      return {
-        ...observation,
-        candidateTargetId: match.id,
-        candidateTargetTitle: match.title,
-      };
-    }
-    return observation;
-  }
-
-  // Explicit Create stays Create. Do not manufacture Create from an
-  // Update that merely had a title and no trustworthy target.
-  return observation;
 }
 
 function findScopedEntity(
