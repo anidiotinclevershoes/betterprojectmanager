@@ -1,0 +1,2826 @@
+[
+  {
+    "caseId": "share-vs-replace-ambiguous",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 5682,
+    "usage": {
+      "prompt_tokens": 886,
+      "completion_tokens": 193,
+      "total_tokens": 1079,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "UAT lead ownership",
+            "proposedValues": {
+              "name": null,
+              "personName": "Fizz Caramel",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+            "understood": "A possible UAT ownership change is described, but it is unclear whether Fizz replaces Pippa or shares responsibility with her.",
+            "question": "Is Fizz Caramel replacing Pippa Gumdrop as UAT lead, sharing the responsibility with her, or is the change still undecided?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "UAT lead ownership",
+        "referencedCanonicalId": "resp-uat",
+        "assertedValue": {
+          "name": null,
+          "personName": "Fizz Caramel",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "UAT lead",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+        "ambiguity": "Is Fizz Caramel replacing Pippa Gumdrop as UAT lead, sharing the responsibility with her, or is the change still undecided?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": {
+      "writesAttempted": 0,
+      "writesExecuted": 0,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "risk-resolution",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4489,
+    "usage": {
+      "prompt_tokens": 875,
+      "completion_tokens": 134,
+      "total_tokens": 1009,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "update",
+            "domain": "risk",
+            "targetCanonicalId": "risk-bridge",
+            "subject": "Gumdrop Bridge icing",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": "closed",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The icing on Gumdrop Bridge has melted; that risk is closed.",
+            "understood": "The existing Gumdrop Bridge icing risk is now closed.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "update",
+          "toOperation": "needs_you",
+          "reason": "This Risk update is not specific enough to apply automatically.",
+          "plannerKind": "needs_you",
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Gumdrop Bridge icing",
+        "referencedCanonicalId": "risk-bridge",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": "closed",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "The icing on Gumdrop Bridge has melted; that risk is closed.",
+        "ambiguity": "This Risk update is not specific enough to apply automatically.",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": {
+      "writesAttempted": 0,
+      "writesExecuted": 0,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "todo-create",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4209,
+    "usage": {
+      "prompt_tokens": 878,
+      "completion_tokens": 158,
+      "total_tokens": 1036,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Polish the candy-cane banners",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Polish the candy-cane banners before the float leaves",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+            "understood": "Add a to-do to polish the candy-cane banners before the float leaves; no explicit date was provided.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_todo",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "todo",
+        "subject": "Polish the candy-cane banners",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Polish the candy-cane banners before the float leaves",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": {
+      "writesAttempted": 1,
+      "writesExecuted": 1,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-mu1hjsl4-grcgm8",
+            "title": "Polish the candy-cane banners before the float leaves",
+            "done": false
+          },
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "mixed-domains",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 11054,
+    "usage": {
+      "prompt_tokens": 888,
+      "completion_tokens": 557,
+      "total_tokens": 1445,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "no_change",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "Pippa Gumdrop — UAT lead",
+            "proposedValues": {
+              "name": "Pippa Gumdrop",
+              "personName": "Pippa Gumdrop",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Pippa Gumdrop remains UAT lead.",
+            "understood": "Pippa Gumdrop remains the UAT lead; this restates current truth.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-parade",
+            "subject": "Parade day",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Parade day",
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parade day moved to 22 October 2026.",
+            "understood": "Parade day moves from 15 October 2026 to 22 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Chocolate fountain pump overheating",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Chocolate fountain pump overheating",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "The chocolate fountain pump is overheating.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "The chocolate fountain pump is overheating.",
+            "understood": "A new concrete issue is reported: the chocolate fountain pump is overheating.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_milestone",
+          "intercepted": false
+        },
+        {
+          "index": 2,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_risk",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "responsibility",
+        "subject": "Pippa Gumdrop — UAT lead",
+        "referencedCanonicalId": "resp-uat",
+        "assertedValue": {
+          "name": "Pippa Gumdrop",
+          "personName": "Pippa Gumdrop",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "UAT lead",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Pippa Gumdrop remains UAT lead.",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      },
+      {
+        "domain": "milestone",
+        "subject": "Parade day",
+        "referencedCanonicalId": "ms-parade",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Parade day",
+          "date": "2026-10-22",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Parade day moved to 22 October 2026.",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      },
+      {
+        "domain": "risk",
+        "subject": "Chocolate fountain pump overheating",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Chocolate fountain pump overheating",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "The chocolate fountain pump is overheating.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "The chocolate fountain pump is overheating.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": {
+      "writesAttempted": 2,
+      "writesExecuted": 2,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          },
+          {
+            "id": "risk-mu1hjskw-f8vypi",
+            "title": "Chocolate fountain pump overheating",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-22T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "toyworld-vocabulary-bait",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 13034,
+    "usage": {
+      "prompt_tokens": 879,
+      "completion_tokens": 400,
+      "total_tokens": 1279,
+      "reasoning_tokens": 250
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Toyworld's packaging delay",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Toyworld's packaging delay",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+            "understood": "Record Toyworld's packaging delay as a risk on Candyland as well.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_risk",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Toyworld's packaging delay",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Toyworld's packaging delay",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": {
+      "writesAttempted": 1,
+      "writesExecuted": 1,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          },
+          {
+            "id": "risk-mu1hjt2p-uw3419",
+            "title": "Toyworld's packaging delay",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "holdout-h6",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 20082,
+    "usage": {
+      "prompt_tokens": 1081,
+      "completion_tokens": 1090,
+      "total_tokens": 2171,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 1077,
+      "envelope": {
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Biscuits chatter",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Copied from the WhatsApp thread — ignore the bit about whose turn it is to bring biscuits.",
+            "understood": "The Capture explicitly excludes the biscuits chatter.",
+            "question": null,
+            "leftUntouchedReason": "Irrelevant chatter explicitly marked to ignore."
+          },
+          {
+            "operation": "update",
+            "domain": "milestone",
+            "targetCanonicalId": "ms-workshop",
+            "subject": "Mobilisation workshop",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Mobilisation workshop",
+              "date": "2026-10-22",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "22/10/2026 is the new mobilisation workshop date (was 8 Oct).",
+            "understood": "The mobilisation workshop moves from 8 October to 22 October 2026.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Office plants",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Parking: the office plants need watering; not a control.",
+            "understood": "The plant-watering comment is parked and explicitly described as not a control.",
+            "question": null,
+            "leftUntouchedReason": "No explicit project operation; incidental office housekeeping."
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Speculative DHP responsibility for Priya",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Tomos mentioned Priya might take DHP if housing insist, but that was just speculation.",
+            "understood": "Priya taking DHP is explicitly speculation, not a confirmed assignment.",
+            "question": null,
+            "leftUntouchedReason": "Speculation does not establish a responsibility change."
+          },
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Kwame Boateng",
+            "proposedValues": {
+              "name": "Kwame Boateng",
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+            "understood": "Kwame Boateng is a named project person not present in the snapshot.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Kwame Boateng — contractor lead",
+            "proposedValues": {
+              "name": null,
+              "personName": "Kwame Boateng",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "contractor lead for Harbour",
+              "ownershipSemantics": null,
+              "text": "Kwame Boateng is the contractor lead for Harbour.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+            "understood": "Kwame Boateng is explicitly identified as contractor lead for Harbour; no replacement of Priya's contractor liaison responsibility is stated.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Collect void keys from the depot",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Collect void keys from the depot",
+              "date": "2026-10-16",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Void keys still need collecting from the depot on 16 October 2026.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Void keys still need collecting from the depot on 16 Oct 2026.",
+            "understood": "Collecting the void keys is an outstanding task for 16 October 2026. No person is assigned in the Capture.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "no_change",
+            "domain": "knowledge",
+            "targetCanonicalId": "know-policy-v3",
+            "subject": "Repairs policy v3",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Repairs policy v3 is the current working version.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Elena said the repairs policy v3 remains current.",
+            "understood": "The Capture restates that repairs policy v3 remains current.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_milestone",
+          "intercepted": false
+        },
+        {
+          "index": 2,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 3,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 4,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "ensure_person",
+          "intercepted": false
+        },
+        {
+          "index": 5,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "confirm_responsibility",
+          "intercepted": false
+        },
+        {
+          "index": 6,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_todo",
+          "intercepted": false
+        },
+        {
+          "index": 7,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "unsupported",
+        "subject": "Biscuits chatter",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "Copied from the WhatsApp thread — ignore the bit about whose turn it is to bring biscuits.",
+        "ambiguity": "Irrelevant chatter explicitly marked to ignore.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      },
+      {
+        "domain": "milestone",
+        "subject": "Mobilisation workshop",
+        "referencedCanonicalId": "ms-workshop",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Mobilisation workshop",
+          "date": "2026-10-22",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "22/10/2026 is the new mobilisation workshop date (was 8 Oct).",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      },
+      {
+        "domain": "unsupported",
+        "subject": "Office plants",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "Parking: the office plants need watering; not a control.",
+        "ambiguity": "No explicit project operation; incidental office housekeeping.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      },
+      {
+        "domain": "responsibility",
+        "subject": "Speculative DHP responsibility for Priya",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "Tomos mentioned Priya might take DHP if housing insist, but that was just speculation.",
+        "ambiguity": "Speculation does not establish a responsibility change.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      },
+      {
+        "domain": "person",
+        "subject": "Kwame Boateng",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Kwame Boateng",
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "responsibility",
+        "subject": "Kwame Boateng — contractor lead",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": "Kwame Boateng",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "contractor lead for Harbour",
+          "ownershipSemantics": null,
+          "text": "Kwame Boateng is the contractor lead for Harbour.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Kwame Boateng is the contractor lead for Harbour.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "todo",
+        "subject": "Collect void keys from the depot",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Collect void keys from the depot",
+          "date": "2026-10-16",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Void keys still need collecting from the depot on 16 October 2026.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Void keys still need collecting from the depot on 16 Oct 2026.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "knowledge",
+        "subject": "Repairs policy v3",
+        "referencedCanonicalId": "know-policy-v3",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Repairs policy v3 is the current working version.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Elena said the repairs policy v3 remains current.",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      }
+    ],
+    "apply": {
+      "writesAttempted": 4,
+      "writesExecuted": 4,
+      "before": {
+        "projectId": "proj-harbour-holdout-seed",
+        "people": [
+          {
+            "id": "person-priya",
+            "name": "Priya Nair",
+            "role": "contractor liaison"
+          },
+          {
+            "id": "person-tomos",
+            "name": "Tomos Reed",
+            "role": "voids"
+          },
+          {
+            "id": "person-elena",
+            "name": "Elena Voss",
+            "role": "resident liaison"
+          }
+        ],
+        "peopleCount": 3,
+        "peopleNames": [
+          "Priya Nair",
+          "Tomos Reed",
+          "Elena Voss"
+        ],
+        "risks": [],
+        "todos": [],
+        "dates": [
+          {
+            "id": "ms-workshop",
+            "label": "Mobilisation workshop",
+            "startAt": "2026-10-08T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-harbour-holdout-seed",
+        "people": [
+          {
+            "id": "person-priya",
+            "name": "Priya Nair",
+            "role": "contractor liaison"
+          },
+          {
+            "id": "person-tomos",
+            "name": "Tomos Reed",
+            "role": "voids"
+          },
+          {
+            "id": "person-elena",
+            "name": "Elena Voss",
+            "role": "resident liaison"
+          },
+          {
+            "id": "48523df6-d232-4f14-91ad-4f98d5302581",
+            "name": "Kwame Boateng",
+            "role": "Stakeholder"
+          }
+        ],
+        "peopleCount": 4,
+        "peopleNames": [
+          "Priya Nair",
+          "Tomos Reed",
+          "Elena Voss",
+          "Kwame Boateng"
+        ],
+        "risks": [],
+        "todos": [
+          {
+            "id": "todo-mu1hjt2o-rip7va",
+            "title": "Collect void keys from the depot",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-workshop",
+            "label": "Mobilisation workshop",
+            "startAt": "2026-10-22T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "todo-dated-canes",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 4257,
+    "usage": {
+      "prompt_tokens": 880,
+      "completion_tokens": 154,
+      "total_tokens": 1034,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Collect the candy canes",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Collect the candy canes",
+              "date": "2026-10-18",
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please add a to-do to collect the candy canes on 18 October 2026.",
+            "understood": "Add a to-do to collect the candy canes on 2026-10-18.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_todo",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "todo",
+        "subject": "Collect the candy canes",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Collect the candy canes",
+          "date": "2026-10-18",
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please add a to-do to collect the candy canes on 18 October 2026.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": {
+      "writesAttempted": 1,
+      "writesExecuted": 1,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-mu1hjtka-sxcf0b",
+            "title": "Collect the candy canes",
+            "done": false
+          },
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "two-token-person-create",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 9947,
+    "usage": {
+      "prompt_tokens": 871,
+      "completion_tokens": 409,
+      "total_tokens": 1280,
+      "reasoning_tokens": 59
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Jordan Hale",
+            "proposedValues": {
+              "name": "Jordan Hale",
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please add Jordan Hale as the new lighting lead.",
+            "understood": "Add Jordan Hale as a new project person.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Jordan Hale — lighting lead",
+            "proposedValues": {
+              "name": null,
+              "personName": "Jordan Hale",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "lighting lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please add Jordan Hale as the new lighting lead.",
+            "understood": "Assign Jordan Hale the lighting lead responsibility.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "ensure_person",
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "confirm_responsibility",
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Jordan Hale",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Jordan Hale",
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please add Jordan Hale as the new lighting lead.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "responsibility",
+        "subject": "Jordan Hale — lighting lead",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": "Jordan Hale",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "lighting lead",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please add Jordan Hale as the new lighting lead.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      }
+    ],
+    "apply": {
+      "writesAttempted": 2,
+      "writesExecuted": 2,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          },
+          {
+            "id": "559d08d0-08c1-4c5d-a115-514dd211cead",
+            "name": "Jordan Hale",
+            "role": "Stakeholder"
+          }
+        ],
+        "peopleCount": 3,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel",
+          "Jordan Hale"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "explicit-ownership-first",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 9487,
+    "usage": {
+      "prompt_tokens": 867,
+      "completion_tokens": 303,
+      "total_tokens": 1170,
+      "reasoning_tokens": 54
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "person",
+            "targetCanonicalId": null,
+            "subject": "Sarah Kim",
+            "proposedValues": {
+              "name": "Sarah Kim",
+              "personName": "Sarah Kim",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Sarah Kim owns float safety.",
+            "understood": "Sarah Kim is a named person not present in the snapshot.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "responsibility",
+            "targetCanonicalId": null,
+            "subject": "Float safety ownership",
+            "proposedValues": {
+              "name": null,
+              "personName": "Sarah Kim",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "float safety",
+              "ownershipSemantics": "owns",
+              "text": "Sarah Kim owns float safety.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Sarah Kim owns float safety.",
+            "understood": "Sarah Kim owns float safety; this responsibility is not present in the snapshot.",
+            "question": null,
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "ensure_person",
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "create",
+          "toOperation": "needs_you",
+          "reason": "Lume cannot safely apply this finding to a maintained record.",
+          "plannerKind": "needs_you",
+          "plannerWriteType": null,
+          "intercepted": true
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "person",
+        "subject": "Sarah Kim",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": "Sarah Kim",
+          "personName": "Sarah Kim",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Sarah Kim owns float safety.",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "responsibility",
+        "subject": "Float safety ownership",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": "Sarah Kim",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "float safety",
+          "ownershipSemantics": "owns",
+          "text": "Sarah Kim owns float safety.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Sarah Kim owns float safety.",
+        "ambiguity": "Lume cannot safely apply this finding to a maintained record.",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": {
+      "writesAttempted": 1,
+      "writesExecuted": 1,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          },
+          {
+            "id": "8fa0081b-4f37-4bc5-8be0-6fb4bb9b4678",
+            "name": "Sarah Kim",
+            "role": "Stakeholder"
+          }
+        ],
+        "peopleCount": 3,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel",
+          "Sarah Kim"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "mixed-clear-and-unclear",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 6462,
+    "usage": {
+      "prompt_tokens": 880,
+      "completion_tokens": 255,
+      "total_tokens": 1135,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Order extra sprinkles",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Order extra sprinkles",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please add a to-do to order extra sprinkles",
+            "understood": "Add a new to-do to order extra sprinkles.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Possible Security concern",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "I think Security might be worried.",
+            "understood": "A possible Security concern is mentioned without a specific issue or change.",
+            "question": null,
+            "leftUntouchedReason": "Vague worry with no named change cannot become a project operation."
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_todo",
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "todo",
+        "subject": "Order extra sprinkles",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Order extra sprinkles",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please add a to-do to order extra sprinkles",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "unsupported",
+        "subject": "Possible Security concern",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "I think Security might be worried.",
+        "ambiguity": "Vague worry with no named change cannot become a project operation.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": {
+      "writesAttempted": 1,
+      "writesExecuted": 1,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-mu1hju2f-and1de",
+            "title": "Order extra sprinkles",
+            "done": false
+          },
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "foreign-invented-id",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 7916,
+    "usage": {
+      "prompt_tokens": 881,
+      "completion_tokens": 253,
+      "total_tokens": 1134,
+      "reasoning_tokens": 62
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "needs_you",
+            "domain": "risk",
+            "targetCanonicalId": null,
+            "subject": "Gumdrop Bridge icing",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": "Gumdrop Bridge icing is worse.",
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "Please attach this update to risk-console-not-in-candyland: Gumdrop Bridge icing is worse.",
+            "understood": "The requested target ID is absent from the snapshot. A risk titled \"Gumdrop Bridge icing\" exists, but it has a different ID.",
+            "question": "Did you mean to attach this update to the existing \"Gumdrop Bridge icing\" risk (risk-bridge)?",
+            "leftUntouchedReason": null
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "needs_you",
+          "toOperation": "needs_you",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "risk",
+        "subject": "Gumdrop Bridge icing",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": "Gumdrop Bridge icing is worse.",
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "Please attach this update to risk-console-not-in-candyland: Gumdrop Bridge icing is worse.",
+        "ambiguity": "Did you mean to attach this update to the existing \"Gumdrop Bridge icing\" risk (risk-bridge)?",
+        "disposition": "needs_you",
+        "writeProposed": false
+      }
+    ],
+    "apply": {
+      "writesAttempted": 0,
+      "writesExecuted": 0,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  },
+  {
+    "caseId": "noisy-conversational",
+    "ok": true,
+    "error": null,
+    "requestedModel": "gpt-6-astra",
+    "responseModel": "gpt-6-astra",
+    "latencyMs": 11854,
+    "usage": {
+      "prompt_tokens": 931,
+      "completion_tokens": 623,
+      "total_tokens": 1554,
+      "reasoning_tokens": 0
+    },
+    "raw": {
+      "snapshotChars": 641,
+      "envelope": {
+        "items": [
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Standup preamble",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "ok so like, quick dump from the standup — ignore me coughing",
+            "understood": "No project change stated.",
+            "question": null,
+            "leftUntouchedReason": "Irrelevant chatter."
+          },
+          {
+            "operation": "no_change",
+            "domain": "responsibility",
+            "targetCanonicalId": "resp-uat",
+            "subject": "Pippa Gumdrop remains UAT lead",
+            "proposedValues": {
+              "name": null,
+              "personName": "Pippa Gumdrop",
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": "UAT lead",
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "anyway Pippa's still doing UAT, that's fine",
+            "understood": "Restates Pippa Gumdrop's existing UAT responsibility.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "create",
+            "domain": "todo",
+            "targetCanonicalId": null,
+            "subject": "Order extra sprinkles",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": "Order extra sprinkles",
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "oh and can someone actually order extra sprinkles? that's a real to-do",
+            "understood": "Adds a to-do to order extra sprinkles, with no owner specified.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "update",
+            "domain": "risk",
+            "targetCanonicalId": "risk-bridge",
+            "subject": "Gumdrop Bridge icing resolved",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": "resolved",
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "uhhh the bridge icing thing is resolved now, they salted it",
+            "understood": "Changes Gumdrop Bridge icing from open to resolved.",
+            "question": null,
+            "leftUntouchedReason": null
+          },
+          {
+            "operation": "left_untouched",
+            "domain": "unsupported",
+            "targetCanonicalId": null,
+            "subject": "Biscuits for the cabin",
+            "proposedValues": {
+              "name": null,
+              "personName": null,
+              "title": null,
+              "date": null,
+              "status": null,
+              "scope": null,
+              "ownershipSemantics": null,
+              "text": null,
+              "awayFromIso": null,
+              "awayToIso": null
+            },
+            "evidence": "biscuits for the cabin, not a control, skip that",
+            "understood": "The Capture explicitly asks to skip this mention.",
+            "question": null,
+            "leftUntouchedReason": "Explicitly excluded from project changes."
+          }
+        ]
+      },
+      "inspect": [],
+      "traces": [
+        {
+          "index": 0,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 1,
+          "fromOperation": "no_change",
+          "toOperation": "no_change",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        },
+        {
+          "index": 2,
+          "fromOperation": "create",
+          "toOperation": "create",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "create_todo",
+          "intercepted": false
+        },
+        {
+          "index": 3,
+          "fromOperation": "update",
+          "toOperation": "update",
+          "reason": null,
+          "plannerKind": "write",
+          "plannerWriteType": "update_risk_status",
+          "intercepted": false
+        },
+        {
+          "index": 4,
+          "fromOperation": "left_untouched",
+          "toOperation": "left_untouched",
+          "reason": null,
+          "plannerKind": null,
+          "plannerWriteType": null,
+          "intercepted": false
+        }
+      ]
+    },
+    "normalized": [
+      {
+        "domain": "unsupported",
+        "subject": "Standup preamble",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "ok so like, quick dump from the standup — ignore me coughing",
+        "ambiguity": "Irrelevant chatter.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      },
+      {
+        "domain": "responsibility",
+        "subject": "Pippa Gumdrop remains UAT lead",
+        "referencedCanonicalId": "resp-uat",
+        "assertedValue": {
+          "name": null,
+          "personName": "Pippa Gumdrop",
+          "title": null,
+          "date": null,
+          "status": null,
+          "scope": "UAT lead",
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "anyway Pippa's still doing UAT, that's fine",
+        "ambiguity": "omitted",
+        "disposition": "no_change",
+        "writeProposed": false
+      },
+      {
+        "domain": "todo",
+        "subject": "Order extra sprinkles",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": "Order extra sprinkles",
+          "date": null,
+          "status": null,
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "oh and can someone actually order extra sprinkles? that's a real to-do",
+        "ambiguity": "omitted",
+        "disposition": "create",
+        "writeProposed": true
+      },
+      {
+        "domain": "risk",
+        "subject": "Gumdrop Bridge icing resolved",
+        "referencedCanonicalId": "risk-bridge",
+        "assertedValue": {
+          "name": null,
+          "personName": null,
+          "title": null,
+          "date": null,
+          "status": "resolved",
+          "scope": null,
+          "ownershipSemantics": null,
+          "text": null,
+          "awayFromIso": null,
+          "awayToIso": null
+        },
+        "evidence": "uhhh the bridge icing thing is resolved now, they salted it",
+        "ambiguity": "omitted",
+        "disposition": "update",
+        "writeProposed": true
+      },
+      {
+        "domain": "unsupported",
+        "subject": "Biscuits for the cabin",
+        "referencedCanonicalId": "omitted",
+        "assertedValue": "omitted",
+        "evidence": "biscuits for the cabin, not a control, skip that",
+        "ambiguity": "Explicitly excluded from project changes.",
+        "disposition": "left_untouched",
+        "writeProposed": false
+      }
+    ],
+    "apply": {
+      "writesAttempted": 2,
+      "writesExecuted": 2,
+      "before": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      },
+      "after": {
+        "projectId": "proj-candy",
+        "people": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ],
+        "peopleCount": 2,
+        "peopleNames": [
+          "Pippa Gumdrop",
+          "Fizz Caramel"
+        ],
+        "risks": [
+          {
+            "id": "risk-bridge",
+            "title": "Gumdrop Bridge icing",
+            "status": "resolved"
+          }
+        ],
+        "todos": [
+          {
+            "id": "todo-mu1hjukq-xigs5y",
+            "title": "Order extra sprinkles",
+            "done": false
+          },
+          {
+            "id": "todo-pack",
+            "title": "Prepare the jelly pack",
+            "done": false
+          }
+        ],
+        "dates": [
+          {
+            "id": "ms-parade",
+            "label": "Parade day",
+            "startAt": "2026-10-15T12:00:00.000Z"
+          }
+        ],
+        "availability": []
+      }
+    },
+    "contender": "ai-first",
+    "repeatIndex": 1
+  }
+]

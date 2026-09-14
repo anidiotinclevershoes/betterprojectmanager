@@ -1,0 +1,68 @@
+{
+  "caseId": "historic-parade",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6659,
+  "usage": {
+    "prompt_tokens": 883,
+    "completion_tokens": 214,
+    "total_tokens": 1097,
+    "reasoning_tokens": 45
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-parade",
+          "subject": "Parade day",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Last June the Parade day used to be the 12th, which is why the banners still say June.",
+          "understood": "The Capture describes a former Parade day date and explains the June wording on the banners.",
+          "question": null,
+          "leftUntouchedReason": "Historical context does not explicitly change the current Parade day date."
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "left_untouched",
+        "toOperation": "left_untouched",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": "omitted",
+      "evidence": "Last June the Parade day used to be the 12th, which is why the banners still say June.",
+      "ambiguity": "Historical context does not explicitly change the current Parade day date.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

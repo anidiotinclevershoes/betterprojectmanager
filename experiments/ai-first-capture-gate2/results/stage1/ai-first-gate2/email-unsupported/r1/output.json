@@ -1,0 +1,68 @@
+{
+  "caseId": "email-unsupported",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5410,
+  "usage": {
+    "prompt_tokens": 872,
+    "completion_tokens": 149,
+    "total_tokens": 1021,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Email the parade committee",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please email the whole parade committee about the new date.",
+          "understood": "The Capture requests sending an email, not an explicit project truth change.",
+          "question": null,
+          "leftUntouchedReason": "Sending email is not a supported project operation; no new date is specified."
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "left_untouched",
+        "toOperation": "left_untouched",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Email the parade committee",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Please email the whole parade committee about the new date.",
+      "ambiguity": "Sending email is not a supported project operation; no new date is specified.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,265 @@
+{
+  "caseId": "noisy-conversational",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 11854,
+  "usage": {
+    "prompt_tokens": 931,
+    "completion_tokens": 623,
+    "total_tokens": 1554,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Standup preamble",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "ok so like, quick dump from the standup — ignore me coughing",
+          "understood": "No project change stated.",
+          "question": null,
+          "leftUntouchedReason": "Irrelevant chatter."
+        },
+        {
+          "operation": "no_change",
+          "domain": "responsibility",
+          "targetCanonicalId": "resp-uat",
+          "subject": "Pippa Gumdrop remains UAT lead",
+          "proposedValues": {
+            "name": null,
+            "personName": "Pippa Gumdrop",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "UAT lead",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "anyway Pippa's still doing UAT, that's fine",
+          "understood": "Restates Pippa Gumdrop's existing UAT responsibility.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "create",
+          "domain": "todo",
+          "targetCanonicalId": null,
+          "subject": "Order extra sprinkles",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Order extra sprinkles",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "oh and can someone actually order extra sprinkles? that's a real to-do",
+          "understood": "Adds a to-do to order extra sprinkles, with no owner specified.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "update",
+          "domain": "risk",
+          "targetCanonicalId": "risk-bridge",
+          "subject": "Gumdrop Bridge icing resolved",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": "resolved",
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "uhhh the bridge icing thing is resolved now, they salted it",
+          "understood": "Changes Gumdrop Bridge icing from open to resolved.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Biscuits for the cabin",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "biscuits for the cabin, not a control, skip that",
+          "understood": "The Capture explicitly asks to skip this mention.",
+          "question": null,
+          "leftUntouchedReason": "Explicitly excluded from project changes."
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "left_untouched",
+        "toOperation": "left_untouched",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      },
+      {
+        "index": 1,
+        "fromOperation": "no_change",
+        "toOperation": "no_change",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      },
+      {
+        "index": 2,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "create_todo",
+        "intercepted": false
+      },
+      {
+        "index": 3,
+        "fromOperation": "update",
+        "toOperation": "update",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "update_risk_status",
+        "intercepted": false
+      },
+      {
+        "index": 4,
+        "fromOperation": "left_untouched",
+        "toOperation": "left_untouched",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Standup preamble",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "ok so like, quick dump from the standup — ignore me coughing",
+      "ambiguity": "Irrelevant chatter.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Pippa Gumdrop remains UAT lead",
+      "referencedCanonicalId": "resp-uat",
+      "assertedValue": {
+        "name": null,
+        "personName": "Pippa Gumdrop",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "UAT lead",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "anyway Pippa's still doing UAT, that's fine",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    },
+    {
+      "domain": "todo",
+      "subject": "Order extra sprinkles",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Order extra sprinkles",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "oh and can someone actually order extra sprinkles? that's a real to-do",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "risk",
+      "subject": "Gumdrop Bridge icing resolved",
+      "referencedCanonicalId": "risk-bridge",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": "resolved",
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "uhhh the bridge icing thing is resolved now, they salted it",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "unsupported",
+      "subject": "Biscuits for the cabin",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "biscuits for the cabin, not a control, skip that",
+      "ambiguity": "Explicitly excluded from project changes.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,120 @@
+{
+  "caseId": "mixed-clear-and-unclear",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6592,
+  "usage": {
+    "prompt_tokens": 880,
+    "completion_tokens": 248,
+    "total_tokens": 1128,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "todo",
+          "targetCanonicalId": null,
+          "subject": "Order extra sprinkles",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Order extra sprinkles",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please add a to-do to order extra sprinkles",
+          "understood": "Add a new to-do to order extra sprinkles.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Possible Security concern",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "I think Security might be worried.",
+          "understood": "Security may have an unspecified concern.",
+          "question": null,
+          "leftUntouchedReason": "Vague worry with no explicit risk or named project change."
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "create_todo",
+        "intercepted": false
+      },
+      {
+        "index": 1,
+        "fromOperation": "left_untouched",
+        "toOperation": "left_untouched",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Order extra sprinkles",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Order extra sprinkles",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Please add a to-do to order extra sprinkles",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "unsupported",
+      "subject": "Possible Security concern",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "I think Security might be worried.",
+      "ambiguity": "Vague worry with no explicit risk or named project change.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

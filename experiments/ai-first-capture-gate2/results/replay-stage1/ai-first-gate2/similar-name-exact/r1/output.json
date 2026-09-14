@@ -1,0 +1,79 @@
+{
+  "caseId": "similar-name-exact",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4398,
+  "usage": {
+    "prompt_tokens": 851,
+    "completion_tokens": 137,
+    "total_tokens": 988,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 612,
+    "envelope": {
+      "items": [
+        {
+          "operation": "no_change",
+          "domain": "person",
+          "targetCanonicalId": "person-brick",
+          "subject": "Brick Oakley",
+          "proposedValues": {
+            "name": "Brick Oakley",
+            "personName": "Brick Oakley",
+            "title": "Sponsor",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Brick Oakley remains the Toyworld sponsor.",
+          "understood": "Brick Oakley is still the Toyworld sponsor; this matches current truth.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "no_change",
+        "toOperation": "no_change",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Brick Oakley",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": {
+        "name": "Brick Oakley",
+        "personName": "Brick Oakley",
+        "title": "Sponsor",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Brick Oakley remains the Toyworld sponsor.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,79 @@
+{
+  "caseId": "might-ownership",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6986,
+  "usage": {
+    "prompt_tokens": 870,
+    "completion_tokens": 215,
+    "total_tokens": 1085,
+    "reasoning_tokens": 63
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Float lighting ownership",
+          "proposedValues": {
+            "name": null,
+            "personName": "Fizz Caramel",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "float lighting",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Fizz Caramel might own float lighting now.",
+          "understood": "Fizz Caramel is suggested as the float lighting owner, but ownership is not confirmed.",
+          "question": "Is Fizz Caramel now responsible for float lighting?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Float lighting ownership",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Fizz Caramel",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "float lighting",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Fizz Caramel might own float lighting now.",
+      "ambiguity": "Is Fizz Caramel now responsible for float lighting?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

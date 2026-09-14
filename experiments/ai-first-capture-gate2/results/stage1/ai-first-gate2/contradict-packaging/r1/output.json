@@ -1,0 +1,79 @@
+{
+  "caseId": "contradict-packaging",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4751,
+  "usage": {
+    "prompt_tokens": 818,
+    "completion_tokens": 147,
+    "total_tokens": 965,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "risk",
+          "targetCanonicalId": "risk-packaging",
+          "subject": "Packaging delay",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Packaging delay",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Packaging delay is resolved. Packaging delay is still getting worse.",
+          "understood": "The Capture gives contradictory updates about the existing Packaging delay risk.",
+          "question": "Is Packaging delay resolved, or is it still open and getting worse?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Packaging delay",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Packaging delay is resolved. Packaging delay is still getting worse.",
+      "ambiguity": "Is Packaging delay resolved, or is it still open and getting worse?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,79 @@
+{
+  "caseId": "correction-of-wording",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6883,
+  "usage": {
+    "prompt_tokens": 814,
+    "completion_tokens": 229,
+    "total_tokens": 1043,
+    "reasoning_tokens": 65
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "risk",
+          "targetCanonicalId": null,
+          "subject": "Audio bus mixer stalling the cert build",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Audio bus mixer stalling the cert build",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+          "understood": "The audio bus mixer is stalling the cert build. The shader reference was retracted.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "create_risk",
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Audio bus mixer stalling the cert build",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Audio bus mixer stalling the cert build",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

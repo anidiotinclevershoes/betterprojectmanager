@@ -1,0 +1,183 @@
+{
+  "caseId": "cross-project-bait",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 18290,
+  "usage": {
+    "prompt_tokens": 887,
+    "completion_tokens": 807,
+    "total_tokens": 1694,
+    "reasoning_tokens": 220
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "person",
+          "targetCanonicalId": null,
+          "subject": "Pixel Ramos",
+          "proposedValues": {
+            "name": "Pixel Ramos",
+            "personName": "Pixel Ramos",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "Pixel Ramos from GamingStudio5000",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Pixel Ramos from GamingStudio5000",
+          "understood": "Pixel Ramos is named as a person from GamingStudio5000 and is not in the current people snapshot.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "needs_you",
+          "domain": "responsibility",
+          "targetCanonicalId": "resp-uat",
+          "subject": "UAT ownership",
+          "proposedValues": {
+            "name": null,
+            "personName": "Pixel Ramos",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "UAT",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT",
+          "understood": "Pixel is proposed as UAT owner, but current truth names Pippa Gumdrop as UAT lead.",
+          "question": "Should Pixel replace Pippa as UAT owner, or share ownership with Pippa?",
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "needs_you",
+          "domain": "risk",
+          "targetCanonicalId": null,
+          "subject": "Resolve Console certification slip risk",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Console certification slip",
+            "date": null,
+            "status": "resolved",
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "please resolve the Console certification slip risk",
+          "understood": "The Capture asks to resolve a named risk, but no matching risk exists in the supplied snapshot.",
+          "question": "Which current risk row does “Console certification slip” refer to?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "ensure_person",
+        "intercepted": false
+      },
+      {
+        "index": 1,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      },
+      {
+        "index": 2,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Pixel Ramos",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Pixel Ramos",
+        "personName": "Pixel Ramos",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "Pixel Ramos from GamingStudio5000",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Pixel Ramos from GamingStudio5000",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "UAT ownership",
+      "referencedCanonicalId": "resp-uat",
+      "assertedValue": {
+        "name": null,
+        "personName": "Pixel Ramos",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "UAT",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT",
+      "ambiguity": "Should Pixel replace Pippa as UAT owner, or share ownership with Pippa?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "risk",
+      "subject": "Resolve Console certification slip risk",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Console certification slip",
+        "date": null,
+        "status": "resolved",
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "please resolve the Console certification slip risk",
+      "ambiguity": "Which current risk row does “Console certification slip” refer to?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

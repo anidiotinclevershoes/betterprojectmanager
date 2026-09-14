@@ -1,0 +1,68 @@
+{
+  "caseId": "unsupported-remove",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5651,
+  "usage": {
+    "prompt_tokens": 869,
+    "completion_tokens": 179,
+    "total_tokens": 1048,
+    "reasoning_tokens": 38
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "remove",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-parade",
+          "subject": "Parade day",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please delete Parade day from the plan.",
+          "understood": "Remove the Parade day milestone from the plan.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "remove",
+        "toOperation": "left_untouched",
+        "reason": "Lume cannot safely apply this type of change.",
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": true
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": "omitted",
+      "evidence": "Please delete Parade day from the plan.",
+      "ambiguity": "Lume cannot safely apply this type of change.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

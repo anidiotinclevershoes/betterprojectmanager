@@ -1,0 +1,79 @@
+{
+  "caseId": "new-risk",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7779,
+  "usage": {
+    "prompt_tokens": 807,
+    "completion_tokens": 278,
+    "total_tokens": 1085,
+    "reasoning_tokens": 50
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "risk",
+          "targetCanonicalId": null,
+          "subject": "Shader compile stalling the cert build",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Shader compile stalls cert build and threatens nightlies",
+            "date": null,
+            "status": "open",
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "The shader compile is stalling the cert build and could miss the nightlies.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "The shader compile is stalling the cert build and could miss the nightlies.",
+          "understood": "A specific shader compilation problem is stalling the cert build and putting nightlies at risk.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "create_risk",
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Shader compile stalling the cert build",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Shader compile stalls cert build and threatens nightlies",
+        "date": null,
+        "status": "open",
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "The shader compile is stalling the cert build and could miss the nightlies.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "The shader compile is stalling the cert build and could miss the nightlies.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

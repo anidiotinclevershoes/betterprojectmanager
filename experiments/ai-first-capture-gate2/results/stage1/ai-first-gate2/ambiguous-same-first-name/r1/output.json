@@ -1,0 +1,79 @@
+{
+  "caseId": "ambiguous-same-first-name",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8859,
+  "usage": {
+    "prompt_tokens": 819,
+    "completion_tokens": 251,
+    "total_tokens": 1070,
+    "reasoning_tokens": 72
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "person",
+          "targetCanonicalId": null,
+          "subject": "Brick from the warehouse",
+          "proposedValues": {
+            "name": "Brick",
+            "personName": "Brick",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "Wants to help with assembly.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+          "understood": "Brick wants to help with assembly, but it is unclear whether he is the existing Brick Oakley or a different person. No assembly responsibility is explicitly assigned.",
+          "question": "Is Brick from the warehouse Brick Oakley, the existing sponsor, or a different person?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Brick from the warehouse",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Brick",
+        "personName": "Brick",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "Wants to help with assembly.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+      "ambiguity": "Is Brick from the warehouse Brick Oakley, the existing sponsor, or a different person?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

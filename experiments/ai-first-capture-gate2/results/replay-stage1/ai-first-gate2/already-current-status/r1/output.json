@@ -1,0 +1,79 @@
+{
+  "caseId": "already-current-status",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 3995,
+  "usage": {
+    "prompt_tokens": 872,
+    "completion_tokens": 134,
+    "total_tokens": 1006,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "no_change",
+          "domain": "risk",
+          "targetCanonicalId": "risk-bridge",
+          "subject": "Gumdrop Bridge icing",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Gumdrop Bridge icing",
+            "date": null,
+            "status": "open",
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Gumdrop Bridge icing is still an open risk.",
+          "understood": "The risk remains open, matching current truth.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "no_change",
+        "toOperation": "no_change",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Gumdrop Bridge icing",
+      "referencedCanonicalId": "risk-bridge",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Gumdrop Bridge icing",
+        "date": null,
+        "status": "open",
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Gumdrop Bridge icing is still an open risk.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

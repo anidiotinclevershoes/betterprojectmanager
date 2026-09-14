@@ -154,7 +154,9 @@ function main() {
     : null;
   const live3 = existsSync(join(here, "results/stage3/judgements.json"))
     ? summarize(join(here, "results/stage3"))
-    : null;
+    : existsSync(join(here, "results/replay-stage3/judgements.json"))
+      ? summarize(join(here, "results/replay-stage3"))
+      : null;
 
   const rows: Array<[string, string]> = [
     ["material fact recall", "recall"],

@@ -1,0 +1,79 @@
+{
+  "caseId": "toyworld-vocabulary-bait",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 13034,
+  "usage": {
+    "prompt_tokens": 879,
+    "completion_tokens": 400,
+    "total_tokens": 1279,
+    "reasoning_tokens": 250
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "risk",
+          "targetCanonicalId": null,
+          "subject": "Toyworld's packaging delay",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Toyworld's packaging delay",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+          "understood": "Record Toyworld's packaging delay as a risk on Candyland as well.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "create_risk",
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Toyworld's packaging delay",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Toyworld's packaging delay",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

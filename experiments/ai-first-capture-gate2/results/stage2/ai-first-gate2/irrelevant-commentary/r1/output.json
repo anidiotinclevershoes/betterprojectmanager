@@ -1,0 +1,68 @@
+{
+  "caseId": "irrelevant-commentary",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5163,
+  "usage": {
+    "prompt_tokens": 808,
+    "completion_tokens": 150,
+    "total_tokens": 958,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Lobby chiptunes",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+          "understood": "The Capture contains incidental chatter and no explicit project change.",
+          "question": null,
+          "leftUntouchedReason": "Irrelevant chatter does not establish a project operation."
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "left_untouched",
+        "toOperation": "left_untouched",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Lobby chiptunes",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+      "ambiguity": "Irrelevant chatter does not establish a project operation.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

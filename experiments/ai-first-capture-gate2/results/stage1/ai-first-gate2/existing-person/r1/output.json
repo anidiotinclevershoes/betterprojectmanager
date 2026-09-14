@@ -1,0 +1,79 @@
+{
+  "caseId": "existing-person",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 9824,
+  "usage": {
+    "prompt_tokens": 878,
+    "completion_tokens": 271,
+    "total_tokens": 1149,
+    "reasoning_tokens": 102
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "update",
+          "domain": "responsibility",
+          "targetCanonicalId": "resp-uat",
+          "subject": "Pippa Gumdrop’s UAT responsibility",
+          "proposedValues": {
+            "name": null,
+            "personName": "Pippa Gumdrop",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "UAT lead for the licorice stands",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+          "understood": "Pippa remains the UAT lead; the Capture specifies the responsibility’s scope as the licorice stands.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "update",
+        "toOperation": "left_untouched",
+        "reason": "The planner would write a different record than the one Astra named.",
+        "plannerKind": "write",
+        "plannerWriteType": "confirm_responsibility",
+        "intercepted": true
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Pippa Gumdrop’s UAT responsibility",
+      "referencedCanonicalId": "resp-uat",
+      "assertedValue": {
+        "name": null,
+        "personName": "Pippa Gumdrop",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "UAT lead for the licorice stands",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+      "ambiguity": "The planner would write a different record than the one Astra named.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

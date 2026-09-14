@@ -1,0 +1,131 @@
+{
+  "caseId": "two-token-person-create",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 9947,
+  "usage": {
+    "prompt_tokens": 871,
+    "completion_tokens": 409,
+    "total_tokens": 1280,
+    "reasoning_tokens": 59
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "person",
+          "targetCanonicalId": null,
+          "subject": "Jordan Hale",
+          "proposedValues": {
+            "name": "Jordan Hale",
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please add Jordan Hale as the new lighting lead.",
+          "understood": "Add Jordan Hale as a new project person.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "create",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Jordan Hale — lighting lead",
+          "proposedValues": {
+            "name": null,
+            "personName": "Jordan Hale",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "lighting lead",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please add Jordan Hale as the new lighting lead.",
+          "understood": "Assign Jordan Hale the lighting lead responsibility.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "ensure_person",
+        "intercepted": false
+      },
+      {
+        "index": 1,
+        "fromOperation": "create",
+        "toOperation": "create",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "confirm_responsibility",
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Jordan Hale",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Jordan Hale",
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Please add Jordan Hale as the new lighting lead.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Jordan Hale — lighting lead",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Jordan Hale",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "lighting lead",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Please add Jordan Hale as the new lighting lead.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

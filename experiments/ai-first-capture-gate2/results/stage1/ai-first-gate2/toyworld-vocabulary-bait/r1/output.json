@@ -1,0 +1,68 @@
+{
+  "caseId": "toyworld-vocabulary-bait",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 13410,
+  "usage": {
+    "prompt_tokens": 879,
+    "completion_tokens": 416,
+    "total_tokens": 1295,
+    "reasoning_tokens": 241
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "risk",
+          "targetCanonicalId": null,
+          "subject": "Copy Toyworld's packaging delay to Candyland",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+          "understood": "The Capture requests copying a packaging delay to Candyland, but the supplied snapshot does not contain the Toyworld source information.",
+          "question": "What packaging-delay information from Toyworld should be copied to Candyland?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Copy Toyworld's packaging delay to Candyland",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+      "ambiguity": "What packaging-delay information from Toyworld should be copied to Candyland?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

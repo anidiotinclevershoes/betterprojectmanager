@@ -1,0 +1,79 @@
+{
+  "caseId": "probably-date",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4842,
+  "usage": {
+    "prompt_tokens": 873,
+    "completion_tokens": 167,
+    "total_tokens": 1040,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-parade",
+          "subject": "Parade day",
+          "proposedValues": {
+            "name": "Parade day",
+            "personName": null,
+            "title": null,
+            "date": "2026-10-30",
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Parade day is probably 30 October 2026.",
+          "understood": "A possible change to Parade day from 15 October to 30 October 2026 is stated, but the date is not confirmed.",
+          "question": "Should Parade day be changed to 30 October 2026?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "name": "Parade day",
+        "personName": null,
+        "title": null,
+        "date": "2026-10-30",
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Parade day is probably 30 October 2026.",
+      "ambiguity": "Should Parade day be changed to 30 October 2026?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

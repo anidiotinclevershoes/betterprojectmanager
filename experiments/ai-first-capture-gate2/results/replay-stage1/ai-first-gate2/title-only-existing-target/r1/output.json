@@ -1,0 +1,79 @@
+{
+  "caseId": "title-only-existing-target",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 3969,
+  "usage": {
+    "prompt_tokens": 873,
+    "completion_tokens": 146,
+    "total_tokens": 1019,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "update",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-parade",
+          "subject": "Parade day",
+          "proposedValues": {
+            "name": "Parade day",
+            "personName": null,
+            "title": null,
+            "date": "2026-10-22",
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Parade day moved to 22 October 2026.",
+          "understood": "Parade day moved from 15 October 2026 to 22 October 2026.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "update",
+        "toOperation": "update",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "update_milestone",
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "name": "Parade day",
+        "personName": null,
+        "title": null,
+        "date": "2026-10-22",
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Parade day moved to 22 October 2026.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

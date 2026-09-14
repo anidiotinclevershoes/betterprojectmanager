@@ -1,0 +1,79 @@
+{
+  "caseId": "harbourline-sarah-first-name",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4791,
+  "usage": {
+    "prompt_tokens": 1056,
+    "completion_tokens": 144,
+    "total_tokens": 1200,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 1204,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Communications ownership",
+          "proposedValues": {
+            "name": null,
+            "personName": "Sarah",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "communications",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "I think Sarah owns communications now? Not sure which Sarah.",
+          "understood": "Communications ownership is tentatively attributed to Sarah, but her identity is unclear.",
+          "question": "Which Sarah do you mean as the communications owner?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "needs_you",
+        "toOperation": "needs_you",
+        "reason": null,
+        "plannerKind": null,
+        "plannerWriteType": null,
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Communications ownership",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Sarah",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "communications",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "I think Sarah owns communications now? Not sure which Sarah.",
+      "ambiguity": "Which Sarah do you mean as the communications owner?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

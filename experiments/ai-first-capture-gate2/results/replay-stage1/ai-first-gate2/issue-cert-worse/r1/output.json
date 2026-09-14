@@ -1,0 +1,79 @@
+{
+  "caseId": "issue-cert-worse",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6246,
+  "usage": {
+    "prompt_tokens": 802,
+    "completion_tokens": 202,
+    "total_tokens": 1004,
+    "reasoning_tokens": 59
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "update",
+          "domain": "risk",
+          "targetCanonicalId": "risk-console",
+          "subject": "Console certification slip",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": "open",
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "Console certification slip is worse this week.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Console certification slip is worse this week and still open.",
+          "understood": "The existing risk has worsened this week; its status remains open.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "update",
+        "toOperation": "update",
+        "reason": null,
+        "plannerKind": "write",
+        "plannerWriteType": "update_risk_status",
+        "intercepted": false
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Console certification slip",
+      "referencedCanonicalId": "risk-console",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": "open",
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "Console certification slip is worse this week.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Console certification slip is worse this week and still open.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

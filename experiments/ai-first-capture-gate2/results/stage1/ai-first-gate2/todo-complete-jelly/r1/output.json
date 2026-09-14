@@ -1,0 +1,79 @@
+{
+  "caseId": "todo-complete-jelly",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 3703,
+  "usage": {
+    "prompt_tokens": 869,
+    "completion_tokens": 126,
+    "total_tokens": 995,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "update",
+          "domain": "todo",
+          "targetCanonicalId": "todo-pack",
+          "subject": "Prepare the jelly pack",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Prepare the jelly pack",
+            "date": null,
+            "status": "done",
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Mark Prepare the jelly pack as done.",
+          "understood": "Mark the existing to-do as done.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": [],
+    "traces": [
+      {
+        "index": 0,
+        "fromOperation": "update",
+        "toOperation": "needs_you",
+        "reason": "This To Do update is not specific enough to apply automatically.",
+        "plannerKind": "needs_you",
+        "plannerWriteType": null,
+        "intercepted": true
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Prepare the jelly pack",
+      "referencedCanonicalId": "todo-pack",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Prepare the jelly pack",
+        "date": null,
+        "status": "done",
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Mark Prepare the jelly pack as done.",
+      "ambiguity": "This To Do update is not specific enough to apply automatically.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}
