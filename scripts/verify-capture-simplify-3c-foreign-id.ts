@@ -233,8 +233,12 @@ function main() {
       resolve,
       /A model UUID is not identity\. Wrong-type \/ missing \/ title-incompatible/,
     );
+    assert.doesNotMatch(
+      resolve,
+      /disposition: "create_new",\s*truthIntent: "current",\s*candidateTargetId: null,\s*candidateTargetTitle: title,/,
+    );
     assert.match(resolve, /function rematerializeIndependentDatedCreate/);
-    assert.match(resolve, /Do not manufacture a Create merely because/);
+    assert.match(resolve, /manufacture a Create merely because/);
   });
 
   check("10. Ready still means planner-executable; Apply still plans", () => {

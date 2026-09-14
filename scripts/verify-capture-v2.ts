@@ -629,15 +629,16 @@ function main() {
     assert.equal(run.validation.observations.length, 0);
     assert.equal(run.validation.rejected.length, 1);
     assert.equal(run.validation.rejected[0]?.disposition, "ambiguous");
+    assert.equal(run.resolved.length, 0);
     assert.ok(
-      (run.resolved ?? []).every((row) => row.decision.kind !== "write"),
-      "foreign project UUID must not become a write",
+      (run.result.proposedOperations ?? []).every(
+        (op) => op.operation === "NO_CHANGE" && op.requiresClarification,
+      ),
     );
+    assert.equal(run.result.findings?.[0]?.invalidTarget, true);
+    assert.equal(run.result.findings?.[0]?.requiresClarification, true);
     const created = buildSuggestions(run.result);
-    assert.equal(
-      created.filter((item) => item.op === "create" || item.op === "update").length,
-      0,
-    );
+    assert.ok(created.every((item) => item.op !== "create"));
   });
 
   check("foreign person update still fails closed", () => {
