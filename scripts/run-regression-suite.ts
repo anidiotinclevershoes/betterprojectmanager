@@ -98,6 +98,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "empty-capture-honesty", script: "scripts/verify-empty-capture-honesty.ts" },
   { name: "left-untouched-safety", script: "scripts/verify-left-untouched-safety.ts" },
   { name: "prompt-a-left-untouched", script: "scripts/verify-prompt-a-left-untouched.ts" },
+  { name: "needs-you-vs-left-untouched", script: "scripts/verify-needs-you-vs-left-untouched.ts" },
   { name: "responsibility-canonical-path", script: "scripts/verify-responsibility-canonical-path.ts" },
   { name: "mounted-persist-trust", script: "scripts/verify-mounted-persist-trust.ts" },
   { name: "update-idempotency", script: "scripts/verify-update-idempotency.ts" },

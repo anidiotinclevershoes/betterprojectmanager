@@ -18,7 +18,10 @@ import {
 } from "@/lib/people/identity";
 import { scopeFromResponsiblePhrase } from "@/lib/people/responsibility-scope";
 import { missingReadySemantics, newReviewOperationId } from "./contract";
-import { LEFT_UNTOUCHED_MODEL_FALLBACK_REASON } from "./left-untouched";
+import {
+  LEFT_UNTOUCHED_GENERIC_REASON,
+  LEFT_UNTOUCHED_MODEL_FALLBACK_REASON,
+} from "./left-untouched";
 import {
   isTruthIntent,
   type CaptureObservationV2,
@@ -160,6 +163,24 @@ function resolveOne(
         reason:
           observation.commentary?.trim() ||
           LEFT_UNTOUCHED_MODEL_FALLBACK_REASON,
+      },
+    };
+  }
+
+  if (observation.domain === "unknown") {
+    const reason =
+      observation.commentary?.trim() || LEFT_UNTOUCHED_GENERIC_REASON;
+    return {
+      observation: {
+        ...observation,
+        disposition: "left_untouched",
+        commentary: reason,
+      },
+      suggestion: null,
+      decision: {
+        kind: "no_change",
+        domain: "unsupported",
+        reason,
       },
     };
   }
@@ -331,13 +352,19 @@ function resolveOne(
 
   const kind = DOMAIN_TO_KIND[observation.domain];
   if (!kind) {
+    const reason =
+      observation.commentary?.trim() || LEFT_UNTOUCHED_GENERIC_REASON;
     return {
-      observation,
+      observation: {
+        ...observation,
+        disposition: "left_untouched",
+        commentary: reason,
+      },
       suggestion: null,
       decision: {
-        kind: "needs_you",
+        kind: "no_change",
         domain: "unsupported",
-        reason: "Unknown observation domain — no write.",
+        reason,
       },
     };
   }

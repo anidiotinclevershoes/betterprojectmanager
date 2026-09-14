@@ -72,6 +72,8 @@
     "verify:left-untouched-safety": "npx --yes tsx scripts/verify-left-untouched-safety.ts",
     "verify:prompt-a-left-untouched": "npx --yes tsx scripts/verify-prompt-a-left-untouched.ts",
     "observe:prompt-a-left-untouched": "npx --yes tsx scripts/observe-prompt-a-left-untouched.ts",
+    "verify:needs-you-vs-left-untouched": "npx --yes tsx scripts/verify-needs-you-vs-left-untouched.ts",
+    "observe:needs-you-vs-left-untouched": "npx --yes tsx scripts/observe-needs-you-vs-left-untouched.ts",
     "verify:capture-intelligence-diagnostic": "npx --yes tsx scripts/verify-capture-intelligence-diagnostic.ts",
     "diagnose:capture-intelligence": "npx --yes tsx scripts/diagnose-capture-intelligence.ts",
     "verify:eval-capture-v2": "npx --yes tsx scripts/verify-eval-capture-v2.ts",
