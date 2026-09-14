@@ -1040,20 +1040,8 @@ function rematerializeIndependentDatedCreate(
     );
 
   if (boundId) {
-    if (
-      observation.disposition === "create_new" &&
-      observation.truthIntent === "uncertain"
-    ) {
-      return {
-        ...observation,
-        truthIntent: "current",
-        candidateTargetId: null,
-        candidateTargetTitle: title,
-      };
-    }
-    // A model UUID is not identity. Wrong-type / missing / title-incompatible
-    // ids must not block a clear titled Create. Resolve/complete stays
-    // fail-closed — never substitute a different same-domain row.
+    // Unique-title bind of an invalid model id stays (Phase 3E). Do not
+    // manufacture a Create merely because the invalid id also had a title.
     if (!isResolveOrComplete(observation) && (!bound || !boundTitleCompatible)) {
       if (match) {
         return {
@@ -1064,13 +1052,7 @@ function rematerializeIndependentDatedCreate(
           candidateTargetTitle: match.title,
         };
       }
-      return {
-        ...observation,
-        disposition: "create_new",
-        truthIntent: "current",
-        candidateTargetId: null,
-        candidateTargetTitle: title,
-      };
+      return observation;
     }
     return observation;
   }
@@ -1087,29 +1069,8 @@ function rematerializeIndependentDatedCreate(
     return observation;
   }
 
-  if (observation.disposition === "create_new" && !boundId) {
-    if (observation.truthIntent === "uncertain") {
-      return {
-        ...observation,
-        truthIntent: "current",
-        candidateTargetTitle: title,
-      };
-    }
-    return observation;
-  }
-
-  if (
-    observation.disposition === "create_new" ||
-    observation.disposition === "update_existing"
-  ) {
-    return {
-      ...observation,
-      disposition: "create_new",
-      truthIntent: "current",
-      candidateTargetId: null,
-      candidateTargetTitle: title,
-    };
-  }
+  // Explicit Create stays Create. Do not manufacture Create from an
+  // Update that merely had a title and no trustworthy target.
   return observation;
 }
 

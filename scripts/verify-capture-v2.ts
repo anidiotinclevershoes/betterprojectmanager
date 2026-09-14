@@ -599,7 +599,7 @@ function main() {
     assert.doesNotMatch(barrel, /extractObservationsWithOpenAI/);
   });
 
-  check("project UUID as dated todo target rematerializes to create", () => {
+  check("project UUID as dated todo target is rejected, not rescued into create", () => {
     const run = runCaptureV2FromModelJson({
       transcript:
         "Separately: collect the void keys from the depot on 16 October 2026.",
@@ -626,19 +626,18 @@ function main() {
       projectId: CANDYLAND_ID,
     });
     assert.ok(run.validation.issues.some((issue) => issue.code === "foreign_id"));
-    assert.equal(run.validation.observations[0]?.disposition, "create_new");
-    assert.equal(run.validation.observations[0]?.candidateTargetId, null);
-    assert.equal(run.resolved[0]?.decision.kind, "write");
-    assert.equal(
-      run.resolved[0]?.decision.kind === "write"
-        ? run.resolved[0].decision.operation.type
-        : "",
-      "create_todo",
+    assert.equal(run.validation.observations.length, 0);
+    assert.equal(run.validation.rejected.length, 1);
+    assert.equal(run.validation.rejected[0]?.disposition, "ambiguous");
+    assert.ok(
+      (run.resolved ?? []).every((row) => row.decision.kind !== "write"),
+      "foreign project UUID must not become a write",
     );
     const created = buildSuggestions(run.result);
-    const todo = created.find((item) => item.kind === "action");
-    assert.match(todo?.content || "", /void keys|depot/i);
-    assert.doesNotMatch(todo?.content || "", /Harbour isolate/i);
+    assert.equal(
+      created.filter((item) => item.op === "create" || item.op === "update").length,
+      0,
+    );
   });
 
   check("foreign person update still fails closed", () => {
@@ -747,7 +746,7 @@ function main() {
     assert.ok(!keysOp || keysOp.operation === "NO_CHANGE" || keysOp.requiresClarification);
   });
 
-  check("update without id rematerializes to create when current and no in-project title matches", () => {
+  check("update without id stays Needs You when current and no in-project title matches", () => {
     const run = runCaptureV2FromModelJson({
       transcript: "Void keys still need collecting from the depot on 16 Oct 2026.",
       rawModelJson: {
@@ -769,12 +768,12 @@ function main() {
       world,
       projectId: CANDYLAND_ID,
     });
-    assert.equal(run.resolved[0]?.decision.kind, "write");
-    assert.equal(
-      run.resolved[0]?.decision.kind === "write"
-        ? run.resolved[0].decision.operation.type
-        : "",
-      "create_todo",
+    assert.equal(run.resolved[0]?.decision.kind, "needs_you");
+    assert.equal(run.resolved[0]?.suggestion, null);
+    assert.ok(
+      (run.result.proposedOperations ?? []).every(
+        (op) => op.operation === "NO_CHANGE" || op.requiresClarification,
+      ),
     );
   });
 

@@ -101,6 +101,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "needs-you-vs-left-untouched", script: "scripts/verify-needs-you-vs-left-untouched.ts" },
   { name: "capture-simplify-3a-uncertain", script: "scripts/verify-capture-simplify-3a-uncertain.ts" },
   { name: "capture-simplify-3b-no-change", script: "scripts/verify-capture-simplify-3b-no-change.ts" },
+  { name: "capture-simplify-3c-foreign-id", script: "scripts/verify-capture-simplify-3c-foreign-id.ts" },
   { name: "responsibility-canonical-path", script: "scripts/verify-responsibility-canonical-path.ts" },
   { name: "mounted-persist-trust", script: "scripts/verify-mounted-persist-trust.ts" },
   { name: "update-idempotency", script: "scripts/verify-update-idempotency.ts" },
