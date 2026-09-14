@@ -1,8 +1,8 @@
 /**
  * Phase 3A — stop rematerialising uncertain observations into writes.
  *
- * truthIntent=uncertain no longer becomes current Create/Update solely
- * because rematerializeIndependentDatedCreate can complete a dated shape.
+ * truthIntent=uncertain no longer becomes current Create/Update.
+ * Unique-title rematerialise is also gone.
  *
  * Does not change no_change rematerialisation, hydrate, Prompt A, or Apply.
  *
@@ -240,7 +240,7 @@ function main() {
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
     assert.doesNotMatch(resolve, /function hydrateFromLocalEvidence/);
-    assert.match(resolve, /function rematerializeIndependentDatedCreate/);
+    assert.doesNotMatch(resolve, /function rematerializeIndependentDatedCreate/);
     assert.doesNotMatch(
       resolve,
       /truthIntent === "uncertain"[\s\S]{0,180}rematerializeIndependentDatedCreate/,

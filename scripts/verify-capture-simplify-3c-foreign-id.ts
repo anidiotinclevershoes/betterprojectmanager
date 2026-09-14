@@ -2,7 +2,7 @@
  * Phase 3C — stop rescuing invalid/foreign identity into Create.
  *
  * Foreign IDs stay rejected. Explicit Create without a fake canonical ID
- * still writes. Unique-title bind of an in-project mismatch stays (3E).
+ * still writes. Unique-title bind is not this checkpoint.
  * Do not manufacture Create merely because an invalid target had a title.
  *
  * Run: npx tsx scripts/verify-capture-simplify-3c-foreign-id.ts
@@ -191,7 +191,7 @@ function main() {
     assert.equal(writes(run).length, 0);
   });
 
-  check("8. Unique-title bind of an in-project mismatch still updates (3E)", () => {
+  check("8. Unique title plus a wrong-type ID is Needs You, not a bind", () => {
     const run = runFrom("Parade day moved to 22 October 2026.", [
       {
         id: "obs-title-bind",
@@ -205,17 +205,8 @@ function main() {
         proposedValues: { title: "Parade day", date: "2026-10-22" },
       },
     ]);
-    assert.equal(run.resolved[0]?.decision.kind, "write");
-    assert.equal(
-      run.resolved[0]?.decision.kind === "write"
-        ? run.resolved[0].decision.operation.type
-        : "",
-      "update_milestone",
-    );
-    if (run.resolved[0]?.decision.kind === "write") {
-      const op = run.resolved[0].decision.operation;
-      assert.equal("milestoneId" in op ? op.milestoneId : "", "ms-parade");
-    }
+    assert.equal(run.resolved[0]?.decision.kind, "needs_you");
+    assert.equal(writes(run).length, 0);
   });
 
   check("9. Rescue helpers are gone; no replacement interpreter", () => {
@@ -237,8 +228,8 @@ function main() {
       resolve,
       /disposition: "create_new",\s*truthIntent: "current",\s*candidateTargetId: null,\s*candidateTargetTitle: title,/,
     );
-    assert.match(resolve, /function rematerializeIndependentDatedCreate/);
-    assert.match(resolve, /manufacture a Create merely because/);
+    assert.doesNotMatch(resolve, /function rematerializeIndependentDatedCreate/);
+    assert.doesNotMatch(resolve, /function uniqueTitledRecord/);
   });
 
   check("10. Ready still means planner-executable; Apply still plans", () => {

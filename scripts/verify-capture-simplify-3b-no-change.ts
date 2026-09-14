@@ -151,7 +151,7 @@ function main() {
     assert.doesNotMatch(resolve, /function rematerializeTrustedNoChange/);
     assert.doesNotMatch(resolve, /function rematerializeAbsentPerson/);
     assert.doesNotMatch(resolve, /function hydrateFromLocalEvidence/);
-    assert.match(resolve, /function rematerializeIndependentDatedCreate/);
+    assert.doesNotMatch(resolve, /function rematerializeIndependentDatedCreate/);
   });
 
   check("8. Ready still means planCaptureApply can construct the write", () => {

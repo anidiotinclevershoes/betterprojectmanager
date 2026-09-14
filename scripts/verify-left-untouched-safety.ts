@@ -830,13 +830,13 @@ async function main() {
     );
   });
 
-  await check("Linguistic hydrate is gone; unique-title rematerialise remains", () => {
+  await check("Linguistic hydrate and unique-title rematerialise are gone", () => {
     const resolve = readFileSync(
       join(process.cwd(), "src/lib/capture-v2/resolve.ts"),
       "utf8",
     );
     assert.doesNotMatch(resolve, /hydrateFromLocalEvidence/);
-    assert.match(resolve, /function rematerializeIndependentDatedCreate/);
+    assert.doesNotMatch(resolve, /function rematerializeIndependentDatedCreate/);
   });
 
   console.log(`\n${passed} left-untouched safety checks passed`);
