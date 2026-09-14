@@ -43,9 +43,20 @@ Worktree: `/tmp/lume-bakeoff/simplification-astra` @ `bd76bbf` (dedicated; bake-
 ## Model
 
 - Requested: `gpt-6-astra` (same id as accepted AI-first Gate 1 v2)
-- Prompt A request shape: unchanged (`temperature: 0.2`, `response_format: { type: "json_object" }`, Prompt A system + user)
+- Prompt A text: unchanged (`capture-v2-eval-baseline-v2`)
+- `response_format`: `{ type: "json_object" }` unchanged
 - Silent substitution: forbidden. Record requested vs response model on every case.
 - `OPENAI_API_KEY`: present
+
+### Trivial adapter (required)
+
+A first probe with the unmodified Prompt A extract path (`temperature: 0.2`) returned HTTP 400:
+
+`Unsupported value: 'temperature' does not support 0.2 with this model. Only the default (1) value is supported.`
+
+The experiment-only runner therefore **omits `temperature`**, matching the accepted AI-first Astra request (which also omitted temperature). This is not a Prompt A rewrite. It is recorded on every run as `adapter: omit-temperature-for-gpt-6-astra`.
+
+If `json_object` had also failed, the experiment would STOP.
 
 ## Isolation
 

@@ -18,7 +18,7 @@ const EXPECTED_CORPUS_SHA =
 const PINNED_SIMPLIFICATION = "bd76bbf35b60cec2685e9bb106a4d4a4a9dbdab0";
 const REQUESTED_MODEL = "gpt-6-astra";
 const WORKTREE = "/tmp/lume-bakeoff/simplification-astra";
-const RUNNER_SRC = join(BAKEOFF, "runners/production-runner.ts");
+const RUNNER_SRC = join(here, "runners/simplification-astra-runner.ts");
 const RUNNER_DEST = join(WORKTREE, ".astra-control-runner.ts");
 
 function sha256File(path: string): string {
