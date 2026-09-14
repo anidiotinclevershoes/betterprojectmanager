@@ -3,8 +3,9 @@
 **Status:** Living accepted position for Capture V2  
 **Date:** 14 September 2026  
 **Production SHA this position was accepted against:** `91fabf8d1627e89538f26e00b9b3343b9d577cdb` (PR #167)  
-**Current `main` this living file was last reconciled against:** `920d65d9c0f6e49efca8e26fc8906dbbd11e8f25`  
-**Simplification production port:** validated candidate `bd76bbf35b60cec2685e9bb106a4d4a4a9dbdab0` applied onto current `main`. Not merged until human review.  
+**Current production baseline (`origin/main`):** `29acea5149c1c56dcb18375fd22025c072931a24` (PR #184 merge)  
+**Current `main` this living file was last reconciled against:** `29acea5149c1c56dcb18375fd22025c072931a24`  
+**Capture Simplification:** **CLOSED** architecturally. Merged via PR #184. Validated HEAD `d06c07eba63bd018474a2b2ee943016faf3ed3ca` onto `920d65d9c0f6e49efca8e26fc8906dbbd11e8f25`. Hosted Capture → Apply → canonical Supabase reread proved on that exact SHA. Schema, RLS, persistence, and write spine unchanged. AI-first remains parked (PRs #181–#183 evidence only; do not merge).  
 **Owned by:** [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md) §4  
 **Docs entry:** [`docs/README.md`](./README.md)
 
@@ -143,3 +144,21 @@ Deterministic guards for those families now live on `cursor/v1-trust-convergence
 - Apply reload (D-045), fingerprint completeness (D-046), session/project bind (D-047), apply receipts (D-048)
 - Observation-local identity evidence and contradictory-sibling Needs You (PR #167)
 - New Project name-only recovery from remaining VALIDATE rejects (D-052 / PR #167)
+
+---
+
+## 9. Architecture closeout (14 September 2026)
+
+Capture Simplification is the canonical production architecture on `main`.
+
+This baseline contains: Simplification resolver; Left untouched; narrowed Needs You; removed semantic rescue stack; unchanged canonical persistence model; unchanged database schema; unchanged write spine; AI-first excluded.
+
+Accepted conservative behaviours (do not restore lost automation unless a future validated user problem justifies it):
+
+- some restated Person facts → Needs You
+- “responsibility continues” may → Needs You
+- unsupported/uncertain semantics → Left untouched / Needs You rather than rescue
+
+Future work should focus on 0.9 tester UX, Review usability, Left untouched clarity/recovery, manual recovery flows, and product polish — not resolver cleverness.
+
+Do not merge Gate 1, Gate 2, Astra control, or the three-way bake-off.
