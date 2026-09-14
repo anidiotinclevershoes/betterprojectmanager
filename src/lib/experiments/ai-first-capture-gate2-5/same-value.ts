@@ -140,6 +140,71 @@ function lookupCurrent(
   return null;
 }
 
+/** Proposed keys that this domain's Apply write actually uses. Others are ignored. */
+function writeRelevantProposedKeys(item: Gate1V2Item): string[] {
+  const v = item.proposedValues;
+  const present = new Set<string>();
+  if (v.name) present.add("name");
+  if (v.personName) present.add("personName");
+  if (v.title) present.add("title");
+  if (v.date) present.add("date");
+  if (v.status) present.add("status");
+  if (v.scope) present.add("scope");
+  if (v.awayFromIso) present.add("awayFromIso");
+  if (v.awayToIso) present.add("awayToIso");
+  if (v.text) present.add("text");
+
+  const allowed = new Set<string>();
+  switch (item.domain) {
+    case "milestone":
+      allowed.add("date");
+      break;
+    case "responsibility":
+      allowed.add("personName");
+      allowed.add("name");
+      allowed.add("scope");
+      break;
+    case "risk":
+      allowed.add("status");
+      allowed.add("title");
+      allowed.add("name");
+      break;
+    case "todo":
+      allowed.add("title");
+      allowed.add("name");
+      allowed.add("date");
+      allowed.add("status");
+      break;
+    case "person":
+      allowed.add("name");
+      allowed.add("personName");
+      break;
+    case "availability":
+      allowed.add("personName");
+      allowed.add("name");
+      allowed.add("awayFromIso");
+      allowed.add("awayToIso");
+      break;
+    case "knowledge":
+    case "decision":
+      allowed.add("text");
+      break;
+    default:
+      break;
+  }
+  return [...present].filter((key) => allowed.has(key));
+}
+
+function fieldCovers(compared: Compared[], key: string): boolean {
+  if (compared.some((row) => row.field === key)) return true;
+  if (key === "name" && compared.some((row) => row.field === "personName" || row.field === "title")) {
+    return true;
+  }
+  if (key === "personName" && compared.some((row) => row.field === "name")) return true;
+  if (key === "title" && compared.some((row) => row.field === "name")) return true;
+  return false;
+}
+
 function proposedComparisons(item: Gate1V2Item, current: Record<string, string | null>): Compared[] {
   const v = item.proposedValues;
   const out: Compared[] = [];
@@ -211,6 +276,10 @@ export function inspectExactSameValues(
   if (!current) return { comparable: false, exactMatch: false, compared: [] };
   const compared = proposedComparisons(item, current);
   if (!compared.length) return { comparable: false, exactMatch: false, compared: [] };
+  const extras = writeRelevantProposedKeys(item).filter((key) => !fieldCovers(compared, key));
+  if (extras.length) {
+    return { comparable: false, exactMatch: false, compared };
+  }
   return {
     comparable: true,
     exactMatch: compared.every((row) => row.equal),

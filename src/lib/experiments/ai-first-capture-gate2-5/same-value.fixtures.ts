@@ -96,6 +96,20 @@ export function runGate25Fixtures(): { ok: boolean; failures: string[] } {
   const moved = applyGate25DeterministicPath([newDate], world, "proj-candy");
   check("different-date-stays-update", moved.items[0].operation === "update");
 
+  const todoDone = item({
+    operation: "update",
+    domain: "todo",
+    targetCanonicalId: "todo-pack",
+    subject: "Prepare the jelly pack",
+    proposedValues: { ...emptyValues(), title: "Prepare the jelly pack", status: "done" },
+  });
+  const todoStay = applyGate25DeterministicPath([todoDone], world, "proj-candy");
+  check(
+    "todo-done-not-converted-from-title-restatement",
+    todoStay.items[0].operation === "update" && todoStay.traces[0].sameValueConverted === false,
+    todoStay.items[0].operation,
+  );
+
   const emptyUpdate = item({
     operation: "update",
     domain: "responsibility",
