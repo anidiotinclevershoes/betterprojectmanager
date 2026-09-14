@@ -216,7 +216,7 @@ function main() {
     assert.equal(planned.kind, "write");
   });
 
-  check("10. Current update-without-id rematerialise is unchanged", () => {
+  check("10. Current update-without-id is Needs You, not a manufactured Create", () => {
     const run = runFrom("Void keys still need collecting from the depot on 16 Oct 2026.", [
       {
         id: "obs-keys-current",
@@ -231,7 +231,8 @@ function main() {
         },
       },
     ]);
-    assert.equal(run.resolved[0]?.decision.kind, "write");
+    assert.equal(run.resolved[0]?.decision.kind, "needs_you");
+    assert.equal(run.resolved[0]?.suggestion, null);
   });
 
   check("11. hydrate / dated rematerialise / Prompt A stay in place", () => {
