@@ -3,7 +3,7 @@
 Non-mergeable experiment. Contenders were not modified. Expected outcomes were frozen before live runs. Normalization copied present fields only.
 
 **Branch:** `experiment/capture-three-way-bakeoff`  
-**HEAD after results:** recorded in the results commit on this branch  
+**HEAD after results:** `7175ef0ba153affc6d02a6e38f9692d5d1397f28`  
 **Safe to merge:** NO  
 **Contains current main?:** YES (`920d65d`). Not mergeable: experiment-only evaluation infrastructure.
 
@@ -12,6 +12,7 @@ Non-mergeable experiment. Contenders were not modified. Expected outcomes were f
 ## A. Experiment branch + HEAD
 
 - branch: `experiment/capture-three-way-bakeoff`
+- HEAD: `7175ef0ba153affc6d02a6e38f9692d5d1397f28`
 - created from `origin/main` `920d65d9c0f6e49efca8e26fc8906dbbd11e8f25`
 - contains current `main`?: YES
 - classification: `LUME_EXPERIMENT=1` / `experiment/` — do not merge
