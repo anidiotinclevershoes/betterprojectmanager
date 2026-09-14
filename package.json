@@ -79,6 +79,7 @@
     "verify:capture-simplify-3b-no-change": "npx --yes tsx scripts/verify-capture-simplify-3b-no-change.ts",
     "verify:capture-simplify-3c-foreign-id": "npx --yes tsx scripts/verify-capture-simplify-3c-foreign-id.ts",
     "verify:capture-simplify-3d-hydrate": "npx --yes tsx scripts/verify-capture-simplify-3d-hydrate.ts",
+    "observe:capture-simplify-rescue-tranche": "npx --yes tsx scripts/observe-capture-simplify-rescue-tranche.ts",
     "verify:capture-intelligence-diagnostic": "npx --yes tsx scripts/verify-capture-intelligence-diagnostic.ts",
     "diagnose:capture-intelligence": "npx --yes tsx scripts/diagnose-capture-intelligence.ts",
     "verify:eval-capture-v2": "npx --yes tsx scripts/verify-eval-capture-v2.ts",
