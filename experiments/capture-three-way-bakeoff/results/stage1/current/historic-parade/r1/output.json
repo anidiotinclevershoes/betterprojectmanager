@@ -1,0 +1,74 @@
+{
+  "caseId": "historic-parade",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1921,
+  "usage": {
+    "prompt_tokens": 1141,
+    "completion_tokens": 172,
+    "total_tokens": 1313,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The Parade day used to be the 12th.",
+          "evidence": "Last June the Parade day used to be the 12th, which is why the banners still say June.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {
+            "label": "Parade day",
+            "date": "2023-06-12"
+          },
+          "commentary": "This observation reflects a historical date for the Parade day."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "update_existing",
+        "statement": "The Parade day used to be the 12th.",
+        "evidence": "Last June the Parade day used to be the 12th, which is why the banners still say June.",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Not asserting current project truth — no mutation."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "label": "Parade day",
+        "date": "2023-06-12"
+      },
+      "evidence": "Last June the Parade day used to be the 12th, which is why the banners still say June.",
+      "ambiguity": "This observation reflects a historical date for the Parade day.",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

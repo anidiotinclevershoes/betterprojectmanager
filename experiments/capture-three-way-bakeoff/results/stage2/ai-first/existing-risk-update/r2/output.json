@@ -1,0 +1,68 @@
+{
+  "caseId": "existing-risk-update",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6265,
+  "usage": {
+    "prompt_tokens": 817,
+    "completion_tokens": 189,
+    "total_tokens": 1006,
+    "reasoning_tokens": 43
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "update",
+          "domain": "risk",
+          "targetCanonicalId": "risk-packaging",
+          "subject": "Packaging delay",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "Packaging delay is getting worse after the cardboard mill flooded.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+          "understood": "The existing Packaging delay risk is worsening following flooding at the cardboard mill.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "Packaging delay is getting worse after the cardboard mill flooded.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

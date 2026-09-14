@@ -1,0 +1,109 @@
+{
+  "caseId": "cross-project-bait",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2617,
+  "usage": {
+    "prompt_tokens": 1145,
+    "completion_tokens": 274,
+    "total_tokens": 1419,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Pixel Ramos should own our UAT.",
+          "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-gumdrop",
+          "candidateTargetTitle": "Pippa Gumdrop",
+          "proposedValues": {
+            "personName": "Pixel Ramos",
+            "scope": "UAT",
+            "ownershipSemantics": "replace"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        },
+        {
+          "id": "obs-2",
+          "statement": "Resolve the Console certification slip risk.",
+          "evidence": "please resolve the Console certification slip risk while you are here.",
+          "domain": "risk",
+          "disposition": "left_untouched",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "commentary": "It isn't clear what the Console certification slip risk entails or how it should be addressed.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "update_existing",
+        "statement": "Pixel Ramos should own our UAT.",
+        "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT.",
+        "candidateTargetId": "person-gumdrop",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Person identity is not established in the Capture. A supplied record id is not enough."
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "left_untouched",
+        "statement": "Resolve the Console certification slip risk.",
+        "evidence": "please resolve the Console certification slip risk while you are here.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "It isn't clear what the Console certification slip risk entails or how it should be addressed."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Pippa Gumdrop",
+      "referencedCanonicalId": "person-gumdrop",
+      "assertedValue": {
+        "personName": "Pixel Ramos",
+        "scope": "UAT",
+        "ownershipSemantics": "replace"
+      },
+      "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT.",
+      "ambiguity": "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "risk",
+      "subject": "Resolve the Console certification slip risk.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "please resolve the Console certification slip risk while you are here.",
+      "ambiguity": "It isn't clear what the Console certification slip risk entails or how it should be addressed.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

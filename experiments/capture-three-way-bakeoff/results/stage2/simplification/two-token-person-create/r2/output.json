@@ -1,0 +1,69 @@
+{
+  "caseId": "two-token-person-create",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1431,
+  "usage": {
+    "prompt_tokens": 1129,
+    "completion_tokens": 107,
+    "total_tokens": 1236,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Jordan Hale is to be added as the new lighting lead.",
+          "evidence": "Please add Jordan Hale as the new lighting lead.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "name": "Jordan Hale"
+          }
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "create_new",
+        "statement": "Jordan Hale is to be added as the new lighting lead.",
+        "evidence": "Please add Jordan Hale as the new lighting lead.",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "ensure_person",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Jordan Hale is to be added as the new lighting lead.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Jordan Hale"
+      },
+      "evidence": "Please add Jordan Hale as the new lighting lead.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

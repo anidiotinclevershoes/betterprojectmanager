@@ -1,0 +1,100 @@
+{
+  "caseId": "mixed-clear-and-unclear",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6462,
+  "usage": {
+    "prompt_tokens": 880,
+    "completion_tokens": 255,
+    "total_tokens": 1135,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "todo",
+          "targetCanonicalId": null,
+          "subject": "Order extra sprinkles",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Order extra sprinkles",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please add a to-do to order extra sprinkles",
+          "understood": "Add a new to-do to order extra sprinkles.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Possible Security concern",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "I think Security might be worried.",
+          "understood": "A possible Security concern is mentioned without a specific issue or change.",
+          "question": null,
+          "leftUntouchedReason": "Vague worry with no named change cannot become a project operation."
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Order extra sprinkles",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Order extra sprinkles",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Please add a to-do to order extra sprinkles",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "unsupported",
+      "subject": "Possible Security concern",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "I think Security might be worried.",
+      "ambiguity": "Vague worry with no named change cannot become a project operation.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

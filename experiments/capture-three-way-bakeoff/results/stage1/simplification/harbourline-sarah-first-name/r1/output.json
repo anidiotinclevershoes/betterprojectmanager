@@ -1,0 +1,75 @@
+{
+  "caseId": "harbourline-sarah-first-name",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1631,
+  "usage": {
+    "prompt_tokens": 1282,
+    "completion_tokens": 156,
+    "total_tokens": 1438,
+    "prompt_tokens_details": {
+      "cached_tokens": 1152,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Sarah owns communications now.",
+          "evidence": "I think Sarah owns communications now?",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "uncertain",
+          "projectId": "proj-harbourline",
+          "candidateTargetId": "person-hca-unknown",
+          "candidateTargetTitle": "unknown person",
+          "proposedValues": {
+            "personName": "Sarah",
+            "scope": "communications",
+            "ownershipSemantics": "replace"
+          },
+          "commentary": "It is unclear which Sarah is being referred to."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "coverage-left-1",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "Not sure which Sarah.",
+        "evidence": "Not sure which Sarah.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Lume couldn't safely interpret this part of your capture."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "unknown",
+      "subject": "Not sure which Sarah.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "leftUntouched": true,
+        "leftUntouchedSource": "coverage"
+      },
+      "evidence": "Not sure which Sarah.",
+      "ambiguity": "Lume couldn't safely interpret this part of your capture.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,154 @@
+{
+  "caseId": "c5-timber-floor",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8159,
+  "usage": {
+    "prompt_tokens": 1076,
+    "completion_tokens": 374,
+    "total_tokens": 1450,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 1317,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "knowledge",
+          "targetCanonicalId": null,
+          "subject": "Asbestos survey addendum result",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "The asbestos survey addendum came back clean.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "The asbestos survey addendum came back clean.",
+          "understood": "The asbestos survey addendum returned a clean result.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "update",
+          "domain": "todo",
+          "targetCanonicalId": "todo-asbestos",
+          "subject": "Chase the asbestos survey addendum",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": "done",
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "The asbestos survey addendum came back clean. Close that chase.",
+          "understood": "Mark the asbestos survey addendum chase as complete.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "create",
+          "domain": "risk",
+          "targetCanonicalId": null,
+          "subject": "Hall timber floor may hide services",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Hall timber floor may still hide services",
+            "date": null,
+            "status": "open",
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Raise a risk that the hall timber floor may still hide services.",
+          "understood": "Create a risk about potentially hidden services in the hall timber floor.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "knowledge",
+      "subject": "Asbestos survey addendum result",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "The asbestos survey addendum came back clean.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "The asbestos survey addendum came back clean.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "todo",
+      "subject": "Chase the asbestos survey addendum",
+      "referencedCanonicalId": "todo-asbestos",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": null,
+        "date": null,
+        "status": "done",
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "The asbestos survey addendum came back clean. Close that chase.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "risk",
+      "subject": "Hall timber floor may hide services",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Hall timber floor may still hide services",
+        "date": null,
+        "status": "open",
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Raise a risk that the hall timber floor may still hide services.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

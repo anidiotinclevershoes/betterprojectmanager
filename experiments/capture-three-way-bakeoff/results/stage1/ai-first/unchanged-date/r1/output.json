@@ -1,0 +1,68 @@
+{
+  "caseId": "unchanged-date",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4593,
+  "usage": {
+    "prompt_tokens": 819,
+    "completion_tokens": 139,
+    "total_tokens": 958,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "no_change",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-freeze",
+          "subject": "Track freeze",
+          "proposedValues": {
+            "name": "Track freeze",
+            "personName": null,
+            "title": null,
+            "date": "2026-09-01",
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Track freeze remains 1 September 2026.",
+          "understood": "Track freeze remains on its current date, 1 September 2026.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Track freeze",
+      "referencedCanonicalId": "ms-freeze",
+      "assertedValue": {
+        "name": "Track freeze",
+        "personName": null,
+        "title": null,
+        "date": "2026-09-01",
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Track freeze remains 1 September 2026.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

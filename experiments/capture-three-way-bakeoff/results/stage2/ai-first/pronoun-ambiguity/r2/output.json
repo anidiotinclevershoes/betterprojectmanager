@@ -1,0 +1,68 @@
+{
+  "caseId": "pronoun-ambiguity",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4797,
+  "usage": {
+    "prompt_tokens": 804,
+    "completion_tokens": 154,
+    "total_tokens": 958,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Ownership of Boss balancing pass",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Boss balancing pass",
+            "date": null,
+            "status": null,
+            "scope": "Boss balancing pass",
+            "ownershipSemantics": "own",
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "She said she will own the boss balancing pass from now on.",
+          "understood": "The Capture assigns ownership of the existing Boss balancing pass, but does not identify who “she” is.",
+          "question": "Who does “she” refer to?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Ownership of Boss balancing pass",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Boss balancing pass",
+        "date": null,
+        "status": null,
+        "scope": "Boss balancing pass",
+        "ownershipSemantics": "own",
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "She said she will own the boss balancing pass from now on.",
+      "ambiguity": "Who does “she” refer to?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

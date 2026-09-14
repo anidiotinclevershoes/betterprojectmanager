@@ -1,0 +1,77 @@
+{
+  "caseId": "responsibility-replacement",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1601,
+  "usage": {
+    "prompt_tokens": 1110,
+    "completion_tokens": 161,
+    "total_tokens": 1271,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Nova Quill will replace Pixel Ramos as Producer.",
+          "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "candidateTargetId": "person-pixel",
+          "candidateTargetTitle": "Pixel Ramos",
+          "proposedValues": {
+            "personName": "Nova Quill",
+            "scope": "Producer",
+            "ownershipSemantics": "replace"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "update_existing",
+        "statement": "Nova Quill will replace Pixel Ramos as Producer.",
+        "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+        "candidateTargetId": "person-pixel",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "Replacement needs a confirmed current owner. Confirm before Lume changes ownership."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Pixel Ramos",
+      "referencedCanonicalId": "person-pixel",
+      "assertedValue": {
+        "personName": "Nova Quill",
+        "scope": "Producer",
+        "ownershipSemantics": "replace"
+      },
+      "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+      "ambiguity": "Replacement needs a confirmed current owner. Confirm before Lume changes ownership.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

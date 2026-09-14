@@ -1,0 +1,164 @@
+{
+  "caseId": "explicit-ownership-first",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1804,
+  "usage": {
+    "prompt_tokens": 1125,
+    "completion_tokens": 154,
+    "total_tokens": 1279,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Sarah Kim owns float safety.",
+          "evidence": "Sarah Kim owns float safety.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-gumdrop",
+          "candidateTargetTitle": "Pippa Gumdrop",
+          "proposedValues": {
+            "personName": "Sarah Kim",
+            "scope": "float safety",
+            "ownershipSemantics": "replace"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "update_existing",
+        "statement": "Sarah Kim owns float safety.",
+        "evidence": "Sarah Kim owns float safety.",
+        "candidateTargetId": "person-gumdrop",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Person identity is not established in the Capture. A supplied record id is not enough."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Pippa Gumdrop",
+      "referencedCanonicalId": "person-gumdrop",
+      "assertedValue": {
+        "personName": "Sarah Kim",
+        "scope": "float safety",
+        "ownershipSemantics": "replace"
+      },
+      "evidence": "Sarah Kim owns float safety.",
+      "ambiguity": "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": {
+    "writesAttempted": 0,
+    "writesExecuted": 0,
+    "before": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    },
+    "after": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    }
+  }
+}

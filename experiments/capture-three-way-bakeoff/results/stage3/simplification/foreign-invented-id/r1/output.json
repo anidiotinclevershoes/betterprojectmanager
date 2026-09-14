@@ -1,0 +1,180 @@
+{
+  "caseId": "foreign-invented-id",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1385,
+  "usage": {
+    "prompt_tokens": 1139,
+    "completion_tokens": 129,
+    "total_tokens": 1268,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Gumdrop Bridge icing is worse.",
+          "evidence": "Gumdrop Bridge icing is worse.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "risk-bridge",
+          "candidateTargetTitle": "Gumdrop Bridge icing",
+          "proposedValues": {},
+          "commentary": "",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "update_existing",
+        "statement": "Gumdrop Bridge icing is worse.",
+        "evidence": "Gumdrop Bridge icing is worse.",
+        "candidateTargetId": "risk-bridge",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Risk update is not specific enough to apply automatically."
+      },
+      {
+        "id": "coverage-left-1",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "Please attach this update to risk-console-not-in-candyland",
+        "evidence": "Please attach this update to risk-console-not-in-candyland",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Lume couldn't safely interpret this part of your capture."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Gumdrop Bridge icing",
+      "referencedCanonicalId": "risk-bridge",
+      "assertedValue": "omitted",
+      "evidence": "Gumdrop Bridge icing is worse.",
+      "ambiguity": "This Risk update is not specific enough to apply automatically.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "unknown",
+      "subject": "Please attach this update to risk-console-not-in-candyland",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "leftUntouched": true,
+        "leftUntouchedSource": "coverage"
+      },
+      "evidence": "Please attach this update to risk-console-not-in-candyland",
+      "ambiguity": "Lume couldn't safely interpret this part of your capture.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": {
+    "writesAttempted": 0,
+    "writesExecuted": 0,
+    "before": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    },
+    "after": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    }
+  }
+}

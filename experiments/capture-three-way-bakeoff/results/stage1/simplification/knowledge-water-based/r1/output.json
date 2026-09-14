@@ -1,0 +1,69 @@
+{
+  "caseId": "knowledge-water-based",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1200,
+  "usage": {
+    "prompt_tokens": 1121,
+    "completion_tokens": 109,
+    "total_tokens": 1230,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The wooden-track paint must stay water-based.",
+          "evidence": "the wooden-track paint must stay water-based.",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "proposedValues": {
+            "text": "The wooden-track paint must stay water-based."
+          }
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "knowledge",
+        "disposition": "create_new",
+        "statement": "The wooden-track paint must stay water-based.",
+        "evidence": "the wooden-track paint must stay water-based.",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "write_knowledge",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "knowledge",
+      "subject": "The wooden-track paint must stay water-based.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "text": "The wooden-track paint must stay water-based."
+      },
+      "evidence": "the wooden-track paint must stay water-based.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

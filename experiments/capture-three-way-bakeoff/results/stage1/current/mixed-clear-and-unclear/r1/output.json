@@ -1,0 +1,103 @@
+{
+  "caseId": "mixed-clear-and-unclear",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2008,
+  "usage": {
+    "prompt_tokens": 1138,
+    "completion_tokens": 245,
+    "total_tokens": 1383,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "A to-do needs to be added to order extra sprinkles.",
+          "evidence": "Please add a to-do to order extra sprinkles",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "title": "Order extra sprinkles"
+          },
+          "commentary": "It is unclear if this to-do is currently authorized or if it is a suggestion.",
+          "modelConfidence": 0
+        },
+        {
+          "id": "obs-2",
+          "statement": "Security might be worried.",
+          "evidence": "I think Security might be worried.",
+          "domain": "risk",
+          "disposition": "left_untouched",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "commentary": "It isn't clear what Security is concerned about or what project information should change.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "todo",
+        "disposition": "create_new",
+        "statement": "A to-do needs to be added to order extra sprinkles.",
+        "evidence": "Please add a to-do to order extra sprinkles",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_todo",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "left_untouched",
+        "statement": "Security might be worried.",
+        "evidence": "I think Security might be worried.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "It isn't clear what Security is concerned about or what project information should change."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Order extra sprinkles",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Order extra sprinkles"
+      },
+      "evidence": "Please add a to-do to order extra sprinkles",
+      "ambiguity": "It is unclear if this to-do is currently authorized or if it is a suggestion.",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "risk",
+      "subject": "Security might be worried.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "I think Security might be worried.",
+      "ambiguity": "It isn't clear what Security is concerned about or what project information should change.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

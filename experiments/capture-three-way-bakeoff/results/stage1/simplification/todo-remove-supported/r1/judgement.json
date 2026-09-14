@@ -1,0 +1,24 @@
+{
+  "caseId": "todo-remove-supported",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "delete-jelly",
+      "meaning": "Remove Prepare the jelly pack.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": false,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": true,
+      "note": "needs_you write=no id=todo-pack"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

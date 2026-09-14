@@ -1,0 +1,116 @@
+{
+  "caseId": "ambiguous-same-first-name",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 9847,
+  "usage": {
+    "prompt_tokens": 1123,
+    "completion_tokens": 299,
+    "total_tokens": 1422,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick from the warehouse called.",
+          "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+          "domain": "person",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "person-brick",
+          "candidateTargetTitle": "Brick Oakley",
+          "proposedValues": {
+            "name": "Brick Oakley"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        },
+        {
+          "id": "obs-2",
+          "statement": "Brick wants to help with assembly.",
+          "evidence": "he wants to help with assembly.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-toy",
+          "candidateTargetId": "person-brick",
+          "candidateTargetTitle": "Brick Oakley",
+          "proposedValues": {
+            "personName": "Brick Oakley",
+            "scope": "assembly",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "It's unclear what specific responsibilities Brick will take on regarding assembly.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "update_existing",
+        "statement": "Brick from the warehouse called.",
+        "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+        "candidateTargetId": "person-brick",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Person identity is not established in the Capture. A supplied record id is not enough."
+      },
+      {
+        "id": "obs-2",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Brick wants to help with assembly.",
+        "evidence": "he wants to help with assembly.",
+        "candidateTargetId": "person-brick",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It's unclear what specific responsibilities Brick will take on regarding assembly."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Brick Oakley",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": {
+        "name": "Brick Oakley"
+      },
+      "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+      "ambiguity": "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Brick Oakley",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": {
+        "personName": "Brick Oakley",
+        "scope": "assembly",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "he wants to help with assembly.",
+      "ambiguity": "It's unclear what specific responsibilities Brick will take on regarding assembly.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

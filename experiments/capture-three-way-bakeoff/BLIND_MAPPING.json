@@ -1,0 +1,82 @@
+{
+  "new-person": {
+    "X": "simplification",
+    "Y": "ai-first",
+    "Z": "current"
+  },
+  "existing-risk-update": {
+    "X": "current",
+    "Y": "simplification",
+    "Z": "ai-first"
+  },
+  "existing-person": {
+    "X": "ai-first",
+    "Y": "current",
+    "Z": "simplification"
+  },
+  "ambiguous-same-first-name": {
+    "X": "ai-first",
+    "Y": "simplification",
+    "Z": "current"
+  },
+  "pronoun-ambiguity": {
+    "X": "simplification",
+    "Y": "current",
+    "Z": "ai-first"
+  },
+  "share-vs-replace-ambiguous": {
+    "X": "current",
+    "Y": "ai-first",
+    "Z": "simplification"
+  },
+  "mixed-domains": {
+    "X": "simplification",
+    "Y": "ai-first",
+    "Z": "current"
+  },
+  "holdout-h6": {
+    "X": "current",
+    "Y": "simplification",
+    "Z": "ai-first"
+  },
+  "c5-timber-floor": {
+    "X": "ai-first",
+    "Y": "current",
+    "Z": "simplification"
+  },
+  "title-only-existing-target": {
+    "X": "ai-first",
+    "Y": "simplification",
+    "Z": "current"
+  },
+  "two-token-person-create": {
+    "X": "simplification",
+    "Y": "current",
+    "Z": "ai-first"
+  },
+  "vague-parade": {
+    "X": "current",
+    "Y": "ai-first",
+    "Z": "simplification"
+  },
+  "contradict-parade": {
+    "X": "simplification",
+    "Y": "ai-first",
+    "Z": "current"
+  },
+  "unsupported-remove": {
+    "X": "current",
+    "Y": "simplification",
+    "Z": "ai-first"
+  },
+  "noisy-conversational": {
+    "X": "ai-first",
+    "Y": "current",
+    "Z": "simplification"
+  },
+  "harbourline-sarah-first-name": {
+    "X": "ai-first",
+    "Y": "simplification",
+    "Z": "current"
+  }
+}

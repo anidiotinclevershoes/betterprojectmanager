@@ -1,0 +1,57 @@
+{
+  "caseId": "similar-name-ambiguous-brick",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 10157,
+  "usage": {
+    "prompt_tokens": 849,
+    "completion_tokens": 261,
+    "total_tokens": 1110,
+    "reasoning_tokens": 101
+  },
+  "raw": {
+    "snapshotChars": 612,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Call about the track map",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Brick called about the track map.",
+          "understood": "A call about the track map is reported, but no project change is stated.",
+          "question": null,
+          "leftUntouchedReason": "No project operation is specified, and 'Brick' does not uniquely identify a person in the snapshot."
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Call about the track map",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Brick called about the track map.",
+      "ambiguity": "No project operation is specified, and 'Brick' does not uniquely identify a person in the snapshot.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,68 @@
+{
+  "caseId": "ambiguous-same-first-name",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7522,
+  "usage": {
+    "prompt_tokens": 819,
+    "completion_tokens": 255,
+    "total_tokens": 1074,
+    "reasoning_tokens": 88
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Brick wants to help with assembly",
+          "proposedValues": {
+            "name": null,
+            "personName": "Brick",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "assembly",
+            "ownershipSemantics": null,
+            "text": "Brick wants to help with assembly.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+          "understood": "Brick expressed interest in helping with assembly, but his identity is unclear. No ownership change was stated.",
+          "question": "Is Brick from the warehouse Brick Oakley, or a different person?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Brick wants to help with assembly",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Brick",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "assembly",
+        "ownershipSemantics": null,
+        "text": "Brick wants to help with assembly.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+      "ambiguity": "Is Brick from the warehouse Brick Oakley, or a different person?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

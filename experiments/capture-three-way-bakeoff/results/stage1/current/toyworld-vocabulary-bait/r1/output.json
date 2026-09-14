@@ -1,0 +1,65 @@
+{
+  "caseId": "toyworld-vocabulary-bait",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1288,
+  "usage": {
+    "prompt_tokens": 1137,
+    "completion_tokens": 127,
+    "total_tokens": 1264,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Toyworld's packaging delay should be copied onto Candyland.",
+          "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+          "domain": "commentary",
+          "disposition": "left_untouched",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "commentary": "It's unclear what specific changes should be made to Candyland based on Toyworld's packaging delay."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "left_untouched",
+        "statement": "Toyworld's packaging delay should be copied onto Candyland.",
+        "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "It's unclear what specific changes should be made to Candyland based on Toyworld's packaging delay."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "Toyworld's packaging delay should be copied onto Candyland.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+      "ambiguity": "It's unclear what specific changes should be made to Candyland based on Toyworld's packaging delay.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

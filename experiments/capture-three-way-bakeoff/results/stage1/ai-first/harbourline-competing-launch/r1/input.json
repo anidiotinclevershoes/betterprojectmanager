@@ -1,0 +1,278 @@
+{
+  "caseId": "harbourline-competing-launch",
+  "captureText": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+  "projectId": "proj-harbourline",
+  "world": {
+    "projectIds": [
+      "proj-candy",
+      "proj-toy",
+      "proj-game",
+      "proj-harbourline"
+    ],
+    "projects": [
+      {
+        "id": "proj-candy",
+        "name": "Candyland",
+        "code": "CANDY",
+        "stakeholders": [
+          {
+            "id": "person-gumdrop",
+            "name": "Pippa Gumdrop",
+            "role": "UAT lead"
+          },
+          {
+            "id": "person-fizz",
+            "name": "Fizz Caramel",
+            "role": "Designer"
+          }
+        ]
+      },
+      {
+        "id": "proj-toy",
+        "name": "Toyworld",
+        "code": "TOY",
+        "stakeholders": [
+          {
+            "id": "person-brick",
+            "name": "Brick Oakley",
+            "role": "Sponsor"
+          },
+          {
+            "id": "person-buttons",
+            "name": "Captain Buttons",
+            "role": "Assembly lead"
+          }
+        ]
+      },
+      {
+        "id": "proj-game",
+        "name": "GamingStudio5000",
+        "code": "GS5K",
+        "stakeholders": [
+          {
+            "id": "person-pixel",
+            "name": "Pixel Ramos",
+            "role": "Producer"
+          }
+        ]
+      },
+      {
+        "id": "proj-harbourline",
+        "name": "Harbourline Civic Archive Refresh",
+        "code": "HCA",
+        "stakeholders": [
+          {
+            "id": "person-hca-miriam",
+            "name": "Miriam Cole",
+            "role": "Programme sponsor / City Clerk"
+          },
+          {
+            "id": "person-hca-owen",
+            "name": "Owen Hart",
+            "role": "Archives delivery lead"
+          },
+          {
+            "id": "person-hca-priya",
+            "name": "Priya Nair",
+            "role": "Civic ICT lead"
+          },
+          {
+            "id": "person-hca-lila",
+            "name": "Lila Berg",
+            "role": "Conservation lead"
+          }
+        ]
+      }
+    ],
+    "risks": [
+      {
+        "id": "risk-bridge",
+        "projectId": "proj-candy",
+        "title": "Gumdrop Bridge icing",
+        "status": "open"
+      },
+      {
+        "id": "risk-packaging",
+        "projectId": "proj-toy",
+        "title": "Packaging delay",
+        "status": "open"
+      },
+      {
+        "id": "risk-console",
+        "projectId": "proj-game",
+        "title": "Console certification slip",
+        "status": "open"
+      },
+      {
+        "id": "risk-hca-mould",
+        "projectId": "proj-harbourline",
+        "title": "Mould in the wet-store",
+        "status": "open"
+      },
+      {
+        "id": "risk-hca-helix",
+        "projectId": "proj-harbourline",
+        "title": "Helix scanning queue overruns autumn",
+        "status": "open"
+      }
+    ],
+    "todos": [
+      {
+        "id": "todo-pack",
+        "projectId": "proj-candy",
+        "title": "Prepare the jelly pack",
+        "done": false
+      },
+      {
+        "id": "todo-track",
+        "projectId": "proj-toy",
+        "title": "Print the track map",
+        "done": false
+      },
+      {
+        "id": "todo-balance",
+        "projectId": "proj-game",
+        "title": "Boss balancing pass",
+        "done": false
+      },
+      {
+        "id": "todo-hca-spec",
+        "projectId": "proj-harbourline",
+        "title": "Issue scan specification to Helix",
+        "done": false
+      },
+      {
+        "id": "todo-hca-dehumid",
+        "projectId": "proj-harbourline",
+        "title": "Book wet-store dehumidifier",
+        "done": false
+      },
+      {
+        "id": "todo-hca-inventory",
+        "projectId": "proj-harbourline",
+        "title": "Series inventory of Minutes 1985–1995",
+        "done": true
+      }
+    ],
+    "timeline": [
+      {
+        "id": "ms-parade",
+        "projectId": "proj-candy",
+        "label": "Parade day",
+        "startAt": "2026-10-15T12:00:00.000Z"
+      },
+      {
+        "id": "ms-freeze",
+        "projectId": "proj-toy",
+        "label": "Track freeze",
+        "startAt": "2026-09-01T12:00:00.000Z"
+      },
+      {
+        "id": "ms-cert",
+        "projectId": "proj-game",
+        "label": "Console certification",
+        "startAt": "2026-11-20T12:00:00.000Z"
+      },
+      {
+        "id": "ms-hca-cabinet",
+        "projectId": "proj-harbourline",
+        "label": "Cabinet paper",
+        "startAt": "2026-09-12T09:00:00.000Z"
+      },
+      {
+        "id": "ms-hca-spec",
+        "projectId": "proj-harbourline",
+        "label": "Scan specification freeze",
+        "startAt": "2026-10-02T09:00:00.000Z"
+      },
+      {
+        "id": "ms-hca-launch",
+        "projectId": "proj-harbourline",
+        "label": "Public launch",
+        "startAt": "2027-04-09T09:00:00.000Z"
+      }
+    ],
+    "knowledge": [
+      {
+        "projectId": "proj-candy",
+        "sections": {
+          "people": [
+            "Pippa Gumdrop — UAT lead"
+          ],
+          "risks": []
+        },
+        "structured": [
+          {
+            "id": "resp-uat",
+            "kind": "responsibility",
+            "lifecycle": "current",
+            "body": "Pippa Gumdrop — UAT lead",
+            "meta": {
+              "responsibility": {
+                "personId": "person-gumdrop",
+                "personName": "Pippa Gumdrop",
+                "scope": "UAT lead",
+                "ownerConfirmed": true
+              },
+              "availability": null
+            }
+          }
+        ]
+      },
+      {
+        "projectId": "proj-toy",
+        "sections": {
+          "people": [
+            "Brick Oakley — Sponsor",
+            "Captain Buttons — Assembly lead"
+          ],
+          "risks": []
+        },
+        "structured": []
+      },
+      {
+        "projectId": "proj-game",
+        "sections": {
+          "people": [
+            "Pixel Ramos — Producer"
+          ],
+          "risks": []
+        },
+        "structured": []
+      },
+      {
+        "projectId": "proj-harbourline",
+        "sections": {
+          "people": [
+            "Miriam Cole — Programme sponsor / City Clerk",
+            "Owen Hart — Archives delivery lead",
+            "Priya Nair — Civic ICT lead",
+            "Lila Berg — Conservation lead"
+          ],
+          "risks": [
+            "Mould in the wet-store",
+            "Helix scanning queue overruns autumn"
+          ]
+        },
+        "structured": [
+          {
+            "id": "avail-hca-lila",
+            "kind": "availability",
+            "lifecycle": "current",
+            "body": "Lila Berg is away 3–14 November 2026.",
+            "meta": {
+              "personId": "person-hca-lila",
+              "responsibility": null,
+              "availability": {
+                "personId": "person-hca-lila",
+                "awayFromIso": "2026-11-03",
+                "awayToIso": "2026-11-14"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "apply": false
+}

@@ -1,0 +1,57 @@
+{
+  "caseId": "explicit-no-change",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4522,
+  "usage": {
+    "prompt_tokens": 822,
+    "completion_tokens": 133,
+    "total_tokens": 955,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "no_change",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Toyworld project records",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Nothing has changed on Toyworld this week. Leave the records as they are.",
+          "understood": "No changes to the current project records.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Toyworld project records",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Nothing has changed on Toyworld this week. Leave the records as they are.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}
