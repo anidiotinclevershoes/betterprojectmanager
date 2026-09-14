@@ -146,11 +146,11 @@ function main() {
     assert.notEqual(run.resolved[0]?.decision.kind, "write");
   });
 
-  check("7. rematerializeTrustedNoChange is gone; hydrate still present", () => {
+  check("7. rematerializeTrustedNoChange and hydrate are gone", () => {
     const resolve = readFileSync(join(process.cwd(), "src/lib/capture-v2/resolve.ts"), "utf8");
     assert.doesNotMatch(resolve, /function rematerializeTrustedNoChange/);
     assert.doesNotMatch(resolve, /function rematerializeAbsentPerson/);
-    assert.match(resolve, /function hydrateFromLocalEvidence/);
+    assert.doesNotMatch(resolve, /function hydrateFromLocalEvidence/);
     assert.match(resolve, /function rematerializeIndependentDatedCreate/);
   });
 

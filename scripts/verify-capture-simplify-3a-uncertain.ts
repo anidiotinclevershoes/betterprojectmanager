@@ -235,11 +235,11 @@ function main() {
     assert.equal(run.resolved[0]?.suggestion, null);
   });
 
-  check("11. hydrate / dated rematerialise / Prompt A stay in place", () => {
+  check("11. dated rematerialise / Prompt A stay in place; hydrate is gone", () => {
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/prompt.ts"), "");
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
-    assert.match(resolve, /function hydrateFromLocalEvidence/);
+    assert.doesNotMatch(resolve, /function hydrateFromLocalEvidence/);
     assert.match(resolve, /function rematerializeIndependentDatedCreate/);
     assert.doesNotMatch(
       resolve,

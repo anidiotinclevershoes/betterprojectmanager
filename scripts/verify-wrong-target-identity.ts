@@ -354,7 +354,8 @@ function main() {
       candidateTargetTitle: "M&E first-fix coordination with the hall ceiling void",
       proposedValues: { title: "M&E first-fix coordination with the hall ceiling void" },
     });
-    assert.equal(row?.decision.kind, "no_change");
+    assert.equal(row?.decision.kind, "needs_you");
+    assert.equal(row?.suggestion, null);
   });
 
   check("model no_change resolve binds the evidenced risk, never the sibling", () => {

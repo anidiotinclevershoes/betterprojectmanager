@@ -277,71 +277,65 @@ function resolveOne(
   }
 
   if (observation.disposition === "no_change") {
-    const hydrated = hydrateFromLocalEvidence(
-      observation,
-      args.world,
-      projectId,
-      args.transcript,
-    );
-    if (PERSON_LINKED_DOMAINS.has(hydrated.domain)) {
-      const ownership = hydrated.proposedValues?.ownershipSemantics;
+    if (PERSON_LINKED_DOMAINS.has(observation.domain)) {
+      const ownership = observation.proposedValues?.ownershipSemantics;
       if (ownership === "ambiguous") {
         return {
-          observation: hydrated,
+          observation,
           suggestion: null,
           decision: {
             kind: "needs_you",
-            domain: DOMAIN_TO_LEGAL[hydrated.domain],
+            domain: DOMAIN_TO_LEGAL[observation.domain],
             reason:
-              hydrated.commentary?.trim() ||
+              observation.commentary?.trim() ||
               "Lume cannot safely choose between competing interpretations.",
           },
         };
       }
       const identityGate = personLinkedIdentityGate(
-        hydrated,
+        observation,
         args.world,
         projectId,
         args.transcript,
       );
       if (identityGate?.kind === "block" && identityGate.decision.kind === "needs_you") {
-        return { observation: hydrated, suggestion: null, decision: identityGate.decision };
+        return { observation, suggestion: null, decision: identityGate.decision };
       }
     }
     if (
-      isProvenAlreadyCurrent(hydrated, args.world, projectId, args.transcript)
+      isProvenAlreadyCurrent(observation, args.world, projectId, args.transcript)
     ) {
       return {
-        observation: hydrated,
+        observation,
         suggestion: null,
         decision: {
           kind: "no_change",
-          domain: DOMAIN_TO_LEGAL[hydrated.domain],
+          domain: DOMAIN_TO_LEGAL[observation.domain],
           reason: "Already known — no mutation.",
         },
       };
     }
     if (
-      hydrated.domain === "todo" ||
-      hydrated.domain === "risk" ||
-      hydrated.domain === "milestone" ||
-      PERSON_LINKED_DOMAINS.has(hydrated.domain)
+      observation.domain === "todo" ||
+      observation.domain === "risk" ||
+      observation.domain === "milestone" ||
+      PERSON_LINKED_DOMAINS.has(observation.domain)
     ) {
       return {
-        observation: hydrated,
+        observation,
         suggestion: null,
         decision: {
           kind: "needs_you",
-          domain: DOMAIN_TO_LEGAL[hydrated.domain],
-          reason: unexplainedCurrentNoChangeReason(hydrated),
+          domain: DOMAIN_TO_LEGAL[observation.domain],
+          reason: unexplainedCurrentNoChangeReason(observation),
         },
       };
     }
     const reason =
-      hydrated.commentary?.trim() || LEFT_UNTOUCHED_GENERIC_REASON;
+      observation.commentary?.trim() || LEFT_UNTOUCHED_GENERIC_REASON;
     return {
       observation: {
-        ...hydrated,
+        ...observation,
         disposition: "left_untouched",
         commentary: reason,
       },
@@ -667,204 +661,6 @@ function isResolveOrComplete(observation: CaptureObservationV2): boolean {
   return status === "resolved" || status === "complete" || status === "completed";
 }
 
-/**
- * A titled To Do / milestone / risk is independently actionable when no
- * in-project record matches. Model uncertainty or a missing target id must
- * not hide a legal create. A unique title match becomes an update only when
- * truthIntent is already current. Resolve/complete of a missing row stays
- * fail-closed — never substitute a different same-domain entity.
- */
-const MONTH_TO_ISO: Record<string, string> = {
-  january: "01",
-  february: "02",
-  march: "03",
-  april: "04",
-  may: "05",
-  june: "06",
-  july: "07",
-  august: "08",
-  september: "09",
-  october: "10",
-  november: "11",
-  december: "12",
-};
-
-const NAME_EXTRACT_STOP = new Set([
-  "add",
-  "create",
-  "update",
-  "move",
-  "book",
-  "send",
-  "issue",
-  "the",
-  "this",
-  "that",
-  "hall",
-  "cafe",
-  "site",
-  "client",
-  "practical",
-  "name",
-  "from",
-  "with",
-  "after",
-  "before",
-  "january",
-  "february",
-  "march",
-  "april",
-  "june",
-  "july",
-  "august",
-  "september",
-  "october",
-  "november",
-  "december",
-]);
-
-function isoDateFromLocalText(text: string): string | null {
-  const iso = text.match(/\b(20\d{2}-\d{2}-\d{2})\b/);
-  if (iso?.[1]) return iso[1];
-  const named = text.match(
-    /\b(\d{1,2})(?:st|nd|rd|th)?\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(20\d{2})\b/i,
-  );
-  if (!named) return null;
-  const month = MONTH_TO_ISO[named[2]!.toLowerCase()];
-  if (!month) return null;
-  return `${named[3]}-${month}-${named[1]!.padStart(2, "0")}`;
-}
-
-function looksLikeRestatement(text: string): boolean {
-  return /\b(remains?|still|continues?|already|unchanged|no change)\b/i.test(text);
-}
-
-function looksLikeNewAssignment(text: string): boolean {
-  if (looksLikeRestatement(text)) return false;
-  return /\b(owns?|owning|will own|is responsible|responsible for|assign(?:ed|s)?)\b/i.test(
-    text,
-  );
-}
-
-function existingEvidencedPerson(
-  world: CaptureApplyWorld,
-  projectId: string | null,
-  evidence: string,
-  identity: string | null,
-): boolean {
-  const project = projectId
-    ? world.projects.find((row) => row.id === projectId)
-    : undefined;
-  const people = project?.stakeholders ?? [];
-  const evidenced = peopleEvidencedByRecordedNameInText(people, evidence);
-  if (evidenced.length === 1) return true;
-  if (!identity) return false;
-  const byId = people.find((person) => person.id === identity);
-  return Boolean(
-    byId && recordedPersonNameAppearsInText(evidence, byId.name),
-  );
-}
-
-function twoTokenNameFromLocalText(text: string): string | undefined {
-  const matches = text.match(/\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b/g) ?? [];
-  for (const raw of matches) {
-    const [first, second] = raw.split(/\s+/);
-    if (!first || !second) continue;
-    if (NAME_EXTRACT_STOP.has(first.toLowerCase())) continue;
-    if (NAME_EXTRACT_STOP.has(second.toLowerCase())) continue;
-    return `${first} ${second}`;
-  }
-  return undefined;
-}
-
-function statusTokenFromLocalText(text: string): string | undefined {
-  if (/\b(resolved|complete|completed)\b/i.test(text)) return "resolved";
-  if (/\bdone\b/i.test(text)) return "complete";
-  return undefined;
-}
-
-/**
- * Live Prompt A often marks real updates `no_change` and omits structured
- * fields. Fill missing values from observation-local quoted evidence and
- * canonical world only. The model envelope is not authority.
- */
-function hydrateFromLocalEvidence(
-  observation: CaptureObservationV2,
-  world: CaptureApplyWorld,
-  projectId: string | null,
-  transcript: string,
-): CaptureObservationV2 {
-  const evidence = identityEvidenceText(observation, transcript);
-  if (!evidence.trim()) return observation;
-  const values = { ...(observation.proposedValues ?? {}) };
-  let title =
-    asString(values.title) ||
-    asString(values.label) ||
-    observation.candidateTargetTitle?.trim() ||
-    "";
-  let name =
-    asString(values.personName) ||
-    asString(values.name) ||
-    (observation.domain === "person" || observation.domain === "responsibility"
-      ? observation.candidateTargetTitle?.trim() || ""
-      : "");
-  let scope = asString(values.scope) || "";
-  let date = asIso(values.date) || asIso(values.startAt) || asIso(values.dueAt);
-  let status = asString(values.status) || asString(values.proposedStatus) || "";
-
-  if (!date) date = isoDateFromLocalText(evidence);
-  if (!status && (observation.domain === "risk" || observation.domain === "todo")) {
-    status = statusTokenFromLocalText(evidence) ?? "";
-  }
-  if (!scope) scope = scopeFromResponsiblePhrase(evidence) ?? "";
-
-  if (!title) {
-    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
-    if (hits.length === 1) title = hits[0]!.title;
-  }
-
-  if (
-    !name &&
-    (observation.domain === "person" ||
-      observation.domain === "responsibility" ||
-      observation.domain === "availability")
-  ) {
-    const project = projectId
-      ? world.projects.find((row) => row.id === projectId)
-      : undefined;
-    const evidenced = peopleEvidencedByRecordedNameInText(
-      project?.stakeholders ?? [],
-      evidence,
-    );
-    if (evidenced.length === 1) name = evidenced[0]!.name;
-    else if (evidenced.length === 0 && observation.domain === "person") {
-      name = twoTokenNameFromLocalText(evidence) ?? "";
-    }
-  }
-
-  const nextTitle = title || observation.candidateTargetTitle || null;
-  const changed =
-    (title && title !== (observation.candidateTargetTitle ?? "")) ||
-    (name && name !== asString(values.personName) && name !== asString(values.name)) ||
-    (scope && scope !== asString(values.scope)) ||
-    (date && date !== asIso(values.date) && date !== asIso(values.startAt)) ||
-    (status && status !== asString(values.status));
-  if (!changed) return observation;
-
-  return {
-    ...observation,
-    candidateTargetTitle: nextTitle,
-    proposedValues: {
-      ...values,
-      ...(title ? { title, label: asString(values.label) || title } : {}),
-      ...(name ? { name, personName: name } : {}),
-      ...(scope ? { scope } : {}),
-      ...(date ? { date, startAt: asIso(values.startAt) || date } : {}),
-      ...(status ? { status } : {}),
-    },
-  };
-}
-
 function isProvenAlreadyCurrent(
   observation: CaptureObservationV2,
   world: CaptureApplyWorld,
@@ -874,72 +670,85 @@ function isProvenAlreadyCurrent(
   const evidence = identityEvidenceText(observation, transcript);
   if (!evidence.trim()) return false;
   const values = observation.proposedValues ?? {};
-  const date = asIso(values.date) || asIso(values.startAt) || isoDateFromLocalText(evidence);
+  const date = asIso(values.date) || asIso(values.startAt) || asIso(values.dueAt);
   const status = (
     asString(values.status) ||
     asString(values.proposedStatus) ||
-    statusTokenFromLocalText(evidence) ||
     ""
   ).toLowerCase();
+  const boundId = observation.candidateTargetId?.trim() || undefined;
+  const uniqueHits = uniquelyEvidencedRecords(
+    observation,
+    world,
+    projectId,
+    evidence,
+  );
 
   if (observation.domain === "milestone") {
-    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
-    if (hits.length !== 1) return false;
-    const row = world.timeline.find((item) => item.id === hits[0]!.id);
+    if (!date) return false;
+    const row = boundId
+      ? world.timeline.find(
+          (item) => item.id === boundId && (!projectId || item.projectId === projectId),
+        )
+      : uniqueHits.length === 1
+        ? world.timeline.find((item) => item.id === uniqueHits[0]!.id)
+        : undefined;
     if (!row) return false;
-    if (date) return (row.startAt ?? "").slice(0, 10) === date.slice(0, 10);
-    return !status;
+    return (row.startAt ?? "").slice(0, 10) === date.slice(0, 10);
   }
   if (observation.domain === "risk") {
-    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
-    if (hits.length !== 1) return false;
-    const row = world.risks.find((item) => item.id === hits[0]!.id);
+    if (!status) return false;
+    const row = boundId
+      ? world.risks.find(
+          (item) => item.id === boundId && (!projectId || item.projectId === projectId),
+        )
+      : uniqueHits.length === 1
+        ? world.risks.find((item) => item.id === uniqueHits[0]!.id)
+        : undefined;
     if (!row) return false;
     if (status === "resolved" || status === "complete" || status === "completed") {
       return row.status === "resolved" || row.status === "accepted";
     }
-    return true;
+    return row.status === status;
   }
   if (observation.domain === "todo") {
-    const hits = uniquelyEvidencedRecords(observation, world, projectId, evidence);
-    if (hits.length !== 1) return false;
-    const row = world.todos.find((item) => item.id === hits[0]!.id);
+    if (!status) return false;
+    const row = boundId
+      ? world.todos.find(
+          (item) =>
+            item.id === boundId &&
+            (!projectId || !item.projectId || item.projectId === projectId),
+        )
+      : uniqueHits.length === 1
+        ? world.todos.find((item) => item.id === uniqueHits[0]!.id)
+        : undefined;
     if (!row) return false;
     if (status === "complete" || status === "completed" || status === "resolved") {
       return Boolean(row.done);
     }
-    return true;
+    return !row.done && (status === "open" || status === "todo");
   }
   if (observation.domain === "person") {
+    const name =
+      asString(values.name) ||
+      asString(values.personName) ||
+      observation.candidateTargetTitle?.trim() ||
+      "";
+    if (!name) return false;
     const project = projectId
       ? world.projects.find((row) => row.id === projectId)
       : undefined;
-    const evidenced = peopleEvidencedByRecordedNameInText(
-      project?.stakeholders ?? [],
-      evidence,
+    return (project?.stakeholders ?? []).some((person) =>
+      namesMatchExact(person.name, name),
     );
-    if (evidenced.length !== 1) return false;
-    return !scopeFromResponsiblePhrase(evidence);
   }
   if (observation.domain === "responsibility") {
-    if (
-      looksLikeRestatement(evidence) &&
-      existingEvidencedPerson(
-        world,
-        projectId,
-        evidence,
-        observation.candidateTargetId ?? null,
-      )
-    ) {
-      return true;
-    }
     const name =
       asString(values.personName) ||
       asString(values.name) ||
       observation.candidateTargetTitle?.trim() ||
       "";
-    const scope =
-      asString(values.scope) || scopeFromResponsiblePhrase(evidence) || "";
+    const scope = asString(values.scope) || "";
     if (!name || !scope) return false;
     return world.knowledge.some((entry) => {
       if (projectId && entry.projectId !== projectId) return false;
