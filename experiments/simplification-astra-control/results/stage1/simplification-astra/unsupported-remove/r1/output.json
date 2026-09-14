@@ -1,0 +1,66 @@
+{
+  "caseId": "unsupported-remove",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6534,
+  "usage": {
+    "prompt_tokens": 1126,
+    "completion_tokens": 229,
+    "total_tokens": 1355,
+    "reasoning_tokens": 67
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The user requests removal of Parade day from the plan.",
+          "evidence": "Please delete Parade day from the plan.",
+          "domain": "milestone",
+          "disposition": "left_untouched",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {},
+          "commentary": "Deletion is explicitly requested, but the supported dispositions and milestone values do not represent deletion.",
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "left_untouched",
+        "statement": "The user requests removal of Parade day from the plan.",
+        "evidence": "Please delete Parade day from the plan.",
+        "truthIntent": "current",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Deletion is explicitly requested, but the supported dispositions and milestone values do not represent deletion."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": "omitted",
+      "evidence": "Please delete Parade day from the plan.",
+      "ambiguity": "Deletion is explicitly requested, but the supported dispositions and milestone values do not represent deletion.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

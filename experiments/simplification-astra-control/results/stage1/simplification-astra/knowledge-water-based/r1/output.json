@@ -1,0 +1,67 @@
+{
+  "caseId": "knowledge-water-based",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4229,
+  "usage": {
+    "prompt_tokens": 1120,
+    "completion_tokens": 127,
+    "total_tokens": 1247,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The wooden-track paint must stay water-based.",
+          "evidence": "Remember: the wooden-track paint must stay water-based.",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "proposedValues": {
+            "text": "The wooden-track paint must stay water-based."
+          },
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "knowledge",
+        "disposition": "create_new",
+        "statement": "The wooden-track paint must stay water-based.",
+        "evidence": "Remember: the wooden-track paint must stay water-based.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "write_knowledge",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "knowledge",
+      "subject": "The wooden-track paint must stay water-based.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "text": "The wooden-track paint must stay water-based."
+      },
+      "evidence": "Remember: the wooden-track paint must stay water-based.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

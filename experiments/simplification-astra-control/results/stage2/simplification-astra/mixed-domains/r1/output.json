@@ -1,0 +1,149 @@
+{
+  "caseId": "mixed-domains",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 10103,
+  "usage": {
+    "prompt_tokens": 1145,
+    "completion_tokens": 488,
+    "total_tokens": 1633,
+    "reasoning_tokens": 82
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 3,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Pippa Gumdrop remains UAT lead.",
+          "evidence": "Pippa Gumdrop remains UAT lead.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-gumdrop",
+          "candidateTargetTitle": "Pippa Gumdrop",
+          "proposedValues": {
+            "personName": "Pippa Gumdrop",
+            "scope": "UAT lead",
+            "ownershipSemantics": "continue"
+          },
+          "modelConfidence": 0.96
+        },
+        {
+          "id": "obs-2",
+          "statement": "Parade day moved to 22 October 2026.",
+          "evidence": "Parade day moved to 22 October 2026.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {
+            "date": "2026-10-22"
+          },
+          "modelConfidence": 1
+        },
+        {
+          "id": "obs-3",
+          "statement": "The chocolate fountain pump is overheating.",
+          "evidence": "The chocolate fountain pump is overheating.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "title": "Chocolate fountain pump overheating"
+          },
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "no_change",
+        "statement": "Pippa Gumdrop remains UAT lead.",
+        "evidence": "Pippa Gumdrop remains UAT lead.",
+        "truthIntent": "current",
+        "candidateTargetId": "person-gumdrop",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Already known — no mutation."
+      },
+      {
+        "id": "obs-2",
+        "domain": "milestone",
+        "disposition": "update_existing",
+        "statement": "Parade day moved to 22 October 2026.",
+        "evidence": "Parade day moved to 22 October 2026.",
+        "truthIntent": "current",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "write",
+        "writeType": "update_milestone",
+        "reason": null
+      },
+      {
+        "id": "obs-3",
+        "domain": "risk",
+        "disposition": "create_new",
+        "statement": "The chocolate fountain pump is overheating.",
+        "evidence": "The chocolate fountain pump is overheating.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_risk",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Pippa Gumdrop",
+      "referencedCanonicalId": "person-gumdrop",
+      "assertedValue": {
+        "personName": "Pippa Gumdrop",
+        "scope": "UAT lead",
+        "ownershipSemantics": "continue"
+      },
+      "evidence": "Pippa Gumdrop remains UAT lead.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    },
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "date": "2026-10-22"
+      },
+      "evidence": "Parade day moved to 22 October 2026.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "risk",
+      "subject": "The chocolate fountain pump is overheating.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Chocolate fountain pump overheating"
+      },
+      "evidence": "The chocolate fountain pump is overheating.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

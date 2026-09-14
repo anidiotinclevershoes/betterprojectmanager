@@ -1,0 +1,109 @@
+{
+  "caseId": "new-person",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7022,
+  "usage": {
+    "prompt_tokens": 1125,
+    "completion_tokens": 347,
+    "total_tokens": 1472,
+    "reasoning_tokens": 40
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Velvet Sprocket is joining the wooden-track refresh.",
+          "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "proposedValues": {
+            "name": "Velvet Sprocket"
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+          "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "proposedValues": {
+            "personName": "Velvet Sprocket",
+            "scope": "Paint lead for the wooden-track refresh",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "The paint lead role is explicit, but it is unclear whether Velvet shares or replaces ownership.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "create_new",
+        "statement": "Velvet Sprocket is joining the wooden-track refresh.",
+        "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "ensure_person",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "The paint lead role is explicit, but it is unclear whether Velvet shares or replaces ownership."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Velvet Sprocket is joining the wooden-track refresh.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Velvet Sprocket"
+      },
+      "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "personName": "Velvet Sprocket",
+        "scope": "Paint lead for the wooden-track refresh",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+      "ambiguity": "The paint lead role is explicit, but it is unclear whether Velvet shares or replaces ownership.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

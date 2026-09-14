@@ -1,0 +1,149 @@
+{
+  "caseId": "ambiguous-same-first-name",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 14383,
+  "usage": {
+    "prompt_tokens": 1122,
+    "completion_tokens": 578,
+    "total_tokens": 1700,
+    "reasoning_tokens": 176
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 3,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick is described as being from the warehouse.",
+          "evidence": "Brick from the warehouse",
+          "domain": "person",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-toy",
+          "candidateTargetId": "person-brick",
+          "candidateTargetTitle": "Brick Oakley",
+          "proposedValues": {
+            "name": "Brick",
+            "text": "Brick is from the warehouse."
+          },
+          "commentary": "It isn't clear whether Brick from the warehouse is the existing Brick Oakley.",
+          "modelConfidence": 0.94
+        },
+        {
+          "id": "obs-2",
+          "statement": "Brick called.",
+          "evidence": "Brick from the warehouse called",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "proposedValues": {
+            "text": "Brick from the warehouse called."
+          },
+          "modelConfidence": 0.98
+        },
+        {
+          "id": "obs-3",
+          "statement": "Brick wants to help with assembly.",
+          "evidence": "he wants to help with assembly.",
+          "domain": "responsibility",
+          "disposition": "left_untouched",
+          "truthIntent": "non_current",
+          "projectId": "proj-toy",
+          "proposedValues": {
+            "personName": "Brick",
+            "scope": "assembly"
+          },
+          "commentary": "This expresses interest in helping, not an agreed responsibility or ownership change.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "ambiguous",
+        "statement": "Brick is described as being from the warehouse.",
+        "evidence": "Brick from the warehouse",
+        "truthIntent": "uncertain",
+        "candidateTargetId": "person-brick",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It isn't clear whether Brick from the warehouse is the existing Brick Oakley."
+      },
+      {
+        "id": "obs-2",
+        "domain": "knowledge",
+        "disposition": "create_new",
+        "statement": "Brick called.",
+        "evidence": "Brick from the warehouse called",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "write_knowledge",
+        "reason": null
+      },
+      {
+        "id": "obs-3",
+        "domain": "responsibility",
+        "disposition": "left_untouched",
+        "statement": "Brick wants to help with assembly.",
+        "evidence": "he wants to help with assembly.",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "This expresses interest in helping, not an agreed responsibility or ownership change."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Brick Oakley",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": {
+        "name": "Brick",
+        "text": "Brick is from the warehouse."
+      },
+      "evidence": "Brick from the warehouse",
+      "ambiguity": "It isn't clear whether Brick from the warehouse is the existing Brick Oakley.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "knowledge",
+      "subject": "Brick called.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "text": "Brick from the warehouse called."
+      },
+      "evidence": "Brick from the warehouse called",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Brick wants to help with assembly.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "personName": "Brick",
+        "scope": "assembly"
+      },
+      "evidence": "he wants to help with assembly.",
+      "ambiguity": "This expresses interest in helping, not an agreed responsibility or ownership change.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,109 @@
+{
+  "caseId": "two-token-person-create",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6327,
+  "usage": {
+    "prompt_tokens": 1128,
+    "completion_tokens": 308,
+    "total_tokens": 1436,
+    "reasoning_tokens": 38
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Jordan Hale is to be added to the project.",
+          "evidence": "Please add Jordan Hale as the new lighting lead.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "name": "Jordan Hale"
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "Jordan Hale is the new lighting lead.",
+          "evidence": "Please add Jordan Hale as the new lighting lead.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "personName": "Jordan Hale",
+            "scope": "lighting lead",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "It isn't clear whether Jordan Hale shares or replaces any existing lighting ownership.",
+          "modelConfidence": 0.95
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "create_new",
+        "statement": "Jordan Hale is to be added to the project.",
+        "evidence": "Please add Jordan Hale as the new lighting lead.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "ensure_person",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Jordan Hale is the new lighting lead.",
+        "evidence": "Please add Jordan Hale as the new lighting lead.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It isn't clear whether Jordan Hale shares or replaces any existing lighting ownership."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Jordan Hale is to be added to the project.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Jordan Hale"
+      },
+      "evidence": "Please add Jordan Hale as the new lighting lead.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Jordan Hale is the new lighting lead.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "personName": "Jordan Hale",
+        "scope": "lighting lead",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Please add Jordan Hale as the new lighting lead.",
+      "ambiguity": "It isn't clear whether Jordan Hale shares or replaces any existing lighting ownership.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

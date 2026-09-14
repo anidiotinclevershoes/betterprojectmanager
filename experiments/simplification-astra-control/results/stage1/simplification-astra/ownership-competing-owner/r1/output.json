@@ -1,0 +1,74 @@
+{
+  "caseId": "ownership-competing-owner",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6630,
+  "usage": {
+    "prompt_tokens": 1126,
+    "completion_tokens": 226,
+    "total_tokens": 1352,
+    "reasoning_tokens": 30
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Fizz Caramel owns UAT lead.",
+          "evidence": "Fizz Caramel owns UAT lead.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-fizz",
+          "candidateTargetTitle": "Fizz Caramel",
+          "proposedValues": {
+            "personName": "Fizz Caramel",
+            "scope": "UAT lead",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "The ownership is explicit, but whether it is shared, replaces another owner, or continues existing ownership is not stated.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Fizz Caramel owns UAT lead.",
+        "evidence": "Fizz Caramel owns UAT lead.",
+        "truthIntent": "current",
+        "candidateTargetId": "person-fizz",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "The ownership is explicit, but whether it is shared, replaces another owner, or continues existing ownership is not stated."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Fizz Caramel",
+      "referencedCanonicalId": "person-fizz",
+      "assertedValue": {
+        "personName": "Fizz Caramel",
+        "scope": "UAT lead",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Fizz Caramel owns UAT lead.",
+      "ambiguity": "The ownership is explicit, but whether it is shared, replaces another owner, or continues existing ownership is not stated.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

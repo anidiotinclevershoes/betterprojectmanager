@@ -1,0 +1,110 @@
+{
+  "caseId": "harbourline-competing-launch",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8688,
+  "usage": {
+    "prompt_tokens": 1291,
+    "completion_tokens": 395,
+    "total_tokens": 1686,
+    "reasoning_tokens": 35
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "12 March 2027 is a possible public launch date.",
+          "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+          "domain": "milestone",
+          "disposition": "ambiguous",
+          "truthIntent": "non_current",
+          "projectId": "proj-harbourline",
+          "candidateTargetId": "ms-hca-launch",
+          "candidateTargetTitle": "Public launch",
+          "proposedValues": {
+            "date": "2027-03-12"
+          },
+          "commentary": "This is one of two possible dates; neither is stated as agreed.",
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "9 April 2027 is a possible public launch date.",
+          "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+          "domain": "milestone",
+          "disposition": "ambiguous",
+          "truthIntent": "non_current",
+          "projectId": "proj-harbourline",
+          "candidateTargetId": "ms-hca-launch",
+          "candidateTargetTitle": "Public launch",
+          "proposedValues": {
+            "date": "2027-04-09"
+          },
+          "commentary": "This is one of two possible dates; neither is stated as agreed.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "ambiguous",
+        "statement": "12 March 2027 is a possible public launch date.",
+        "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+        "truthIntent": "non_current",
+        "candidateTargetId": "ms-hca-launch",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Not asserting current project truth — no mutation."
+      },
+      {
+        "id": "obs-2",
+        "domain": "milestone",
+        "disposition": "ambiguous",
+        "statement": "9 April 2027 is a possible public launch date.",
+        "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+        "truthIntent": "non_current",
+        "candidateTargetId": "ms-hca-launch",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Not asserting current project truth — no mutation."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Public launch",
+      "referencedCanonicalId": "ms-hca-launch",
+      "assertedValue": {
+        "date": "2027-03-12"
+      },
+      "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+      "ambiguity": "This is one of two possible dates; neither is stated as agreed.",
+      "disposition": "no_change",
+      "writeProposed": false
+    },
+    {
+      "domain": "milestone",
+      "subject": "Public launch",
+      "referencedCanonicalId": "ms-hca-launch",
+      "assertedValue": {
+        "date": "2027-04-09"
+      },
+      "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+      "ambiguity": "This is one of two possible dates; neither is stated as agreed.",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

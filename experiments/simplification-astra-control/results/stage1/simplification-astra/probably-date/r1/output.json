@@ -1,0 +1,69 @@
+{
+  "caseId": "probably-date",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4431,
+  "usage": {
+    "prompt_tokens": 1130,
+    "completion_tokens": 194,
+    "total_tokens": 1324,
+    "reasoning_tokens": 35
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Parade day is probably 30 October 2026.",
+          "evidence": "Parade day is probably 30 October 2026.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {
+            "date": "2026-10-30"
+          },
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "update_existing",
+        "statement": "Parade day is probably 30 October 2026.",
+        "evidence": "Parade day is probably 30 October 2026.",
+        "truthIntent": "uncertain",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It is unclear whether this should change current project truth."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "date": "2026-10-30"
+      },
+      "evidence": "Parade day is probably 30 October 2026.",
+      "ambiguity": "It is unclear whether this should change current project truth.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

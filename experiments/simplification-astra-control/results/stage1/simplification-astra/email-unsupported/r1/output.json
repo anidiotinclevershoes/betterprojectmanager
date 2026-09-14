@@ -1,0 +1,67 @@
+{
+  "caseId": "email-unsupported",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4049,
+  "usage": {
+    "prompt_tokens": 1129,
+    "completion_tokens": 129,
+    "total_tokens": 1258,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Email the whole parade committee about the new date.",
+          "evidence": "Please email the whole parade committee about the new date.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "title": "Email the whole parade committee about the new date"
+          },
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "todo",
+        "disposition": "create_new",
+        "statement": "Email the whole parade committee about the new date.",
+        "evidence": "Please email the whole parade committee about the new date.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_todo",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Email the whole parade committee about the new date.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Email the whole parade committee about the new date"
+      },
+      "evidence": "Please email the whole parade committee about the new date.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

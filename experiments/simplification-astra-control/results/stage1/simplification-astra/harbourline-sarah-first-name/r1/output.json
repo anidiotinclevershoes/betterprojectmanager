@@ -1,0 +1,72 @@
+{
+  "caseId": "harbourline-sarah-first-name",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7841,
+  "usage": {
+    "prompt_tokens": 1281,
+    "completion_tokens": 254,
+    "total_tokens": 1535,
+    "reasoning_tokens": 72
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Sarah may now own communications, but her identity and ownership are uncertain.",
+          "evidence": "I think Sarah owns communications now? Not sure which Sarah.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-harbourline",
+          "proposedValues": {
+            "personName": "Sarah",
+            "scope": "communications",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "It isn't clear which Sarah is meant, whether she owns communications, or whether ownership would be shared or replaced.",
+          "modelConfidence": 0.98
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Sarah may now own communications, but her identity and ownership are uncertain.",
+        "evidence": "I think Sarah owns communications now? Not sure which Sarah.",
+        "truthIntent": "uncertain",
+        "candidateTargetId": null,
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It isn't clear which Sarah is meant, whether she owns communications, or whether ownership would be shared or replaced."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Sarah may now own communications, but her identity and ownership are uncertain.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "personName": "Sarah",
+        "scope": "communications",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "I think Sarah owns communications now? Not sure which Sarah.",
+      "ambiguity": "It isn't clear which Sarah is meant, whether she owns communications, or whether ownership would be shared or replaced.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

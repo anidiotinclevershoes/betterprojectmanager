@@ -1,0 +1,73 @@
+{
+  "caseId": "existing-person",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5526,
+  "usage": {
+    "prompt_tokens": 1135,
+    "completion_tokens": 239,
+    "total_tokens": 1374,
+    "reasoning_tokens": 47
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Pippa Gumdrop continues as UAT lead for the licorice stands.",
+          "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-gumdrop",
+          "candidateTargetTitle": "Pippa Gumdrop",
+          "proposedValues": {
+            "personName": "Pippa Gumdrop",
+            "scope": "UAT lead for the licorice stands",
+            "ownershipSemantics": "continue"
+          },
+          "modelConfidence": 0.98
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "no_change",
+        "statement": "Pippa Gumdrop continues as UAT lead for the licorice stands.",
+        "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+        "truthIntent": "current",
+        "candidateTargetId": "person-gumdrop",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "Lume understood an ownership change, but needs you to confirm who owns what."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Pippa Gumdrop",
+      "referencedCanonicalId": "person-gumdrop",
+      "assertedValue": {
+        "personName": "Pippa Gumdrop",
+        "scope": "UAT lead for the licorice stands",
+        "ownershipSemantics": "continue"
+      },
+      "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+      "ambiguity": "Lume understood an ownership change, but needs you to confirm who owns what.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

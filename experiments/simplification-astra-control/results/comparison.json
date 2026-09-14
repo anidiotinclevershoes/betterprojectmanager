@@ -1,0 +1,1721 @@
+{
+  "modelMismatch": [],
+  "stage1": {
+    "facts": 70,
+    "recalled": 69,
+    "falseFacts": 5,
+    "falseWrites": 6,
+    "wrongIdentity": 1,
+    "silentOmissions": 0,
+    "evidenceKnown": 69,
+    "evidenceGrounded": 69,
+    "ambiguityKnown": 22,
+    "ambiguitySafe": 19,
+    "clearKnown": 36,
+    "clearOk": 23,
+    "justified": 23,
+    "unnecessary": 14,
+    "extraWrites": 5,
+    "malformed": 0,
+    "latencies": [
+      7425,
+      8125,
+      14383,
+      5976,
+      8003,
+      8932,
+      10166,
+      14132,
+      6250,
+      3895,
+      4494,
+      3785,
+      4690,
+      5518,
+      11622,
+      9965,
+      6896,
+      4530,
+      6564,
+      13128,
+      7915,
+      9935,
+      6534,
+      28276,
+      6622,
+      6686,
+      5118,
+      4229,
+      4089,
+      6292,
+      11095,
+      5390,
+      7803,
+      7988,
+      6675,
+      4049,
+      3784,
+      4114,
+      9001,
+      3602,
+      7787,
+      3702,
+      6324,
+      7218,
+      6630,
+      11649,
+      5624,
+      4151,
+      5183,
+      4431,
+      4690,
+      5696,
+      8751,
+      9623,
+      7841,
+      8688,
+      4514,
+      4604,
+      17784
+    ],
+    "promptTokens": 67276,
+    "completionTokens": 17712,
+    "cases": 59
+  },
+  "stage2": {
+    "facts": 87,
+    "recalled": 87,
+    "falseFacts": 6,
+    "falseWrites": 9,
+    "wrongIdentity": 3,
+    "silentOmissions": 0,
+    "evidenceKnown": 87,
+    "evidenceGrounded": 87,
+    "ambiguityKnown": 24,
+    "ambiguitySafe": 24,
+    "clearKnown": 51,
+    "clearOk": 34,
+    "justified": 27,
+    "unnecessary": 17,
+    "extraWrites": 6,
+    "malformed": 0,
+    "latencies": [
+      5526,
+      5485,
+      5691,
+      8160,
+      7022,
+      7980,
+      11395,
+      18705,
+      14778,
+      8131,
+      10238,
+      9840,
+      10880,
+      10281,
+      10029,
+      12098,
+      14321,
+      9554,
+      10103,
+      9516,
+      9103,
+      9970,
+      7612,
+      6642,
+      4108,
+      5168,
+      5212,
+      8507,
+      9936,
+      9695,
+      7302,
+      14900,
+      7135,
+      35984,
+      32643,
+      31054,
+      4547,
+      3652,
+      4053,
+      8631,
+      6298,
+      7564,
+      6327,
+      6181,
+      8297,
+      9601,
+      6270,
+      7041,
+      5080,
+      3663,
+      4056,
+      5416,
+      5016,
+      5129,
+      9719,
+      9613,
+      9698,
+      19179,
+      19621,
+      16344
+    ],
+    "promptTokens": 68673,
+    "completionTokens": 24872,
+    "cases": 60
+  },
+  "stage3": {
+    "facts": 21,
+    "recalled": 21,
+    "falseFacts": 2,
+    "falseWrites": 2,
+    "wrongIdentity": 0,
+    "silentOmissions": 0,
+    "evidenceKnown": 21,
+    "evidenceGrounded": 21,
+    "ambiguityKnown": 5,
+    "ambiguitySafe": 5,
+    "clearKnown": 14,
+    "clearOk": 11,
+    "justified": 5,
+    "unnecessary": 4,
+    "extraWrites": 0,
+    "malformed": 0,
+    "latencies": [
+      9966,
+      6786,
+      4048,
+      9867,
+      8316,
+      31173,
+      4205,
+      8106,
+      8501,
+      5046,
+      7686,
+      16819
+    ],
+    "promptTokens": 13763,
+    "completionTokens": 5381,
+    "cases": 12
+  },
+  "signals": [
+    {
+      "caseId": "existing-person",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "new-person",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1,
+        "needs_you": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "ambiguous-same-first-name",
+      "observationCount": 3,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1,
+        "update": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "responsibility-continues",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "responsibility-replacement",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1,
+        "needs_you": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "share-vs-replace-ambiguous",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "existing-risk-update",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1,
+        "no_change": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "new-risk",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1,
+        "needs_you": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "risk-resolution",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 2
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "milestone-move",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "unchanged-date",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "todo-create",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "availability",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "duplicate-observation",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1,
+        "no_change": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "correction-of-wording",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1,
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "mixed-domains",
+      "observationCount": 3,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1,
+        "update": 1,
+        "create": 1
+      },
+      "writeProposed": 2
+    },
+    {
+      "caseId": "pronoun-ambiguity",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "irrelevant-commentary",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "explicit-no-change",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 2
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "cross-project-bait",
+      "observationCount": 3,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1,
+        "needs_you": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "toyworld-vocabulary-bait",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "contradict-parade",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 2
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "unsupported-remove",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "holdout-h6",
+      "observationCount": 10,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 7,
+        "update": 1,
+        "create": 2,
+        "needs_you": 1
+      },
+      "writeProposed": 3
+    },
+    {
+      "caseId": "todo-remove-supported",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "unsupported-remove-person",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "unsupported-remove-risk",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "knowledge-water-based",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "vague-parade",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "relative-date-parade",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "historic-parade",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 2,
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "similar-name-exact",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "similar-name-other-brick",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "similar-name-ambiguous-brick",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "similar-name-spelling",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "email-unsupported",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "todo-complete-jelly",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "person-rename-unsupported",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "contradict-packaging",
+      "observationCount": 2,
+      "uncertainTruthIntent": 2,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 2
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "todo-dated-canes",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "issue-cert-worse",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1,
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "chatter-weather",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "availability-relative",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "two-token-person-create",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1,
+        "needs_you": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "ownership-competing-owner",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "explicit-ownership-first",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1,
+        "needs_you": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "mixed-clear-and-unclear",
+      "observationCount": 2,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "title-only-existing-target",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "might-ownership",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "probably-date",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "valid-canonical-id",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "wrong-type-id",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "foreign-invented-id",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "c5-timber-floor",
+      "observationCount": 3,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 2,
+        "create": 1
+      },
+      "writeProposed": 3
+    },
+    {
+      "caseId": "harbourline-sarah-first-name",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "harbourline-competing-launch",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 2
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "repeated-fact-wording",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "already-current-status",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "noisy-conversational",
+      "observationCount": 6,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 2,
+        "needs_you": 1,
+        "create": 1,
+        "update": 1,
+        "no_change": 1
+      },
+      "writeProposed": 2
+    }
+  ],
+  "bakeSignalsSimplification": [
+    {
+      "caseId": "existing-person",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "new-person",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1,
+        "needs_you": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "ambiguous-same-first-name",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "responsibility-continues",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "responsibility-replacement",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "share-vs-replace-ambiguous",
+      "observationCount": 2,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1,
+        "left_untouched": 2
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "existing-risk-update",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "new-risk",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 2
+      },
+      "writeProposed": 2
+    },
+    {
+      "caseId": "risk-resolution",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "milestone-move",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "unchanged-date",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "todo-create",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "availability",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "duplicate-observation",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1,
+        "no_change": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "correction-of-wording",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "mixed-domains",
+      "observationCount": 3,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 2,
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "pronoun-ambiguity",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "irrelevant-commentary",
+      "observationCount": 2,
+      "uncertainTruthIntent": 2,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 2
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "explicit-no-change",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "cross-project-bait",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 2,
+      "dispositions": {},
+      "writeProposed": 0
+    },
+    {
+      "caseId": "toyworld-vocabulary-bait",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "contradict-parade",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1,
+        "no_change": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "unsupported-remove",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "holdout-h6",
+      "observationCount": 5,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1,
+        "create": 2,
+        "left_untouched": 4
+      },
+      "writeProposed": 3
+    },
+    {
+      "caseId": "todo-remove-supported",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "unsupported-remove-person",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "unsupported-remove-risk",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "knowledge-water-based",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "vague-parade",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "relative-date-parade",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "historic-parade",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "similar-name-exact",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {},
+      "writeProposed": 0
+    },
+    {
+      "caseId": "similar-name-other-brick",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "similar-name-ambiguous-brick",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 1,
+      "dispositions": {},
+      "writeProposed": 0
+    },
+    {
+      "caseId": "similar-name-spelling",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {},
+      "writeProposed": 0
+    },
+    {
+      "caseId": "email-unsupported",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "todo-complete-jelly",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "person-rename-unsupported",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "contradict-packaging",
+      "observationCount": 2,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 2
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "todo-dated-canes",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "issue-cert-worse",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "chatter-weather",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "availability-relative",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "two-token-person-create",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "ownership-competing-owner",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "explicit-ownership-first",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "mixed-clear-and-unclear",
+      "observationCount": 2,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "create": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "title-only-existing-target",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "might-ownership",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "probably-date",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "valid-canonical-id",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "wrong-type-id",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "foreign-invented-id",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "c5-timber-floor",
+      "observationCount": 2,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "update": 1,
+        "needs_you": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 1
+    },
+    {
+      "caseId": "harbourline-sarah-first-name",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "harbourline-competing-launch",
+      "observationCount": 1,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "repeated-fact-wording",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1,
+        "left_untouched": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "already-current-status",
+      "observationCount": 1,
+      "uncertainTruthIntent": 0,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "no_change": 1
+      },
+      "writeProposed": 0
+    },
+    {
+      "caseId": "noisy-conversational",
+      "observationCount": 4,
+      "uncertainTruthIntent": 1,
+      "omitLikeTargetIds": 0,
+      "dispositions": {
+        "needs_you": 1,
+        "create": 1,
+        "update": 1,
+        "left_untouched": 2
+      },
+      "writeProposed": 2
+    }
+  ],
+  "stage2Var": {
+    "existing-person": 1,
+    "new-person": 1,
+    "ambiguous-same-first-name": 2,
+    "share-vs-replace-ambiguous": 1,
+    "existing-risk-update": 1,
+    "correction-of-wording": 3,
+    "mixed-domains": 1,
+    "pronoun-ambiguity": 2,
+    "irrelevant-commentary": 1,
+    "contradict-parade": 1,
+    "unsupported-remove": 1,
+    "holdout-h6": 1,
+    "vague-parade": 1,
+    "similar-name-ambiguous-brick": 1,
+    "two-token-person-create": 1,
+    "explicit-ownership-first": 1,
+    "title-only-existing-target": 1,
+    "might-ownership": 1,
+    "c5-timber-floor": 2,
+    "noisy-conversational": 1
+  },
+  "watch": [
+    {
+      "caseId": "c5-timber-floor",
+      "title": "Long-haul C5 timber-floor services risk",
+      "cols": {
+        "current": {
+          "note": "update write=yes id=todo-asbestos | create write=yes id=omitted",
+          "writes": [
+            "update:todo:todo-asbestos",
+            "create:risk:omitted"
+          ]
+        },
+        "simplification": {
+          "note": "update write=yes id=todo-asbestos | needs_you write=no id=omitted",
+          "writes": [
+            "update:todo:todo-asbestos"
+          ]
+        },
+        "ai-first": {
+          "note": "create write=yes id=omitted | create write=yes id=omitted",
+          "writes": [
+            "create:knowledge:omitted",
+            "update:todo:todo-asbestos",
+            "create:risk:omitted"
+          ]
+        },
+        "simplification-astra": {
+          "note": "update write=yes id=omitted | create write=yes id=omitted",
+          "writes": [
+            "update:knowledge:omitted",
+            "update:todo:todo-asbestos",
+            "create:risk:omitted"
+          ]
+        }
+      }
+    },
+    {
+      "caseId": "mixed-domains",
+      "title": "Mixed domains in one transcript",
+      "cols": {
+        "current": {
+          "note": "no_change write=no id=person-gumdrop | update write=yes id=ms-parade | create write=yes id=omitted",
+          "writes": [
+            "update:milestone:ms-parade",
+            "create:risk:omitted"
+          ]
+        },
+        "simplification": {
+          "note": "needs_you write=no id=person-gumdrop | update write=yes id=ms-parade | needs_you write=no id=omitted",
+          "writes": [
+            "update:milestone:ms-parade"
+          ]
+        },
+        "ai-first": {
+          "note": "no_change write=no id=resp-uat | update write=yes id=ms-parade | create write=yes id=omitted",
+          "writes": [
+            "update:milestone:ms-parade",
+            "create:risk:omitted"
+          ]
+        },
+        "simplification-astra": {
+          "note": "no_change write=no id=person-gumdrop | update write=yes id=ms-parade | create write=yes id=omitted",
+          "writes": [
+            "update:milestone:ms-parade",
+            "create:risk:omitted"
+          ]
+        }
+      }
+    },
+    {
+      "caseId": "mixed-clear-and-unclear",
+      "title": "Clear create plus uncertain concern",
+      "cols": {
+        "current": {
+          "note": "create write=yes id=omitted | left_untouched write=no id=omitted",
+          "writes": [
+            "create:todo:omitted"
+          ]
+        },
+        "simplification": {
+          "note": "create write=yes id=omitted | left_untouched write=no id=omitted",
+          "writes": [
+            "create:todo:omitted"
+          ]
+        },
+        "ai-first": {
+          "note": "create write=yes id=omitted | left_untouched write=no id=omitted",
+          "writes": [
+            "create:todo:omitted"
+          ]
+        },
+        "simplification-astra": {
+          "note": "create write=yes id=omitted | left_untouched write=no id=omitted",
+          "writes": [
+            "create:todo:omitted"
+          ]
+        }
+      }
+    },
+    {
+      "caseId": "similar-name-exact",
+      "title": "Exact known Person restatement",
+      "cols": {
+        "current": {
+          "note": "no_change write=no id=person-brick",
+          "writes": []
+        },
+        "simplification": {
+          "note": "No matching item",
+          "writes": []
+        },
+        "ai-first": {
+          "note": "no_change write=no id=person-brick",
+          "writes": []
+        },
+        "simplification-astra": {
+          "note": "needs_you write=no id=person-brick",
+          "writes": []
+        }
+      }
+    },
+    {
+      "caseId": "similar-name-spelling",
+      "title": "Spelling-near Person",
+      "cols": {
+        "current": {
+          "note": "needs_you write=no id=person-brick",
+          "writes": []
+        },
+        "simplification": {
+          "note": "No matching item",
+          "writes": []
+        },
+        "ai-first": {
+          "note": "no_change write=no id=person-brick",
+          "writes": []
+        },
+        "simplification-astra": {
+          "note": "needs_you write=no id=person-brick",
+          "writes": []
+        }
+      }
+    },
+    {
+      "caseId": "responsibility-continues",
+      "title": "Responsibility continues",
+      "cols": {
+        "current": {
+          "note": "no_change write=no id=person-pixel",
+          "writes": []
+        },
+        "simplification": {
+          "note": "needs_you write=no id=person-pixel",
+          "writes": []
+        },
+        "ai-first": {
+          "note": "no_change write=no id=person-pixel",
+          "writes": []
+        },
+        "simplification-astra": {
+          "note": "needs_you write=no id=person-pixel",
+          "writes": []
+        }
+      }
+    },
+    {
+      "caseId": "explicit-ownership-first",
+      "title": "Person + explicit new responsibility",
+      "cols": {
+        "current": {
+          "note": "needs_you write=no id=person-gumdrop",
+          "writes": []
+        },
+        "simplification": {
+          "note": "needs_you write=no id=person-gumdrop",
+          "writes": []
+        },
+        "ai-first": {
+          "note": "create write=yes id=omitted",
+          "writes": [
+            "create:person:omitted",
+            "create:responsibility:omitted"
+          ]
+        },
+        "simplification-astra": {
+          "note": "create write=yes id=omitted",
+          "writes": [
+            "create:person:omitted"
+          ]
+        }
+      }
+    },
+    {
+      "caseId": "contradict-packaging",
+      "title": "Contradictory sibling facts on one issue",
+      "cols": {
+        "current": {
+          "note": "update write=yes id=risk-packaging",
+          "writes": [
+            "update:risk:risk-packaging"
+          ]
+        },
+        "simplification": {
+          "note": "needs_you write=no id=risk-packaging",
+          "writes": []
+        },
+        "ai-first": {
+          "note": "needs_you write=no id=risk-packaging",
+          "writes": []
+        },
+        "simplification-astra": {
+          "note": "needs_you write=no id=risk-packaging",
+          "writes": []
+        }
+      }
+    },
+    {
+      "caseId": "correction-of-wording",
+      "title": "Correction of earlier wording",
+      "cols": {
+        "current": {
+          "note": "create write=yes id=omitted",
+          "writes": [
+            "create:risk:omitted",
+            "create:risk:omitted"
+          ]
+        },
+        "simplification": {
+          "note": "create write=yes id=omitted",
+          "writes": [
+            "create:risk:omitted"
+          ]
+        },
+        "ai-first": {
+          "note": "create write=yes id=omitted",
+          "writes": [
+            "create:risk:omitted"
+          ]
+        },
+        "simplification-astra": {
+          "note": "left_untouched write=no id=risk-console",
+          "writes": []
+        }
+      }
+    },
+    {
+      "caseId": "title-only-existing-target",
+      "title": "Title-only existing entity date update",
+      "cols": {
+        "current": {
+          "note": "update write=yes id=ms-parade",
+          "writes": [
+            "update:milestone:ms-parade"
+          ]
+        },
+        "simplification": {
+          "note": "update write=yes id=ms-parade",
+          "writes": [
+            "update:milestone:ms-parade"
+          ]
+        },
+        "ai-first": {
+          "note": "update write=yes id=ms-parade",
+          "writes": [
+            "update:milestone:ms-parade"
+          ]
+        },
+        "simplification-astra": {
+          "note": "update write=yes id=ms-parade",
+          "writes": [
+            "update:milestone:ms-parade"
+          ]
+        }
+      }
+    }
+  ]
+}

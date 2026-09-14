@@ -1,0 +1,101 @@
+{
+  "caseId": "mixed-clear-and-unclear",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5624,
+  "usage": {
+    "prompt_tokens": 1137,
+    "completion_tokens": 234,
+    "total_tokens": 1371,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Add a to-do to order extra sprinkles.",
+          "evidence": "Please add a to-do to order extra sprinkles",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "title": "Order extra sprinkles"
+          },
+          "modelConfidence": 1
+        },
+        {
+          "id": "obs-2",
+          "statement": "The speaker thinks Security might be worried.",
+          "evidence": "I think Security might be worried.",
+          "domain": "unknown",
+          "disposition": "left_untouched",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "proposedValues": {},
+          "commentary": "It isn't clear what Security is worried about or what project information should change.",
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "todo",
+        "disposition": "create_new",
+        "statement": "Add a to-do to order extra sprinkles.",
+        "evidence": "Please add a to-do to order extra sprinkles",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_todo",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "The speaker thinks Security might be worried.",
+        "evidence": "I think Security might be worried.",
+        "truthIntent": "uncertain",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "It isn't clear what Security is worried about or what project information should change."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Add a to-do to order extra sprinkles.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Order extra sprinkles"
+      },
+      "evidence": "Please add a to-do to order extra sprinkles",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "unknown",
+      "subject": "The speaker thinks Security might be worried.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "I think Security might be worried.",
+      "ambiguity": "It isn't clear what Security is worried about or what project information should change.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

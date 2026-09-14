@@ -1,0 +1,109 @@
+{
+  "caseId": "explicit-ownership-first",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7041,
+  "usage": {
+    "prompt_tokens": 1124,
+    "completion_tokens": 302,
+    "total_tokens": 1426,
+    "reasoning_tokens": 35
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Sarah Kim is a named project person.",
+          "evidence": "Sarah Kim owns float safety.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "name": "Sarah Kim"
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "Sarah Kim owns float safety.",
+          "evidence": "Sarah Kim owns float safety.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "personName": "Sarah Kim",
+            "scope": "float safety",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "The ownership is explicit, but whether it is shared, replaces another owner, or continues existing ownership is not stated.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "create_new",
+        "statement": "Sarah Kim is a named project person.",
+        "evidence": "Sarah Kim owns float safety.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "ensure_person",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Sarah Kim owns float safety.",
+        "evidence": "Sarah Kim owns float safety.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "The ownership is explicit, but whether it is shared, replaces another owner, or continues existing ownership is not stated."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Sarah Kim is a named project person.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Sarah Kim"
+      },
+      "evidence": "Sarah Kim owns float safety.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Sarah Kim owns float safety.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "personName": "Sarah Kim",
+        "scope": "float safety",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Sarah Kim owns float safety.",
+      "ambiguity": "The ownership is explicit, but whether it is shared, replaces another owner, or continues existing ownership is not stated.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

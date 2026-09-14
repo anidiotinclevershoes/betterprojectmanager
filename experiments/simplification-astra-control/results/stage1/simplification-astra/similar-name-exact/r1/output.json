@@ -1,0 +1,73 @@
+{
+  "caseId": "similar-name-exact",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5390,
+  "usage": {
+    "prompt_tokens": 1152,
+    "completion_tokens": 215,
+    "total_tokens": 1367,
+    "reasoning_tokens": 47
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick Oakley remains the Toyworld sponsor.",
+          "evidence": "Brick Oakley remains the Toyworld sponsor.",
+          "domain": "responsibility",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "person-brick",
+          "candidateTargetTitle": "Brick Oakley",
+          "proposedValues": {
+            "personName": "Brick Oakley",
+            "scope": "Toyworld sponsor",
+            "ownershipSemantics": "continue"
+          },
+          "modelConfidence": 0.97
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "no_change",
+        "statement": "Brick Oakley remains the Toyworld sponsor.",
+        "evidence": "Brick Oakley remains the Toyworld sponsor.",
+        "truthIntent": "current",
+        "candidateTargetId": "person-brick",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "Lume understood an ownership change, but needs you to confirm who owns what."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Brick Oakley",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": {
+        "personName": "Brick Oakley",
+        "scope": "Toyworld sponsor",
+        "ownershipSemantics": "continue"
+      },
+      "evidence": "Brick Oakley remains the Toyworld sponsor.",
+      "ambiguity": "Lume understood an ownership change, but needs you to confirm who owns what.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

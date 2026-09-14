@@ -1,0 +1,64 @@
+{
+  "caseId": "foreign-invented-id",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8751,
+  "usage": {
+    "prompt_tokens": 1138,
+    "completion_tokens": 283,
+    "total_tokens": 1421,
+    "reasoning_tokens": 120
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Gumdrop Bridge icing is worse.",
+          "evidence": "Please attach this update to risk-console-not-in-candyland: Gumdrop Bridge icing is worse.",
+          "domain": "risk",
+          "disposition": "left_untouched",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {},
+          "commentary": "The explicitly requested target is not among the supplied records. It is unclear whether the update is intended for Candyland's existing Gumdrop Bridge icing risk.",
+          "modelConfidence": 0.98
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "left_untouched",
+        "statement": "Gumdrop Bridge icing is worse.",
+        "evidence": "Please attach this update to risk-console-not-in-candyland: Gumdrop Bridge icing is worse.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "The explicitly requested target is not among the supplied records. It is unclear whether the update is intended for Candyland's existing Gumdrop Bridge icing risk."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Gumdrop Bridge icing is worse.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Please attach this update to risk-console-not-in-candyland: Gumdrop Bridge icing is worse.",
+      "ambiguity": "The explicitly requested target is not among the supplied records. It is unclear whether the update is intended for Candyland's existing Gumdrop Bridge icing risk.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

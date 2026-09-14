@@ -1,0 +1,69 @@
+{
+  "caseId": "already-current-status",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4604,
+  "usage": {
+    "prompt_tokens": 1129,
+    "completion_tokens": 168,
+    "total_tokens": 1297,
+    "reasoning_tokens": 17
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Gumdrop Bridge icing remains an open risk.",
+          "evidence": "Gumdrop Bridge icing is still an open risk.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "risk-bridge",
+          "candidateTargetTitle": "Gumdrop Bridge icing",
+          "proposedValues": {
+            "status": "open"
+          },
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "no_change",
+        "statement": "Gumdrop Bridge icing remains an open risk.",
+        "evidence": "Gumdrop Bridge icing is still an open risk.",
+        "truthIntent": "current",
+        "candidateTargetId": "risk-bridge",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Already known — no mutation."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Gumdrop Bridge icing",
+      "referencedCanonicalId": "risk-bridge",
+      "assertedValue": {
+        "status": "open"
+      },
+      "evidence": "Gumdrop Bridge icing is still an open risk.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,69 @@
+{
+  "caseId": "valid-canonical-id",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4690,
+  "usage": {
+    "prompt_tokens": 1134,
+    "completion_tokens": 154,
+    "total_tokens": 1288,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Parade day moved to 22 October 2026.",
+          "evidence": "Update ms-parade: Parade day moved to 22 October 2026.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {
+            "date": "2026-10-22"
+          },
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "update_existing",
+        "statement": "Parade day moved to 22 October 2026.",
+        "evidence": "Update ms-parade: Parade day moved to 22 October 2026.",
+        "truthIntent": "current",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "write",
+        "writeType": "update_milestone",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "date": "2026-10-22"
+      },
+      "evidence": "Update ms-parade: Parade day moved to 22 October 2026.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

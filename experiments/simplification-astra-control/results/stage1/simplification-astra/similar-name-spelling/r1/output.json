@@ -1,0 +1,74 @@
+{
+  "caseId": "similar-name-spelling",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6675,
+  "usage": {
+    "prompt_tokens": 1152,
+    "completion_tokens": 263,
+    "total_tokens": 1415,
+    "reasoning_tokens": 69
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brikk Oakley continues as sponsor.",
+          "evidence": "Brikk Oakley is still the sponsor.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "person-brick",
+          "candidateTargetTitle": "Brick Oakley",
+          "proposedValues": {
+            "personName": "Brikk Oakley",
+            "scope": "sponsor",
+            "ownershipSemantics": "continue"
+          },
+          "commentary": "It is unclear whether “Brikk Oakley” refers to the existing person “Brick Oakley.”",
+          "modelConfidence": 0.9
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Brikk Oakley continues as sponsor.",
+        "evidence": "Brikk Oakley is still the sponsor.",
+        "truthIntent": "current",
+        "candidateTargetId": "person-brick",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It is unclear whether “Brikk Oakley” refers to the existing person “Brick Oakley.”"
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Brick Oakley",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": {
+        "personName": "Brikk Oakley",
+        "scope": "sponsor",
+        "ownershipSemantics": "continue"
+      },
+      "evidence": "Brikk Oakley is still the sponsor.",
+      "ambiguity": "It is unclear whether “Brikk Oakley” refers to the existing person “Brick Oakley.”",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

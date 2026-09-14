@@ -1,0 +1,69 @@
+{
+  "caseId": "availability-relative",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6324,
+  "usage": {
+    "prompt_tokens": 1124,
+    "completion_tokens": 247,
+    "total_tokens": 1371,
+    "reasoning_tokens": 102
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Fizz Caramel is off next week.",
+          "evidence": "Fizz is off next week.",
+          "domain": "availability",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-fizz",
+          "candidateTargetTitle": "Fizz Caramel",
+          "proposedValues": {
+            "personName": "Fizz Caramel"
+          },
+          "modelConfidence": 0.98
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "availability",
+        "disposition": "update_existing",
+        "statement": "Fizz Caramel is off next week.",
+        "evidence": "Fizz is off next week.",
+        "truthIntent": "current",
+        "candidateTargetId": "person-fizz",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This availability cannot be saved — the dates are not clear."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "availability",
+      "subject": "Fizz Caramel",
+      "referencedCanonicalId": "person-fizz",
+      "assertedValue": {
+        "personName": "Fizz Caramel"
+      },
+      "evidence": "Fizz is off next week.",
+      "ambiguity": "This availability cannot be saved — the dates are not clear.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

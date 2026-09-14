@@ -1,0 +1,132 @@
+{
+  "caseId": "historic-parade",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 11095,
+  "usage": {
+    "prompt_tokens": 1140,
+    "completion_tokens": 462,
+    "total_tokens": 1602,
+    "reasoning_tokens": 180
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Last June, Parade day used to be the 12th.",
+          "evidence": "Last June the Parade day used to be the 12th",
+          "domain": "milestone",
+          "disposition": "left_untouched",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {
+            "label": "Parade day"
+          },
+          "commentary": "This describes a former date; it does not establish the current Parade day date.",
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "The banners still say June.",
+          "evidence": "the banners still say June",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "text": "The banners still say June."
+          },
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "left_untouched",
+        "statement": "Last June, Parade day used to be the 12th.",
+        "evidence": "Last June the Parade day used to be the 12th",
+        "truthIntent": "non_current",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "This describes a former date; it does not establish the current Parade day date."
+      },
+      {
+        "id": "obs-2",
+        "domain": "knowledge",
+        "disposition": "create_new",
+        "statement": "The banners still say June.",
+        "evidence": "the banners still say June",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "write_knowledge",
+        "reason": null
+      },
+      {
+        "id": "coverage-left-1",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "which is why",
+        "evidence": "which is why",
+        "truthIntent": "uncertain",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Lume couldn't safely interpret this part of your capture."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "label": "Parade day"
+      },
+      "evidence": "Last June the Parade day used to be the 12th",
+      "ambiguity": "This describes a former date; it does not establish the current Parade day date.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    },
+    {
+      "domain": "knowledge",
+      "subject": "The banners still say June.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "text": "The banners still say June."
+      },
+      "evidence": "the banners still say June",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "unknown",
+      "subject": "which is why",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "leftUntouched": true,
+        "leftUntouchedSource": "coverage"
+      },
+      "evidence": "which is why",
+      "ambiguity": "Lume couldn't safely interpret this part of your capture.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

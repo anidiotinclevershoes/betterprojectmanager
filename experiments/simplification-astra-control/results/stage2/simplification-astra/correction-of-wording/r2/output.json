@@ -1,0 +1,137 @@
+{
+  "caseId": "correction-of-wording",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 14321,
+  "usage": {
+    "prompt_tokens": 1119,
+    "completion_tokens": 593,
+    "total_tokens": 1712,
+    "reasoning_tokens": 199
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 3,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The shader compile was initially identified as stalling the cert build, but that statement was corrected.",
+          "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+          "domain": "knowledge",
+          "disposition": "ignore",
+          "truthIntent": "non_current",
+          "projectId": "proj-game",
+          "proposedValues": {},
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "The audio bus mixer is stalling the cert build.",
+          "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "proposedValues": {
+            "text": "The audio bus mixer is stalling the cert build."
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-3",
+          "statement": "The shader is not the cause of the stated cert build stall.",
+          "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "proposedValues": {
+            "text": "The shader is not the cause of the stated cert build stall."
+          },
+          "modelConfidence": 0.98
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "knowledge",
+        "disposition": "ignore",
+        "statement": "The shader compile was initially identified as stalling the cert build, but that statement was corrected.",
+        "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      },
+      {
+        "id": "obs-2",
+        "domain": "knowledge",
+        "disposition": "create_new",
+        "statement": "The audio bus mixer is stalling the cert build.",
+        "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "write_knowledge",
+        "reason": null
+      },
+      {
+        "id": "obs-3",
+        "domain": "knowledge",
+        "disposition": "create_new",
+        "statement": "The shader is not the cause of the stated cert build stall.",
+        "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "write_knowledge",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "knowledge",
+      "subject": "The shader compile was initially identified as stalling the cert build, but that statement was corrected.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+      "ambiguity": "omitted",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    },
+    {
+      "domain": "knowledge",
+      "subject": "The audio bus mixer is stalling the cert build.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "text": "The audio bus mixer is stalling the cert build."
+      },
+      "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "knowledge",
+      "subject": "The shader is not the cause of the stated cert build stall.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "text": "The shader is not the cause of the stated cert build stall."
+      },
+      "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

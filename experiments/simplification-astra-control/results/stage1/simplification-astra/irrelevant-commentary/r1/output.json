@@ -1,0 +1,64 @@
+{
+  "caseId": "irrelevant-commentary",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4530,
+  "usage": {
+    "prompt_tokens": 1113,
+    "completion_tokens": 143,
+    "total_tokens": 1256,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The lobby cabinets were blasting chiptunes all morning, unrelated to the certification sprint.",
+          "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "projectId": "proj-game",
+          "proposedValues": {},
+          "commentary": "This is project-irrelevant chatter, not a certification update.",
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "commentary",
+        "statement": "The lobby cabinets were blasting chiptunes all morning, unrelated to the certification sprint.",
+        "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "The lobby cabinets were blasting chiptunes all morning, unrelated to the certification sprint.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+      "ambiguity": "This is project-irrelevant chatter, not a certification update.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,143 @@
+{
+  "caseId": "c5-timber-floor",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 9698,
+  "usage": {
+    "prompt_tokens": 1298,
+    "completion_tokens": 431,
+    "total_tokens": 1729,
+    "reasoning_tokens": 52
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 3,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The asbestos survey addendum came back clean.",
+          "evidence": "The asbestos survey addendum came back clean.",
+          "domain": "knowledge",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-riverside-c5",
+          "proposedValues": {
+            "text": "The asbestos survey addendum came back clean."
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "The chase for the asbestos survey addendum is to be closed.",
+          "evidence": "Close that chase.",
+          "domain": "todo",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-riverside-c5",
+          "candidateTargetId": "todo-asbestos",
+          "candidateTargetTitle": "Chase the asbestos survey addendum",
+          "proposedValues": {
+            "status": "complete"
+          },
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-3",
+          "statement": "The hall timber floor may still hide services.",
+          "evidence": "Raise a risk that the hall timber floor may still hide services.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-riverside-c5",
+          "proposedValues": {
+            "title": "Hall timber floor may still hide services"
+          },
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "knowledge",
+        "disposition": "create_new",
+        "statement": "The asbestos survey addendum came back clean.",
+        "evidence": "The asbestos survey addendum came back clean.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "write_knowledge",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "todo",
+        "disposition": "update_existing",
+        "statement": "The chase for the asbestos survey addendum is to be closed.",
+        "evidence": "Close that chase.",
+        "truthIntent": "current",
+        "candidateTargetId": "todo-asbestos",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This does not identify that existing record. Lume will not apply the change to a different item."
+      },
+      {
+        "id": "obs-3",
+        "domain": "risk",
+        "disposition": "create_new",
+        "statement": "The hall timber floor may still hide services.",
+        "evidence": "Raise a risk that the hall timber floor may still hide services.",
+        "truthIntent": "current",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_risk",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "knowledge",
+      "subject": "The asbestos survey addendum came back clean.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "text": "The asbestos survey addendum came back clean."
+      },
+      "evidence": "The asbestos survey addendum came back clean.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "todo",
+      "subject": "Chase the asbestos survey addendum",
+      "referencedCanonicalId": "todo-asbestos",
+      "assertedValue": {
+        "status": "complete"
+      },
+      "evidence": "Close that chase.",
+      "ambiguity": "This does not identify that existing record. Lume will not apply the change to a different item.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "risk",
+      "subject": "The hall timber floor may still hide services.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Hall timber floor may still hide services"
+      },
+      "evidence": "Raise a risk that the hall timber floor may still hide services.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

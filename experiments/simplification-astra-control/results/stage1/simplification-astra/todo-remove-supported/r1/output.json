@@ -1,0 +1,66 @@
+{
+  "caseId": "todo-remove-supported",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6622,
+  "usage": {
+    "prompt_tokens": 1129,
+    "completion_tokens": 226,
+    "total_tokens": 1355,
+    "reasoning_tokens": 59
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The user requests deletion of the to-do titled Prepare the jelly pack.",
+          "evidence": "Please delete the To Do titled Prepare the jelly pack.",
+          "domain": "todo",
+          "disposition": "left_untouched",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "todo-pack",
+          "candidateTargetTitle": "Prepare the jelly pack",
+          "proposedValues": {},
+          "commentary": "Deletion is explicitly requested, but the supported dispositions and status values do not represent deletion.",
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "todo",
+        "disposition": "left_untouched",
+        "statement": "The user requests deletion of the to-do titled Prepare the jelly pack.",
+        "evidence": "Please delete the To Do titled Prepare the jelly pack.",
+        "truthIntent": "current",
+        "candidateTargetId": "todo-pack",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Deletion is explicitly requested, but the supported dispositions and status values do not represent deletion."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Prepare the jelly pack",
+      "referencedCanonicalId": "todo-pack",
+      "assertedValue": "omitted",
+      "evidence": "Please delete the To Do titled Prepare the jelly pack.",
+      "ambiguity": "Deletion is explicitly requested, but the supported dispositions and status values do not represent deletion.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

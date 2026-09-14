@@ -1,0 +1,140 @@
+{
+  "caseId": "ambiguous-same-first-name",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 14778,
+  "usage": {
+    "prompt_tokens": 1122,
+    "completion_tokens": 581,
+    "total_tokens": 1703,
+    "reasoning_tokens": 182
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 3,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick is described as being from the warehouse.",
+          "evidence": "Brick from the warehouse",
+          "domain": "person",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-toy",
+          "candidateTargetId": "person-brick",
+          "candidateTargetTitle": "Brick Oakley",
+          "proposedValues": {},
+          "commentary": "It isn't clear whether Brick from the warehouse is the existing Brick Oakley.",
+          "modelConfidence": 0.9
+        },
+        {
+          "id": "obs-2",
+          "statement": "Brick called.",
+          "evidence": "Brick from the warehouse called",
+          "domain": "unknown",
+          "disposition": "left_untouched",
+          "truthIntent": "non_current",
+          "projectId": "proj-toy",
+          "proposedValues": {},
+          "commentary": "The call is a past event; no supported project change is specified by the fact that it occurred.",
+          "modelConfidence": 0.95
+        },
+        {
+          "id": "obs-3",
+          "statement": "Brick wants to help with assembly.",
+          "evidence": "he wants to help with assembly",
+          "domain": "responsibility",
+          "disposition": "left_untouched",
+          "truthIntent": "non_current",
+          "projectId": "proj-toy",
+          "proposedValues": {
+            "personName": "Brick",
+            "scope": "assembly"
+          },
+          "commentary": "This reports Brick's interest, not an agreed responsibility assignment or ownership change.",
+          "modelConfidence": 0.98
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "ambiguous",
+        "statement": "Brick is described as being from the warehouse.",
+        "evidence": "Brick from the warehouse",
+        "truthIntent": "uncertain",
+        "candidateTargetId": "person-brick",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It isn't clear whether Brick from the warehouse is the existing Brick Oakley."
+      },
+      {
+        "id": "obs-2",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "Brick called.",
+        "evidence": "Brick from the warehouse called",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "The call is a past event; no supported project change is specified by the fact that it occurred."
+      },
+      {
+        "id": "obs-3",
+        "domain": "responsibility",
+        "disposition": "left_untouched",
+        "statement": "Brick wants to help with assembly.",
+        "evidence": "he wants to help with assembly",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "This reports Brick's interest, not an agreed responsibility assignment or ownership change."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Brick Oakley",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": "omitted",
+      "evidence": "Brick from the warehouse",
+      "ambiguity": "It isn't clear whether Brick from the warehouse is the existing Brick Oakley.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "unknown",
+      "subject": "Brick called.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Brick from the warehouse called",
+      "ambiguity": "The call is a past event; no supported project change is specified by the fact that it occurred.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Brick wants to help with assembly.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "personName": "Brick",
+        "scope": "assembly"
+      },
+      "evidence": "he wants to help with assembly",
+      "ambiguity": "This reports Brick's interest, not an agreed responsibility assignment or ownership change.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,151 @@
+{
+  "caseId": "toyworld-vocabulary-bait",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8316,
+  "usage": {
+    "prompt_tokens": 1136,
+    "completion_tokens": 300,
+    "total_tokens": 1436,
+    "reasoning_tokens": 135
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick Oakley proposes copying Toyworld's packaging delay onto Candyland as well.",
+          "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+          "domain": "unknown",
+          "disposition": "left_untouched",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "proposedValues": {},
+          "commentary": "The source packaging-delay record is not supplied, and it is unclear whether this proposal has been agreed as Candyland project truth.",
+          "modelConfidence": 0.92
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "Brick Oakley proposes copying Toyworld's packaging delay onto Candyland as well.",
+        "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "The source packaging-delay record is not supplied, and it is unclear whether this proposal has been agreed as Candyland project truth."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "unknown",
+      "subject": "Brick Oakley proposes copying Toyworld's packaging delay onto Candyland as well.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Brick Oakley says Toyworld's packaging delay should be copied onto Candyland as well.",
+      "ambiguity": "The source packaging-delay record is not supplied, and it is unclear whether this proposal has been agreed as Candyland project truth.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": {
+    "writesAttempted": 0,
+    "writesExecuted": 0,
+    "before": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    },
+    "after": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "caseId": "correction-of-wording",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 11622,
+  "usage": {
+    "prompt_tokens": 1119,
+    "completion_tokens": 441,
+    "total_tokens": 1560,
+    "reasoning_tokens": 134
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The shader compile was initially identified as stalling the cert build, but that attribution was retracted.",
+          "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+          "domain": "risk",
+          "disposition": "ignore",
+          "truthIntent": "non_current",
+          "projectId": "proj-game",
+          "candidateTargetId": "risk-console",
+          "candidateTargetTitle": "Console certification slip",
+          "proposedValues": {},
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "The audio bus mixer is stalling the cert build.",
+          "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "candidateTargetId": "risk-console",
+          "candidateTargetTitle": "Console certification slip",
+          "proposedValues": {
+            "text": "The audio bus mixer is stalling the cert build."
+          },
+          "modelConfidence": 0.95
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "ignore",
+        "statement": "The shader compile was initially identified as stalling the cert build, but that attribution was retracted.",
+        "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+        "truthIntent": "non_current",
+        "candidateTargetId": "risk-console",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "update_existing",
+        "statement": "The audio bus mixer is stalling the cert build.",
+        "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+        "truthIntent": "current",
+        "candidateTargetId": "risk-console",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Risk update is not specific enough to apply automatically."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Console certification slip",
+      "referencedCanonicalId": "risk-console",
+      "assertedValue": "omitted",
+      "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+      "ambiguity": "omitted",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    },
+    {
+      "domain": "risk",
+      "subject": "Console certification slip",
+      "referencedCanonicalId": "risk-console",
+      "assertedValue": {
+        "text": "The audio bus mixer is stalling the cert build."
+      },
+      "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+      "ambiguity": "This Risk update is not specific enough to apply automatically.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

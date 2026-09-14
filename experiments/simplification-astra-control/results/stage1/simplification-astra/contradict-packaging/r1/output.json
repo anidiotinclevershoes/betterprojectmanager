@@ -1,0 +1,106 @@
+{
+  "caseId": "contradict-packaging",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 9001,
+  "usage": {
+    "prompt_tokens": 1121,
+    "completion_tokens": 360,
+    "total_tokens": 1481,
+    "reasoning_tokens": 57
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 2,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Packaging delay is resolved.",
+          "evidence": "Packaging delay is resolved.",
+          "domain": "risk",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-toy",
+          "candidateTargetId": "risk-packaging",
+          "candidateTargetTitle": "Packaging delay",
+          "proposedValues": {
+            "status": "resolved"
+          },
+          "commentary": "This conflicts with the statement that Packaging delay is still getting worse; neither statement is explicitly identified as a correction.",
+          "modelConfidence": 0.99
+        },
+        {
+          "id": "obs-2",
+          "statement": "Packaging delay is still getting worse.",
+          "evidence": "Packaging delay is still getting worse.",
+          "domain": "risk",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-toy",
+          "candidateTargetId": "risk-packaging",
+          "candidateTargetTitle": "Packaging delay",
+          "proposedValues": {},
+          "commentary": "This conflicts with the statement that Packaging delay is resolved; it is unclear which statement represents current truth.",
+          "modelConfidence": 0.99
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "ambiguous",
+        "statement": "Packaging delay is resolved.",
+        "evidence": "Packaging delay is resolved.",
+        "truthIntent": "uncertain",
+        "candidateTargetId": "risk-packaging",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This conflicts with the statement that Packaging delay is still getting worse; neither statement is explicitly identified as a correction."
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "ambiguous",
+        "statement": "Packaging delay is still getting worse.",
+        "evidence": "Packaging delay is still getting worse.",
+        "truthIntent": "uncertain",
+        "candidateTargetId": "risk-packaging",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This conflicts with the statement that Packaging delay is resolved; it is unclear which statement represents current truth."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": {
+        "status": "resolved"
+      },
+      "evidence": "Packaging delay is resolved.",
+      "ambiguity": "This conflicts with the statement that Packaging delay is still getting worse; neither statement is explicitly identified as a correction.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": "omitted",
+      "evidence": "Packaging delay is still getting worse.",
+      "ambiguity": "This conflicts with the statement that Packaging delay is resolved; it is unclear which statement represents current truth.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

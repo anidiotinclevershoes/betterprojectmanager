@@ -1,0 +1,63 @@
+{
+  "caseId": "chatter-weather",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 3702,
+  "usage": {
+    "prompt_tokens": 1132,
+    "completion_tokens": 124,
+    "total_tokens": 1256,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The speaker thinks Friday's weather will be nice and explicitly says this is unrelated to the project.",
+          "evidence": "I think the weather will be nice on Friday, nothing project related.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "proposedValues": {},
+          "modelConfidence": 1
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "commentary",
+        "statement": "The speaker thinks Friday's weather will be nice and explicitly says this is unrelated to the project.",
+        "evidence": "I think the weather will be nice on Friday, nothing project related.",
+        "truthIntent": "non_current",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "The speaker thinks Friday's weather will be nice and explicitly says this is unrelated to the project.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "I think the weather will be nice on Friday, nothing project related.",
+      "ambiguity": "omitted",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

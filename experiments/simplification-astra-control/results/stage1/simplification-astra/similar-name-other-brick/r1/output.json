@@ -1,0 +1,74 @@
+{
+  "caseId": "similar-name-other-brick",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7803,
+  "usage": {
+    "prompt_tokens": 1153,
+    "completion_tokens": 271,
+    "total_tokens": 1424,
+    "reasoning_tokens": 77
+  },
+  "raw": {
+    "adapter": "omit-temperature-for-gpt-6-astra",
+    "promptId": "capture-v2-observations",
+    "promptVersion": "capture-v2-eval-baseline-v2",
+    "path": "capture-v2/extractObservationsWithOpenAI",
+    "observationCount": 1,
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick Willow will help with warehouse packing this week.",
+          "evidence": "Brick Willow will help with warehouse packing this week.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "person-brick-willow",
+          "candidateTargetTitle": "Brick Willow",
+          "proposedValues": {
+            "personName": "Brick Willow",
+            "scope": "warehouse packing this week",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "Helping is explicit, but whether Brick Willow shares or replaces ownership is not stated.",
+          "modelConfidence": 0.95
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Brick Willow will help with warehouse packing this week.",
+        "evidence": "Brick Willow will help with warehouse packing this week.",
+        "truthIntent": "current",
+        "candidateTargetId": "person-brick-willow",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "Helping is explicit, but whether Brick Willow shares or replaces ownership is not stated."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Brick Willow",
+      "referencedCanonicalId": "person-brick-willow",
+      "assertedValue": {
+        "personName": "Brick Willow",
+        "scope": "warehouse packing this week",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Brick Willow will help with warehouse packing this week.",
+      "ambiguity": "Helping is explicit, but whether Brick Willow shares or replaces ownership is not stated.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}
