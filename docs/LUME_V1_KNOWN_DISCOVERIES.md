@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 13 September 2026 (Left untouched Review-only safety net on `7f94ec4`)  
+**Last housekeeping:** 13 September 2026 (Prompt A left_untouched freeze v2)  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
@@ -68,24 +68,6 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 ---
 
 ## Open discoveries
-
-### D-056 — Prompt A does not yet emit Left untouched
-
-| Field | Value |
-| --- | --- |
-| **Status** | open |
-| **Severity** | medium |
-| **Domain** | Capture |
-| **Found in** | Left untouched safety slice (from `7f94ec4`) |
-| **Failure class** | Live Prompt A still classifies leftovers as commentary / omit / no_change. The Review-only Left untouched outcome exists, but production extraction will not label it until a deliberate prompt experiment. Deterministic evidence-span coverage is the live backstop. |
-| **Evidence / repro** | `src/lib/capture-v2/prompt.ts` schema omits `left_untouched`. `scripts/verify-left-untouched-safety.ts` injects the disposition via fixture JSON. |
-| **Likely files** | `src/lib/capture-v2/prompt.ts`; `src/lib/eval-capture-v2/baseline.ts` |
-| **Proposed fix direction** | A later prompt experiment may teach Prompt A the disposition. Do not retune A against the 538-case corpus. Do not treat coverage leftovers as Writes. |
-| **Explicit non-goals** | Removing rematerialise / hydrate; rewriting `planCaptureApply`; a second AI call; a new canonical store |
-| **Regression test to add** | Keep `verify:left-untouched-safety`. Add a live-prompt observe-only check only after a deliberate freeze. |
-| **Target resolution / validation point** | Capture hardening / before V1 launch |
-| **Related docs** | `docs/LUME_CAPTURE_STATUS.md` |
-| **Notes** | Existing Review has Needs You repair (entity type / Create new) for Issue, Person, To Do, and Knowledge. There is no standalone Add-item layer. This slice reuses that picker on Left untouched cards only. |
 
 ### D-003 — Suggestion accept/dismiss is memory-only
 
@@ -732,6 +714,18 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 ## Resolved discoveries (reference)
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
+
+### D-R56 — Prompt A can emit Left untouched (D-056)
+
+| Field | Value |
+| --- | --- |
+| **Status** | CLOSED / VERIFIED for the prompt contract |
+| **Fixed in** | Phase 1 Prompt A left_untouched — `cursor/prompt-a-left-untouched-e61d` |
+| **Failure class** | Production Prompt A schema omitted `left_untouched`, so the model had no escape hatch and leftovers relied on coverage / commentary / omit. |
+| **Fix summary** | Deliberate freeze `capture-v2-eval-baseline-v2`. Prompt A extracts explicitly stated facts only, and uses `left_untouched` plus a short uncertainty reason when a supported operation cannot be safely identified. Resolver / rematerialise / hydrate / Apply spine unchanged. |
+| **Evidence** | `scripts/verify-prompt-a-left-untouched.ts`; `scripts/observe-prompt-a-left-untouched.ts` (live observe-only). `verify:left-untouched-safety` still proves leftovers cannot write. |
+| **Residual** | Live emission rate vs ordinary Capture preservation is a measurement, not a retune-against-538 licence. Phase 2 still narrows Needs You vs Left untouched. Coverage remains the omission backstop. |
+| **Related docs** | `docs/LUME_CAPTURE_STATUS.md` |
 
 ### D-R45 — Apply refreshes paint cache from confirmed reload (N-10)
 

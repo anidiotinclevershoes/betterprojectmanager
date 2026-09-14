@@ -2,8 +2,8 @@
  * Review-only Left untouched helpers.
  *
  * Never a canonical store, never an Apply write, never a substitute
- * for rematerialise / hydrate. Prompt A is unchanged — the disposition
- * is accepted when present, and coverage can synthesise it.
+ * for rematerialise / hydrate. Prompt A may emit the disposition;
+ * coverage can still synthesise leftovers the model omitted.
  */
 
 export const LEFT_UNTOUCHED_GENERIC_REASON =

@@ -39,7 +39,7 @@ Safety classification is versioned independently of corpus and prompt baseline:
 | Kind | Identifier |
 |---|---|
 | Corpus | `capture-v2-eval-corpus-v1-hulk` |
-| Baseline (prompt/schema/model freeze) | `capture-v2-eval-baseline-v1` |
+| Baseline (prompt/schema/model freeze) | `capture-v2-eval-baseline-v2` |
 | Scorer (current) | `capture-v2-eval-scorer-v3` |
 | Scorer (v2) | `capture-v2-eval-scorer-v2` |
 | Scorer (first live benchmark, implicit) | `capture-v2-eval-scorer-v1` |

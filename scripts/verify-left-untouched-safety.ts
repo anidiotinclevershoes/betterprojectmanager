@@ -2,7 +2,8 @@
  * Left untouched safety net — Review-only, never a write path.
  *
  * Proves the 19 gates for the conservative foundation slice.
- * Does not remove rematerialise / hydrate. Does not retune Prompt A.
+ * Does not remove rematerialise / hydrate. Prompt A may now emit
+ * left_untouched; this script still injects the disposition via fixtures.
  *
  * Run: npx tsx scripts/verify-left-untouched-safety.ts
  */
@@ -812,15 +813,15 @@ async function main() {
     assert.doesNotMatch(types, /left_untouched/);
   });
 
-  await check("Prompt A schema is unchanged", () => {
+  await check("Prompt A schema includes left_untouched", () => {
     const prompt = readFileSync(
       join(process.cwd(), "src/lib/capture-v2/prompt.ts"),
       "utf8",
     );
-    assert.doesNotMatch(prompt, /left_untouched/);
+    assert.match(prompt, /left_untouched/);
     assert.match(
       prompt,
-      /update_existing \| create_new \| no_change \| ambiguous \| merge \| commentary \| ignore/,
+      /update_existing \| create_new \| no_change \| ambiguous \| merge \| commentary \| ignore \| left_untouched/,
     );
   });
 

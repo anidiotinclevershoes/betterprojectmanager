@@ -209,7 +209,7 @@ async function main() {
     assert.equal(CAPTURE_V2_EVAL_SCORER_V3, "capture-v2-eval-scorer-v3");
     assert.equal(CAPTURE_V2_EVAL_SCORER_VERSION, CAPTURE_V2_EVAL_SCORER_V3);
     assert.equal(FROZEN_CORPUS_COMPOSITION.version, "capture-v2-eval-corpus-v1-hulk");
-    assert.equal(FROZEN_V2_BASELINE.version, "capture-v2-eval-baseline-v1");
+    assert.equal(FROZEN_V2_BASELINE.version, "capture-v2-eval-baseline-v2");
     const lume = readFileSync(join(ROOT, "src/lib/eval-capture-v2/lume-safety.ts"), "utf8");
     assert.equal(/shader compile/.test(lume), false);
     assert.equal(/audio bus/.test(lume), false);
