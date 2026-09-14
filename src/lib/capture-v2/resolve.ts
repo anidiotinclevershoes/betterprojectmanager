@@ -227,23 +227,37 @@ function resolveOne(
   }
 
   if (observation.truthIntent === "uncertain") {
-    const rematerialized = rematerializeIndependentDatedCreate(
-      observation,
-      args.world,
-      projectId,
-    );
-    if (rematerialized !== observation) {
-      return resolveOne(rematerialized, args);
+    const knownOperation =
+      (observation.disposition === "create_new" ||
+        observation.disposition === "update_existing" ||
+        observation.disposition === "ambiguous") &&
+      DOMAIN_TO_KIND[observation.domain] != null;
+    if (knownOperation) {
+      return {
+        observation,
+        suggestion: null,
+        decision: {
+          kind: "needs_you",
+          domain: DOMAIN_TO_LEGAL[observation.domain],
+          reason:
+            observation.commentary?.trim() ||
+            "It is unclear whether this should change current project truth.",
+        },
+      };
     }
+    const reason =
+      observation.commentary?.trim() || LEFT_UNTOUCHED_GENERIC_REASON;
     return {
-      observation,
+      observation: {
+        ...observation,
+        disposition: "left_untouched",
+        commentary: reason,
+      },
       suggestion: null,
       decision: {
-        kind: "needs_you",
-        domain: DOMAIN_TO_LEGAL[observation.domain],
-        reason:
-          observation.commentary?.trim() ||
-          "It is unclear whether this should change current project truth.",
+        kind: "no_change",
+        domain: "unsupported",
+        reason,
       },
     };
   }
