@@ -85,7 +85,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Accept/dismiss plan does not resurrect after hydrate simulation |
 | **Target resolution / validation point** | V1 product hardening; must be resolved before V1 launch |
 | **Related docs** | Architecture audit §3.1; RiskFrame recommendation path (Slice 1B left this intentional) |
-| **Notes** | Risk recommendations must remain suggestions until explicitly converted (Slice 1B product rule). No dedicated “Suggestions slice” is named yet — revisit under general V1 product hardening. |
+| **Notes** | Risk recommendations must remain suggestions until explicitly converted (Slice 1B product rule). **Figma UI Convergence Part 2:** Home Suggestion Discard / Save To Do persist `recommendations.status` through the existing column (`persistRecommendationStatus`). Legacy `dismissSuggestion` / `acceptSuggestion` remain memory-only. |
 
 ---
 
@@ -105,7 +105,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Selected mutations emit durable history rows in plan/fake client |
 | **Target resolution / validation point** | V1 product hardening |
 | **Related docs** | Architecture audit; philosophy (History = evidence/chronology) |
-| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. **Phase 3A create-path decision:** New Project History is **secondary evidence after authoritative bundle success**. A failed/rolled-back create must not write `project_created`. Failure of the History insert must not roll back the project bundle. Broader `pushHistory` without `persistHistoryEvent` remains open. |
+| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. **Phase 3A create-path decision:** New Project History is **secondary evidence after authoritative bundle success**. A failed/rolled-back create must not write `project_created`. Failure of the History insert must not roll back the project bundle. Broader `pushHistory` without `persistHistoryEvent` remains open. **Figma UI Convergence Part 2:** `history_events` still has no `item_id`. Item drawers show a D-004 bounded limitation instead of title/detail matching. |
 
 ---
 

@@ -1,6 +1,6 @@
 # Figma UI Convergence V1
 
-**Status:** Part 1 complete — Figma frames inspected; no architecture gate; waiting for explicit Part 2  
+**Status:** Part 2 in progress — safety clarifications recorded; implementing from Phase 1  
 **Date:** 17 September 2026  
 **Programme:** Lume 0.9 Figma UI Convergence  
 **Docs entry:** [`docs/README.md`](./README.md)  
@@ -23,15 +23,15 @@ Lume already has a working production architecture. Capture writes only after Re
 
 The approved Figma file now defines how the product should look and how people move around it. This programme moves that approved UI into the live app **without** rewriting Capture, inventing a second store, or changing persisted project data.
 
-Part 1 recovered the current repository, mapped reuse, then inspected the current Figma frames on `02 — Product Screens`. It **stopped** before changing production UI. Begin implementation only when Part 2 is explicitly started.
+Part 1 recovered the current repository, mapped reuse, then inspected the current Figma frames on `02 — Product Screens`. Part 2 was started 17 September 2026 with two safety clarifications (item History attribution; tag Save failure safety). Stay on this integration branch. Do not merge to `main`.
 
 ---
 
 ## How to continue (Part 2)
 
-Figma inspection is closed. Stay on `integration/figma-ui-convergence-v1`. Re-run `npm run git:preflight` first. If the branch is CURRENT and contains current `main`, implement from §12. If MATERIALLY STALE, STOP.
+Figma inspection is closed. Stay on `integration/figma-ui-convergence-v1`. Re-run `npm run git:preflight` first. If the branch is CURRENT and contains current `main`, continue from §12 / §17. If MATERIALLY STALE, STOP.
 
-Do not restart Part 1 recovery. Do not wait for the original giant Part 1 prompt.
+Do not restart Part 1 recovery. Honour §17 safety rules before any History or tag Save work.
 
 ---
 
@@ -325,7 +325,9 @@ If History events for tags require a new `HistoryEventType` rather than `other`,
 - **Item-level History panel does not exist** in `KnowledgeItemDetailDrawer`.
 - D-004: many `pushHistory` paths never persist.
 - Capture Apply does persist history (secondary after write).
-- Do not create a UI-only item history store. Project `history_events` and filter by item when the event payload allows; if events lack item ids, that is a gate, not a licence to invent a second store.
+- `history_events` has **no** `item_id` / `target_id`. Title, detail, or fuzzy matching is **not** attribution.
+- Do not create a UI-only item history store. Do not add a history schema migration in this programme unless a STOP is raised and explicitly approved.
+- If an event cannot be deterministically attributed under existing contracts, preserve D-004 as an explicit bounded limitation in the item drawer.
 
 ### Close / Remove
 
@@ -462,7 +464,7 @@ Decisions below are from **code inspection + current Figma frames** (§9). Prefe
 | Buttons | `primary-btn` / `ghost-btn` / `danger-btn` | **reuse** | Already locked to Lume purple / destructive. |
 | Avatars | `ReviewPersonAvatar`, `PersonEntity` | **reuse** | |
 | Timeline | `TimelineFrame`, `timeline-projection.ts` | **reuse** | Read-only embed on Home / KC. |
-| History | `history_events`, `/history` page | **modify** | Add item-level read of the same events. No second store. |
+| History | `history_events`, `/history` page | **modify** | Item drawer may show an event only when existing contracts attribute it deterministically. Current table has no `item_id` — preserve D-004 rather than fuzzy-match. No second store. No history migration. |
 | Tags | `src/lib/tags/*`, `persist-tags.ts`, `KnowledgeTagFilter` | **modify** | Wire editor + store. No new schema. |
 | Catch Me Up | `CatchMeUpPanel` | **keep unmounted from tabs** | Current Figma tabs do not include it. Derived briefing only. Not Project Scan. Not a writer. |
 
@@ -508,7 +510,7 @@ Decisions below are from **code inspection + current Figma frames** (§9). Prefe
 2. **People tags** — data allows `stakeholder` tags; product forbids People-tag UI. Do not “complete” the data model in the UI.
 3. **Multi-owner items** — not present. Do not add.
 4. **Suggestion discard durability** — D-003. Prefer persist existing `recommendations` status. STOP if that requires a new table.
-5. **Item History identity** — if `history_events` cannot be filtered to one item without schema change, STOP and propose the smallest additive field.
+5. **Item History identity** — `history_events` has no `item_id` / `target_id`. Do **not** fuzzy-match, title-match, or invent detail-string conventions. Preserve D-004 as a bounded limitation in the item drawer. STOP before any history schema migration unless explicitly approved.
 6. **Manual Add Issue / Person** — if existing persist helpers cannot create a risk / stakeholder without a new RPC, extend the established persist path additively. STOP before a new canonical kind.
 7. **Project Scan writer pressure** — if Figma shows Scan applying fixes directly, keep analysis-only and route user action through Suggestion Add or Manual Add. Do not let Scan write.
 8. **Catch Me Up vs Project Scan** — do not rename Catch Me Up into Scan. Do not import AI-first Scan architecture.
@@ -557,7 +559,7 @@ If a phase needs schema / RPC / RLS / new canonical kind: **stop and update §11
 | Baseline `npm test` / typecheck / build | done | 99/99; tsc 0; build 0 |
 | Code inspection: shell, writes, tags, ownership, history | done | §7–§11 |
 | Figma frame inspection | **done** | Figma MCP authenticated this thread; §9 evidence 17 Sep 2026 |
-| Part 2 UI implementation | not started | waiting for explicit Part 2 instruction |
+| Part 2 UI implementation | in progress | Phase 1–8 landed on integration branch; honour §17; do not merge |
 
 ---
 
@@ -581,13 +583,53 @@ PART 1 STATUS
   are written. Figma-inspection blocker is closed.
   No architecture / schema / domain gate.
 
-READY FOR PART 2
-  YES — after an explicit Part 2 instruction only.
-
-SAFEST NEXT ACTION
-  Wait for the user to start Part 2 on
-  integration/figma-ui-convergence-v1.
-  Re-run npm run git:preflight first.
-  Do not implement production UI until then.
-  Do not merge to main.
+PART 2 STATUS
+  Started. Honour §17 safety rules. Stay on
+  integration/figma-ui-convergence-v1. Do not merge to main.
 ```
+
+---
+
+## 17. Part 2 safety clarifications (binding)
+
+Recorded before Phase 1 implementation. These override any earlier “filter History by title” or “transaction-pure tag Save” reading of this file.
+
+### 17.1 Item History attribution
+
+`history_events` columns today: `workspace_id`, `project_id`, `type`, `title`, `detail`, `source`, `created_by`, `created_at`. There is **no** `item_id` / `target_id`.
+
+- Do **not** implement apparent item-level History by fuzzy matching, title matching, or detail-string conventions and present that as authoritative.
+- Only display a History event in an item drawer when existing data/contracts allow that event to be **deterministically attributed** to that item.
+- If existing events cannot be deterministically attributed, preserve **D-004** as an explicit bounded limitation.
+- Do not create a second UI history store.
+- Do not add a history schema migration during this UI programme unless a STOP condition is raised and explicitly approved.
+- New actions may write through existing `persistHistoryEvent` where attribution is safe under existing contracts (project-level chronology is fine).
+- Do not fabricate historical events that were never persisted.
+
+### 17.2 Tag Save failure safety
+
+Approved existing architecture only:
+
+- tables: `project_tags`, `item_tags`
+- helpers: `persistEnsureProjectTag`, `persistAttachItemTag`, `persistDetachItemTag`
+
+No new schema / RPC / RLS / domain contract.
+
+- Save is the only UI write boundary. Discard before Save performs **zero** persistence.
+- Reuse an existing equivalent tag (same project + slug) where possible.
+- Post-create Save is ensure-then-attach, not one database transaction.
+- Never report Save success unless the item/tag **attachment** actually completed.
+- If this Save created a new tag and attachment then fails, clean that newly-created tag **only** if the existing architecture lets you prove it is still unused (`item_tags` lookup succeeds and is empty).
+- Never delete a tag that could have been attached elsewhere.
+- If safe compensating cleanup cannot be guaranteed, leave the harmless metadata row, report the Save failure, and document the bounded failure mode.
+- An unattached metadata tag must never be treated as canonical project information.
+- Do not add a new RPC merely to achieve transaction purity.
+
+### 17.3 Knowledge Centre result loading
+
+Retain the existing production behaviour:
+
+- no traditional pager;
+- hydrate the full project set, then filter/render every matching item;
+- do not remove this because Figma omitted loading chrome;
+- endless scroll is **not** a Figma requirement and must not be invented.
