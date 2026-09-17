@@ -1007,6 +1007,79 @@ export async function persistRiskStatus(
 }
 
 /**
+ * Manual Add Issue — existing `risks` table, source=manual.
+ * Additive persist helper. Not a new RPC.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRiskCreate(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  risk: {
+    id?: string;
+    projectId: string;
+    title: string;
+    status?: ProjectRisk["status"];
+    source?: LegalRiskSource;
+  },
+): Promise<ProjectRisk> {
+  await requireProjectInWorkspace(client, workspaceId, risk.projectId);
+  const rowIn: Record<string, unknown> = {
+    workspace_id: workspaceId,
+    project_id: risk.projectId,
+    title: risk.title.trim(),
+    status: risk.status ?? "open",
+    source: risk.source ?? "manual",
+    created_by: userId,
+  };
+  if (risk.id && UUID_RE.test(risk.id)) rowIn.id = risk.id;
+  const { data, error } = await client
+    .from("risks")
+    .insert(rowIn)
+    .select("*")
+    .single();
+  const row = requireData(data, error, "create risk");
+  return {
+    id: String(row.id),
+    projectId: String(row.project_id),
+    title: String(row.title),
+    status: row.status,
+    source: row.source === "capture" || row.source === "seed" ? row.source : "manual",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+/**
+ * Persist recommendation status (D-003). Existing `recommendations.status`
+ * column. Not a new table.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRecommendationStatus(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  recommendationId: string,
+  status: Recommendation["status"],
+  projectId?: string | null,
+): Promise<void> {
+  let query = client
+    .from("recommendations")
+    .update({ status })
+    .eq("id", recommendationId)
+    .eq("workspace_id", workspaceId);
+  if (projectId) query = query.eq("project_id", projectId);
+  const { data, error } = await query.select("id").maybeSingle();
+  if (error) {
+    throw new Error(`[supabase] update recommendation status: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error(
+      "[supabase] update recommendation status: not found in this workspace",
+    );
+  }
+}
+
+/**
  * Slice 1C: ensure a durable project-scoped Person (stakeholders row).
  * Inserts when missing; returns the durable UUID. Exact id preferred;
  * otherwise insert with provided/new UUID (caller must have deduped in memory).

@@ -67,7 +67,6 @@ export function Sidebar({
 
         <nav className="sidebar-nav" data-testid="ocean-sidebar-nav">
           <div className="ocean-sidebar-projects-head">
-            <p className="sidebar-label">{collapsed ? "P" : "PROJECTS"}</p>
             {!collapsed ? (
               <Link
                 href="/projects/new"
@@ -75,7 +74,7 @@ export function Sidebar({
                 onClick={onCloseMobile}
                 data-testid="ocean-new-project"
               >
-                <span aria-hidden>+</span> New Project
+                <span aria-hidden>+</span> New project
               </Link>
             ) : (
               <Link

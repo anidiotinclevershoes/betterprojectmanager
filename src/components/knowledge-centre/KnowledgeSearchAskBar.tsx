@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { MeMark } from "@/components/brand/MeMark";
 import { useMission } from "@/lib/store";
 import { searchAuthoritativeProject } from "@/lib/knowledge-centre/search-authority";
 import { highlightMatches } from "@/lib/tell-me/knowledge-search";
@@ -83,9 +84,7 @@ export function KnowledgeSearchAskBar({
           or
         </span>
         <form className="ocean-ask-field" onSubmit={onAsk}>
-          <span className="ocean-ai-glyph" aria-hidden>
-            ✦
-          </span>
+          <MeMark size="button" />
           <input
             type="text"
             value={question}

@@ -451,7 +451,7 @@ export function CaptureWorkspace({
                 reloadWorkspace: async () => {
                   const peeked = await peekDurableWorkspace();
                   if (!peeked) {
-                    throw new Error("Could not reload project truth.");
+                    throw new Error("Could not reload saved project information.");
                   }
                   return peeked;
                 },
@@ -467,7 +467,7 @@ export function CaptureWorkspace({
         : undefined,
     });
     if (reconcileFailed) {
-      announce("Applied — refreshing project truth…");
+      announce("Applied — refreshing saved project information…");
     } else if (succeededWrites.length > 0) {
       announce("Applied");
     }

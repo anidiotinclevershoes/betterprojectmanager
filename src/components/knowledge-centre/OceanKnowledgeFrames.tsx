@@ -90,6 +90,16 @@ function KcItemCard({
           </p>
         ) : null}
       </button>
+      {onSelect ? (
+        <button
+          type="button"
+          className="ghost-btn kc-open-details"
+          data-testid={`kc-open-details-${item.id}`}
+          onClick={onSelect}
+        >
+          Open Details
+        </button>
+      ) : null}
     </article>
   );
 }
@@ -150,16 +160,25 @@ function BucketGroup({
 export function OceanKnowledgeFrames({
   projectId,
   searchQuery = "",
+  selected: selectedProp,
+  onSelect,
 }: {
   projectId: string;
   searchQuery?: string;
+  selected?: KnowledgeItemRef | null;
+  onSelect?: (ref: KnowledgeItemRef | null) => void;
 }) {
   const { state } = useMission();
-  const [selected, setSelected] = useState<KnowledgeItemRef | null>(null);
+  const [localSelected, setLocalSelected] = useState<KnowledgeItemRef | null>(
+    null,
+  );
+  const selected = selectedProp !== undefined ? selectedProp : localSelected;
+  const setSelected = onSelect ?? setLocalSelected;
   const [tagFilter, setTagFilter] = useState<string[]>([]);
   const [bucket, setBucket] = useState<KcBucket>("all");
   const [subtype, setSubtype] = useState<KcKnowledgeSubtype>("all");
   const [catchUpId, setCatchUpId] = useState<string | null>(null);
+  const [layout, setLayout] = useState<"grid" | "list">("grid");
 
   // Keep these symbols in this module — item-detail / people UI contracts.
   void refForTodo;
@@ -200,7 +219,7 @@ export function OceanKnowledgeFrames({
   }, [state.itemTags, projectId]);
 
   const select = (ref: KnowledgeItemRef) => {
-    setSelected((prev) => (knowledgeDetailEquals(prev, ref) ? null : ref));
+    setSelected(knowledgeDetailEquals(selected, ref) ? null : ref);
   };
 
   const searching = Boolean(searchQuery.trim()) || tagFilter.length > 0;
@@ -244,13 +263,40 @@ export function OceanKnowledgeFrames({
         />
       ) : null}
 
-      <KnowledgeTagFilter
-        projectId={projectId}
-        projectTags={projectTags}
-        usedTagIds={usedTagIds}
-        selectedTagIds={tagFilter}
-        onChange={setTagFilter}
-      />
+      <div className="kc-layout-row">
+        <KnowledgeTagFilter
+          projectId={projectId}
+          projectTags={projectTags}
+          usedTagIds={usedTagIds}
+          selectedTagIds={tagFilter}
+          onChange={setTagFilter}
+        />
+        <div
+          className="kc-layout-toggle"
+          role="group"
+          aria-label="Knowledge Centre layout"
+          data-testid="kc-layout-toggle"
+        >
+          <button
+            type="button"
+            className={layout === "grid" ? "is-selected" : ""}
+            aria-pressed={layout === "grid"}
+            data-testid="kc-layout-grid"
+            onClick={() => setLayout("grid")}
+          >
+            Grid
+          </button>
+          <button
+            type="button"
+            className={layout === "list" ? "is-selected" : ""}
+            aria-pressed={layout === "list"}
+            data-testid="kc-layout-list"
+            onClick={() => setLayout("list")}
+          >
+            List
+          </button>
+        </div>
+      </div>
 
       {bucket === "knowledge" ? (
         <div className="kc-subtype-nav" data-testid="kc-knowledge-subtypes">
@@ -291,7 +337,11 @@ export function OceanKnowledgeFrames({
         </p>
       ) : null}
 
-      <div className="kc-four-body" data-testid="kc-four-body">
+      <div
+        className={`kc-four-body is-${layout}`}
+        data-testid="kc-four-body"
+        data-kc-layout={layout}
+      >
         {bucket === "all" ? (
           view.globalCount ? (
             <>
@@ -422,11 +472,13 @@ export function OceanKnowledgeFrames({
         </div>
       ) : null}
 
-      <KnowledgeItemDetailDrawer
-        projectId={projectId}
-        selected={selected}
-        onClose={() => setSelected(null)}
-      />
+      {selectedProp === undefined ? (
+        <KnowledgeItemDetailDrawer
+          projectId={projectId}
+          selected={selected}
+          onClose={() => setSelected(null)}
+        />
+      ) : null}
     </div>
   );
 }

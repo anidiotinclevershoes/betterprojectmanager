@@ -250,7 +250,7 @@ function AppShellInner({ children }: { children: ReactNode }) {
               data-testid="ocean-save-error"
             >
               Could not save your last change. Lume has not treated it as
-              maintained project truth. {saveError}
+              saved project information. {saveError}
             </div>
           ) : null}
           <EntitlementGate>{children}</EntitlementGate>
