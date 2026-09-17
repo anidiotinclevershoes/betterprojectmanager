@@ -1,6 +1,6 @@
 # Figma UI Convergence V1
 
-**Status:** Part 1 recovery / preflight / plan — Figma frame inspection still open  
+**Status:** Part 1 complete — Figma frames inspected; no architecture gate; waiting for explicit Part 2  
 **Date:** 17 September 2026  
 **Programme:** Lume 0.9 Figma UI Convergence  
 **Docs entry:** [`docs/README.md`](./README.md)  
@@ -23,53 +23,15 @@ Lume already has a working production architecture. Capture writes only after Re
 
 The approved Figma file now defines how the product should look and how people move around it. This programme moves that approved UI into the live app **without** rewriting Capture, inventing a second store, or changing persisted project data.
 
-Part 1 recovered the current repository and mapped what to reuse. It **stopped** before changing production UI. A later session must inspect the actual Figma frames, then begin implementation only when Part 2 is explicitly started.
+Part 1 recovered the current repository, mapped reuse, then inspected the current Figma frames on `02 — Product Screens`. It **stopped** before changing production UI. Begin implementation only when Part 2 is explicitly started.
 
 ---
 
-## How to continue (new Cursor thread)
+## How to continue (Part 2)
 
-The previous Cloud Agent started **before** the Figma plugin was installed. That session cannot authenticate Figma. Start a **new** agent after the plugin is installed.
+Figma inspection is closed. Stay on `integration/figma-ui-convergence-v1`. Re-run `npm run git:preflight` first. If the branch is CURRENT and contains current `main`, implement from §12. If MATERIALLY STALE, STOP.
 
-### Paste this as the new-thread prompt
-
-```text
-You are Ultron, lead implementation agent for Lume.
-
-Continue LUME 0.9 — FIGMA UI CONVERGENCE from the durable handoff:
-
-  docs/FIGMA_UI_CONVERGENCE_V1.md
-
-Do not restart recovery from scratch.
-
-1. Authenticate the Figma MCP in this new thread.
-2. Fetch origin/main and run npm run git:preflight on
-   integration/figma-ui-convergence-v1.
-3. If the branch is CURRENT and contains current main, continue.
-   If it is MATERIALLY STALE, STOP.
-4. Inspect the approved Figma frames listed in the handoff.
-   File: Lume-V1-UX
-   Key: TPzPxiSMFgPQBZPDNzQ6LL
-5. Confirm or revise the reuse matrix and phases against the
-   actual current frames. Older/reference frames are not authority.
-6. Update docs/FIGMA_UI_CONVERGENCE_V1.md with Figma evidence
-   and close the Figma-inspection blocker.
-7. STOP. Do not implement production UI unless I explicitly
-   start Part 2 in this thread.
-
-Authorities:
-- Figma = visual and interaction
-- Existing production architecture = behaviour, canonical data,
-  persistence
-If Figma appears to require a material architecture/schema/domain
-change, record a gate and STOP.
-
-Do not merge to main.
-Do not rewrite Capture Simplification.
-Do not import AI-first or Novel work.
-```
-
-If the user then says **Part 2**, implement from this document’s phases. Do not wait for the original giant Part 1 prompt to be re-sent.
+Do not restart Part 1 recovery. Do not wait for the original giant Part 1 prompt.
 
 ---
 
@@ -111,17 +73,17 @@ If Figma appears to require behaviour that conflicts with production architectur
 
 ## 3. Branch / baseline
 
-Recorded 17 September 2026 after `git fetch origin main`.
+Recorded 17 September 2026 after `git fetch origin main` (Figma close-out re-preflight).
 
 ```text
 Working branch: integration/figma-ui-convergence-v1
-Branch HEAD:    71219584972d8d65a11296187a090ecef56a5db0
+Branch HEAD:    944cf7e6ce84a1f6ad6196fe0d563722f893fda8
 origin/main HEAD: 71219584972d8d65a11296187a090ecef56a5db0
 Merge-base:     71219584972d8d65a11296187a090ecef56a5db0
-Ahead: 0
+Ahead: 2
 Behind: 0
 Contains current main?: YES
-Working tree clean?: YES at branch creation; this docs commit is the first programme change
+Working tree clean?: YES before this Figma-evidence docs commit
 PR base: main
 Dependencies: none
 Shared/global files expected: none in Part 1 (docs only)
@@ -414,33 +376,66 @@ Scan in Part 2 must be a **projection / analysis view**. Findings may seed Sugge
 ## 9. Figma authority
 
 **File:** Lume-V1-UX  
-**Key:** `TPzPxiSMFgPQBZPDNzQ6LL`
+**Key:** `TPzPxiSMFgPQBZPDNzQ6LL`  
+**Inspected:** 17 September 2026 via authenticated Figma MCP (`whoami`: Tom Hughes).  
+**Blocker:** **closed.**
 
-Inspect these nodes. Prefer the newest explicitly current / converged production surfaces. Older/reference/state frames are not authority.
+### 9.1 File map (current vs reference)
 
-| Surface | Node |
-| --- | --- |
-| Home | `213:2` |
-| Capture | `153:131` |
-| Knowledge Centre grid | `151:243` |
-| Knowledge Centre list | `171:131` |
-| KC detail | `152:669` |
-| KC Edit Item | `248:263` |
-| Project Scan | `153:231` |
-| Review | `28:119` |
-| New Project | `91:202` |
-| First Project | `94:65` |
-| First Project Help | `209:333` |
-| Suggestion → Add | `282:2` |
-| Manual Add Item | `282:435` |
+Three pages. Only **`02 — Product Screens`** is screen authority.
 
-**Part 1 blocker:** these frames were **not** inspected in the first agent run. Figma MCP was unavailable, then un-authenticatable on that thread. A new thread must inspect them before marking Part 1 complete / starting Part 2 UI.
+| Page | Id | Authority |
+| --- | --- | --- |
+| `00 — Reference Archive` | `0:1` | **No.** Component studies, Final Polish v1, First Pass Home, archived Review. Includes leftover copy “Current project truth” — do not import. |
+| `01 — Foundations & Components` | `10:2` | Component / token library only: `Button/*`, `ProjectIdentity`, `PersonEditor`, `ReviewCard`, `Brand/LumeWordmark`, `Brand/AIUsageMark`. |
+| `02 — Product Screens` | `10:3` | **Yes.** Current workspace v2 / v3 / Production v1 frames. |
+
+Older Product Screens frames (`ReviewWorkspace — Desktop`, `Capture — Desktop`, `Capture — Production v1`, `Knowledge Centre — Desktop`, `LEGACY — Project Home — Rules Applied v2 (pre-convergence)`, `Project Home — First Pass v1` on the archive page) are **not** authority.
+
+### 9.2 Inspected authority frames
+
+All listed node IDs still exist. Names below are the **current frame names**.
+
+| Surface | Node | Current name | Verdict |
+| --- | --- | --- | --- |
+| Home | `213:2` | Project Workspace — Home v2 | **Current.** Default workspace. Sidebar + four equal tabs + header band. To Do queue (~75%) + People rail (~25%), then collapsible Issues / Knowledge, then read-only Timeline. Suggestions toggle. Date-relevant Issue stays an Issue (`Open Details`, not Close). |
+| Capture | `153:131` | Project Workspace — Capture v2 | **Current.** Capture tab active; composer + “You’ll review everything before anything changes.” Home projection is pushed below the tab. AI `me` mark sits **inside** the Capture button. |
+| Knowledge Centre grid | `151:243` | Project Workspace — Knowledge Centre v2 | **Current.** Search, Ask Lume, domain filters, tag filters, grid/list toggle (grid selected), `+ Add item`, four-domain cards, `Open Details`. Home remains below. |
+| Knowledge Centre list | `171:131` | Project Workspace — Knowledge Centre List v2 | **Current.** Same chrome; list selected. Compact rows, not a different data model. |
+| KC detail | `152:669` | Project Workspace — Knowledge Centre Detail v2 | **Current.** Right drawer: `← Back`, DETAILS, TAGS, CONTEXT, RELATED, HISTORY (newest-first meaningful events), Edit item, Close, Remove. Copy: “Close keeps the item and its history. Remove deletes it from the project entirely.” |
+| KC Edit Item | `248:263` | Project Workspace — Knowledge Centre Edit Item v3 | **Current.** Same drawer in edit mode. Save / Discard. “New tags are created and attached only when you Save changes.” Discard restores saved values and creates no orphan tag. |
+| Project Scan | `153:231` | Project Workspace — Project Scan v2 | **Current.** Groupings: Risks, Dependencies, Missing information, Contradictions. “Scan findings are analysis only. Nothing changes in the project unless you choose to act.” `View evidence ›` / `Scan again` only. Home remains below. |
+| Review | `28:119` | ReviewWorkspace — Converged MP v2 | **Current Review chrome.** Standalone Review (no project sidebar, no Home tab). Confirm review / Discard review. Needs You / Create / Update / Remove. “Not saved yet — nothing changes until you click Confirm review.” Do **not** force this into the four-tab workspace shell. |
+| New Project | `91:202` | New Project — Production v1 | **Current.** Compose: identity + Capture notes + four domain adders. “You’ll review what Lume finds before anything is added.” Draft until Create project. |
+| First Project | `94:65` | New Project — First Project v1 | **Current.** Same compose + first-project rail + “What goes where?” |
+| First Project Help | `209:333` | New Project — First Project Help Open v1 | **Current.** Help overlay open. Same compose; not a new flow. |
+| Suggestion → Add | `282:2` | Project Workspace — Suggestion Add v1 | **Current.** Home + modal: “Add suggested To Do” / “Nothing is created until you Save To Do.” Discard / Save To Do. Distinct from Capture Review. |
+| Manual Add Item | `282:435` | Project Workspace — Add Item v1 | **Current.** KC + drawer: type Issue / Person / To Do / Knowledge. “Manual add writes directly to the project only when you Save item. No Review is needed.” “Single owner supported by the current project model.” Tags created only on Save. |
+
+### 9.3 Interaction evidence that confirms the plan
+
+- Workspace tabs are **Home | Capture | Knowledge Centre | Project Scan**. Catch Me Up and Advise are absent.
+- Selecting Capture / KC / Scan expands that mode and **pushes Home downward**. Home tab collapses the mode.
+- Sidebar: Lume wordmark, generous gap, `+ New project`, selected-project bar, no `PROJECTS` heading, Account / Settings at the bottom. No last-used dates inside Capture / Scan tabs.
+- Header: project title + `SR · Updated today…`, four equal tabs, purple/lighter band, `me` + “AI token use” / “Usage & spending →”.
+- `me` is the underlined wordmark / `Brand/AIUsageMark` component (standard / button / micro). It belongs inside AI actions (Capture, Ask Lume, Scan tab, suggestion row).
+- Copy uses “saved project information”, not “project truth”, on current screens.
+- Grid/list is a **view toggle**, not a second store. Endless scroll is **not** shown; do not invent it.
+- People appear in KC as PERSON cards. **No People-tag editor.** Filter-row `Add tag` is filter chrome, not a writer.
+- Suggestions say “not a To Do yet”. Add opens a short Save/Discard state. Discard “remembers the dismissal and does not change the project.”
+- Timeline is read-only embed with 2W / 1M / 3M / Fit.
+
+### 9.4 Architecture gate from Figma?
+
+**None.** Current frames do not require a new table, RPC, RLS, canonical kind, or parallel store. They ask for projections, chrome, and wiring of existing writes.
+
+Existing Part 1 gates still apply (D-003 dismiss persist, D-004 history gaps, Manual Add Issue/Person persist helpers, tag History event type). Figma did not add a new one.
 
 ---
 
 ## 10. Reuse matrix
 
-Decisions below are from **code inspection**. Mark `FIGMA-PENDING` until the named frames confirm visual/interaction detail. Prefer modify/reuse over replacement when responsibility already matches.
+Decisions below are from **code inspection + current Figma frames** (§9). Prefer modify/reuse over replacement when responsibility already matches. No row remains Figma-pending.
 
 | Figma concept | Existing code | Decision | Rationale |
 | --- | --- | --- | --- |
@@ -451,25 +446,25 @@ Decisions below are from **code inspection**. Mark `FIGMA-PENDING` until the nam
 | People rail | `buildPeopleRows` / KC people bucket / `PersonEntity` | **modify** | Reuse people projection. New layout only. |
 | To Do queue | `composeKnowledgeCentreItems` todo bucket + `addTodo` / `toggleTodo` | **modify** | Queue is a presentation over canonical todos plus date-relevant non-todos. Do not coerce Issues into todos. |
 | Capture | `CaptureWorkspace` | **modify (visual only)** | Keep Analyse → Review → Apply. Do not change resolver/Apply. |
-| Review | `CompactChangeCard`, `SuggestedChangesList`, `CorrectionActions` | **modify (visual only)** | Domain/operation colours already exist in `review-cards.css`. |
-| Knowledge Centre | `OceanKnowledgeFrames`, `four-bucket.ts`, `KnowledgeSearchAskBar`, `KnowledgeTagFilter` | **modify** | Already four-bucket + search/ask/tags/timeline. Add grid/list, endless scroll, Manual Add if Figma shows them. |
-| KC detail drawer | `KnowledgeItemDetailDrawer` | **modify** | Same drawer. Add Back stack, History, Close/Remove, Open Details, tag editor. Do not replace with a new drawer system. |
-| KC Edit Item | drawer `Correct` / `updateKnowledgeSection` / `updateTodo` | **modify** | Manual edit already bypasses Review. Align chrome to Figma. |
-| Project Scan | none mounted | **create (view only)** | New mode component that **reads** existing risks/dependencies/gaps/contradictions. No writer. May reuse Catch Me Up assembly only as a read helper if it stays non-authoritative. |
+| Review | `CompactChangeCard`, `SuggestedChangesList`, `CorrectionActions` | **modify (visual only)** | Authority is standalone `28:119` (Converged MP v2), not the four-tab workspace. Keep Analyse → Review → Apply. “Confirm review” is Apply confirmation copy. Do not mount Review as a workspace tab. |
+| Knowledge Centre | `OceanKnowledgeFrames`, `four-bucket.ts`, `KnowledgeSearchAskBar`, `KnowledgeTagFilter` | **modify** | Figma confirms search, Ask Lume, domain + tag filters, grid/list toggle, `+ Add item`. Endless scroll is **not** in the current frames — do not invent it. |
+| KC detail drawer | `KnowledgeItemDetailDrawer` | **modify** | Figma confirms `← Back`, HISTORY, Close, Remove, Open Details, tag chips. Same drawer. Do not replace with a new drawer system. |
+| KC Edit Item | drawer `Correct` / `updateKnowledgeSection` / `updateTodo` | **modify** | Figma v3: Save changes / Discard; tags persist only on Save. Manual edit already bypasses Review. |
+| Project Scan | none mounted | **create (view only)** | Figma confirms four analysis groups and explicit non-writer copy. `Scan again` recomputes the projection. Findings may seed Suggestions. Do not write on sight. |
 | New Project | `NewProjectExperience` | **modify (visual)** | Compose-oriented four-frame path is already production. |
 | First Project / Help | `NewProjectExperience variant="first-run"`, `FirstProjectGuidance` | **modify (visual)** | Same first-run entry. |
-| Suggestion → Add | unmounted `ProjectWidgetGrid` + `acceptSuggestion` | **modify + persist** | Reuse recommendation records. Do not treat Capture Review as this flow. D-003 must be closed for Discard to survive reload. |
-| Manual Add Item | New Project `ComposeFrame`; store `addTodo` / knowledge helpers | **create thin adapter** | New modal/drawer chrome, existing canonical writes. Missing Issue/Person create helpers may be small store extensions over existing persist functions — not a new RPC. |
+| Suggestion → Add | unmounted `ProjectWidgetGrid` + `acceptSuggestion` | **modify + persist** | Figma is a Home modal: Save To Do / Discard. Reuse recommendation records. Not Capture Review. D-003 must be closed for Discard to survive reload. |
+| Manual Add Item | New Project `ComposeFrame`; store `addTodo` / knowledge helpers | **create thin adapter** | Figma is a KC drawer with Issue / Person / To Do / Knowledge. Writes only on Save item. Hide tags when type = Person. Missing Issue/Person helpers may extend existing persist — not a new RPC. |
 | Drawer Back stack | none | **create** inside existing drawer | Client navigation stack only. Not a route/store of truth. |
 | Domain header / cards | `KcItemCard`, `DomainMark`, locked domain tokens | **modify** | Tokens already match coral/blue/green/purple. Restrain tints. |
-| me mark | `ocean-wordmark-me`, `ocean-ai-glyph` ✦, `LumeLogo` | **modify / small create** | Need standard / button / micro underlined `me`. Keep inside buttons. Logo SVG is not the wordmark authority. |
+| me mark | `ocean-wordmark-me`, `ocean-ai-glyph` ✦, `LumeLogo` | **modify / small create** | Figma component `Brand/AIUsageMark` is underlined `me` (standard / button / micro). Keep inside AI buttons. Logo SVG is not the wordmark authority. |
 | Warning / instruction | `.ocean-save-error`, Capture reliability, Needs You, first-run cues | **modify** | Reuse surfaces; replace “project truth” copy. |
 | Buttons | `primary-btn` / `ghost-btn` / `danger-btn` | **reuse** | Already locked to Lume purple / destructive. |
 | Avatars | `ReviewPersonAvatar`, `PersonEntity` | **reuse** | |
 | Timeline | `TimelineFrame`, `timeline-projection.ts` | **reuse** | Read-only embed on Home / KC. |
 | History | `history_events`, `/history` page | **modify** | Add item-level read of the same events. No second store. |
 | Tags | `src/lib/tags/*`, `persist-tags.ts`, `KnowledgeTagFilter` | **modify** | Wire editor + store. No new schema. |
-| Catch Me Up | `CatchMeUpPanel` | **keep unmounted from tabs** unless Figma still shows it | Derived briefing. Not Project Scan. Not a writer. |
+| Catch Me Up | `CatchMeUpPanel` | **keep unmounted from tabs** | Current Figma tabs do not include it. Derived briefing only. Not Project Scan. Not a writer. |
 
 ---
 
@@ -500,12 +495,12 @@ Decisions below are from **code inspection**. Mark `FIGMA-PENDING` until the nam
 - drawer Back stack;
 - item History panel;
 - Close / Remove universal labelling and People/Issue Remove where product requires it;
-- KC/Home Manual Add for all four domains;
-- Suggestion Add → Save/Discard + durable Discard (D-003);
-- tag editor on Issue / To Do / Knowledge;
-- grid/list + endless scroll if Figma KC frames require them;
-- underlined `me` mark sizes;
-- user-facing “project truth” copy sweep.
+- KC/Home Manual Add for all four domains (Figma: drawer, Save item);
+- Suggestion Add → Save To Do / Discard + durable Discard (D-003);
+- tag editor on Issue / To Do / Knowledge (create-on-Save only; hide on People);
+- grid/list toggle (Figma required). Endless scroll is **not** required;
+- underlined `me` mark sizes (`Brand/AIUsageMark`);
+- user-facing “project truth” copy sweep (current Figma already avoids the phrase).
 
 ### Architecture gates (do not implement in passing)
 
@@ -517,6 +512,10 @@ Decisions below are from **code inspection**. Mark `FIGMA-PENDING` until the nam
 6. **Manual Add Issue / Person** — if existing persist helpers cannot create a risk / stakeholder without a new RPC, extend the established persist path additively. STOP before a new canonical kind.
 7. **Project Scan writer pressure** — if Figma shows Scan applying fixes directly, keep analysis-only and route user action through Suggestion Add or Manual Add. Do not let Scan write.
 8. **Catch Me Up vs Project Scan** — do not rename Catch Me Up into Scan. Do not import AI-first Scan architecture.
+9. **KC filter-row `Add tag`** — filter chrome only. Do not create orphan project tags from that control.
+10. **Review chrome** — `28:119` is a standalone Review surface. Do not invent a Home-tab Review mode.
+
+Figma close-out added **no new schema / RPC / RLS gate**.
 
 ---
 
@@ -524,15 +523,15 @@ Decisions below are from **code inspection**. Mark `FIGMA-PENDING` until the nam
 
 Safe commit boundaries. Each phase stays on `integration/figma-ui-convergence-v1`. Re-run `npm run git:preflight` and `npm test` at the end of each phase. Do not merge to `main`.
 
-0. **Figma close-out** — inspect listed nodes; update this file; confirm reuse matrix. No production UI.
+0. **Figma close-out** — **done** 17 Sep 2026. Listed nodes inspected; reuse matrix confirmed; no architecture gate.
 1. **Shell chrome** — sidebar + four tabs + header band + copy sweep for “project truth” in mounted chrome. Home tab may still render current KC until Phase 2. Files: `Sidebar.tsx`, `ProjectModeSelector.tsx`, `OceanProjectWorkspace.tsx`, `TopHeader.tsx`, `AppShell.tsx`, locked CSS.
-2. **Home projection** — compose To Do queue / People rail / Issues / Knowledge / Timeline from existing selectors (`four-bucket.ts`, `ocean-frames.ts`, `TimelineFrame`). Change `/` and project default mode to Home. No new persist.
-3. **Knowledge Centre visual convergence** — grid/list, scroll, filters, Open Details label, Manual Add entry points wired to existing writes.
-4. **Drawer stack + History + Close/Remove** — extend `KnowledgeItemDetailDrawer` with Back stack and item History read. Map Close/Remove onto existing complete/resolve/delete helpers. No second history store.
-5. **Tags editor** — wire `suggestTags` + `persist-tags.ts` through `store.tsx` for Issue / To Do / Knowledge only. Discard creates nothing. Save is the write. Tests in `scripts/verify-project-tags.ts` plus new store/UI tests.
-6. **Manual Add + Suggestion Add/Discard** — thin adapters over canonical writes; persist recommendation dismiss (D-003) if the existing table supports it.
-7. **Project Scan view** — read-only groupings. Findings may offer Suggestions. No canonical mutation.
-8. **Capture / Review / New Project / First Project visual pass** — chrome only. Do not touch Apply, resolver, receipts, or Prompt A.
+2. **Home projection** — compose To Do queue / People rail / Issues / Knowledge / Timeline from existing selectors (`four-bucket.ts`, `ocean-frames.ts`, `TimelineFrame`). Change `/` and project default mode to Home. No new persist. Issue-in-queue stays an Issue.
+3. **Knowledge Centre visual convergence** — grid/list toggle, search/Ask Lume, filters, Open Details, `+ Add item` entry. No endless-scroll contract.
+4. **Drawer stack + History + Close/Remove** — extend `KnowledgeItemDetailDrawer` with `← Back` and item History read. Map Close/Remove onto existing complete/resolve/delete helpers. No second history store.
+5. **Tags editor** — wire `suggestTags` + `persist-tags.ts` through `store.tsx` for Issue / To Do / Knowledge only. Discard creates nothing. Save is the write. Hide on People. Tests in `scripts/verify-project-tags.ts` plus new store/UI tests.
+6. **Manual Add + Suggestion Add/Discard** — KC Add Item drawer and Home Suggestion modal over canonical writes; persist recommendation dismiss (D-003) if the existing table supports it.
+7. **Project Scan view** — read-only Risks / Dependencies / Missing information / Contradictions. Findings may offer Suggestions. No canonical mutation.
+8. **Capture / Review / New Project / First Project visual pass** — chrome only. Capture uses workspace v2 shell; Review stays standalone `28:119`. Do not touch Apply, resolver, receipts, or Prompt A.
 9. **Visual verification + regression** — screenshot scripts, Playwright where contracts exist, `verify:ocean-*`, `verify:knowledge-centre-four-bucket`, `verify:project-tags`, `verify:ocean-item-detail`, `verify:first-run-journey`, `verify:new-project-four-frame`, `npm test`.
 
 If a phase needs schema / RPC / RLS / new canonical kind: **stop and update §11 gates** instead of implementing.
@@ -557,20 +556,20 @@ If a phase needs schema / RPC / RLS / new canonical kind: **stop and update §11
 | Fetch `origin/main` + create integration branch | done | branch from `7121958` |
 | Baseline `npm test` / typecheck / build | done | 99/99; tsc 0; build 0 |
 | Code inspection: shell, writes, tags, ownership, history | done | §7–§11 |
-| Figma frame inspection | **open** | plugin not bound to first agent thread |
-| Part 2 UI implementation | not started | by design |
+| Figma frame inspection | **done** | Figma MCP authenticated this thread; §9 evidence 17 Sep 2026 |
+| Part 2 UI implementation | not started | waiting for explicit Part 2 instruction |
 
 ---
 
 ## 15. Known blockers
 
-1. **Figma MCP must be authenticated in a new thread** started after the plugin install. Until frames are inspected, Part 1 is not closed and Part 2 must not start.
+1. ~~Figma MCP / frame inspection~~ — **closed** 17 Sep 2026.
 2. D-003 suggestion dismiss is memory-only. Home/Scan Discard cannot be honest across reload until persisted.
 3. D-004 History persist gaps. Item History UI must not pretend missing events exist.
 4. Current `npm run lint` is already red on `main`. Not a programme blocker; do not churn it.
 5. User-facing “project truth” copy still exists in mounted Capture / AppShell / New Project strings.
 
-**STOP conditions found in Part 1 code inspection:** none that prevent planning. No schema change is required to begin shell/Home/KC visual work. Figma inspection may still raise a gate.
+**STOP conditions found in Part 1 (code + Figma):** none that prevent planning. No schema change is required to begin shell/Home/KC visual work. Figma did not raise an architecture / schema / domain gate.
 
 ---
 
@@ -578,15 +577,17 @@ If a phase needs schema / RPC / RLS / new canonical kind: **stop and update §11
 
 ```text
 PART 1 STATUS
-  Recovery, preflight, code inspection, and plan are written.
-  Figma frames are not yet inspected.
+  Recovery, preflight, code inspection, Figma inspection, and plan
+  are written. Figma-inspection blocker is closed.
+  No architecture / schema / domain gate.
 
 READY FOR PART 2
-  NO — authenticate Figma, inspect the listed nodes, update this file,
-  then wait for an explicit Part 2 instruction.
+  YES — after an explicit Part 2 instruction only.
 
 SAFEST NEXT ACTION
-  New Cursor thread using the prompt in “How to continue”.
-  Stay on integration/figma-ui-convergence-v1.
-  Do not implement production UI in that close-out.
+  Wait for the user to start Part 2 on
+  integration/figma-ui-convergence-v1.
+  Re-run npm run git:preflight first.
+  Do not implement production UI until then.
+  Do not merge to main.
 ```
