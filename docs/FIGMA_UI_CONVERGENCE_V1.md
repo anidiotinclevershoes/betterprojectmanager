@@ -73,20 +73,20 @@ If Figma appears to require behaviour that conflicts with production architectur
 
 ## 3. Branch / baseline
 
-Recorded 17 September 2026 after `git fetch origin main` (Figma close-out re-preflight).
+Recorded 17 September 2026 after Part 2 implementation (`npm run git:preflight`).
 
 ```text
 Working branch: integration/figma-ui-convergence-v1
-Branch HEAD:    944cf7e6ce84a1f6ad6196fe0d563722f893fda8
+Branch HEAD:    6cb1895e05ce61e1aa64a8ebee9235b5837f3898
 origin/main HEAD: 71219584972d8d65a11296187a090ecef56a5db0
 Merge-base:     71219584972d8d65a11296187a090ecef56a5db0
-Ahead: 2
+Ahead: 6
 Behind: 0
 Contains current main?: YES
-Working tree clean?: YES before this Figma-evidence docs commit
+Working tree clean?: YES
 PR base: main
 Dependencies: none
-Shared/global files expected: none in Part 1 (docs only)
+Shared/global files expected: store.tsx persist helpers (additive); no Capture Apply ownership
 Branch classification: CURRENT
 ```
 
@@ -559,7 +559,7 @@ If a phase needs schema / RPC / RLS / new canonical kind: **stop and update §11
 | Baseline `npm test` / typecheck / build | done | 99/99; tsc 0; build 0 |
 | Code inspection: shell, writes, tags, ownership, history | done | §7–§11 |
 | Figma frame inspection | **done** | Figma MCP authenticated this thread; §9 evidence 17 Sep 2026 |
-| Part 2 UI implementation | in progress | Phase 1–8 landed on integration branch; honour §17; do not merge |
+| Part 2 UI implementation | in progress | Phases 1–9 landed on integration branch. `npm test` 100/100. Honour §17. Do not merge to `main`. |
 
 ---
 
