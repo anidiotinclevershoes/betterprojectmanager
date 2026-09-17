@@ -118,6 +118,7 @@ SQL printed by the adversarial script is for operators on a copy of dogfood data
 | --- | --- | --- |
 | High-order product / architecture rule | `docs/LUME_CONSTITUTION.md` + the named specialist contract | Historical handovers, root README, `MISSION.md` |
 | Product / trust / Ocean UI philosophy | `docs/v1-reference-pack/`, except the Spiderman amendment deltas | Historical UI snapshots |
+| Approved Figma UI convergence look/feel | Figma `Lume-V1-UX` + `docs/FIGMA_UI_CONVERGENCE_V1.md` | Implementing Figma by inventing a parallel writer or new schema |
 | Current Capture position | `docs/LUME_CAPTURE_STATUS.md` | `V09_QUALIFICATION.md` “Stage 2 BLOCKED”; experiment PRs; Prompt E |
 | What the code does now | The code on current `main` | Architecture Memory Handoff (26 Aug); 19 Aug Project Truth Audit; `docs/current-state/`; SLICE/PHASE bodies |
 | What shipped in v0.9 / leftovers / isolation | `docs/LUME_V09_TO_V1_HANDOFF.md` | Phase 3 “unfinished programme” language; Coach-as-live-surface docs |
