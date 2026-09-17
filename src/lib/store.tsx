@@ -89,6 +89,8 @@ import {
   persistKnowledgeLifecycle,
   persistEnsureStakeholder,
   persistMemory,
+  persistRecommendationStatus,
+  persistRiskCreate,
   persistRiskStatus,
   persistTimelineItem,
   persistTimelineUpdate,
@@ -96,6 +98,21 @@ import {
   persistTodoDelete,
   persistTodoUpdate,
 } from "@/lib/data/supabase/persist-mutations";
+import {
+  persistAttachItemTag,
+  persistDeleteUnusedProjectTag,
+  persistDetachItemTag,
+  persistEnsureProjectTag,
+} from "@/lib/data/supabase/persist-tags";
+import {
+  describeTagSaveFailure,
+  itemTagRow,
+  planItemTagSave,
+  shouldDeleteCreatedTag,
+  type TagSaveFailureMode,
+} from "@/lib/tags/save";
+import { tagsForItem } from "@/lib/tags";
+import type { TagTargetKind } from "@/lib/tags";
 import {
   persistKnowledgeReconcile,
   remapStructuredForSections,
@@ -155,6 +172,14 @@ type UpdateTodoInput = {
   projectId?: string | null;
   kind?: import("@/lib/types").TodoKind | null;
   waitingOn?: string | null;
+};
+
+export type ManualItemType = "issue" | "person" | "todo" | "knowledge";
+
+export type ManualWriteResult = {
+  ok: boolean;
+  id?: string;
+  error?: string;
 };
 
 type AddSuggestionInput = {
@@ -229,6 +254,26 @@ type MissionContextValue = {
     sectionId: KnowledgeSectionId,
     bullet: string,
   ) => void;
+  addManualItem: (input: {
+    projectId: string;
+    type: ManualItemType;
+    title: string;
+    detail?: string;
+  }) => Promise<ManualWriteResult>;
+  saveItemTags: (input: {
+    projectId: string;
+    targetKind: TagTargetKind;
+    targetId: string;
+    names: string[];
+  }) => Promise<ManualWriteResult>;
+  dismissSuggestionDurable: (
+    recommendationId: string,
+  ) => Promise<ManualWriteResult>;
+  saveSuggestedTodo: (input: {
+    recommendationId: string;
+    title: string;
+    detail?: string;
+  }) => Promise<ManualWriteResult>;
   replaceKnowledge: (knowledge: ProjectKnowledge) => void;
   /**
    * Slice 1B: set lifecycle on a genuine Risk (by stable risks.id).
@@ -1852,6 +1897,564 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const persistRecommendationStatusSafe = useCallback(
+    async (
+      recommendationId: string,
+      status: Recommendation["status"],
+      projectId?: string | null,
+    ): Promise<ManualWriteResult> => {
+      const meta = persistMetaRef.current;
+      const applyLocal = () => {
+        setState((prev) => ({
+          ...prev,
+          recommendations: prev.recommendations.map((r) =>
+            r.id === recommendationId ? { ...r, status } : r,
+          ),
+        }));
+      };
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          await persistRecommendationStatus(
+            client,
+            meta.workspaceId,
+            recommendationId,
+            status,
+            projectId,
+          );
+          applyLocal();
+          markPersistSaved();
+          return { ok: true, id: recommendationId };
+        } catch (err) {
+          console.error("[persistRecommendationStatus] failed", err);
+          reportPersistFailure(err, "Could not update suggestion");
+          return {
+            ok: false,
+            error:
+              err instanceof Error ? err.message : "Could not update suggestion",
+          };
+        }
+      }
+      applyLocal();
+      return { ok: true, id: recommendationId };
+    },
+    [],
+  );
+
+  const dismissSuggestionDurable = useCallback(
+    async (recommendationId: string): Promise<ManualWriteResult> => {
+      const rec = stateRef.current.recommendations.find(
+        (r) => r.id === recommendationId,
+      );
+      if (!rec) return { ok: false, error: "That suggestion is no longer available." };
+      return persistRecommendationStatusSafe(
+        recommendationId,
+        "dismissed",
+        rec.projectId,
+      );
+    },
+    [persistRecommendationStatusSafe],
+  );
+
+  const addManualItem = useCallback(
+    async (input: {
+      projectId: string;
+      type: ManualItemType;
+      title: string;
+      detail?: string;
+    }): Promise<ManualWriteResult> => {
+      const title = input.title.trim();
+      if (!title) return { ok: false, error: "Enter a title before saving." };
+      const meta = persistMetaRef.current;
+
+      if (input.type === "todo") {
+        if (meta.mode === "supabase" && meta.workspaceId) {
+          setSaveStatus("saving");
+          setSaveError(null);
+          try {
+            const client = createBrowserSupabaseClient();
+            const created = await persistTodoCreate(
+              client,
+              meta.workspaceId,
+              meta.userId,
+              {
+                projectId: input.projectId,
+                title,
+                detail: input.detail,
+                done: false,
+              },
+            );
+            setState((prev) =>
+              pushHistory(
+                { ...prev, todos: [created, ...(prev.todos ?? [])] },
+                makeHistoryEvent({
+                  type: "task_added",
+                  title: "You added a To Do",
+                  detail: title,
+                  projectId: input.projectId,
+                  source: "user",
+                }),
+              ),
+            );
+            await persistHistoryEvent(client, meta.workspaceId, meta.userId, {
+              type: "task_added",
+              title: "You added a To Do",
+              detail: title,
+              projectId: input.projectId,
+              source: "user",
+            });
+            markPersistSaved();
+            return { ok: true, id: created.id };
+          } catch (err) {
+            console.error("[addManualItem] todo failed", err);
+            reportPersistFailure(err, "Could not save To Do");
+            return {
+              ok: false,
+              error: err instanceof Error ? err.message : "Could not save To Do",
+            };
+          }
+        }
+        const id = newClientId();
+        setState((prev) =>
+          pushHistory(
+            {
+              ...prev,
+              todos: [
+                {
+                  id,
+                  projectId: input.projectId,
+                  title,
+                  detail: input.detail,
+                  done: false,
+                  createdAt: new Date().toISOString(),
+                },
+                ...(prev.todos ?? []),
+              ],
+            },
+            makeHistoryEvent({
+              type: "task_added",
+              title: "You added a To Do",
+              detail: title,
+              projectId: input.projectId,
+              source: "user",
+            }),
+          ),
+        );
+        return { ok: true, id };
+      }
+
+      if (input.type === "issue") {
+        if (meta.mode === "supabase" && meta.workspaceId) {
+          setSaveStatus("saving");
+          setSaveError(null);
+          try {
+            const client = createBrowserSupabaseClient();
+            const created = await persistRiskCreate(
+              client,
+              meta.workspaceId,
+              meta.userId,
+              { projectId: input.projectId, title, source: "manual" },
+            );
+            setState((prev) =>
+              pushHistory(
+                { ...prev, risks: [created, ...(prev.risks ?? [])] },
+                makeHistoryEvent({
+                  type: "risk_added",
+                  title: "You added an Issue",
+                  detail: title,
+                  projectId: input.projectId,
+                  source: "user",
+                }),
+              ),
+            );
+            await persistHistoryEvent(client, meta.workspaceId, meta.userId, {
+              type: "risk_added",
+              title: "You added an Issue",
+              detail: title,
+              projectId: input.projectId,
+              source: "user",
+            });
+            markPersistSaved();
+            return { ok: true, id: created.id };
+          } catch (err) {
+            console.error("[addManualItem] issue failed", err);
+            reportPersistFailure(err, "Could not save Issue");
+            return {
+              ok: false,
+              error: err instanceof Error ? err.message : "Could not save Issue",
+            };
+          }
+        }
+        const id = newClientId();
+        setState((prev) =>
+          pushHistory(
+            {
+              ...prev,
+              risks: [
+                {
+                  id,
+                  projectId: input.projectId,
+                  title,
+                  status: "open",
+                  source: "manual",
+                  createdAt: new Date().toISOString(),
+                },
+                ...(prev.risks ?? []),
+              ],
+            },
+            makeHistoryEvent({
+              type: "risk_added",
+              title: "You added an Issue",
+              detail: title,
+              projectId: input.projectId,
+              source: "user",
+            }),
+          ),
+        );
+        return { ok: true, id };
+      }
+
+      if (input.type === "person") {
+        const preview = applyEnsurePersonOnProject(
+          stateRef.current.projects,
+          input.projectId,
+          title,
+        );
+        if (!preview.created) {
+          return { ok: true, id: preview.stakeholder.id };
+        }
+        if (meta.mode === "supabase" && meta.workspaceId) {
+          setSaveStatus("saving");
+          setSaveError(null);
+          try {
+            const client = createBrowserSupabaseClient();
+            const persisted = await persistEnsureStakeholder(
+              client,
+              meta.workspaceId,
+              input.projectId,
+              {
+                id: preview.stakeholder.id,
+                name: preview.stakeholder.name,
+                role: preview.stakeholder.role,
+              },
+            );
+            setState((prev) => ({
+              ...prev,
+              projects: applyEnsurePersonOnProject(
+                prev.projects,
+                input.projectId,
+                title,
+                persisted.id,
+              ).projects,
+            }));
+            markPersistSaved();
+            return { ok: true, id: persisted.id };
+          } catch (err) {
+            console.error("[addManualItem] person failed", err);
+            reportPersistFailure(err, "Could not save person");
+            return {
+              ok: false,
+              error: err instanceof Error ? err.message : "Could not save person",
+            };
+          }
+        }
+        setState((prev) => ({
+          ...prev,
+          projects: applyEnsurePersonOnProject(
+            prev.projects,
+            input.projectId,
+            title,
+          ).projects,
+        }));
+        return { ok: true, id: preview.stakeholder.id };
+      }
+
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          const knowledgeId = newClientId();
+          await persistKnowledgeBullet(
+            client,
+            meta.workspaceId,
+            input.projectId,
+            "now",
+            title,
+            meta.userId,
+            { id: knowledgeId, kind: "fact" },
+          );
+          setState((prev) => {
+            const current =
+              (prev.knowledge ?? []).find((k) => k.projectId === input.projectId) ??
+              emptyKnowledge(input.projectId);
+            const merged = mergeKnowledge(current, input.projectId, {
+              now: [title],
+            });
+            return pushHistory(
+              {
+                ...prev,
+                knowledge: [
+                  ...(prev.knowledge ?? []).filter(
+                    (k) => k.projectId !== input.projectId,
+                  ),
+                  merged,
+                ],
+              },
+              makeHistoryEvent({
+                type: "knowledge_updated",
+                title: "You added knowledge",
+                detail: title,
+                projectId: input.projectId,
+                source: "user",
+              }),
+            );
+          });
+          await persistHistoryEvent(client, meta.workspaceId, meta.userId, {
+            type: "knowledge_updated",
+            title: "You added knowledge",
+            detail: title,
+            projectId: input.projectId,
+            source: "user",
+          });
+          markPersistSaved();
+          return { ok: true, id: knowledgeId };
+        } catch (err) {
+          console.error("[addManualItem] knowledge failed", err);
+          reportPersistFailure(err, "Could not save knowledge");
+          return {
+            ok: false,
+            error:
+              err instanceof Error ? err.message : "Could not save knowledge",
+          };
+        }
+      }
+      const knowledgeId = newClientId();
+      setState((prev) => {
+        const current =
+          (prev.knowledge ?? []).find((k) => k.projectId === input.projectId) ??
+          emptyKnowledge(input.projectId);
+        const merged = mergeKnowledge(current, input.projectId, { now: [title] });
+        return {
+          ...prev,
+          knowledge: [
+            ...(prev.knowledge ?? []).filter((k) => k.projectId !== input.projectId),
+            merged,
+          ],
+        };
+      });
+      return { ok: true, id: knowledgeId };
+    },
+    [],
+  );
+
+  const saveItemTags = useCallback(
+    async (input: {
+      projectId: string;
+      targetKind: TagTargetKind;
+      targetId: string;
+      names: string[];
+    }): Promise<ManualWriteResult> => {
+      if (input.targetKind === "stakeholder") {
+        return { ok: false, error: "People are not tagged in this UI." };
+      }
+      const current = tagsForItem({
+        projectTags: stateRef.current.projectTags ?? [],
+        itemTags: stateRef.current.itemTags ?? [],
+        projectId: input.projectId,
+        targetKind: input.targetKind,
+        targetId: input.targetId,
+      });
+      const planned = planItemTagSave({
+        projectId: input.projectId,
+        names: input.names,
+        projectTags: stateRef.current.projectTags ?? [],
+        newTagId: newClientId,
+      });
+      const desiredSlugs = new Set(planned.map((op) => (op.kind === "reuse" ? op.tag.slug : op.draft.slug)));
+      const toDetach = current.filter((tag) => !desiredSlugs.has(tag.slug));
+      const meta = persistMetaRef.current;
+
+      const applyLocal = (
+        projectTags: NonNullable<MissionState["projectTags"]>,
+        itemTags: NonNullable<MissionState["itemTags"]>,
+      ) => {
+        setState((prev) => ({ ...prev, projectTags, itemTags }));
+      };
+
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        const client = createBrowserSupabaseClient();
+        let mode: TagSaveFailureMode = "none";
+        try {
+          const nextProjectTags = [...(stateRef.current.projectTags ?? [])];
+          const nextItemTags = [...(stateRef.current.itemTags ?? [])];
+          for (const tag of toDetach) {
+            await persistDetachItemTag(client, meta.workspaceId, {
+              tagId: tag.id,
+              targetKind: input.targetKind,
+              targetId: input.targetId,
+              projectId: input.projectId,
+            });
+            const idx = nextItemTags.findIndex(
+              (row) =>
+                row.tagId === tag.id &&
+                row.targetKind === input.targetKind &&
+                row.targetId === input.targetId,
+            );
+            if (idx >= 0) nextItemTags.splice(idx, 1);
+          }
+          for (const op of planned) {
+            const already = nextItemTags.some(
+              (row) =>
+                row.tagId === (op.kind === "reuse" ? op.tag.id : op.draft.id) &&
+                row.targetKind === input.targetKind &&
+                row.targetId === input.targetId,
+            );
+            if (already && op.kind === "reuse") continue;
+            let tag = op.kind === "reuse" ? op.tag : op.draft;
+            let createdThisSave = op.kind === "create";
+            if (op.kind === "create") {
+              tag = await persistEnsureProjectTag(
+                client,
+                meta.workspaceId,
+                op.draft,
+              );
+              createdThisSave = tag.id === op.draft.id;
+              if (!nextProjectTags.some((row) => row.id === tag.id)) {
+                nextProjectTags.push(tag);
+              }
+            }
+            try {
+              const row = itemTagRow({
+                id: newClientId(),
+                projectId: input.projectId,
+                tagId: tag.id,
+                targetKind: input.targetKind,
+                targetId: input.targetId,
+              });
+              await persistAttachItemTag(client, meta.workspaceId, row);
+              nextItemTags.push(row);
+            } catch (attachErr) {
+              if (createdThisSave) {
+                const cleanup = await persistDeleteUnusedProjectTag(
+                  client,
+                  meta.workspaceId,
+                  input.projectId,
+                  tag.id,
+                );
+                const canDelete = shouldDeleteCreatedTag({
+                  createdThisSave: true,
+                  unusedProven: cleanup.unusedProven,
+                  proveFailed: cleanup.proveFailed,
+                });
+                if (canDelete && cleanup.deleted) {
+                  mode = "attach_failed_unused_cleaned";
+                  const idx = nextProjectTags.findIndex((row) => row.id === tag.id);
+                  if (idx >= 0) nextProjectTags.splice(idx, 1);
+                } else if (cleanup.proveFailed) {
+                  mode = "attach_failed_unused_left";
+                } else {
+                  mode = "attach_failed_in_use";
+                }
+              } else {
+                mode = "attach_failed_in_use";
+              }
+              applyLocal(nextProjectTags, nextItemTags);
+              reportPersistFailure(attachErr, describeTagSaveFailure(mode));
+              return { ok: false, error: describeTagSaveFailure(mode) };
+            }
+          }
+          applyLocal(nextProjectTags, nextItemTags);
+          markPersistSaved();
+          return { ok: true, id: input.targetId };
+        } catch (err) {
+          console.error("[saveItemTags] failed", err);
+          reportPersistFailure(err, "Could not save tags");
+          return {
+            ok: false,
+            error: err instanceof Error ? err.message : "Could not save tags",
+          };
+        }
+      }
+
+      let projectTags = [...(stateRef.current.projectTags ?? [])];
+      let itemTags = [...(stateRef.current.itemTags ?? [])];
+      itemTags = itemTags.filter(
+        (row) =>
+          !(
+            row.targetKind === input.targetKind &&
+            row.targetId === input.targetId &&
+            toDetach.some((tag) => tag.id === row.tagId)
+          ),
+      );
+      for (const op of planned) {
+        const tag = op.kind === "reuse" ? op.tag : op.draft;
+        if (op.kind === "create" && !projectTags.some((row) => row.slug === tag.slug)) {
+          projectTags.push(tag);
+        }
+        if (
+          !itemTags.some(
+            (row) =>
+              row.tagId === tag.id &&
+              row.targetKind === input.targetKind &&
+              row.targetId === input.targetId,
+          )
+        ) {
+          itemTags.push(
+            itemTagRow({
+              id: newClientId(),
+              projectId: input.projectId,
+              tagId: tag.id,
+              targetKind: input.targetKind,
+              targetId: input.targetId,
+            }),
+          );
+        }
+      }
+      applyLocal(projectTags, itemTags);
+      return { ok: true, id: input.targetId };
+    },
+    [],
+  );
+
+  const saveSuggestedTodo = useCallback(
+    async (input: {
+      recommendationId: string;
+      title: string;
+      detail?: string;
+    }): Promise<ManualWriteResult> => {
+      const rec = stateRef.current.recommendations.find(
+        (r) => r.id === input.recommendationId,
+      );
+      if (!rec) return { ok: false, error: "That suggestion is no longer available." };
+      const created = await addManualItem({
+        projectId: rec.projectId ?? "",
+        type: "todo",
+        title: input.title,
+        detail: input.detail,
+      });
+      if (!created.ok) return created;
+      const marked = await persistRecommendationStatusSafe(
+        rec.id,
+        "done",
+        rec.projectId,
+      );
+      if (!marked.ok) {
+        return {
+          ok: false,
+          error:
+            "To Do was saved. Lume could not mark the suggestion done — it may still appear until that status is stored.",
+        };
+      }
+      return created;
+    },
+    [addManualItem, persistRecommendationStatusSafe],
+  );
+
   const setRiskStatus = useCallback(
     (riskId: string, status: RiskStatus, projectId: string) => {
       const prev = stateRef.current;
@@ -2754,6 +3357,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       refreshSuggestions,
       updateKnowledgeSection,
       addKnowledgeBullet,
+      addManualItem,
+      saveItemTags,
+      dismissSuggestionDurable,
+      saveSuggestedTodo,
       replaceKnowledge,
       setRiskStatus,
       setKnowledgeOnlyRiskResolved,
@@ -2801,6 +3408,10 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       refreshSuggestions,
       updateKnowledgeSection,
       addKnowledgeBullet,
+      addManualItem,
+      saveItemTags,
+      dismissSuggestionDurable,
+      saveSuggestedTodo,
       replaceKnowledge,
       setRiskStatus,
       setKnowledgeOnlyRiskResolved,

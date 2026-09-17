@@ -22,3 +22,11 @@ export {
   uniqueProjectTagNames,
 } from "./query";
 export { itemVisibleForTagFilter } from "./filter";
+export {
+  describeTagSaveFailure,
+  itemTagRow,
+  planItemTagSave,
+  shouldDeleteCreatedTag,
+  type PlannedTagOp,
+  type TagSaveFailureMode,
+} from "./save";

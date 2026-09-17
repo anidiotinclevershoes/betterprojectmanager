@@ -127,3 +127,39 @@ export async function persistDetachItemTag(
     .eq("target_id", row.targetId);
   requireOk(error, "detach item tag");
 }
+
+/**
+ * Compensating cleanup for a tag this Save just created.
+ * Deletes only when item_tags lookup proves the tag is still unused.
+ * If the lookup fails, do not delete — leftover metadata is harmless.
+ */
+export async function persistDeleteUnusedProjectTag(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  projectId: string,
+  tagId: string,
+): Promise<{ deleted: boolean; unusedProven: boolean; proveFailed: boolean }> {
+  const { data, error } = await client
+    .from("item_tags")
+    .select("id")
+    .eq("workspace_id", workspaceId)
+    .eq("tag_id", tagId)
+    .limit(1);
+  if (error) {
+    return { deleted: false, unusedProven: false, proveFailed: true };
+  }
+  if ((data ?? []).length > 0) {
+    return { deleted: false, unusedProven: false, proveFailed: false };
+  }
+  const { error: deleteError } = await client
+    .from("project_tags")
+    .delete()
+    .eq("workspace_id", workspaceId)
+    .eq("project_id", projectId)
+    .eq("id", tagId);
+  if (deleteError) {
+    return { deleted: false, unusedProven: true, proveFailed: false };
+  }
+  return { deleted: true, unusedProven: true, proveFailed: false };
+}

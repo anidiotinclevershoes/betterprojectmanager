@@ -23,6 +23,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "people-entities", script: "scripts/verify-people-entities.ts" },
   { name: "ask-context-authority", script: "scripts/verify-ask-context-authority.ts" },
   { name: "ocean-knowledge-centre", script: "scripts/verify-ocean-knowledge-centre.ts" },
+  { name: "figma-ui-convergence", script: "scripts/verify-figma-ui-convergence.ts" },
   { name: "search-authority", script: "scripts/verify-search-authority.ts" },
   { name: "ocean-capture", script: "scripts/verify-ocean-capture.ts" },
   { name: "capture-experience", script: "scripts/verify-capture-experience.ts" },

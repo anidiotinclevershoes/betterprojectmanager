@@ -192,7 +192,7 @@ export function NewProjectExperience({
         {variant === "first-run" ? (
           <p className="np-first-run-next" data-testid="np-first-run-next">
             After you create this project, Capture is how you tell Lume what
-            changed. Nothing becomes project truth until you review it.
+            changed. Nothing is added to the project until you review it.
           </p>
         ) : null}
       </header>
