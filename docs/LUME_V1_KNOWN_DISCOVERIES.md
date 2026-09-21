@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 14 September 2026 (Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked)  
+**Last housekeeping:** 21 September 2026 (CD-007 / D-057 — pre-V1 To Do assignees recorded; not a v0.9 implementation task)  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
@@ -350,7 +350,27 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Authority rule characterisation: waiting todos vs openLoop narrative; promotion supersedes the openLoop |
 | **Target resolution / validation point** | Open-loop / To Do architecture slice — after tests lock current concatenation behaviour |
 | **Related docs** | Architecture audit; `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` Part C §C2 |
-| **Notes** | Authority is now decided in the handoff. Implementation is a later slice. Do not fix opportunistically inside unrelated slices. |
+| **Notes** | Authority is now decided in the handoff. Implementation is a later slice. Do not fix opportunistically inside unrelated slices. **Do not reinterpret `waiting_on` as To Do assignment** (CD-007 / D-057). Waiting work and assignee are different concepts. |
+
+---
+
+### D-057 — To Dos have no assignee relationship (required before V1)
+
+| Field | Value |
+| --- | --- |
+| **Status** | open — accepted product requirement; **not** a v0.9 implementation task |
+| **Severity** | high (V1 completeness; not a current production defect) |
+| **Domain** | Todos / People |
+| **Found in** | Product Owner decision 21 September 2026 (CD-007) |
+| **Failure class** | A To Do cannot be assigned to zero / one / many canonical project People. v0.9 has no assignee field. `waiting_on` is a single nullable free-text wait/block, not an assignee. Knowledge responsibility must not be reused as To Do assignment. |
+| **Evidence / repro** | `todos.waiting_on text`; `TodoItem.waitingOn?: string`; no `todo_assignees` (or equivalent); Person detail matches waiting text by exact name only. Diagnosis: current `main` as of CD-007. |
+| **Likely files** | `supabase/migrations/20260812002748_workspace_schema.sql`; `src/lib/types.ts`; persist / load / Capture Apply todo paths; `TodoFrame`; KC projections |
+| **Proposed fix direction** | **Pre-V1 only.** Additive To Do ↔ `stakeholders` many-to-many (directional example: `todo_assignees`). Durable Person IDs. Keep `waiting_on` unchanged. No migration may turn waits into assignees. Cover load/persist, Manual Add/Edit, display of one or several People, Capture/Review when assignment is explicit, tests, old-project compatibility. |
+| **Explicit non-goals** | v0.9 schema/migrations/persist/Apply/`waiting_on` edits; multi-assignee UI during UI-convergence; speculative client-only assignees; auth.users / collaboration / invitations; treating Figma Person bubbles as shipped multi-assign |
+| **Regression test to add** | When implemented: 0/1/many assignees; `waiting_on` fixtures unchanged; no wait→assignee backfill; Capture only when assignment is explicitly stated |
+| **Target resolution / validation point** | before V1 launch — **not** v0.9 UI completion |
+| **Related docs** | [`docs/LUME_PRODUCT_DECISIONS.md`](./LUME_PRODUCT_DECISIONS.md) CD-007; constitution §11; canonical contract §2; v0.9→V1 handoff §8 |
+| **Notes** | Documentation must not imply this is already implemented. Continue current UI-convergence work without local assignee logic. |
 
 ---
 
@@ -1065,6 +1085,7 @@ Canonical categories for the later large hardening pass. Details live in the aud
 ### PRODUCT / MODEL DECISIONS
 
 - D-008 / D-021 — waiting vs open-loop split (authority decided, not implemented)
+- D-057 / CD-007 — To Do assignees 0/1/many (required before V1; do not implement in v0.9; do not reuse `waiting_on`)
 - People uniqueness / workspace-level people
 - D-027 — archive / undo after project delete
 - Whether 8 or 24 is the Knowledge section law
