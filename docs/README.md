@@ -70,6 +70,7 @@ Slice, phase, current-state, experimental-programme, old qualification and archi
 - **Tags:** retrieval metadata only.
 - **Ready → Apply:** Ready means the same production Apply path can execute that change. Apply still revalidates.
 - After a successful Apply, never adopt pre-write state. Capture session binds to the open project.
+- **Assigned to ≠ Waiting on ≠ Responsibility.** Multi-assignee To Dos are required before V1 and are **not** implemented in v0.9. Do not treat `waiting_on` as assignment. See CD-007 / D-057.
 
 ---
 

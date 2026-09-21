@@ -89,3 +89,5 @@ Keep as **target direction** (do not implement schema/UI on this branch):
 - future rich Issue-like objects remain an **extension point only**.
 
 Current code remains project-scoped stakeholders. Architecture owns the schema. UX language (`@person`, Owns, Away) can survive.
+
+**To Do assignees:** Figma / Ocean may keep the established Person-bubble visual grammar. The actual **multiple-assignee** interaction and control arrangement is **deferred** until the pre-V1 capability (CD-007 / D-057) is implemented. v0.9 UI-convergence must not add multi-assignee controls or imply that To Dos already have assignees. `waiting_on` remains wait/block, not assignment.

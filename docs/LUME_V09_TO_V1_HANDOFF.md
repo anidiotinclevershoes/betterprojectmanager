@@ -384,6 +384,15 @@ Ship to trusted testers. Watch the questions in §7.
 | Entitlement after trial / Stripe when charging | Trial is 90 days; Stripe not configured; local “50 actions left” is not billing (D-024) |
 | Hide leftover `/memory` `/coaching` `/releases` if testers find them | Confusion, not a repo-deletion programme |
 | Basic ops: call `assertProductionConfigOrThrow` at boot; payload cap on Capture; don’t log row text in `error.message` | Small boring hardening |
+| **To Do assignees (0 / 1 / many project People)** | **Must-do before V1.** Not implemented in v0.9. Not a v0.9 UI task. See CD-007 / D-057. |
+
+### To Do assignees — pre-V1 requirement (do not implement in v0.9)
+
+A To Do must be assignable to zero, one, or many canonical project People (`stakeholders`). This is **Assigned to** (who does the work). It is not `waiting_on` (blocked/waiting) and not Knowledge responsibility.
+
+v0.9 has no assignee model. Continue UI-convergence without schema, persist, Capture Apply, or multi-assignee control work. Person-bubble visual grammar may stay in Figma; the interaction is deferred.
+
+Detail: [`docs/LUME_PRODUCT_DECISIONS.md`](./LUME_PRODUCT_DECISIONS.md) CD-007. Backlog: D-057.
 
 ### V1 reliability (promote only if testers hit them)
 
@@ -427,6 +436,7 @@ Landing, pricing, onboarding, Stripe — only to the level needed to acquire use
 | Full event sourcing / generic archive-undo | D-027 stays product-optional |
 | Milestone completion architecture (D-029) | Not required to explain dates |
 | Large-scale repo refactor | Does not help testers |
+| **To Do multi-assignee implementation** | **Required before V1** (CD-007 / D-057). Explicitly **out of v0.9**. Do not add schema, persist, Apply, or assignee controls during UI-convergence. |
 
 ---
 
@@ -479,7 +489,8 @@ Living IDs: `docs/LUME_V1_KNOWN_DISCOVERIES.md`. Classifications below are the v
 | D-028 sequential create/delete | Create and delete are one RPC transaction each | CLOSED | `create_project_bundle` / `delete_project_bundle` | History remains secondary after create success |
 | D-004 History persist gaps | Many `pushHistory` not durable | ACCEPTED v0.9 | `history_events` schema | Needed if Change Intelligence reads History |
 | D-007 people prose | Remainder: unlinked Knowledge people | ACCEPTED v0.9 | KD notes | No unique-name platform |
-| D-008 / D-021 waiting dual | Authority decided, not implemented | ACCEPTED v0.9 | Handoff Part C | Later slice |
+| D-008 / D-021 waiting dual | Authority decided, not implemented | ACCEPTED v0.9 | Handoff Part C | Later slice. Do not treat as To Do assignment (D-057). |
+| D-057 To Do assignees 0/1/many | No assignee model; `waiting_on` is wait/block text | **REQUIRED BEFORE V1** / not v0.9 | CD-007 | Additive To Do ↔ People; do not migrate waits into assignees |
 | D-011 NP extractors | Capture path fixed; NP regex remains | ACCEPTED v0.9 | `create-project.ts` | No homemade LLM |
 | D-012 `database.ts` lag | Hand-maintained types | ACCEPTED v0.9 | Types vs migrations | Ops hygiene |
 | D-013 session tables | Client lists still primary | ACCEPTED v0.9 | CaptureSessionContext | Not a Capture unfreeze |
