@@ -31,7 +31,7 @@ Part 1 recovered the current repository, mapped reuse, then inspected the curren
 
 Figma inspection is closed. Stay on `integration/figma-ui-convergence-v1`. Re-run `npm run git:preflight` first. If the branch is CURRENT and contains current `main`, continue from §12 / §17. If MATERIALLY STALE, STOP.
 
-Do not restart Part 1 recovery. Honour §17 safety rules before any History or tag Save work.
+Do not restart Part 1 recovery. Honour §17 safety rules before any History or tag Save work. Honour §17.4 before implementing Page 09 To Do, Issue, or Person detail/edit. Do not redesign those screens.
 
 ---
 
@@ -633,3 +633,19 @@ Retain the existing production behaviour:
 - hydrate the full project set, then filter/render every matching item;
 - do not remove this because Figma omitted loading chrome;
 - endless scroll is **not** a Figma requirement and must not be invented.
+
+### 17.4 Page 09 field semantics (25 September 2026)
+
+Authority for these rules is CD-008–CD-011 in `docs/LUME_PRODUCT_DECISIONS.md` and D-058 in Known Discoveries. This section only points the UI programme at them.
+
+Current `main` is authoritative for the implementation and domain architecture that exists today: schema, persistence, write paths, established contracts, and other implementation constraints. It is not automatically the visual or UI authority.
+
+Standing precedence: canonical product/truth and behavioural/specialist contracts, then the Design Authority Register, then signed/approved UI authority, components, and patterns, then approved screen compositions and working mocks, then current UI implementation.
+
+Figma page `09`, section M To Do, Issue and Person detail/edit screens are approved working mocks for convergence. The rest of page 09 is not promoted. They cannot override canonical product or domain contracts. They can override an older or current UI presentation where that is the purpose of this convergence work. Surface an implementation constraint as a gap. Do not change the approved design to match the old UI. D-058 is the example: multi-person Waiting on stays the product rule, and the single `todos.waiting_on` string is not faked as support for it.
+
+- **To Do Type.** Hidden on the section M To Do detail and edit mocks. Do not add a user-facing Type taxonomy. `todos.kind` stays internal.
+- **Waiting on.** Relationships to zero or more existing People. `todos.waiting_on` is still one string (D-058). Do not fake the relationship by joining names into that string, and do not ship the single string as if it were the product model.
+- **Notes.** Supplementary only. To Do uses `detail`. Knowledge uses `body`. Date/Milestone uses `notes`. The approved Issue and Person screens do not require a notes column. Notes must not create, overwrite, infer, or replace structured project truth.
+
+Preserve the rest of the latest accepted pass. No adjacent redesign.
