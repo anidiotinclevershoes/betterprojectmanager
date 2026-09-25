@@ -46,13 +46,13 @@ Engineering may record a gap here and keep current safe behaviour. Do not block 
 | CD-008 | No user-facing To Do Type taxonomy. `todos.kind` stays an internal routing value | This register; Page 09 working mocks |
 | CD-009 | Waiting on is zero or more relationships to existing People. `todos.waiting_on` is not that model | This register; D-058 |
 | CD-010 | Notes stay supplementary and must not replace structured project truth | This register |
-| CD-011 | Page 09 To Do, Issue and Person detail/edit screens are approved working mocks and do not outrank this hierarchy | Figma `Lume-V1-UX` page `09` section M |
+| CD-011 | Page 09 To Do, Issue and Person screens are approved working mocks. They cannot override canonical product or domain contracts. They can override current UI presentation | Figma `Lume-V1-UX` page `09` section M |
 
 ---
 
 ## UI convergence semantics (25 September 2026)
 
-These decisions govern the current UI work. Page 09 does not outrank this register, the constitution, the specialist contracts, or current `main`.
+These decisions govern the current UI work. Current `main` is authoritative for the implementation and domain architecture that exists today: schema, persistence, write paths, established contracts, and other implementation constraints. It is not automatically the visual or UI authority.
 
 CD-007 is unused here so it can stay with the open pre-V1 assignee note (PR #187). This lock does not decide assignment.
 
@@ -82,6 +82,14 @@ Notes are supplementary text only. They must never silently create, overwrite, i
 
 ### CD-011 — Page 09 mock authority
 
-Figma file `Lume-V1-UX` (`TPzPxiSMFgPQBZPDNzQ6LL`), page `09 — REVIEW · MAGIC PATTERNS CONVERGENCE — NON-AUTHORITY`, section M To Do, Issue and Person detail/edit screens are approved working mocks for UI convergence.
+Figma file `Lume-V1-UX` (`TPzPxiSMFgPQBZPDNzQ6LL`), page `09 — REVIEW · MAGIC PATTERNS CONVERGENCE — NON-AUTHORITY`, section M To Do, Issue and Person detail/edit screens are approved working mocks for UI convergence. The rest of page 09 is unchanged and is not promoted by this decision.
 
-They do not automatically become higher authority than the Lume authority hierarchy. If a mock and this register, the constitution, a specialist contract, or current `main` disagree on canonical behaviour, the hierarchy wins. The rest of page 09 is unchanged and is not promoted by this decision.
+Standing precedence:
+
+1. Canonical product/truth and behavioural/specialist contracts
+2. Design Authority Register
+3. Signed/approved UI authority, components, and patterns
+4. Approved screen compositions and working mocks
+5. Current UI implementation
+
+These screens cannot override canonical product or domain contracts. They can override an older or current UI presentation where that is the explicit purpose of the convergence work. An implementation constraint is surfaced as a gap. The approved design is not silently changed to match the old UI. D-058 is the example: Waiting on stays a relationship to multiple existing People, the single `todos.waiting_on` string does not implement it, and that support is not faked.

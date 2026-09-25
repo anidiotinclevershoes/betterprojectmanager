@@ -370,7 +370,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | When the relationship exists: a To Do can reference two existing People by id, reload preserves both ids, and a string-only legacy `waiting_on` is not silently rewritten into those links |
 | **Target resolution / validation point** | People slice, before treating the Page 09 Waiting-on control as implemented |
 | **Related docs** | CD-009 in `docs/LUME_PRODUCT_DECISIONS.md`; D-008 |
-| **Notes** | CD-009 is the product rule. This entry is the implementation gap. Do not fake the behaviour in the current UI work. |
+| **Notes** | CD-009 is the product rule. This entry is the implementation gap. Keep the approved multi-person Waiting-on rule, record that `todos.waiting_on` cannot store it, and do not fake support or change the approved design to match the string. |
 
 ---
 
