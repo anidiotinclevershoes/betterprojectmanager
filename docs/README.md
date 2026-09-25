@@ -69,6 +69,7 @@ Slice, phase, current-state, experimental-programme, old qualification and archi
 - **Timeline / Catch Me Up:** projections over project truth. Catch Me Up is a derived briefing surface (it may appear as a project-page tab). Neither is a source of truth.
 - **Tags:** retrieval metadata only.
 - **Ready → Apply:** Ready means the same production Apply path can execute that change. Apply still revalidates.
+- **UI convergence field semantics:** no user-facing To Do Type; Waiting on is many existing People and is not implemented (`todos.waiting_on` string — D-058); notes stay supplementary (`detail` / `body` / `notes`). Page 09 To Do, Issue and Person screens are approved working mocks: they cannot override canonical product or domain contracts, and they can override current UI presentation. See CD-011 in [`docs/LUME_PRODUCT_DECISIONS.md`](./LUME_PRODUCT_DECISIONS.md).
 - After a successful Apply, never adopt pre-write state. Capture session binds to the open project.
 
 ---
@@ -121,6 +122,8 @@ SQL printed by the adversarial script is for operators on a copy of dogfood data
 | What debt is open vs fixed | Known Discoveries | Duplicate headings, historical “still missing” notes |
 | Ask / eval scoring | Intelligence Contract | Benchmark-chasing notes in old phase handovers |
 | Existing-project compatibility | `docs/LUME_DURABLE_PROJECT_TRUTH.md` | “Start again”; backups-as-migration |
+| To Do Type, Waiting on, supplementary notes | `docs/LUME_PRODUCT_DECISIONS.md` CD-008–CD-010 | A Page 09 mock that invents a To Do Type or collapses Waiting on onto `todos.waiting_on` |
+| Approved UI presentation during convergence | CD-011 precedence: canonical contracts, then Design Authority, then approved mocks, then current UI implementation | Treating current `main` as visual authority; changing an approved mock to match old UI |
 
 ---
 
