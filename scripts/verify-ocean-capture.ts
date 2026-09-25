@@ -97,8 +97,9 @@ function testCaptureModeInOceanWorkspace() {
   assert.match(workspace, /variant="ocean"/);
   assert.match(workspace, /CaptureWorkspace/);
   assert.match(mode, /ocean-mode-capture/);
-  assert.match(mode, /Coming soon/);
-  assert.match(mode, /disabled/);
+  assert.match(mode, /ocean-mode-home/);
+  assert.match(mode, /ocean-mode-scan/);
+  assert.doesNotMatch(mode, /Coming soon/);
   // Modes remain in workspace — not sidebar destinations
   const sidebar = readSrc("src/components/app-shell/Sidebar.tsx");
   assert.doesNotMatch(sidebar, /href="\/capture"/);

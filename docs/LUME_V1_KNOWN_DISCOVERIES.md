@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 14 September 2026 (Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked)  
+**Last housekeeping:** 25 September 2026 (D-058 Waiting-on relationship gap). 14 September 2026: Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked.  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
@@ -85,7 +85,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Accept/dismiss plan does not resurrect after hydrate simulation |
 | **Target resolution / validation point** | V1 product hardening; must be resolved before V1 launch |
 | **Related docs** | Architecture audit §3.1; RiskFrame recommendation path (Slice 1B left this intentional) |
-| **Notes** | Risk recommendations must remain suggestions until explicitly converted (Slice 1B product rule). No dedicated “Suggestions slice” is named yet — revisit under general V1 product hardening. |
+| **Notes** | Risk recommendations must remain suggestions until explicitly converted (Slice 1B product rule). **Figma UI Convergence Part 2:** Home Suggestion Discard / Save To Do persist `recommendations.status` through the existing column (`persistRecommendationStatus`). Legacy `dismissSuggestion` / `acceptSuggestion` remain memory-only. |
 
 ---
 
@@ -105,7 +105,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Selected mutations emit durable history rows in plan/fake client |
 | **Target resolution / validation point** | V1 product hardening |
 | **Related docs** | Architecture audit; philosophy (History = evidence/chronology) |
-| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. **Phase 3A create-path decision:** New Project History is **secondary evidence after authoritative bundle success**. A failed/rolled-back create must not write `project_created`. Failure of the History insert must not roll back the project bundle. Broader `pushHistory` without `persistHistoryEvent` remains open. |
+| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. **Phase 3A create-path decision:** New Project History is **secondary evidence after authoritative bundle success**. A failed/rolled-back create must not write `project_created`. Failure of the History insert must not roll back the project bundle. Broader `pushHistory` without `persistHistoryEvent` remains open. **Figma UI Convergence Part 2:** `history_events` still has no `item_id`. Item drawers show a D-004 bounded limitation instead of title/detail matching. |
 
 ---
 
@@ -350,7 +350,27 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Authority rule characterisation: waiting todos vs openLoop narrative; promotion supersedes the openLoop |
 | **Target resolution / validation point** | Open-loop / To Do architecture slice — after tests lock current concatenation behaviour |
 | **Related docs** | Architecture audit; `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` Part C §C2 |
-| **Notes** | Authority is now decided in the handoff. Implementation is a later slice. Do not fix opportunistically inside unrelated slices. |
+| **Notes** | Authority is now decided in the handoff. Implementation is a later slice. Do not fix opportunistically inside unrelated slices. **D-058:** do not treat `todos.waiting_on` text as a multi-person Waiting-on relationship. |
+
+---
+
+### D-058 — Waiting on is not yet a relationship to multiple People
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Todos / People |
+| **Found in** | UI convergence semantics lock, 25 September 2026 |
+| **Failure class** | Product Waiting on is zero or more relationships to existing project People. The stored model is one nullable string, `todos.waiting_on` |
+| **Evidence / repro** | `TodoItem.waitingOn` / `todos.waiting_on` in `src/lib/types.ts` and `src/types/database.ts`. No person-id join. Page 09 section M still shows one person because the relationship is not implemented. Exact-name match in People detail is a temporary resolver only |
+| **Likely files** | `src/lib/types.ts`; `src/types/database.ts`; `src/lib/data/supabase/persist-mutations.ts`; `src/lib/knowledge-centre/knowledge-item-detail.ts` |
+| **Proposed fix direction** | A later additive People slice: stable links from a To Do to existing stakeholder ids, display names as cache only. Do not start that slice from this UI lock |
+| **Explicit non-goals** | Joining several names into `waiting_on`. Reinterpreting the current string as the product model. Using Waiting on as assignment or as responsibility. A user-facing To Do Type control. Schema or migration work inside the current UI pass |
+| **Regression test to add** | When the relationship exists: a To Do can reference two existing People by id, reload preserves both ids, and a string-only legacy `waiting_on` is not silently rewritten into those links |
+| **Target resolution / validation point** | People slice, before treating the Page 09 Waiting-on control as implemented |
+| **Related docs** | CD-009 in `docs/LUME_PRODUCT_DECISIONS.md`; D-008 |
+| **Notes** | CD-009 is the product rule. This entry is the implementation gap. Keep the approved multi-person Waiting-on rule, record that `todos.waiting_on` cannot store it, and do not fake support or change the approved design to match the string. |
 
 ---
 

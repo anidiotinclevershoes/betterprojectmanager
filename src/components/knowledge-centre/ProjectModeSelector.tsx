@@ -1,34 +1,28 @@
 "use client";
 
-export type OceanProjectMode =
-  | "capture"
-  | "knowledge"
-  | "catch-me-up"
-  | "advise";
+import { MeMark } from "@/components/brand/MeMark";
+
+export type OceanProjectMode = "home" | "capture" | "knowledge" | "scan";
 
 const MODES: Array<{
-  id: Exclude<OceanProjectMode, "advise">;
+  id: OceanProjectMode;
   label: string;
   testId: string;
   ai?: boolean;
 }> = [
+  { id: "home", label: "Home", testId: "ocean-mode-home" },
   { id: "capture", label: "Capture", testId: "ocean-mode-capture", ai: true },
   {
     id: "knowledge",
     label: "Knowledge Centre",
     testId: "ocean-mode-knowledge",
   },
-  {
-    id: "catch-me-up",
-    label: "Catch Me Up",
-    testId: "ocean-mode-catch-me-up",
-    ai: true,
-  },
+  { id: "scan", label: "Project Scan", testId: "ocean-mode-scan", ai: true },
 ];
 
 /**
- * Capture / Knowledge Centre / Catch Me Up / Advise — project modes, not sidebar nav.
- * Advise stays parked (Coming soon). Coach is not a mode.
+ * Home / Capture / Knowledge Centre / Project Scan — four equal workspace tabs.
+ * Catch Me Up remains a derived briefing, not a tab. Advise is unmounted.
  */
 export function ProjectModeSelector({
   mode,
@@ -56,31 +50,11 @@ export function ProjectModeSelector({
             onClick={() => onChange(item.id)}
             data-testid={item.testId}
           >
-            {item.ai ? (
-              <span className="ocean-ai-glyph" aria-hidden>
-                ✦
-              </span>
-            ) : null}
+            {item.ai ? <MeMark size="button" /> : null}
             {item.label}
           </button>
         );
       })}
-      <button
-        type="button"
-        role="tab"
-        aria-selected={false}
-        aria-disabled="true"
-        disabled
-        className="ocean-mode-tab is-advise is-disabled"
-        title="Advise is coming soon"
-        data-testid="ocean-mode-advise"
-      >
-        <span className="ocean-ai-glyph" aria-hidden>
-          ✦
-        </span>
-        Advise
-        <span className="ocean-coming-soon">Coming soon</span>
-      </button>
     </div>
   );
 }

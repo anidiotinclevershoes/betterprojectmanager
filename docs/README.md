@@ -53,6 +53,8 @@ Longer product / trust / Ocean UI philosophy remains in [`docs/v1-reference-pack
 
 [`docs/LUME_V09_TO_V1_HANDOFF.md`](./LUME_V09_TO_V1_HANDOFF.md) — v0.9 closure operating picture: what shipped, parked surfaces, leftover inventory, isolation evidence. High-order invariants now live in the constitution and specialist contracts. If they disagree, **constitution + specialist contracts + current code win**.
 
+[`docs/FIGMA_UI_CONVERGENCE_V1.md`](./FIGMA_UI_CONVERGENCE_V1.md) — Figma UI convergence programme. Visual/interaction authority is Figma `Lume-V1-UX`. Behaviour and persistence stay on the constitution + current code. Not a second architecture map.
+
 The code on current `main` is the implementation map. [`docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md`](./LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md) is **HISTORICAL**.
 
 ### 5. Historical / experimental
@@ -69,6 +71,7 @@ Slice, phase, current-state, experimental-programme, old qualification and archi
 - **Timeline / Catch Me Up:** projections over project truth. Catch Me Up is a derived briefing surface (it may appear as a project-page tab). Neither is a source of truth.
 - **Tags:** retrieval metadata only.
 - **Ready → Apply:** Ready means the same production Apply path can execute that change. Apply still revalidates.
+- **UI convergence field semantics:** no user-facing To Do Type; Waiting on is many existing People and is not implemented (`todos.waiting_on` string — D-058); notes stay supplementary (`detail` / `body` / `notes`). Page 09 To Do, Issue and Person screens are approved working mocks: they cannot override canonical product or domain contracts, and they can override current UI presentation. See CD-011 in [`docs/LUME_PRODUCT_DECISIONS.md`](./LUME_PRODUCT_DECISIONS.md).
 - After a successful Apply, never adopt pre-write state. Capture session binds to the open project.
 
 ---
@@ -83,10 +86,11 @@ For ordinary development:
 4. the specialist contract the task touches (canonical / durable / Capture)
 5. `docs/LUME_V1_KNOWN_DISCOVERIES.md`
 6. the code on current `main`
-7. `docs/LUME_V09_TO_V1_HANDOFF.md` when you need leftovers, isolation evidence, or v0.9 shipped scope
-8. `docs/v1-reference-pack/` when you need product/trust/UI philosophy
-9. only the relevant historical `SLICE*` / `PHASE*` handover when extending that seam
-10. Intelligence Contract when doing Ask / eval / scoring work
+7. `docs/FIGMA_UI_CONVERGENCE_V1.md` when doing the Figma UI convergence programme
+8. `docs/LUME_V09_TO_V1_HANDOFF.md` when you need leftovers, isolation evidence, or v0.9 shipped scope
+9. `docs/v1-reference-pack/` when you need product/trust/UI philosophy
+10. only the relevant historical `SLICE*` / `PHASE*` handover when extending that seam
+11. Intelligence Contract when doing Ask / eval / scoring work
 
 Then open operational docs only if the task is about tests, deploy, or persistence setup.
 
@@ -115,12 +119,15 @@ SQL printed by the adversarial script is for operators on a copy of dogfood data
 | --- | --- | --- |
 | High-order product / architecture rule | `docs/LUME_CONSTITUTION.md` + the named specialist contract | Historical handovers, root README, `MISSION.md` |
 | Product / trust / Ocean UI philosophy | `docs/v1-reference-pack/`, except the Spiderman amendment deltas | Historical UI snapshots |
+| Approved Figma UI convergence look/feel | Figma `Lume-V1-UX` + `docs/FIGMA_UI_CONVERGENCE_V1.md` | Implementing Figma by inventing a parallel writer or new schema |
 | Current Capture position | `docs/LUME_CAPTURE_STATUS.md` | `V09_QUALIFICATION.md` “Stage 2 BLOCKED”; experiment PRs; Prompt E |
 | What the code does now | The code on current `main` | Architecture Memory Handoff (26 Aug); 19 Aug Project Truth Audit; `docs/current-state/`; SLICE/PHASE bodies |
 | What shipped in v0.9 / leftovers / isolation | `docs/LUME_V09_TO_V1_HANDOFF.md` | Phase 3 “unfinished programme” language; Coach-as-live-surface docs |
 | What debt is open vs fixed | Known Discoveries | Duplicate headings, historical “still missing” notes |
 | Ask / eval scoring | Intelligence Contract | Benchmark-chasing notes in old phase handovers |
 | Existing-project compatibility | `docs/LUME_DURABLE_PROJECT_TRUTH.md` | “Start again”; backups-as-migration |
+| To Do Type, Waiting on, supplementary notes | `docs/LUME_PRODUCT_DECISIONS.md` CD-008–CD-010 | A Page 09 mock that invents a To Do Type or collapses Waiting on onto `todos.waiting_on` |
+| Approved UI presentation during convergence | CD-011 precedence: canonical contracts, then Design Authority, then approved mocks, then current UI implementation | Treating current `main` as visual authority; changing an approved mock to match old UI |
 
 ---
 

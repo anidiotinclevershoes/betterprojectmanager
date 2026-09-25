@@ -1,25 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { CatchMeUpPanel } from "@/components/catch-me-up/CatchMeUpPanel";
+import { AddItemDrawer } from "@/components/knowledge-centre/AddItemDrawer";
 import { CaptureWorkspace } from "@/components/capture/CaptureWorkspace";
-import { DeleteProjectButton } from "@/components/knowledge-centre/DeleteProjectButton";
+import { KnowledgeItemDetailDrawer } from "@/components/knowledge-centre/KnowledgeItemDetailDrawer";
 import { KnowledgeSearchAskBar } from "@/components/knowledge-centre/KnowledgeSearchAskBar";
+import { OceanHomeProjection } from "@/components/knowledge-centre/OceanHomeProjection";
 import { OceanKnowledgeFrames } from "@/components/knowledge-centre/OceanKnowledgeFrames";
-import { ProjectIntelligenceStrip } from "@/components/knowledge-centre/ProjectIntelligenceStrip";
 import {
   ProjectModeSelector,
   type OceanProjectMode,
 } from "@/components/knowledge-centre/ProjectModeSelector";
+import { ProjectScanView } from "@/components/knowledge-centre/ProjectScanView";
+import { ProjectWorkspaceHeader } from "@/components/knowledge-centre/ProjectWorkspaceHeader";
+import { SuggestionAddModal } from "@/components/knowledge-centre/SuggestionAddModal";
+import type { KnowledgeItemRef } from "@/lib/knowledge-centre/knowledge-item-detail";
 import type { Project } from "@/lib/types";
 
 /**
- * Ocean V1 selected-project workspace.
- * Capture, Knowledge Centre, and Catch Me Up are modes of one shell.
+ * Approved workspace: Home is default. Capture / KC / Scan expand over Home.
+ * Catch Me Up stays a derived briefing, not a tab.
  */
 export function OceanProjectWorkspace({ project }: { project: Project }) {
-  const [mode, setMode] = useState<OceanProjectMode>("knowledge");
+  const [mode, setMode] = useState<OceanProjectMode>("home");
   const [kcQuery, setKcQuery] = useState("");
+  const [selected, setSelected] = useState<KnowledgeItemRef | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [suggestionId, setSuggestionId] = useState<string | null>(null);
+
+  function selectMode(next: OceanProjectMode) {
+    setMode(next);
+    setSelected(null);
+  }
 
   return (
     <div
@@ -28,28 +40,25 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
       data-project-id={project.id}
       data-project-mode={mode}
     >
-      <ProjectIntelligenceStrip projectId={project.id} />
-
-      <header className="ocean-project-header">
-        <div className="ocean-project-identity">
-          <h1 className="ocean-project-title">{project.name}</h1>
-          <p className="ocean-project-subtitle">
-            {project.currentFocus?.trim() ||
-              project.summary?.trim() ||
-              "Project intelligence at a glance."}
-          </p>
-          <DeleteProjectButton project={project} />
-        </div>
-      </header>
-
-      <ProjectModeSelector mode={mode} onChange={setMode} />
+      <ProjectWorkspaceHeader project={project} />
+      <ProjectModeSelector mode={mode} onChange={selectMode} />
 
       {mode === "knowledge" ? (
         <div
-          className="ocean-knowledge-centre"
+          className="ocean-expanded-mode"
           data-testid="ocean-knowledge-centre"
         >
-          <h2 className="kc-heading">Knowledge Centre</h2>
+          <div className="ocean-kc-toolbar">
+            <h2 className="kc-heading">Knowledge Centre</h2>
+            <button
+              type="button"
+              className="primary-btn"
+              data-testid="ocean-add-item"
+              onClick={() => setAddOpen(true)}
+            >
+              + Add item
+            </button>
+          </div>
           <KnowledgeSearchAskBar
             projectId={project.id}
             search={kcQuery}
@@ -58,13 +67,15 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
           <OceanKnowledgeFrames
             projectId={project.id}
             searchQuery={kcQuery}
+            selected={selected}
+            onSelect={setSelected}
           />
         </div>
       ) : null}
 
       {mode === "capture" ? (
         <div
-          className="ocean-capture-mode is-active"
+          className="ocean-capture-mode is-active ocean-expanded-mode"
           data-testid="ocean-capture-mode"
           data-mode="capture"
         >
@@ -75,24 +86,35 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
         </div>
       ) : null}
 
-      {mode === "catch-me-up" ? (
-        <div
-          className="ocean-catch-me-up-mode"
-          data-testid="ocean-catch-me-up-mode"
-          data-mode="catch-me-up"
-        >
-          <CatchMeUpPanel projectId={project.id} />
+      {mode === "scan" ? (
+        <div className="ocean-expanded-mode" data-testid="ocean-scan-mode">
+          <ProjectScanView
+            projectId={project.id}
+            onOpenDetails={setSelected}
+          />
         </div>
       ) : null}
 
-      {mode === "advise" ? (
-        <div
-          className="ocean-advise-soon"
-          data-testid="ocean-advise-soon"
-        >
-          <p>Advise is coming soon.</p>
-        </div>
-      ) : null}
+      <OceanHomeProjection
+        projectId={project.id}
+        onOpenDetails={setSelected}
+        onAddSuggestion={setSuggestionId}
+      />
+
+      <KnowledgeItemDetailDrawer
+        projectId={project.id}
+        selected={selected}
+        onClose={() => setSelected(null)}
+      />
+      <AddItemDrawer
+        projectId={project.id}
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+      />
+      <SuggestionAddModal
+        recommendationId={suggestionId}
+        onClose={() => setSuggestionId(null)}
+      />
     </div>
   );
 }

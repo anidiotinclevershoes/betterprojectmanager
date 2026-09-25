@@ -87,7 +87,8 @@ function testSidebarContract() {
   assert.match(sidebar, /Master To Do/);
   assert.match(sidebar, /History/);
   assert.match(sidebar, /Captures/);
-  assert.match(sidebar, /New Project/);
+  assert.match(sidebar, /New [Pp]roject/);
+  assert.doesNotMatch(sidebar, />PROJECTS</);
   assert.match(sidebar, /ocean-wordmark/);
 }
 
@@ -95,20 +96,18 @@ function testModeSelectorContract() {
   const mode = readSrc(
     "src/components/knowledge-centre/ProjectModeSelector.tsx",
   );
+  assert.match(mode, /ocean-mode-home/);
   assert.match(mode, /ocean-mode-capture/);
   assert.match(mode, /ocean-mode-knowledge/);
-  assert.match(mode, /ocean-mode-catch-me-up/);
-  assert.match(mode, /ocean-mode-advise/);
-  assert.match(mode, /Coming soon/);
-  assert.match(mode, /ocean-ai-glyph/);
-  assert.match(mode, /disabled/);
-  assert.match(mode, /id: "capture"[\s\S]*ai: true|ai: true[\s\S]*Capture/);
-  assert.match(mode, /ocean-ai-glyph/);
+  assert.match(mode, /ocean-mode-scan/);
+  assert.doesNotMatch(mode, /ocean-mode-catch-me-up/);
+  assert.doesNotMatch(mode, /ocean-mode-advise/);
+  assert.doesNotMatch(mode, /Coming soon/);
   const workspace = readSrc(
     "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
   );
-  assert.match(workspace, /ocean-catch-me-up-mode/);
-  assert.match(workspace, /CatchMeUpPanel/);
+  assert.doesNotMatch(workspace, /CatchMeUpPanel/);
+  assert.doesNotMatch(workspace, /ocean-catch-me-up-mode/);
   assert.doesNotMatch(workspace, /CoachDrawer|CoachResultsCard/);
 }
 
@@ -120,7 +119,7 @@ function testSearchAskContract() {
   assert.match(bar, /data-ai="true"/);
   assert.match(bar, /searchAuthoritativeProject/);
   assert.doesNotMatch(bar, /searchProjectKnowledge/);
-  assert.match(bar, /ocean-ai-glyph/);
+  assert.match(bar, /lume-me-mark|MeMark/);
   assert.match(bar, /ocean-suggestion-link/);
   assert.doesNotMatch(bar, /primary-btn/);
 }
@@ -134,7 +133,7 @@ function testFramesLayoutContract() {
   );
   assert.match(workspace, /knowledge/);
   assert.match(workspace, /OceanKnowledgeFrames/);
-  assert.match(workspace, /ProjectIntelligenceStrip/);
+  assert.match(workspace, /ProjectWorkspaceHeader/);
   assert.doesNotMatch(frames, />More project knowledge</i);
   assert.doesNotMatch(workspace, />More project knowledge</i);
   assert.doesNotMatch(frames, /more-project-knowledge/i);
@@ -160,19 +159,17 @@ function testFramesLayoutContract() {
 }
 
 function testNoProgressKpi() {
-  const strip = readSrc(
-    "src/components/knowledge-centre/ProjectIntelligenceStrip.tsx",
+  const header = readSrc(
+    "src/components/knowledge-centre/ProjectWorkspaceHeader.tsx",
   );
   const workspace = readSrc(
     "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
   );
-  assert.doesNotMatch(strip, />Progress</);
+  assert.doesNotMatch(header, />Progress</);
   assert.doesNotMatch(workspace, />Progress</);
-  assert.doesNotMatch(strip, /progressPercent|projectProgress/);
-  assert.match(strip, /actions left/);
-  assert.match(strip, /ocean-refresh/);
-  assert.match(strip, /I know/);
-  assert.match(strip, /I see/);
+  assert.doesNotMatch(header, /progressPercent|projectProgress/);
+  assert.match(header, /Usage/);
+  assert.match(header, /ocean-usage-spending/);
 }
 
 function testResolvedRisksExcluded() {
@@ -399,8 +396,9 @@ function testDefaultModeKnowledge() {
   const workspace = readSrc(
     "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
   );
-  assert.match(workspace, /useState<OceanProjectMode>\("knowledge"\)/);
+  assert.match(workspace, /useState<OceanProjectMode>\("home"\)/);
   assert.match(workspace, /ocean-knowledge-centre/);
+  assert.match(workspace, /OceanHomeProjection/);
 }
 
 function testOceanSaveFailureVisible() {
@@ -430,7 +428,7 @@ function testCatchMeUpSeamHasNoAiRoute() {
   const workspace = readSrc(
     "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
   );
-  assert.match(workspace, /mode === "catch-me-up"/);
+  assert.doesNotMatch(workspace, /mode === "catch-me-up"/);
 }
 
 function testInspectorOverlayContract() {
@@ -438,11 +436,12 @@ function testInspectorOverlayContract() {
     "src/components/knowledge-centre/KnowledgeItemDetailDrawer.tsx",
   );
   assert.match(drawer, /data-overlay="true"/);
-  assert.match(drawer, /ocean-item-detail-close/);
+  assert.match(drawer, /ocean-item-detail-back/);
   assert.match(drawer, /ocean-item-detail-backdrop/);
   assert.match(drawer, /Escape/);
-  assert.match(drawer, /Right now/);
-  assert.match(drawer, /Connected to/);
+  assert.match(drawer, />Details</);
+  assert.match(drawer, />Related</);
+  assert.match(drawer, /ocean-item-detail-history/);
   const frames = readSrc(
     "src/components/knowledge-centre/OceanKnowledgeFrames.tsx",
   );
@@ -465,7 +464,7 @@ async function main() {
   testSidebarContract();
   console.log("✓ sidebar omits removed V1 items; keeps Projects/utility");
   testModeSelectorContract();
-  console.log("✓ mode selector Capture/KC/Catch Me Up + Advise Coming soon");
+  console.log("✓ mode selector Home/Capture/KC/Project Scan");
   testSearchAskContract();
   console.log("✓ Search non-AI; Ask AI; quiet suggestions");
   testFramesLayoutContract();
@@ -489,13 +488,13 @@ async function main() {
   testDateLabelsAndCounts();
   console.log("✓ semantic dates + truthful strip counts");
   testDefaultModeKnowledge();
-  console.log("✓ Knowledge Centre default selected mode");
+  console.log("✓ Home default selected mode");
   testOceanSaveFailureVisible();
   console.log("✓ Ocean chrome surfaces persistence failure");
   testCoachHiddenFromShell();
   console.log("✓ Coach drawer/results hidden from product shell");
   testCatchMeUpSeamHasNoAiRoute();
-  console.log("✓ Catch Me Up mode seam present without AI route");
+  console.log("✓ Catch Me Up stays unmounted from workspace tabs");
   testInspectorOverlayContract();
   console.log("✓ inspector overlay open/close + project isolation");
   testResponsiveShellCss();

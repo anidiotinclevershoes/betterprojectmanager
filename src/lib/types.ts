@@ -195,7 +195,12 @@ export interface CaptureInput {
   occurredAt?: string;
 }
 
-/** Owned checklist item — accepted from suggestions or added manually. */
+/**
+ * Owned checklist item — accepted from suggestions or added manually.
+ * `TodoKind` is an internal routing value. It is not a user-facing To Do
+ * Type taxonomy. Do not add a Type control for it unless a canonical
+ * product decision requires one (CD-008).
+ */
 export type TodoKind = "ACTION" | "WAITING" | "CHASE" | "REMINDER";
 
 export interface TodoItem {
@@ -211,9 +216,13 @@ export interface TodoItem {
   /** ISO datetime — editable; for RELOPS prefer within merge→release window */
   dueAt?: string;
   sourceRecommendationId?: string;
-  /** Follow-up semantics formerly expressed as Nudge Me. */
+  /** Follow-up semantics formerly expressed as Nudge Me. Internal only — not a user-facing Type. */
   kind?: TodoKind;
-  /** Person/org the item is waiting on (Waiting / Chase). */
+  /**
+   * Legacy single string. Not the product Waiting-on model.
+   * Waiting on is a relationship to zero or more existing People (CD-009 / D-058).
+   * Do not join names into this string or treat it as that relationship.
+   */
   waitingOn?: string;
 }
 
