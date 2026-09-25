@@ -31,7 +31,7 @@ Part 1 recovered the current repository, mapped reuse, then inspected the curren
 
 Figma inspection is closed. Stay on `integration/figma-ui-convergence-v1`. Re-run `npm run git:preflight` first. If the branch is CURRENT and contains current `main`, continue from §12 / §17. If MATERIALLY STALE, STOP.
 
-Do not restart Part 1 recovery. Honour §17 safety rules before any History or tag Save work.
+Do not restart Part 1 recovery. Honour §17 safety rules before any History or tag Save work. Honour §17.4 before implementing Page 09 To Do, Issue, or Person detail/edit. Do not redesign those screens.
 
 ---
 
@@ -633,3 +633,15 @@ Retain the existing production behaviour:
 - hydrate the full project set, then filter/render every matching item;
 - do not remove this because Figma omitted loading chrome;
 - endless scroll is **not** a Figma requirement and must not be invented.
+
+### 17.4 Page 09 field semantics (25 September 2026)
+
+Authority for these rules is CD-008–CD-011 in `docs/LUME_PRODUCT_DECISIONS.md` (PR #188) and D-058 in Known Discoveries. This section only points the UI programme at them. It does not outrank the constitution, specialist contracts, or current `main`.
+
+Figma page `09`, section M To Do, Issue and Person detail/edit screens are approved working mocks for convergence. The rest of page 09 is not promoted. If a mock disagrees with the hierarchy on canonical behaviour, the hierarchy wins.
+
+- **To Do Type.** Hidden on the section M To Do detail and edit mocks. Do not add a user-facing Type taxonomy. `todos.kind` stays internal.
+- **Waiting on.** Relationships to zero or more existing People. `todos.waiting_on` is still one string (D-058). Do not fake the relationship by joining names into that string, and do not ship the single string as if it were the product model.
+- **Notes.** Supplementary only. To Do uses `detail`. Knowledge uses `body`. Date/Milestone uses `notes`. The approved Issue and Person screens do not require a notes column. Notes must not create, overwrite, infer, or replace structured project truth.
+
+Preserve the rest of the latest accepted pass. No adjacent redesign.
