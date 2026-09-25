@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 14 September 2026 (Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked)  
+**Last housekeeping:** 25 September 2026 (D-058 Waiting-on relationship gap). 14 September 2026: Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked.  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
@@ -350,7 +350,27 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Authority rule characterisation: waiting todos vs openLoop narrative; promotion supersedes the openLoop |
 | **Target resolution / validation point** | Open-loop / To Do architecture slice — after tests lock current concatenation behaviour |
 | **Related docs** | Architecture audit; `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` Part C §C2 |
-| **Notes** | Authority is now decided in the handoff. Implementation is a later slice. Do not fix opportunistically inside unrelated slices. |
+| **Notes** | Authority is now decided in the handoff. Implementation is a later slice. Do not fix opportunistically inside unrelated slices. **D-058:** do not treat `todos.waiting_on` text as a multi-person Waiting-on relationship. |
+
+---
+
+### D-058 — Waiting on is not yet a relationship to multiple People
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Todos / People |
+| **Found in** | UI convergence semantics lock, 25 September 2026 |
+| **Failure class** | Product Waiting on is zero or more relationships to existing project People. The stored model is one nullable string, `todos.waiting_on` |
+| **Evidence / repro** | `TodoItem.waitingOn` / `todos.waiting_on` in `src/lib/types.ts` and `src/types/database.ts`. No person-id join. Page 09 section M still shows one person because the relationship is not implemented. Exact-name match in People detail is a temporary resolver only |
+| **Likely files** | `src/lib/types.ts`; `src/types/database.ts`; `src/lib/data/supabase/persist-mutations.ts`; `src/lib/knowledge-centre/knowledge-item-detail.ts` |
+| **Proposed fix direction** | A later additive People slice: stable links from a To Do to existing stakeholder ids, display names as cache only. Do not start that slice from this UI lock |
+| **Explicit non-goals** | Joining several names into `waiting_on`. Reinterpreting the current string as the product model. Using Waiting on as assignment or as responsibility. A user-facing To Do Type control. Schema or migration work inside the current UI pass |
+| **Regression test to add** | When the relationship exists: a To Do can reference two existing People by id, reload preserves both ids, and a string-only legacy `waiting_on` is not silently rewritten into those links |
+| **Target resolution / validation point** | People slice, before treating the Page 09 Waiting-on control as implemented |
+| **Related docs** | CD-009 in `docs/LUME_PRODUCT_DECISIONS.md`; D-008 |
+| **Notes** | CD-009 is the product rule. This entry is the implementation gap. Do not fake the behaviour in the current UI work. |
 
 ---
 
