@@ -636,9 +636,13 @@ Retain the existing production behaviour:
 
 ### 17.4 Page 09 field semantics (25 September 2026)
 
-Authority for these rules is CD-008–CD-011 in `docs/LUME_PRODUCT_DECISIONS.md` (PR #188) and D-058 in Known Discoveries. This section only points the UI programme at them. It does not outrank the constitution, specialist contracts, or current `main`.
+Authority for these rules is CD-008–CD-011 in `docs/LUME_PRODUCT_DECISIONS.md` and D-058 in Known Discoveries. This section only points the UI programme at them.
 
-Figma page `09`, section M To Do, Issue and Person detail/edit screens are approved working mocks for convergence. The rest of page 09 is not promoted. If a mock disagrees with the hierarchy on canonical behaviour, the hierarchy wins.
+Current `main` is authoritative for the implementation and domain architecture that exists today: schema, persistence, write paths, established contracts, and other implementation constraints. It is not automatically the visual or UI authority.
+
+Standing precedence: canonical product/truth and behavioural/specialist contracts, then the Design Authority Register, then signed/approved UI authority, components, and patterns, then approved screen compositions and working mocks, then current UI implementation.
+
+Figma page `09`, section M To Do, Issue and Person detail/edit screens are approved working mocks for convergence. The rest of page 09 is not promoted. They cannot override canonical product or domain contracts. They can override an older or current UI presentation where that is the purpose of this convergence work. Surface an implementation constraint as a gap. Do not change the approved design to match the old UI. D-058 is the example: multi-person Waiting on stays the product rule, and the single `todos.waiting_on` string is not faked as support for it.
 
 - **To Do Type.** Hidden on the section M To Do detail and edit mocks. Do not add a user-facing Type taxonomy. `todos.kind` stays internal.
 - **Waiting on.** Relationships to zero or more existing People. `todos.waiting_on` is still one string (D-058). Do not fake the relationship by joining names into that string, and do not ship the single string as if it were the product model.
