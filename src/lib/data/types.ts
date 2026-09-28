@@ -41,6 +41,7 @@ export type CreateRiskInput = {
   workspaceId: string;
   projectId: string;
   title: string;
+  notes?: string | null;
   status?: RiskStatus;
   source?: string;
   createdBy?: string | null;
@@ -127,7 +128,9 @@ export interface TodoRepository {
 }
 
 export interface RiskRepository {
-  listByProject(projectId: string): Promise<Array<{ id: string; title: string }>>;
+  listByProject(projectId: string): Promise<
+    Array<{ id: string; title: string; notes: string | null }>
+  >;
   create(input: CreateRiskInput): Promise<string>;
   update(
     riskId: string,
