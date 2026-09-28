@@ -20,6 +20,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "d049-hydrate-completeness", script: "scripts/verify-d049-hydrate-completeness.ts" },
   { name: "project-truth-safety", script: "scripts/verify-project-truth-safety.ts" },
   { name: "risk-lifecycle", script: "scripts/verify-risk-lifecycle.ts" },
+  { name: "issue-fields-history", script: "scripts/verify-issue-fields-history.ts" },
   { name: "people-entities", script: "scripts/verify-people-entities.ts" },
   { name: "ask-context-authority", script: "scripts/verify-ask-context-authority.ts" },
   { name: "ocean-knowledge-centre", script: "scripts/verify-ocean-knowledge-centre.ts" },
