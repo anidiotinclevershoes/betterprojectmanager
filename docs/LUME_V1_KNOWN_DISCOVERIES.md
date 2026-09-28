@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 25 September 2026 (D-058 Waiting-on relationship gap). 14 September 2026: Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked.  
+**Last housekeeping:** 28 September 2026 (D-058 evidence corrected to the multi-person Page 09 mock; gap remains open). 25 September 2026 recorded the Waiting-on relationship gap. 14 September 2026: Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked.  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
@@ -363,7 +363,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Domain** | Todos / People |
 | **Found in** | UI convergence semantics lock, 25 September 2026 |
 | **Failure class** | Product Waiting on is zero or more relationships to existing project People. The stored model is one nullable string, `todos.waiting_on` |
-| **Evidence / repro** | `TodoItem.waitingOn` / `todos.waiting_on` in `src/lib/types.ts` and `src/types/database.ts`. No person-id join. Page 09 section M still shows one person because the relationship is not implemented. Exact-name match in People detail is a temporary resolver only |
+| **Evidence / repro** | `TodoItem.waitingOn` / `todos.waiting_on` in `src/lib/types.ts` and `src/types/database.ts`. No person-id join. The product and Figma requirement is zero or more existing People. The approved Page 09 Section M To Do detail mock now shows multiple People, including Olga Petrov and Sarah Kim. Implementation storage is still one nullable `todos.waiting_on` string, so the gap is clearer and is not resolved. Exact-name match in People detail is a temporary resolver only |
 | **Likely files** | `src/lib/types.ts`; `src/types/database.ts`; `src/lib/data/supabase/persist-mutations.ts`; `src/lib/knowledge-centre/knowledge-item-detail.ts` |
 | **Proposed fix direction** | A later additive People slice: stable links from a To Do to existing stakeholder ids, display names as cache only. Do not start that slice from this UI lock |
 | **Explicit non-goals** | Joining several names into `waiting_on`. Reinterpreting the current string as the product model. Using Waiting on as assignment or as responsibility. A user-facing To Do Type control. Schema or migration work inside the current UI pass |

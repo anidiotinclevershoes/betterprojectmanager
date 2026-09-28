@@ -1,7 +1,7 @@
 # Lume product decisions register
 
 **Status:** Living register of semantics engineering must **not** invent  
-**Date:** 25 September 2026 (CD-008–CD-011). Earlier rows remain 12 September 2026.  
+**Date:** 28 September 2026 (CD-010 Issue Notes amendment). CD-008–CD-011 were recorded 25 September 2026. Earlier rows remain 12 September 2026.  
 **Owned by:** Product Owner  
 **Docs entry:** [`docs/README.md`](./README.md)
 
@@ -77,8 +77,17 @@ Notes are supplementary text only. They must never silently create, overwrite, i
 | To Do | Existing `todos.detail` |
 | Knowledge | Existing `knowledge_items.body` |
 | Date / Milestone | Existing `milestones.notes` |
-| Issue | No notes field on the approved Page 09 Issue detail/edit screens. An optional nullable notes column may be added only if a later approved UI requires it |
-| Person | No notes field on the approved Page 09 Person detail/edit screens. An optional nullable notes column may be added only if a later approved UI requires it |
+| Issue | Amended 28 September 2026. See the amendment below. The 25 September row that said Issue had no notes field is superseded |
+| Person | No notes field on the approved Page 09 Person detail/edit screens. Do not add a Person Notes requirement |
+
+#### CD-010 amendment — 28 September 2026 — Issue Notes
+
+Approved Page 09 Section M requires Issue Notes. This amends the Issue row above. It does not add a Person Notes requirement.
+
+- Issue Notes are mutable current context. They may be added, updated, or completely cleared.
+- They stay supplementary. They must not create, overwrite, infer, or replace structured Issue status or other canonical fields.
+- Current `risks` storage has no notes field. That gap is known and open.
+- Implementing the field requires a later safe additive data slice: a nullable canonical Issue Notes field. This amendment does not implement that field.
 
 ### CD-011 — Page 09 mock authority
 

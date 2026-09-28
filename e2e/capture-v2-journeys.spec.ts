@@ -154,10 +154,44 @@ test.describe("Capture V2 frozen journeys", () => {
 
     await page.reload();
     await expect(page.getByRole("heading", { name: "Toyworld" })).toBeVisible();
+    // Home is the resting workspace. Reload must not keep Knowledge Centre mounted.
+    await expect(page.getByTestId("ocean-project-workspace")).toHaveAttribute(
+      "data-project-mode",
+      "home",
+    );
+    await expect(page.getByTestId("ocean-mode-home")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    const home = page.getByTestId("ocean-home");
+    await expect(home).toBeVisible();
+    await expect(page.getByTestId("ocean-knowledge-centre")).toHaveCount(0);
+    await expect(
+      home.getByTestId("ocean-home-queue").getByText("Print the track map"),
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("ocean-home-people").getByText("Brick Oakley", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      home.getByText("Packaging delay", { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByText(/candy-cane banners/i)).toHaveCount(0);
+    await expect(page.getByText("Pippa Gumdrop")).toHaveCount(0);
+
+    await openKnowledgeCentre(page);
+    await expect(
+      page.getByTestId("ocean-frame-todo").getByText(/candy-cane banners/i),
+    ).toHaveCount(0);
     await expect(
       page.getByTestId("ocean-frame-todo").getByText("Print the track map"),
     ).toBeVisible();
-    await expect(page.getByText(/candy-cane banners/i)).toHaveCount(0);
+    await expect(
+      page.getByTestId("ocean-frame-risks").getByText("Packaging delay"),
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("ocean-frame-people").getByText("Brick Oakley"),
+    ).toBeVisible();
+    await expect(page.getByText("Pippa Gumdrop")).toHaveCount(0);
     const isoShot = walkthroughPath("capture_v2_toyworld_isolation.png");
     if (isoShot) await page.screenshot({ path: isoShot, fullPage: true });
   });

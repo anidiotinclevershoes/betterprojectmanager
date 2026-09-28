@@ -173,8 +173,8 @@ Preserve approved Lume identity.
 - Domain colour through icon, restrained header/top line, subtle tint. Not saturated domain panels.
 - Operation colour separate: Create green, Update blue, Remove red, Needs You amber.
 - Primary action: Lume purple.
-- AI / “me” mark: underlined `me`, sizes standard / button / micro. Micro for inline Suggestions. If the mark belongs to a button, it belongs inside the button. Do not use purple-filled UI as a generic synonym for AI.
-- Workspace shell: persistent project sidebar, clearly selected project, generous logo → New Project gap, generous New Project → project-list gap, **no PROJECTS heading**, project title, four equal workspace tabs, subtle separators, active tab bright white, inactive muted, no last-used dates inside Capture / Project Scan tabs, small top-right me/token-use callout, Usage & spending link, purple/lighter page header band.
+- AI identity: the corrected Lume lightbulb. One shared mark, with standard / button / micro sizes where the context needs them. Micro for inline Suggestions. If the mark belongs to a button, it belongs inside the button. Purple remains primary user intent/action and is not a generic AI colour. Do not add a parallel AI mark.
+- Workspace shell: persistent project sidebar, clearly selected project, generous logo → New Project gap, generous New Project → project-list gap, **no PROJECTS heading**, project title, four equal workspace tabs, subtle separators, active tab bright white, inactive muted, no last-used dates inside Capture / Project Scan tabs, small top-right lightbulb and token-use callout, Usage & spending link, purple/lighter page header band.
 - Use **Open Details** consistently.
 - Never expose internal phrase **project truth**. Prefer: saved project information / project information / what Lume knows about the project.
 
@@ -256,7 +256,7 @@ Do not remount as a shortcut unless the architecture still matches:
 | Project page | `ProjectDashboardPage` | `src/app/projects/[id]/page.tsx` |
 | Home | `HomePage` | `src/app/page.tsx` — redirects; first-run uses `NewProjectExperience` |
 
-Tokens: `src/styles/lume-locked-visual.css` already has domain + operation + primary colours. Buttons: `primary-btn`, `ghost-btn`, `danger-btn`. Me mark today is wordmark weight/colour (`ocean-wordmark-me`) plus ✦ `ocean-ai-glyph`, not the approved underlined `me` sizes.
+Tokens: `src/styles/lume-locked-visual.css` already has domain + operation + primary colours. Buttons: `primary-btn`, `ghost-btn`, `danger-btn`. Signed AI identity is the corrected Lume lightbulb, reused at standard / button / micro sizes. Purple is the primary action colour, not an AI colour. Current `MeMark` still renders an underlined `me`; that render is not the signed mark, and it must not be replaced by a second identity component.
 
 ### Canonical writes
 
@@ -401,7 +401,7 @@ All listed node IDs still exist. Names below are the **current frame names**.
 | Surface | Node | Current name | Verdict |
 | --- | --- | --- | --- |
 | Home | `213:2` | Project Workspace — Home v2 | **Current.** Default workspace. Sidebar + four equal tabs + header band. To Do queue (~75%) + People rail (~25%), then collapsible Issues / Knowledge, then read-only Timeline. Suggestions toggle. Date-relevant Issue stays an Issue (`Open Details`, not Close). |
-| Capture | `153:131` | Project Workspace — Capture v2 | **Current.** Capture tab active; composer + “You’ll review everything before anything changes.” Home projection is pushed below the tab. AI `me` mark sits **inside** the Capture button. |
+| Capture | `153:131` | Project Workspace — Capture v2 | **Current.** Capture tab active; composer + “You’ll review everything before anything changes.” Home projection is pushed below the tab. The signed lightbulb sits **inside** the Capture tab. |
 | Knowledge Centre grid | `151:243` | Project Workspace — Knowledge Centre v2 | **Current.** Search, Ask Lume, domain filters, tag filters, grid/list toggle (grid selected), `+ Add item`, four-domain cards, `Open Details`. Home remains below. |
 | Knowledge Centre list | `171:131` | Project Workspace — Knowledge Centre List v2 | **Current.** Same chrome; list selected. Compact rows, not a different data model. |
 | KC detail | `152:669` | Project Workspace — Knowledge Centre Detail v2 | **Current.** Right drawer: `← Back`, DETAILS, TAGS, CONTEXT, RELATED, HISTORY (newest-first meaningful events), Edit item, Close, Remove. Copy: “Close keeps the item and its history. Remove deletes it from the project entirely.” |
@@ -419,8 +419,8 @@ All listed node IDs still exist. Names below are the **current frame names**.
 - Workspace tabs are **Home | Capture | Knowledge Centre | Project Scan**. Catch Me Up and Advise are absent.
 - Selecting Capture / KC / Scan expands that mode and **pushes Home downward**. Home tab collapses the mode.
 - Sidebar: Lume wordmark, generous gap, `+ New project`, selected-project bar, no `PROJECTS` heading, Account / Settings at the bottom. No last-used dates inside Capture / Scan tabs.
-- Header: project title + `SR · Updated today…`, four equal tabs, purple/lighter band, `me` + “AI token use” / “Usage & spending →”.
-- `me` is the underlined wordmark / `Brand/AIUsageMark` component (standard / button / micro). It belongs inside AI actions (Capture, Ask Lume, Scan tab, suggestion row).
+- Header: project title + `SR · Updated today…`, four equal tabs, purple/lighter band, the shared lightbulb + “AI token use” / “Usage & spending →”.
+- AI identity is the corrected Lume lightbulb, one shared mark at standard / button / micro sizes. It belongs inside AI actions (Capture, Ask Lume, Scan tab, suggestion row). Purple is primary intent, not the AI mark.
 - Copy uses “saved project information”, not “project truth”, on current screens.
 - Grid/list is a **view toggle**, not a second store. Endless scroll is **not** shown; do not invent it.
 - People appear in KC as PERSON cards. **No People-tag editor.** Filter-row `Add tag` is filter chrome, not a writer.
@@ -429,9 +429,11 @@ All listed node IDs still exist. Names below are the **current frame names**.
 
 ### 9.4 Architecture gate from Figma?
 
-**None.** Current frames do not require a new table, RPC, RLS, canonical kind, or parallel store. They ask for projections, chrome, and wiring of existing writes.
+Part 1 frames asked for projections, chrome, and wiring of existing writes. They did not add a new table, RPC, RLS, or canonical kind.
 
-Existing Part 1 gates still apply (D-003 dismiss persist, D-004 history gaps, Manual Add Issue/Person persist helpers, tag History event type). Figma did not add a new one.
+The later Page 09 Section M decision does. Issue Notes need a nullable canonical field that `risks` does not have yet. That field is not implemented. See §17.4. Do not treat this Part 1 gate as permission to skip it, and do not invent the column inside a visual pass.
+
+Existing Part 1 gates still apply (D-003 dismiss persist, D-004 history gaps, Manual Add Issue/Person persist helpers, tag History event type).
 
 ---
 
@@ -443,7 +445,7 @@ Decisions below are from **code inspection + current Figma frames** (§9). Prefe
 | --- | --- | --- | --- |
 | Project sidebar | `Sidebar` | **modify** | Already the project list + New Project. Remove `PROJECTS` heading; retune logo / New Project / list gaps; keep selected-project state. |
 | Workspace tabs | `ProjectModeSelector` | **modify** | Same shell responsibility. Change set to Home / Capture / KC / Project Scan; four equal tabs; retire Catch Me Up and Advise from this tab row (Catch Me Up remains a derived briefing, not a 4th tab unless Figma later says otherwise). |
-| Page header | `TopHeader` + `ocean-project-header` + `ProjectIntelligenceStrip` | **modify** | Collapse competing headers into the approved band: project title, me/token callout, Usage & spending. Do not add a second identity chrome. |
+| Page header | `TopHeader` + `ocean-project-header` + `ProjectIntelligenceStrip` | **modify** | Collapse competing headers into the approved band: project title, lightbulb and token-use callout, Usage & spending. Do not add a second identity chrome. |
 | Home surface | `OceanProjectWorkspace` + `HomePage` redirect + KC four-bucket + `TodoFrame` | **modify + compose** | No new truth store. Home is a new **projection layout** over existing todos / people / issues / knowledge / timeline selectors. Stop redirecting `/` away from the open project’s Home. |
 | People rail | `buildPeopleRows` / KC people bucket / `PersonEntity` | **modify** | Reuse people projection. New layout only. |
 | To Do queue | `composeKnowledgeCentreItems` todo bucket + `addTodo` / `toggleTodo` | **modify** | Queue is a presentation over canonical todos plus date-relevant non-todos. Do not coerce Issues into todos. |
@@ -459,7 +461,7 @@ Decisions below are from **code inspection + current Figma frames** (§9). Prefe
 | Manual Add Item | New Project `ComposeFrame`; store `addTodo` / knowledge helpers | **create thin adapter** | Figma is a KC drawer with Issue / Person / To Do / Knowledge. Writes only on Save item. Hide tags when type = Person. Missing Issue/Person helpers may extend existing persist — not a new RPC. |
 | Drawer Back stack | none | **create** inside existing drawer | Client navigation stack only. Not a route/store of truth. |
 | Domain header / cards | `KcItemCard`, `DomainMark`, locked domain tokens | **modify** | Tokens already match coral/blue/green/purple. Restrain tints. |
-| me mark | `ocean-wordmark-me`, `ocean-ai-glyph` ✦, `LumeLogo` | **modify / small create** | Figma component `Brand/AIUsageMark` is underlined `me` (standard / button / micro). Keep inside AI buttons. Logo SVG is not the wordmark authority. |
+| AI identity | `MeMark` | **modify** | Signed Page 07 identity is the corrected Lume lightbulb, reused for standard / button / micro contexts inside AI actions. Do not add a parallel mark. Purple stays the primary action colour. The current underlined `me` render is not that authority. Logo SVG is not the AI mark. |
 | Warning / instruction | `.ocean-save-error`, Capture reliability, Needs You, first-run cues | **modify** | Reuse surfaces; replace “project truth” copy. |
 | Buttons | `primary-btn` / `ghost-btn` / `danger-btn` | **reuse** | Already locked to Lume purple / destructive. |
 | Avatars | `ReviewPersonAvatar`, `PersonEntity` | **reuse** | |
@@ -493,7 +495,7 @@ Decisions below are from **code inspection + current Figma frames** (§9). Prefe
 - Project Scan analysis view;
 - four equal tabs and expand/collapse-over-Home;
 - sidebar visual contract (no PROJECTS heading, spacing);
-- header me/token callout + Usage & spending;
+- header lightbulb and token-use callout + Usage & spending;
 - drawer Back stack;
 - item History panel;
 - Close / Remove universal labelling and People/Issue Remove where product requires it;
@@ -501,7 +503,7 @@ Decisions below are from **code inspection + current Figma frames** (§9). Prefe
 - Suggestion Add → Save To Do / Discard + durable Discard (D-003);
 - tag editor on Issue / To Do / Knowledge (create-on-Save only; hide on People);
 - grid/list toggle (Figma required). Endless scroll is **not** required;
-- underlined `me` mark sizes (`Brand/AIUsageMark`);
+- signed lightbulb AI identity, one shared mark, with standard / button / micro sizes where the context needs them;
 - user-facing “project truth” copy sweep (current Figma already avoids the phrase).
 
 ### Architecture gates (do not implement in passing)
@@ -646,6 +648,6 @@ Figma page `09`, section M To Do, Issue and Person detail/edit screens are appro
 
 - **To Do Type.** Hidden on the section M To Do detail and edit mocks. Do not add a user-facing Type taxonomy. `todos.kind` stays internal.
 - **Waiting on.** Relationships to zero or more existing People. `todos.waiting_on` is still one string (D-058). Do not fake the relationship by joining names into that string, and do not ship the single string as if it were the product model.
-- **Notes.** Supplementary only. To Do uses `detail`. Knowledge uses `body`. Date/Milestone uses `notes`. The approved Issue and Person screens do not require a notes column. Notes must not create, overwrite, infer, or replace structured project truth.
+- **Notes.** Supplementary only. To Do uses existing `todos.detail`. Knowledge uses existing `knowledge_items.body`. Date/Milestone uses existing `milestones.notes`. Issue now explicitly requires mutable supplementary Notes: they may be added, updated, or cleared, and they must not create, overwrite, infer, or replace structured Issue status or other canonical fields. Current `risks` storage has no notes field. The expected direction is a nullable canonical Issue Notes field in a later additive schema slice; that field is not implemented. Person still has no approved Notes requirement.
 
 Preserve the rest of the latest accepted pass. No adjacent redesign.

@@ -126,7 +126,7 @@ SQL printed by the adversarial script is for operators on a copy of dogfood data
 | What debt is open vs fixed | Known Discoveries | Duplicate headings, historical “still missing” notes |
 | Ask / eval scoring | Intelligence Contract | Benchmark-chasing notes in old phase handovers |
 | Existing-project compatibility | `docs/LUME_DURABLE_PROJECT_TRUTH.md` | “Start again”; backups-as-migration |
-| To Do Type, Waiting on, supplementary notes | `docs/LUME_PRODUCT_DECISIONS.md` CD-008–CD-010 | A Page 09 mock that invents a To Do Type or collapses Waiting on onto `todos.waiting_on` |
+| To Do Type, Waiting on, supplementary notes | `docs/LUME_PRODUCT_DECISIONS.md` CD-008–CD-010, including the 28 September 2026 Issue Notes amendment | A Page 09 mock that invents a To Do Type, collapses Waiting on onto `todos.waiting_on`, or treats Issue as having no Notes field |
 | Approved UI presentation during convergence | CD-011 precedence: canonical contracts, then Design Authority, then approved mocks, then current UI implementation | Treating current `main` as visual authority; changing an approved mock to match old UI |
 
 ---
