@@ -1,18 +1,21 @@
 /**
- * Item-level History attribution.
+ * Deterministic item-level History attribution.
  *
- * history_events has no item_id / target_id. Title, detail, and fuzzy
- * matching are not attribution. Do not present unmatched events as
- * belonging to an item.
+ * New history rows can name a stable target_kind + target_id. Older rows remain
+ * valid with null targets and are intentionally not guessed onto an item.
  */
-import type { HistoryEvent, MissionState } from "@/lib/types";
+import type {
+  HistoryEvent,
+  HistoryTargetKind,
+  MissionState,
+} from "@/lib/types";
 import type { KnowledgeItemRef } from "@/lib/knowledge-centre/knowledge-item-detail";
 
 export const ITEM_HISTORY_ATTRIBUTION = {
-  supported: false,
+  supported: true,
   limitation: "D-004",
   reason:
-    "history_events has no item_id or target_id. Existing contracts cannot deterministically attribute a row to one item.",
+    "New rows can be attributed by stable target id. Earlier un-targeted History remains project-level only.",
 } as const;
 
 export type ItemHistoryRead = {
@@ -22,23 +25,64 @@ export type ItemHistoryRead = {
   notice: string;
 };
 
-/**
- * Return History events only when a deterministic item contract exists.
- * Today that contract does not exist — always empty + D-004 notice.
- */
+function targetForRef(
+  ref: KnowledgeItemRef | null,
+): { kind: HistoryTargetKind; id: string } | null {
+  if (!ref) return null;
+  switch (ref.kind) {
+    case "risk":
+      return { kind: "risk", id: ref.riskId };
+    case "todo":
+      return { kind: "todo", id: ref.todoId };
+    case "person":
+      return { kind: "stakeholder", id: ref.personId };
+    case "timeline":
+      return { kind: "milestone", id: ref.timelineId };
+    case "structured":
+      return { kind: "knowledge_item", id: ref.itemId };
+    case "section":
+      return ref.itemId
+        ? { kind: "knowledge_item", id: ref.itemId }
+        : null;
+    case "unconfirmed_owner":
+      return { kind: "knowledge_item", id: ref.itemId };
+    case "knowledge_risk":
+      return null;
+    default:
+      return null;
+  }
+}
+
 export function historyEventsForItem(
-  _state: MissionState,
-  _projectId: string,
-  _ref: KnowledgeItemRef | null,
+  state: MissionState,
+  projectId: string,
+  ref: KnowledgeItemRef | null,
 ): ItemHistoryRead {
-  void _state;
-  void _projectId;
-  void _ref;
+  const target = targetForRef(ref);
+  if (!target) {
+    return {
+      events: [],
+      attributable: false,
+      limitation: ITEM_HISTORY_ATTRIBUTION.limitation,
+      notice:
+        "Item History is limited for this legacy item because it has no stable history target.",
+    };
+  }
+
+  const events = (state.history ?? []).filter(
+    (event) =>
+      event.projectId === projectId &&
+      event.targetKind === target.kind &&
+      event.targetId === target.id,
+  );
+
   return {
-    events: [],
-    attributable: ITEM_HISTORY_ATTRIBUTION.supported,
+    events,
+    attributable: true,
     limitation: ITEM_HISTORY_ATTRIBUTION.limitation,
     notice:
-      "Item History is limited. Lume only shows events that are deterministically tied to this item. Many earlier actions were never stored that way (D-004), so this list can be empty even when the workspace History page has later project-level events.",
+      events.length > 0
+        ? "Earlier project-level history may not be attached to this item."
+        : "No item-linked history yet. Earlier project-level history may still exist.",
   };
 }
