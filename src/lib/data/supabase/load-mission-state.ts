@@ -249,6 +249,7 @@ export async function loadMissionStateFromSupabase(
       id: row.id,
       projectId: row.project_id,
       title: row.title,
+      notes: row.notes ?? undefined,
       status: (row.status as import("@/types/database").RiskStatus) || "open",
       source: (row.source as "manual" | "capture" | "seed") || "manual",
       createdAt: row.created_at,
@@ -335,6 +336,8 @@ export async function loadMissionStateFromSupabase(
     title: row.title,
     detail: row.detail ?? undefined,
     projectId: row.project_id,
+    targetKind: row.target_kind ?? undefined,
+    targetId: row.target_id ?? undefined,
     createdAt: row.created_at,
     source: row.source ?? undefined,
   }));
