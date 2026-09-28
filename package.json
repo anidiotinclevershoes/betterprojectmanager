@@ -57,6 +57,7 @@
     "verify:knowledge-reconcile": "npx --yes tsx scripts/verify-knowledge-reconcile.ts",
     "verify:project-truth-safety": "npx --yes tsx scripts/verify-project-truth-safety.ts",
     "verify:risk-lifecycle": "npx --yes tsx scripts/verify-risk-lifecycle.ts",
+    "verify:issue-fields-history": "npx --yes tsx scripts/verify-issue-fields-history.ts",
     "verify:people-entities": "npx --yes tsx scripts/verify-people-entities.ts",
     "verify:ask-context-authority": "npx --yes tsx scripts/verify-ask-context-authority.ts",
     "verify:ocean-knowledge-centre": "npx --yes tsx scripts/verify-ocean-knowledge-centre.ts",
