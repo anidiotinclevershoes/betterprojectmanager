@@ -176,6 +176,7 @@ export type Database = {
           workspace_id: string;
           project_id: string;
           title: string;
+          notes: string | null;
           status: RiskStatus;
           source: string;
           created_by: string | null;
@@ -187,6 +188,7 @@ export type Database = {
           workspace_id: string;
           project_id: string;
           title: string;
+          notes?: string | null;
           status?: RiskStatus;
           source?: string;
           created_by?: string | null;
@@ -300,6 +302,8 @@ export type Database = {
           type: string;
           title: string;
           detail: string | null;
+          target_kind: string | null;
+          target_id: string | null;
           source: string | null;
           created_by: string | null;
           created_at: string;
@@ -311,6 +315,8 @@ export type Database = {
           type: string;
           title: string;
           detail?: string | null;
+          target_kind?: string | null;
+          target_id?: string | null;
           source?: string | null;
           created_by?: string | null;
           created_at?: string;
