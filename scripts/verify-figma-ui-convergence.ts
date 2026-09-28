@@ -66,6 +66,29 @@ function check(name: string, fn: () => void) {
   console.log(`ok  ${name}`);
 }
 
+check("shared AI mark is the approved lightbulb, not underlined me", () => {
+  const mark = readSrc("src/components/brand/MeMark.tsx");
+  const css = readSrc("src/app/globals.css");
+  const svg = readSrc("public/brand/lume-ai-lightbulb.svg");
+  assert.match(mark, /export type MeMarkSize = "standard" \| "button" \| "micro"/);
+  assert.match(mark, /data-testid="lume-me-mark"/);
+  assert.match(mark, /data-me-size=\{size\}/);
+  assert.match(mark, /aria-hidden/);
+  assert.match(mark, /\/brand\/lume-ai-lightbulb\.svg/);
+  assert.doesNotMatch(mark, />\s*me\s*</);
+  assert.match(css, /\.lume-me-mark\.is-standard/);
+  assert.match(css, /\.lume-me-mark\.is-button/);
+  assert.match(css, /\.lume-me-mark\.is-micro/);
+  assert.doesNotMatch(
+    css,
+    /\.lume-me-mark\s*\{[^}]*text-decoration:\s*underline/,
+  );
+  assert.match(svg, /width="18"/);
+  assert.match(svg, /height="18"/);
+  assert.match(svg, /viewBox="0 0 18 18"/);
+  assert.match(svg, /#A996FF/);
+});
+
 check("workspace tabs are Home / Capture / KC / Scan", () => {
   const mode = readSrc("src/components/knowledge-centre/ProjectModeSelector.tsx");
   assert.match(mode, /ocean-mode-home/);

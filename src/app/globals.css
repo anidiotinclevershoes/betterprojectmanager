@@ -9248,23 +9248,47 @@ label.field {
 }
 
 .lume-me-mark {
-  display: inline-block;
-  font-weight: 750;
-  text-decoration: underline;
-  text-underline-offset: 0.12em;
-  color: inherit;
+  display: inline-flex;
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+  line-height: 0;
+  vertical-align: middle;
+  border-radius: 5px;
+  background: #201a33;
+  border: 1px solid #5d4bb8;
 }
 
-.lume-me-mark.is-standard {
-  font-size: 1.05rem;
+.lume-me-mark img {
+  display: block;
+  position: absolute;
+  left: 7px;
+  top: 2px;
+  width: 18px;
+  height: 18px;
+  max-width: none;
 }
 
+.lume-me-mark.is-standard,
 .lume-me-mark.is-button {
-  font-size: 0.78rem;
+  width: 34px;
+  height: 24px;
 }
 
 .lume-me-mark.is-micro {
-  font-size: 0.68rem;
+  width: 14px;
+  height: 14px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.lume-me-mark.is-micro img {
+  position: static;
+  width: 14px;
+  height: 14px;
 }
 
 .ocean-workspace-header {
