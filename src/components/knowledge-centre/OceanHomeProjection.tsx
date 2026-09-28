@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { MeMark } from "@/components/brand/MeMark";
+import { DomainIcon } from "@/components/domain/DomainIcon";
 import { TimelineFrame } from "@/components/frames/TimelineFrame";
 import { composeHomeProjection } from "@/lib/knowledge-centre/home-projection";
 import type { KnowledgeItemRef } from "@/lib/knowledge-centre/knowledge-item-detail";
@@ -28,14 +29,17 @@ export function OceanHomeProjection({
     <div className="ocean-home" data-testid="ocean-home">
       <div className="ocean-home-top">
         <section
-          className="ocean-home-queue"
+          className="ocean-home-queue lume-domain-section"
+          data-domain="todo"
           data-testid="ocean-home-queue"
           aria-label="Working queue"
         >
-          <header className="ocean-home-section-head">
+          <header className="ocean-home-section-head lume-domain-section-head">
+            <DomainIcon domain="todo" />
             <h2>To Do</h2>
             <span className="ocean-home-count">{home.queue.length}</span>
           </header>
+          <div className="lume-domain-section-body">
           {home.queue.length ? (
             <ul className="ocean-home-queue-list">
               {home.queue.map((item) => (
@@ -45,16 +49,23 @@ export function OceanHomeProjection({
                   data-testid={`ocean-home-queue-${item.kind}`}
                   data-stays-issue={item.staysIssue ? "true" : undefined}
                 >
-                  <div className="ocean-home-queue-copy">
-                    <p className="ocean-home-kicker">
-                      {item.kind === "todo"
-                        ? "To Do"
-                        : item.kind === "issue"
-                          ? "Issue"
-                          : item.kind === "date"
-                            ? "Date"
-                            : "Suggestion"}
-                    </p>
+                  <div
+                    className={`ocean-home-queue-copy${
+                      item.kind === "todo" || item.kind === "issue"
+                        ? " has-domain-icon"
+                        : ""
+                    }`}
+                  >
+                    {item.kind === "todo" || item.kind === "issue" ? (
+                      <DomainIcon
+                        domain={item.kind === "todo" ? "todo" : "issue"}
+                      />
+                    ) : (
+                      <p className="ocean-home-kicker">
+                        {item.kind === "date" ? "Date" : "Suggestion"}
+                      </p>
+                    )}
+                    <div>
                     <h3>{item.title}</h3>
                     {item.supporting ? <p>{item.supporting}</p> : null}
                     {item.kind === "suggestion" ? (
@@ -62,6 +73,7 @@ export function OceanHomeProjection({
                         <MeMark size="micro" /> not a To Do yet
                       </p>
                     ) : null}
+                    </div>
                   </div>
                   {item.kind === "suggestion" && item.recommendationId ? (
                     <button
@@ -88,17 +100,21 @@ export function OceanHomeProjection({
           ) : (
             <p className="ocean-home-empty">Nothing in the working queue.</p>
           )}
+          </div>
         </section>
 
         <section
-          className="ocean-home-people"
+          className="ocean-home-people lume-domain-section"
+          data-domain="people"
           data-testid="ocean-home-people"
           aria-label="People"
         >
-          <header className="ocean-home-section-head">
+          <header className="ocean-home-section-head lume-domain-section-head">
+            <DomainIcon domain="people" />
             <h2>People</h2>
             <span className="ocean-home-count">{home.people.length}</span>
           </header>
+          <div className="lume-domain-section-body">
           {home.people.length ? (
             <ul>
               {home.people.map((person) => (
@@ -122,78 +138,87 @@ export function OceanHomeProjection({
           ) : (
             <p className="ocean-home-empty">No people recorded yet.</p>
           )}
+          </div>
         </section>
       </div>
 
       <section
-        className="ocean-home-collapsible is-issues"
+        className="ocean-home-collapsible is-issues lume-domain-section"
+        data-domain="issue"
         data-testid="ocean-home-issues"
       >
         <button
           type="button"
-          className="ocean-home-collapse-btn"
+          className="ocean-home-collapse-btn lume-domain-section-head"
           aria-expanded={issuesOpen}
           onClick={() => setIssuesOpen((open) => !open)}
         >
-          Issues · {home.issues.length}
+          <DomainIcon domain="issue" />
+          <span>Issues · {home.issues.length}</span>
         </button>
         {issuesOpen ? (
-          home.issues.length ? (
-            <ul>
-              {home.issues.map((item) => (
-                <li key={item.id}>
-                  <span>{item.title}</span>
-                  {item.ref ? (
-                    <button
-                      type="button"
-                      className="ghost-btn"
-                      onClick={() => onOpenDetails(item.ref!)}
-                    >
-                      Open Details
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="ocean-home-empty">No open issues.</p>
-          )
+          <div className="lume-domain-section-body">
+            {home.issues.length ? (
+              <ul>
+                {home.issues.map((item) => (
+                  <li key={item.id}>
+                    <span>{item.title}</span>
+                    {item.ref ? (
+                      <button
+                        type="button"
+                        className="ghost-btn"
+                        onClick={() => onOpenDetails(item.ref!)}
+                      >
+                        Open Details
+                      </button>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="ocean-home-empty">No open issues.</p>
+            )}
+          </div>
         ) : null}
       </section>
 
       <section
-        className="ocean-home-collapsible is-knowledge"
+        className="ocean-home-collapsible is-knowledge lume-domain-section"
+        data-domain="knowledge"
         data-testid="ocean-home-knowledge"
       >
         <button
           type="button"
-          className="ocean-home-collapse-btn"
+          className="ocean-home-collapse-btn lume-domain-section-head"
           aria-expanded={knowledgeOpen}
           onClick={() => setKnowledgeOpen((open) => !open)}
         >
-          Knowledge · {home.knowledge.length}
+          <DomainIcon domain="knowledge" />
+          <span>Knowledge · {home.knowledge.length}</span>
         </button>
         {knowledgeOpen ? (
-          home.knowledge.length ? (
-            <ul>
-              {home.knowledge.map((item) => (
-                <li key={item.id}>
-                  <span>{item.title}</span>
-                  {item.ref ? (
-                    <button
-                      type="button"
-                      className="ghost-btn"
-                      onClick={() => onOpenDetails(item.ref!)}
-                    >
-                      Open Details
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="ocean-home-empty">No knowledge recorded yet.</p>
-          )
+          <div className="lume-domain-section-body">
+            {home.knowledge.length ? (
+              <ul>
+                {home.knowledge.map((item) => (
+                  <li key={item.id}>
+                    <span>{item.title}</span>
+                    {item.ref ? (
+                      <button
+                        type="button"
+                        className="ghost-btn"
+                        onClick={() => onOpenDetails(item.ref!)}
+                      >
+                        Open Details
+                      </button>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="ocean-home-empty">No knowledge recorded yet.</p>
+            )}
+          </div>
         ) : null}
       </section>
 

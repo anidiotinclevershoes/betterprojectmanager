@@ -61,12 +61,6 @@
   opacity: 1;
 }
 
-.kc-four .compact-change-ico {
-  filter: grayscale(1);
-  opacity: 0.86;
-  margin-top: 0;
-}
-
 .kc-bucket-nav,
 .kc-subtype-nav {
   display: flex;

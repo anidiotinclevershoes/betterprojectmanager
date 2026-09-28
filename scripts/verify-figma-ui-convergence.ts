@@ -89,6 +89,38 @@ check("shared AI mark is the approved lightbulb, not underlined me", () => {
   assert.match(svg, /#A996FF/);
 });
 
+check("Page 09 domain identity is one semantic map", () => {
+  const grammar = readSrc("src/lib/domain/lume-domain.ts");
+  const icon = readSrc("src/components/domain/DomainIcon.tsx");
+  const css = readSrc("src/components/domain/domain-identity.css");
+  const frames = readSrc("src/components/knowledge-centre/OceanKnowledgeFrames.tsx");
+  const buckets = readSrc("src/lib/knowledge-centre/four-bucket.ts");
+  const home = readSrc("src/components/knowledge-centre/OceanHomeProjection.tsx");
+  const review = readSrc("src/components/capture/review/DomainMark.tsx");
+  for (const domain of ["issue", "people", "todo", "knowledge"]) {
+    assert.match(grammar, new RegExp(`${domain}: "/brand/domain-${domain}.svg"`));
+    const svg = readSrc(`public/brand/domain-${domain}.svg`);
+    assert.match(svg, /width="15"/);
+    assert.match(svg, /height="15"/);
+    assert.match(svg, /viewBox="0 0 15 15"/);
+  }
+  assert.match(grammar, /dates: "knowledge"/);
+  assert.doesNotMatch(grammar, /orange|coral|blue|green|purple/);
+  assert.match(icon, /data-domain=\{domain\}/);
+  assert.doesNotMatch(frames, /KC_BUCKET_ICON|[⚠◎☑☰◆◇]/u);
+  assert.doesNotMatch(buckets, /[⚠◎☑☰◆◇]/u);
+  assert.match(frames, /DomainIcon/);
+  assert.match(home, /data-domain="todo"/);
+  assert.match(home, /data-domain="issue"/);
+  assert.match(home, /\{home\.issues\.length \?/);
+  assert.match(home, /\{home\.knowledge\.length \?/);
+  assert.match(css, /rgba\(219, 99, 56, 0\.34\)/);
+  assert.match(css, /rgba\(232, 137, 92, 0\.05\)/);
+  assert.match(css, /#f08a6a/);
+  assert.match(review, /lume-review-domain-mark/);
+  assert.doesNotMatch(review, /lume-domain-section/);
+});
+
 check("workspace tabs are Home / Capture / KC / Scan", () => {
   const mode = readSrc("src/components/knowledge-centre/ProjectModeSelector.tsx");
   assert.match(mode, /ocean-mode-home/);

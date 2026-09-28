@@ -256,7 +256,7 @@ Do not remount as a shortcut unless the architecture still matches:
 | Project page | `ProjectDashboardPage` | `src/app/projects/[id]/page.tsx` |
 | Home | `HomePage` | `src/app/page.tsx` — redirects; first-run uses `NewProjectExperience` |
 
-Tokens: `src/styles/lume-locked-visual.css` already has domain + operation + primary colours. Buttons: `primary-btn`, `ghost-btn`, `danger-btn`. Signed AI identity is the corrected Lume lightbulb, reused at standard / button / micro sizes. Purple is the primary action colour, not an AI colour. Current `MeMark` still renders an underlined `me`; that render is not the signed mark, and it must not be replaced by a second identity component.
+Tokens: `src/styles/lume-locked-visual.css` already has domain + operation + primary colours. Buttons: `primary-btn`, `ghost-btn`, `danger-btn`. Signed AI identity is the corrected Lume lightbulb, reused at standard / button / micro sizes. Purple is the primary action colour, not an AI colour. The shared `MeMark` renders the approved Lume lightbulb, and it must not be replaced by a second identity component.
 
 ### Canonical writes
 

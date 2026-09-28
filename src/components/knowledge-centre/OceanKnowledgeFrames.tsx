@@ -15,9 +15,10 @@ import {
   refForTodo,
   type KnowledgeItemRef,
 } from "@/lib/knowledge-centre/knowledge-item-detail";
+import { DomainIcon } from "@/components/domain/DomainIcon";
+import { lumeDomainForKcBucket } from "@/lib/domain/lume-domain";
 import {
   BUCKET_IDS,
-  KC_BUCKET_ICON,
   bucketLabel,
   composeKnowledgeCentreItems,
   filterKnowledgeCentreItems,
@@ -60,9 +61,7 @@ function KcItemCard({
       >
         <header className="compact-change-head">
           <div className="compact-change-entity">
-            <span className="compact-change-ico" aria-hidden>
-              {item.icon}
-            </span>
+            <DomainIcon domain={lumeDomainForKcBucket(item.bucket)} />
             <div className="compact-change-titles">
               <p className="compact-change-type">
                 {bucketLabel(item.bucket)} · {item.typeLabel}
@@ -125,19 +124,18 @@ function BucketGroup({
   const label = heading ?? bucketLabel(bucket);
   return (
     <section
-      className="kc-bucket-group"
+      className="kc-bucket-group lume-domain-section"
+      data-domain={lumeDomainForKcBucket(bucket)}
       data-testid={oceanTestId ?? `kc-group-${bucket}`}
       data-kc-group={bucket}
     >
-      <header className="kc-bucket-group-head">
-        <span className="compact-change-ico" aria-hidden>
-          {KC_BUCKET_ICON[bucket]}
-        </span>
+      <header className="kc-bucket-group-head lume-domain-section-head">
+        <DomainIcon domain={lumeDomainForKcBucket(bucket)} />
         <h3>
           {label} · {items.length}
         </h3>
       </header>
-      <div className="kc-bucket-group-body">
+      <div className="kc-bucket-group-body lume-domain-section-body">
         {items.map((item) => (
           <KcItemCard
             key={item.id}
@@ -246,6 +244,9 @@ export function OceanKnowledgeFrames({
                 if (id !== "knowledge") setSubtype("all");
               }}
             >
+              {id === "all" ? null : (
+                <DomainIcon domain={lumeDomainForKcBucket(id)} />
+              )}
               {bucketLabel(id)}
               <span className="kc-bucket-count">{count}</span>
             </button>
