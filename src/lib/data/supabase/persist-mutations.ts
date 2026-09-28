@@ -1007,6 +1007,92 @@ export async function persistRiskStatus(
 }
 
 /**
+ * User edit of Issue title/notes + immutable item-targeted History.
+ * Canonical truth and History are committed atomically by the database.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRiskEditWithHistory(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  projectId: string,
+  riskId: string,
+  next: { title: string; notes?: string | null },
+  history: { title: string; detail: string },
+): Promise<ProjectRisk> {
+  const { data, error } = await client.rpc("update_risk_with_history", {
+    p_workspace_id: workspaceId,
+    p_project_id: projectId,
+    p_risk_id: riskId,
+    p_title: next.title,
+    p_notes: next.notes ?? null,
+    p_history_title: history.title,
+    p_history_detail: history.detail,
+    p_created_by: userId,
+  });
+  const row = requireData(
+    data as Record<string, unknown> | null,
+    error,
+    "update issue with history",
+  );
+  return {
+    id: String(row.id),
+    projectId: String(row.project_id),
+    title: String(row.title),
+    notes: (row.notes as string | null) ?? undefined,
+    status: row.status as ProjectRisk["status"],
+    source:
+      row.source === "capture" || row.source === "seed"
+        ? row.source
+        : "manual",
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  };
+}
+
+/**
+ * User Resolve/Reopen + immutable item-targeted History in one transaction.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRiskStatusWithHistory(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  projectId: string,
+  riskId: string,
+  status: "open" | "watch" | "resolved" | "accepted",
+  history: { title: string; detail: string },
+): Promise<ProjectRisk> {
+  const { data, error } = await client.rpc("set_risk_status_with_history", {
+    p_workspace_id: workspaceId,
+    p_project_id: projectId,
+    p_risk_id: riskId,
+    p_status: status,
+    p_history_title: history.title,
+    p_history_detail: history.detail,
+    p_created_by: userId,
+  });
+  const row = requireData(
+    data as Record<string, unknown> | null,
+    error,
+    "set issue status with history",
+  );
+  return {
+    id: String(row.id),
+    projectId: String(row.project_id),
+    title: String(row.title),
+    notes: (row.notes as string | null) ?? undefined,
+    status: row.status as ProjectRisk["status"],
+    source:
+      row.source === "capture" || row.source === "seed"
+        ? row.source
+        : "manual",
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  };
+}
+
+/**
  * Manual Add Issue — existing `risks` table, source=manual.
  * Additive persist helper. Not a new RPC.
  */
@@ -1019,6 +1105,7 @@ export async function persistRiskCreate(
     id?: string;
     projectId: string;
     title: string;
+    notes?: string | null;
     status?: ProjectRisk["status"];
     source?: LegalRiskSource;
   },
@@ -1028,6 +1115,7 @@ export async function persistRiskCreate(
     workspace_id: workspaceId,
     project_id: risk.projectId,
     title: risk.title.trim(),
+    notes: risk.notes?.trim() || null,
     status: risk.status ?? "open",
     source: risk.source ?? "manual",
     created_by: userId,
@@ -1043,6 +1131,7 @@ export async function persistRiskCreate(
     id: String(row.id),
     projectId: String(row.project_id),
     title: String(row.title),
+    notes: (row.notes as string | null) ?? undefined,
     status: row.status,
     source: row.source === "capture" || row.source === "seed" ? row.source : "manual",
     createdAt: row.created_at,
@@ -1584,6 +1673,8 @@ export async function persistHistoryEvent(
     type: event.type,
     title: event.title,
     detail: event.detail ?? null,
+    target_kind: event.targetKind ?? null,
+    target_id: event.targetId ?? null,
     source: event.source ?? "user",
     created_by: userId,
   });
