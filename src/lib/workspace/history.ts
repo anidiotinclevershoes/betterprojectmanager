@@ -9,6 +9,8 @@ export function makeHistoryEvent(input: {
   title: string;
   detail?: string;
   projectId?: string | null;
+  targetKind?: HistoryEvent["targetKind"];
+  targetId?: string;
   source?: HistoryEvent["source"];
 }): HistoryEvent {
   return {
@@ -17,6 +19,8 @@ export function makeHistoryEvent(input: {
     title: input.title,
     detail: input.detail,
     projectId: input.projectId,
+    targetKind: input.targetKind,
+    targetId: input.targetId,
     createdAt: new Date().toISOString(),
     source: input.source ?? "user",
   };
