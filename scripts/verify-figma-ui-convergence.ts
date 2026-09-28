@@ -256,11 +256,51 @@ check("tag Save reuses equivalent slug and never deletes unproven leftovers", ()
   }), false);
 });
 
+check("Page 09 workspace heading is one shared primitive", () => {
+  const heading = readSrc(
+    "src/components/knowledge-centre/WorkspacePageHeading.tsx",
+  );
+  const css = readSrc(
+    "src/components/knowledge-centre/workspace-page-heading.css",
+  );
+  const home = readSrc(
+    "src/components/knowledge-centre/OceanHomeProjection.tsx",
+  );
+  const workspace = readSrc(
+    "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
+  );
+  const scan = readSrc("src/components/knowledge-centre/ProjectScanView.tsx");
+  const capture = readSrc("src/components/capture/CaptureWorkspace.tsx");
+  assert.match(heading, /export function WorkspacePageHeading/);
+  assert.match(heading, /title: "Home"/);
+  assert.match(heading, /What needs your attention next\./);
+  assert.match(heading, /What needs your attention now\./);
+  assert.match(heading, /title: "Knowledge Centre"/);
+  assert.match(heading, /Search and work with the project information Lume has saved\./);
+  assert.match(heading, /Search, ask and work with saved project information\./);
+  assert.match(heading, /title: "Project Scan"/);
+  assert.match(heading, /Nothing changes until you act\./);
+  assert.match(heading, /Things in the project that may need your attention\./);
+  assert.doesNotMatch(heading, /fontSize|color:|margin/);
+  assert.match(css, /height:\s*58px/);
+  assert.match(css, /font-size:\s*15\.5px/);
+  assert.match(css, /font-size:\s*24px/);
+  assert.match(css, /#f1f4f8/);
+  assert.match(css, /#8e98a6/);
+  assert.match(home, /WORKSPACE_PAGE_HEADINGS\.home/);
+  assert.match(workspace, /WORKSPACE_PAGE_HEADINGS\.knowledge/);
+  assert.match(scan, /WORKSPACE_PAGE_HEADINGS\.scan/);
+  assert.doesNotMatch(scan, /MeMark/);
+  assert.doesNotMatch(capture, /WorkspacePageHeading|lume-page-heading/);
+  assert.doesNotMatch(capture, /P09\/Common\/PageHeading/);
+});
+
 check("Project Scan is a projection and does not import persist writers", () => {
   const scanSrc = readSrc("src/lib/knowledge-centre/project-scan.ts");
   assert.doesNotMatch(scanSrc, /persist|supabase|addTodo|addManualItem/);
   const view = readSrc("src/components/knowledge-centre/ProjectScanView.tsx");
-  assert.match(view, /analysis only/);
+  assert.match(view, /WORKSPACE_PAGE_HEADINGS\.scan/);
+  assert.doesNotMatch(view, /MeMark/);
   assert.match(view, /ocean-scan-again/);
   const state = emptyState();
   state.risks = [

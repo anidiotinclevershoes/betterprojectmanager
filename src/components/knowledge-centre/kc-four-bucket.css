@@ -1,12 +1,5 @@
 /* Knowledge Centre four-bucket presentation. View-only — no persist. */
 
-.kc-heading {
-  margin: 0 0 0.35rem;
-  font-size: 1.05rem;
-  font-weight: 620;
-  letter-spacing: -0.01em;
-}
-
 .ocean-knowledge-centre .ocean-search-field {
   min-height: 2.85rem;
   border-color: var(--border-strong, var(--border-subtle));

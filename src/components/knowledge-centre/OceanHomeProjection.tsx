@@ -3,6 +3,10 @@
 import { useMemo, useState } from "react";
 import { MeMark } from "@/components/brand/MeMark";
 import { DomainIcon } from "@/components/domain/DomainIcon";
+import {
+  WORKSPACE_PAGE_HEADINGS,
+  WorkspacePageHeading,
+} from "@/components/knowledge-centre/WorkspacePageHeading";
 import { TimelineFrame } from "@/components/frames/TimelineFrame";
 import { composeHomeProjection } from "@/lib/knowledge-centre/home-projection";
 import type { KnowledgeItemRef } from "@/lib/knowledge-centre/knowledge-item-detail";
@@ -27,6 +31,7 @@ export function OceanHomeProjection({
 
   return (
     <div className="ocean-home" data-testid="ocean-home">
+      <WorkspacePageHeading {...WORKSPACE_PAGE_HEADINGS.home} />
       <div className="ocean-home-top">
         <section
           className="ocean-home-queue lume-domain-section"

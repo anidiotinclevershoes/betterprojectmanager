@@ -12,6 +12,10 @@ import {
   type OceanProjectMode,
 } from "@/components/knowledge-centre/ProjectModeSelector";
 import { ProjectScanView } from "@/components/knowledge-centre/ProjectScanView";
+import {
+  WORKSPACE_PAGE_HEADINGS,
+  WorkspacePageHeading,
+} from "@/components/knowledge-centre/WorkspacePageHeading";
 import { ProjectWorkspaceHeader } from "@/components/knowledge-centre/ProjectWorkspaceHeader";
 import { SuggestionAddModal } from "@/components/knowledge-centre/SuggestionAddModal";
 import type { KnowledgeItemRef } from "@/lib/knowledge-centre/knowledge-item-detail";
@@ -48,8 +52,8 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
           className="ocean-expanded-mode"
           data-testid="ocean-knowledge-centre"
         >
+          <WorkspacePageHeading {...WORKSPACE_PAGE_HEADINGS.knowledge} />
           <div className="ocean-kc-toolbar">
-            <h2 className="kc-heading">Knowledge Centre</h2>
             <button
               type="button"
               className="primary-btn"

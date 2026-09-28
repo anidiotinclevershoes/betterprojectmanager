@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { MeMark } from "@/components/brand/MeMark";
+import {
+  WORKSPACE_PAGE_HEADINGS,
+  WorkspacePageHeading,
+} from "@/components/knowledge-centre/WorkspacePageHeading";
 import {
   SCAN_GROUP_LABEL,
   composeProjectScan,
@@ -34,13 +37,7 @@ export function ProjectScanView({
   return (
     <div className="ocean-scan" data-testid="ocean-scan">
       <header className="ocean-scan-header">
-        <h2>
-          <MeMark size="button" /> Project Scan
-        </h2>
-        <p className="ocean-scan-boundary">
-          Scan findings are analysis only. Nothing changes in the project
-          unless you choose to act.
-        </p>
+        <WorkspacePageHeading {...WORKSPACE_PAGE_HEADINGS.scan} />
         <button
           type="button"
           className="ghost-btn"
