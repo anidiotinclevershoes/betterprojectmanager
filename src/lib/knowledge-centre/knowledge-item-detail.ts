@@ -72,6 +72,11 @@ export type KnowledgeDetailModel = {
   projectId: string;
   title: string;
   body: string;
+  /** Domain-specific mutable notes, when the canonical record has them. */
+  notes?: string;
+  /** Durable timestamps used by detail metadata. */
+  createdAt?: string;
+  updatedAt?: string;
   subtitle?: string;
   epistemic?: EpistemicStatus | null;
   epistemicLabel?: string | null;
@@ -87,6 +92,7 @@ export type KnowledgeDetailModel = {
   editItemId?: string | null;
   canToggleTodo: boolean;
   canResolveRisk: boolean;
+  canReopenRisk?: boolean;
   canResolveKnowledgeRisk: boolean;
   canConfirmOwner: boolean;
   confirmOwnerScope?: string;
@@ -414,9 +420,11 @@ export function resolveKnowledgeItemDetail(
     return {
       ref,
       projectId,
-      title: "Risk",
-      body: risk.title,
-      subtitle: `Status: ${risk.status}`,
+      title: risk.title,
+      body: risk.notes ?? "",
+      notes: risk.notes,
+      createdAt: risk.createdAt,
+      updatedAt: risk.updatedAt,
       epistemic: null,
       epistemicLabel: null,
       provenanceLines: [],
@@ -425,6 +433,7 @@ export function resolveKnowledgeItemDetail(
       canEditBody: false,
       canToggleTodo: false,
       canResolveRisk: isOpenRiskStatus(risk.status),
+      canReopenRisk: isClosedRiskStatus(risk.status),
       canResolveKnowledgeRisk: false,
       canConfirmOwner: false,
       honestyNotes,
