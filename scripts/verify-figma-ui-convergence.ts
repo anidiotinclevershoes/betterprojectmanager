@@ -311,6 +311,32 @@ check("Project Scan is a projection and does not import persist writers", () => 
   assert.equal(scan.groups.contradictions.length, 0);
 });
 
+check("Page 09 Knowledge Centre browse keeps Ask and Search distinct", () => {
+  const bar = readSrc(
+    "src/components/knowledge-centre/KnowledgeSearchAskBar.tsx",
+  );
+  const frames = readSrc(
+    "src/components/knowledge-centre/OceanKnowledgeFrames.tsx",
+  );
+  assert.match(bar, /searchAuthoritativeProject/);
+  assert.match(bar, /data-ai="false"/);
+  assert.match(bar, /data-ai="true"/);
+  assert.match(bar, /MeMark/);
+  assert.match(bar, /Ask a project question/);
+  assert.match(bar, /Search Knowledge/);
+  assert.match(bar, /Search knowledge/);
+  assert.doesNotMatch(bar, /ocean-search-or/);
+  assert.match(frames, /DOMAIN/);
+  assert.match(frames, /kc-browse-card/);
+  assert.match(frames, /kc-layout-grid/);
+  assert.match(frames, /kc-layout-list/);
+  assert.match(frames, /ocean-add-item/);
+  assert.doesNotMatch(frames, /Recently updated|Add tag/);
+  assert.match(frames, /\["all", \.\.\.BUCKET_IDS\]/);
+  assert.match(frames, /kc-bucket-\$\{id\}/);
+  assert.doesNotMatch(frames, /kc-bucket-dates|Dates fifth/);
+});
+
 check("KC keeps full-set render and adds grid/list + Open Details", () => {
   const frames = readSrc(
     "src/components/knowledge-centre/OceanKnowledgeFrames.tsx",

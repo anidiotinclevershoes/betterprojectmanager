@@ -53,16 +53,6 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
           data-testid="ocean-knowledge-centre"
         >
           <WorkspacePageHeading {...WORKSPACE_PAGE_HEADINGS.knowledge} />
-          <div className="ocean-kc-toolbar">
-            <button
-              type="button"
-              className="primary-btn"
-              data-testid="ocean-add-item"
-              onClick={() => setAddOpen(true)}
-            >
-              + Add item
-            </button>
-          </div>
           <KnowledgeSearchAskBar
             projectId={project.id}
             search={kcQuery}
@@ -73,6 +63,7 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
             searchQuery={kcQuery}
             selected={selected}
             onSelect={setSelected}
+            onAddItem={() => setAddOpen(true)}
           />
         </div>
       ) : null}
