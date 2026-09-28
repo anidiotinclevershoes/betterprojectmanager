@@ -174,7 +174,7 @@ export function createSupabaseRepositories(client: Client): LumeDataRepositories
     async listByProject(projectId) {
       const { data, error } = await client
         .from("risks")
-        .select("id, title")
+        .select("id, title, notes")
         .eq("project_id", projectId);
       if (error) throw new Error(`[supabase] list risks: ${error.message}`);
       return data ?? [];
@@ -186,6 +186,7 @@ export function createSupabaseRepositories(client: Client): LumeDataRepositories
           workspace_id: requireUuid(input.workspaceId, "workspaceId"),
           project_id: requireUuid(input.projectId, "projectId"),
           title: requireNonEmptyString(input.title, "title"),
+          notes: input.notes ?? null,
           status: input.status ?? "open",
           source: input.source ?? "manual",
           created_by: input.createdBy ?? null,
@@ -200,6 +201,7 @@ export function createSupabaseRepositories(client: Client): LumeDataRepositories
         .update({
           project_id: patch.projectId,
           title: patch.title,
+          notes: patch.notes,
           status: patch.status,
           source: patch.source,
         })
