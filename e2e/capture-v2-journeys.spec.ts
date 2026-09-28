@@ -52,9 +52,25 @@ test.describe("Capture V2 frozen journeys", () => {
     const todos = page.getByTestId("ocean-frame-todo");
     await expect(todos.getByText(/Gumdrop Bridge icing/)).toHaveCount(0);
     await page.reload();
-    await expect(
-      page.getByTestId("ocean-frame-risks").getByText("Gumdrop Bridge icing"),
-    ).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Candyland" })).toBeVisible();
+    await expect(page.getByTestId("ocean-project-workspace")).toHaveAttribute(
+      "data-project-mode",
+      "home",
+    );
+    await expect(page.getByTestId("ocean-mode-home")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.getByTestId("ocean-home")).toBeVisible();
+    await expect(page.getByTestId("ocean-knowledge-centre")).toHaveCount(0);
+
+    await openKnowledgeCentre(page);
+    const risksAfterReload = page.getByTestId("ocean-frame-risks");
+    const todosAfterReload = page.getByTestId("ocean-frame-todo");
+    await expect(risksAfterReload).toBeVisible();
+    await expect(todosAfterReload).toBeVisible();
+    await expect(risksAfterReload.getByText("Gumdrop Bridge icing")).toHaveCount(0);
+    await expect(todosAfterReload.getByText(/Gumdrop Bridge icing/)).toHaveCount(0);
   });
 
   test("milestone date move — Parade day updates, not a To Do", async ({
