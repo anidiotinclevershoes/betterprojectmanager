@@ -91,7 +91,9 @@ import {
   persistMemory,
   persistRecommendationStatus,
   persistRiskCreate,
+  persistRiskEditWithHistory,
   persistRiskStatus,
+  persistRiskStatusWithHistory,
   persistTimelineItem,
   persistTimelineUpdate,
   persistTodoCreate,
@@ -284,6 +286,12 @@ type MissionContextValue = {
     status: RiskStatus,
     projectId: string,
   ) => void;
+  /** User edit of canonical Issue title/notes. Persist-first; History is atomic with truth. */
+  updateRisk: (
+    riskId: string,
+    projectId: string,
+    patch: { title?: string; notes?: string | null },
+  ) => Promise<ManualWriteResult>;
   /**
    * Slice 1B: resolve/reopen a legacy Knowledge-only risk bullet (no risks row).
    * Does not fabricate a Risk-domain record.
@@ -2055,7 +2063,12 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               client,
               meta.workspaceId,
               meta.userId,
-              { projectId: input.projectId, title, source: "manual" },
+              {
+                projectId: input.projectId,
+                title,
+                notes: input.detail?.trim() || null,
+                source: "manual",
+              },
             );
             setState((prev) =>
               pushHistory(
@@ -2097,6 +2110,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
                   id,
                   projectId: input.projectId,
                   title,
+                  notes: input.detail?.trim() || undefined,
                   status: "open",
                   source: "manual",
                   createdAt: new Date().toISOString(),
@@ -2455,11 +2469,150 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     [addManualItem, persistRecommendationStatusSafe],
   );
 
+  const updateRisk = useCallback(
+    async (
+      riskId: string,
+      projectId: string,
+      patch: { title?: string; notes?: string | null },
+    ): Promise<ManualWriteResult> => {
+      const before = findProjectRisk(stateRef.current.risks, riskId, projectId);
+      if (!before) return { ok: false, error: "This Issue could not be found." };
+
+      const nextTitle =
+        patch.title !== undefined ? patch.title.trim() : before.title;
+      if (!nextTitle) return { ok: false, error: "Issue title cannot be empty." };
+      const nextNotes =
+        patch.notes === null
+          ? undefined
+          : patch.notes !== undefined
+            ? patch.notes.trim() || undefined
+            : before.notes;
+
+      const titleChanged = before.title !== nextTitle;
+      const notesChanged = (before.notes ?? "") !== (nextNotes ?? "");
+      if (!titleChanged && !notesChanged) return { ok: true, id: riskId };
+
+      const changes: string[] = [];
+      if (titleChanged) {
+        changes.push(`Title:\n${before.title} → ${nextTitle}`);
+      }
+      if (notesChanged) {
+        if (!before.notes && nextNotes) {
+          changes.push(`Notes added:\n${nextNotes}`);
+        } else if (before.notes && !nextNotes) {
+          changes.push(`Notes cleared:\n${before.notes}`);
+        } else {
+          changes.push(`Notes:\n${before.notes ?? ""} → ${nextNotes ?? ""}`);
+        }
+      }
+
+      const historyTitle =
+        notesChanged && !titleChanged
+          ? nextNotes
+            ? before.notes
+              ? "Issue notes updated"
+              : "Issue notes added"
+            : "Issue notes cleared"
+          : "Issue updated";
+      const historyDetail = changes.join("\n");
+      const historyEvent = makeHistoryEvent({
+        type: "risk_updated",
+        title: historyTitle,
+        detail: historyDetail,
+        projectId,
+        targetKind: "risk",
+        targetId: riskId,
+        source: "user",
+      });
+
+      const currentKnowledge =
+        (stateRef.current.knowledge ?? []).find((k) => k.projectId === projectId) ??
+        emptyKnowledge(projectId);
+      const withoutOld = titleChanged
+        ? {
+            ...currentKnowledge,
+            sections: {
+              ...currentKnowledge.sections,
+              risks: (currentKnowledge.sections.risks ?? []).filter(
+                (title) =>
+                  stripResolvedPrefix(title).toLowerCase() !==
+                  stripResolvedPrefix(before.title).toLowerCase(),
+              ),
+            },
+          }
+        : currentKnowledge;
+      const optimisticRisk = {
+        ...before,
+        title: nextTitle,
+        notes: nextNotes,
+        updatedAt: new Date().toISOString(),
+      };
+      const nextKnowledge = syncKnowledgeRiskProjection(
+        withoutOld,
+        optimisticRisk,
+      );
+
+      const applyLocal = (savedRisk = optimisticRisk) => {
+        setState((latest) =>
+          pushHistory(
+            {
+              ...latest,
+              risks: (latest.risks ?? []).map((risk) =>
+                risk.id === riskId && risk.projectId === projectId
+                  ? savedRisk
+                  : risk,
+              ),
+              knowledge: [
+                ...(latest.knowledge ?? []).filter(
+                  (k) => k.projectId !== projectId,
+                ),
+                nextKnowledge,
+              ],
+            },
+            historyEvent,
+          ),
+        );
+      };
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          const saved = await persistRiskEditWithHistory(
+            client,
+            meta.workspaceId,
+            meta.userId,
+            projectId,
+            riskId,
+            { title: nextTitle, notes: nextNotes ?? null },
+            { title: historyTitle, detail: historyDetail },
+          );
+          applyLocal(saved);
+          markPersistSaved();
+          return { ok: true, id: riskId };
+        } catch (err) {
+          console.error("[updateRisk] persist failed", err);
+          reportPersistFailure(err, "Could not save Issue");
+          return {
+            ok: false,
+            error: err instanceof Error ? err.message : "Could not save Issue",
+          };
+        }
+      }
+
+      applyLocal();
+      return { ok: true, id: riskId };
+    },
+    [],
+  );
+
   const setRiskStatus = useCallback(
     (riskId: string, status: RiskStatus, projectId: string) => {
       const prev = stateRef.current;
       const existing = findProjectRisk(prev.risks, riskId, projectId);
-      if (!existing) return;
+      if (!existing || existing.status === status) return;
       const updatedRisk = {
         ...existing,
         status,
@@ -2469,17 +2622,37 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         (prev.knowledge ?? []).find((k) => k.projectId === projectId) ??
         emptyKnowledge(projectId);
       const nextKnowledge = syncKnowledgeRiskProjection(current, updatedRisk);
-      const applyLocal = () => {
-        setState((latest) => ({
-          ...latest,
-          risks: (latest.risks ?? []).map((r) =>
-            r.id === riskId && r.projectId === projectId ? updatedRisk : r,
+      const closed = status === "resolved" || status === "accepted";
+      const historyEvent = makeHistoryEvent({
+        type: "risk_updated",
+        title: closed ? "Issue resolved" : "Issue reopened",
+        detail: existing.title,
+        projectId,
+        targetKind: "risk",
+        targetId: riskId,
+        source: "user",
+      });
+
+      const applyLocal = (savedRisk = updatedRisk) => {
+        setState((latest) =>
+          pushHistory(
+            {
+              ...latest,
+              risks: (latest.risks ?? []).map((risk) =>
+                risk.id === riskId && risk.projectId === projectId
+                  ? savedRisk
+                  : risk,
+              ),
+              knowledge: [
+                ...(latest.knowledge ?? []).filter(
+                  (k) => k.projectId !== projectId,
+                ),
+                nextKnowledge,
+              ],
+            },
+            historyEvent,
           ),
-          knowledge: [
-            ...(latest.knowledge ?? []).filter((k) => k.projectId !== projectId),
-            nextKnowledge,
-          ],
-        }));
+        );
       };
 
       const meta = persistMetaRef.current;
@@ -2489,26 +2662,38 @@ export function MissionProvider({ children }: { children: ReactNode }) {
           setSaveError(null);
           try {
             const client = createBrowserSupabaseClient();
-            await persistRiskStatus(
+            const saved = await persistRiskStatusWithHistory(
               client,
               meta.workspaceId!,
+              meta.userId,
               projectId,
               riskId,
               status,
+              {
+                title: historyEvent.title,
+                detail: historyEvent.detail ?? existing.title,
+              },
             );
-            await persistKnowledgeReconcile(
-              client,
-              meta.workspaceId!,
-              projectId,
-              nextKnowledge,
-              meta.userId,
-              ["risks"],
-            );
-            applyLocal();
+            try {
+              await persistKnowledgeReconcile(
+                client,
+                meta.workspaceId!,
+                projectId,
+                nextKnowledge,
+                meta.userId,
+                ["risks"],
+              );
+            } catch (projectionErr) {
+              console.error(
+                "[setRiskStatus] derivative Knowledge projection refresh failed",
+                projectionErr,
+              );
+            }
+            applyLocal(saved);
             markPersistSaved();
           } catch (err) {
             console.error("[setRiskStatus] persist failed", err);
-            reportPersistFailure(err, "Could not save risk status");
+            reportPersistFailure(err, "Could not save Issue status");
           }
         })();
         return;
@@ -3363,6 +3548,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       saveSuggestedTodo,
       replaceKnowledge,
       setRiskStatus,
+      updateRisk,
       setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,
