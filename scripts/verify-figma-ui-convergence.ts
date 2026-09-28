@@ -123,11 +123,39 @@ check("Page 09 domain identity is one semantic map", () => {
 
 check("workspace tabs are Home / Capture / KC / Scan", () => {
   const mode = readSrc("src/components/knowledge-centre/ProjectModeSelector.tsx");
+  const css = readSrc("src/app/globals.css");
+  const workspace = readSrc(
+    "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
+  );
+  const domains = readSrc("src/lib/domain/lume-domain.ts");
   assert.match(mode, /ocean-mode-home/);
   assert.match(mode, /ocean-mode-capture/);
   assert.match(mode, /ocean-mode-knowledge/);
   assert.match(mode, /ocean-mode-scan/);
   assert.doesNotMatch(mode, /ocean-mode-catch-me-up|ocean-mode-advise/);
+  assert.match(mode, /aria-label=\{item\.label\}/);
+  assert.match(mode, /label: "Home"/);
+  assert.match(mode, /label: "Capture"/);
+  assert.match(mode, /label: "Knowledge Centre"/);
+  assert.match(mode, /narrowLabel: "Knowledge"/);
+  assert.match(mode, /label: "Project Scan"/);
+  assert.match(mode, /narrowLabel: "Scan"/);
+  assert.match(mode, /MeMark size="button"/);
+  assert.match(mode, /\/brand\/nav-home\.svg/);
+  assert.doesNotMatch(mode, /useRouter|href=|next\/link|next\/navigation/);
+  assert.match(workspace, /useState<OceanProjectMode>\("home"\)/);
+  assert.doesNotMatch(domains, /nav-home/);
+  assert.match(css, /\.ocean-mode-selector[\s\S]*height:\s*54px/);
+  assert.match(css, /height:\s*3px/);
+  assert.match(css, /flex:\s*42 1 42px/);
+  assert.match(css, /flex:\s*92 1 92px/);
+  assert.match(css, /flex:\s*136 1 136px/);
+  assert.match(css, /flex:\s*120 1 120px/);
+  assert.match(css, /flex-wrap:\s*nowrap/);
+  const homeIcon = readSrc("public/brand/nav-home.svg");
+  assert.match(homeIcon, /width="16"/);
+  assert.match(homeIcon, /height="16"/);
+  assert.match(homeIcon, /viewBox="0 0 16 16"/);
 });
 
 check("sidebar has no PROJECTS heading", () => {

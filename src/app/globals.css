@@ -8099,47 +8099,92 @@ body {
   color: #f0a0a0;
 }
 
+/* Page 09 P09/Shell/TopProjectNav — 54px row, equal tabs, 3px active rule. */
 .ocean-mode-selector {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  position: relative;
+  box-sizing: border-box;
   width: 100%;
-  gap: 0.15rem;
+  height: 54px;
+  margin: 0;
   padding: 0;
+  gap: 0;
   border: 0;
-  border-bottom: 1px solid var(--border-subtle);
   border-radius: 0;
-  background: transparent;
+  background: #0d0e11;
+  overflow: hidden;
+}
+
+.ocean-mode-selector::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: #1e2126;
+  pointer-events: none;
 }
 
 .ocean-mode-tab {
-  display: inline-flex;
+  display: flex;
+  position: relative;
+  flex: 1 1 0;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.55rem 0.95rem;
-  border-radius: 0;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-width: 0;
+  height: 54px;
+  margin: 0;
+  padding: 0;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-radius: 0;
   background: transparent;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 560;
+  color: #b8b8c7;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
   cursor: pointer;
   white-space: nowrap;
 }
 
-.ocean-mode-tab {
-  flex: 1 1 0;
-  justify-content: center;
+.ocean-mode-tab + .ocean-mode-tab::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18px;
+  width: 1px;
+  height: 18px;
+  background: #2a2e35;
 }
 
 .ocean-mode-tab.is-selected {
-  background: transparent;
-  border-bottom-color: #ffffff;
+  background: rgba(124, 92, 255, 0.05);
   color: #ffffff;
 }
 
-.ocean-mode-tab:not(.is-selected) {
-  color: var(--text-muted);
+.ocean-mode-tab.is-selected::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  height: 3px;
+  background: #7c5cff;
+}
+
+.ocean-mode-home-icon,
+.ocean-mode-narrow-label {
+  display: none;
+}
+
+.ocean-mode-home-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
 }
 
 .ocean-mode-tab.is-disabled,
@@ -8674,22 +8719,82 @@ body {
     min-height: 0;
   }
   .ocean-mode-selector {
-    width: 100%;
+    height: 48px;
   }
   .ocean-mode-tab {
-    flex: 1 1 auto;
+    height: 48px;
+    flex: none;
+    min-height: 0;
+    padding: 0;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #aab3c0;
+    white-space: nowrap;
+  }
+  .ocean-mode-tab.is-home {
+    flex: 42 1 42px;
     justify-content: center;
-    min-height: 44px;
-    font-size: 0.82rem;
-    padding: 0.5rem 0.65rem;
-    white-space: normal;
-    text-align: center;
+  }
+  .ocean-mode-tab.is-capture {
+    flex: 92 1 92px;
+    justify-content: flex-start;
+    padding-left: 11px;
+  }
+  .ocean-mode-tab.is-knowledge {
+    flex: 136 1 136px;
+    justify-content: center;
+  }
+  .ocean-mode-tab.is-scan {
+    flex: 120 1 120px;
+    justify-content: flex-start;
+    padding-left: 11px;
+  }
+  .ocean-mode-tab + .ocean-mode-tab::before {
+    display: none;
+  }
+  .ocean-mode-tab.is-selected {
+    color: #ffffff;
+  }
+  .ocean-mode-tab.is-home .ocean-mode-label {
+    display: none;
+  }
+  .ocean-mode-home-icon {
+    display: block;
+  }
+  .ocean-mode-tab.is-knowledge .ocean-mode-label,
+  .ocean-mode-tab.is-scan .ocean-mode-label {
+    display: none;
+  }
+  .ocean-mode-tab.is-knowledge .ocean-mode-narrow-label,
+  .ocean-mode-tab.is-scan .ocean-mode-narrow-label {
+    display: inline;
+  }
+  .ocean-mode-tab .lume-me-mark.is-button {
+    width: 14px;
+    height: 14px;
+    background: none;
+    border: 0;
+    border-radius: 0;
+  }
+  .ocean-mode-tab .lume-me-mark.is-button img {
+    position: static;
+    width: 14px;
+    height: 14px;
   }
   .ocean-intel-strip {
     padding: 0.65rem 0.75rem;
   }
   .ocean-knowledge-item {
     padding: 0.7rem 0.75rem;
+  }
+}
+
+@media (max-width: 699px) {
+  .ocean-mode-selector {
+    margin-left: -12px;
+    margin-right: -12px;
+    width: calc(100% + 24px);
   }
 }
 

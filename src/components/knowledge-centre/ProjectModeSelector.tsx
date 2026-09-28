@@ -7,22 +7,32 @@ export type OceanProjectMode = "home" | "capture" | "knowledge" | "scan";
 const MODES: Array<{
   id: OceanProjectMode;
   label: string;
+  narrowLabel?: string;
   testId: string;
   ai?: boolean;
+  homeIcon?: boolean;
 }> = [
-  { id: "home", label: "Home", testId: "ocean-mode-home" },
+  { id: "home", label: "Home", testId: "ocean-mode-home", homeIcon: true },
   { id: "capture", label: "Capture", testId: "ocean-mode-capture", ai: true },
   {
     id: "knowledge",
     label: "Knowledge Centre",
+    narrowLabel: "Knowledge",
     testId: "ocean-mode-knowledge",
   },
-  { id: "scan", label: "Project Scan", testId: "ocean-mode-scan", ai: true },
+  {
+    id: "scan",
+    label: "Project Scan",
+    narrowLabel: "Scan",
+    testId: "ocean-mode-scan",
+    ai: true,
+  },
 ];
 
 /**
- * Home / Capture / Knowledge Centre / Project Scan — four equal workspace tabs.
- * Catch Me Up remains a derived briefing, not a tab. Advise is unmounted.
+ * Home / Capture / Knowledge Centre / Project Scan.
+ * One tab tree. Desktop follows Page 09 TopProjectNav; the narrow
+ * breakpoint only changes presentation. Catch Me Up is not a tab.
  */
 export function ProjectModeSelector({
   mode,
@@ -46,12 +56,25 @@ export function ProjectModeSelector({
             type="button"
             role="tab"
             aria-selected={selected}
+            aria-label={item.label}
             className={`ocean-mode-tab is-${item.id} ${selected ? "is-selected" : ""}`}
             onClick={() => onChange(item.id)}
             data-testid={item.testId}
           >
+            {item.homeIcon ? (
+              <img
+                className="ocean-mode-home-icon"
+                src="/brand/nav-home.svg"
+                alt=""
+                width={16}
+                height={16}
+              />
+            ) : null}
             {item.ai ? <MeMark size="button" /> : null}
-            {item.label}
+            <span className="ocean-mode-label">{item.label}</span>
+            {item.narrowLabel ? (
+              <span className="ocean-mode-narrow-label">{item.narrowLabel}</span>
+            ) : null}
           </button>
         );
       })}
