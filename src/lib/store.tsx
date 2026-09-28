@@ -124,6 +124,7 @@ import {
   findProjectRisk,
   resolveKnowledgeOnlyRiskBullet,
   reopenKnowledgeOnlyRiskBullet,
+  stripResolvedPrefix,
   syncKnowledgeRiskProjection,
 } from "@/lib/risks/lifecycle";
 import type { RiskStatus } from "@/types/database";
