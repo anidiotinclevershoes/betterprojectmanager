@@ -343,6 +343,7 @@ export type HistoryEventType =
   | "meeting_created"
   | "milestone_changed"
   | "risk_added"
+  | "risk_updated"
   | "knowledge_updated"
   | "project_created"
   | "capture_analysed"
@@ -350,6 +351,13 @@ export type HistoryEventType =
   | "nudge_chased"
   | "nudge_resolved"
   | "other";
+
+export type HistoryTargetKind =
+  | "risk"
+  | "todo"
+  | "stakeholder"
+  | "knowledge_item"
+  | "milestone";
 
 export interface HistoryEvent {
   id: string;
@@ -359,6 +367,9 @@ export interface HistoryEvent {
   title: string;
   detail?: string;
   projectId?: string | null;
+  /** Stable item attribution for new history rows. Older rows may be null. */
+  targetKind?: HistoryTargetKind;
+  targetId?: string;
   createdAt: string;
   source?: "user" | "ai" | "system";
 }
@@ -372,6 +383,8 @@ export interface ProjectRisk {
   id: string;
   projectId: string;
   title: string;
+  /** Mutable current context. Historical edits belong in History. */
+  notes?: string;
   status: import("@/types/database").RiskStatus;
   source?: "manual" | "capture" | "seed";
   createdAt?: string;
