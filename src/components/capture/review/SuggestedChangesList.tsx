@@ -9,11 +9,10 @@ import { SuggestedChangeCard } from "./SuggestedChangeCard";
 import { KnowledgeRememberList } from "./KnowledgeRememberList";
 import type { TargetOption } from "./TargetPicker";
 
-type QueueFilter = "all" | "needsYou" | "create" | "update" | "remove";
+type QueueFilter = "all" | "create" | "update" | "remove";
 
 const FILTERS: { id: QueueFilter; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "needsYou", label: "Needs you" },
   { id: "create", label: "Create" },
   { id: "update", label: "Update" },
   { id: "remove", label: "Remove" },
@@ -113,7 +112,6 @@ export function SuggestedChangesList({
     const families = pending.map(familyOf);
     return {
       all: pending.length,
-      needsYou: families.filter((f) => f === "needs_you").length,
       create: families.filter((f) => f === "create").length,
       update: families.filter((f) => f === "update").length,
       remove: families.filter((f) => f === "remove").length,
@@ -122,9 +120,7 @@ export function SuggestedChangesList({
 
   const visiblePending = pending.filter((model) => {
     if (filter === "all") return true;
-    const family = familyOf(model);
-    if (filter === "needsYou") return family === "needs_you";
-    return family === filter;
+    return familyOf(model) === filter;
   });
   const needsYou = visiblePending.filter((m) => familyOf(m) === "needs_you");
   const proposed = visiblePending.filter((m) => familyOf(m) !== "needs_you");
@@ -148,6 +144,7 @@ export function SuggestedChangesList({
         }
         targetOptions={targetOptions}
         highlighted={highlightedId === model.id}
+        forceCollapsed={queueCollapsed}
         onApprove={() => onApprove(model.id)}
         onDismiss={() => onDismiss(model.id)}
         onUseThis={() => onUseThis(model.id)}
@@ -168,27 +165,26 @@ export function SuggestedChangesList({
 
   return (
     <>
+      <div className="capture-changes-head p09-review-heading">
+        <div className="capture-changes-head-main">
+          <h3
+            id="capture-changes-title"
+            className="lume-review-frame-title"
+          >
+            Review
+          </h3>
+          <p className="capture-review-progress" role="status">
+            {opTotal} proposed operations from this capture
+            <span className="sr-only">
+              . Check these changes. Checked {opReviewed} of {opTotal}.
+            </span>
+          </p>
+        </div>
+      </div>
       <section
         className="capture-changes-panel"
         aria-labelledby="capture-changes-title"
       >
-        <div className="capture-changes-head">
-          <div className="capture-changes-head-main">
-            <h3
-              id="capture-changes-title"
-              className="lume-review-frame-title"
-            >
-              Review
-            </h3>
-            <p className="capture-review-progress" role="status">
-              {opTotal} proposed operations from this capture
-              <span className="sr-only">
-                . Check these changes. Checked {opReviewed} of {opTotal}.
-              </span>
-            </p>
-          </div>
-        </div>
-
         <div className="lume-queue-toolbar">
           <div
             role="tablist"
@@ -221,7 +217,7 @@ export function SuggestedChangesList({
             className="ghost-btn lume-queue-collapse"
             onClick={() => setQueueCollapsed((value) => !value)}
           >
-            {queueCollapsed ? "Expand all" : "Collapse all"}
+            {queueCollapsed ? "Expand changes" : "Collapse changes"}
           </button>
         </div>
 
@@ -237,7 +233,7 @@ export function SuggestedChangesList({
               <section className="lume-queue-group" aria-labelledby="group-needs-you">
                 <div className="lume-queue-rule">
                   <h4 id="group-needs-you" className="lume-queue-heading">
-                    Needs you
+                    Needs You
                   </h4>
                   <span className="lume-queue-count">{needsYou.length}</span>
                 </div>
@@ -248,7 +244,8 @@ export function SuggestedChangesList({
               <section className="lume-queue-group" aria-labelledby="group-proposed">
                 <div className="lume-queue-rule">
                   <h4 id="group-proposed" className="lume-queue-heading">
-                    Proposed
+                    <span className="p09-review-group-wide">Proposed</span>
+                    <span className="p09-review-group-narrow">Proposed changes</span>
                   </h4>
                   <span className="lume-queue-count">
                     {proposed.length + visibleReviewed.length}
@@ -288,21 +285,19 @@ export function SuggestedChangesList({
           </div>
         )}
 
-        <div className="lume-commit-bar">
+        <div className="lume-commit-bar p09-review-actionbar">
           <p className="lume-commit-status">
             <span className="lume-commit-ready">
-              <strong>{readyCount}</strong> ready
+              <strong>
+                {readyCount} {readyCount === 1 ? "change" : "changes"} ready
+              </strong>
             </span>
             {blockedCount > 0 ? (
-              <>
-                <span aria-hidden className="capture-count-sep">
-                  ·
-                </span>
-                <span className="lume-commit-blocked">
-                  {blockedCount} {blockedCount === 1 ? "item requires" : "items require"}{" "}
-                  attention
-                </span>
-              </>
+              <span className="lume-commit-blocked">
+                {blockedCount === 1
+                  ? "1 item still needs you before Apply"
+                  : `${blockedCount} items still need you before Apply`}
+              </span>
             ) : null}
           </p>
           {readyCount > 0 ? (

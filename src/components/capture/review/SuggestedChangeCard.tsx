@@ -39,6 +39,7 @@ export function SuggestedChangeCard({
   currentOwners = [],
   initialWhyOpen = false,
   highlighted = false,
+  forceCollapsed = false,
 }: {
   model: ReviewChangeViewModel;
   state?: "pending" | "approved" | "dismissed";
@@ -65,6 +66,7 @@ export function SuggestedChangeCard({
   currentOwners?: ReviewOwnerHit[];
   initialWhyOpen?: boolean;
   highlighted?: boolean;
+  forceCollapsed?: boolean;
 }) {
   const [whyOpen, setWhyOpen] = useState(initialWhyOpen);
   const whyId = useId();
@@ -194,6 +196,7 @@ export function SuggestedChangeCard({
         readiness={attentionReadiness}
         state={state}
         highlighted={highlighted}
+        forceCollapsed={forceCollapsed}
         needsYouHeadline={headline}
         needsYouDetail={detail}
         reviewReason={model.reviewReason}
@@ -218,7 +221,7 @@ export function SuggestedChangeCard({
             />
           ) : (
             <div className="compact-change-action-row">
-              <button type="button" className="ghost-btn" onClick={onDismiss}>
+              <button type="button" className="ghost-btn p09-review-exclude" onClick={onDismiss}>
                 Exclude change
               </button>
             </div>

@@ -3,6 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
 import "@/components/capture/capture-experience.css";
 import "@/components/capture/capture-composer.css";
+import "@/components/capture/review-workspace.css";
 import { MeMark } from "@/components/brand/MeMark";
 import { CaptureContextInspector } from "@/components/capture/CaptureContextInspector";
 import { CaptureReliabilityNotice } from "@/components/capture/CaptureReliabilityNotice";
@@ -27,6 +28,7 @@ import {
   SuggestedChangesList,
   AnnotatedTranscript,
 } from "@/components/capture/review";
+import { DidntUnderstand } from "@/components/capture/review/DidntUnderstand";
 import { annotationSourcesFromResult } from "@/lib/capture/review/annotateTranscript";
 import type { TargetOption } from "@/components/capture/review/TargetPicker";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
@@ -297,6 +299,7 @@ export function CaptureWorkspace({
     preReliability.state !== "normal";
 
   const reviewOpen = Boolean(result) && !collapsed;
+  const [capturedOpen, setCapturedOpen] = useState(true);
   const isDev = process.env.NODE_ENV === "development";
   const showSessionActions = Boolean(result);
 
@@ -716,6 +719,7 @@ export function CaptureWorkspace({
     isOcean ? "ocean-capture-workspace" : "",
     maximized ? "is-maximized" : "",
     collapsed ? "is-minimised" : "",
+    reviewOpen && isOcean ? "is-review" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -1047,7 +1051,23 @@ export function CaptureWorkspace({
         className={`capture-transcript-panel${isAnalysed ? " is-captured" : ""}`}
         aria-labelledby={isAnalysed ? "capture-transcript-title" : undefined}
       >
-        {isAnalysed ? (
+        {isAnalysed && isOcean ? (
+          <div className="p09-captured-head">
+            <h3 id="capture-transcript-title" className="p09-captured-label">
+              Captured information
+            </h3>
+            <span className="p09-captured-meta">Read-only</span>
+            <button
+              type="button"
+              className="p09-captured-toggle"
+              aria-expanded={capturedOpen}
+              aria-controls="p09-captured-body"
+              onClick={() => setCapturedOpen((value) => !value)}
+            >
+              {capturedOpen ? "Collapse captured information" : "Expand captured information"}
+            </button>
+          </div>
+        ) : isAnalysed ? (
           <div className="lume-captured-head">
             <h3 id="capture-transcript-title" className="lume-rail-title">
               Captured Information
@@ -1061,7 +1081,11 @@ export function CaptureWorkspace({
             Capture notes
           </label>
         )}
-          <div className={!isAnalysed ? "capture-compose" : undefined}>
+          <div
+            id={isAnalysed && isOcean ? "p09-captured-body" : undefined}
+            className={!isAnalysed ? "capture-compose" : capturedOpen || !isOcean ? undefined : "p09-captured-collapsed"}
+            hidden={isAnalysed && isOcean && !capturedOpen ? true : undefined}
+          >
             {isAnalysed ? (
               <AnnotatedTranscript
                 transcript={content}
@@ -1134,6 +1158,11 @@ export function CaptureWorkspace({
               </div>
             )}
           </div>
+          {isAnalysed && isOcean && capturedOpen ? (
+            <p className="p09-captured-hint">
+              Marked phrases are what Lume drew on. Hover or tap one to see what it proposed.
+            </p>
+          ) : null}
 
           <div className="capture-toolbar">
             <div className="capture-toolbar-left">
@@ -1304,6 +1333,7 @@ export function CaptureWorkspace({
             needsAttentionCount={counts.needsAttention}
             onSelectObservation={onSelectObservation}
           />
+          <DidntUnderstand observations={observations} />
           {result?.capturePipeline === "v2" && result.observationAccount ? (
             <p
               className="capture-summary-line capture-v2-account"
