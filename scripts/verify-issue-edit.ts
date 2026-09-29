@@ -730,7 +730,7 @@ async function main() {
     );
   });
 
-  await check("the editor is not mounted and the store does not compose three writes", () => {
+  await check("the editor mounts on one saveRiskEdit call and the store does not compose three writes", () => {
     const store = read("src/lib/store.tsx");
     const fn = store.slice(
       store.indexOf("const saveRiskEdit"),
@@ -741,11 +741,20 @@ async function main() {
     assert.doesNotMatch(fn, /setRiskNotes|saveItemTags|persistRiskNotes/);
     assert.doesNotMatch(store, /setRiskTitle|persistRiskTitle/);
     const view = read("src/components/knowledge-centre/IssueDetailView.tsx");
-    assert.doesNotMatch(view, />\s*Edit issue\s*</i);
-    assert.doesNotMatch(view, /Save changes|<textarea|Discard/);
+    assert.match(view, />\s*Edit issue\s*</);
+    assert.doesNotMatch(view, /Save changes|<textarea|Discard|saveRiskEdit/);
+    const edit = read("src/components/knowledge-centre/IssueEditView.tsx");
+    assert.match(edit, /Save changes/);
+    assert.doesNotMatch(edit, /saveRiskEdit|saveItemTags|setRiskNotes|persistEnsureProjectTag/);
     const drawer = read("src/components/knowledge-centre/KnowledgeItemDetailDrawer.tsx");
-    assert.doesNotMatch(drawer, />\s*Edit issue\s*</i);
-    assert.doesNotMatch(drawer, /saveRiskEdit|save_risk_edit/);
+    const saveFn = drawer.slice(
+      drawer.indexOf("async function saveIssueEdit"),
+      drawer.indexOf("function goBack"),
+    );
+    assert.equal((saveFn.match(/saveRiskEdit\(/g) ?? []).length, 1);
+    assert.doesNotMatch(saveFn, /setRiskNotes|saveItemTags|persistEnsureProjectTag|updateKnowledgeSection/);
+    assert.match(drawer, /finishIssueSave\(current, saved\)/);
+    assert.doesNotMatch(drawer, /setRiskTitle|persistRiskTitle|set_risk_notes/);
   });
 
   console.log("verify-issue-edit: OK");

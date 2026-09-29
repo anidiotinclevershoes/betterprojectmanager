@@ -70,6 +70,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "issue-notes-history", script: "scripts/verify-issue-notes-history.ts" },
   { name: "issue-edit", script: "scripts/verify-issue-edit.ts" },
   { name: "issue-detail", script: "scripts/verify-issue-detail.ts" },
+  { name: "issue-editor-ui", script: "scripts/verify-issue-editor-ui.ts" },
   { name: "risk-read-authority", script: "scripts/verify-risk-read-authority.ts" },
   { name: "catch-me-up", script: "scripts/verify-catch-me-up.ts" },
   { name: "capture-context", script: "scripts/verify-capture-context.ts" },

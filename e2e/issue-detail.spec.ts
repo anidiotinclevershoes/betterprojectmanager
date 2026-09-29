@@ -160,7 +160,7 @@ test("genuine Issue detail shows Notes, tags, and exact History", async ({
   );
   await expect(page.getByTestId("issue-detail-related")).toHaveCount(0);
   await expect(drawer.getByText("Source: Capture")).toHaveCount(0);
-  await expect(drawer.getByRole("button", { name: "Edit issue" })).toHaveCount(0);
+  await expect(drawer.getByRole("button", { name: "Edit issue" })).toHaveCount(1);
   await expect(drawer.getByRole("button", { name: "Close item" })).toHaveCount(0);
   await expect(drawer.getByRole("button", { name: "Remove item" })).toHaveCount(0);
   await expect(drawer.locator("textarea")).toHaveCount(0);
@@ -210,6 +210,7 @@ test("genuine Issue detail shows Notes, tags, and exact History", async ({
   await expect(page.getByTestId("issue-detail-status")).toHaveText("Resolved");
   await expect(page.getByTestId("issue-detail-reopen")).toHaveText("Reopen issue");
   await expect(page.getByTestId("issue-detail-resolve")).toHaveCount(0);
+  await expect(drawer.getByRole("button", { name: "Edit issue" })).toHaveCount(0);
   await expect(page.getByTestId("issue-detail-title")).toHaveText(TITLE);
   await expect(page.getByTestId("issue-detail-notes-body")).toHaveText(NOTES);
   const afterResolve = await page.evaluate((key) => {

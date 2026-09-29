@@ -14,8 +14,8 @@ import type { RiskStatus } from "@/types/database";
 
 /**
  * Page 09 Section M Issue detail, for a genuine Risk row only.
- * Title, Notes, and tags are read-only here. Edit Issue stays unmounted.
- * The atomic Issue save exists, and this screen does not call it yet.
+ * Title, Notes, and tags stay read-only here.
+ * Open and watch Issues offer Edit issue. This screen does not save.
  */
 export function IssueDetailView({
   title,
@@ -31,6 +31,7 @@ export function IssueDetailView({
   onClose,
   onResolve,
   onReopen,
+  onEdit,
   backRef,
 }: {
   title: string;
@@ -46,6 +47,7 @@ export function IssueDetailView({
   onClose: () => void;
   onResolve: () => void;
   onReopen: () => void;
+  onEdit?: () => void;
   backRef?: Ref<HTMLButtonElement>;
 }) {
   const action = issueLifecycleAction(status);
@@ -177,6 +179,16 @@ export function IssueDetailView({
       </div>
 
       <footer className="issue-detail-footer" data-testid="issue-detail-actions">
+        {action === "resolve" && onEdit ? (
+          <button
+            type="button"
+            className="issue-detail-action"
+            data-testid="issue-detail-edit"
+            onClick={onEdit}
+          >
+            Edit issue
+          </button>
+        ) : null}
         {action === "resolve" ? (
           <button
             type="button"

@@ -13,11 +13,16 @@ export function ItemTagsEditor({
   value,
   onChange,
   disabled,
+  showKindLabel = false,
+  labelledBy,
 }: {
   projectTags: ProjectTag[];
   value: string[];
   onChange: (names: string[]) => void;
   disabled?: boolean;
+  /** Page 09 Issue edit shows Existing tag / New tag. Other callers stay plain. */
+  showKindLabel?: boolean;
+  labelledBy?: string;
 }) {
   const [query, setQuery] = useState("");
   const suggestions = useMemo(
@@ -69,6 +74,8 @@ export function ItemTagsEditor({
         disabled={disabled}
         placeholder="Add a tag"
         autoComplete="off"
+        aria-label={labelledBy ? undefined : "Tags"}
+        aria-labelledby={labelledBy}
         data-testid="ocean-tag-input"
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => {
@@ -86,7 +93,22 @@ export function ItemTagsEditor({
                 type="button"
                 onClick={() => addName(item.name)}
               >
-                {item.kind === "create" ? `Create “${item.name}”` : item.name}
+                <span>
+                  {showKindLabel
+                    ? item.kind === "create"
+                      ? `Create ${item.name}`
+                      : item.name
+                    : item.kind === "create"
+                      ? `Create “${item.name}”`
+                      : item.name}
+                </span>
+                {showKindLabel ? (
+                  <span
+                    className={`ocean-tag-suggest-kind${item.kind === "create" ? " is-new" : ""}`}
+                  >
+                    {item.kind === "create" ? "New tag" : "Existing tag"}
+                  </span>
+                ) : null}
               </button>
             </li>
           ))}

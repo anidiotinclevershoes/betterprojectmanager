@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ConfirmOwnerDialog } from "@/components/intelligence/ConfirmOwnerDialog";
 import { PersonEntity } from "@/components/intelligence/PersonEntity";
 import { IssueDetailView } from "@/components/knowledge-centre/IssueDetailView";
+import { IssueEditView } from "@/components/knowledge-centre/IssueEditView";
 import { ItemTagsEditor } from "@/components/knowledge-centre/ItemTagsEditor";
 import {
   buildCorrectedSectionBullets,
@@ -12,6 +13,16 @@ import {
   type KnowledgeItemRef,
 } from "@/lib/knowledge-centre/knowledge-item-detail";
 import { historyEventsForItem } from "@/lib/knowledge-centre/item-history";
+import {
+  beginIssueSave,
+  canMountIssueEditor,
+  changeIssueDraft,
+  discardIssueEdit,
+  finishIssueSave,
+  idleIssueEditor,
+  requestIssueEditExit,
+  startIssueEdit,
+} from "@/lib/knowledge-centre/issue-editor-state";
 import { emptyKnowledge } from "@/lib/knowledge";
 import { tagsForItem } from "@/lib/tags";
 import { useMission } from "@/lib/store";
@@ -38,6 +49,7 @@ export function KnowledgeItemDetailDrawer({
     setRiskStatus,
     setKnowledgeOnlyRiskResolved,
     saveItemTags,
+    saveRiskEdit,
     saveStatus,
     saveError,
   } = useMission();
@@ -57,6 +69,12 @@ export function KnowledgeItemDetailDrawer({
   const [stack, setStack] = useState<KnowledgeItemRef[]>([]);
   const [draftTags, setDraftTags] = useState<string[]>([]);
   const [tagError, setTagError] = useState<string | null>(null);
+  const [issueEditor, setIssueEditor] = useState(idleIssueEditor);
+  const issueEditorRef = useRef(issueEditor);
+  issueEditorRef.current = issueEditor;
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const savingIssueRef = useRef(false);
 
   const detail = useMemo(() => {
     if (!selected) return null;
@@ -122,6 +140,11 @@ export function KnowledgeItemDetailDrawer({
   }, [projectId]);
 
   useEffect(() => {
+    if (open) return;
+    setIssueEditor(idleIssueEditor());
+  }, [open]);
+
+  useEffect(() => {
     if (open) {
       triggerReturnFocus.current = document.activeElement;
       window.setTimeout(() => closeRef.current?.focus(), 50);
@@ -133,16 +156,67 @@ export function KnowledgeItemDetailDrawer({
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key !== "Escape") return;
+      if (issueEditorRef.current.active) {
+        e.preventDefault();
+        setIssueEditor(requestIssueEditExit(issueEditorRef.current));
+        return;
+      }
+      onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Project isolation: if selection no longer resolves in this project, close
+  // Project isolation: if selection no longer resolves in this project, close.
+  // An active Issue edit keeps its snapshot instead of dismissing.
   useEffect(() => {
+    if (issueEditorRef.current.active) return;
     if (selected && !detail) onClose();
-  }, [selected, detail, onClose]);
+  }, [selected, detail, onClose, issueEditor.active]);
+
+  function holdIssueEditor() {
+    const editor = issueEditorRef.current;
+    if (!editor.active) return false;
+    setIssueEditor(requestIssueEditExit(editor));
+    return true;
+  }
+
+  function discardIssueEditSession() {
+    if (issueEditorRef.current.saving || savingIssueRef.current) return;
+    setIssueEditor(discardIssueEdit(issueEditorRef.current));
+    window.setTimeout(() => closeRef.current?.focus(), 0);
+  }
+
+  async function saveIssueEdit() {
+    if (savingIssueRef.current) return;
+    const editor = issueEditorRef.current;
+    const exists = (stateRef.current.risks ?? []).some(
+      (risk) => risk.id === editor.riskId && risk.projectId === projectId,
+    );
+    const begun = beginIssueSave(editor, exists);
+    setIssueEditor(begun.state);
+    if (!begun.intent.ok) return;
+    savingIssueRef.current = true;
+    try {
+      const saved = await saveRiskEdit({
+        projectId,
+        riskId: begun.intent.input.riskId,
+        title: begun.intent.input.title,
+        notes: begun.intent.input.notes,
+        tagNames: begun.intent.input.tagNames,
+      });
+      setIssueEditor((current) => {
+        const next = finishIssueSave(current, saved);
+        if (!next.active) {
+          window.setTimeout(() => closeRef.current?.focus(), 0);
+        }
+        return next;
+      });
+    } finally {
+      savingIssueRef.current = false;
+    }
+  }
 
   function goBack() {
     if (stack.length) {
@@ -232,28 +306,86 @@ export function KnowledgeItemDetailDrawer({
         (risk) => risk.id === riskRef.riskId && risk.projectId === projectId,
       ) ?? null
     : null;
+  const issueEditActive = Boolean(
+    issueEditor.active && issueEditor.draft && issueEditor.riskId,
+  );
+  const issueSurface = Boolean(genuineIssue) || issueEditActive;
+  const editHistory = issueEditActive
+    ? historyEventsForItem(state, projectId, {
+        kind: "risk",
+        riskId: issueEditor.riskId!,
+      })
+    : null;
+  const issueProjectTags = (state.projectTags ?? []).filter(
+    (tag) => tag.projectId === projectId,
+  );
+
+  function openIssueEditor() {
+    if (!genuineIssue || !canMountIssueEditor(genuineIssue.status)) return;
+    setIssueEditor(
+      startIssueEdit(issueEditorRef.current, {
+        riskId: genuineIssue.id,
+        title: genuineIssue.title,
+        notes: genuineIssue.notes ?? null,
+        tagNames: savedTagNames,
+      }),
+    );
+  }
 
   return (
     <>
       <button
         type="button"
-        className={`ocean-item-detail-backdrop${genuineIssue ? " is-issue-detail" : ""}`}
+        className={`ocean-item-detail-backdrop${issueSurface ? " is-issue-detail" : ""}`}
         aria-label="Close detail"
-        onClick={onClose}
+        onClick={() => {
+          if (holdIssueEditor()) return;
+          onClose();
+        }}
         data-testid="ocean-item-detail-backdrop"
       />
       <aside
-        className={`ocean-item-detail-drawer is-open${genuineIssue ? " is-issue-detail" : ""}`}
+        className={`ocean-item-detail-drawer is-open${issueSurface ? " is-issue-detail" : ""}${issueEditActive ? " is-issue-edit" : ""}`}
         role="dialog"
         aria-modal="true"
-        aria-label={genuineIssue ? "Issue detail" : "Knowledge item detail"}
+        aria-label={issueEditActive ? "Edit issue" : issueSurface ? "Issue detail" : "Knowledge item detail"}
+        aria-busy={issueEditor.saving ? true : undefined}
         data-testid="ocean-item-detail-drawer"
         data-overlay="true"
         data-item-kind={selected?.kind}
-        data-issue-detail={genuineIssue ? "true" : undefined}
+        data-issue-detail={issueSurface ? "true" : undefined}
+        data-issue-editing={issueEditActive ? "true" : undefined}
         data-project-id={projectId}
       >
-        {genuineIssue ? (
+        {issueEditActive && issueEditor.draft ? (
+          <IssueEditView
+            title={issueEditor.draft.title}
+            notes={issueEditor.draft.notes}
+            tagNames={issueEditor.draft.tagNames}
+            projectTags={issueProjectTags}
+            history={editHistory?.events ?? []}
+            historyNotice={editHistory?.notice ?? historyRead.notice}
+            saving={issueEditor.saving}
+            error={issueEditor.error}
+            lockAnnounced={issueEditor.lockAnnounced}
+            announceTick={issueEditor.announceTick}
+            onTitle={(value) =>
+              setIssueEditor((current) => changeIssueDraft(current, { title: value }))
+            }
+            onNotes={(value) =>
+              setIssueEditor((current) => changeIssueDraft(current, { notes: value }))
+            }
+            onTags={(names) =>
+              setIssueEditor((current) =>
+                changeIssueDraft(current, { tagNames: names }),
+              )
+            }
+            onSave={() => void saveIssueEdit()}
+            onDiscard={discardIssueEditSession}
+            onBlockedExit={holdIssueEditor}
+            backRef={closeRef}
+          />
+        ) : genuineIssue ? (
           <IssueDetailView
             title={genuineIssue.title}
             status={genuineIssue.status}
@@ -266,6 +398,7 @@ export function KnowledgeItemDetailDrawer({
             relations={detail?.relations ?? []}
             onBack={goBack}
             onClose={onClose}
+            onEdit={openIssueEditor}
             onResolve={() =>
               setRiskStatus(genuineIssue.id, "resolved", projectId)
             }

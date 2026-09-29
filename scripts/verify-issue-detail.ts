@@ -1,6 +1,7 @@
 /**
  * Genuine Issue detail presentation.
- * Page 09 field order, exact Notes/History/tags, no title editor.
+ * Page 09 field order, exact Notes/History/tags.
+ * Detail stays read-only. Edit issue is the affordance into the editor.
  *
  * Run: npx tsx scripts/verify-issue-detail.ts
  */
@@ -293,10 +294,11 @@ check("Issue view and drawer stay presentation-only", () => {
   assert.match(view, /Reopen issue/);
   assert.match(view, /No notes yet\./);
   assert.match(view, /\{historyNotice\}/);
-  assert.doesNotMatch(view, />\s*Edit issue\s*</i);
-  assert.doesNotMatch(view, /Source: Capture|Close item|Remove item|<textarea|Change status/);
+  assert.match(view, />\s*Edit issue\s*</);
+  assert.match(view, /action === "resolve" && onEdit/);
+  assert.doesNotMatch(view, /Source: Capture|Close item|Remove item|<textarea|Change status|Save changes|Discard/);
   assert.doesNotMatch(view, /Earlier activity may not appear/);
-  assert.doesNotMatch(view, /setRiskStatus|setRiskNotes|set_risk_notes|setRiskTitle/);
+  assert.doesNotMatch(view, /setRiskStatus|setRiskNotes|set_risk_notes|setRiskTitle|saveRiskEdit/);
   assert.doesNotMatch(view, /From meeting notes/);
 
   assert.match(drawer, /detail\?\.ref\.kind === "risk"/);
@@ -311,7 +313,10 @@ check("Issue view and drawer stay presentation-only", () => {
   assert.match(drawer, /data-overlay="true"/);
   assert.match(drawer, /Escape/);
   assert.match(drawer, /onClose\(\)/);
-  assert.doesNotMatch(drawer, /Edit issue|setRiskTitle|persistRiskTitle|set_risk_notes/);
+  assert.match(drawer, /IssueEditView/);
+  assert.match(drawer, /saveRiskEdit\(\{/);
+  assert.match(drawer, /requestIssueEditExit/);
+  assert.doesNotMatch(drawer, /setRiskTitle|persistRiskTitle|set_risk_notes/);
   assert.doesNotMatch(drawer, /Source: Capture/);
 
   assert.match(css, /min\(438px, 100vw\)/);

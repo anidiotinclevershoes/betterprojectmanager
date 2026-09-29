@@ -9252,6 +9252,232 @@ body {
   line-height: 1.4;
 }
 
+.issue-detail-footer .issue-detail-action[data-testid="issue-detail-edit"] {
+  min-width: 112px;
+}
+
+.issue-detail-footer .issue-detail-action[data-testid="issue-detail-resolve"] {
+  min-width: 126px;
+}
+
+/* Page 09 Issue edit. Scoped to the Issue drawer so To Do and Knowledge stay put. */
+.issue-edit-heading {
+  margin: 14px 0 0;
+  color: #f1f4f8;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.issue-edit-helper,
+.issue-edit-discard-note {
+  margin: 6px 0 0;
+  color: #8e98a6;
+  font-size: 11.5px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.issue-edit-discard-note {
+  margin-top: 16px;
+}
+
+.issue-edit-lock {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 14px 0 0;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #47386b;
+  border-left: 3px solid #7c56ff;
+  border-radius: 6px;
+  background: #110e17;
+  color: #cbbdff;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.issue-edit-lock.is-announced {
+  outline: 2px solid #f1f4f8;
+  outline-offset: 2px;
+}
+
+.issue-edit-lock-mark,
+.issue-edit-lock-flag {
+  flex: 0 0 auto;
+  color: #f1f4f8;
+  font-weight: 700;
+}
+
+.issue-edit-lock-flag {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 10px;
+}
+
+.issue-edit-label {
+  display: block;
+  margin: 18px 0 8px;
+  color: #8992a0;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.issue-edit-input,
+.issue-edit-notes {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid #3a344f;
+  border-radius: 5px;
+  background: #111319;
+  color: #e4e9ef;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.issue-edit-input {
+  height: 40px;
+  padding: 0 11px;
+}
+
+.issue-edit-notes {
+  min-height: 86px;
+  padding: 11px;
+  resize: vertical;
+  overflow-wrap: anywhere;
+}
+
+.issue-edit-error {
+  margin: 12px 0 0;
+  color: #ffb4c0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.issue-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.issue-edit-discard,
+.issue-edit-save {
+  box-sizing: border-box;
+  min-width: 124px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.issue-edit-save {
+  min-width: 130px;
+  background: #7c5cff;
+}
+
+.issue-edit-discard {
+  background: #be465a;
+}
+
+.issue-edit-save:disabled,
+.issue-edit-discard:disabled,
+.issue-edit-input:disabled,
+.issue-edit-notes:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ocean-item-detail-drawer.is-issue-edit .ocean-tag-editor-hint {
+  order: 4;
+  margin: 0;
+  color: #8e98a6;
+  font-size: 11.5px;
+}
+
+.ocean-item-detail-drawer.is-issue-edit .ocean-tag-chips {
+  order: 1;
+}
+
+.ocean-item-detail-drawer.is-issue-edit .ocean-tag-editor > input {
+  order: 2;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  height: 36px;
+  border: 1px solid #2e303b;
+  border-radius: 5px;
+  background: #17181d;
+  color: #e4e9ef;
+  padding: 0 11px;
+  font-size: 12px;
+}
+
+.ocean-item-detail-drawer.is-issue-edit .ocean-tag-suggest {
+  order: 3;
+  max-width: 100%;
+  overflow-x: hidden;
+  border: 1px solid #2e303b;
+  border-radius: 5px;
+  background: #121317;
+}
+
+.ocean-item-detail-drawer.is-issue-edit .ocean-tag-suggest button {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #e4e9ef;
+}
+
+.ocean-item-detail-drawer.is-issue-edit .ocean-tag-suggest-kind {
+  color: #a8adbd;
+  font-size: 11px;
+}
+
+.ocean-item-detail-drawer.is-issue-edit .ocean-tag-suggest-kind.is-new {
+  color: #7a52ff;
+}
+
+.ocean-item-detail-drawer.is-issue-edit .tag-chip {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 24px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid #2a2e35;
+  border-radius: 5px;
+  background: #15181c;
+  color: #c6cdd6;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+@media (max-width: 720px) {
+  .issue-edit-save,
+  .issue-edit-discard {
+    min-height: 44px;
+    height: auto;
+  }
+}
+
 /* ── Catch Me Up v0.9 briefing surface ─────────────────────────────── */
 .ocean-catch-me-up {
   display: flex;
