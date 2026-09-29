@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { MeMark } from "@/components/brand/MeMark";
 import {
   WORKSPACE_PAGE_HEADINGS,
   WorkspacePageHeading,
@@ -8,10 +9,13 @@ import {
 import {
   SCAN_GROUP_LABEL,
   composeProjectScan,
+  formatScanSummary,
+  type ScanFinding,
   type ScanGroupId,
 } from "@/lib/knowledge-centre/project-scan";
 import type { KnowledgeItemRef } from "@/lib/knowledge-centre/knowledge-item-detail";
 import { useMission } from "@/lib/store";
+import "./project-scan.css";
 
 const GROUPS: ScanGroupId[] = [
   "risks",
@@ -33,6 +37,7 @@ export function ProjectScanView({
     () => composeProjectScan(state, projectId, Date.now()),
     [state, projectId, tick],
   );
+  const summary = formatScanSummary(scan.groups);
 
   return (
     <div className="ocean-scan" data-testid="ocean-scan">
@@ -40,58 +45,89 @@ export function ProjectScanView({
         <WorkspacePageHeading {...WORKSPACE_PAGE_HEADINGS.scan} />
         <button
           type="button"
-          className="ghost-btn"
+          className="ocean-scan-again"
           data-testid="ocean-scan-again"
           onClick={() => setTick((n) => n + 1)}
         >
+          <MeMark size="micro" />
           Scan again
         </button>
       </header>
 
-      {GROUPS.map((group) => {
-        const findings = scan.groups[group];
-        return (
-          <section
+      <section className="ocean-scan-summary" aria-label="Scan summary">
+        <p className="ocean-scan-summary-label">Summary</p>
+        <p className="ocean-scan-summary-counts" data-testid="ocean-scan-summary">
+          {summary}
+        </p>
+        <p className="ocean-scan-summary-helper">
+          Scan findings do not change project information unless you act.
+        </p>
+      </section>
+
+      <div className="ocean-scan-grid">
+        {GROUPS.map((group) => (
+          <ScanGroup
             key={group}
-            className={`ocean-scan-group is-${group}`}
-            data-testid={`ocean-scan-${group}`}
-          >
-            <h3>
-              {SCAN_GROUP_LABEL[group]} · {findings.length}
-            </h3>
-            {findings.length ? (
-              <ul>
-                {findings.map((finding) => (
-                  <li key={finding.id}>
-                    <div>
-                      <p>{finding.title}</p>
-                      {finding.detail ? (
-                        <p className="ocean-home-muted">{finding.detail}</p>
-                      ) : null}
-                    </div>
-                    {finding.ref ? (
-                      <button
-                        type="button"
-                        className="ghost-btn"
-                        data-testid={`ocean-scan-evidence-${finding.id}`}
-                        onClick={() => onOpenDetails(finding.ref!)}
-                      >
-                        View evidence ›
-                      </button>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="ocean-home-empty">
-                {group === "contradictions"
-                  ? "No stored contradictions to report."
-                  : "Nothing in this group."}
-              </p>
-            )}
-          </section>
-        );
-      })}
+            group={group}
+            findings={scan.groups[group]}
+            onOpenDetails={onOpenDetails}
+          />
+        ))}
+      </div>
+
+      <p className="ocean-scan-footer">
+        Suggestions only appear on Home when Suggestions is turned on.
+      </p>
     </div>
+  );
+}
+
+function ScanGroup({
+  group,
+  findings,
+  onOpenDetails,
+}: {
+  group: ScanGroupId;
+  findings: ScanFinding[];
+  onOpenDetails: (ref: KnowledgeItemRef) => void;
+}) {
+  return (
+    <section
+      className={`ocean-scan-group is-${group}`}
+      data-testid={`ocean-scan-${group}`}
+    >
+      <header className="ocean-scan-group-head">
+        <h3>{SCAN_GROUP_LABEL[group]}</h3>
+        <span className="ocean-scan-count">{findings.length}</span>
+      </header>
+      {findings.length ? (
+        <ul>
+          {findings.map((finding) => (
+            <li key={finding.id} className="ocean-scan-finding">
+              <p className="ocean-scan-finding-title">{finding.title}</p>
+              {finding.detail ? (
+                <p className="ocean-scan-finding-detail">{finding.detail}</p>
+              ) : null}
+              {finding.ref ? (
+                <button
+                  type="button"
+                  className="ocean-scan-open"
+                  data-testid={`ocean-scan-evidence-${finding.id}`}
+                  onClick={() => onOpenDetails(finding.ref!)}
+                >
+                  Open ›
+                </button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ocean-scan-empty">
+          {group === "contradictions"
+            ? "No stored contradictions to report."
+            : "Nothing in this group."}
+        </p>
+      )}
+    </section>
   );
 }

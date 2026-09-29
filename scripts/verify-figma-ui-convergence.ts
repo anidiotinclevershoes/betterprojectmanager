@@ -12,7 +12,10 @@ import {
   partitionHomeQueue,
 } from "../src/lib/knowledge-centre/home-projection";
 import { historyEventsForItem } from "../src/lib/knowledge-centre/item-history";
-import { composeProjectScan } from "../src/lib/knowledge-centre/project-scan";
+import {
+  composeProjectScan,
+  formatScanSummary,
+} from "../src/lib/knowledge-centre/project-scan";
 import {
   planItemTagSave,
   shouldDeleteCreatedTag,
@@ -389,7 +392,8 @@ check("Page 09 workspace heading is one shared primitive", () => {
   assert.match(home, /WORKSPACE_PAGE_HEADINGS\.home/);
   assert.match(workspace, /WORKSPACE_PAGE_HEADINGS\.knowledge/);
   assert.match(scan, /WORKSPACE_PAGE_HEADINGS\.scan/);
-  assert.doesNotMatch(scan, /MeMark/);
+  assert.doesNotMatch(heading, /MeMark/);
+  assert.match(scan, /<MeMark size="micro" \/>/);
   assert.doesNotMatch(capture, /WorkspacePageHeading|lume-page-heading/);
   assert.doesNotMatch(capture, /P09\/Common\/PageHeading/);
 });
@@ -399,15 +403,51 @@ check("Project Scan is a projection and does not import persist writers", () => 
   assert.doesNotMatch(scanSrc, /persist|supabase|addTodo|addManualItem/);
   const view = readSrc("src/components/knowledge-centre/ProjectScanView.tsx");
   assert.match(view, /WORKSPACE_PAGE_HEADINGS\.scan/);
-  assert.doesNotMatch(view, /MeMark/);
+  assert.match(view, /<MeMark size="micro" \/>/);
   assert.match(view, /ocean-scan-again/);
+  assert.match(view, /setTick\(\(n\) => n \+ 1\)/);
+  assert.match(view, /Open ›/);
+  assert.match(view, /formatScanSummary/);
+  assert.match(
+    view,
+    /Scan findings do not change project information unless you act\./,
+  );
+  assert.match(
+    view,
+    /Suggestions only appear on Home when Suggestions is turned on\./,
+  );
+  assert.doesNotMatch(
+    view,
+    /Discard|SuggestionAddModal|dismissSuggestion|onAddSuggestion|recommendationId/,
+  );
   const state = emptyState();
   state.risks = [
     { id: ISSUE, projectId: PROJECT, title: "Vendor slip", status: "open" },
   ];
   const scan = composeProjectScan(state, PROJECT);
   assert.equal(scan.groups.risks.length, 1);
+  assert.equal(scan.groups.risks[0]?.detail, "Status: open");
+  assert.equal(scan.groups.risks[0]?.ref?.kind, "risk");
   assert.equal(scan.groups.contradictions.length, 0);
+  assert.equal(
+    formatScanSummary(scan.groups),
+    "1 finding · 1 risk · 0 dependencies · 0 missing details · 0 contradictions",
+  );
+  const total =
+    scan.groups.risks.length +
+    scan.groups.dependencies.length +
+    scan.groups.missing.length +
+    scan.groups.contradictions.length;
+  assert.equal(total, 1);
+  assert.equal(
+    formatScanSummary({
+      risks: [{}],
+      dependencies: [{}],
+      missing: [{}],
+      contradictions: [{}],
+    }),
+    "4 findings · 1 risk · 1 dependency · 1 missing detail · 1 contradiction",
+  );
 });
 
 check("Page 09 Knowledge Centre browse keeps Ask and Search distinct", () => {

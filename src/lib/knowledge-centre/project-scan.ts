@@ -34,6 +34,28 @@ export const SCAN_GROUP_LABEL: Record<ScanGroupId, string> = {
   contradictions: "Contradictions",
 };
 
+function countLabel(count: number, singular: string, pluralForm: string): string {
+  return `${count} ${count === 1 ? singular : pluralForm}`;
+}
+
+/** Compact count line. Uses the four group lengths only — no generated prose. */
+export function formatScanSummary(
+  groups: Record<ScanGroupId, readonly unknown[]>,
+): string {
+  const risks = groups.risks.length;
+  const dependencies = groups.dependencies.length;
+  const missing = groups.missing.length;
+  const contradictions = groups.contradictions.length;
+  const total = risks + dependencies + missing + contradictions;
+  return [
+    countLabel(total, "finding", "findings"),
+    countLabel(risks, "risk", "risks"),
+    countLabel(dependencies, "dependency", "dependencies"),
+    countLabel(missing, "missing detail", "missing details"),
+    countLabel(contradictions, "contradiction", "contradictions"),
+  ].join(" · ");
+}
+
 export function composeProjectScan(
   state: MissionState,
   projectId: string,

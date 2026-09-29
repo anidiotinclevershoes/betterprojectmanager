@@ -1,0 +1,289 @@
+/* Page 09 Project Scan. Findings stay read-only. */
+
+.ocean-scan {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ocean-scan > .ocean-scan-header > .ocean-scan-again {
+  position: absolute;
+  top: 14px;
+  right: 0;
+}
+
+.ocean-scan-again {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: 120px;
+  height: 30px;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 5px;
+  background: #7c5cff;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.0625px;
+  line-height: 12.5px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ocean-scan-again .lume-me-mark.is-micro,
+.ocean-scan-again .lume-me-mark.is-micro img {
+  width: 16px;
+  height: 16px;
+}
+
+.ocean-scan-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ocean-scan-summary-label {
+  display: none;
+  margin: 0;
+  color: #a892ff;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.ocean-scan-summary-counts {
+  margin: 0;
+  color: #c6cdd6;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.ocean-scan-summary-helper,
+.ocean-scan-footer {
+  margin: 0;
+  color: #818b99;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 14px;
+}
+
+.ocean-scan-footer {
+  display: none;
+  color: #656e7a;
+}
+
+.ocean-scan-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px 32px;
+  align-items: start;
+  min-width: 0;
+}
+
+.ocean-scan .ocean-scan-group {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  margin: 0;
+  padding: 14px 14px 8px 16px;
+  overflow: hidden;
+  border: 1px solid #2a2e35;
+  border-radius: 7px;
+  background: #0f1114;
+}
+
+.ocean-scan .ocean-scan-group::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+}
+
+.ocean-scan .ocean-scan-group.is-risks::before {
+  background: rgba(240, 138, 106, 0.72);
+}
+
+.ocean-scan .ocean-scan-group.is-dependencies::before {
+  background: rgba(92, 200, 242, 0.72);
+}
+
+.ocean-scan .ocean-scan-group.is-missing::before {
+  background: rgba(215, 168, 77, 0.72);
+}
+
+.ocean-scan .ocean-scan-group.is-contradictions::before {
+  background: rgba(156, 123, 216, 0.72);
+}
+
+.ocean-scan-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 21px;
+}
+
+.ocean-scan .ocean-scan-group h3 {
+  margin: 0;
+  color: #f1f4f8;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 21px;
+}
+
+.ocean-scan-count {
+  color: #818b99;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.ocean-scan .ocean-scan-group ul {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.ocean-scan-finding {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 10px 0 6px;
+  border-top: 1px solid #2a2e35;
+}
+
+.ocean-scan-finding:first-child {
+  border-top: 0;
+  padding-top: 8px;
+}
+
+.ocean-scan-finding-title,
+.ocean-scan-finding-detail,
+.ocean-scan-empty {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ocean-scan-finding-title {
+  color: #c6cdd6;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.ocean-scan-finding-detail {
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.ocean-scan-group.is-risks .ocean-scan-finding-detail {
+  color: #f08a6a;
+}
+
+.ocean-scan-group.is-dependencies .ocean-scan-finding-detail {
+  color: #5cc8f2;
+}
+
+.ocean-scan-group.is-missing .ocean-scan-finding-detail {
+  color: #d7a84d;
+}
+
+.ocean-scan-group.is-contradictions .ocean-scan-finding-detail {
+  color: #9c7bd8;
+}
+
+.ocean-scan-open {
+  align-self: flex-end;
+  min-width: 44px;
+  min-height: 28px;
+  margin: 0;
+  padding: 4px 0 4px 12px;
+  border: 0;
+  background: transparent;
+  color: #aab3c0;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.ocean-scan-empty {
+  padding: 12px 0 8px;
+  color: #656e7a;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+@media (max-width: 720px) {
+  .ocean-scan > .ocean-scan-header {
+    display: contents;
+  }
+
+  .ocean-scan > .lume-page-heading,
+  .ocean-scan > .ocean-scan-header > .lume-page-heading {
+    order: 1;
+  }
+
+  .ocean-scan-summary {
+    order: 2;
+    box-sizing: border-box;
+    padding: 12px 13px;
+    border: 1px solid #343a43;
+    border-radius: 7px;
+    background: #111318;
+  }
+
+  .ocean-scan-summary-label {
+    display: block;
+  }
+
+  .ocean-scan > .ocean-scan-header > .ocean-scan-again,
+  .ocean-scan-again {
+    position: static;
+    order: 3;
+    align-self: flex-end;
+    width: 116px;
+  }
+
+  .ocean-scan-grid {
+    order: 4;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .ocean-scan-footer {
+    display: block;
+    order: 5;
+  }
+
+  .ocean-scan-open {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 699px) {
+  .ocean-scan-summary,
+  .ocean-scan-grid,
+  .ocean-scan-footer {
+    width: calc(100% - 8px);
+    margin-right: 4px;
+    margin-left: 4px;
+  }
+
+  .ocean-scan-again {
+    margin-right: 4px;
+  }
+}
