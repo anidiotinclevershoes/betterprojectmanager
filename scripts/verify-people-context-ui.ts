@@ -654,9 +654,16 @@ check("UI: person detail exposes assign + handover actions", () => {
   const drawer = readSrc(
     "src/components/knowledge-centre/KnowledgeItemDetailDrawer.tsx",
   );
+  const person = readSrc(
+    "src/components/knowledge-centre/PersonDetailView.tsx",
+  );
   assert.match(drawer, /Assign ownership|Hand over/);
   assert.match(drawer, /allowScopeEdit/);
   assert.match(drawer, /defaultReplacePersonId/);
+  assert.match(drawer, /defaultPersonName/);
+  assert.match(person, /Hand over/);
+  assert.match(person, /Add responsibility/);
+  assert.doesNotMatch(person, /Edit person/i);
 });
 
 check("Capture / Ask boundaries untouched in this slice wiring", () => {

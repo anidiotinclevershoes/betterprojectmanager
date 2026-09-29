@@ -66,6 +66,7 @@
     "verify:capture-experience": "npx --yes tsx scripts/verify-capture-experience.ts",
     "verify:ocean-item-detail": "npx --yes tsx scripts/verify-ocean-item-detail.ts",
     "verify:people-context-ui": "npx --yes tsx scripts/verify-people-context-ui.ts",
+    "verify:person-detail": "npx --yes tsx scripts/verify-person-detail.ts",
     "verify:phase3b-capture-boundary": "npx --yes tsx scripts/verify-phase3b-capture-boundary.ts",
     "verify:apply-authoritative-first-paint": "npx --yes tsx scripts/verify-apply-authoritative-first-paint.ts",
     "verify:run3-production-envelope": "npx --yes tsx scripts/verify-run3-production-envelope.ts",

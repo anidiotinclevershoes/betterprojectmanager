@@ -105,3 +105,14 @@ Standing precedence:
 5. Current UI implementation
 
 These screens cannot override canonical product or domain contracts. They can override an older or current UI presentation where that is the explicit purpose of the convergence work. An implementation constraint is surfaced as a gap. The approved design is not silently changed to match the old UI. D-058 is the example: Waiting on stays a relationship to multiple existing People, the single `todos.waiting_on` string does not implement it, and that support is not faked.
+
+#### CD-011 note — 29 September 2026 — Person detail
+
+Page 09 Person detail now follows `798:9587` using `getPersonBundle`. People tags remain prohibited. Add responsibility reuses the explicit share/replace ownership flow. Person Name/Role editing remains blocked pending an identity-safe mutation. Person-targeted History remains unavailable.
+
+- `BLOCKED — DATA MODEL: Person created/updated timestamps are not available in the current Person state.`
+- `BLOCKED — PERSON IDENTITY: no reviewed atomic Name/Role edit contract exists yet.`
+- `OPEN — HISTORY ATTRIBUTION: Person-targeted History identity is not yet implemented.`
+- `BLOCKED — INTERACTION CONTRACT: true previous-item Back restoration is not yet supported.`
+
+This does not mark Person edit or the wider UI convergence programme complete.

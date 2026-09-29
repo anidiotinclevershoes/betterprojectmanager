@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ConfirmOwnerDialog } from "@/components/intelligence/ConfirmOwnerDialog";
-import { PersonEntity } from "@/components/intelligence/PersonEntity";
 import { IssueDetailView } from "@/components/knowledge-centre/IssueDetailView";
 import { IssueEditView } from "@/components/knowledge-centre/IssueEditView";
+import { PersonDetailView } from "@/components/knowledge-centre/PersonDetailView";
 import { ItemTagsEditor } from "@/components/knowledge-centre/ItemTagsEditor";
 import {
   buildCorrectedSectionBullets,
@@ -64,6 +64,7 @@ export function KnowledgeItemDetailDrawer({
   const [handoverReplacePersonId, setHandoverReplacePersonId] = useState<
     string | null
   >(null);
+  const [addingResponsibility, setAddingResponsibility] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [moreDetails, setMoreDetails] = useState(false);
   const [stack, setStack] = useState<KnowledgeItemRef[]>([]);
@@ -82,27 +83,23 @@ export function KnowledgeItemDetailDrawer({
   }, [state, projectId, selected]);
 
   const savedTagNames = useMemo(() => {
-    if (!detail) return [];
+    if (!detail || detail.ref.kind === "person") return [];
     const kind =
       detail.ref.kind === "risk"
         ? "risk"
         : detail.ref.kind === "todo"
           ? "todo"
-          : detail.ref.kind === "person"
-            ? "stakeholder"
-            : "knowledge_item";
+          : "knowledge_item";
     const targetId =
       detail.ref.kind === "risk"
         ? detail.ref.riskId
         : detail.ref.kind === "todo"
           ? detail.ref.todoId
-          : detail.ref.kind === "person"
-            ? detail.ref.personId
-            : detail.ref.kind === "structured"
+          : detail.ref.kind === "structured"
+            ? detail.ref.itemId
+            : detail.ref.kind === "section"
               ? detail.ref.itemId
-              : detail.ref.kind === "section"
-                ? detail.ref.itemId
-                : null;
+              : null;
     if (!targetId) return [];
     return tagsForItem({
       projectTags: state.projectTags ?? [],
@@ -130,6 +127,7 @@ export function KnowledgeItemDetailDrawer({
     setConfirmOwnerOpen(false);
     setHandoverScope(null);
     setHandoverReplacePersonId(null);
+    setAddingResponsibility(false);
     setLocalError(null);
     setTagError(null);
     setMoreDetails(false);
@@ -216,6 +214,27 @@ export function KnowledgeItemDetailDrawer({
     } finally {
       savingIssueRef.current = false;
     }
+  }
+
+  function closeConfirmOwner() {
+    setConfirmOwnerOpen(false);
+    setHandoverScope(null);
+    setHandoverReplacePersonId(null);
+    setAddingResponsibility(false);
+  }
+
+  function openAddResponsibility() {
+    setHandoverScope(null);
+    setHandoverReplacePersonId(null);
+    setAddingResponsibility(true);
+    setConfirmOwnerOpen(true);
+  }
+
+  function openHandover(scope: string, personId: string) {
+    setAddingResponsibility(false);
+    setHandoverScope(scope);
+    setHandoverReplacePersonId(personId);
+    setConfirmOwnerOpen(true);
   }
 
   function goBack() {
@@ -310,6 +329,9 @@ export function KnowledgeItemDetailDrawer({
     issueEditor.active && issueEditor.draft && issueEditor.riskId,
   );
   const issueSurface = Boolean(genuineIssue) || issueEditActive;
+  const personSurface = Boolean(
+    detail?.ref.kind === "person" && detail.personBundle,
+  );
   const editHistory = issueEditActive
     ? historyEventsForItem(state, projectId, {
         kind: "risk",
@@ -336,7 +358,7 @@ export function KnowledgeItemDetailDrawer({
     <>
       <button
         type="button"
-        className={`ocean-item-detail-backdrop${issueSurface ? " is-issue-detail" : ""}`}
+        className={`ocean-item-detail-backdrop${issueSurface ? " is-issue-detail" : personSurface ? " is-person-detail" : ""}`}
         aria-label="Close detail"
         onClick={() => {
           if (holdIssueEditor()) return;
@@ -345,15 +367,16 @@ export function KnowledgeItemDetailDrawer({
         data-testid="ocean-item-detail-backdrop"
       />
       <aside
-        className={`ocean-item-detail-drawer is-open${issueSurface ? " is-issue-detail" : ""}${issueEditActive ? " is-issue-edit" : ""}`}
+        className={`ocean-item-detail-drawer is-open${issueSurface ? " is-issue-detail" : personSurface ? " is-person-detail" : ""}${issueEditActive ? " is-issue-edit" : ""}`}
         role="dialog"
         aria-modal="true"
-        aria-label={issueEditActive ? "Edit issue" : issueSurface ? "Issue detail" : "Knowledge item detail"}
+        aria-label={issueEditActive ? "Edit issue" : issueSurface ? "Issue detail" : personSurface ? "Person detail" : "Knowledge item detail"}
         aria-busy={issueEditor.saving ? true : undefined}
         data-testid="ocean-item-detail-drawer"
         data-overlay="true"
         data-item-kind={selected?.kind}
         data-issue-detail={issueSurface ? "true" : undefined}
+        data-person-detail={personSurface ? "true" : undefined}
         data-issue-editing={issueEditActive ? "true" : undefined}
         data-project-id={projectId}
       >
@@ -404,6 +427,54 @@ export function KnowledgeItemDetailDrawer({
             }
             onReopen={() => setRiskStatus(genuineIssue.id, "open", projectId)}
             backRef={closeRef}
+          />
+        ) : detail?.ref.kind === "person" && detail.personBundle ? (
+          <PersonDetailView
+            name={detail.personBundle.person.name}
+            role={detail.personBundle.person.role}
+            lastContactAt={detail.personBundle.person.lastContactAt}
+            currentResponsibilities={detail.personBundle.currentResponsibilities}
+            historicalResponsibilities={
+              detail.personBundle.historicalResponsibilities
+            }
+            sharedScopes={detail.personBundle.sharedScopes}
+            availability={detail.personBundle.availability}
+            waitingLines={detail.waitingLines ?? []}
+            legacyContext={detail.legacyContext ?? []}
+            history={historyRead.events}
+            historyNotice={historyRead.notice}
+            onBack={goBack}
+            onClose={onClose}
+            onAddResponsibility={openAddResponsibility}
+            onHandover={(scope) =>
+              openHandover(scope, detail.personBundle!.person.id)
+            }
+            backRef={closeRef}
+            ownerSlot={
+              confirmOwnerOpen ? (
+                <ConfirmOwnerDialog
+                  key={
+                    addingResponsibility
+                      ? "add-responsibility"
+                      : `handover-${handoverScope ?? ""}`
+                  }
+                  projectId={projectId}
+                  scope={addingResponsibility ? "" : handoverScope ?? ""}
+                  truthItemId={null}
+                  allowScopeEdit={addingResponsibility}
+                  defaultPersonName={
+                    addingResponsibility
+                      ? detail.personBundle.person.name
+                      : undefined
+                  }
+                  defaultReplacePersonId={
+                    addingResponsibility ? null : handoverReplacePersonId
+                  }
+                  onDone={closeConfirmOwner}
+                  onCancel={closeConfirmOwner}
+                />
+              ) : null
+            }
           />
         ) : (
         <>
@@ -477,117 +548,6 @@ export function KnowledgeItemDetailDrawer({
                   </p>
                 )}
               </section>
-
-              {detail.domain === "person" && detail.personBundle ? (
-                <section
-                  className="ocean-item-detail-section"
-                  data-testid="ocean-item-detail-person"
-                >
-                  <h4>Responsibilities</h4>
-                  <ul>
-                    {detail.personBundle.currentResponsibilities.map((r) => (
-                      <li key={r.item.id}>
-                        <PersonEntity
-                          name={detail.personBundle!.person.name}
-                          scope={r.scope}
-                        />
-                        <span className="ocean-item-detail-muted">
-                          {" "}
-                          · current
-                        </span>
-                      </li>
-                    ))}
-                    {detail.personBundle.historicalResponsibilities.map(
-                      (r) => (
-                        <li key={r.item.id}>
-                          {r.scope}
-                          <span className="ocean-item-detail-muted">
-                            {" "}
-                            · {r.lifecycle}
-                          </span>
-                        </li>
-                      ),
-                    )}
-                    {!detail.personBundle.currentResponsibilities.length &&
-                    !detail.personBundle.historicalResponsibilities
-                      .length ? (
-                      <li className="ocean-item-detail-muted">
-                        No structured responsibilities yet.
-                      </li>
-                    ) : null}
-                  </ul>
-                  {detail.personBundle.sharedScopes.length ? (
-                    <>
-                      <h4>Shared</h4>
-                      <ul data-testid="ocean-item-detail-shared">
-                        {detail.personBundle.sharedScopes.map((s) => (
-                          <li key={s.scope}>
-                            {s.scope} · also{" "}
-                            {s.coOwnerNames.join(", ")}
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : null}
-                  {detail.personBundle.availability.length ? (
-                    <>
-                      <h4>Availability</h4>
-                      <ul data-testid="ocean-item-detail-availability">
-                        {detail.personBundle.availability.map((a) => (
-                          <li key={a.item.id}>{a.body}</li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : null}
-                  {detail.waitingLines?.length ? (
-                    <>
-                      <h4>Waiting on them</h4>
-                      <ul data-testid="ocean-item-detail-waiting">
-                        {detail.waitingLines.map((line, i) => (
-                          <li key={`${line}-${i}`}>{line}</li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : null}
-                  {detail.legacyContext?.length ? (
-                    <>
-                      <h4>Legacy people notes</h4>
-                      <ul data-testid="ocean-item-detail-legacy">
-                        {detail.legacyContext.map((line, i) => (
-                          <li key={`${line}-${i}`}>{line}</li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : null}
-                  {detail.personBundle.currentResponsibilities.length ? (
-                    <div className="ocean-item-detail-handover-list">
-                      <h4>Hand over</h4>
-                      <ul data-testid="ocean-item-detail-handover">
-                        {detail.personBundle.currentResponsibilities.map(
-                          (r) => (
-                            <li key={`hand-${r.item.id}`}>
-                              <button
-                                type="button"
-                                className="ghost-btn"
-                                data-testid={`ocean-item-detail-handover-${r.item.id}`}
-                                onClick={() => {
-                                  setHandoverScope(r.scope);
-                                  setHandoverReplacePersonId(
-                                    detail.personBundle!.person.id,
-                                  );
-                                  setConfirmOwnerOpen(true);
-                                }}
-                              >
-                                Hand over {r.scope}…
-                              </button>
-                            </li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  ) : null}
-                </section>
-              ) : null}
 
               {showTagEditor || savedTagNames.length ? (
                 <section
