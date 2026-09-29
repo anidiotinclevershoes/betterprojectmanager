@@ -301,7 +301,7 @@ test.describe("Capture experience — annotated transcript", () => {
       "sibling-ready-and-needs-you",
     );
     await openCapture(page);
-    await expect(page.getByPlaceholder("Tell Lume what changed…")).toBeVisible();
+    await expect(page.getByPlaceholder("Paste or type project notes…")).toBeVisible();
     const inputShot = walkthroughPath("capture_experience_input.png");
     if (inputShot) await page.screenshot({ path: inputShot, fullPage: true });
     await analyseFrozenTranscript(page, frozen.transcript);
