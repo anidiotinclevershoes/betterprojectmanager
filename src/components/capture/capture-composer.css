@@ -436,6 +436,13 @@
   }
 }
 
+@media (min-width: 900px) {
+  .ocean-capture-mode .p09-capture-usage,
+  .ocean-capture-mode .usage-meter {
+    display: none;
+  }
+}
+
 @media (max-width: 699px) {
   .p09-capture {
     width: calc(100% - 8px);

@@ -174,8 +174,12 @@ function testNoProgressKpi() {
   assert.doesNotMatch(header, />Progress</);
   assert.doesNotMatch(workspace, />Progress</);
   assert.doesNotMatch(header, /progressPercent|projectProgress/);
-  assert.match(header, /Usage/);
-  assert.match(header, /ocean-usage-spending/);
+  assert.match(header, /analysesRemaining/);
+  assert.match(header, /AI usage/);
+  assert.match(header, /Account &amp; billing/);
+  assert.match(header, /ocean-usage-account/);
+  assert.doesNotMatch(header, /AI token use/);
+  assert.doesNotMatch(header, /Usage & spending/);
 }
 
 function testResolvedRisksExcluded() {

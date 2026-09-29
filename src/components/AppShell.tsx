@@ -208,15 +208,25 @@ function AppShellInner({ children }: { children: ReactNode }) {
       />
 
       <div className="app-main">
-        <TopHeader
-          title={header.title}
-          subtitle={header.subtitle}
-          onOpenMobileNav={() => setMobileOpen(true)}
-          userName={user?.name}
-          userEmail={user?.email}
-          onSignOut={() => void signOut()}
-          quiet={!header.title}
-        />
+        {activeProject ? (
+          <TopHeader
+            projectMobile
+            onOpenMobileNav={() => setMobileOpen(true)}
+            brandHref={
+              state.projects[0] ? `/projects/${state.projects[0].id}` : "/"
+            }
+          />
+        ) : (
+          <TopHeader
+            title={header.title}
+            subtitle={header.subtitle}
+            onOpenMobileNav={() => setMobileOpen(true)}
+            userName={user?.name}
+            userEmail={user?.email}
+            onSignOut={() => void signOut()}
+            quiet={!header.title}
+          />
+        )}
         <main className="app-content">
           {saveStatus === "error" && saveError ? (
             <div

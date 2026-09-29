@@ -5729,6 +5729,33 @@ body {
   padding-bottom: 8px;
 }
 
+/* Project routes: this band exists for the hamburger. Desktop does not lay it out. */
+.top-header.is-project-mobile {
+  box-sizing: border-box;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 12px;
+  border-bottom: 1px solid #1e2126;
+  background: #0d0e11;
+}
+
+.ocean-mobile-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #f1f4f8;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
+@media (min-width: 900px) {
+  .top-header.is-project-mobile {
+    display: none;
+  }
+}
+
 /* Selected sidebar project = entry into the project-owned surface below. */
 .sidebar-link.sidebar-project.is-active.is-project-owned {
   position: relative;
@@ -8685,6 +8712,7 @@ body {
 
 @media (min-width: 900px) {
   .app-shell.has-project-workspace .app-content {
+    padding-top: 0;
     padding-left: 32px;
   }
 }
@@ -10140,45 +10168,95 @@ label.field {
 }
 
 .ocean-workspace-header {
-  padding: 1rem 1.1rem 0.85rem;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--lume-primary, #7c5cff) 14%, #12141a);
-  border: 1px solid color-mix(in srgb, var(--lume-primary, #7c5cff) 22%, transparent);
+  position: relative;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
-.ocean-workspace-header-main {
+.ocean-workspace-header .ocean-project-title,
+.ocean-workspace-header .ocean-project-subtitle {
+  position: absolute;
+  margin: 0;
+}
+
+.ocean-workspace-header .ocean-project-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ocean-workspace-header .ocean-project-subtitle {
   display: flex;
-  justify-content: space-between;
-  gap: 1.5rem;
-  align-items: flex-start;
+  align-items: baseline;
+  min-width: 0;
+  overflow: hidden;
+  color: #8e98a6;
+  white-space: nowrap;
+}
+
+.ocean-workspace-header .ocean-project-updated {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ocean-workspace-header .ocean-delete-project {
+  flex: 0 0 auto;
+  margin: 0 0 0 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #8e98a6;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 .ocean-workspace-usage {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.2rem;
-  min-width: 12rem;
-}
-
-.ocean-workspace-usage-mark {
-  display: inline-flex;
+  display: none;
   align-items: center;
-  gap: 0.35rem;
-  margin: 0;
-  font-size: 0.82rem;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 254px;
+  height: 52px;
+  padding: 0 10px 0 11px;
+  border: 1px solid #2a2e35;
+  border-radius: 6px;
+  background: #111319;
 }
 
-.ocean-workspace-usage-count,
-.ocean-usage-spending {
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--text-muted);
+.ocean-usage-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
 }
 
-.ocean-usage-spending {
-  color: var(--lume-primary, #7c5cff);
+.ocean-usage-line {
+  margin: 0;
+  overflow: hidden;
+  color: #f1f4f8;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ocean-usage-account {
+  color: #a98cff;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 14px;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .ocean-project-code {
@@ -10449,12 +10527,115 @@ label.field {
 }
 
 @media (max-width: 720px) {
-  .ocean-home-top,
-  .ocean-workspace-header-main {
+  .ocean-home-top {
     grid-template-columns: 1fr;
-    flex-direction: column;
   }
+}
+
+@media (min-width: 900px) {
+  .app-shell.has-project-workspace .ocean-project-workspace {
+    gap: 0;
+  }
+
+  .app-shell.has-project-workspace .ocean-workspace-header,
+  .app-shell.has-project-workspace .ocean-mode-selector {
+    margin-right: -20px;
+    margin-left: -32px;
+    width: calc(100% + 52px);
+  }
+
+  .app-shell.has-project-workspace .ocean-workspace-header {
+    height: 106px;
+  }
+
+  .ocean-workspace-header .ocean-project-title {
+    top: 34px;
+    left: 32px;
+    max-width: calc(100% - 340px);
+    color: #f1f4f8;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 26px;
+    letter-spacing: -0.02em;
+  }
+
+  .ocean-workspace-header .ocean-project-subtitle {
+    top: 72px;
+    left: 32px;
+    max-width: calc(100% - 48px);
+    font-size: 12.5px;
+    line-height: 16px;
+  }
+
+  .app-shell.has-project-workspace .ocean-workspace-usage {
+    display: flex;
+    position: absolute;
+    top: 24px;
+    right: 32px;
+  }
+
+  .app-shell.has-project-workspace .ocean-project-workspace > .ocean-home,
+  .app-shell.has-project-workspace .ocean-project-workspace > .ocean-expanded-mode:not(.ocean-capture-mode) {
+    margin-top: 9px;
+  }
+
+  .app-shell.has-project-workspace .ocean-project-workspace > .ocean-capture-mode {
+    margin-top: 21px;
+  }
+}
+
+@media (max-width: 899px) {
+  .app-shell.has-project-workspace .app-content {
+    padding-top: 0;
+  }
+
+  .app-shell.has-project-workspace .ocean-project-workspace {
+    gap: 0;
+  }
+
+  .app-shell.has-project-workspace .ocean-workspace-header {
+    height: 64px;
+    margin-right: -20px;
+    margin-left: -20px;
+    width: calc(100% + 40px);
+  }
+
+  .ocean-workspace-header .ocean-project-title {
+    top: 14px;
+    left: 16px;
+    max-width: calc(100% - 32px);
+    color: #f1f4f8;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  .ocean-workspace-header .ocean-project-subtitle {
+    top: 36px;
+    left: 16px;
+    max-width: calc(100% - 32px);
+    font-size: 12px;
+    line-height: 16px;
+  }
+
   .ocean-workspace-usage {
-    align-items: flex-start;
+    display: none;
+  }
+
+  .app-shell.has-project-workspace .ocean-project-workspace > .ocean-home,
+  .app-shell.has-project-workspace .ocean-project-workspace > .ocean-expanded-mode:not(.ocean-capture-mode) {
+    margin-top: 9px;
+  }
+
+  .app-shell.has-project-workspace .ocean-project-workspace > .ocean-capture-mode {
+    margin-top: 21px;
+  }
+}
+
+@media (max-width: 699px) {
+  .app-shell.has-project-workspace .ocean-workspace-header {
+    margin-right: -12px;
+    margin-left: -12px;
+    width: calc(100% + 24px);
   }
 }

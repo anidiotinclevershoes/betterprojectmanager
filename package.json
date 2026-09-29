@@ -62,6 +62,7 @@
     "verify:ocean-knowledge-centre": "npx --yes tsx scripts/verify-ocean-knowledge-centre.ts",
     "verify:figma-ui-convergence": "npx --yes tsx scripts/verify-figma-ui-convergence.ts",
     "verify:sidebar-shell": "npx --yes tsx scripts/verify-sidebar-shell.ts",
+    "verify:project-top-chrome": "npx --yes tsx scripts/verify-project-top-chrome.ts",
     "verify:search-authority": "npx --yes tsx scripts/verify-search-authority.ts",
     "verify:ocean-capture": "npx --yes tsx scripts/verify-ocean-capture.ts",
     "verify:capture-experience": "npx --yes tsx scripts/verify-capture-experience.ts",

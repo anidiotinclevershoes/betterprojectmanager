@@ -136,4 +136,12 @@ The canonical desktop sidebar follows Page 09 / Page 07 `601:836`: 220px, lightb
 
 - `BLOCKED — PRODUCT SURFACE: signed sidebar requires Settings, but no Settings route/surface exists.`
 
-The mobile hamburger stays until a separate narrow-shell decision. Top header and token use are the next shell slice. This does not mark the wider UI convergence programme complete.
+The mobile hamburger stays until a separate narrow-shell decision. This does not mark the wider UI convergence programme complete.
+
+#### CD-011 note — 29 September 2026 — Project top chrome
+
+Desktop project routes no longer lay out `TopHeader`. `ProjectWorkspaceHeader` is the Page 03 identity and compact usage callout. The visible allowance is the existing local `analysesRemaining` value, linked to Account for subscription management. It is not token use and not a spend ledger.
+
+- `OPEN — USAGE METER: local analysis allowance is informational and is not durable billing usage.`
+
+Narrow project chrome stays about 160px and omits that callout. Delete project remains on the meta line because production already has the durable action and Page 03 does not place it. Non-project `TopHeader` behaviour is unchanged. This does not mark the wider UI convergence programme complete.
