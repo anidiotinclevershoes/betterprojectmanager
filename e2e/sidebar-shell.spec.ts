@@ -171,7 +171,7 @@ test("mobile hamburger opens the sidebar and project or backdrop closes it", asy
     path: "/opt/cursor/artifacts/sidebar-mobile-open.png",
     fullPage: false,
   });
-  await page.getByTestId("ocean-sidebar-backdrop").click();
+  await page.getByTestId("ocean-sidebar-backdrop").click({ position: { x: 320, y: 240 } });
   await expect(sidebar).not.toHaveClass(/is-mobile-open/);
 
   await page.getByRole("button", { name: "Open navigation" }).click();
