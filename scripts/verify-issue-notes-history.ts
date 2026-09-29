@@ -491,11 +491,15 @@ async function main() {
       "src/lib/tell-me/knowledge-search.ts",
       "src/lib/knowledge-centre/search-authority.ts",
       "src/lib/capture/apply/apply-approved.ts",
-      "src/components/knowledge-centre/KnowledgeItemDetailDrawer.tsx",
     ]) {
       const src = read(rel);
       assert.doesNotMatch(src, /set_risk_notes|canonicalRiskNotes|issueNotes/);
     }
+    const drawer = read(
+      "src/components/knowledge-centre/KnowledgeItemDetailDrawer.tsx",
+    );
+    assert.doesNotMatch(drawer, /set_risk_notes|canonicalRiskNotes|setRiskTitle|persistRiskTitle/);
+    assert.match(drawer, /IssueDetailView/);
     assert.doesNotMatch(read("src/lib/store.tsx"), /setRiskTitle|persistRiskTitle/);
     assert.match(read("src/lib/data/supabase/load-mission-state.ts"), /notes: canonicalRiskNotes\(row\.notes\)/);
     assert.match(

@@ -8996,6 +8996,260 @@ body {
   .ocean-item-detail-actions {
     padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
   }
+  .issue-detail-action,
+  .issue-detail-back,
+  .issue-detail-close {
+    min-height: 44px;
+  }
+}
+
+/* Page 09 Issue detail. Scoped so other drawer domains keep their layout. */
+.ocean-item-detail-backdrop.is-issue-detail {
+  background: rgba(0, 0, 0, 0.26);
+}
+
+.ocean-item-detail-drawer.is-issue-detail {
+  width: min(438px, 100vw);
+  background: #121418;
+  border: 1px solid #3a3f47;
+  box-shadow: -12px 0 28px rgba(0, 0, 0, 0.48);
+  color: #f1f4f8;
+  overflow: hidden;
+}
+
+.ocean-item-detail-drawer.is-issue-detail::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(82, 89, 100, 0.85);
+}
+
+.issue-detail-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 23px 0;
+}
+
+.issue-detail-back,
+.issue-detail-close {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.issue-detail-back {
+  color: #a98cff;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 14px;
+}
+
+.issue-detail-close {
+  color: #8e98a6;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.issue-detail-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 12px 23px 16px;
+}
+
+.issue-detail-title {
+  margin: 14px 0 0;
+  max-width: 360px;
+  color: #f1f4f8;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.issue-detail-resolved {
+  margin: 8px 0 0;
+  color: #a3acb9;
+  font-size: 12.5px;
+  line-height: 1.3;
+}
+
+.issue-detail-section {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #1e2126;
+}
+
+.issue-detail-section h3 {
+  margin: 0 0 14px;
+  color: #6e7783;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.issue-detail-section dl {
+  margin: 0;
+}
+
+.issue-detail-row {
+  display: grid;
+  grid-template-columns: 126px minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+  margin: 0 0 12px;
+}
+
+.issue-detail-row dt {
+  margin: 0;
+  color: #818b99;
+  font-size: 11.5px;
+  font-weight: 400;
+}
+
+.issue-detail-row dd {
+  margin: 0;
+  color: #e4e9ef;
+  font-size: 12.5px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.issue-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.issue-detail-tags li {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 24px;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid #2a2e35;
+  border-radius: 5px;
+  background: #15181c;
+  color: #a3acb9;
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
+.issue-detail-notes {
+  display: grid;
+  grid-template-columns: 1px minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.issue-detail-accent {
+  background: rgba(77, 182, 176, 0.55);
+}
+
+.issue-detail-notes p,
+.issue-detail-history-detail,
+.issue-detail-quiet,
+.issue-detail-hint,
+.issue-detail-history-limit {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.issue-detail-notes p {
+  color: #c6cdd6;
+  font-size: 11.5px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.issue-detail-quiet {
+  color: #818b99;
+  font-size: 11.5px;
+}
+
+.issue-detail-history {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.issue-detail-history li + li {
+  margin-top: 12px;
+}
+
+.issue-detail-history-line {
+  margin: 0;
+  color: #a3acb9;
+  font-size: 11.5px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.issue-detail-history-detail {
+  margin-top: 4px;
+  color: #a8adbd;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.issue-detail-history-limit {
+  margin-top: 12px;
+  color: #6e7783;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.issue-detail-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px 23px calc(18px + env(safe-area-inset-bottom, 0px));
+}
+
+.issue-detail-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 34px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid #2e333a;
+  border-radius: 5px;
+  background: #0d0e11;
+  color: #c6cdd6;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.0625px;
+  line-height: 12.5px;
+  cursor: pointer;
+}
+
+.issue-detail-action:hover {
+  border-color: #3a3f47;
+  color: #f1f4f8;
+}
+
+.issue-detail-hint {
+  flex: 1 0 100%;
+  color: #818b99;
+  font-size: 11.5px;
+  line-height: 1.4;
 }
 
 /* ── Catch Me Up v0.9 briefing surface ─────────────────────────────── */

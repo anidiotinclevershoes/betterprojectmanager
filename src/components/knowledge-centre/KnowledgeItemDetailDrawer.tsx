@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ConfirmOwnerDialog } from "@/components/intelligence/ConfirmOwnerDialog";
 import { PersonEntity } from "@/components/intelligence/PersonEntity";
+import { IssueDetailView } from "@/components/knowledge-centre/IssueDetailView";
 import { ItemTagsEditor } from "@/components/knowledge-centre/ItemTagsEditor";
 import {
   buildCorrectedSectionBullets,
@@ -147,7 +148,7 @@ export function KnowledgeItemDetailDrawer({
     if (stack.length) {
       const prev = stack[stack.length - 1]!;
       setStack((s) => s.slice(0, -1));
-      // Parent owns selected; Back with empty stack closes.
+      // Parent owns selected. The stack is not handed back, so Back closes.
       void prev;
     }
     onClose();
@@ -225,25 +226,54 @@ export function KnowledgeItemDetailDrawer({
 
   if (!open) return null;
 
+  const riskRef = detail?.ref.kind === "risk" ? detail.ref : null;
+  const genuineIssue = riskRef
+    ? (state.risks ?? []).find(
+        (risk) => risk.id === riskRef.riskId && risk.projectId === projectId,
+      ) ?? null
+    : null;
+
   return (
     <>
       <button
         type="button"
-        className="ocean-item-detail-backdrop"
+        className={`ocean-item-detail-backdrop${genuineIssue ? " is-issue-detail" : ""}`}
         aria-label="Close detail"
         onClick={onClose}
         data-testid="ocean-item-detail-backdrop"
       />
       <aside
-        className="ocean-item-detail-drawer is-open"
+        className={`ocean-item-detail-drawer is-open${genuineIssue ? " is-issue-detail" : ""}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Knowledge item detail"
+        aria-label={genuineIssue ? "Issue detail" : "Knowledge item detail"}
         data-testid="ocean-item-detail-drawer"
         data-overlay="true"
         data-item-kind={selected?.kind}
+        data-issue-detail={genuineIssue ? "true" : undefined}
         data-project-id={projectId}
       >
+        {genuineIssue ? (
+          <IssueDetailView
+            title={genuineIssue.title}
+            status={genuineIssue.status}
+            createdAt={genuineIssue.createdAt}
+            updatedAt={genuineIssue.updatedAt}
+            notes={detail?.issueNotes ?? null}
+            tags={savedTagNames}
+            history={historyRead.events}
+            historyNotice={historyRead.notice}
+            relations={detail?.relations ?? []}
+            onBack={goBack}
+            onClose={onClose}
+            onResolve={() =>
+              setRiskStatus(genuineIssue.id, "resolved", projectId)
+            }
+            onReopen={() => setRiskStatus(genuineIssue.id, "open", projectId)}
+            backRef={closeRef}
+          />
+        ) : (
+        <>
         <header className="ocean-item-detail-header">
           <button
             ref={closeRef}
@@ -758,6 +788,8 @@ export function KnowledgeItemDetailDrawer({
             )}
           </footer>
         ) : null}
+        </>
+        )}
       </aside>
     </>
   );
