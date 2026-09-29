@@ -405,7 +405,7 @@ check("20. narrow Person drawer reuses the 438px shell without a second model", 
   const css = read("src/app/globals.css");
   assert.match(
     css,
-    /\.ocean-item-detail-drawer\.is-issue-detail,\s*\.ocean-item-detail-drawer\.is-person-detail\s*\{[^}]*width:\s*min\(438px,\s*100vw\)/,
+    /\.ocean-item-detail-drawer\.is-issue-detail,\s*\.ocean-item-detail-drawer\.is-person-detail,\s*\.ocean-item-detail-drawer\.is-todo-detail\s*\{[^}]*width:\s*min\(438px,\s*100vw\)/,
   );
   assert.match(css, /data-testid="person-detail-add"\]\s*\{[^}]*min-width:\s*148px/);
   assert.match(css, /\.person-detail-handover\s*\{[^}]*min-height:\s*44px/);

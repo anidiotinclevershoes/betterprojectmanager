@@ -9002,16 +9002,21 @@ body {
   .person-detail-handover {
     min-height: 44px;
   }
+  .todo-detail-remove {
+    min-height: 44px;
+  }
 }
 
 /* Page 09 Issue detail. Scoped so other drawer domains keep their layout. */
 .ocean-item-detail-backdrop.is-issue-detail,
-.ocean-item-detail-backdrop.is-person-detail {
+.ocean-item-detail-backdrop.is-person-detail,
+.ocean-item-detail-backdrop.is-todo-detail {
   background: rgba(0, 0, 0, 0.26);
 }
 
 .ocean-item-detail-drawer.is-issue-detail,
-.ocean-item-detail-drawer.is-person-detail {
+.ocean-item-detail-drawer.is-person-detail,
+.ocean-item-detail-drawer.is-todo-detail {
   width: min(438px, 100vw);
   background: #121418;
   border: 1px solid #3a3f47;
@@ -9021,7 +9026,8 @@ body {
 }
 
 .ocean-item-detail-drawer.is-issue-detail::before,
-.ocean-item-detail-drawer.is-person-detail::before {
+.ocean-item-detail-drawer.is-person-detail::before,
+.ocean-item-detail-drawer.is-todo-detail::before {
   content: "";
   position: absolute;
   left: 0;
@@ -9353,6 +9359,63 @@ body {
 
 .issue-detail-footer .issue-detail-action[data-testid="person-detail-add"] {
   min-width: 148px;
+}
+
+.todo-detail-status {
+  margin: 8px 0 0;
+  color: #a3acb9;
+  font-size: 12.5px;
+  line-height: 1.3;
+}
+
+.todo-detail-waiting-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.todo-detail-waiting-row p {
+  margin: 0;
+  color: #c6cdd6;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.is-todo-detail .todo-detail-waiting-row .lume-review-avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 9.5px;
+}
+
+.todo-detail-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 34px;
+  min-width: 96px;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 5px;
+  background: #be465a;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.0625px;
+  line-height: 12.5px;
+  cursor: pointer;
+}
+
+.issue-detail-footer .issue-detail-action[data-testid="todo-detail-close"] {
+  min-width: 92px;
+}
+
+.issue-detail-footer .issue-detail-action[data-testid="todo-detail-reopen"] {
+  min-width: 124px;
 }
 
 /* Page 09 Issue edit. Scoped to the Issue drawer so To Do and Knowledge stay put. */

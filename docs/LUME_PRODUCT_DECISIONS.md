@@ -116,3 +116,16 @@ Page 09 Person detail now follows `798:9587` using `getPersonBundle`. People tag
 - `BLOCKED — INTERACTION CONTRACT: true previous-item Back restoration is not yet supported.`
 
 This does not mark Person edit or the wider UI convergence programme complete.
+
+#### CD-011 note — 29 September 2026 — To Do detail
+
+Page 09 To Do detail now follows `798:9301` for a genuine `TodoItem`. Type stays internal. Waiting On remains the D-058 legacy single string, so Edit To Do is not mounted. To Do-targeted History remains unavailable. `toggleTodo` lifecycle and project History stay sequential, not one transaction.
+
+- `BLOCKED — DATA MODEL: To Do does not currently expose a durable updatedAt.`
+- `BLOCKED — D-058: signed Waiting On is zero-or-more existing People; production still stores one legacy string.`
+- `BLOCKED — DATA MODEL: Edit To Do withheld until D-058 Waiting On representation is resolved.`
+- `OPEN — HISTORY ATTRIBUTION: To Do-targeted History identity is not yet implemented.`
+- `OPEN — LIFECYCLE/HISTORY ATOMICITY: toggleTodo persists To Do state and project History sequentially; a History failure can occur after the canonical update.`
+- `BLOCKED — INTERACTION CONTRACT: true previous-item Back restoration is not yet supported.`
+
+This does not mark To Do editing or the wider UI convergence programme complete.

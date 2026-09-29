@@ -5,6 +5,7 @@ import { ConfirmOwnerDialog } from "@/components/intelligence/ConfirmOwnerDialog
 import { IssueDetailView } from "@/components/knowledge-centre/IssueDetailView";
 import { IssueEditView } from "@/components/knowledge-centre/IssueEditView";
 import { PersonDetailView } from "@/components/knowledge-centre/PersonDetailView";
+import { TodoDetailView } from "@/components/knowledge-centre/TodoDetailView";
 import { ItemTagsEditor } from "@/components/knowledge-centre/ItemTagsEditor";
 import {
   buildCorrectedSectionBullets,
@@ -332,6 +333,28 @@ export function KnowledgeItemDetailDrawer({
   const personSurface = Boolean(
     detail?.ref.kind === "person" && detail.personBundle,
   );
+  const todoRef = detail?.ref.kind === "todo" ? detail.ref : null;
+  const todoItem = todoRef
+    ? (state.todos ?? []).find(
+        (todo) => todo.id === todoRef.todoId && todo.projectId === projectId,
+      ) ?? null
+    : null;
+  const todoSurface = Boolean(todoItem);
+  const waitingNeedle = todoItem?.waitingOn?.trim().toLowerCase() ?? "";
+  const waitingMatches = waitingNeedle
+    ? (state.projects.find((project) => project.id === projectId)?.stakeholders ??
+        []
+      ).filter((person) => person.name.trim().toLowerCase() === waitingNeedle)
+    : [];
+  const waitingPersonName =
+    waitingMatches.length === 1 ? waitingMatches[0]!.name : null;
+  const detailShell = issueSurface
+    ? " is-issue-detail"
+    : personSurface
+      ? " is-person-detail"
+      : todoSurface
+        ? " is-todo-detail"
+        : "";
   const editHistory = issueEditActive
     ? historyEventsForItem(state, projectId, {
         kind: "risk",
@@ -358,7 +381,7 @@ export function KnowledgeItemDetailDrawer({
     <>
       <button
         type="button"
-        className={`ocean-item-detail-backdrop${issueSurface ? " is-issue-detail" : personSurface ? " is-person-detail" : ""}`}
+        className={`ocean-item-detail-backdrop${detailShell}`}
         aria-label="Close detail"
         onClick={() => {
           if (holdIssueEditor()) return;
@@ -367,16 +390,17 @@ export function KnowledgeItemDetailDrawer({
         data-testid="ocean-item-detail-backdrop"
       />
       <aside
-        className={`ocean-item-detail-drawer is-open${issueSurface ? " is-issue-detail" : personSurface ? " is-person-detail" : ""}${issueEditActive ? " is-issue-edit" : ""}`}
+        className={`ocean-item-detail-drawer is-open${detailShell}${issueEditActive ? " is-issue-edit" : ""}`}
         role="dialog"
         aria-modal="true"
-        aria-label={issueEditActive ? "Edit issue" : issueSurface ? "Issue detail" : personSurface ? "Person detail" : "Knowledge item detail"}
+        aria-label={issueEditActive ? "Edit issue" : issueSurface ? "Issue detail" : personSurface ? "Person detail" : todoSurface ? "To Do detail" : "Knowledge item detail"}
         aria-busy={issueEditor.saving ? true : undefined}
         data-testid="ocean-item-detail-drawer"
         data-overlay="true"
         data-item-kind={selected?.kind}
         data-issue-detail={issueSurface ? "true" : undefined}
         data-person-detail={personSurface ? "true" : undefined}
+        data-todo-detail={todoSurface ? "true" : undefined}
         data-issue-editing={issueEditActive ? "true" : undefined}
         data-project-id={projectId}
       >
@@ -475,6 +499,27 @@ export function KnowledgeItemDetailDrawer({
                 />
               ) : null
             }
+          />
+        ) : todoItem ? (
+          <TodoDetailView
+            title={todoItem.title}
+            done={Boolean(todoItem.done)}
+            dueAt={todoItem.dueAt}
+            createdAt={todoItem.createdAt}
+            detail={todoItem.detail}
+            waitingOn={todoItem.waitingOn}
+            waitingPersonName={waitingPersonName}
+            tags={savedTagNames}
+            history={historyRead.events}
+            historyNotice={historyRead.notice}
+            onBack={goBack}
+            onClose={onClose}
+            onToggle={() => toggleTodo(todoItem.id)}
+            onRemove={() => {
+              removeTodo(todoItem.id);
+              onClose();
+            }}
+            backRef={closeRef}
           />
         ) : (
         <>
