@@ -94,6 +94,7 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
         projectId={project.id}
         onOpenDetails={setSelected}
         onAddSuggestion={setSuggestionId}
+        onAddTodo={() => setAddOpen(true)}
       />
 
       <KnowledgeItemDetailDrawer

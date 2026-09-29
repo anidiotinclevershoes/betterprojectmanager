@@ -1,0 +1,442 @@
+/* Page 09 Home composition. Presentation only. */
+
+.ocean-home {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ocean-home > .ocean-home-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+  align-items: start;
+}
+
+.ocean-home .ocean-home-queue,
+.ocean-home .ocean-home-people,
+.ocean-home .ocean-home-collapsible {
+  border-radius: 8px;
+  padding: 0;
+  background: #191c21;
+}
+
+.ocean-home .lume-domain-section-body {
+  padding: 0;
+}
+
+.ocean-home .ocean-home-section-head,
+.ocean-home .ocean-home-collapse-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 14px;
+  border-bottom: 1px solid transparent;
+}
+
+.ocean-home .lume-domain-section[data-domain="todo"] > .lume-domain-section-head {
+  min-height: 50px;
+  border-bottom-color: rgba(166, 212, 95, 0.45);
+}
+
+.ocean-home .lume-domain-section[data-domain="people"] > .lume-domain-section-head {
+  min-height: 46px;
+  border-bottom-color: rgba(92, 200, 242, 0.45);
+}
+
+.ocean-home .lume-domain-section[data-domain="issue"] > .ocean-home-collapse-btn {
+  border-bottom-color: rgba(232, 137, 92, 0.45);
+}
+
+.ocean-home .lume-domain-section[data-domain="knowledge"] > .ocean-home-collapse-btn {
+  border-bottom-color: rgba(205, 135, 224, 0.45);
+}
+
+.ocean-home .ocean-home-section-head h2,
+.ocean-home .ocean-home-section-title {
+  margin: 0;
+  color: #f1f4f8;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.ocean-home .ocean-home-count {
+  color: #8e98a6;
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: 14px;
+}
+
+.ocean-home-head-spacer {
+  flex: 1 1 auto;
+  min-width: 8px;
+}
+
+.ocean-home-suggestions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #8e98a6;
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: 14px;
+  cursor: pointer;
+}
+
+.ocean-home-switch {
+  position: relative;
+  display: inline-block;
+  width: 28px;
+  height: 16px;
+  border-radius: 8px;
+  background: #2a2e35;
+}
+
+.ocean-home-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #8e98a6;
+}
+
+.ocean-home-suggestions.is-on .ocean-home-switch {
+  background: #4f45b0;
+}
+
+.ocean-home-suggestions.is-on .ocean-home-switch::after {
+  left: 14px;
+  background: #f1f4f8;
+}
+
+.ocean-home-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 0 14px;
+  color: #818b99;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 14px;
+}
+
+.ocean-home .ocean-home-queue-list,
+.ocean-home .ocean-home-people ul,
+.ocean-home .ocean-home-collapsible ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ocean-home .ocean-home-queue-item {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  min-height: 82px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid #2a2e35;
+  border-radius: 0;
+}
+
+.ocean-home .ocean-home-queue-item.is-issue,
+.ocean-home .ocean-home-queue-item.is-todo {
+  border-left: 0;
+  padding-left: 14px;
+}
+
+.ocean-home .ocean-home-queue-item:last-child {
+  border-bottom: 0;
+}
+
+.ocean-home-queue-copy,
+.ocean-home-suggestion-copy,
+.ocean-home-person-copy,
+.ocean-home-overview-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ocean-home-queue-copy h3,
+.ocean-home-suggestion-copy h3,
+.ocean-home-person-name,
+.ocean-home-overview-title {
+  margin: 0;
+  color: #f1f4f8;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  overflow-wrap: anywhere;
+}
+
+.ocean-home-person-name {
+  font-size: 12.5px;
+}
+
+.ocean-home-queue-copy p,
+.ocean-home-suggestion-copy p,
+.ocean-home .ocean-home-muted,
+.ocean-home-needs {
+  margin: 0;
+  color: #8e98a6;
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: 14px;
+  overflow-wrap: anywhere;
+}
+
+.ocean-home .ocean-home-queue-item.is-issue .ocean-home-queue-copy p {
+  color: #e8895c;
+}
+
+.ocean-home-queue-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ocean-home-action {
+  box-sizing: border-box;
+  height: 26px;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid #2e333a;
+  border-radius: 6px;
+  background: #0d0e11;
+  color: #c6cdd6;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ocean-home-action.is-primary {
+  border-color: #4f45b0;
+  background: #12121d;
+  color: #f1f4f8;
+}
+
+.ocean-home-action:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ocean-home .ocean-home-queue-item.is-suggestion {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 106px;
+  margin: 8px 12px 12px;
+  padding: 12px 14px;
+  border: 1px dashed rgba(124, 92, 255, 0.28);
+  border-radius: 8px;
+  background: #15171b;
+}
+
+.ocean-home-suggestion-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  color: #a892ff;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 14px;
+}
+
+.ocean-home-suggestion-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #5d4bb8;
+  border-radius: 5px;
+  background: #201a33;
+}
+
+.ocean-home-suggestion-mark .lume-me-mark.is-micro {
+  width: 14px;
+  height: 14px;
+}
+
+.ocean-home-suggestion-note {
+  color: #818b99;
+  font-size: 10.5px;
+}
+
+.ocean-home .ocean-home-person,
+.ocean-home .ocean-home-overview-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 88px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid #2a2e35;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ocean-home .ocean-home-people li:last-child .ocean-home-person,
+.ocean-home .ocean-home-collapsible li:last-child .ocean-home-overview-row {
+  border-bottom: 0;
+}
+
+.ocean-home-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #f1f4f8;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.ocean-home-disclosure,
+.ocean-home-chevron {
+  color: #8e98a6;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.ocean-home-chevron {
+  margin-left: auto;
+  font-size: 14px;
+}
+
+.ocean-home-chevron[data-open="true"] {
+  transform: rotate(180deg);
+}
+
+.ocean-home-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.ocean-home-tag {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid #2e333a;
+  border-radius: 5px;
+  background: #0d0e11;
+  color: #8e98a6;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.ocean-home .ocean-home-empty,
+.ocean-home-action-error {
+  margin: 0;
+  padding: 14px;
+  color: #8e98a6;
+  font-size: 12px;
+}
+
+.ocean-home-action-error {
+  color: #f08a6a;
+}
+
+.ocean-home-timeline {
+  box-sizing: border-box;
+  max-width: 100%;
+  border: 1px solid #2a2e35;
+  border-radius: 8px;
+  background: #191c21;
+  overflow: hidden;
+}
+
+.ocean-home-timeline-label {
+  margin: 0;
+  padding: 12px 14px;
+  border-bottom: 1px solid #2a2e35;
+  color: #f1f4f8;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.ocean-home-timeline-body {
+  min-width: 0;
+  max-width: 100%;
+  overflow: auto;
+}
+
+@media (max-width: 720px) {
+  .ocean-home > .ocean-home-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ocean-home .ocean-home-queue-item,
+  .ocean-home .ocean-home-queue-item.is-suggestion {
+    min-height: 120px;
+  }
+
+  .ocean-home .ocean-home-person {
+    min-height: 72px;
+  }
+
+  .ocean-home-action {
+    min-width: 44px;
+    min-height: 44px;
+    height: 44px;
+  }
+
+  .ocean-home-suggestions {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 699px) {
+  .ocean-home > .ocean-home-top,
+  .ocean-home > .ocean-home-collapsible,
+  .ocean-home > .ocean-home-timeline {
+    width: calc(100% - 8px);
+    margin-right: 4px;
+    margin-left: 4px;
+  }
+}

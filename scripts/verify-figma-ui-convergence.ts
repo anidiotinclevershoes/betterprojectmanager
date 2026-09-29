@@ -6,7 +6,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { emptyKnowledge } from "../src/lib/knowledge";
-import { composeHomeProjection } from "../src/lib/knowledge-centre/home-projection";
+import {
+  composeHomeProjection,
+  homeQueueBand,
+  partitionHomeQueue,
+} from "../src/lib/knowledge-centre/home-projection";
 import { historyEventsForItem } from "../src/lib/knowledge-centre/item-history";
 import { composeProjectScan } from "../src/lib/knowledge-centre/project-scan";
 import {
@@ -208,6 +212,101 @@ check("Home queue keeps a date-linked Issue as an Issue", () => {
   assert.equal(issue?.title, "Vendor slip");
   assert.ok(home.queue.some((item) => item.kind === "todo"));
   assert.ok(home.queue.some((item) => item.kind === "suggestion"));
+  assert.equal(issue?.occursAt, state.timeline[0]?.startAt);
+  const suggestion = home.queue.find((item) => item.kind === "suggestion");
+  assert.equal(suggestion?.occursAt, null);
+});
+
+check("Home Today/Next uses structured instants only", () => {
+  const now = Date.parse("2026-09-16T15:00:00.000Z");
+  const later = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
+  const prose = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
+  const state = emptyState();
+  state.todos = [
+    {
+      id: TODO,
+      projectId: PROJECT,
+      title: "Pack CAB someday",
+      done: false,
+      createdAt: "2026-09-01T00:00:00.000Z",
+      dueAt: "2026-09-16T09:00:00.000Z",
+    },
+    {
+      id: prose,
+      projectId: PROJECT,
+      title: "Due today in the title only",
+      done: false,
+      createdAt: "2026-09-01T00:00:00.000Z",
+    },
+    {
+      id: later,
+      projectId: PROJECT,
+      title: "Later pack",
+      done: false,
+      createdAt: "2026-09-01T00:00:00.000Z",
+      dueAt: "2026-09-20T09:00:00.000Z",
+    },
+  ];
+  state.recommendations = [
+    {
+      id: REC,
+      kind: "risk",
+      urgency: "today",
+      title: "Chase today",
+      action: "Ask for a date",
+      why: "CAB",
+      leadershipImpact: "",
+      projectId: PROJECT,
+      createdAt: "2026-09-01T00:00:00.000Z",
+      status: "active",
+    },
+  ];
+  const home = composeHomeProjection(state, PROJECT, now);
+  const bands = partitionHomeQueue(home.queue, now);
+  assert.deepEqual(
+    bands.today.map((item) => item.title),
+    ["Pack CAB someday"],
+  );
+  assert.deepEqual(
+    bands.next.map((item) => item.title),
+    ["Later pack"],
+  );
+  assert.deepEqual(
+    bands.ungrouped.map((item) => item.title),
+    ["Due today in the title only", "Chase today"],
+  );
+  assert.equal(homeQueueBand(undefined, now), "ungrouped");
+  assert.equal(homeQueueBand("not-a-date", now), "ungrouped");
+  assert.equal(home.queue.find((item) => item.todoId === TODO)?.kind, "todo");
+  const projection = readSrc("src/lib/knowledge-centre/home-projection.ts");
+  assert.match(projection, /export function composeHomeProjection/);
+  assert.doesNotMatch(projection, /composeHomeModel|waitingOn/);
+  const bandFn = projection.slice(
+    projection.indexOf("export function homeQueueBand"),
+    projection.indexOf("export function partitionHomeQueue"),
+  );
+  assert.doesNotMatch(bandFn, /title|supporting/);
+});
+
+check("Home suggestions and collapse stay presentation-only", () => {
+  const home = readSrc(
+    "src/components/knowledge-centre/OceanHomeProjection.tsx",
+  );
+  const workspace = readSrc(
+    "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
+  );
+  assert.match(home, /useState\(false\)/);
+  assert.match(home, /setShowSuggestions\(\(on\) => !on\)/);
+  assert.match(home, /dismissSuggestionDurable/);
+  assert.doesNotMatch(home, /dismissSuggestion(?!Durable)/);
+  assert.match(home, /onAddSuggestion/);
+  assert.match(home, /toggleTodo/);
+  assert.doesNotMatch(home, /removeTodo|updateTodoDueDate|Compact|Comfortable/);
+  assert.match(home, /composeHomeProjection/);
+  assert.match(home, />\s*Discard\s*</);
+  assert.match(home, />\s*Add\s*</);
+  assert.match(workspace, /onAddTodo=\{\(\) => setAddOpen\(true\)\}/);
+  assert.doesNotMatch(home, /Open scan|Open Scan/);
 });
 
 check("item History does not title-match existing events", () => {
