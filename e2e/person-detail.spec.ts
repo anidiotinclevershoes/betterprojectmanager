@@ -174,7 +174,9 @@ test("Person detail shows bundle fields and omits stale actions", async ({
   await expect(drawer.getByTestId("person-detail-role")).toHaveText(
     "Supplier contact",
   );
-  await expect(drawer.locator("[data-domain='people']")).toContainText("Person");
+  await expect(drawer.locator(".lume-domain-badge[data-domain='people']")).toHaveText(
+    "Person",
+  );
   await expect(drawer.getByTestId("person-detail-last-contact")).toHaveText("16 Sep");
   await expect(drawer.getByTestId("person-detail-responsibility")).toContainText(
     "Cut-over communications",
