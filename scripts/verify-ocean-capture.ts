@@ -112,7 +112,14 @@ function testOceanCaptureAiAffordanceAndInputs() {
   assert.match(capture, /ocean-capture-analyse/);
   assert.match(capture, /✦/);
   assert.match(capture, /Analyse/);
+  assert.match(capture, /Review changes/);
+  assert.match(capture, /MeMark/);
+  assert.match(capture, /runAnalyse/);
+  assert.match(capture, /Paste or type project notes/);
+  assert.match(capture, /Nothing added yet/);
+  assert.match(capture, /Stop recording/);
   assert.match(capture, /data-ai="true"/);
+  assert.doesNotMatch(capture, /WorkspacePageHeading|lume-page-heading/);
   assert.match(capture, /ocean-capture-input/);
   assert.match(capture, /data-ai="false"/);
   assert.match(capture, /ocean-capture-record/);
@@ -216,7 +223,7 @@ async function main() {
   testCaptureModeInOceanWorkspace();
   console.log("✓ Capture selectable in Ocean mode selector + embedded");
   testOceanCaptureAiAffordanceAndInputs();
-  console.log("✓ ✦ Analyse, typed input, Record, review boundary");
+  console.log("✓ Review changes, typed input, Record, review boundary");
   testAnalyseDoesNotWriteMaintainedTruth();
   console.log("✓ Analyse path yields proposals only (review-before-write)");
   testAppearanceThemes();

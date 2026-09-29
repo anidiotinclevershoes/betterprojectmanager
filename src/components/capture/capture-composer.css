@@ -1,0 +1,451 @@
+/* Page 09 pre-analysis Capture composer.
+   Desktop: P09/Capture/Heading 690:6178, LargeComposer 674:5909, ActionRow 690:6181.
+   Narrow: HeadingNarrow 694:17902, LargeComposerNarrow 694:7754, ActionRowNarrow 697:8126.
+   Scoped to the ocean composer so Review and legacy Capture keep their styles. */
+
+.ocean-capture-mode:has(.p09-capture) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.ocean-capture-mode:has(.p09-capture) .ocean-capture-workspace {
+  padding: 0;
+  background: transparent;
+}
+
+.p09-capture {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.p09-capture-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 68px;
+  min-width: 0;
+}
+
+.p09-capture-title {
+  margin: 0;
+  color: #f1f4f8;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.13px;
+  line-height: 32px;
+}
+
+.p09-capture-helper {
+  margin: 0;
+  color: #8e98a6;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: -0.0625px;
+  line-height: 16px;
+}
+
+.p09-capture-helper-narrow {
+  display: none;
+}
+
+.p09-capture-composer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 272px;
+  min-width: 0;
+  border: 1px solid #2e333a;
+  border-radius: 5px;
+  background: #0d0e11;
+  overflow: hidden;
+}
+
+.p09-capture-content {
+  flex: 1 1 auto;
+  min-height: 238px;
+  min-width: 0;
+  padding: 14px 12px;
+}
+
+.p09-capture-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.p09-capture-block {
+  min-width: 0;
+}
+
+.p09-capture-sep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.p09-capture-sep-rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: rgba(142, 152, 166, 0.5);
+}
+
+.p09-capture-sep.is-leading {
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+.p09-capture-delete {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: #8e98a6;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+.ocean-capture-workspace .p09-capture .p09-capture-field {
+  display: block;
+  width: 100%;
+  min-height: 22px;
+  max-height: 480px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #f1f4f8;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 400;
+  letter-spacing: -0.0675px;
+  line-height: 20px;
+  resize: none;
+  field-sizing: fixed;
+  box-shadow: none;
+}
+
+.ocean-capture-workspace .p09-capture .p09-capture-field::placeholder {
+  color: #8e98a6;
+  opacity: 1;
+}
+
+.p09-capture-footer {
+  display: flex;
+  flex: 0 0 33px;
+  align-items: center;
+  height: 33px;
+  margin: 0;
+  padding: 0 14px;
+  border-top: 1px solid #2e333a;
+  color: #8e98a6;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 14px;
+}
+
+.p09-capture-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 58px;
+  min-width: 0;
+}
+
+.p09-capture-actions-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.p09-capture-record,
+.p09-capture-stop,
+.p09-capture-cancel {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 120px;
+  height: 30px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid #2e333a;
+  border-radius: 5px;
+  background: #0d0e11;
+  color: #c6cdd6;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.0625px;
+  line-height: 12.5px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.p09-capture-record:disabled,
+.p09-capture-stop:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.p09-capture-review {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: 150px;
+  height: 30px;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 5px;
+  background: #7c5cff;
+  color: #fff;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.0625px;
+  line-height: 12.5px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.p09-capture-review:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.p09-capture-review .lume-me-mark.is-micro,
+.p09-capture-review .lume-me-mark.is-micro img {
+  width: 16px;
+  height: 16px;
+}
+
+.p09-capture-recording {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: #8e98a6;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.p09-capture-rec-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e8556d;
+  animation: p09-capture-pulse 1.2s ease-in-out infinite;
+}
+
+.p09-capture-elapsed {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.p09-capture-rec-hint {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@keyframes p09-capture-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.p09-capture-status {
+  margin: -8px 0 0;
+  color: #8e98a6;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.p09-capture-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.p09-capture-usage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  color: #8e98a6;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.p09-capture-usage-bar {
+  display: block;
+  flex: 0 0 auto;
+  width: 72px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #2e333a;
+}
+
+.p09-capture-usage-bar > span {
+  display: block;
+  height: 100%;
+  background: #8e98a6;
+}
+
+.p09-capture-session {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.ocean-capture-workspace .p09-capture-session .capture-new-btn,
+.ocean-capture-workspace .p09-capture-session .capture-window-btn {
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #8e98a6;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.p09-capture-minimised {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.p09-capture-record:focus-visible,
+.p09-capture-stop:focus-visible,
+.p09-capture-cancel:focus-visible,
+.p09-capture-review:focus-visible,
+.p09-capture-delete:focus-visible,
+.ocean-capture-workspace .p09-capture .p09-capture-field:focus-visible {
+  outline: 2px solid #7c5cff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .p09-capture-heading {
+    min-height: 76px;
+  }
+
+  .p09-capture-title {
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  .p09-capture-helper {
+    font-size: 11.5px;
+    line-height: 18px;
+  }
+
+  .p09-capture-helper-wide {
+    display: none;
+  }
+
+  .p09-capture-helper-narrow {
+    display: inline;
+  }
+
+  .p09-capture-composer {
+    min-height: 235px;
+  }
+
+  .p09-capture-content {
+    min-height: 200px;
+    padding: 12px;
+  }
+
+  .ocean-capture-workspace .p09-capture .p09-capture-field {
+    font-size: 13px;
+  }
+
+  .p09-capture-actions {
+    align-items: flex-start;
+    height: auto;
+    min-height: 70px;
+  }
+
+  .p09-capture-recording {
+    flex: 1 0 100%;
+  }
+
+  .p09-capture-meta {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .p09-capture-session {
+    margin-left: 0;
+  }
+
+  .p09-capture-record,
+  .p09-capture-stop,
+  .p09-capture-cancel,
+  .p09-capture-review {
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .p09-capture-record,
+  .p09-capture-stop {
+    min-width: 132px;
+  }
+
+  .p09-capture-review {
+    width: 154px;
+  }
+}
+
+@media (max-width: 699px) {
+  .p09-capture {
+    width: calc(100% - 8px);
+    margin-right: 4px;
+    margin-left: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p09-capture-rec-dot {
+    animation: none;
+  }
+}
