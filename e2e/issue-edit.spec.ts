@@ -352,14 +352,12 @@ test("knowledge-only risks and To Do or Knowledge editing stay on their own path
   await boot(page, testInfo.testId);
   await page.getByTestId(`kc-open-details-todo:${TODO}`).click();
   const drawer = page.getByTestId("ocean-item-detail-drawer");
+  await expect(drawer).toHaveAttribute("data-todo-detail", "true");
   await expect(drawer).not.toHaveAttribute("data-issue-detail", "true");
   await expect(drawer.getByRole("button", { name: "Edit issue" })).toHaveCount(0);
-  await page.getByTestId("ocean-item-detail-edit").click();
-  await page.getByTestId("ocean-item-detail-edit-input").fill("Book the revised review");
-  await page.getByTestId("ocean-item-detail-save").click();
-  await expect(page.getByTestId("ocean-item-detail-body")).toHaveText(
-    "Book the revised review",
-  );
+  await expect(drawer.getByTestId("ocean-item-detail-edit")).toHaveCount(0);
+  await expect(drawer.getByTestId("todo-detail-title")).toHaveText(TODO_TITLE);
+  await expect(drawer.getByTestId("todo-detail-close")).toBeVisible();
   await page.getByTestId("ocean-item-detail-back").click();
 
   await page.getByTestId(`kc-open-details-decision:${DECISION}`).click();
