@@ -1756,10 +1756,6 @@ body {
   transition: width 160ms ease;
 }
 
-.app-sidebar.is-collapsed {
-  width: 64px;
-}
-
 .sidebar-top {
   padding: 16px 14px 8px;
 }
@@ -8535,53 +8531,162 @@ body {
   padding: 0;
 }
 
-.ocean-sidebar .ocean-wordmark {
-  font-size: 1.35rem;
-  font-weight: 650;
-  letter-spacing: -0.03em;
-  color: var(--text-primary);
-  text-transform: lowercase;
+/* Page 09 sidebar. 220px replaces the 232px shell. Project pages add 12px of
+   left gutter so accepted content still starts at x≈252 (220 + 32). */
+.app-sidebar.ocean-sidebar {
+  width: 220px;
+  box-sizing: border-box;
+  padding: 22px 16px 16px;
+  background: #0d0e11;
+  border-right: 1px solid #1e2126;
+  transition: none;
 }
 
-.ocean-wordmark-me {
-  font-weight: 750;
-  color: #c9d4ff;
+.ocean-sidebar .sidebar-top,
+.ocean-sidebar .sidebar-bottom {
+  padding: 0;
+  border-top: 0;
 }
 
-.ocean-wordmark-compact {
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.ocean-sidebar-projects-head {
+.ocean-sidebar .ocean-brand {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  padding: 1.75rem 0.55rem 1.5rem;
+  gap: 8px;
+  min-height: 48px;
+  padding-left: 8px;
+  color: #f1f4f8;
+  text-decoration: none;
 }
 
-.ocean-new-project {
-  display: inline-flex;
+.ocean-sidebar .ocean-brand-bulb {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.ocean-sidebar .ocean-brand-name {
+  color: #f1f4f8;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.ocean-sidebar .ocean-new-project {
+  display: flex;
   align-items: center;
-  gap: 0.2rem;
-  color: var(--success);
-  font-size: 0.75rem;
+  box-sizing: border-box;
+  width: 188px;
+  height: 34px;
+  margin: 34px 0 40px;
+  padding: 0 12px;
+  border: 1px solid #8f76ff;
+  border-radius: 5px;
+  background: #7c5cff;
+  color: #fff;
+  font-size: 12.5px;
   font-weight: 600;
+  line-height: 1;
   text-decoration: none;
   white-space: nowrap;
 }
 
-.ocean-new-project:hover {
-  color: color-mix(in srgb, var(--success) 78%, white);
+.ocean-sidebar .ocean-new-project:hover {
+  background: #8a6dff;
+  color: #fff;
 }
 
-.ocean-sidebar .sidebar-project {
-  /* No health dots */
+.ocean-sidebar-projects {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-.ocean-sidebar .sidebar-link.sidebar-project.is-active.is-project-owned {
-  background: color-mix(in srgb, var(--info) 12%, transparent);
+.ocean-sidebar .ocean-project-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 188px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  color: #818b99;
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.ocean-sidebar .ocean-project-link span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ocean-sidebar .ocean-project-link.is-active {
+  background: #1b1921;
+  color: #fafaff;
+  font-weight: 500;
+}
+
+.ocean-sidebar .ocean-project-link.is-active::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  width: 3px;
+  height: 28px;
+  border-radius: 2px;
+  background: #7c56ff;
+}
+
+.ocean-sidebar .ocean-sidebar-bottom {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.ocean-sidebar .ocean-account-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 188px;
+  height: 36px;
+  padding: 0 4px;
+  border-radius: 5px;
+  color: #a3acb9;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.ocean-sidebar .ocean-account-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #2a2e35;
+  color: #a3acb9;
+  font-size: 10px;
+  line-height: 1;
+}
+
+@media (min-width: 900px) {
+  .app-shell.has-project-workspace .app-content {
+    padding-left: 32px;
+  }
 }
 
 .ocean-utility-header {

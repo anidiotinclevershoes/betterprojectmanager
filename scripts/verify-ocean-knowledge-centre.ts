@@ -84,11 +84,17 @@ function testSidebarContract() {
   assert.doesNotMatch(sidebar, /href="\/coaching"/);
   assert.doesNotMatch(sidebar, /href="\/memory"/);
   assert.doesNotMatch(sidebar, /data-project-status/);
-  assert.match(sidebar, /Master To Do/);
-  assert.match(sidebar, /History/);
-  assert.match(sidebar, /Captures/);
   assert.match(sidebar, /New [Pp]roject/);
+  assert.match(sidebar, /href="\/projects\/new"/);
+  assert.match(sidebar, /href="\/account"/);
+  assert.match(sidebar, /LumeLogo/);
   assert.doesNotMatch(sidebar, />PROJECTS</);
+  assert.doesNotMatch(sidebar, /Master To Do/);
+  assert.doesNotMatch(sidebar, /href="\/todos"/);
+  assert.doesNotMatch(sidebar, /href="\/history"/);
+  assert.doesNotMatch(sidebar, /href="\/captures"/);
+  assert.doesNotMatch(sidebar, /Help & support/);
+  assert.doesNotMatch(sidebar, /ocean-wordmark-me/);
   assert.match(sidebar, /ocean-wordmark/);
 }
 
@@ -462,7 +468,7 @@ function testResponsiveShellCss() {
 
 async function main() {
   testSidebarContract();
-  console.log("✓ sidebar omits removed V1 items; keeps Projects/utility");
+  console.log("✓ sidebar is projects plus Account; utility links stay unmounted");
   testModeSelectorContract();
   console.log("✓ mode selector Home/Capture/KC/Project Scan");
   testSearchAskContract();

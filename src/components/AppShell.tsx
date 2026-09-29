@@ -14,8 +14,6 @@ import { clearAuthenticatedBrowserState } from "@/lib/session-cleanup";
 import { useMission } from "@/lib/store";
 import { MISSION_MESSAGE } from "@/lib/mission";
 
-const SIDEBAR_KEY = "mc-sidebar-collapsed-v1";
-
 function isAuthChromePath(pathname: string) {
   return (
     pathname === "/welcome" ||
@@ -70,7 +68,6 @@ function AppShellWithTellMe({ children }: { children: ReactNode }) {
 function AppShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { state, saveStatus, saveError } = useMission();
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<{
     email: string;
@@ -78,14 +75,6 @@ function AppShellInner({ children }: { children: ReactNode }) {
   } | null>(null);
 
   const onAuthPage = isAuthChromePath(pathname);
-
-  useEffect(() => {
-    try {
-      setCollapsed(window.localStorage.getItem(SIDEBAR_KEY) === "1");
-    } catch {
-      /* ignore */
-    }
-  }, []);
 
   useEffect(() => {
     if (onAuthPage) return;
@@ -119,18 +108,6 @@ function AppShellInner({ children }: { children: ReactNode }) {
     setUser(null);
     navigateAuthBoundary("/login");
   }
-
-  const toggleCollapse = () => {
-    setCollapsed((prev) => {
-      const next = !prev;
-      try {
-        window.localStorage.setItem(SIDEBAR_KEY, next ? "1" : "0");
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
-  };
 
   const header = useMemo(() => {
     if (pathname === "/") {
@@ -220,13 +197,11 @@ function AppShellInner({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className={`app-shell ${collapsed ? "sidebar-collapsed" : ""} ${activeProject ? "has-project-workspace" : ""}`}
+      className={`app-shell${activeProject ? " has-project-workspace" : ""}`}
       data-active-project={activeProject?.code ?? undefined}
       data-project-status={activeProject?.status ?? undefined}
     >
       <Sidebar
-        collapsed={collapsed}
-        onToggleCollapse={toggleCollapse}
         mobileOpen={mobileOpen}
         onCloseMobile={() => setMobileOpen(false)}
         userName={user?.name}

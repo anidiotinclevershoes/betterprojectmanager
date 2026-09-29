@@ -129,3 +129,11 @@ Page 09 To Do detail now follows `798:9301` for a genuine `TodoItem`. Type stays
 - `BLOCKED — INTERACTION CONTRACT: true previous-item Back restoration is not yet supported.`
 
 This does not mark To Do editing or the wider UI convergence programme complete.
+
+#### CD-011 note — 29 September 2026 — Sidebar
+
+The canonical desktop sidebar follows Page 09 / Page 07 `601:836`: 220px, lightbulb plus plain Lume, `+ New project`, the project list, and Account. Legacy product and development links are not in that sidebar. Their routes remain. Desktop collapse is retired. Settings is not mounted.
+
+- `BLOCKED — PRODUCT SURFACE: signed sidebar requires Settings, but no Settings route/surface exists.`
+
+The mobile hamburger stays until a separate narrow-shell decision. Top header and token use are the next shell slice. This does not mark the wider UI convergence programme complete.
