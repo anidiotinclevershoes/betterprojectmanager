@@ -23,6 +23,7 @@ import type {
   TodoItem,
 } from "@/lib/types";
 import { emptyKnowledge } from "@/lib/knowledge";
+import { canonicalRiskNotes } from "@/lib/risks/issue-notes";
 
 /** DB check on `risks.source` — do not invent values (D-006). */
 export const LEGAL_RISK_SOURCES = ["manual", "capture", "seed"] as const;
@@ -222,6 +223,9 @@ function mapRiskRows(rows: Array<Record<string, unknown>>): ProjectRisk[] {
     source: requireLegalRiskSource(String(row.source || NEW_PROJECT_RISK_SOURCE)),
     createdAt: row.created_at ? String(row.created_at) : undefined,
     updatedAt: row.updated_at ? String(row.updated_at) : undefined,
+    notes: canonicalRiskNotes(
+      row.notes == null ? null : String(row.notes),
+    ),
   }));
 }
 
@@ -1006,6 +1010,62 @@ export async function persistRiskStatus(
   }
 }
 
+export type PersistRiskNotesResult = {
+  ok: boolean;
+  error?: string;
+  changed?: boolean;
+  notes?: string | null;
+  historyId?: string;
+  historyTitle?: string;
+  historyDetail?: string;
+};
+
+/**
+ * Canonical Issue Notes plus the required targeted History row.
+ * `set_risk_notes` commits both or neither. Callers must not treat a
+ * notes update as saved when this returns ok: false.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRiskNotes(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  input: { projectId: string; riskId: string; notes: string | null },
+): Promise<PersistRiskNotesResult> {
+  const { data, error } = await client.rpc("set_risk_notes", {
+    p_workspace_id: workspaceId,
+    p_project_id: input.projectId,
+    p_risk_id: input.riskId,
+    p_notes: input.notes,
+    p_created_by: userId,
+  });
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  const payload =
+    data && typeof data === "object"
+      ? (data as Record<string, unknown>)
+      : {};
+  if (payload.ok === false) {
+    return {
+      ok: false,
+      error: String(payload.error ?? "Could not save issue notes"),
+    };
+  }
+  return {
+    ok: true,
+    changed: Boolean(payload.changed),
+    notes: payload.notes == null ? null : String(payload.notes),
+    historyId: payload.history_id ? String(payload.history_id) : undefined,
+    historyTitle: payload.history_title
+      ? String(payload.history_title)
+      : undefined,
+    historyDetail: payload.history_detail
+      ? String(payload.history_detail)
+      : undefined,
+  };
+}
+
 /**
  * Manual Add Issue — existing `risks` table, source=manual.
  * Additive persist helper. Not a new RPC.
@@ -1047,6 +1107,9 @@ export async function persistRiskCreate(
     source: row.source === "capture" || row.source === "seed" ? row.source : "manual",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    notes: canonicalRiskNotes(
+      typeof row.notes === "string" ? row.notes : null,
+    ),
   };
 }
 
@@ -1578,6 +1641,8 @@ export async function persistHistoryEvent(
   event: Omit<HistoryEvent, "id" | "createdAt"> & { createdAt?: string },
 ): Promise<void> {
   await requireProjectInWorkspace(client, workspaceId, event.projectId);
+  const targetKind = event.targetKind?.trim() || null;
+  const targetId = event.targetId?.trim() || null;
   const { error } = await client.from("history_events").insert({
     workspace_id: workspaceId,
     project_id: event.projectId ?? null,
@@ -1586,6 +1651,9 @@ export async function persistHistoryEvent(
     detail: event.detail ?? null,
     source: event.source ?? "user",
     created_by: userId,
+    ...(targetKind && targetId
+      ? { target_kind: targetKind, target_id: targetId }
+      : {}),
   });
   if (error) throw new Error(`[supabase] create history: ${error.message}`);
 }

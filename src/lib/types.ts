@@ -361,6 +361,12 @@ export interface HistoryEvent {
   projectId?: string | null;
   createdAt: string;
   source?: "user" | "ai" | "system";
+  /**
+   * Stable item target. Both absent means the event stays unattributed.
+   * Do not infer this from title or detail.
+   */
+  targetKind?: string | null;
+  targetId?: string | null;
 }
 
 /**
@@ -376,6 +382,11 @@ export interface ProjectRisk {
   source?: "manual" | "capture" | "seed";
   createdAt?: string;
   updatedAt?: string;
+  /**
+   * Supplementary Issue Notes. Null or absent means no current Notes.
+   * Not status, owner, or date truth.
+   */
+  notes?: string | null;
 }
 
 export interface MissionState {

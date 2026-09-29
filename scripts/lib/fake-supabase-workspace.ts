@@ -6,6 +6,8 @@
  * - projects.cloned_from_id SET NULL (clones survive)
  */
 
+import { planRiskNotesChange } from "../../src/lib/risks/issue-notes";
+
 export type FakeRow = Record<string, unknown>;
 
 const CASCADE_ON_PROJECT_DELETE = [
@@ -320,6 +322,69 @@ export class FakeWorkspaceClient {
           }
         }
         return { project_id: projectId };
+      });
+    }
+    if (fn === "set_risk_notes") {
+      return this.runAtomic(async () => {
+        const workspaceId = String(args.p_workspace_id ?? "");
+        const projectId = String(args.p_project_id ?? "");
+        const riskId = String(args.p_risk_id ?? "");
+        if (workspaceId !== this.workspaceId) {
+          throw new FakeRpcError("not a workspace member");
+        }
+        const project = this.tables.projects.find(
+          (row) => row.id === projectId && row.workspace_id === workspaceId,
+        );
+        if (!project) {
+          throw new FakeRpcError("project is not in this workspace");
+        }
+        const risk = this.tables.risks.find(
+          (row) =>
+            row.id === riskId &&
+            row.project_id === projectId &&
+            row.workspace_id === workspaceId,
+        );
+        if (!risk) throw new FakeRpcError("issue is not in this project");
+        const plan = planRiskNotesChange(
+          risk.notes == null ? null : String(risk.notes),
+          args.p_notes == null ? null : String(args.p_notes),
+        );
+        if (!plan.changed) {
+          return { ok: true, changed: false, notes: plan.notes };
+        }
+        const updated = await this.from("risks")
+          .update({ notes: plan.notes })
+          .eq("id", riskId)
+          .eq("project_id", projectId)
+          .eq("workspace_id", workspaceId);
+        if (updated.error) {
+          throw new FakeRpcError(updated.error.message, updated.error.code);
+        }
+        const inserted = await this.from("history_events").insert({
+          workspace_id: workspaceId,
+          project_id: projectId,
+          type: "other",
+          title: plan.title,
+          detail: plan.detail,
+          source: "user",
+          created_by: args.p_created_by ?? this.userId,
+          target_kind: "risk",
+          target_id: riskId,
+        });
+        if (inserted.error) {
+          throw new FakeRpcError(inserted.error.message, inserted.error.code);
+        }
+        const historyRow = Array.isArray(inserted.data)
+          ? inserted.data[0]
+          : null;
+        return {
+          ok: true,
+          changed: true,
+          notes: plan.notes,
+          history_id: historyRow?.id ?? null,
+          history_title: plan.title,
+          history_detail: plan.detail,
+        };
       });
     }
     if (fn === "delete_project_bundle") {

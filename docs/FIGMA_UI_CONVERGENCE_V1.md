@@ -322,12 +322,11 @@ If History events for tags require a new `HistoryEventType` rather than `other`,
 | `src/lib/sessions/history.ts` | Capture/Coach **localStorage** session list — not item History |
 
 - Workspace History page exists: `src/app/history/page.tsx` (newest first).
-- **Item-level History panel does not exist** in `KnowledgeItemDetailDrawer`.
-- D-004: many `pushHistory` paths never persist.
-- Capture Apply does persist history (secondary after write).
-- `history_events` has **no** `item_id` / `target_id`. Title, detail, or fuzzy matching is **not** attribution.
-- Do not create a UI-only item history store. Do not add a history schema migration in this programme unless a STOP is raised and explicitly approved.
-- If an event cannot be deterministically attributed under existing contracts, preserve D-004 as an explicit bounded limitation in the item drawer.
+- The item History list in `KnowledgeItemDetailDrawer` already renders exact targeted events or the D-004 notice. Page 09 Issue detail/edit composition is still the next slice.
+- D-004: many `pushHistory` paths never persist. Old NULL-target rows stay unattributed.
+- Capture Apply does persist history (secondary after write). `update_risk_status` History now also stores `target_kind = risk` and the operation's existing risk id. `create_risk` History stays untargeted because that UUID is minted inside persist.
+- **29 Sep 2026, explicitly approved:** `history_events.target_kind` and `history_events.target_id` are nullable. The only target kind is `risk`. Title, detail, substring, or fuzzy matching is **not** attribution, and there is no backfill.
+- Do not create a UI-only item history store. Do not infer targets for old rows.
 
 ### Close / Remove
 
@@ -512,7 +511,7 @@ Decisions below are from **code inspection + current Figma frames** (§9). Prefe
 2. **People tags** — data allows `stakeholder` tags; product forbids People-tag UI. Do not “complete” the data model in the UI.
 3. **Multi-owner items** — not present. Do not add.
 4. **Suggestion discard durability** — D-003. Prefer persist existing `recommendations` status. STOP if that requires a new table.
-5. **Item History identity** — `history_events` has no `item_id` / `target_id`. Do **not** fuzzy-match, title-match, or invent detail-string conventions. Preserve D-004 as a bounded limitation in the item drawer. STOP before any history schema migration unless explicitly approved.
+5. **Item History identity** — Nullable `target_kind` / `target_id` now exist for new rows (`risk` + `risks.id` only). Do **not** fuzzy-match, title-match, or invent detail-string conventions. NULL-target rows stay unattributed. Preserve D-004 for history that was never stored with a target. Do not backfill.
 6. **Manual Add Issue / Person** — if existing persist helpers cannot create a risk / stakeholder without a new RPC, extend the established persist path additively. STOP before a new canonical kind.
 7. **Project Scan writer pressure** — if Figma shows Scan applying fixes directly, keep analysis-only and route user action through Suggestion Add or Manual Add. Do not let Scan write.
 8. **Catch Me Up vs Project Scan** — do not rename Catch Me Up into Scan. Do not import AI-first Scan architecture.
@@ -598,14 +597,14 @@ Recorded before Phase 1 implementation. These override any earlier “filter His
 
 ### 17.1 Item History attribution
 
-`history_events` columns today: `workspace_id`, `project_id`, `type`, `title`, `detail`, `source`, `created_by`, `created_at`. There is **no** `item_id` / `target_id`.
+`history_events` columns: `workspace_id`, `project_id`, `type`, `title`, `detail`, `source`, `created_by`, `created_at`, plus nullable `target_kind` and `target_id` from `20260929120000_issue_notes_and_history_target.sql`. There is still no generic `item_id`. The only allowed target kind is `risk`.
 
 - Do **not** implement apparent item-level History by fuzzy matching, title matching, or detail-string conventions and present that as authoritative.
-- Only display a History event in an item drawer when existing data/contracts allow that event to be **deterministically attributed** to that item.
-- If existing events cannot be deterministically attributed, preserve **D-004** as an explicit bounded limitation.
+- Only display a History event in an item drawer when `target_kind`, `target_id`, and project match that item exactly.
+- NULL-target rows, including every row written before this migration, stay unattributed. Preserve **D-004** for that history. Do not backfill it from title, detail, source, or time.
 - Do not create a second UI history store.
-- Do not add a history schema migration during this UI programme unless a STOP condition is raised and explicitly approved.
-- New actions may write through existing `persistHistoryEvent` where attribution is safe under existing contracts (project-level chronology is fine).
+- The additive target columns were an explicit product approval. Do not add further target kinds without the same approval.
+- New actions may write through existing `persistHistoryEvent`. Target fields stay optional. Do not invent a target.
 - Do not fabricate historical events that were never persisted.
 
 ### 17.2 Tag Save failure safety
@@ -648,6 +647,6 @@ Figma page `09`, section M To Do, Issue and Person detail/edit screens are appro
 
 - **To Do Type.** Hidden on the section M To Do detail and edit mocks. Do not add a user-facing Type taxonomy. `todos.kind` stays internal.
 - **Waiting on.** Relationships to zero or more existing People. `todos.waiting_on` is still one string (D-058). Do not fake the relationship by joining names into that string, and do not ship the single string as if it were the product model.
-- **Notes.** Supplementary only. To Do uses existing `todos.detail`. Knowledge uses existing `knowledge_items.body`. Date/Milestone uses existing `milestones.notes`. Issue now explicitly requires mutable supplementary Notes: they may be added, updated, or cleared, and they must not create, overwrite, infer, or replace structured Issue status or other canonical fields. Current `risks` storage has no notes field. The expected direction is a nullable canonical Issue Notes field in a later additive schema slice; that field is not implemented. Person still has no approved Notes requirement.
+- **Notes.** Supplementary only. To Do uses existing `todos.detail`. Knowledge uses existing `knowledge_items.body`. Date/Milestone uses existing `milestones.notes`. Issue Notes are the nullable `risks.notes` column. They may be added, updated, or cleared through `set_risk_notes`, which also writes the targeted History row. They must not create, overwrite, infer, or replace structured Issue status or other canonical fields. The Page 09 Issue detail/edit screen is not wired yet. Person still has no approved Notes requirement.
 
 Preserve the rest of the latest accepted pass. No adjacent redesign.

@@ -10,7 +10,11 @@ export function makeHistoryEvent(input: {
   detail?: string;
   projectId?: string | null;
   source?: HistoryEvent["source"];
+  targetKind?: string | null;
+  targetId?: string | null;
 }): HistoryEvent {
+  const targetKind = input.targetKind?.trim() || null;
+  const targetId = input.targetId?.trim() || null;
   return {
     id: id(),
     type: input.type,
@@ -19,6 +23,7 @@ export function makeHistoryEvent(input: {
     projectId: input.projectId,
     createdAt: new Date().toISOString(),
     source: input.source ?? "user",
+    ...(targetKind && targetId ? { targetKind, targetId } : {}),
   };
 }
 

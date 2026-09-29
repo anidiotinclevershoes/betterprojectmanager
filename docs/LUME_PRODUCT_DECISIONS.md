@@ -86,8 +86,9 @@ Approved Page 09 Section M requires Issue Notes. This amends the Issue row above
 
 - Issue Notes are mutable current context. They may be added, updated, or completely cleared.
 - They stay supplementary. They must not create, overwrite, infer, or replace structured Issue status or other canonical fields.
-- Current `risks` storage has no notes field. That gap is known and open.
-- Implementing the field requires a later safe additive data slice: a nullable canonical Issue Notes field. This amendment does not implement that field.
+- **29 Sep 2026 — data foundation:** `public.risks.notes` is a nullable text column. NULL means no current Notes. There is no backfill and no synthetic default.
+- `set_risk_notes` writes the Notes change and one targeted History event in the same transaction. Clearing current Notes sets the column to NULL and keeps the previous text on that History row. A no-op does not write a History event.
+- Page 09 Issue detail/edit UI wiring is still the next slice. This decision does not claim that screen is complete. Notes are not part of Capture, Search, Tell Me, Project Scan, recommendations, timeline, or ownership.
 
 ### CD-011 — Page 09 mock authority
 

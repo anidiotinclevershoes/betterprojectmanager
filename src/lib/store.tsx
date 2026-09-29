@@ -91,6 +91,7 @@ import {
   persistMemory,
   persistRecommendationStatus,
   persistRiskCreate,
+  persistRiskNotes,
   persistRiskStatus,
   persistTimelineItem,
   persistTimelineUpdate,
@@ -124,6 +125,10 @@ import {
   reopenKnowledgeOnlyRiskBullet,
   syncKnowledgeRiskProjection,
 } from "@/lib/risks/lifecycle";
+import {
+  applyRiskNotesLocal,
+  historyEventForNotesPlan,
+} from "@/lib/risks/issue-notes";
 import type { RiskStatus } from "@/types/database";
 
 function newClientId(): string {
@@ -284,6 +289,15 @@ type MissionContextValue = {
     status: RiskStatus,
     projectId: string,
   ) => void;
+  /**
+   * Canonical Issue Notes. Durable mode waits for the transactional
+   * Notes + targeted History write before painting success.
+   */
+  setRiskNotes: (input: {
+    projectId: string;
+    riskId: string;
+    notes: string | null;
+  }) => Promise<ManualWriteResult>;
   /**
    * Slice 1B: resolve/reopen a legacy Knowledge-only risk bullet (no risks row).
    * Does not fabricate a Risk-domain record.
@@ -2518,6 +2532,84 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const setRiskNotes = useCallback(
+    async (input: {
+      projectId: string;
+      riskId: string;
+      notes: string | null;
+    }): Promise<ManualWriteResult> => {
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          const saved = await persistRiskNotes(
+            client,
+            meta.workspaceId,
+            meta.userId,
+            input,
+          );
+          if (!saved.ok) {
+            const message = saved.error ?? "Could not save issue notes";
+            reportPersistFailure(new Error(message), "Could not save issue notes");
+            return { ok: false, error: message };
+          }
+          setState((latest) => {
+            const has = (latest.risks ?? []).some(
+              (row) =>
+                row.id === input.riskId && row.projectId === input.projectId,
+            );
+            if (!has) return latest;
+            const risks = (latest.risks ?? []).map((row) =>
+              row.id === input.riskId && row.projectId === input.projectId
+                ? {
+                    ...row,
+                    notes: saved.notes ?? null,
+                    ...(saved.changed
+                      ? { updatedAt: new Date().toISOString() }
+                      : {}),
+                  }
+                : row,
+            );
+            const next = { ...latest, risks };
+            if (!saved.changed || !saved.historyTitle) return next;
+            return pushHistory(
+              next,
+              historyEventForNotesPlan(
+                {
+                  changed: true,
+                  notes: saved.notes ?? null,
+                  previous: null,
+                  title: saved.historyTitle,
+                  detail: saved.historyDetail ?? "",
+                },
+                {
+                  projectId: input.projectId,
+                  riskId: input.riskId,
+                  id: saved.historyId,
+                },
+              ),
+            );
+          });
+          markPersistSaved();
+          return saved.historyId ? { ok: true, id: saved.historyId } : { ok: true };
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Could not save issue notes";
+          reportPersistFailure(err, "Could not save issue notes");
+          return { ok: false, error: message };
+        }
+      }
+
+      const applied = applyRiskNotesLocal(stateRef.current, input);
+      if (!applied.ok) return applied;
+      if (applied.changed) setState(applied.state);
+      return { ok: true };
+    },
+    [markPersistSaved, reportPersistFailure],
+  );
+
   const setKnowledgeOnlyRiskResolved = useCallback(
     (projectId: string, title: string, resolved: boolean) => {
       const prev = stateRef.current;
@@ -3363,6 +3455,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       saveSuggestedTodo,
       replaceKnowledge,
       setRiskStatus,
+      setRiskNotes,
       setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,
@@ -3414,6 +3507,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       saveSuggestedTodo,
       replaceKnowledge,
       setRiskStatus,
+      setRiskNotes,
       setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,

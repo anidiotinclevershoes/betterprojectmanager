@@ -18,6 +18,7 @@ import type {
   TodoItem,
 } from "@/lib/types";
 import { emptyKnowledge } from "@/lib/knowledge";
+import { canonicalRiskNotes } from "@/lib/risks/issue-notes";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import { isTagTargetKind, type ItemTag, type ProjectTag } from "@/lib/tags";
 
@@ -253,6 +254,7 @@ export async function loadMissionStateFromSupabase(
       source: (row.source as "manual" | "capture" | "seed") || "manual",
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      notes: canonicalRiskNotes(row.notes),
     }),
   );
 
@@ -337,6 +339,8 @@ export async function loadMissionStateFromSupabase(
     projectId: row.project_id,
     createdAt: row.created_at,
     source: row.source ?? undefined,
+    targetKind: row.target_kind ?? null,
+    targetId: row.target_id ?? null,
   }));
 
   const { projectTags, itemTags } = await loadRetrievalTags(client, workspaceId);
