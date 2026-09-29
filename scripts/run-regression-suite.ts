@@ -69,6 +69,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "capture-apply-history", script: "scripts/verify-capture-apply-history.ts" },
   { name: "issue-notes-history", script: "scripts/verify-issue-notes-history.ts" },
   { name: "issue-detail", script: "scripts/verify-issue-detail.ts" },
+  { name: "risk-read-authority", script: "scripts/verify-risk-read-authority.ts" },
   { name: "catch-me-up", script: "scripts/verify-catch-me-up.ts" },
   { name: "capture-context", script: "scripts/verify-capture-context.ts" },
   { name: "capture-review", script: "scripts/verify-capture-review.ts" },

@@ -8,6 +8,7 @@ import {
   detectMentionedProjects,
   buildProjectIndex,
 } from "@/lib/capture/projectResolve";
+import { projectHasDomainRisks } from "@/lib/risks/lifecycle";
 import { truncatePreservingMeaning } from "@/lib/text/semantic-truncate";
 import type {
   MissionState,
@@ -233,10 +234,12 @@ function structuredAuthorityRecords(
 
 function knowledgeCandidates(
   knowledge: ProjectKnowledge | undefined,
+  domainOwnsCurrentIssues: boolean,
 ): CaptureContextRecord[] {
   if (!knowledge) return [];
   const rows: CaptureContextRecord[] = [];
   for (const [section, bullets] of Object.entries(knowledge.sections)) {
+    if (domainOwnsCurrentIssues && section === "risks") continue;
     for (const [i, bullet] of (bullets ?? []).entries()) {
       rows.push(
         rec({
@@ -461,9 +464,13 @@ export function buildCaptureContext(args: {
   if (milestonePick.hit) limitsReached.push(milestonePick.hit);
 
   const knowledge = knowledgeList.find((k) => k.projectId === projectId);
+  const domainOwnsCurrentIssues = projectHasDomainRisks(
+    args.state.risks,
+    projectId,
+  );
   const knowledgePick = takeRankedWithExclusions(
     [
-      ...knowledgeCandidates(knowledge),
+      ...knowledgeCandidates(knowledge, domainOwnsCurrentIssues),
       ...structuredAuthorityRecords(knowledge),
     ],
     limits.knowledgeItems,

@@ -28,6 +28,28 @@ export function isClosedRiskStatus(status: RiskStatus): boolean {
 }
 
 /**
+ * Genuine Risk-domain rows exist for this project, including resolved ones.
+ * Read assemblers use this as the switch for current Issue truth.
+ */
+export function projectHasDomainRisks(
+  risks: readonly { projectId: string }[] | undefined,
+  projectId: string,
+): boolean {
+  return (risks ?? []).some((risk) => risk.projectId === projectId);
+}
+
+/**
+ * Knowledge projection of an Issue. Not a domain Risk row.
+ * Kind and section are both sufficient; title is not consulted.
+ */
+export function isKnowledgeRiskProjection(item: {
+  kind?: string | null;
+  section?: string | null;
+}): boolean {
+  return item.kind === "risk" || item.section === "risks";
+}
+
+/**
  * Project open/watch Risk titles into Knowledge for Capture/Tell Me/KC display.
  * Skips resolved/accepted — they must not reappear as open Knowledge risks.
  */

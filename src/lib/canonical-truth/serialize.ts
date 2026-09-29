@@ -17,10 +17,8 @@ import type {
   NeedsConfirmationItem,
 } from "@/lib/canonical-truth/types";
 import {
-  isClosedRiskStatus,
+  isKnowledgeRiskProjection,
   isResolvedProse,
-  stripResolvedPrefix,
-  titlesMatch,
 } from "@/lib/risks/lifecycle";
 
 function newId(prefix: string): string {
@@ -211,9 +209,9 @@ export function serializeCanonicalTruth(args: {
   const domainRisks = (args.state.risks ?? []).filter(
     (r) => r.projectId === args.projectId,
   );
-  const closedRiskTitles = domainRisks
-    .filter((r) => isClosedRiskStatus(r.status))
-    .map((r) => r.title);
+  // Any genuine Risk row makes domain lifecycle the sole current Issue truth.
+  // Leftover Knowledge risk prose stays stored; it is not a current fact.
+  const domainOwnsCurrentIssues = domainRisks.length > 0;
 
   const visible = items.filter((i) => {
     if (historical) {
@@ -224,14 +222,9 @@ export function serializeCanonicalTruth(args: {
       );
     }
     if (i.lifecycle !== "current") return false;
-    // Current-state: do not surface resolved Risk prose as open facts
-    if (i.kind === "risk" || i.section === "risks") {
+    if (isKnowledgeRiskProjection(i)) {
+      if (domainOwnsCurrentIssues) return false;
       if (isResolvedProse(i.body)) return false;
-      if (
-        closedRiskTitles.some((t) => titlesMatch(t, stripResolvedPrefix(i.body)))
-      ) {
-        return false;
-      }
     }
     return true;
   });
