@@ -91,6 +91,7 @@ import {
   persistMemory,
   persistRecommendationStatus,
   persistRiskCreate,
+  persistRiskEdit,
   persistRiskNotes,
   persistRiskStatus,
   persistTimelineItem,
@@ -129,6 +130,10 @@ import {
   applyRiskNotesLocal,
   historyEventForNotesPlan,
 } from "@/lib/risks/issue-notes";
+import {
+  applyRiskEditLocal,
+  type RiskEditResult,
+} from "@/lib/risks/issue-edit";
 import type { RiskStatus } from "@/types/database";
 
 function newClientId(): string {
@@ -140,6 +145,84 @@ function newClientId(): string {
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+function paintSavedRiskEdit(
+  latest: MissionState,
+  input: { projectId: string; riskId: string },
+  saved: RiskEditResult,
+): MissionState {
+  let next = latest;
+  if (saved.titleChanged || saved.notesChanged) {
+    const has = (latest.risks ?? []).some(
+      (row) => row.id === input.riskId && row.projectId === input.projectId,
+    );
+    if (has) {
+      next = {
+        ...next,
+        risks: (next.risks ?? []).map((row) =>
+          row.id === input.riskId && row.projectId === input.projectId
+            ? {
+                ...row,
+                title: saved.title ?? row.title,
+                notes: saved.notes ?? null,
+                updatedAt: saved.updatedAt ?? row.updatedAt,
+              }
+            : row,
+        ),
+      };
+    }
+  }
+  if (saved.tagsChanged) {
+    const projectTags = [...(next.projectTags ?? [])];
+    for (const tag of saved.tags ?? []) {
+      if (!projectTags.some((row) => row.id === tag.id)) {
+        projectTags.push({
+          id: tag.id,
+          projectId: input.projectId,
+          name: tag.name,
+          slug: tag.slug,
+          origin: tag.origin,
+        });
+      }
+    }
+    const kept = (next.itemTags ?? []).filter(
+      (row) =>
+        !(
+          row.projectId === input.projectId &&
+          row.targetKind === "risk" &&
+          row.targetId === input.riskId
+        ),
+    );
+    next = {
+      ...next,
+      projectTags,
+      itemTags: [
+        ...kept,
+        ...(saved.itemTags ?? []).map((row) => ({
+          id: row.id,
+          projectId: input.projectId,
+          tagId: row.tagId,
+          targetKind: "risk" as const,
+          targetId: input.riskId,
+        })),
+      ],
+    };
+  }
+  for (const event of saved.history ?? []) {
+    next = pushHistory(next, {
+      id: event.id,
+      type: "other",
+      title: event.title,
+      detail: event.detail,
+      projectId: input.projectId,
+      createdAt: event.createdAt ?? new Date().toISOString(),
+      source: "user",
+      targetKind: "risk",
+      targetId: input.riskId,
+    });
+  }
+  return next;
 }
 
 function sleep(ms: number) {
@@ -298,6 +381,17 @@ type MissionContextValue = {
     riskId: string;
     notes: string | null;
   }) => Promise<ManualWriteResult>;
+  /**
+   * One Issue Save for Title, Notes, and tags. Does not compose
+   * setRiskNotes and saveItemTags. Knowledge prose is left untouched.
+   */
+  saveRiskEdit: (input: {
+    projectId: string;
+    riskId: string;
+    title: string;
+    notes: string | null;
+    tagNames: string[];
+  }) => Promise<RiskEditResult>;
   /**
    * Slice 1B: resolve/reopen a legacy Knowledge-only risk bullet (no risks row).
    * Does not fabricate a Risk-domain record.
@@ -2610,6 +2704,56 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     [markPersistSaved, reportPersistFailure],
   );
 
+  const saveRiskEdit = useCallback(
+    async (input: {
+      projectId: string;
+      riskId: string;
+      title: string;
+      notes: string | null;
+      tagNames: string[];
+    }): Promise<RiskEditResult> => {
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          const saved = await persistRiskEdit(
+            client,
+            meta.workspaceId,
+            meta.userId,
+            input,
+          );
+          if (!saved.ok) {
+            const message = saved.error ?? "Could not save the issue edit";
+            reportPersistFailure(new Error(message), "Could not save the issue edit");
+            return { ok: false, error: message };
+          }
+          if (saved.changed) {
+            setState((latest) => paintSavedRiskEdit(latest, input, saved));
+          }
+          markPersistSaved();
+          return saved;
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Could not save the issue edit";
+          reportPersistFailure(err, "Could not save the issue edit");
+          return { ok: false, error: message };
+        }
+      }
+
+      const applied = applyRiskEditLocal(stateRef.current, {
+        ...input,
+        newTagId: newClientId,
+        newItemTagId: newClientId,
+      });
+      if (!applied.ok) return applied;
+      if (applied.changed) setState(applied.state);
+      return applied.result;
+    },
+    [markPersistSaved, reportPersistFailure],
+  );
+
   const setKnowledgeOnlyRiskResolved = useCallback(
     (projectId: string, title: string, resolved: boolean) => {
       const prev = stateRef.current;
@@ -3456,6 +3600,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       replaceKnowledge,
       setRiskStatus,
       setRiskNotes,
+      saveRiskEdit,
       setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,
@@ -3508,6 +3653,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       replaceKnowledge,
       setRiskStatus,
       setRiskNotes,
+      saveRiskEdit,
       setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,

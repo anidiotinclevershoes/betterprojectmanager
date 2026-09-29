@@ -14,8 +14,8 @@ import type { RiskStatus } from "@/types/database";
 
 /**
  * Page 09 Section M Issue detail, for a genuine Risk row only.
- * Title, Notes, and tags are read-only. Edit Issue stays unmounted
- * until title mutation has a stable Knowledge projection link.
+ * Title, Notes, and tags are read-only here. Edit Issue stays unmounted.
+ * The atomic Issue save exists, and this screen does not call it yet.
  */
 export function IssueDetailView({
   title,

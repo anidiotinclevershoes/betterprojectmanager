@@ -1,7 +1,7 @@
 # Lume product decisions register
 
 **Status:** Living register of semantics engineering must **not** invent  
-**Date:** 28 September 2026 (CD-010 Issue Notes amendment). CD-008–CD-011 were recorded 25 September 2026. Earlier rows remain 12 September 2026.  
+**Date:** 29 September 2026 (CD-010 atomic Issue edit amendment). CD-008–CD-011 were recorded 25 September 2026. Earlier rows remain 12 September 2026.  
 **Owned by:** Product Owner  
 **Docs entry:** [`docs/README.md`](./README.md)
 
@@ -88,7 +88,8 @@ Approved Page 09 Section M requires Issue Notes. This amends the Issue row above
 - They stay supplementary. They must not create, overwrite, infer, or replace structured Issue status or other canonical fields.
 - **29 Sep 2026 — data foundation:** `public.risks.notes` is a nullable text column. NULL means no current Notes. There is no backfill and no synthetic default.
 - `set_risk_notes` writes the Notes change and one targeted History event in the same transaction. Clearing current Notes sets the column to NULL and keeps the previous text on that History row. A no-op does not write a History event.
-- Page 09 Issue detail/edit UI wiring is still the next slice. This decision does not claim that screen is complete. Notes are not part of Capture, Search, Tell Me, Project Scan, recommendations, timeline, or ownership.
+- Page 09 Issue detail now shows Notes and exact History. The editor UI is not mounted.
+- **29 Sep 2026 — atomic Issue edit:** `save_risk_edit` is the one durable Save for Title, Notes, and retrieval tags. Title, Notes, tag associations, and any required History from that Save commit together or roll back together. A tags-only Save does not write canonical History and does not bump Risk `updated_at`. A no-op writes nothing. Title changes update the domain Risk only. They do not rewrite legacy `knowledge.sections.risks` prose, because domain `risks` is current Issue authority. The Page 09 editor is still not mounted, and this programme is not complete. Notes remain out of Capture, Search, Tell Me, Project Scan, recommendations, timeline, and ownership.
 
 ### CD-011 — Page 09 mock authority
 

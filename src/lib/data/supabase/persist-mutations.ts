@@ -24,6 +24,10 @@ import type {
 } from "@/lib/types";
 import { emptyKnowledge } from "@/lib/knowledge";
 import { canonicalRiskNotes } from "@/lib/risks/issue-notes";
+import {
+  canonicalTagsFromNames,
+  type RiskEditResult,
+} from "@/lib/risks/issue-edit";
 
 /** DB check on `risks.source` — do not invent values (D-006). */
 export const LEGAL_RISK_SOURCES = ["manual", "capture", "seed"] as const;
@@ -1063,6 +1067,103 @@ export async function persistRiskNotes(
     historyDetail: payload.history_detail
       ? String(payload.history_detail)
       : undefined,
+  };
+}
+
+/**
+ * One Issue Save: Title, Notes, and retrieval tags.
+ * `save_risk_edit` commits the set or rolls it back. The returned tags
+ * and history rows are the durable ids. A later refresh is not required
+ * to know the write landed.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRiskEdit(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  input: {
+    projectId: string;
+    riskId: string;
+    title: string;
+    notes: string | null;
+    tagNames: string[];
+  },
+): Promise<RiskEditResult> {
+  const { data, error } = await client.rpc("save_risk_edit", {
+    p_workspace_id: workspaceId,
+    p_project_id: input.projectId,
+    p_risk_id: input.riskId,
+    p_title: input.title,
+    p_notes: input.notes,
+    p_tags: canonicalTagsFromNames(input.tagNames),
+    p_created_by: userId,
+  });
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  const payload =
+    data && typeof data === "object"
+      ? (data as Record<string, unknown>)
+      : null;
+  if (!payload || payload.ok === false) {
+    return {
+      ok: false,
+      error: String(payload?.error ?? "Could not save the issue edit"),
+    };
+  }
+  const history = Array.isArray(payload.history)
+    ? payload.history.flatMap((row) => {
+        if (!row || typeof row !== "object") return [];
+        const event = row as Record<string, unknown>;
+        if (!event.id || !event.title) return [];
+        return [
+          {
+            id: String(event.id),
+            title: String(event.title),
+            detail: event.detail == null ? "" : String(event.detail),
+            createdAt: event.created_at ? String(event.created_at) : undefined,
+          },
+        ];
+      })
+    : [];
+  const tags = Array.isArray(payload.tags)
+    ? payload.tags.flatMap((row) => {
+        if (!row || typeof row !== "object") return [];
+        const tag = row as Record<string, unknown>;
+        if (!tag.id || !tag.slug) return [];
+        return [
+          {
+            id: String(tag.id),
+            name: String(tag.name ?? tag.slug),
+            slug: String(tag.slug),
+            origin:
+              tag.origin === "predefined"
+                ? ("predefined" as const)
+                : ("custom" as const),
+          },
+        ];
+      })
+    : [];
+  const itemTags = Array.isArray(payload.item_tags)
+    ? payload.item_tags.flatMap((row) => {
+        if (!row || typeof row !== "object") return [];
+        const link = row as Record<string, unknown>;
+        if (!link.id || !link.tag_id) return [];
+        return [{ id: String(link.id), tagId: String(link.tag_id) }];
+      })
+    : [];
+  return {
+    ok: true,
+    changed: Boolean(payload.changed),
+    titleChanged: Boolean(payload.title_changed),
+    notesChanged: Boolean(payload.notes_changed),
+    tagsChanged: Boolean(payload.tags_changed),
+    title: payload.title == null ? undefined : String(payload.title),
+    notes: payload.notes == null ? null : String(payload.notes),
+    updatedAt: payload.updated_at ? String(payload.updated_at) : undefined,
+    history,
+    tags,
+    itemTags,
   };
 }
 
