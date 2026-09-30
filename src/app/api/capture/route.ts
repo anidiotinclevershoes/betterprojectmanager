@@ -38,6 +38,7 @@ import {
   loadServerCaptureWorld,
 } from "@/lib/capture-v2/server-truth";
 import { extractObservationsWithOpenAI } from "@/lib/capture-v2/extract";
+import { captureReferenceDate } from "@/lib/capture-v2/semantic-fields";
 import {
   extractProvenanceBase,
   logIntelligenceProvenance,
@@ -284,15 +285,18 @@ async function postCaptureV2(args: {
         code: project.code,
       })
     : "Current project: (unscoped)\nAuthoritative current records:\n(none)";
+  const referenceDate = captureReferenceDate();
   const extraction = await extractObservationsWithOpenAI({
     transcript: content,
     projectBlock,
+    referenceDate,
   });
   const v2 = runCaptureV2FromModelJson({
     transcript: content,
     rawModelJson: extraction.rawModelJson,
     world: loaded.world,
     projectId: loaded.projectId,
+    referenceDate,
   });
   const existingKnowledge: ProjectKnowledge | null =
     knowledge.find((k) => k.projectId === loaded.projectId) ?? null;

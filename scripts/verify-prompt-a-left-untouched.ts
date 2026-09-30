@@ -43,9 +43,6 @@ function check(name: string, fn: () => void) {
 
 const ROOT = process.cwd();
 const UNCHANGED_VS_MAIN = [
-  "src/lib/capture-v2/run.ts",
-  "src/lib/capture-v2/source-coverage.ts",
-  "src/lib/capture/apply/dispatch.ts",
   "src/lib/capture/apply/apply-approved.ts",
   "src/lib/capture/apply/expected-target.ts",
 ];
@@ -143,9 +140,17 @@ function main() {
     for (const rel of UNCHANGED_VS_MAIN) {
       assert.equal(gitDiffAgainstMain(rel), "", `${rel} must not change in Phase 1`);
     }
+    const coverage = read("src/lib/capture-v2/source-coverage.ts");
+    assert.match(coverage, /leftoverSourceSpans/);
+    assert.match(coverage, /\["detail", "notes", "text"\]/);
     const resolve = read("src/lib/capture-v2/resolve.ts");
     assert.doesNotMatch(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /observation\.disposition === "left_untouched"/);
+    const run = read("src/lib/capture-v2/run.ts");
+    assert.match(run, /applyCaptureSemanticContract/);
+    const dispatch = read("src/lib/capture/apply/dispatch.ts");
+    assert.match(dispatch, /roleHint: statedField/);
+    assert.match(dispatch, /unsupportedApplyReason/);
   });
 
   check("model-emitted left_untouched stays Review-only and never Ready", () => {
@@ -283,11 +288,14 @@ function main() {
         },
       ],
     );
-    assert.ok(
-      !noChange.resolved.some(
-        (row) => row.observation.disposition === "left_untouched",
-      ),
+    const original = noChange.resolved.find((row) => row.observation.id === "obs-nc");
+    assert.ok(original);
+    assert.notEqual(original?.observation.disposition, "left_untouched");
+    assert.notEqual(original?.decision.kind, "write");
+    const residue = noChange.resolved.filter(
+      (row) => row.observation.disposition === "left_untouched",
     );
+    assert.ok(residue.some((row) => /licorice stands/i.test(row.observation.statement)));
   });
 
   check("mixed capture keeps clear clauses and surfaces leftover wording", () => {
@@ -328,8 +336,8 @@ function main() {
     const left = run.resolved.filter(
       (row) => row.observation.disposition === "left_untouched",
     );
-    assert.equal(left.length, 1);
-    assert.notEqual(left[0]!.decision.kind, "write");
+    assert.ok(left.some((row) => /Security might be worried/i.test(row.observation.statement)));
+    assert.ok(left.every((row) => row.decision.kind !== "write"));
     const actionable = run.resolved.filter(
       (row) => row.observation.disposition !== "left_untouched",
     );

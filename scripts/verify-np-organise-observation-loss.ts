@@ -377,7 +377,13 @@ async function main() {
           run.validation.observations.every((obs) => obs.disposition === "create_new"),
         );
         assert.ok(run.validation.observations.every((obs) => !obs.candidateTargetId));
-        assert.equal((run.result.findings ?? []).length, 2);
+        const findings = run.result.findings ?? [];
+        assert.equal(findings.filter((finding) => !finding.leftUntouched).length, 2);
+        assert.ok(
+          findings
+            .filter((finding) => finding.leftUntouched)
+            .every((finding) => /bob is the ba/i.test(finding.fact)),
+        );
       },
     );
 

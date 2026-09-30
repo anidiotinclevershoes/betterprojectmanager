@@ -79,6 +79,20 @@ function asString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
+/** Keep a reviewed field only when the source text actually states it. */
+function statedField(
+  value: string | undefined,
+  item: PendingSuggestion,
+  text: string,
+): string | undefined {
+  if (!value) return undefined;
+  const evidence = asString(proposedValues(item).evidence) ?? "";
+  const haystack = `${evidence}\n${text}`.toLowerCase();
+  const needle = value.replace(/[.?!]+$/g, "").trim().toLowerCase();
+  if (!needle || !haystack.includes(needle)) return undefined;
+  return value;
+}
+
 function targetId(item: PendingSuggestion): string | undefined {
   if (item.targetEntityId?.trim()) return item.targetEntityId.trim();
   return undefined;
@@ -182,6 +196,7 @@ function planTodo(
   if (!title) {
     return needsYou("todo", "This To Do has no title.");
   }
+  const todoValues = proposedValues(item);
   if (todoId) {
     if (!requireTodoOnProject(world, projectId, todoId)) {
       return needsYou(
@@ -195,8 +210,11 @@ function planTodo(
     type: "create_todo",
     projectId,
     title,
-    detail: item.recommendation?.action,
-    dueAt: item.date,
+    detail: statedField(asString(todoValues.detail), item, text) || item.recommendation?.action,
+    dueAt:
+      item.date ||
+      parseIsoDate(asString(todoValues.dueDate)) ||
+      parseIsoDate(asString(todoValues.dueAt)),
     todoKind: item.todoKind ?? (item.kind === "nudge" ? "CHASE" : "ACTION"),
     waitingOn: item.waitingOn,
     applyOperationId: item.id.trim() || undefined,
@@ -287,6 +305,7 @@ function planRisk(
     type: "create_risk",
     projectId,
     title,
+    notes: statedField(asString(proposedValues(item).notes), item, text),
     applyOperationId: item.id.trim() || undefined,
   });
 }
@@ -321,12 +340,14 @@ function planMilestone(
       parseIsoDate(item.date) ||
       parseIsoDate(asString(values.startAt)) ||
       parseIsoDate(asString(values.date));
+    const endAt = parseIsoDate(asString(values.endAt));
     const currentDay = isoDay(byId.startAt);
     const nextDay = isoDay(nextDate);
-    if (nextDay && currentDay && nextDay === currentDay) {
+    const endUnchanged = !endAt || isoDay(endAt) === isoDay(byId.endAt);
+    if (nextDay && currentDay && nextDay === currentDay && endUnchanged) {
       return noChange("milestone", "This date is already recorded.");
     }
-    if (!nextDate) {
+    if (!nextDate && !endAt) {
       if (text === byId.label) {
         return noChange("milestone", "This date is already recorded.");
       }
@@ -340,6 +361,7 @@ function planMilestone(
       projectId,
       milestoneId: byId.id,
       startAt: nextDate,
+      endAt,
     });
   }
 
@@ -359,10 +381,11 @@ function planMilestone(
   if (!label) {
     return needsYou("milestone", "This date has no label.");
   }
+  const milestoneValues = proposedValues(item);
   const startAt =
     parseIsoDate(item.date) ||
-    parseIsoDate(asString(proposedValues(item).startAt)) ||
-    parseIsoDate(asString(proposedValues(item).date));
+    parseIsoDate(asString(milestoneValues.startAt)) ||
+    parseIsoDate(asString(milestoneValues.date));
   if (!startAt) {
     return needsYou(
       "milestone",
@@ -374,6 +397,7 @@ function planMilestone(
     projectId,
     label,
     startAt,
+    endAt: parseIsoDate(asString(milestoneValues.endAt)),
     notes: item.timelineItem?.notes,
     applyOperationId: item.id.trim() || undefined,
   });
@@ -499,6 +523,7 @@ function planPerson(
       projectId,
       name: resolved.name,
       personId: resolved.personId,
+      roleHint: statedField(asString(values.role), item, text),
       applyOperationId: item.id.trim() || undefined,
     });
   }
