@@ -938,7 +938,7 @@ function main() {
     const sql = readFileSync(
       join(
         process.cwd(),
-        "supabase/migrations/20260930180000_capture_risk_create_notes.sql",
+        "supabase/migrations/20260930190035_capture_risk_create_notes.sql",
       ),
       "utf8",
     );
