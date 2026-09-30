@@ -145,6 +145,9 @@ function main() {
     assert.match(prompt, /one requested action/i);
     assert.match(prompt, /do not strengthen temporal implications/i);
     assert.match(prompt, /by January/i);
+    assert.match(prompt, /until January/i);
+    assert.match(prompt, /single explicit agreement or decision/i);
+    assert.match(prompt, /disposition=left_untouched rather than a shortened write/i);
   });
 
   check("explicit person role survives into ensure_person.roleHint and memory", () => {
@@ -216,7 +219,7 @@ function main() {
     assert.notEqual(update.kind, "write");
   });
 
-  check("pipeline carries an explicit role even when the model omits proposed role", () => {
+  check("an omitted person role is not recovered from the transcript", () => {
     const run = runCaptureV2FromModelJson({
       transcript: "Nina has joined as the UX Designer.",
       referenceDate: REFERENCE,
@@ -241,7 +244,9 @@ function main() {
     const op = assertWrite(decision!);
     assert.equal(op.type, "ensure_person");
     if (op.type !== "ensure_person") return;
-    assert.equal(op.roleHint, "UX Designer");
+    assert.equal(op.roleHint, undefined);
+    const left = (run.result.findings ?? []).filter((row) => row.leftUntouched);
+    assert.ok(left.some((row) => /UX Designer/i.test(row.fact)));
   });
 
   check("operation-linked finding is not displaced by a higher-confidence insight", () => {
@@ -300,7 +305,7 @@ function main() {
     assert.equal(observations[0]?.findingId, undefined);
   });
 
-  check("yearless launch date resolves against the supplied reference date", () => {
+  check("an unsafe historical launch date fails closed instead of being reconstructed", () => {
     const run = runCaptureV2FromModelJson({
       transcript: "Launch is 20 October.",
       referenceDate: REFERENCE,
@@ -320,15 +325,44 @@ function main() {
       world: world(),
       projectId: PROJECT,
     });
-    const decision = run.resolved.find((row) => row.decision.kind === "write")?.decision;
-    const op = assertWrite(decision!);
-    assert.equal(op.type, "create_milestone");
-    if (op.type !== "create_milestone") return;
-    assert.equal(op.startAt?.slice(0, 10), "2026-10-20");
-    assert.equal(op.endAt, undefined);
+    const writes = run.resolved.filter((row) => row.decision.kind === "write");
+    assert.equal(writes.length, 0);
+    assert.ok(run.resolved.some((row) => row.decision.kind === "needs_you"));
+    const persisted = JSON.stringify(run.resolved);
+    assert.doesNotMatch(persisted, /2023-10-20/);
+    assert.doesNotMatch(persisted, /2026-10-20/);
   });
 
-  check("Friday resolves to the next Friday on or after the reference date", () => {
+  check("an extracted due date survives onto the To Do", () => {
+    const decision = planCaptureApply({
+      item: suggestion({
+        kind: "action",
+        legalDomain: "todo",
+        content: "Send the comms pack",
+        date: "2026-10-02",
+        proposedValues: {
+          title: "Send the comms pack",
+          dueDate: "2026-10-02",
+        },
+      }),
+      text: "Add a To Do to send the comms pack by Friday.",
+      world: world(),
+      captureEntryProjectId: PROJECT,
+    });
+    const op = assertWrite(decision);
+    assert.equal(op.type, "create_todo");
+    if (op.type !== "create_todo") return;
+    assert.equal(op.dueAt?.slice(0, 10), "2026-10-02");
+    const next = applyCaptureOperationInMemory(emptyState(), op);
+    assert.equal(next.todos[0]?.dueAt?.slice(0, 10), "2026-10-02");
+    const persist = readFileSync(
+      join(process.cwd(), "src/lib/data/supabase/persist-mutations.ts"),
+      "utf8",
+    );
+    assert.match(persist, /due_on: isoToDateOnly\(todo\.dueAt\)/);
+  });
+
+  check("a historical todo date is not rewritten onto the next Friday", () => {
     const run = runCaptureV2FromModelJson({
       transcript: "Add a To Do to send the comms pack by Friday.",
       referenceDate: REFERENCE,
@@ -356,10 +390,13 @@ function main() {
     assert.equal(op.type, "create_todo");
     if (op.type !== "create_todo") return;
     assert.equal(op.title, "Send the comms pack");
-    assert.equal(op.dueAt?.slice(0, 10), "2026-10-02");
+    assert.equal(op.dueAt, undefined);
+    const persisted = JSON.stringify(op);
+    assert.doesNotMatch(persisted, /2023-10-06/);
+    assert.doesNotMatch(persisted, /2026-10-02/);
   });
 
-  check("a todo create with no date still resolves an explicit by-Friday", () => {
+  check("an omitted todo date is not filled from by-Friday", () => {
     const run = runCaptureV2FromModelJson({
       transcript: "Add a To Do to send the comms pack by Friday.",
       referenceDate: REFERENCE,
@@ -368,7 +405,7 @@ function main() {
           {
             id: "obs-friday-missing",
             statement: "Send the comms pack",
-            evidence: "Add a To Do to send the comms pack.",
+            evidence: "Add a To Do to send the comms pack by Friday.",
             domain: "todo",
             disposition: "create_new",
             truthIntent: "current",
@@ -386,10 +423,11 @@ function main() {
     const op = assertWrite(decision!);
     assert.equal(op.type, "create_todo");
     if (op.type !== "create_todo") return;
-    assert.equal(op.dueAt?.slice(0, 10), "2026-10-02");
+    assert.equal(op.dueAt, undefined);
+    assert.equal(op.detail, "by Friday");
   });
 
-  check("a same-year date that is not the named by-weekday is corrected", () => {
+  check("a same-year date is transported and not corrected to a weekday", () => {
     const run = runCaptureV2FromModelJson({
       transcript: "Add a To Do to send the comms pack by Friday.",
       referenceDate: REFERENCE,
@@ -416,7 +454,7 @@ function main() {
     const op = assertWrite(decision!);
     assert.equal(op.type, "create_todo");
     if (op.type !== "create_todo") return;
-    assert.equal(op.dueAt?.slice(0, 10), "2026-10-02");
+    assert.equal(op.dueAt?.slice(0, 10), "2026-10-07");
   });
 
   check("a milestone does not gain a Friday date that was never a calendar day", () => {
@@ -465,9 +503,16 @@ function main() {
     if (op.type !== "create_milestone") return;
     assert.equal(op.startAt?.slice(0, 10), "2026-10-12");
     assert.equal(op.endAt?.slice(0, 10), "2026-10-16");
+    const next = applyCaptureOperationInMemory(emptyState(), op);
+    assert.equal(next.timeline[0]?.endAt?.slice(0, 10), "2026-10-16");
+    const persist = readFileSync(
+      join(process.cwd(), "src/lib/data/supabase/persist-mutations.ts"),
+      "utf8",
+    );
+    assert.match(persist, /end_on: isoToDateOnly\(item\.endAt\)/);
   });
 
-  check("a historical year on a stated range is corrected and endAt is kept", () => {
+  check("a historical year on a stated range is dropped, not rewritten", () => {
     const run = runCaptureV2FromModelJson({
       transcript: "UAT runs from 12 October to 16 October.",
       referenceDate: REFERENCE,
@@ -491,27 +536,51 @@ function main() {
       world: world(),
       projectId: PROJECT,
     });
+    const writes = run.resolved.filter((row) => row.decision.kind === "write");
+    assert.equal(writes.length, 0);
+    assert.ok(run.resolved.some((row) => row.decision.kind === "needs_you"));
+    const persisted = JSON.stringify(run.resolved);
+    assert.doesNotMatch(persisted, /2023-10-1/);
+    assert.doesNotMatch(persisted, /2026-10-1/);
+  });
+
+  check("an explicit historical year in the source is kept", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript: "The archive milestone was 20 October 2023.",
+      referenceDate: REFERENCE,
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-archive",
+            statement: "Archive milestone",
+            evidence: "The archive milestone was 20 October 2023.",
+            domain: "milestone",
+            disposition: "create_new",
+            truthIntent: "current",
+            proposedValues: { label: "Archive milestone", date: "2023-10-20" },
+          },
+        ],
+      },
+      world: world(),
+      projectId: PROJECT,
+    });
     const decision = run.resolved.find((row) => row.decision.kind === "write")?.decision;
     const op = assertWrite(decision!);
     assert.equal(op.type, "create_milestone");
     if (op.type !== "create_milestone") return;
-    assert.equal(op.startAt?.slice(0, 10), "2026-10-12");
-    assert.equal(op.endAt?.slice(0, 10), "2026-10-16");
-    const next = applyCaptureOperationInMemory(emptyState(), op);
-    assert.equal(next.timeline[0]?.startAt.slice(0, 10), "2026-10-12");
-    assert.equal(next.timeline[0]?.endAt?.slice(0, 10), "2026-10-16");
+    assert.equal(op.startAt?.slice(0, 10), "2023-10-20");
   });
 
-  check("model evidence cannot invent a range end the transcript does not state", () => {
+  check("an extracted milestone end date is transported without local range parsing", () => {
     const run = runCaptureV2FromModelJson({
       transcript: "Launch is 20 October.",
       referenceDate: REFERENCE,
       rawModelJson: {
         observations: [
           {
-            id: "obs-launch-invented-end",
+            id: "obs-launch-extracted-end",
             statement: "Launch",
-            evidence: "Launch runs from 20 October to 21 October.",
+            evidence: "Launch is 20 October.",
             domain: "milestone",
             disposition: "create_new",
             truthIntent: "current",
@@ -531,7 +600,7 @@ function main() {
     assert.equal(op.type, "create_milestone");
     if (op.type !== "create_milestone") return;
     assert.equal(op.startAt?.slice(0, 10), "2026-10-20");
-    assert.equal(op.endAt, undefined);
+    assert.equal(op.endAt?.slice(0, 10), "2026-10-21");
   });
 
   check("one stated date does not invent a range end", () => {
@@ -578,7 +647,7 @@ function main() {
     assert.equal(next.todos[0]?.detail, "Include the updated budget figures");
   });
 
-  check("a split action and qualifier collapse to one To Do with detail", () => {
+  check("independently extracted Include observations are not merged locally", () => {
     const transcript =
       "Add a To Do to send the steering pack. Include the updated budget figures.";
     const run = runCaptureV2FromModelJson({
@@ -614,12 +683,13 @@ function main() {
         row.decision.kind === "write" &&
         row.decision.operation.type === "create_todo",
     );
-    assert.equal(todos.length, 1);
-    const op = todos[0]!.decision.kind === "write" ? todos[0]!.decision.operation : null;
-    assert.equal(op?.type, "create_todo");
-    if (op?.type !== "create_todo") return;
-    assert.equal(op.title, "Send the steering pack");
-    assert.match(op.detail ?? "", /updated budget figures/);
+    assert.equal(todos.length, 2);
+    const details = todos.map((row) =>
+      row.decision.kind === "write" && row.decision.operation.type === "create_todo"
+        ? row.decision.operation.detail
+        : undefined,
+    );
+    assert.ok(details.every((detail) => detail == null || !/updated budget figures/i.test(detail) || detail === "Include the updated budget figures"));
   });
 
   check("todo detail already on the observation covers the qualifier sentence", () => {
@@ -648,7 +718,7 @@ function main() {
       projectId: PROJECT,
     });
     const left = (run.result.findings ?? []).filter((finding) => finding.leftUntouched);
-    assert.equal(left.length, 0);
+    assert.ok(!left.some((finding) => /updated budget figures/i.test(finding.fact)));
     const todos = run.resolved.filter(
       (row) =>
         row.decision.kind === "write" &&
@@ -721,7 +791,7 @@ function main() {
     assert.equal(next.risks?.[0]?.title, "API supplier slips by two weeks");
   });
 
-  check("risk notes stated only in the source land on the create", () => {
+  check("omitted risk notes are not manufactured from a because clause", () => {
     const transcript =
       "There is a risk that the API supplier slips by two weeks because their security review is late.";
     const run = runCaptureV2FromModelJson({
@@ -748,43 +818,89 @@ function main() {
     assert.equal(op.type, "create_risk");
     if (op.type !== "create_risk") return;
     assert.equal(op.title, "API supplier slips by two weeks");
-    assert.match(op.notes ?? "", /security review is late/i);
+    assert.equal(op.notes, undefined);
+    const left = (run.result.findings ?? []).filter((row) => row.leftUntouched);
+    assert.ok(left.some((row) => /security review is late/i.test(row.fact)));
   });
 
-  check("knowledge text does not gain an unstated by-January deadline", () => {
-    const evidence =
+  check("broad evidence does not hide an unrepresented until-January qualifier", () => {
+    const transcript =
       "We agreed to keep the legacy API until January because the React replacement won't be ready.";
     const run = runCaptureV2FromModelJson({
-      transcript: evidence,
+      transcript,
       referenceDate: REFERENCE,
       rawModelJson: {
         observations: [
           {
             id: "obs-decision",
-            statement: "The React replacement won't be ready by January.",
-            evidence,
+            statement: "Keep the legacy API",
+            evidence: transcript,
             domain: "decision",
             disposition: "create_new",
             truthIntent: "current",
-            proposedValues: {
-              text: "The React replacement won't be ready by January.",
-            },
+            proposedValues: { text: "Keep the legacy API" },
           },
         ],
       },
       world: world(),
       projectId: PROJECT,
     });
-    const decision = run.resolved.find((row) => row.decision.kind === "write")?.decision;
-    const op = assertWrite(decision!);
-    assert.equal(op.type, "write_knowledge");
-    if (op.type !== "write_knowledge") return;
-    assert.doesNotMatch(op.text, /\bby January\b/i);
-    assert.match(op.text, /until January/i);
-    assert.match(op.text, /won't be ready/i);
+    const left = (run.result.findings ?? []).filter((row) => row.leftUntouched);
+    assert.ok(left.some((row) => /until January/i.test(row.fact)));
+    const knowledge = run.resolved.find(
+      (row) =>
+        row.decision.kind === "write" &&
+        row.decision.operation.type === "write_knowledge",
+    );
+    assert.ok(knowledge && knowledge.decision.kind === "write");
+    if (knowledge?.decision.kind === "write" && knowledge.decision.operation.type === "write_knowledge") {
+      assert.equal(knowledge.decision.operation.text, "Keep the legacy API");
+      assert.doesNotMatch(knowledge.decision.operation.text, /\bby January\b/i);
+    }
   });
 
-  check("a month without a day does not become the first of that month", () => {
+  check("knowledge wording is not locally rewritten when the model strengthens it", () => {
+    const transcript =
+      "We agreed to keep the legacy API until January because the React replacement won't be ready.";
+    const supplied = "The React replacement won't be ready by January.";
+    const run = runCaptureV2FromModelJson({
+      transcript,
+      referenceDate: REFERENCE,
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-decision",
+            statement: supplied,
+            evidence: transcript,
+            domain: "decision",
+            disposition: "create_new",
+            truthIntent: "current",
+            proposedValues: { text: supplied },
+          },
+        ],
+      },
+      world: world(),
+      projectId: PROJECT,
+    });
+    const knowledge = run.resolved.find(
+      (row) =>
+        row.decision.kind === "write" &&
+        row.decision.operation.type === "write_knowledge",
+    );
+    assert.ok(knowledge && knowledge.decision.kind === "write");
+    if (knowledge?.decision.kind === "write" && knowledge.decision.operation.type === "write_knowledge") {
+      assert.equal(knowledge.decision.operation.text, supplied);
+    }
+    const left = (run.result.findings ?? []).filter((row) => row.leftUntouched);
+    assert.ok(left.some((row) => /until January/i.test(row.fact)));
+  });
+
+  check("a supplied same-year date is not cleared by month-name parsing", () => {
+    const fields = readFileSync(
+      join(process.cwd(), "src/lib/capture-v2/semantic-fields.ts"),
+      "utf8",
+    );
+    assert.doesNotMatch(fields, /january|february|nextWeekday|because\s|as the \(/i);
     const transcript =
       "We agreed to keep the legacy API until January because the React replacement won't be ready.";
     const run = runCaptureV2FromModelJson({
@@ -815,7 +931,7 @@ function main() {
         row.decision.operation.type === "create_milestone" &&
         row.decision.operation.startAt?.slice(0, 10) === "2026-01-01",
     );
-    assert.equal(dated.length, 0);
+    assert.equal(dated.length, 1);
   });
 
   check("create_risk persistence writes notes on the existing risks.notes column", () => {

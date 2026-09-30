@@ -57,7 +57,6 @@ export function runCaptureV2FromModelJson(args: {
   const observations = applyCaptureSemanticContract(
     validation.observations,
     referenceDate,
-    args.transcript,
   );
   const leftovers = leftoverObservationsFromCoverage({
     transcript: args.transcript,

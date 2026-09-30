@@ -51,7 +51,7 @@ export const CAPTURE_V2_OBSERVATION_SCHEMA = `{
 
 export const CAPTURE_V2_PROMPT_RULES = `Rules:
 - Extract explicitly stated project facts only. Do not infer unstated project truth. Do not advise, recommend, diagnose, predict, or invent project meaning.
-- Split the transcript into the smallest project-relevant facts (multiple observations per sentence are expected).
+- Split the transcript into the smallest project-relevant facts when the sentence states independent facts. A single agreement or decision that includes its qualifier and reason stays one observation.
 - Every observation needs a verbatim evidence quote from the transcript.
 - candidateTargetId MUST be copied from the supplied current records. Never invent IDs.
 - If a person/risk/date/todo already exists, prefer update_existing or no_change over create_new.
@@ -68,6 +68,7 @@ export const CAPTURE_V2_PROMPT_RULES = `Rules:
 - Todo create: when the text describes one requested action and an explicit qualifier, instruction, or supporting detail for that action, emit one todo. Put the action in proposedValues.title and the qualifier in proposedValues.detail. Do not create two To Dos merely because one action was split. Two independent actions stay two To Dos.
 - Risk create: proposedValues.title is a concise faithful title. proposedValues.notes is the explicit supporting context, without adding probability, impact, owner, mitigation, or inference. An explicit risk sentence is a risk, not a leftover worry.
 - Knowledge/decision: preserve explicit source meaning. Do not strengthen temporal implications. Prefer faithful wording over an explanatory paraphrase. "won't be ready" together with a separate "until January" is not "won't be ready by January". An agreement ("we agreed to … until <month>") is knowledge or decision, not a risk and not a milestone.
+- A single explicit agreement or decision, together with its temporal qualifier and its explicit reason, should normally remain one knowledge or decision observation. Preserve temporal qualifiers such as "until January". Preserve the explicitly stated rationale. Do not strengthen that rationale into an unstated deadline. Do not split the reason into a separate project fact if doing so loses its relationship to the decision. If the full explicit meaning cannot be preserved in that one observation, disposition=left_untouched rather than a shortened write that drops part of the sentence.
 - Project-irrelevant chatter is domain=commentary and disposition=commentary.
 - Duplicate restatements: keep one observation and mark others disposition=merge.
 - If a supported project operation cannot be safely identified from the explicit wording, disposition=left_untouched. Put a short plain-English reason in commentary that describes the uncertainty (what is unclear), not advice. Example: "It isn't clear what Security is concerned about or what project information should change." Not: "You should create a risk for Security."

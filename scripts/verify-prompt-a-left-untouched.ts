@@ -288,11 +288,14 @@ function main() {
         },
       ],
     );
-    assert.ok(
-      !noChange.resolved.some(
-        (row) => row.observation.disposition === "left_untouched",
-      ),
+    const original = noChange.resolved.find((row) => row.observation.id === "obs-nc");
+    assert.ok(original);
+    assert.notEqual(original?.observation.disposition, "left_untouched");
+    assert.notEqual(original?.decision.kind, "write");
+    const residue = noChange.resolved.filter(
+      (row) => row.observation.disposition === "left_untouched",
     );
+    assert.ok(residue.some((row) => /licorice stands/i.test(row.observation.statement)));
   });
 
   check("mixed capture keeps clear clauses and surfaces leftover wording", () => {
@@ -333,8 +336,8 @@ function main() {
     const left = run.resolved.filter(
       (row) => row.observation.disposition === "left_untouched",
     );
-    assert.equal(left.length, 1);
-    assert.notEqual(left[0]!.decision.kind, "write");
+    assert.ok(left.some((row) => /Security might be worried/i.test(row.observation.statement)));
+    assert.ok(left.every((row) => row.decision.kind !== "write"));
     const actionable = run.resolved.filter(
       (row) => row.observation.disposition !== "left_untouched",
     );
