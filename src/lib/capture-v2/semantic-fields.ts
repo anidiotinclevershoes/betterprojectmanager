@@ -287,12 +287,7 @@ function rewriteDates(
     }
   }
 
-  const hasStart = START_DATE_KEYS.some((key) => values[key] != null && values[key] !== "");
-  if (
-    observation.domain === "todo" &&
-    observation.disposition === "create_new" &&
-    !hasStart
-  ) {
+  if (observation.domain === "todo" && observation.disposition === "create_new") {
     const weekdaySource = `${evidence}\n${asTrimmed(values.detail) ?? ""}`;
     const byWeekday = weekdaySource.match(
       /\bby\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i,
@@ -300,7 +295,12 @@ function rewriteDates(
     if (byWeekday && calendarDays(weekdaySource).length === 0) {
       const weekday = WEEKDAY_INDEX[byWeekday[1]!.toLowerCase()];
       const next = weekday === undefined ? null : nextWeekdayOnOrAfter(referenceDate, weekday);
-      if (next) {
+      const current = parsedIso(values.dueDate ?? values.date ?? values.dueAt);
+      const currentWeekday =
+        current == null
+          ? null
+          : new Date(Date.UTC(current.year, current.month - 1, current.day)).getUTCDay();
+      if (next && currentWeekday !== weekday) {
         values.dueDate = next;
         values.date = next;
       }

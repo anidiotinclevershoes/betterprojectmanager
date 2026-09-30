@@ -389,6 +389,36 @@ function main() {
     assert.equal(op.dueAt?.slice(0, 10), "2026-10-02");
   });
 
+  check("a same-year date that is not the named by-weekday is corrected", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript: "Add a To Do to send the comms pack by Friday.",
+      referenceDate: REFERENCE,
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-friday-wrong",
+            statement: "Send the comms pack",
+            evidence: "Add a To Do to send the comms pack by Friday.",
+            domain: "todo",
+            disposition: "create_new",
+            truthIntent: "current",
+            proposedValues: {
+              title: "Send the comms pack",
+              dueDate: "2026-10-07",
+            },
+          },
+        ],
+      },
+      world: world(),
+      projectId: PROJECT,
+    });
+    const decision = run.resolved.find((row) => row.decision.kind === "write")?.decision;
+    const op = assertWrite(decision!);
+    assert.equal(op.type, "create_todo");
+    if (op.type !== "create_todo") return;
+    assert.equal(op.dueAt?.slice(0, 10), "2026-10-02");
+  });
+
   check("a milestone does not gain a Friday date that was never a calendar day", () => {
     const run = runCaptureV2FromModelJson({
       transcript: "Launch by Friday.",
