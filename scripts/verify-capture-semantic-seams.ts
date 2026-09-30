@@ -359,6 +359,60 @@ function main() {
     assert.equal(op.dueAt?.slice(0, 10), "2026-10-02");
   });
 
+  check("a todo create with no date still resolves an explicit by-Friday", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript: "Add a To Do to send the comms pack by Friday.",
+      referenceDate: REFERENCE,
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-friday-missing",
+            statement: "Send the comms pack",
+            evidence: "Add a To Do to send the comms pack.",
+            domain: "todo",
+            disposition: "create_new",
+            truthIntent: "current",
+            proposedValues: {
+              title: "Send the comms pack",
+              detail: "by Friday",
+            },
+          },
+        ],
+      },
+      world: world(),
+      projectId: PROJECT,
+    });
+    const decision = run.resolved.find((row) => row.decision.kind === "write")?.decision;
+    const op = assertWrite(decision!);
+    assert.equal(op.type, "create_todo");
+    if (op.type !== "create_todo") return;
+    assert.equal(op.dueAt?.slice(0, 10), "2026-10-02");
+  });
+
+  check("a milestone does not gain a Friday date that was never a calendar day", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript: "Launch by Friday.",
+      referenceDate: REFERENCE,
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-launch-friday",
+            statement: "Launch",
+            evidence: "Launch by Friday.",
+            domain: "milestone",
+            disposition: "create_new",
+            truthIntent: "current",
+            proposedValues: { label: "Launch" },
+          },
+        ],
+      },
+      world: world(),
+      projectId: PROJECT,
+    });
+    const writes = run.resolved.filter((row) => row.decision.kind === "write");
+    assert.equal(writes.length, 0);
+  });
+
   check("stated milestone end date survives onto create_milestone.endAt", () => {
     const decision = planCaptureApply({
       item: suggestion({
@@ -416,6 +470,38 @@ function main() {
     const next = applyCaptureOperationInMemory(emptyState(), op);
     assert.equal(next.timeline[0]?.startAt.slice(0, 10), "2026-10-12");
     assert.equal(next.timeline[0]?.endAt?.slice(0, 10), "2026-10-16");
+  });
+
+  check("model evidence cannot invent a range end the transcript does not state", () => {
+    const run = runCaptureV2FromModelJson({
+      transcript: "Launch is 20 October.",
+      referenceDate: REFERENCE,
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-launch-invented-end",
+            statement: "Launch",
+            evidence: "Launch runs from 20 October to 21 October.",
+            domain: "milestone",
+            disposition: "create_new",
+            truthIntent: "current",
+            proposedValues: {
+              label: "Launch",
+              date: "2026-10-20",
+              endAt: "2026-10-21",
+            },
+          },
+        ],
+      },
+      world: world(),
+      projectId: PROJECT,
+    });
+    const decision = run.resolved.find((row) => row.decision.kind === "write")?.decision;
+    const op = assertWrite(decision!);
+    assert.equal(op.type, "create_milestone");
+    if (op.type !== "create_milestone") return;
+    assert.equal(op.startAt?.slice(0, 10), "2026-10-20");
+    assert.equal(op.endAt, undefined);
   });
 
   check("one stated date does not invent a range end", () => {
@@ -504,6 +590,41 @@ function main() {
     if (op?.type !== "create_todo") return;
     assert.equal(op.title, "Send the steering pack");
     assert.match(op.detail ?? "", /updated budget figures/);
+  });
+
+  check("todo detail already on the observation covers the qualifier sentence", () => {
+    const transcript =
+      "Add a To Do to send the steering pack. Include the updated budget figures.";
+    const run = runCaptureV2FromModelJson({
+      transcript,
+      referenceDate: REFERENCE,
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-send-detail",
+            statement: "Send the steering pack",
+            evidence: "Add a To Do to send the steering pack.",
+            domain: "todo",
+            disposition: "create_new",
+            truthIntent: "current",
+            proposedValues: {
+              title: "Send the steering pack",
+              detail: "Include the updated budget figures.",
+            },
+          },
+        ],
+      },
+      world: world(),
+      projectId: PROJECT,
+    });
+    const left = (run.result.findings ?? []).filter((finding) => finding.leftUntouched);
+    assert.equal(left.length, 0);
+    const todos = run.resolved.filter(
+      (row) =>
+        row.decision.kind === "write" &&
+        row.decision.operation.type === "create_todo",
+    );
+    assert.equal(todos.length, 1);
   });
 
   check("two independent actions stay two To Dos", () => {
@@ -631,6 +752,40 @@ function main() {
     assert.doesNotMatch(op.text, /\bby January\b/i);
     assert.match(op.text, /until January/i);
     assert.match(op.text, /won't be ready/i);
+  });
+
+  check("a month without a day does not become the first of that month", () => {
+    const transcript =
+      "We agreed to keep the legacy API until January because the React replacement won't be ready.";
+    const run = runCaptureV2FromModelJson({
+      transcript,
+      referenceDate: REFERENCE,
+      rawModelJson: {
+        observations: [
+          {
+            id: "obs-january",
+            statement: "Keep legacy API",
+            evidence: transcript,
+            domain: "milestone",
+            disposition: "create_new",
+            truthIntent: "current",
+            proposedValues: {
+              label: "Keep legacy API",
+              date: "2026-01-01",
+            },
+          },
+        ],
+      },
+      world: world(),
+      projectId: PROJECT,
+    });
+    const dated = run.resolved.filter(
+      (row) =>
+        row.decision.kind === "write" &&
+        row.decision.operation.type === "create_milestone" &&
+        row.decision.operation.startAt?.slice(0, 10) === "2026-01-01",
+    );
+    assert.equal(dated.length, 0);
   });
 
   check("create_risk persistence writes notes on the existing risks.notes column", () => {

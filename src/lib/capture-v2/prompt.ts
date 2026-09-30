@@ -55,18 +55,19 @@ export const CAPTURE_V2_PROMPT_RULES = `Rules:
 - Every observation needs a verbatim evidence quote from the transcript.
 - candidateTargetId MUST be copied from the supplied current records. Never invent IDs.
 - If a person/risk/date/todo already exists, prefer update_existing or no_change over create_new.
+- When authoritative current records are (none), an explicit new person, risk, milestone, or to-do is create_new. Do not target the project name with update_existing.
 - If share vs replace (or two plausible targets) cannot be decided from the transcript, disposition=ambiguous.
 - truthIntent=current only when the user is asserting this as current authoritative project truth (including explicit corrections, agreed dates/ownership, and agreed future milestones). truthIntent=non_current for historical, quoted, superseded, considered-but-not-agreed, or rejected alternatives. truthIntent=uncertain when it is unclear whether current truth should change.
 - Restating existing current truth without a change is disposition=no_change. Do not mark historical or quoted material as truthIntent=current.
 - Put domain-required values in proposedValues. Do not invent missing values. If a required value is unknown, omit it (Lume will Needs You) rather than guessing.
 - Person create: proposedValues.name must be the explicit usable person name. proposedValues.role only when the role is explicitly stated. Do not infer a role from responsibility or ownership language. Omit role when none was stated.
 - Milestone create: proposedValues.label and proposedValues.date (ISO YYYY-MM-DD). proposedValues.endAt only when an end date is explicitly stated. Do not invent a range from one date.
-- Resolve relative dates against the supplied reference date. Resolve yearless dates to the contextually appropriate year relative to that reference date. Do not invent an arbitrary historical year. If the year cannot be resolved safely, omit the date.
+- Resolve relative dates against the supplied reference date. Resolve yearless dates to the contextually appropriate year relative to that reference date. Do not invent an arbitrary historical year. If the year cannot be resolved safely, omit the date. A month name with no day number is not a date — do not invent day 1.
 - Availability: proposedValues.personName (or name) and proposedValues.awayFromIso (ISO). Optional awayToIso.
 - Responsibility: proposedValues.personName, proposedValues.scope, and proposedValues.ownershipSemantics (share|replace|continue|ambiguous).
 - Todo create: when the text describes one requested action and an explicit qualifier, instruction, or supporting detail for that action, emit one todo. Put the action in proposedValues.title and the qualifier in proposedValues.detail. Do not create two To Dos merely because one action was split. Two independent actions stay two To Dos.
 - Risk create: proposedValues.title is a concise faithful title. proposedValues.notes is the explicit supporting context, without adding probability, impact, owner, mitigation, or inference. An explicit risk sentence is a risk, not a leftover worry.
-- Knowledge/decision: preserve explicit source meaning. Do not strengthen temporal implications. Prefer faithful wording over an explanatory paraphrase. "won't be ready" together with a separate "until January" is not "won't be ready by January".
+- Knowledge/decision: preserve explicit source meaning. Do not strengthen temporal implications. Prefer faithful wording over an explanatory paraphrase. "won't be ready" together with a separate "until January" is not "won't be ready by January". An agreement ("we agreed to … until <month>") is knowledge or decision, not a risk and not a milestone.
 - Project-irrelevant chatter is domain=commentary and disposition=commentary.
 - Duplicate restatements: keep one observation and mark others disposition=merge.
 - If a supported project operation cannot be safely identified from the explicit wording, disposition=left_untouched. Put a short plain-English reason in commentary that describes the uncertainty (what is unclear), not advice. Example: "It isn't clear what Security is concerned about or what project information should change." Not: "You should create a risk for Security."

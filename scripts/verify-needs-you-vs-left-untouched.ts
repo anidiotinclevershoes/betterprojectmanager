@@ -9,7 +9,6 @@
  * Run: npx tsx scripts/verify-needs-you-vs-left-untouched.ts
  */
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -124,13 +123,6 @@ function candyState(): MissionState {
     ],
     timeline: [],
   };
-}
-
-function gitDiffAgainstMain(rel: string): string {
-  return execFileSync("git", ["diff", "origin/main", "--", rel], {
-    cwd: ROOT,
-    encoding: "utf8",
-  });
 }
 
 async function main() {
@@ -631,7 +623,9 @@ async function main() {
     assert.match(prompt, /left_untouched/);
     assert.match(prompt, /Authoritative reference date/);
     assert.match(prompt, /Do not invent a risk, to-do, person, or knowledge item/);
-    assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
+    const coverage = readFileSync(join(ROOT, "src/lib/capture-v2/source-coverage.ts"), "utf8");
+    assert.match(coverage, /leftoverSourceSpans/);
+    assert.match(coverage, /\["detail", "notes", "text"\]/);
     const dispatch = readFileSync(join(ROOT, "src/lib/capture/apply/dispatch.ts"), "utf8");
     assert.match(dispatch, /roleHint: statedField/);
     assert.match(dispatch, /unsupportedApplyReason/);

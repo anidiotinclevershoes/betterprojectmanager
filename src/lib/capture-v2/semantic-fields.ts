@@ -102,6 +102,50 @@ function namedWeekday(text: string): number | null {
   return [...found][0]!;
 }
 
+function distinctCalendarDays(text: string): Array<{ month: number; day: number }> {
+  const seen = new Set<string>();
+  const days: Array<{ month: number; day: number }> = [];
+  for (const day of calendarDays(text)) {
+    const key = `${day.month}-${day.day}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    days.push(day);
+  }
+  return days;
+}
+
+function textHasDay(text: string, month: number, day: number): boolean {
+  return calendarDays(text).some((found) => found.month === month && found.day === day);
+}
+
+/** A month name with no day number is not a date. A single weekday is left for weekday resolution. */
+function monthWithoutDay(text: string): boolean {
+  if (calendarDays(text).length > 0 || namedWeekday(text) !== null) return false;
+  return /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/i.test(
+    text,
+  );
+}
+
+/**
+ * A milestone end is real only when this observation quotes two different
+ * calendar days and the transcript also states the end day.
+ * Model evidence cannot invent a second day the transcript never said.
+ */
+function milestoneEndAllowed(args: {
+  evidence: string;
+  transcript: string;
+  end: { month: number; day: number } | null;
+}): boolean {
+  if (!args.end) return false;
+  const authority = args.transcript.trim() ? args.transcript : args.evidence;
+  if (distinctCalendarDays(authority).length < 2) return false;
+  if (distinctCalendarDays(args.evidence).length < 2) return false;
+  return (
+    textHasDay(authority, args.end.month, args.end.day) &&
+    textHasDay(args.evidence, args.end.month, args.end.day)
+  );
+}
+
 function contextualYearDay(
   referenceDate: string,
   month: number,
@@ -138,6 +182,7 @@ function anchorIso(args: {
   referenceDate: string;
   slot: "start" | "end";
 }): string | null | undefined {
+  if (monthWithoutDay(args.evidence)) return null;
   const days = calendarDays(args.evidence);
   const years = explicitYears(args.evidence);
   const proposed = parsedIso(args.proposed);
@@ -187,6 +232,7 @@ function anchorIso(args: {
 function rewriteDates(
   observation: CaptureObservationV2,
   referenceDate: string,
+  transcript: string,
 ): Record<string, unknown> {
   const values = { ...(observation.proposedValues ?? {}) };
   const evidence = `${observation.evidence}\n${observation.statement}`;
@@ -217,19 +263,48 @@ function rewriteDates(
       slot: "end",
     });
     if (!hasValue && next && observation.domain === "milestone" && key === "endAt") {
-      values[key] = next;
+      const end = parsedIso(next);
+      if (
+        end &&
+        milestoneEndAllowed({
+          evidence,
+          transcript,
+          end,
+        })
+      ) {
+        values[key] = next;
+      }
       continue;
     }
     if (!hasValue) continue;
     if (next === null) delete values[key];
     else if (next) values[key] = next;
   }
+  if (observation.domain === "milestone" && values.endAt) {
+    const end = parsedIso(values.endAt);
+    if (!milestoneEndAllowed({ evidence, transcript, end })) {
+      delete values.endAt;
+    }
+  }
+
+  const hasStart = START_DATE_KEYS.some((key) => values[key] != null && values[key] !== "");
   if (
-    observation.domain === "milestone" &&
+    observation.domain === "todo" &&
     observation.disposition === "create_new" &&
-    calendarDays(evidence).length < 2
+    !hasStart
   ) {
-    delete values.endAt;
+    const weekdaySource = `${evidence}\n${asTrimmed(values.detail) ?? ""}`;
+    const byWeekday = weekdaySource.match(
+      /\bby\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i,
+    );
+    if (byWeekday && calendarDays(weekdaySource).length === 0) {
+      const weekday = WEEKDAY_INDEX[byWeekday[1]!.toLowerCase()];
+      const next = weekday === undefined ? null : nextWeekdayOnOrAfter(referenceDate, weekday);
+      if (next) {
+        values.dueDate = next;
+        values.date = next;
+      }
+    }
   }
 
   return values;
@@ -267,8 +342,9 @@ function unstatedByMonth(text: string, evidence: string): boolean {
 function adjustObservation(
   observation: CaptureObservationV2,
   referenceDate: string,
+  transcript: string,
 ): CaptureObservationV2 {
-  const values = rewriteDates(observation, referenceDate);
+  const values = rewriteDates(observation, referenceDate, transcript);
   let statement = observation.statement;
 
   if (observation.domain === "person" && observation.disposition === "create_new") {
@@ -360,8 +436,11 @@ function foldTodoQualifiers(observations: CaptureObservationV2[]): CaptureObserv
 export function applyCaptureSemanticContract(
   observations: CaptureObservationV2[],
   referenceDate: string,
+  transcript = "",
 ): CaptureObservationV2[] {
   return foldTodoQualifiers(
-    observations.map((observation) => adjustObservation(observation, referenceDate)),
+    observations.map((observation) =>
+      adjustObservation(observation, referenceDate, transcript),
+    ),
   );
 }

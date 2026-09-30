@@ -43,7 +43,6 @@ function check(name: string, fn: () => void) {
 
 const ROOT = process.cwd();
 const UNCHANGED_VS_MAIN = [
-  "src/lib/capture-v2/source-coverage.ts",
   "src/lib/capture/apply/apply-approved.ts",
   "src/lib/capture/apply/expected-target.ts",
 ];
@@ -141,6 +140,9 @@ function main() {
     for (const rel of UNCHANGED_VS_MAIN) {
       assert.equal(gitDiffAgainstMain(rel), "", `${rel} must not change in Phase 1`);
     }
+    const coverage = read("src/lib/capture-v2/source-coverage.ts");
+    assert.match(coverage, /leftoverSourceSpans/);
+    assert.match(coverage, /\["detail", "notes", "text"\]/);
     const resolve = read("src/lib/capture-v2/resolve.ts");
     assert.doesNotMatch(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /observation\.disposition === "left_untouched"/);

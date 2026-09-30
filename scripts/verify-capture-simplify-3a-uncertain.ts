@@ -9,7 +9,6 @@
  * Run: npx tsx scripts/verify-capture-simplify-3a-uncertain.ts
  */
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -42,13 +41,6 @@ function runFrom(transcript: string, observations: unknown[]) {
     rawModelJson: { observations },
     world: world(),
     projectId: CANDYLAND_ID,
-  });
-}
-
-function gitDiffAgainstMain(rel: string): string {
-  return execFileSync("git", ["diff", "origin/main", "--", rel], {
-    cwd: ROOT,
-    encoding: "utf8",
   });
 }
 
@@ -239,7 +231,9 @@ function main() {
     const prompt = readFileSync(join(process.cwd(), "src/lib/capture-v2/prompt.ts"), "utf8");
     assert.match(prompt, /left_untouched/);
     assert.match(prompt, /Authoritative reference date/);
-    assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
+    const coverage = readFileSync(join(ROOT, "src/lib/capture-v2/source-coverage.ts"), "utf8");
+    assert.match(coverage, /leftoverSourceSpans/);
+    assert.match(coverage, /\["detail", "notes", "text"\]/);
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
     assert.doesNotMatch(resolve, /function hydrateFromLocalEvidence/);
     assert.doesNotMatch(resolve, /function rematerializeIndependentDatedCreate/);

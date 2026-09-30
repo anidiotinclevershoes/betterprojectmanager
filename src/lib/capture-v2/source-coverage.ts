@@ -78,6 +78,11 @@ function collectCoveredSpans(
     if (observation.statement !== observation.evidence) {
       takeQuote(observation.statement, observation.id);
     }
+    const values = observation.proposedValues ?? {};
+    for (const key of ["detail", "notes", "text"] as const) {
+      const quote = values[key];
+      if (typeof quote === "string") takeQuote(quote, observation.id);
+    }
   }
 
   return spans;
@@ -122,6 +127,15 @@ function alreadyAccounted(
     }
     if (statement && (statement === needle || statement.includes(needle))) {
       return true;
+    }
+    const values = observation.proposedValues ?? {};
+    for (const key of ["detail", "notes", "text"] as const) {
+      const extra = values[key];
+      if (typeof extra !== "string") continue;
+      const accounted = extra.replace(/\s+/g, " ").trim().toLowerCase();
+      if (accounted && (accounted === needle || accounted.includes(needle))) {
+        return true;
+      }
     }
   }
   return false;
