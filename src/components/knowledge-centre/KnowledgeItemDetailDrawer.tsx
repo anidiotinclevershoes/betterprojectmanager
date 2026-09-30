@@ -918,10 +918,6 @@ export function KnowledgeItemDetailDrawer({
                     Remove
                   </button>
                 ) : null}
-                <p className="ocean-item-close-remove-hint">
-                  Close keeps the item and its history. Remove deletes it from
-                  the project entirely.
-                </p>
               </>
             )}
           </footer>

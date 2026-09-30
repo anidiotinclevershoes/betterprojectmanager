@@ -1182,6 +1182,8 @@ export async function persistRiskCreate(
     title: string;
     status?: ProjectRisk["status"];
     source?: LegalRiskSource;
+    /** Canonical Issue Notes. Omit to leave the column untouched. */
+    notes?: string | null;
   },
 ): Promise<ProjectRisk> {
   await requireProjectInWorkspace(client, workspaceId, risk.projectId);
@@ -1194,6 +1196,10 @@ export async function persistRiskCreate(
     created_by: userId,
   };
   if (risk.id && UUID_RE.test(risk.id)) rowIn.id = risk.id;
+  if (risk.notes !== undefined) {
+    const notes = canonicalRiskNotes(risk.notes);
+    if (notes) rowIn.notes = notes;
+  }
   const { data, error } = await client
     .from("risks")
     .insert(rowIn)

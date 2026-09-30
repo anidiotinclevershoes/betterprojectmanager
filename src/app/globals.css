@@ -8375,6 +8375,20 @@ body {
   color: var(--text-secondary);
 }
 
+.ocean-ask-noticed-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 720px) {
+  .ocean-item-detail-drawer.is-manual-add .ocean-item-detail-actions .primary-btn,
+  .ocean-item-detail-drawer.is-manual-add .ocean-item-detail-actions .ghost-btn {
+    min-height: 44px;
+    height: 44px;
+  }
+}
+
 .ocean-ask-clear {
   margin-top: 0.65rem;
   border: 0;

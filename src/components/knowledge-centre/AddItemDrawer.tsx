@@ -43,7 +43,11 @@ export function AddItemDrawer({
     setError(null);
     const trimmed = title.trim();
     if (!trimmed) {
-      setError("Enter a title before saving.");
+      setError(
+        type === "knowledge"
+          ? "Enter knowledge before saving."
+          : "Enter a title before saving.",
+      );
       return;
     }
     setBusy(true);
@@ -52,7 +56,10 @@ export function AddItemDrawer({
         projectId,
         type,
         title: trimmed,
-        detail: detail.trim() || undefined,
+        detail:
+          type === "issue" || type === "todo"
+            ? detail.trim() || undefined
+            : undefined,
       });
       if (!created.ok || !created.id) {
         setError(created.error ?? "Could not save item.");
@@ -99,7 +106,7 @@ export function AddItemDrawer({
         }}
       />
       <aside
-        className="ocean-item-detail-drawer is-open"
+        className="ocean-item-detail-drawer is-open is-manual-add"
         role="dialog"
         aria-modal="true"
         aria-label="Add item"
@@ -141,17 +148,29 @@ export function AddItemDrawer({
               </button>
             ))}
           </div>
-          <label className="ocean-item-detail-edit">
-            <span>{type === "person" ? "Name" : "Title"}</span>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              data-testid="ocean-add-title"
-            />
-          </label>
-          {type !== "person" ? (
+          {type === "knowledge" ? (
             <label className="ocean-item-detail-edit">
-              <span>Detail</span>
+              <span>Knowledge</span>
+              <textarea
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                rows={6}
+                data-testid="ocean-add-knowledge-body"
+              />
+            </label>
+          ) : (
+            <label className="ocean-item-detail-edit">
+              <span>{type === "person" ? "Name" : "Title"}</span>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                data-testid="ocean-add-title"
+              />
+            </label>
+          )}
+          {type === "issue" || type === "todo" ? (
+            <label className="ocean-item-detail-edit">
+              <span>{type === "issue" ? "Notes" : "Detail"}</span>
               <textarea
                 value={detail}
                 onChange={(e) => setDetail(e.target.value)}
@@ -159,12 +178,12 @@ export function AddItemDrawer({
                 data-testid="ocean-add-detail"
               />
             </label>
-          ) : (
+          ) : type === "person" ? (
             <p className="ocean-home-muted">
               Single owner supported by the current project model. Tags are
               hidden for people.
             </p>
-          )}
+          ) : null}
           {type !== "person" ? (
             <ItemTagsEditor
               projectTags={state.projectTags ?? []}

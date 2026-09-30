@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 28 September 2026 (D-058 evidence corrected to the multi-person Page 09 mock; gap remains open). 25 September 2026 recorded the Waiting-on relationship gap. 14 September 2026: Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked.  
+**Last housekeeping:** 30 September 2026 (Manual Add false-save closed; D-058 and the other deferred product gaps remain open). 28 September 2026 (D-058 evidence corrected to the multi-person Page 09 mock; gap remains open). 25 September 2026 recorded the Waiting-on relationship gap. 14 September 2026: Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked.  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
@@ -734,6 +734,18 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 ## Resolved discoveries (reference)
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
+
+### Manual Add false save — Issue Notes and Knowledge body
+
+| Field | Value |
+| --- | --- |
+| **Status** | CLOSED for the audit blocker. Hosted migrations are still not applied. |
+| **Fixed in** | Final V1 convergence fix on `integration/figma-ui-convergence-v1` |
+| **Failure class** | Manual Add offered Detail for Issue and Knowledge, reported Save success, and dropped that text. Issue create wrote title only. Knowledge stored the title as the only body. |
+| **Fix summary** | Issue Detail maps to canonical `risks.notes` on create. Knowledge Manual Add offers one body and persists that string. No new column. The generic Close/Remove sentence is removed where those controls are absent. Ask “Lume noticed” uses the shared lightbulb. |
+| **Evidence** | `scripts/verify-manual-add-honesty.ts`; `e2e/manual-add-honesty.spec.ts` |
+| **Residual** | D-058, To Do edit, Person Name/Role edit, Settings, Person/To Do History, previous-item Back, To Do lifecycle/History atomicity, and durable billing usage stay open. Hosted deployment of `20260929120000` and `20260929140000` is still outstanding. |
+| **Related docs** | `docs/FIGMA_UI_CONVERGENCE_V1.md` |
 
 ### D-R56 — Prompt A can emit Left untouched (D-056)
 

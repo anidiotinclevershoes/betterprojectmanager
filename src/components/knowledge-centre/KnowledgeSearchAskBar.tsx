@@ -174,7 +174,10 @@ export function KnowledgeSearchAskBar({
               <p className="ocean-ask-answer-text">{answer.answer}</p>
               {answer.noticed?.length ? (
                 <div className="ocean-ask-noticed">
-                  <p className="ocean-ask-noticed-label">✦ Lume noticed</p>
+                  <p className="ocean-ask-noticed-label" data-testid="ocean-ask-noticed-label">
+                    <MeMark size="micro" />
+                    <span>Lume noticed</span>
+                  </p>
                   <ul>
                     {answer.noticed.map((n, i) => (
                       <li key={i}>{n}</li>

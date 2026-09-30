@@ -128,6 +128,7 @@ import {
 } from "@/lib/risks/lifecycle";
 import {
   applyRiskNotesLocal,
+  canonicalRiskNotes,
   historyEventForNotesPlan,
 } from "@/lib/risks/issue-notes";
 import {
@@ -2163,7 +2164,12 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               client,
               meta.workspaceId,
               meta.userId,
-              { projectId: input.projectId, title, source: "manual" },
+              {
+                projectId: input.projectId,
+                title,
+                source: "manual",
+                notes: canonicalRiskNotes(input.detail),
+              },
             );
             setState((prev) =>
               pushHistory(
@@ -2208,6 +2214,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
                   status: "open",
                   source: "manual",
                   createdAt: new Date().toISOString(),
+                  notes: canonicalRiskNotes(input.detail),
                 },
                 ...(prev.risks ?? []),
               ],

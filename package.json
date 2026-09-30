@@ -67,6 +67,7 @@
     "verify:ocean-capture": "npx --yes tsx scripts/verify-ocean-capture.ts",
     "verify:capture-experience": "npx --yes tsx scripts/verify-capture-experience.ts",
     "verify:ocean-item-detail": "npx --yes tsx scripts/verify-ocean-item-detail.ts",
+    "verify:manual-add-honesty": "npx --yes tsx scripts/verify-manual-add-honesty.ts",
     "verify:people-context-ui": "npx --yes tsx scripts/verify-people-context-ui.ts",
     "verify:person-detail": "npx --yes tsx scripts/verify-person-detail.ts",
     "verify:todo-detail": "npx --yes tsx scripts/verify-todo-detail.ts",
