@@ -1,3 +1,5 @@
+import { captureReferenceDate } from "./semantic-fields";
+
 /** Stable id for hosted provenance logs. Not a prompt rewrite. */
 export const CAPTURE_V2_PROMPT_ID = "capture-v2-observations";
 /** Matches the frozen eval baseline version. Do not bump without a deliberate freeze. */
@@ -24,11 +26,16 @@ export const CAPTURE_V2_OBSERVATION_SCHEMA = `{
       "mergeWithObservationId": "optional id of a duplicate observation",
       "proposedValues": {
         "name": "person create/update: explicit usable person name",
+        "role": "person create: explicit role only, omit when unstated",
         "personName": "availability/responsibility: explicit usable person name",
         "title": "todo/risk create: concise title",
+        "detail": "todo create: explicit qualifier for that one action, omit when unstated",
+        "notes": "risk create: explicit supporting context, omit when unstated",
         "label": "milestone create: semantic date label, not the whole transcript",
         "date": "ISO YYYY-MM-DD when the domain is a dated fact",
         "startAt": "ISO YYYY-MM-DD milestone date if not using date",
+        "endAt": "ISO YYYY-MM-DD milestone end only when a range end is stated",
+        "dueDate": "todo: ISO YYYY-MM-DD due date resolved against the reference date",
         "awayFromIso": "availability: ISO YYYY-MM-DD start",
         "awayToIso": "availability: ISO YYYY-MM-DD end, or omit to use awayFromIso",
         "scope": "responsibility: the owned thing",
@@ -52,11 +59,14 @@ export const CAPTURE_V2_PROMPT_RULES = `Rules:
 - truthIntent=current only when the user is asserting this as current authoritative project truth (including explicit corrections, agreed dates/ownership, and agreed future milestones). truthIntent=non_current for historical, quoted, superseded, considered-but-not-agreed, or rejected alternatives. truthIntent=uncertain when it is unclear whether current truth should change.
 - Restating existing current truth without a change is disposition=no_change. Do not mark historical or quoted material as truthIntent=current.
 - Put domain-required values in proposedValues. Do not invent missing values. If a required value is unknown, omit it (Lume will Needs You) rather than guessing.
-- Person create: proposedValues.name must be the explicit usable person name.
-- Milestone create: proposedValues.label and proposedValues.date (ISO YYYY-MM-DD).
+- Person create: proposedValues.name must be the explicit usable person name. proposedValues.role only when the role is explicitly stated. Do not infer a role from responsibility or ownership language. Omit role when none was stated.
+- Milestone create: proposedValues.label and proposedValues.date (ISO YYYY-MM-DD). proposedValues.endAt only when an end date is explicitly stated. Do not invent a range from one date.
+- Resolve relative dates against the supplied reference date. Resolve yearless dates to the contextually appropriate year relative to that reference date. Do not invent an arbitrary historical year. If the year cannot be resolved safely, omit the date.
 - Availability: proposedValues.personName (or name) and proposedValues.awayFromIso (ISO). Optional awayToIso.
 - Responsibility: proposedValues.personName, proposedValues.scope, and proposedValues.ownershipSemantics (share|replace|continue|ambiguous).
-- Todo create: proposedValues.title. Risk create: proposedValues.title. Knowledge/decision: proposedValues.text or a clear statement.
+- Todo create: when the text describes one requested action and an explicit qualifier, instruction, or supporting detail for that action, emit one todo. Put the action in proposedValues.title and the qualifier in proposedValues.detail. Do not create two To Dos merely because one action was split. Two independent actions stay two To Dos.
+- Risk create: proposedValues.title is a concise faithful title. proposedValues.notes is the explicit supporting context, without adding probability, impact, owner, mitigation, or inference. An explicit risk sentence is a risk, not a leftover worry.
+- Knowledge/decision: preserve explicit source meaning. Do not strengthen temporal implications. Prefer faithful wording over an explanatory paraphrase. "won't be ready" together with a separate "until January" is not "won't be ready by January".
 - Project-irrelevant chatter is domain=commentary and disposition=commentary.
 - Duplicate restatements: keep one observation and mark others disposition=merge.
 - If a supported project operation cannot be safely identified from the explicit wording, disposition=left_untouched. Put a short plain-English reason in commentary that describes the uncertainty (what is unclear), not advice. Example: "It isn't clear what Security is concerned about or what project information should change." Not: "You should create a risk for Security."
@@ -66,8 +76,14 @@ export const CAPTURE_V2_PROMPT_RULES = `Rules:
 export function buildObservationExtractionPrompt(args: {
   transcript: string;
   projectBlock: string;
+  /** ISO day the model must resolve relative and yearless dates against. */
+  referenceDate?: string;
 }): string {
+  const referenceDate = args.referenceDate?.trim() || captureReferenceDate();
   return `You extract atomic project observations. You do not mutate a database.
+
+Authoritative reference date: ${referenceDate}
+Resolve relative dates and yearless dates against this reference date only. Do not invent an arbitrary historical year. If the year cannot be resolved safely, omit the date.
 
 ${CAPTURE_V2_PROMPT_RULES}
 

@@ -43,9 +43,7 @@ function check(name: string, fn: () => void) {
 
 const ROOT = process.cwd();
 const UNCHANGED_VS_MAIN = [
-  "src/lib/capture-v2/run.ts",
   "src/lib/capture-v2/source-coverage.ts",
-  "src/lib/capture/apply/dispatch.ts",
   "src/lib/capture/apply/apply-approved.ts",
   "src/lib/capture/apply/expected-target.ts",
 ];
@@ -146,6 +144,11 @@ function main() {
     const resolve = read("src/lib/capture-v2/resolve.ts");
     assert.doesNotMatch(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /observation\.disposition === "left_untouched"/);
+    const run = read("src/lib/capture-v2/run.ts");
+    assert.match(run, /applyCaptureSemanticContract/);
+    const dispatch = read("src/lib/capture/apply/dispatch.ts");
+    assert.match(dispatch, /roleHint: statedField/);
+    assert.match(dispatch, /unsupportedApplyReason/);
   });
 
   check("model-emitted left_untouched stays Review-only and never Ready", () => {

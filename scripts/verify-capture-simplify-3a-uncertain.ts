@@ -236,7 +236,9 @@ function main() {
   });
 
   check("11. dated rematerialise / Prompt A stay in place; hydrate is gone", () => {
-    assert.equal(gitDiffAgainstMain("src/lib/capture-v2/prompt.ts"), "");
+    const prompt = readFileSync(join(process.cwd(), "src/lib/capture-v2/prompt.ts"), "utf8");
+    assert.match(prompt, /left_untouched/);
+    assert.match(prompt, /Authoritative reference date/);
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
     assert.doesNotMatch(resolve, /function hydrateFromLocalEvidence/);

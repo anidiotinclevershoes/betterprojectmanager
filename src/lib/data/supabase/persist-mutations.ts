@@ -914,6 +914,8 @@ export async function persistKnowledgeBullet(
     riskId?: string | null;
     /** Optional Apply receipt written in the same transaction as the risk. */
     receipt?: CaptureApplyReceipt | null;
+    /** Explicit supporting context written onto risks.notes in the same transaction. */
+    notes?: string | null;
   },
 ): Promise<{ riskId?: string }> {
   await requireProjectInWorkspace(client, workspaceId, projectId);
@@ -945,6 +947,7 @@ export async function persistKnowledgeBullet(
       )
         ? meta.riskId
         : crypto.randomUUID();
+    const notes = canonicalRiskNotes(meta?.notes);
     const { data, error } = await client.rpc("persist_risk_with_knowledge", {
       p_workspace_id: workspaceId,
       p_project_id: projectId,
@@ -955,6 +958,7 @@ export async function persistKnowledgeBullet(
         status: "open",
         source: "capture",
         created_by: userId,
+        ...(notes ? { notes } : {}),
       },
       p_receipt: meta?.receipt
         ? {

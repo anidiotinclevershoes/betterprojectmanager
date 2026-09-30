@@ -627,9 +627,14 @@ async function main() {
   });
 
   await check("Prompt A / rematerialise / hydrate / Apply spine stay in place", () => {
-    assert.equal(gitDiffAgainstMain("src/lib/capture-v2/prompt.ts"), "");
+    const prompt = readFileSync(join(ROOT, "src/lib/capture-v2/prompt.ts"), "utf8");
+    assert.match(prompt, /left_untouched/);
+    assert.match(prompt, /Authoritative reference date/);
+    assert.match(prompt, /Do not invent a risk, to-do, person, or knowledge item/);
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
-    assert.equal(gitDiffAgainstMain("src/lib/capture/apply/dispatch.ts"), "");
+    const dispatch = readFileSync(join(ROOT, "src/lib/capture/apply/dispatch.ts"), "utf8");
+    assert.match(dispatch, /roleHint: statedField/);
+    assert.match(dispatch, /unsupportedApplyReason/);
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
     assert.doesNotMatch(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /applyContradictorySiblingNeedsYou/);
