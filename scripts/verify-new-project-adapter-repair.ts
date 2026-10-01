@@ -305,7 +305,7 @@ async function main() {
     const risk = loaded.state.risks?.find((item) => item.title === "API supplier delay");
     assert.equal(risk?.notes, notes);
     const bundleSql = readSrc(
-      "supabase/migrations/20261001120000_create_project_bundle_risk_notes.sql",
+      "supabase/migrations/20261001111618_create_project_bundle_risk_notes.sql",
     );
     assert.match(bundleSql, /insert into public\.risks \(/);
     assert.match(bundleSql, /notes/);
