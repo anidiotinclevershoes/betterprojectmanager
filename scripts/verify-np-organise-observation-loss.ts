@@ -289,7 +289,11 @@ async function main() {
       assert.match(route, /provisionalItems: parsed\.items/);
       assert.match(parse, /parseObservationEnvelope/);
       assert.match(parse, /validateObservations\(parsed\.observations, \[\], null\)/);
-      assert.match(parse, /validation\.observations\.map/);
+      assert.match(
+        parse,
+        /applyCaptureSemanticContract\(validation\.observations, referenceDate\)/,
+      );
+      assert.match(parse, /const items: ProvisionalItem\[\] = observations\.map/);
       assert.match(parse, /recoverablePersonName/);
     });
 
