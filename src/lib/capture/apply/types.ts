@@ -75,10 +75,12 @@ export type CaptureLegalOperation =
       projectId: string;
       todoId: string;
     }
-  | {
+    | {
       type: "create_risk";
       projectId: string;
       title: string;
+      /** Explicit supporting context. Supplementary only. */
+      notes?: string;
       applyOperationId?: string;
     }
   | {

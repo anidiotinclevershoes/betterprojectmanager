@@ -1,15 +1,16 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { MeMark } from "@/components/brand/MeMark";
 import { useMission } from "@/lib/store";
 import { searchAuthoritativeProject } from "@/lib/knowledge-centre/search-authority";
 import { highlightMatches } from "@/lib/tell-me/knowledge-search";
 import { useTellMeSession } from "@/components/tell-me/TellMeSessionContext";
 
 /**
- * Deterministic Search Knowledge + ✦ Ask Lume — clearly distinct.
- * Search never calls AI. Ask uses existing Tell Me session (server-loaded
- * canonical truth on `/api/tell-me`; suggestions remain local MissionState cache).
+ * Page 09 Knowledge Centre: Ask Lume, then deterministic Search, on
+ * separate rows. Search never calls AI. Ask uses the existing Tell Me
+ * session (server-loaded canonical truth on `/api/tell-me`).
  */
 export function KnowledgeSearchAskBar({
   projectId,
@@ -63,49 +64,45 @@ export function KnowledgeSearchAskBar({
 
   return (
     <div className="ocean-search-ask" data-testid="ocean-search-ask">
-      <div className="ocean-search-ask-row">
-        <label className="ocean-search-field">
-          <span className="sr-only">Search knowledge</span>
-          <span className="ocean-search-ico" aria-hidden>
-            ⌕
-          </span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search knowledge…"
-            autoComplete="off"
-            data-testid="ocean-search-input"
-            data-ai="false"
-          />
-        </label>
-        <span className="ocean-search-or" aria-hidden>
-          or
-        </span>
-        <form className="ocean-ask-field" onSubmit={onAsk}>
-          <span className="ocean-ai-glyph" aria-hidden>
-            ✦
-          </span>
+      <form className="kc-ask-wide" onSubmit={onAsk}>
+        <label className="kc-ask-prompt">
+          <span className="sr-only">Ask Lume</span>
           <input
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Ask Lume anything…"
+            placeholder="Ask a project question… e.g. What is blocking UAT?"
             autoComplete="off"
             data-testid="ocean-ask-input"
             data-ai="true"
           />
-          <button
-            type="submit"
-            className="ocean-ask-send"
-            disabled={busy || !question.trim()}
-            aria-label="Ask Lume"
-            data-testid="ocean-ask-send"
-          >
-            {busy ? "…" : "→"}
-          </button>
-        </form>
-      </div>
+        </label>
+        <button
+          type="submit"
+          className="kc-ask-submit"
+          disabled={busy || !question.trim()}
+          aria-label="Ask Lume"
+          data-testid="ocean-ask-send"
+        >
+          <MeMark size="button" />
+          <span>{busy ? "…" : "Ask Lume"}</span>
+        </button>
+      </form>
+      <label className="kc-search-row">
+        <span className="sr-only">Search knowledge</span>
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search Knowledge…"
+          autoComplete="off"
+          data-testid="ocean-search-input"
+          data-ai="false"
+        />
+        <span className="kc-search-glyph" aria-hidden>
+          ⌕
+        </span>
+      </label>
 
       {search.trim() ? (
         <div
@@ -177,7 +174,10 @@ export function KnowledgeSearchAskBar({
               <p className="ocean-ask-answer-text">{answer.answer}</p>
               {answer.noticed?.length ? (
                 <div className="ocean-ask-noticed">
-                  <p className="ocean-ask-noticed-label">✦ Lume noticed</p>
+                  <p className="ocean-ask-noticed-label" data-testid="ocean-ask-noticed-label">
+                    <MeMark size="micro" />
+                    <span>Lume noticed</span>
+                  </p>
                   <ul>
                     {answer.noticed.map((n, i) => (
                       <li key={i}>{n}</li>

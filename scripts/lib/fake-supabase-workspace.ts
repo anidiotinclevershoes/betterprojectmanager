@@ -6,6 +6,12 @@
  * - projects.cloned_from_id SET NULL (clones survive)
  */
 
+import { planRiskNotesChange } from "../../src/lib/risks/issue-notes";
+import {
+  canonicalRiskTitle,
+  rejectMalformedTags,
+} from "../../src/lib/risks/issue-edit";
+
 export type FakeRow = Record<string, unknown>;
 
 const CASCADE_ON_PROJECT_DELETE = [
@@ -322,6 +328,280 @@ export class FakeWorkspaceClient {
         return { project_id: projectId };
       });
     }
+    if (fn === "set_risk_notes") {
+      return this.runAtomic(async () => {
+        const workspaceId = String(args.p_workspace_id ?? "");
+        const projectId = String(args.p_project_id ?? "");
+        const riskId = String(args.p_risk_id ?? "");
+        if (workspaceId !== this.workspaceId) {
+          throw new FakeRpcError("not a workspace member");
+        }
+        const project = this.tables.projects.find(
+          (row) => row.id === projectId && row.workspace_id === workspaceId,
+        );
+        if (!project) {
+          throw new FakeRpcError("project is not in this workspace");
+        }
+        const risk = this.tables.risks.find(
+          (row) =>
+            row.id === riskId &&
+            row.project_id === projectId &&
+            row.workspace_id === workspaceId,
+        );
+        if (!risk) throw new FakeRpcError("issue is not in this project");
+        const plan = planRiskNotesChange(
+          risk.notes == null ? null : String(risk.notes),
+          args.p_notes == null ? null : String(args.p_notes),
+        );
+        if (!plan.changed) {
+          return { ok: true, changed: false, notes: plan.notes };
+        }
+        const updated = await this.from("risks")
+          .update({ notes: plan.notes })
+          .eq("id", riskId)
+          .eq("project_id", projectId)
+          .eq("workspace_id", workspaceId);
+        if (updated.error) {
+          throw new FakeRpcError(updated.error.message, updated.error.code);
+        }
+        const inserted = await this.from("history_events").insert({
+          workspace_id: workspaceId,
+          project_id: projectId,
+          type: "other",
+          title: plan.title,
+          detail: plan.detail,
+          source: "user",
+          created_by: args.p_created_by ?? this.userId,
+          target_kind: "risk",
+          target_id: riskId,
+        });
+        if (inserted.error) {
+          throw new FakeRpcError(inserted.error.message, inserted.error.code);
+        }
+        const historyRow = Array.isArray(inserted.data)
+          ? inserted.data[0]
+          : null;
+        return {
+          ok: true,
+          changed: true,
+          notes: plan.notes,
+          history_id: historyRow?.id ?? null,
+          history_title: plan.title,
+          history_detail: plan.detail,
+        };
+      });
+    }
+    if (fn === "save_risk_edit") {
+      return this.runAtomic(async () => {
+        const workspaceId = String(args.p_workspace_id ?? "");
+        const projectId = String(args.p_project_id ?? "");
+        const riskId = String(args.p_risk_id ?? "");
+        if (workspaceId !== this.workspaceId) {
+          throw new FakeRpcError("not a workspace member");
+        }
+        const project = this.tables.projects.find(
+          (row) => row.id === projectId && row.workspace_id === workspaceId,
+        );
+        if (!project) {
+          throw new FakeRpcError("project is not in this workspace");
+        }
+        const risk = this.tables.risks.find(
+          (row) =>
+            row.id === riskId &&
+            row.project_id === projectId &&
+            row.workspace_id === workspaceId,
+        );
+        if (!risk) throw new FakeRpcError("issue is not in this project");
+
+        const titleNext = canonicalRiskTitle(
+          args.p_title == null ? "" : String(args.p_title),
+        );
+        if (!titleNext) throw new FakeRpcError("issue title is blank");
+        const titlePrev = canonicalRiskTitle(String(risk.title ?? ""));
+        const titleChanged = titlePrev !== titleNext;
+        const notesPlan = planRiskNotesChange(
+          risk.notes == null ? null : String(risk.notes),
+          args.p_notes == null ? null : String(args.p_notes),
+        );
+        const parsedTags = rejectMalformedTags(args.p_tags);
+        if (!parsedTags.ok) throw new FakeRpcError(parsedTags.error);
+
+        const currentLinks = this.tables.item_tags.filter(
+          (row) =>
+            row.project_id === projectId &&
+            row.workspace_id === workspaceId &&
+            row.target_kind === "risk" &&
+            row.target_id === riskId,
+        );
+        const currentSlugs = currentLinks.map((link) => {
+          const tag = this.tables.project_tags.find(
+            (row) => row.id === link.tag_id && row.project_id === projectId,
+          );
+          return tag ? String(tag.slug) : "";
+        });
+        const desiredSlugs = parsedTags.tags.map((tag) => tag.slug);
+        const tagsChanged = !sameSlugSet(currentSlugs.filter(Boolean), desiredSlugs);
+        if (!titleChanged && !notesPlan.changed && !tagsChanged) {
+          return this.riskEditPayload(risk, {
+            changed: false,
+            titleChanged: false,
+            notesChanged: false,
+            tagsChanged: false,
+            title: String(risk.title ?? ""),
+            notes: notesPlan.notes,
+            updatedAt: risk.updated_at == null ? null : String(risk.updated_at),
+            history: [],
+          });
+        }
+
+        if (titleChanged || notesPlan.changed) {
+          const patch: FakeRow = {};
+          if (titleChanged) patch.title = titleNext;
+          if (notesPlan.changed) patch.notes = notesPlan.notes;
+          const updated = await this.from("risks")
+            .update(patch)
+            .eq("id", riskId)
+            .eq("project_id", projectId)
+            .eq("workspace_id", workspaceId);
+          if (updated.error) {
+            throw new FakeRpcError(updated.error.message, updated.error.code);
+          }
+        }
+
+        const history: FakeRow[] = [];
+        if (titleChanged) {
+          const detail = `Previous title:\n${titlePrev}\nCurrent title:\n${titleNext}`;
+          const inserted = await this.from("history_events").insert({
+            workspace_id: workspaceId,
+            project_id: projectId,
+            type: "other",
+            title: "Issue title updated",
+            detail,
+            source: "user",
+            created_by: args.p_created_by ?? this.userId,
+            target_kind: "risk",
+            target_id: riskId,
+          });
+          if (inserted.error) {
+            throw new FakeRpcError(inserted.error.message, inserted.error.code);
+          }
+          const row = Array.isArray(inserted.data) ? inserted.data[0] : null;
+          history.push({
+            id: row?.id ?? null,
+            title: "Issue title updated",
+            detail,
+            created_at: row?.created_at ?? null,
+          });
+        }
+        if (notesPlan.changed) {
+          const inserted = await this.from("history_events").insert({
+            workspace_id: workspaceId,
+            project_id: projectId,
+            type: "other",
+            title: notesPlan.title,
+            detail: notesPlan.detail,
+            source: "user",
+            created_by: args.p_created_by ?? this.userId,
+            target_kind: "risk",
+            target_id: riskId,
+          });
+          if (inserted.error) {
+            throw new FakeRpcError(inserted.error.message, inserted.error.code);
+          }
+          const row = Array.isArray(inserted.data) ? inserted.data[0] : null;
+          history.push({
+            id: row?.id ?? null,
+            title: notesPlan.title,
+            detail: notesPlan.detail,
+            created_at: row?.created_at ?? null,
+          });
+        }
+
+        if (tagsChanged) {
+          const tagIds: string[] = [];
+          for (const tag of parsedTags.tags) {
+            let existing = this.tables.project_tags.find(
+              (row) => row.project_id === projectId && row.slug === tag.slug,
+            );
+            if (!existing) {
+              const inserted = await this.from("project_tags").insert({
+                workspace_id: workspaceId,
+                project_id: projectId,
+                name: tag.name,
+                slug: tag.slug,
+                origin: "custom",
+              });
+              if (inserted.error) {
+                if (inserted.error.code === "23505") {
+                  existing = this.tables.project_tags.find(
+                    (row) => row.project_id === projectId && row.slug === tag.slug,
+                  );
+                } else {
+                  throw new FakeRpcError(
+                    inserted.error.message,
+                    inserted.error.code,
+                  );
+                }
+              } else {
+                existing = Array.isArray(inserted.data) ? inserted.data[0] : undefined;
+              }
+            }
+            if (!existing?.id) {
+              throw new FakeRpcError("could not save issue tags");
+            }
+            tagIds.push(String(existing.id));
+          }
+          for (const link of this.tables.item_tags.filter(
+            (row) =>
+              row.project_id === projectId &&
+              row.workspace_id === workspaceId &&
+              row.target_kind === "risk" &&
+              row.target_id === riskId &&
+              !tagIds.includes(String(row.tag_id)),
+          )) {
+            const deleted = await this.from("item_tags").delete().eq("id", link.id);
+            if (deleted.error) {
+              throw new FakeRpcError(deleted.error.message, deleted.error.code);
+            }
+          }
+          const missing = tagIds.filter(
+            (tagId) =>
+              !this.tables.item_tags.some(
+                (row) =>
+                  row.tag_id === tagId &&
+                  row.target_kind === "risk" &&
+                  row.target_id === riskId,
+              ),
+          );
+          if (missing.length) {
+            const inserted = await this.from("item_tags").insert(
+              missing.map((tagId) => ({
+                workspace_id: workspaceId,
+                project_id: projectId,
+                tag_id: tagId,
+                target_kind: "risk",
+                target_id: riskId,
+              })),
+            );
+            if (inserted.error) {
+              throw new FakeRpcError(inserted.error.message, inserted.error.code);
+            }
+          }
+        }
+
+        const saved = this.tables.risks.find((row) => row.id === riskId) ?? risk;
+        return this.riskEditPayload(saved, {
+          changed: true,
+          titleChanged,
+          notesChanged: notesPlan.changed,
+          tagsChanged,
+          title: titleChanged ? titleNext : String(saved.title ?? ""),
+          notes: notesPlan.notes,
+          updatedAt: saved.updated_at == null ? null : String(saved.updated_at),
+          history,
+        });
+      });
+    }
     if (fn === "delete_project_bundle") {
       return this.runAtomic(async () => {
         const workspaceId = String(args.p_workspace_id ?? "");
@@ -424,6 +704,59 @@ export class FakeWorkspaceClient {
         row.cloned_from_id = null;
       }
     }
+  }
+
+  private riskEditPayload(
+    risk: FakeRow,
+    fields: {
+      changed: boolean;
+      titleChanged: boolean;
+      notesChanged: boolean;
+      tagsChanged: boolean;
+      title: string;
+      notes: string | null;
+      updatedAt: string | null;
+      history: FakeRow[];
+    },
+  ) {
+    const projectId = String(risk.project_id ?? "");
+    const riskId = String(risk.id ?? "");
+    const links = this.tables.item_tags.filter(
+      (row) =>
+        row.project_id === projectId &&
+        row.workspace_id === risk.workspace_id &&
+        row.target_kind === "risk" &&
+        row.target_id === riskId,
+    );
+    const tags = links
+      .map((link) =>
+        this.tables.project_tags.find(
+          (row) => row.id === link.tag_id && row.project_id === projectId,
+        ),
+      )
+      .filter((row): row is FakeRow => Boolean(row))
+      .sort((a, b) => String(a.slug).localeCompare(String(b.slug)))
+      .map((row) => ({
+        id: row.id,
+        name: row.name,
+        slug: row.slug,
+        origin: row.origin ?? "custom",
+      }));
+    return {
+      ok: true,
+      changed: fields.changed,
+      title_changed: fields.titleChanged,
+      notes_changed: fields.notesChanged,
+      tags_changed: fields.tagsChanged,
+      title: fields.title,
+      notes: fields.notes,
+      updated_at: fields.updatedAt,
+      history: fields.history,
+      tags,
+      item_tags: links
+        .map((row) => ({ id: row.id, tag_id: row.tag_id }))
+        .sort((a, b) => String(a.tag_id).localeCompare(String(b.tag_id))),
+    };
   }
 }
 
@@ -661,6 +994,12 @@ function asRow(value: unknown): FakeRow {
 function asArray(value: unknown): FakeRow[] {
   if (!Array.isArray(value)) return [];
   return value.map((row) => asRow(row));
+}
+
+function sameSlugSet(left: string[], right: string[]): boolean {
+  if (left.length !== right.length) return false;
+  const seen = new Set(left);
+  return right.every((slug) => seen.has(slug));
 }
 
 function now() {

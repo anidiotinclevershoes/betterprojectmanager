@@ -46,6 +46,8 @@ type ObservationCandidate = {
   confidence: number;
   source: "finding" | "insight" | "transcript";
   findingId?: string;
+  /** Structured finding that already has a proposed review operation. */
+  operationLinked?: boolean;
 };
 
 function ensurePhrase(text: string): string {
@@ -172,6 +174,13 @@ export function dedupeObservationCandidates(
     }
 
     const existing = kept[idx];
+    // An unlinked insight must not displace an operation-linked finding
+    // just because its confidence number is higher.
+    if (existing.operationLinked && !next.operationLinked) continue;
+    if (next.operationLinked && !existing.operationLinked) {
+      kept[idx] = next;
+      continue;
+    }
     const preferNext =
       (next.source === "finding" && existing.source !== "finding") ||
       (next.category !== "other" && existing.category === "other") ||
@@ -337,7 +346,9 @@ export function buildCaptureObservations(
 
   for (const finding of result.findings ?? []) {
     const c = candidateFromFinding(finding);
-    if (c) candidates.push(c);
+    if (!c) continue;
+    if (opsByFinding.has(finding.id)) c.operationLinked = true;
+    candidates.push(c);
   }
 
   for (const insight of result.insights ?? []) {

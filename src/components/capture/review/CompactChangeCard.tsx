@@ -2,7 +2,7 @@
 
 import type { ChangeDiff } from "@/lib/capture/review/viewModel";
 import type { SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import "./review-cards.css";
 import { DomainRow, OperationBar } from "./ReviewBadge";
 import {
@@ -165,6 +165,7 @@ export function CompactChangeCard({
   needsYouHeadline,
   needsYouDetail,
   reviewReason,
+  forceCollapsed = false,
 }: {
   entityKind: SuggestionKind;
   entityLabel: string;
@@ -183,7 +184,10 @@ export function CompactChangeCard({
   needsYouHeadline?: string;
   needsYouDetail?: string | null;
   reviewReason?: import("@/lib/capture/review/reviewReason").ReviewReason | null;
+  /** Global Collapse changes. Presentation only. */
+  forceCollapsed?: boolean;
 }) {
+  const [collapsed, setCollapsed] = useState(Boolean(forceCollapsed));
   const attention = readiness ?? (emphasized ? "needs_review" : undefined);
   const family = reviewOpFamily(operation, attention, reviewReason);
 
@@ -208,15 +212,26 @@ export function CompactChangeCard({
         "lume-review-card",
         reviewFamilyClass(family),
         highlighted ? "is-flash" : "",
+        collapsed ? "is-collapsed" : "",
       ]
         .filter(Boolean)
         .join(" ")}
       data-review-family={family}
       data-review-kind={entityKind}
+      data-review-collapsed={collapsed ? "true" : "false"}
       aria-label={articleLabel}
     >
       <header className="lume-review-head">
         <OperationBar family={family} operation={operation} />
+        <button
+          type="button"
+          className="p09-review-card-toggle"
+          aria-expanded={!collapsed}
+          data-testid="review-card-collapse"
+          onClick={() => setCollapsed((value) => !value)}
+        >
+          {collapsed ? "Expand" : "Collapse"}
+        </button>
       </header>
 
       <div className="lume-review-body">

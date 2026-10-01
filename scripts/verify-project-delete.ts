@@ -455,10 +455,10 @@ async function main() {
     assert.match(ui, /danger-btn/);
     assert.match(ui, /project\.name/);
     assert.doesNotMatch(ui, /✦|ocean-ai-glyph/);
-    const workspace = readSrc(
-      "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
+    const header = readSrc(
+      "src/components/knowledge-centre/ProjectWorkspaceHeader.tsx",
     );
-    assert.match(workspace, /DeleteProjectButton/);
+    assert.match(header, /DeleteProjectButton/);
 
     assert.equal(
       shouldWriteDurableMissionCache({

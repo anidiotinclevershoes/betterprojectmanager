@@ -1,34 +1,38 @@
 "use client";
 
-export type OceanProjectMode =
-  | "capture"
-  | "knowledge"
-  | "catch-me-up"
-  | "advise";
+import { MeMark } from "@/components/brand/MeMark";
+
+export type OceanProjectMode = "home" | "capture" | "knowledge" | "scan";
 
 const MODES: Array<{
-  id: Exclude<OceanProjectMode, "advise">;
+  id: OceanProjectMode;
   label: string;
+  narrowLabel?: string;
   testId: string;
   ai?: boolean;
+  homeIcon?: boolean;
 }> = [
+  { id: "home", label: "Home", testId: "ocean-mode-home", homeIcon: true },
   { id: "capture", label: "Capture", testId: "ocean-mode-capture", ai: true },
   {
     id: "knowledge",
     label: "Knowledge Centre",
+    narrowLabel: "Knowledge",
     testId: "ocean-mode-knowledge",
   },
   {
-    id: "catch-me-up",
-    label: "Catch Me Up",
-    testId: "ocean-mode-catch-me-up",
+    id: "scan",
+    label: "Project Scan",
+    narrowLabel: "Scan",
+    testId: "ocean-mode-scan",
     ai: true,
   },
 ];
 
 /**
- * Capture / Knowledge Centre / Catch Me Up / Advise — project modes, not sidebar nav.
- * Advise stays parked (Coming soon). Coach is not a mode.
+ * Home / Capture / Knowledge Centre / Project Scan.
+ * One tab tree. Desktop follows Page 09 TopProjectNav; the narrow
+ * breakpoint only changes presentation. Catch Me Up is not a tab.
  */
 export function ProjectModeSelector({
   mode,
@@ -52,35 +56,28 @@ export function ProjectModeSelector({
             type="button"
             role="tab"
             aria-selected={selected}
+            aria-label={item.label}
             className={`ocean-mode-tab is-${item.id} ${selected ? "is-selected" : ""}`}
             onClick={() => onChange(item.id)}
             data-testid={item.testId}
           >
-            {item.ai ? (
-              <span className="ocean-ai-glyph" aria-hidden>
-                ✦
-              </span>
+            {item.homeIcon ? (
+              <img
+                className="ocean-mode-home-icon"
+                src="/brand/nav-home.svg"
+                alt=""
+                width={16}
+                height={16}
+              />
             ) : null}
-            {item.label}
+            {item.ai ? <MeMark size="button" /> : null}
+            <span className="ocean-mode-label">{item.label}</span>
+            {item.narrowLabel ? (
+              <span className="ocean-mode-narrow-label">{item.narrowLabel}</span>
+            ) : null}
           </button>
         );
       })}
-      <button
-        type="button"
-        role="tab"
-        aria-selected={false}
-        aria-disabled="true"
-        disabled
-        className="ocean-mode-tab is-advise is-disabled"
-        title="Advise is coming soon"
-        data-testid="ocean-mode-advise"
-      >
-        <span className="ocean-ai-glyph" aria-hidden>
-          ✦
-        </span>
-        Advise
-        <span className="ocean-coming-soon">Coming soon</span>
-      </button>
     </div>
   );
 }

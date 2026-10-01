@@ -1,7 +1,7 @@
 # Lume product decisions register
 
 **Status:** Living register of semantics engineering must **not** invent  
-**Date:** 12 September 2026  
+**Date:** 29 September 2026 (CD-010 atomic Issue edit amendment). CD-008–CD-011 were recorded 25 September 2026. Earlier rows remain 12 September 2026.  
 **Owned by:** Product Owner  
 **Docs entry:** [`docs/README.md`](./README.md)
 
@@ -43,3 +43,105 @@ Engineering may record a gap here and keep current safe behaviour. Do not block 
 | CD-004 | Responsibilities are optional; multiple supported | Constitution §7 |
 | CD-005 | Tags are retrieval metadata only | Constitution §6 |
 | CD-006 | Ready means the same production Apply path can execute; Apply still revalidates | Canonical contract |
+| CD-008 | No user-facing To Do Type taxonomy. `todos.kind` stays an internal routing value | This register; Page 09 working mocks |
+| CD-009 | Waiting on is zero or more relationships to existing People. `todos.waiting_on` is not that model | This register; D-058 |
+| CD-010 | Notes stay supplementary and must not replace structured project truth | This register |
+| CD-011 | Page 09 To Do, Issue and Person screens are approved working mocks. They cannot override canonical product or domain contracts. They can override current UI presentation | Figma `Lume-V1-UX` page `09` section M |
+
+---
+
+## UI convergence semantics (25 September 2026)
+
+These decisions govern the current UI work. Current `main` is authoritative for the implementation and domain architecture that exists today: schema, persistence, write paths, established contracts, and other implementation constraints. It is not automatically the visual or UI authority.
+
+CD-007 is unused here so it can stay with the open pre-V1 assignee note (PR #187). This lock does not decide assignment.
+
+### CD-008 — No user-facing To Do Type
+
+Do not introduce or preserve a user-facing To Do “Type” taxonomy unless a later canonical product decision requires one. None does today.
+
+`todos.kind` (`ACTION | WAITING | CHASE | REMINDER`) remains an internal routing value. It is not a Type control. The approved Page 09 To Do detail and edit mocks hide that field. Do not invent a new structured type to put back in its place.
+
+### CD-009 — Waiting on is many existing People
+
+Waiting on is a relationship from a To Do to zero or more existing project People. It is not one free-text person or string. It is not assignment, and it is not responsibility.
+
+The current domain does not implement this. `todos.waiting_on` is one nullable string. That gap is D-058. Do not fake the relationship by joining names into `waiting_on`, and do not narrow the product rule to match the string.
+
+### CD-010 — Notes stay supplementary
+
+Notes are supplementary text only. They must never silently create, overwrite, infer, or replace structured project truth (status, dates, people, responsibilities, waiting relationships, owners, or other canonical fields).
+
+| Surface | Notes field |
+| --- | --- |
+| To Do | Existing `todos.detail` |
+| Knowledge | Existing `knowledge_items.body` |
+| Date / Milestone | Existing `milestones.notes` |
+| Issue | Amended 28 September 2026. See the amendment below. The 25 September row that said Issue had no notes field is superseded |
+| Person | No notes field on the approved Page 09 Person detail/edit screens. Do not add a Person Notes requirement |
+
+#### CD-010 amendment — 28 September 2026 — Issue Notes
+
+Approved Page 09 Section M requires Issue Notes. This amends the Issue row above. It does not add a Person Notes requirement.
+
+- Issue Notes are mutable current context. They may be added, updated, or completely cleared.
+- They stay supplementary. They must not create, overwrite, infer, or replace structured Issue status or other canonical fields.
+- **29 Sep 2026 — data foundation:** `public.risks.notes` is a nullable text column. NULL means no current Notes. There is no backfill and no synthetic default.
+- `set_risk_notes` writes the Notes change and one targeted History event in the same transaction. Clearing current Notes sets the column to NULL and keeps the previous text on that History row. A no-op does not write a History event.
+- Page 09 Issue detail now shows Notes and exact History.
+- **29 Sep 2026 — atomic Issue edit:** `save_risk_edit` is the one durable Save for Title, Notes, and retrieval tags. Title, Notes, tag associations, and any required History from that Save commit together or roll back together. A tags-only Save does not write canonical History and does not bump Risk `updated_at`. A no-op writes nothing. Title changes update the domain Risk only. They do not rewrite legacy `knowledge.sections.risks` prose, because domain `risks` is current Issue authority. Notes remain out of Capture, Search, Tell Me, Project Scan, recommendations, timeline, and ownership.
+- **29 Sep 2026 — Page 09 editor mounted:** Open and watch Issues show Edit issue. The editor is draft presentation for Title, Notes, and Tags only. Save calls `saveRiskEdit` once. It does not compose `setRiskNotes` and `saveItemTags`. Discard writes nothing. Resolved Issues keep Reopen and do not show Edit. Legacy Knowledge risk prose is not rewritten. Hosted migrations `20260929120000_issue_notes_and_history_target.sql` and `20260929140000_save_risk_edit.sql` are not deployed. This programme is not complete.
+
+### CD-011 — Page 09 mock authority
+
+Figma file `Lume-V1-UX` (`TPzPxiSMFgPQBZPDNzQ6LL`), page `09 — REVIEW · MAGIC PATTERNS CONVERGENCE — NON-AUTHORITY`, section M To Do, Issue and Person detail/edit screens are approved working mocks for UI convergence. The rest of page 09 is unchanged and is not promoted by this decision.
+
+Standing precedence:
+
+1. Canonical product/truth and behavioural/specialist contracts
+2. Design Authority Register
+3. Signed/approved UI authority, components, and patterns
+4. Approved screen compositions and working mocks
+5. Current UI implementation
+
+These screens cannot override canonical product or domain contracts. They can override an older or current UI presentation where that is the explicit purpose of the convergence work. An implementation constraint is surfaced as a gap. The approved design is not silently changed to match the old UI. D-058 is the example: Waiting on stays a relationship to multiple existing People, the single `todos.waiting_on` string does not implement it, and that support is not faked.
+
+#### CD-011 note — 29 September 2026 — Person detail
+
+Page 09 Person detail now follows `798:9587` using `getPersonBundle`. People tags remain prohibited. Add responsibility reuses the explicit share/replace ownership flow. Person Name/Role editing remains blocked pending an identity-safe mutation. Person-targeted History remains unavailable.
+
+- `BLOCKED — DATA MODEL: Person created/updated timestamps are not available in the current Person state.`
+- `BLOCKED — PERSON IDENTITY: no reviewed atomic Name/Role edit contract exists yet.`
+- `OPEN — HISTORY ATTRIBUTION: Person-targeted History identity is not yet implemented.`
+- `BLOCKED — INTERACTION CONTRACT: true previous-item Back restoration is not yet supported.`
+
+This does not mark Person edit or the wider UI convergence programme complete.
+
+#### CD-011 note — 29 September 2026 — To Do detail
+
+Page 09 To Do detail now follows `798:9301` for a genuine `TodoItem`. Type stays internal. Waiting On remains the D-058 legacy single string, so Edit To Do is not mounted. To Do-targeted History remains unavailable. `toggleTodo` lifecycle and project History stay sequential, not one transaction.
+
+- `BLOCKED — DATA MODEL: To Do does not currently expose a durable updatedAt.`
+- `BLOCKED — D-058: signed Waiting On is zero-or-more existing People; production still stores one legacy string.`
+- `BLOCKED — DATA MODEL: Edit To Do withheld until D-058 Waiting On representation is resolved.`
+- `OPEN — HISTORY ATTRIBUTION: To Do-targeted History identity is not yet implemented.`
+- `OPEN — LIFECYCLE/HISTORY ATOMICITY: toggleTodo persists To Do state and project History sequentially; a History failure can occur after the canonical update.`
+- `BLOCKED — INTERACTION CONTRACT: true previous-item Back restoration is not yet supported.`
+
+This does not mark To Do editing or the wider UI convergence programme complete.
+
+#### CD-011 note — 29 September 2026 — Sidebar
+
+The canonical desktop sidebar follows Page 09 / Page 07 `601:836`: 220px, lightbulb plus plain Lume, `+ New project`, the project list, and Account. Legacy product and development links are not in that sidebar. Their routes remain. Desktop collapse is retired. Settings is not mounted.
+
+- `BLOCKED — PRODUCT SURFACE: signed sidebar requires Settings, but no Settings route/surface exists.`
+
+The mobile hamburger stays until a separate narrow-shell decision. This does not mark the wider UI convergence programme complete.
+
+#### CD-011 note — 29 September 2026 — Project top chrome
+
+Desktop project routes no longer lay out `TopHeader`. `ProjectWorkspaceHeader` is the Page 03 identity and compact usage callout. The visible allowance is the existing local `analysesRemaining` value, linked to Account for subscription management. It is not token use and not a spend ledger.
+
+- `OPEN — USAGE METER: local analysis allowance is informational and is not durable billing usage.`
+
+Narrow project chrome stays about 160px and omits that callout. Delete project remains on the meta line because production already has the durable action and Page 03 does not place it. Non-project `TopHeader` behaviour is unchanged. This does not mark the wider UI convergence programme complete.

@@ -156,8 +156,8 @@ check("project AI Catch Me Up mode is unchanged", () => {
     join(ROOT, "src/components/knowledge-centre/OceanProjectWorkspace.tsx"),
     "utf8",
   );
-  assert.match(workspace, /CatchMeUpPanel/);
-  assert.match(workspace, /mode === "catch-me-up"/);
+  assert.doesNotMatch(workspace, /CatchMeUpPanel/);
+  assert.doesNotMatch(workspace, /mode === "catch-me-up"/);
   assert.equal(existsSync(join(ROOT, "src/app/api/catch-me-up/route.ts")), true);
 });
 

@@ -1,0 +1,93 @@
+/* Page 09 P09/Common/PageHeading — 58px, no card or border. */
+.lume-page-heading {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 58px;
+  margin: 12px 0 0;
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
+.lume-page-heading-title,
+.lume-page-heading-support {
+  position: absolute;
+  left: 0;
+  margin: 0;
+  font-family: var(--font-sans), Inter, sans-serif;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.lume-page-heading h2.lume-page-heading-title {
+  top: 0;
+  color: #f1f4f8;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 19px;
+}
+
+.lume-page-heading-support {
+  top: 30px;
+  color: #8e98a6;
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: 14px;
+}
+
+.lume-page-heading-support.is-narrow {
+  display: none;
+}
+
+.ocean-expanded-mode > .ocean-kc-toolbar {
+  justify-content: flex-end;
+}
+
+.ocean-scan > .ocean-scan-header {
+  display: block;
+  position: relative;
+}
+
+.ocean-scan > .ocean-scan-header > .ghost-btn {
+  position: absolute;
+  top: 12px;
+  right: 0;
+}
+
+@media (max-width: 720px) {
+  .lume-page-heading {
+    height: 54px;
+  }
+
+  .lume-page-heading h2.lume-page-heading-title {
+    height: 30px;
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .lume-page-heading-support {
+    display: none;
+  }
+
+  .lume-page-heading-support.is-narrow {
+    display: block;
+    top: 32px;
+    height: 18px;
+    font-size: 12px;
+    line-height: 18px;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 699px) {
+  .lume-page-heading {
+    width: calc(100% - 8px);
+    margin-left: 4px;
+    margin-right: 4px;
+  }
+
+  .ocean-scan > .ocean-scan-header > .ghost-btn {
+    right: 4px;
+  }
+}

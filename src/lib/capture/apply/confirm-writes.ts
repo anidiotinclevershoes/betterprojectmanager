@@ -14,7 +14,9 @@ export function appliedStateContainsWrite(
       return (state.todos ?? []).some(
         (todo) =>
           todo.projectId === operation.projectId &&
-          todo.title.trim() === operation.title.trim(),
+          todo.title.trim() === operation.title.trim() &&
+          (operation.detail == null ||
+            (todo.detail ?? "").trim() === operation.detail.trim()),
       );
     case "complete_todo":
       return (state.todos ?? []).some(
@@ -24,7 +26,9 @@ export function appliedStateContainsWrite(
       return (state.risks ?? []).some(
         (risk) =>
           risk.projectId === operation.projectId &&
-          risk.title.trim() === operation.title.trim(),
+          risk.title.trim() === operation.title.trim() &&
+          (operation.notes == null ||
+            (risk.notes ?? "").trim() === operation.notes.trim()),
       );
     case "update_risk_status":
       return (state.risks ?? []).some(
@@ -35,7 +39,9 @@ export function appliedStateContainsWrite(
       return (state.timeline ?? []).some(
         (item) =>
           item.projectId === operation.projectId &&
-          item.label.trim() === operation.label.trim(),
+          item.label.trim() === operation.label.trim() &&
+          (operation.endAt == null ||
+            item.endAt?.slice(0, 10) === operation.endAt.slice(0, 10)),
       );
     case "update_milestone": {
       const row = state.timeline.find((item) => item.id === operation.milestoneId);
@@ -49,7 +55,9 @@ export function appliedStateContainsWrite(
       const project = state.projects.find((item) => item.id === operation.projectId);
       return Boolean(
         project?.stakeholders.some(
-          (person) => person.name.trim() === operation.name.trim(),
+          (person) =>
+            person.name.trim() === operation.name.trim() &&
+            (operation.roleHint == null || person.role === operation.roleHint),
         ),
       );
     }

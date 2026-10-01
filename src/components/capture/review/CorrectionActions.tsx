@@ -136,7 +136,7 @@ export function CorrectionActions({
               ))}
             </select>
           </label>
-          <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+          <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
             Dismiss
           </button>
         </div>
@@ -152,7 +152,7 @@ export function CorrectionActions({
       <div className="compact-change-correction">
         {prompt(copy)}
         <div className="compact-change-action-row">
-          <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+          <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
             Dismiss
           </button>
         </div>
@@ -163,7 +163,7 @@ export function CorrectionActions({
   if (!reason && model.readiness === "ready" && canApprove) {
     return (
       <div className="compact-change-action-row">
-        <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+        <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
           Exclude change
         </button>
       </div>
@@ -269,7 +269,7 @@ export function CorrectionActions({
           >
             Use this date
           </button>
-          <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+          <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
             Dismiss
           </button>
         </div>
@@ -296,7 +296,7 @@ export function CorrectionActions({
               {p.code || p.name}
             </button>
           ))}
-          <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+          <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
             Dismiss
           </button>
         </div>
@@ -347,7 +347,7 @@ export function CorrectionActions({
           >
             {labels.createLabel}
           </button>
-          <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+          <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
             Dismiss
           </button>
         </div>
@@ -376,7 +376,7 @@ export function CorrectionActions({
           >
             {model.entityKind === "risk" ? "Resolve" : "Complete"}
           </button>
-          <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+          <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
             Dismiss
           </button>
         </div>
@@ -413,7 +413,7 @@ export function CorrectionActions({
           >
             Apply type
           </button>
-          <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+          <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
             Dismiss
           </button>
         </div>
@@ -445,7 +445,7 @@ export function CorrectionActions({
             Approve
           </button>
         ) : null}
-        <button type="button" className="ghost-btn" onClick={handlers.onDismiss}>
+        <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
           Dismiss
         </button>
       </div>

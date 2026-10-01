@@ -82,14 +82,23 @@ check("production persistence is supabase", () => {
   assert.equal(mode, "supabase");
 });
 
-check("developer tools gated by NODE_ENV in Sidebar", () => {
+check("developer tools stay off the primary sidebar", () => {
   const sidebar = fs.readFileSync(
     path.join(root, "src/components/app-shell/Sidebar.tsx"),
     "utf8",
   );
-  assert.match(sidebar, /NODE_ENV === \"development\"/);
-  assert.match(sidebar, /Golden Test/);
-  assert.match(sidebar, /AI Cockpit/);
+  assert.doesNotMatch(sidebar, /Golden Test/);
+  assert.doesNotMatch(sidebar, /AI Cockpit/);
+  assert.doesNotMatch(sidebar, /Reset demo/);
+  assert.doesNotMatch(sidebar, /EvalsNavLink/);
+  assert.equal(
+    fs.existsSync(path.join(root, "src/components/evals/EvalsNavLink.tsx")),
+    true,
+  );
+  assert.equal(
+    fs.existsSync(path.join(root, "src/components/dev/ResetDemoDataButton.tsx")),
+    true,
+  );
 });
 
 check("dev pages call notFound outside development", () => {

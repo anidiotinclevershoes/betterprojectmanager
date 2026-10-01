@@ -427,6 +427,70 @@
   font-weight: 500;
 }
 
+.np-experience .p09-didnt {
+  margin-top: 0.85rem;
+  padding: 15px;
+  border: 1px solid #5a4fc4;
+  border-radius: 8px;
+  background: #161425;
+}
+
+.np-experience .p09-didnt-title {
+  margin: 0 0 10px;
+  color: #c6cdd6;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.np-experience .p09-didnt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.np-experience .p09-didnt-quote {
+  margin: 0 0 8px;
+  color: #e4e9ef;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.np-experience .p09-didnt-explain,
+.np-experience .p09-didnt-safe,
+.np-experience .p09-didnt-meta {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid rgba(77, 182, 176, 0.55);
+}
+
+.np-experience .p09-didnt-explain {
+  color: #aab3c0;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.np-experience .p09-didnt-safe {
+  margin-top: 4px;
+  color: #818b99;
+  font-size: 11px;
+  line-height: 15px;
+}
+
+.np-experience .p09-didnt-meta {
+  margin-top: 10px;
+  padding-top: 8px;
+  padding-left: 0;
+  border-left: 0;
+  border-top: 1px solid #1b1e23;
+  color: #79828f;
+  font-size: 10.5px;
+}
+
 .np-needs-you {
   border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--border-subtle));
   border-radius: 10px;

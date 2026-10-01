@@ -23,6 +23,11 @@ import type {
   TodoItem,
 } from "@/lib/types";
 import { emptyKnowledge } from "@/lib/knowledge";
+import { canonicalRiskNotes } from "@/lib/risks/issue-notes";
+import {
+  canonicalTagsFromNames,
+  type RiskEditResult,
+} from "@/lib/risks/issue-edit";
 
 /** DB check on `risks.source` — do not invent values (D-006). */
 export const LEGAL_RISK_SOURCES = ["manual", "capture", "seed"] as const;
@@ -33,6 +38,16 @@ export type LegalRiskSource = (typeof LEGAL_RISK_SOURCES)[number];
  * Map to the legal `manual` source rather than expanding the enum.
  */
 export const NEW_PROJECT_RISK_SOURCE: LegalRiskSource = "manual";
+
+/** Notes already on the reviewed setup draft. Absent notes stay NULL. */
+function notesForSetupRisk(input: CreateProjectInput, title: string): string | null {
+  const match = (input.risks ?? []).find(
+    (risk) =>
+      risk.title.trim().toLowerCase() === title.trim().toLowerCase() &&
+      !risk.needsReview,
+  );
+  return canonicalRiskNotes(match?.notes);
+}
 
 export const NEW_PROJECT_PARTIAL_CREATE =
   "New Project create did not complete. A partial project was not treated as success.";
@@ -222,6 +237,9 @@ function mapRiskRows(rows: Array<Record<string, unknown>>): ProjectRisk[] {
     source: requireLegalRiskSource(String(row.source || NEW_PROJECT_RISK_SOURCE)),
     createdAt: row.created_at ? String(row.created_at) : undefined,
     updatedAt: row.updated_at ? String(row.updated_at) : undefined,
+    notes: canonicalRiskNotes(
+      row.notes == null ? null : String(row.notes),
+    ),
   }));
 }
 
@@ -531,6 +549,7 @@ export async function persistNewProject(
     title,
     status: "open",
     source: riskSource,
+    notes: notesForSetupRisk(input, title),
   }));
 
   const knowledgeRows: Array<Record<string, unknown>> = [];
@@ -906,6 +925,8 @@ export async function persistKnowledgeBullet(
     riskId?: string | null;
     /** Optional Apply receipt written in the same transaction as the risk. */
     receipt?: CaptureApplyReceipt | null;
+    /** Explicit supporting context written onto risks.notes in the same transaction. */
+    notes?: string | null;
   },
 ): Promise<{ riskId?: string }> {
   await requireProjectInWorkspace(client, workspaceId, projectId);
@@ -937,6 +958,7 @@ export async function persistKnowledgeBullet(
       )
         ? meta.riskId
         : crypto.randomUUID();
+    const notes = canonicalRiskNotes(meta?.notes);
     const { data, error } = await client.rpc("persist_risk_with_knowledge", {
       p_workspace_id: workspaceId,
       p_project_id: projectId,
@@ -947,6 +969,7 @@ export async function persistKnowledgeBullet(
         status: "open",
         source: "capture",
         created_by: userId,
+        ...(notes ? { notes } : {}),
       },
       p_receipt: meta?.receipt
         ? {
@@ -1003,6 +1026,241 @@ export async function persistRiskStatus(
   }
   if (!data) {
     throw new Error("[supabase] update risk status: not found in this project");
+  }
+}
+
+export type PersistRiskNotesResult = {
+  ok: boolean;
+  error?: string;
+  changed?: boolean;
+  notes?: string | null;
+  historyId?: string;
+  historyTitle?: string;
+  historyDetail?: string;
+};
+
+/**
+ * Canonical Issue Notes plus the required targeted History row.
+ * `set_risk_notes` commits both or neither. Callers must not treat a
+ * notes update as saved when this returns ok: false.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRiskNotes(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  input: { projectId: string; riskId: string; notes: string | null },
+): Promise<PersistRiskNotesResult> {
+  const { data, error } = await client.rpc("set_risk_notes", {
+    p_workspace_id: workspaceId,
+    p_project_id: input.projectId,
+    p_risk_id: input.riskId,
+    p_notes: input.notes,
+    p_created_by: userId,
+  });
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  const payload =
+    data && typeof data === "object"
+      ? (data as Record<string, unknown>)
+      : {};
+  if (payload.ok === false) {
+    return {
+      ok: false,
+      error: String(payload.error ?? "Could not save issue notes"),
+    };
+  }
+  return {
+    ok: true,
+    changed: Boolean(payload.changed),
+    notes: payload.notes == null ? null : String(payload.notes),
+    historyId: payload.history_id ? String(payload.history_id) : undefined,
+    historyTitle: payload.history_title
+      ? String(payload.history_title)
+      : undefined,
+    historyDetail: payload.history_detail
+      ? String(payload.history_detail)
+      : undefined,
+  };
+}
+
+/**
+ * One Issue Save: Title, Notes, and retrieval tags.
+ * `save_risk_edit` commits the set or rolls it back. The returned tags
+ * and history rows are the durable ids. A later refresh is not required
+ * to know the write landed.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRiskEdit(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  input: {
+    projectId: string;
+    riskId: string;
+    title: string;
+    notes: string | null;
+    tagNames: string[];
+  },
+): Promise<RiskEditResult> {
+  const { data, error } = await client.rpc("save_risk_edit", {
+    p_workspace_id: workspaceId,
+    p_project_id: input.projectId,
+    p_risk_id: input.riskId,
+    p_title: input.title,
+    p_notes: input.notes,
+    p_tags: canonicalTagsFromNames(input.tagNames),
+    p_created_by: userId,
+  });
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  const payload =
+    data && typeof data === "object"
+      ? (data as Record<string, unknown>)
+      : null;
+  if (!payload || payload.ok === false) {
+    return {
+      ok: false,
+      error: String(payload?.error ?? "Could not save the issue edit"),
+    };
+  }
+  const history = Array.isArray(payload.history)
+    ? payload.history.flatMap((row) => {
+        if (!row || typeof row !== "object") return [];
+        const event = row as Record<string, unknown>;
+        if (!event.id || !event.title) return [];
+        return [
+          {
+            id: String(event.id),
+            title: String(event.title),
+            detail: event.detail == null ? "" : String(event.detail),
+            createdAt: event.created_at ? String(event.created_at) : undefined,
+          },
+        ];
+      })
+    : [];
+  const tags = Array.isArray(payload.tags)
+    ? payload.tags.flatMap((row) => {
+        if (!row || typeof row !== "object") return [];
+        const tag = row as Record<string, unknown>;
+        if (!tag.id || !tag.slug) return [];
+        return [
+          {
+            id: String(tag.id),
+            name: String(tag.name ?? tag.slug),
+            slug: String(tag.slug),
+            origin:
+              tag.origin === "predefined"
+                ? ("predefined" as const)
+                : ("custom" as const),
+          },
+        ];
+      })
+    : [];
+  const itemTags = Array.isArray(payload.item_tags)
+    ? payload.item_tags.flatMap((row) => {
+        if (!row || typeof row !== "object") return [];
+        const link = row as Record<string, unknown>;
+        if (!link.id || !link.tag_id) return [];
+        return [{ id: String(link.id), tagId: String(link.tag_id) }];
+      })
+    : [];
+  return {
+    ok: true,
+    changed: Boolean(payload.changed),
+    titleChanged: Boolean(payload.title_changed),
+    notesChanged: Boolean(payload.notes_changed),
+    tagsChanged: Boolean(payload.tags_changed),
+    title: payload.title == null ? undefined : String(payload.title),
+    notes: payload.notes == null ? null : String(payload.notes),
+    updatedAt: payload.updated_at ? String(payload.updated_at) : undefined,
+    history,
+    tags,
+    itemTags,
+  };
+}
+
+/**
+ * Manual Add Issue — existing `risks` table, source=manual.
+ * Additive persist helper. Not a new RPC.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRiskCreate(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  risk: {
+    id?: string;
+    projectId: string;
+    title: string;
+    status?: ProjectRisk["status"];
+    source?: LegalRiskSource;
+    /** Canonical Issue Notes. Omit to leave the column untouched. */
+    notes?: string | null;
+  },
+): Promise<ProjectRisk> {
+  await requireProjectInWorkspace(client, workspaceId, risk.projectId);
+  const rowIn: Record<string, unknown> = {
+    workspace_id: workspaceId,
+    project_id: risk.projectId,
+    title: risk.title.trim(),
+    status: risk.status ?? "open",
+    source: risk.source ?? "manual",
+    created_by: userId,
+  };
+  if (risk.id && UUID_RE.test(risk.id)) rowIn.id = risk.id;
+  if (risk.notes !== undefined) {
+    const notes = canonicalRiskNotes(risk.notes);
+    if (notes) rowIn.notes = notes;
+  }
+  const { data, error } = await client
+    .from("risks")
+    .insert(rowIn)
+    .select("*")
+    .single();
+  const row = requireData(data, error, "create risk");
+  return {
+    id: String(row.id),
+    projectId: String(row.project_id),
+    title: String(row.title),
+    status: row.status,
+    source: row.source === "capture" || row.source === "seed" ? row.source : "manual",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    notes: canonicalRiskNotes(
+      typeof row.notes === "string" ? row.notes : null,
+    ),
+  };
+}
+
+/**
+ * Persist recommendation status (D-003). Existing `recommendations.status`
+ * column. Not a new table.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistRecommendationStatus(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  recommendationId: string,
+  status: Recommendation["status"],
+  projectId?: string | null,
+): Promise<void> {
+  let query = client
+    .from("recommendations")
+    .update({ status })
+    .eq("id", recommendationId)
+    .eq("workspace_id", workspaceId);
+  if (projectId) query = query.eq("project_id", projectId);
+  const { data, error } = await query.select("id").maybeSingle();
+  if (error) {
+    throw new Error(`[supabase] update recommendation status: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error(
+      "[supabase] update recommendation status: not found in this workspace",
+    );
   }
 }
 
@@ -1505,6 +1763,8 @@ export async function persistHistoryEvent(
   event: Omit<HistoryEvent, "id" | "createdAt"> & { createdAt?: string },
 ): Promise<void> {
   await requireProjectInWorkspace(client, workspaceId, event.projectId);
+  const targetKind = event.targetKind?.trim() || null;
+  const targetId = event.targetId?.trim() || null;
   const { error } = await client.from("history_events").insert({
     workspace_id: workspaceId,
     project_id: event.projectId ?? null,
@@ -1513,6 +1773,9 @@ export async function persistHistoryEvent(
     detail: event.detail ?? null,
     source: event.source ?? "user",
     created_by: userId,
+    ...(targetKind && targetId
+      ? { target_kind: targetKind, target_id: targetId }
+      : {}),
   });
   if (error) throw new Error(`[supabase] create history: ${error.message}`);
 }

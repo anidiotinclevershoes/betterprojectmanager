@@ -2,7 +2,7 @@
 
 **Status:** Living document  
 **Date started:** 19 August 2026  
-**Last housekeeping:** 14 September 2026 (Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked)  
+**Last housekeeping:** 30 September 2026 (Manual Add false-save closed; D-058 and the other deferred product gaps remain open). 28 September 2026 (D-058 evidence corrected to the multi-person Page 09 mock; gap remains open). 25 September 2026 recorded the Waiting-on relationship gap. 14 September 2026: Capture Simplification merged to `main` as `29acea5149c1c56dcb18375fd22025c072931a24` / PR #184; rematerialise/hydrate/unique-title/foreign-ID Create rescue removed; AI-first parked.  
 **Product/architecture constitution:** `docs/LUME_CONSTITUTION.md`  
 **Product/trust/UI philosophy:** `docs/v1-reference-pack/`  
 **Current implementation map:** the code on current `main`. The 26 Aug architecture memory handoff is historical.  
@@ -85,7 +85,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Accept/dismiss plan does not resurrect after hydrate simulation |
 | **Target resolution / validation point** | V1 product hardening; must be resolved before V1 launch |
 | **Related docs** | Architecture audit §3.1; RiskFrame recommendation path (Slice 1B left this intentional) |
-| **Notes** | Risk recommendations must remain suggestions until explicitly converted (Slice 1B product rule). No dedicated “Suggestions slice” is named yet — revisit under general V1 product hardening. |
+| **Notes** | Risk recommendations must remain suggestions until explicitly converted (Slice 1B product rule). **Figma UI Convergence Part 2:** Home Suggestion Discard / Save To Do persist `recommendations.status` through the existing column (`persistRecommendationStatus`). Legacy `dismissSuggestion` / `acceptSuggestion` remain memory-only. |
 
 ---
 
@@ -105,7 +105,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Selected mutations emit durable history rows in plan/fake client |
 | **Target resolution / validation point** | V1 product hardening |
 | **Related docs** | Architecture audit; philosophy (History = evidence/chronology) |
-| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. **Phase 3A create-path decision:** New Project History is **secondary evidence after authoritative bundle success**. A failed/rolled-back create must not write `project_created`. Failure of the History insert must not roll back the project bundle. Broader `pushHistory` without `persistHistoryEvent` remains open. |
+| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. **Phase 3A create-path decision:** New Project History is **secondary evidence after authoritative bundle success**. A failed/rolled-back create must not write `project_created`. Failure of the History insert must not roll back the project bundle. Broader `pushHistory` without `persistHistoryEvent` remains open. **Figma UI Convergence Part 2:** Item drawers show a D-004 bounded limitation instead of title/detail matching. **29 Sep 2026 — exact target identity, not a full close:** new `history_events` rows may carry nullable `target_kind` (`risk`) and `target_id` (`risks.id`). `historyEventsForItem` attributes a genuine Risk only when the project, target kind, and exact id all match. Old rows with NULL target stay unattributed forever. Title, detail, substring, and fuzzy matching remain prohibited. D-004 is not solved for history that was never stored with a target, and many `pushHistory` paths still do not persist. **29 Sep 2026 — Person detail:** `OPEN — HISTORY ATTRIBUTION: Person-targeted History identity is not yet implemented.` Person detail does not title-match History and does not expand `history_events.target_kind`. **29 Sep 2026 — To Do detail:** `OPEN — HISTORY ATTRIBUTION: To Do-targeted History identity is not yet implemented.` To Do detail shows the D-004 notice and does not title-match project History onto the selected To Do. |
 
 ---
 
@@ -350,7 +350,27 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Authority rule characterisation: waiting todos vs openLoop narrative; promotion supersedes the openLoop |
 | **Target resolution / validation point** | Open-loop / To Do architecture slice — after tests lock current concatenation behaviour |
 | **Related docs** | Architecture audit; `docs/LUME_CURRENT_ARCHITECTURE_MEMORY_HANDOFF.md` Part C §C2 |
-| **Notes** | Authority is now decided in the handoff. Implementation is a later slice. Do not fix opportunistically inside unrelated slices. |
+| **Notes** | Authority is now decided in the handoff. Implementation is a later slice. Do not fix opportunistically inside unrelated slices. **D-058:** do not treat `todos.waiting_on` text as a multi-person Waiting-on relationship. |
+
+---
+
+### D-058 — Waiting on is not yet a relationship to multiple People
+
+| Field | Value |
+| --- | --- |
+| **Status** | open |
+| **Severity** | medium |
+| **Domain** | Todos / People |
+| **Found in** | UI convergence semantics lock, 25 September 2026 |
+| **Failure class** | Product Waiting on is zero or more relationships to existing project People. The stored model is one nullable string, `todos.waiting_on` |
+| **Evidence / repro** | `TodoItem.waitingOn` / `todos.waiting_on` in `src/lib/types.ts` and `src/types/database.ts`. No person-id join. The product and Figma requirement is zero or more existing People. The approved Page 09 Section M To Do detail mock now shows multiple People, including Olga Petrov and Sarah Kim. Implementation storage is still one nullable `todos.waiting_on` string, so the gap is clearer and is not resolved. Exact-name match in People detail is a temporary resolver only |
+| **Likely files** | `src/lib/types.ts`; `src/types/database.ts`; `src/lib/data/supabase/persist-mutations.ts`; `src/lib/knowledge-centre/knowledge-item-detail.ts` |
+| **Proposed fix direction** | A later additive People slice: stable links from a To Do to existing stakeholder ids, display names as cache only. Do not start that slice from this UI lock |
+| **Explicit non-goals** | Joining several names into `waiting_on`. Reinterpreting the current string as the product model. Using Waiting on as assignment or as responsibility. A user-facing To Do Type control. Schema or migration work inside the current UI pass |
+| **Regression test to add** | When the relationship exists: a To Do can reference two existing People by id, reload preserves both ids, and a string-only legacy `waiting_on` is not silently rewritten into those links |
+| **Target resolution / validation point** | People slice, before treating the Page 09 Waiting-on control as implemented |
+| **Related docs** | CD-009 in `docs/LUME_PRODUCT_DECISIONS.md`; D-008 |
+| **Notes** | CD-009 is the product rule. This entry is the implementation gap. Keep the approved multi-person Waiting-on rule, record that `todos.waiting_on` cannot store it, and do not fake support or change the approved design to match the string. **29 Sep 2026 — To Do detail:** the Page 09 drawer shows at most that one stored string and does not mount Edit To Do. `BLOCKED — D-058: signed Waiting On is zero-or-more existing People; production still stores one legacy string.` |
 
 ---
 
@@ -608,7 +628,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Evidence / repro** | Candyland: resolve “Gumdrop Bridge icing” → `risks.status=resolved` and intelligence “I see 0 risks”, but `knowledge.sections.risks` still contains “Gumdrop Bridge icing remains open.” Ocean frames only skip knowledge bullets whose stripped title *equals* the domain title. |
 | **Likely files** | `src/lib/knowledge-centre/ocean-frames.ts`; Capture apply knowledge projection (not the 3B dispatcher) |
 | **Proposed fix direction** | When Capture legally resolves/updates a domain record, retire or rewrite the matching Knowledge projection using carried IDs — not fuzzy title match. Until then, testers should trust the domain frame + intelligence strip over leftover sentences. |
-| **Fix applied (presentation only)** | Display precedence in `buildOpenRiskRows` / `buildCurrentPositionRows`: if a project has any domain `risks` rows, Risks & blockers shows only open/watch domain risks. Knowledge `sections.risks` prose is not painted as peer current truth. Current position excludes `kind=date`/`kind=risk` and `sectionItemIds` that match a domain risk or timeline id. Unlinked leftover sentences are preserved. No fuzzy match, no Knowledge mutation, no reconcile engine. Data rewrite remains a later architecture item. |
+| **Fix applied (presentation only)** | Display precedence in `buildOpenRiskRows` / `buildCurrentPositionRows`: if a project has any domain `risks` rows, Risks & blockers shows only open/watch domain risks. Knowledge `sections.risks` prose is not painted as peer current truth. The same domain switch now applies at read time in current canonical Ask/Tell Me facts and Capture context: Knowledge `kind=risk` / `section=risks` items are omitted from current facts, and the `RISKS (domain lifecycle)` / Capture risk bucket stays authoritative. Projects with zero domain Risk rows still read legacy Knowledge risk prose. Current position excludes `kind=date`/`kind=risk` and `sectionItemIds` that match a domain risk or timeline id. Unlinked leftover sentences stay stored. No fuzzy match, no Knowledge mutation, no reconcile engine. Data rewrite remains a later architecture item. An Issue title edit, including one made from the mounted Page 09 editor, updates the domain Risk only and does not rewrite leftover Knowledge risk prose. The hosted Issue Notes and atomic-edit migrations are not deployed. |
 | **Explicit non-goals** | Fuzzy matching leftover bullets to domain titles; treating Knowledge prose as Risk authority |
 | **Regression test to add** | After Capture Risk resolve, KC open-risk rows exclude leftover prose for that durable Risk ID |
 | **Target resolution / validation point** | KC projection / knowledge reconcile — not Phase 3D session UX |
@@ -714,6 +734,18 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 ## Resolved discoveries (reference)
 
 Move items here when fixed. Keep enough detail that regressions are recognizable.
+
+### Manual Add false save — Issue Notes and Knowledge body
+
+| Field | Value |
+| --- | --- |
+| **Status** | CLOSED for the audit blocker. Hosted migrations are still not applied. |
+| **Fixed in** | Final V1 convergence fix on `integration/figma-ui-convergence-v1` |
+| **Failure class** | Manual Add offered Detail for Issue and Knowledge, reported Save success, and dropped that text. Issue create wrote title only. Knowledge stored the title as the only body. |
+| **Fix summary** | Issue Detail maps to canonical `risks.notes` on create. Knowledge Manual Add offers one body and persists that string. No new column. The generic Close/Remove sentence is removed where those controls are absent. Ask “Lume noticed” uses the shared lightbulb. |
+| **Evidence** | `scripts/verify-manual-add-honesty.ts`; `e2e/manual-add-honesty.spec.ts` |
+| **Residual** | D-058, To Do edit, Person Name/Role edit, Settings, Person/To Do History, previous-item Back, To Do lifecycle/History atomicity, and durable billing usage stay open. Hosted deployment of `20260929120000` and `20260929140000` is still outstanding. |
+| **Related docs** | `docs/FIGMA_UI_CONVERGENCE_V1.md` |
 
 ### D-R56 — Prompt A can emit Left untouched (D-056)
 

@@ -15,9 +15,10 @@ import {
   refForTodo,
   type KnowledgeItemRef,
 } from "@/lib/knowledge-centre/knowledge-item-detail";
+import { DomainIcon } from "@/components/domain/DomainIcon";
+import { lumeDomainForKcBucket } from "@/lib/domain/lume-domain";
 import {
   BUCKET_IDS,
-  KC_BUCKET_ICON,
   bucketLabel,
   composeKnowledgeCentreItems,
   filterKnowledgeCentreItems,
@@ -37,6 +38,13 @@ const OCEAN_FRAME_TESTID: Record<KcBucketId, string> = {
   knowledge: "ocean-frame-knowledge",
 };
 
+const CARD_DOMAIN: Record<KcBucketId, string> = {
+  issues: "ISSUE",
+  people: "PEOPLE",
+  todo: "TO DO",
+  knowledge: "KNOWLEDGE",
+};
+
 function KcItemCard({
   item,
   selected,
@@ -46,10 +54,13 @@ function KcItemCard({
   selected: boolean;
   onSelect?: () => void;
 }) {
+  const domain = lumeDomainForKcBucket(item.bucket);
+  const meta = [item.typeLabel, item.supporting].filter(Boolean).join(" · ");
   return (
     <article
-      className={`kc-item compact-change-card ${item.needsYou ? "is-emphasized" : ""} ${selected ? "is-selected" : ""}`}
+      className={`kc-browse-card kc-item ${item.needsYou ? "is-emphasized" : ""} ${selected ? "is-selected" : ""}`}
       data-testid={`kc-item-${item.id}`}
+      data-domain={domain}
     >
       <button
         type="button"
@@ -58,38 +69,35 @@ function KcItemCard({
         disabled={!onSelect}
         aria-pressed={selected}
       >
-        <header className="compact-change-head">
-          <div className="compact-change-entity">
-            <span className="compact-change-ico" aria-hidden>
-              {item.icon}
-            </span>
-            <div className="compact-change-titles">
-              <p className="compact-change-type">
-                {bucketLabel(item.bucket)} · {item.typeLabel}
-              </p>
-              <h4 className="compact-change-title">{item.title}</h4>
-            </div>
-          </div>
-        </header>
-        {item.supporting ? (
-          <p className="kc-item-support">{item.supporting}</p>
-        ) : null}
+        <span className="kc-browse-rule" aria-hidden />
+        <DomainIcon domain={domain} />
+        <span className="kc-browse-domain">{CARD_DOMAIN[item.bucket]}</span>
+        <span className="kc-browse-title">{item.title}</span>
+        {meta ? <span className="kc-browse-meta">{meta}</span> : null}
         {item.needsYou ? (
-          <p className="kc-needs-you">
+          <span className="kc-needs-you">
             <span className="kc-needs-you-dot" aria-hidden />
             <span>{item.needsYou}</span>
-          </p>
+          </span>
         ) : null}
         {item.tagNames.length ? (
-          <p className="kc-item-tags">
-            {item.tagNames.map((name) => (
-              <span key={name} className="tag-chip">
-                {name}
-              </span>
-            ))}
-          </p>
+          <span className="kc-browse-tags">{item.tagNames.join(" · ")}</span>
         ) : null}
       </button>
+      {onSelect ? (
+        <button
+          type="button"
+          className="kc-open-details"
+          data-testid={`kc-open-details-${item.id}`}
+          aria-label="Open Details"
+          onClick={onSelect}
+        >
+          <span className="kc-open-details-label">Open Details</span>
+          <span className="kc-open-details-chevron" aria-hidden>
+            ›
+          </span>
+        </button>
+      ) : null}
     </article>
   );
 }
@@ -115,19 +123,18 @@ function BucketGroup({
   const label = heading ?? bucketLabel(bucket);
   return (
     <section
-      className="kc-bucket-group"
+      className="kc-bucket-group lume-domain-section"
+      data-domain={lumeDomainForKcBucket(bucket)}
       data-testid={oceanTestId ?? `kc-group-${bucket}`}
       data-kc-group={bucket}
     >
-      <header className="kc-bucket-group-head">
-        <span className="compact-change-ico" aria-hidden>
-          {KC_BUCKET_ICON[bucket]}
-        </span>
+      <header className="kc-bucket-group-head lume-domain-section-head">
+        <DomainIcon domain={lumeDomainForKcBucket(bucket)} />
         <h3>
           {label} · {items.length}
         </h3>
       </header>
-      <div className="kc-bucket-group-body">
+      <div className="kc-bucket-group-body lume-domain-section-body">
         {items.map((item) => (
           <KcItemCard
             key={item.id}
@@ -150,16 +157,27 @@ function BucketGroup({
 export function OceanKnowledgeFrames({
   projectId,
   searchQuery = "",
+  selected: selectedProp,
+  onSelect,
+  onAddItem,
 }: {
   projectId: string;
   searchQuery?: string;
+  selected?: KnowledgeItemRef | null;
+  onSelect?: (ref: KnowledgeItemRef | null) => void;
+  onAddItem?: () => void;
 }) {
   const { state } = useMission();
-  const [selected, setSelected] = useState<KnowledgeItemRef | null>(null);
+  const [localSelected, setLocalSelected] = useState<KnowledgeItemRef | null>(
+    null,
+  );
+  const selected = selectedProp !== undefined ? selectedProp : localSelected;
+  const setSelected = onSelect ?? setLocalSelected;
   const [tagFilter, setTagFilter] = useState<string[]>([]);
   const [bucket, setBucket] = useState<KcBucket>("all");
   const [subtype, setSubtype] = useState<KcKnowledgeSubtype>("all");
   const [catchUpId, setCatchUpId] = useState<string | null>(null);
+  const [layout, setLayout] = useState<"grid" | "list">("grid");
 
   // Keep these symbols in this module — item-detail / people UI contracts.
   void refForTodo;
@@ -200,7 +218,7 @@ export function OceanKnowledgeFrames({
   }, [state.itemTags, projectId]);
 
   const select = (ref: KnowledgeItemRef) => {
-    setSelected((prev) => (knowledgeDetailEquals(prev, ref) ? null : ref));
+    setSelected(knowledgeDetailEquals(selected, ref) ? null : ref);
   };
 
   const searching = Boolean(searchQuery.trim()) || tagFilter.length > 0;
@@ -211,28 +229,75 @@ export function OceanKnowledgeFrames({
 
   return (
     <div className="ocean-knowledge-frames kc-four" data-testid="ocean-knowledge-frames">
-      <nav className="kc-bucket-nav" aria-label="Knowledge Centre views" data-testid="kc-bucket-nav">
-        {(["all", ...BUCKET_IDS] as KcBucket[]).map((id) => {
-          const count = view.counts[id];
-          const selectedBucket = bucket === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              className={`kc-bucket-tab ${selectedBucket ? "is-selected" : ""}`}
-              aria-pressed={selectedBucket}
-              data-testid={`kc-bucket-${id}`}
-              onClick={() => {
-                setBucket(id);
-                if (id !== "knowledge") setSubtype("all");
-              }}
+      <div className="kc-filter-block">
+        <p className="kc-filter-label">DOMAIN</p>
+        <div className="kc-domain-row">
+          <nav className="kc-bucket-nav" aria-label="Knowledge Centre views" data-testid="kc-bucket-nav">
+            {(["all", ...BUCKET_IDS] as KcBucket[]).map((id) => {
+              const count = view.counts[id];
+              const selectedBucket = bucket === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  className={`kc-bucket-tab ${selectedBucket ? "is-selected" : ""}`}
+                  aria-pressed={selectedBucket}
+                  data-testid={`kc-bucket-${id}`}
+                  onClick={() => {
+                    setBucket(id);
+                    if (id !== "knowledge") setSubtype("all");
+                  }}
+                >
+                  {id === "all" ? null : (
+                    <DomainIcon domain={lumeDomainForKcBucket(id)} />
+                  )}
+                  {bucketLabel(id)}
+                  <span className="kc-bucket-count">{count}</span>
+                </button>
+              );
+            })}
+          </nav>
+          <div className="kc-browse-tools">
+            <div
+              className="kc-layout-toggle"
+              role="group"
+              aria-label="Knowledge Centre layout"
+              data-testid="kc-layout-toggle"
             >
-              {bucketLabel(id)}
-              <span className="kc-bucket-count">{count}</span>
-            </button>
-          );
-        })}
-      </nav>
+              <button
+                type="button"
+                className={layout === "grid" ? "is-selected" : ""}
+                aria-pressed={layout === "grid"}
+                aria-label="Grid"
+                data-testid="kc-layout-grid"
+                onClick={() => setLayout("grid")}
+              >
+                <span aria-hidden>▦</span>
+              </button>
+              <button
+                type="button"
+                className={layout === "list" ? "is-selected" : ""}
+                aria-pressed={layout === "list"}
+                aria-label="List"
+                data-testid="kc-layout-list"
+                onClick={() => setLayout("list")}
+              >
+                <span aria-hidden>≡</span>
+              </button>
+            </div>
+            {onAddItem ? (
+              <button
+                type="button"
+                className="kc-add-item"
+                data-testid="ocean-add-item"
+                onClick={onAddItem}
+              >
+                + Add Item
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </div>
 
       <NextMeetingCue projectId={projectId} onOpen={setCatchUpId} />
 
@@ -291,7 +356,11 @@ export function OceanKnowledgeFrames({
         </p>
       ) : null}
 
-      <div className="kc-four-body" data-testid="kc-four-body">
+      <div
+        className={`kc-four-body is-${layout}`}
+        data-testid="kc-four-body"
+        data-kc-layout={layout}
+      >
         {bucket === "all" ? (
           view.globalCount ? (
             <>
@@ -422,11 +491,13 @@ export function OceanKnowledgeFrames({
         </div>
       ) : null}
 
-      <KnowledgeItemDetailDrawer
-        projectId={projectId}
-        selected={selected}
-        onClose={() => setSelected(null)}
-      />
+      {selectedProp === undefined ? (
+        <KnowledgeItemDetailDrawer
+          projectId={projectId}
+          selected={selected}
+          onClose={() => setSelected(null)}
+        />
+      ) : null}
     </div>
   );
 }

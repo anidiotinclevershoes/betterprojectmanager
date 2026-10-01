@@ -718,11 +718,11 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
           } else if (data.executed?.kind === "wrote" && data.reconcileFailed) {
             const recovered = await reconcileDurableWorkspace();
             if (!recovered) {
-              announce("Applied — refreshing project truth…");
+              announce("Applied — refreshing saved project information…");
             }
           }
         } else if (data.executed?.kind === "wrote" && data.reconcileFailed) {
-          announce("Applied — refreshing project truth…");
+          announce("Applied — refreshing saved project information…");
         }
         if (decision.kind === "needs_you") {
           trackAnalyticsEvent(ANALYTICS_EVENTS.apply_needs_you, {

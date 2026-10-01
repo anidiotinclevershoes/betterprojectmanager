@@ -66,9 +66,10 @@ export function mergeOrganisedDraft(
       ...(current.notMentioned ?? []),
       ...(organised.notMentioned ?? []),
     ]).slice(0, 8),
-    sourceNarrative: [current.sourceNarrative, organised.sourceNarrative]
-      .filter((s) => s?.trim())
-      .join("\n\n"),
+    sourceNarrative: mergeSourceNarrative(
+      current.sourceNarrative,
+      organised.sourceNarrative,
+    ),
     sourceMode: current.sourceMode === "blank" ? "paste" : current.sourceMode,
   };
 }
@@ -103,12 +104,9 @@ function mergePeople(
   return out;
 }
 
+/** Explicit responsibility scopes only. Role is never a scope. */
 function scopesOf(person: SetupStakeholderDraft): string[] {
-  const listed = (person.responsibilities ?? []).map((s) => s.trim()).filter(Boolean);
-  if (listed.length) return listed;
-  const role = person.role?.trim();
-  if (role && role.toLowerCase() !== "stakeholder") return [role];
-  return [];
+  return (person.responsibilities ?? []).map((s) => s.trim()).filter(Boolean);
 }
 
 function mergeByTitle(
@@ -118,10 +116,15 @@ function mergeByTitle(
   const out = current.map((r) => ({ ...r }));
   for (const risk of incoming) {
     if (!risk.title.trim()) continue;
-    if (out.some((r) => keyName(r.title) === keyName(risk.title))) continue;
+    const hit = out.find((r) => keyName(r.title) === keyName(risk.title));
+    if (hit) {
+      hit.notes = keepOrFill(hit.notes, risk.notes);
+      continue;
+    }
     out.push({
       clientKey: risk.clientKey ?? newSetupClientKey(),
       title: risk.title.trim(),
+      notes: keepOrFill(undefined, risk.notes),
       needsReview: risk.needsReview,
       tags: risk.tags,
     });
@@ -136,11 +139,17 @@ function mergeTodos(
   const out = current.map((t) => ({ ...t }));
   for (const todo of incoming) {
     if (!todo.title.trim()) continue;
-    if (out.some((t) => keyName(t.title) === keyName(todo.title))) continue;
+    const hit = out.find((t) => keyName(t.title) === keyName(todo.title));
+    if (hit) {
+      hit.detail = keepOrFill(hit.detail, todo.detail);
+      hit.dueAt = keepOrFill(hit.dueAt, todo.dueAt);
+      continue;
+    }
     out.push({
       clientKey: todo.clientKey ?? newSetupClientKey(),
       title: todo.title.trim(),
-      dueAt: todo.dueAt,
+      detail: keepOrFill(undefined, todo.detail),
+      dueAt: keepOrFill(undefined, todo.dueAt),
       kind: todo.kind,
       waitingOn: todo.waitingOn,
       needsReview: todo.needsReview,
@@ -160,6 +169,7 @@ function mergeDates(
     const hit = out.find((d) => keyName(d.label) === keyName(date.label));
     if (hit) {
       if (!hit.date && date.date) hit.date = date.date;
+      hit.endAt = keepOrFill(hit.endAt, date.endAt);
       if (date.needsReview || !hit.date) hit.needsReview = true;
       continue;
     }
@@ -167,6 +177,7 @@ function mergeDates(
       clientKey: date.clientKey ?? newSetupClientKey(),
       label: date.label.trim(),
       date: date.date,
+      endAt: keepOrFill(undefined, date.endAt),
       needsReview: date.needsReview || !date.date,
       tags: date.tags,
     });
@@ -193,6 +204,28 @@ function mergeKnowledge(
     });
   }
   return out;
+}
+
+/** Keep a user value. Fill it only when the current value is empty. */
+function keepOrFill(current?: string, incoming?: string): string | undefined {
+  const kept = current?.trim();
+  if (kept) return current;
+  const next = incoming?.trim();
+  return next || undefined;
+}
+
+/**
+ * Join source notes without repeating the same Organise submission.
+ * A different earlier narrative is kept.
+ */
+function mergeSourceNarrative(current?: string, incoming?: string): string | undefined {
+  const left = current?.trim() ?? "";
+  const right = incoming?.trim() ?? "";
+  if (!right) return left || undefined;
+  if (!left || left === right) return right;
+  const segments = left.split(/\n\n+/).map((part) => part.trim()).filter(Boolean);
+  if (segments.includes(right)) return left;
+  return `${left}\n\n${right}`;
 }
 
 function uniqueStrings(items: string[]) {

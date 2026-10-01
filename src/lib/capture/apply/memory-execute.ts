@@ -8,6 +8,7 @@ import { emptyKnowledge } from "@/lib/knowledge";
 import { ensurePersonOnProject } from "@/lib/people/identity";
 import { confirmResponsibilityOwner } from "@/lib/people/identity";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
+import { canonicalRiskNotes } from "@/lib/risks/issue-notes";
 import type { MissionState, TodoItem } from "@/lib/types";
 import type { CaptureApplyHooks } from "./execute";
 import type { CaptureLegalOperation } from "./types";
@@ -105,6 +106,7 @@ export function applyCaptureOperationInMemory(
               id: riskId,
               projectId: op.projectId,
               title: op.title,
+              notes: canonicalRiskNotes(op.notes) ?? undefined,
               status: "open",
               source: "capture",
               createdAt: now,

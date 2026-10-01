@@ -24,6 +24,7 @@ import {
   isOpenRiskStatus,
   stripResolvedPrefix,
 } from "@/lib/risks/lifecycle";
+import { projectRiskNotesField } from "@/lib/risks/issue-notes";
 import type {
   KnowledgeSectionId,
   MissionState,
@@ -103,6 +104,8 @@ export type KnowledgeDetailModel = {
   honestyNotes: string[];
   domain: KnowledgeDetailDomain;
   riskStatus?: RiskStatus;
+  /** Current supplementary Notes for a genuine Risk. Absent means none. Not rendered in this slice. */
+  issueNotes?: string | null;
   todoDone?: boolean;
   personBundle?: PersonBundle;
 };
@@ -430,6 +433,7 @@ export function resolveKnowledgeItemDetail(
       honestyNotes,
       domain: "risk",
       riskStatus: risk.status,
+      issueNotes: projectRiskNotesField(risk),
     };
   }
 
