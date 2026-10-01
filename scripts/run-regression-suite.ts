@@ -57,6 +57,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "test-dashboard", script: "scripts/verify-test-dashboard.ts" },
   { name: "new-project-v2", script: "scripts/verify-new-project-v2.ts" },
   { name: "new-project-four-frame", script: "scripts/verify-new-project-four-frame.ts" },
+  { name: "new-project-adapter-repair", script: "scripts/verify-new-project-adapter-repair.ts" },
   { name: "meeting-catch-up", script: "scripts/verify-meeting-catch-up.ts" },
   { name: "legacy-influence", script: "scripts/verify-legacy-influence.ts" },
   { name: "meeting-routes", script: "scripts/verify-meeting-routes.ts" },
