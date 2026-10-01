@@ -39,6 +39,16 @@ export type LegalRiskSource = (typeof LEGAL_RISK_SOURCES)[number];
  */
 export const NEW_PROJECT_RISK_SOURCE: LegalRiskSource = "manual";
 
+/** Notes already on the reviewed setup draft. Absent notes stay NULL. */
+function notesForSetupRisk(input: CreateProjectInput, title: string): string | null {
+  const match = (input.risks ?? []).find(
+    (risk) =>
+      risk.title.trim().toLowerCase() === title.trim().toLowerCase() &&
+      !risk.needsReview,
+  );
+  return canonicalRiskNotes(match?.notes);
+}
+
 export const NEW_PROJECT_PARTIAL_CREATE =
   "New Project create did not complete. A partial project was not treated as success.";
 
@@ -539,6 +549,7 @@ export async function persistNewProject(
     title,
     status: "open",
     source: riskSource,
+    notes: notesForSetupRisk(input, title),
   }));
 
   const knowledgeRows: Array<Record<string, unknown>> = [];

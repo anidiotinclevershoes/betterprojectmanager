@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { LumeLogo } from "@/components/brand/LumeLogo";
+import { DidntUnderstand } from "@/components/capture/review/DidntUnderstand";
 import "./new-project-ocean.css";
 import {
   newSetupClientKey,
@@ -54,6 +55,19 @@ export function NewProjectExperience({
   const organiseAbortRef = useRef<AbortController | null>(null);
 
   const needsYou = useMemo(() => needsYouFromDraft(draft), [draft]);
+  const unplaced = useMemo(
+    () =>
+      (draft.notMentioned ?? [])
+        .map((text) => text.trim())
+        .filter(Boolean)
+        .map((text, index) => ({
+          id: `not-mentioned-${index}`,
+          text,
+          actionStatus: "no_change" as const,
+          actionLabel: "No change proposed",
+        })),
+    [draft.notMentioned],
+  );
 
   const createFromDraft = useCallback(
     async (input: CreateProjectInput) => {
@@ -140,12 +154,7 @@ export function NewProjectExperience({
       }
       setDraft((current) =>
         mergeOrganisedDraft(
-          {
-            ...current,
-            sourceNarrative: [current.sourceNarrative, content]
-              .filter((s) => s?.trim())
-              .join("\n\n"),
-          },
+          current,
           { ...emptyDraft(), ...data.draft, sourceMode: "compose" },
           { codeLocked: Boolean(current.code.trim()) },
         ),
@@ -366,6 +375,8 @@ export function NewProjectExperience({
             }}
           />
         </div>
+
+        <DidntUnderstand observations={unplaced} />
 
         {error ? (
           <p className="np-create-error" data-testid="np-create-error" role="alert">

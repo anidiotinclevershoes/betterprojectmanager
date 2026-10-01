@@ -4,6 +4,7 @@ import {
   reviewSafetyGap,
 } from "@/lib/capture-v2/contract";
 import type { ObservationDisposition } from "@/lib/capture-v2/types";
+import { applyCaptureSemanticContract } from "@/lib/capture-v2/semantic-fields";
 import {
   parseObservationEnvelope,
   validateObservations,
@@ -76,7 +77,10 @@ function nameOnlyPersonItem(raw: unknown, name: string): ProvisionalItem {
  * create. Schema-near-miss rows (missing truthIntent, unknown disposition)
  * still reject. Those rejects must not erase a usable person name (D-052).
  */
-export function parseNewProjectV2Envelope(raw: unknown): {
+export function parseNewProjectV2Envelope(
+  raw: unknown,
+  opts?: { referenceDate?: string },
+): {
   project: { name: string; summary: string; currentFocus: string };
   items: ProvisionalItem[];
   envelopeMalformed: boolean;
@@ -84,8 +88,12 @@ export function parseNewProjectV2Envelope(raw: unknown): {
   const parsed = parseObservationEnvelope(raw);
   const envelopeMalformed = parsed.issues.some((issue) => issue.code === "malformed");
   const validation = validateObservations(parsed.observations, [], null);
+  const referenceDate = opts?.referenceDate?.trim();
+  const observations = referenceDate
+    ? applyCaptureSemanticContract(validation.observations, referenceDate)
+    : validation.observations;
 
-  const items: ProvisionalItem[] = validation.observations.map((obs) => {
+  const items: ProvisionalItem[] = observations.map((obs) => {
     const reason = reviewSafetyGap(obs);
     return {
       id: newReviewOperationId(),
@@ -102,7 +110,7 @@ export function parseNewProjectV2Envelope(raw: unknown): {
     };
   });
 
-  const acceptedIds = new Set(validation.observations.map((obs) => obs.id));
+  const acceptedIds = new Set(observations.map((obs) => obs.id));
   const seenNames = new Set(
     items
       .map((item) =>

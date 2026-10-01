@@ -52,6 +52,7 @@ export function draftFromProvisional(args: {
         asUsableString(item.proposedValues?.title) ||
         asUsableString(item.proposedValues?.label) ||
         item.statement,
+      notes: asUsableString(item.proposedValues?.notes),
       needsReview: Boolean(item.needsReview),
     }));
 
@@ -63,11 +64,12 @@ export function draftFromProvisional(args: {
         asUsableString(item.proposedValues?.title) ||
         asUsableString(item.proposedValues?.label) ||
         item.statement,
-      dueAt:
-        firstUsableIsoDate(
-          item.proposedValues?.date,
-          item.proposedValues?.dueAt,
-        ),
+      detail: asUsableString(item.proposedValues?.detail),
+      dueAt: firstUsableIsoDate(
+        item.proposedValues?.dueDate,
+        item.proposedValues?.dueAt,
+        item.proposedValues?.date,
+      ),
       needsReview: Boolean(item.needsReview),
     }));
 
@@ -85,6 +87,7 @@ export function draftFromProvisional(args: {
           asUsableString(item.proposedValues?.title) ||
           item.statement,
         date,
+        endAt: firstUsableIsoDate(item.proposedValues?.endAt),
         needsReview: Boolean(item.needsReview) || !date,
       };
     });
@@ -93,7 +96,7 @@ export function draftFromProvisional(args: {
     .filter((item) => item.category === "knowledge")
     .map((item) => ({
       clientKey: item.id,
-      text: item.statement,
+      text: asUsableString(item.proposedValues?.text) || item.statement,
       remember: item.truthIntent !== "non_current" && !item.needsReview,
     }));
 
