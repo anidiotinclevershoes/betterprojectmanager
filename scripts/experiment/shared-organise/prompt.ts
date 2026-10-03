@@ -29,9 +29,13 @@ export const PROJECT_CHANGE_FORM_SCHEMA = `{
         "replacePersonName": "current owner being replaced, only if named in the evidence",
         "title": "todo or risk title",
         "detail": "optional todo detail",
-        "dueAt": "ISO YYYY-MM-DD",
+        "dueAt": "ISO YYYY-MM-DD for a to-do",
         "label": "milestone label",
-        "date": "ISO YYYY-MM-DD",
+        "dateIntent": "set_explicit | move_relative | historical | uncertain",
+        "date": "ISO YYYY-MM-DD only for set_explicit. Omit for move_relative",
+        "direction": "earlier | later",
+        "amount": 2,
+        "unit": "days | weeks",
         "status": "open | watch | resolved | accepted | complete",
         "awayFromIso": "ISO YYYY-MM-DD",
         "awayToIso": "ISO YYYY-MM-DD",
@@ -59,7 +63,12 @@ const RULES = `Rules:
 - Historical, quoted, superseded, hypothetical, negated, or questioned statements are not current truth, unless the input also states the current fact. Use no_change or commentary for the part that is not current.
 - Irrelevant chatter is outcome=commentary and operation=none.
 - If the wording does not identify a supported operation, outcome=left_untouched. Say what is unclear in reason. Do not invent a home for it.
-- Dates you are sure of go in values as ISO YYYY-MM-DD. The reference date is in the project state. If the calendar date cannot be resolved, outcome=needs_you. Do not guess a date.
+- A milestone date change sets values.dateIntent to set_explicit, move_relative, historical, or uncertain.
+- set_explicit means the input sets the current milestone date to a stated civil date. Put that date in values.date as ISO YYYY-MM-DD. If the input states the year, use that year. If it states the month and day but not the year, use the next occurrence of that month and day on or after the reference date. If the calendar day is not stated, use uncertain. Do not invent a different day.
+- move_relative means the input moves an existing milestone by a stated number of days or weeks from its canonical date. Do not calculate the resulting date and do not put an ISO date on that change. Set direction to earlier or later, amount to the integer, and unit to days or weeks. earlier means before the canonical date. later means after the canonical date. Direction is the meaning of the sentence, not a particular word. If the amount, unit, or direction is not explicit, use uncertain.
+- historical means the input describes a former date and is not changing the current milestone date. Use outcome=no_change for that part. Do not emit a current milestone-date write for it.
+- uncertain means a milestone or date is mentioned but the current change is not safe to make. Use outcome=needs_you.
+- One sentence may contain a former date and a separate current date. Propose those as separate changes.
 - Decisions are write_knowledge with section=decisions. Other remembered facts are write_knowledge with section=now. Do not use knowledge or memory for a person's role, responsibility, ownership, or authority to sign or approve.
 - This same form is the first Review for a new project and a later Review for an existing project. The input may be collated onboarding notes plus the authoritative state. Propose creates only for truth the input establishes.
 - outcome=ready only when the operation, target, and values are safe to apply. Otherwise use needs_you, no_change, left_untouched, or commentary.`;

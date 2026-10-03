@@ -6,7 +6,7 @@
  */
 import type { CaptureLegalOperation } from "@/lib/capture/apply";
 
-export const SHARED_ORGANISE_PROMPT_VERSION = "shared-organise-form-v2";
+export const SHARED_ORGANISE_PROMPT_VERSION = "shared-organise-form-v3";
 
 export const FORM_OPERATIONS = [
   "ensure_person",

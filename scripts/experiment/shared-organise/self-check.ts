@@ -4,6 +4,7 @@
 import assert from "node:assert/strict";
 import { experimentalApplyWorld, CANDYLAND_ID } from "@/lib/experiments/worlds";
 import { buildSharedOrganiseContext } from "./context";
+import { shiftIsoDate } from "./date";
 import type { ProjectChange } from "./form";
 import { reviewProjectChangeForm } from "./validate";
 
@@ -240,6 +241,150 @@ export function runSharedOrganiseSelfCheck(): void {
     },
   });
   assert.equal(unresolved[0]?.label, "Needs You");
+
+  const dated = buildSharedOrganiseContext({
+    world: {
+      projectIds: new Set(["proj-date"]),
+      projects: [{ id: "proj-date", name: "Date trial", code: "DATE", stakeholders: [] }],
+      risks: [],
+      todos: [],
+      timeline: [
+        { id: "ms-pc", projectId: "proj-date", label: "Practical completion", startAt: "2026-12-12" },
+      ],
+      knowledge: [],
+    },
+    projectId: "proj-date",
+  });
+  const undated = buildSharedOrganiseContext({
+    world: {
+      projectIds: new Set(["proj-date"]),
+      projects: [{ id: "proj-date", name: "Date trial", code: "DATE", stakeholders: [] }],
+      risks: [],
+      todos: [],
+      timeline: [{ id: "ms-pc", projectId: "proj-date", label: "Practical completion" }],
+      knowledge: [],
+    },
+    projectId: "proj-date",
+  });
+
+  const explicit = reviewProjectChangeForm({
+    context: dated,
+    source: "Practical completion is 18 December 2026.",
+    form: {
+      changes: [
+        change({
+          operation: "update_milestone",
+          targetId: "ms-pc",
+          evidence: "Practical completion is 18 December 2026.",
+          values: { dateIntent: "set_explicit", date: "2026-12-18" },
+        }),
+      ],
+    },
+  });
+  assert.equal(explicit[0]?.label, "Ready");
+  assert.equal(explicit[0]?.operation && "startAt" in explicit[0].operation ? explicit[0].operation.startAt : "", "2026-12-18");
+
+  const yearless = reviewProjectChangeForm({
+    context: dated,
+    source: "Practical completion has moved to 18 December.",
+    form: {
+      changes: [
+        change({
+          operation: "update_milestone",
+          targetId: "ms-pc",
+          evidence: "Practical completion has moved to 18 December.",
+          values: { dateIntent: "set_explicit", date: "2026-12-18" },
+        }),
+        change({
+          id: "chg-2",
+          operation: "update_milestone",
+          targetId: "ms-pc",
+          evidence: "Practical completion has moved to 18 December.",
+          values: { dateIntent: "set_explicit", date: "2025-12-18" },
+        }),
+      ],
+    },
+  });
+  assert.equal(yearless[0]?.label, "Ready");
+  assert.equal(yearless[1]?.label, "Needs You");
+
+  const historical = reviewProjectChangeForm({
+    context: dated,
+    source: "Practical completion was 1 September 2025.",
+    form: {
+      changes: [
+        change({
+          operation: "update_milestone",
+          targetId: "ms-pc",
+          evidence: "Practical completion was 1 September 2025.",
+          values: { dateIntent: "historical", date: "2025-09-01" },
+        }),
+      ],
+    },
+  });
+  assert.equal(historical[0]?.label, "No change");
+  assert.equal(historical[0]?.operation, null);
+
+  const bareIso = reviewProjectChangeForm({
+    context: dated,
+    source: "Practical completion was 1 September 2025.",
+    form: {
+      changes: [
+        change({
+          operation: "update_milestone",
+          targetId: "ms-pc",
+          evidence: "Practical completion was 1 September 2025.",
+          values: { date: "2025-09-01" },
+        }),
+      ],
+    },
+  });
+  assert.equal(bareIso[0]?.label, "Needs You");
+
+  assert.equal(shiftIsoDate("2026-12-12", "later", 2, "weeks"), "2026-12-26");
+  assert.equal(shiftIsoDate("2026-12-12", "earlier", 2, "weeks"), "2026-11-28");
+  const relative = reviewProjectChangeForm({
+    context: dated,
+    source: "Move practical completion back two weeks.",
+    form: {
+      changes: [
+        change({
+          operation: "update_milestone",
+          targetId: "ms-pc",
+          evidence: "Move practical completion back two weeks.",
+          values: { dateIntent: "move_relative", direction: "later", amount: 2, unit: "weeks", date: "1999-01-01" },
+        }),
+        change({
+          id: "chg-2",
+          operation: "update_milestone",
+          targetId: "ms-pc",
+          evidence: "Move practical completion back two weeks.",
+          values: { dateIntent: "move_relative", direction: "earlier", amount: 2, unit: "weeks" },
+        }),
+      ],
+    },
+  });
+  assert.equal(relative[0]?.label, "Ready");
+  assert.equal(relative[0]?.operation && "startAt" in relative[0].operation ? relative[0].operation.startAt : "", "2026-12-26");
+  assert.equal(relative[1]?.label, "Ready");
+  assert.equal(relative[1]?.operation && "startAt" in relative[1].operation ? relative[1].operation.startAt : "", "2026-11-28");
+
+  const noBaseline = reviewProjectChangeForm({
+    context: undated,
+    source: "Push practical completion back two weeks.",
+    form: {
+      changes: [
+        change({
+          operation: "update_milestone",
+          targetId: "ms-pc",
+          evidence: "Push practical completion back two weeks.",
+          values: { dateIntent: "move_relative", direction: "later", amount: 2, unit: "weeks", date: "2026-12-26" },
+        }),
+      ],
+    },
+  });
+  assert.equal(noBaseline[0]?.label, "Needs You");
+  assert.equal(noBaseline[0]?.operation, null);
 
   console.log("shared-organise self-check: OK");
 }

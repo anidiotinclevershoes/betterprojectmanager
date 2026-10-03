@@ -5,6 +5,7 @@
  */
 import type { CaptureApplyDecision, CaptureLegalOperation } from "@/lib/capture/apply";
 import { firstUsableIsoDate } from "@/lib/capture-v2/contract";
+import { decideMilestoneDate } from "./date";
 import { recordedTitleEvidencedInText } from "@/lib/capture/apply/recorded-title-evidence";
 import {
   namesMatchExact,
@@ -449,45 +450,8 @@ function checkOperation(
     }, safety);
   }
 
-  if (change.operation === "create_milestone") {
-    const label = asString(values.label) || asString(values.title);
-    const date = firstUsableIsoDate(values.date, values.startAt);
-    if (!label || !recordedTitleEvidencedInText(quoted, label)) {
-      return hold(change, "milestone", "This milestone label is not established in the input.", safety, "needs_you");
-    }
-    if (!date) {
-      return hold(change, "milestone", "This milestone needs a resolved ISO date.", safety, "needs_you");
-    }
-    return ready(change, "milestone", { type: "create_milestone", projectId, label, startAt: date }, safety);
-  }
-
-  if (change.operation === "update_milestone") {
-    if (!target || target.domain !== "milestone") {
-      return hold(change, "milestone", "This does not identify that existing milestone.", safety, "needs_you");
-    }
-    if (!recordedTitleEvidencedInText(quoted, target.title)) {
-      return hold(
-        change,
-        "milestone",
-        "This does not identify that existing record. Lume will not apply the change to a different item.",
-        safety,
-        "needs_you",
-      );
-    }
-    const date = firstUsableIsoDate(values.date, values.startAt);
-    if (date && target.date && target.date.slice(0, 10) === date.slice(0, 10)) {
-      return hold(change, "milestone", "This date is already recorded.", safety, "no_change");
-    }
-    if (!date && !asString(values.label)) {
-      return hold(change, "milestone", "This milestone update has no supported field change.", safety, "needs_you");
-    }
-    return ready(change, "milestone", {
-      type: "update_milestone",
-      projectId,
-      milestoneId: target.id,
-      label: asString(values.label) || undefined,
-      startAt: date,
-    }, safety);
+  if (change.operation === "create_milestone" || change.operation === "update_milestone") {
+    return reviewMilestone(change, context, quoted, target, safety);
   }
 
   if (change.operation === "write_availability") {
@@ -536,6 +500,77 @@ function checkOperation(
   }
 
   return hold(change, "unsupported", "This operation is not supported.", safety, "needs_you");
+}
+
+function reviewMilestone(
+  change: ProjectChange,
+  context: SharedOrganiseContext,
+  quoted: string,
+  target: TargetableRecord | undefined,
+  safety: SafetyTag[],
+): ReviewedChange {
+  const projectId = context.projectId;
+  if (change.operation === "update_milestone") {
+    if (!target || target.domain !== "milestone") {
+      return hold(change, "milestone", "This does not identify that existing milestone.", safety, "needs_you");
+    }
+    if (!recordedTitleEvidencedInText(quoted, target.title)) {
+      return hold(
+        change,
+        "milestone",
+        "This does not identify that existing record. Lume will not apply the change to a different item.",
+        safety,
+        "needs_you",
+      );
+    }
+  }
+  const label = asString(change.values.label) || asString(change.values.title);
+  if (change.operation === "create_milestone") {
+    if (!label || !recordedTitleEvidencedInText(quoted, label)) {
+      return hold(change, "milestone", "This milestone label is not established in the input.", safety, "needs_you");
+    }
+  }
+  const hasDateProposal =
+    asString(change.values.dateIntent) !== "" ||
+    asString(change.values.date) !== "" ||
+    asString(change.values.startAt) !== "" ||
+    asString(change.values.direction) !== "" ||
+    change.values.amount != null;
+  if (!hasDateProposal && change.operation === "update_milestone" && label) {
+    return ready(change, "milestone", {
+      type: "update_milestone",
+      projectId,
+      milestoneId: target!.id,
+      label,
+    }, safety);
+  }
+  const decision = decideMilestoneDate({
+    values: change.values,
+    evidence: quoted,
+    referenceDate: context.referenceDate,
+    canonicalDate: target?.domain === "milestone" ? target.date : undefined,
+  });
+  if (decision.kind === "needs_you") {
+    return hold(change, "milestone", decision.reason, safety, "needs_you");
+  }
+  if (decision.kind === "no_change") {
+    return hold(change, "milestone", decision.reason, safety, "no_change");
+  }
+  if (change.operation === "create_milestone") {
+    return ready(change, "milestone", {
+      type: "create_milestone",
+      projectId,
+      label,
+      startAt: decision.startAt,
+    }, safety);
+  }
+  return ready(change, "milestone", {
+    type: "update_milestone",
+    projectId,
+    milestoneId: target!.id,
+    label: label || undefined,
+    startAt: decision.startAt,
+  }, safety);
 }
 
 function quoteInLoose(quoted: string, text: string): boolean {

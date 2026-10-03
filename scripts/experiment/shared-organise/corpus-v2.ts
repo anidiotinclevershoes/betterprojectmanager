@@ -31,6 +31,8 @@ export type OrganiseCase = {
   wrongDomain?: MatchSpec[];
   contamination?: "adversarial" | "explicit_local";
   roleUpdateUnsupported?: boolean;
+  onlyReadyDate?: string;
+  noReadyMilestone?: boolean;
 };
 
 const SARAH = "proj-sarah";
