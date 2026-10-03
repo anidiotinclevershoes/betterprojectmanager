@@ -7,7 +7,7 @@
 export const DATE_INTENTS = ["set_explicit", "move_relative", "historical", "uncertain"] as const;
 export type DateIntent = (typeof DATE_INTENTS)[number];
 
-export const DATE_DIRECTIONS = ["earlier", "later"] as const;
+export const DATE_DIRECTIONS = ["earlier", "later", "unresolved"] as const;
 export type DateDirection = (typeof DATE_DIRECTIONS)[number];
 
 const MONTHS: Array<{ month: number; names: string[] }> = [
@@ -53,7 +53,7 @@ export function isoDay(value: string): string | null {
 
 export function shiftIsoDate(
   canonical: string,
-  direction: DateDirection,
+  direction: "earlier" | "later",
   amount: number,
   unit: "days" | "weeks",
 ): string | null {
@@ -176,6 +176,12 @@ export function decideMilestoneDate(args: {
   }
   if (intent === "move_relative") {
     const direction = asString(args.values.direction).toLowerCase();
+    if (direction === "unresolved") {
+      return {
+        kind: "needs_you",
+        reason: "The relative direction is unresolved, so the milestone date is not calculated.",
+      };
+    }
     if (direction !== "earlier" && direction !== "later") {
       return { kind: "needs_you", reason: "A relative milestone move needs a direction of earlier or later." };
     }

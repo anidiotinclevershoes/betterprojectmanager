@@ -19,6 +19,7 @@ export const PROJECT_CHANGE_FORM_SCHEMA = `{
       "targetId": "a Targetable id, or null",
       "evidence": "verbatim quote from the input",
       "reason": "why this is unresolved, unchanged, commentary, or not interpretable",
+      "materialUncertainty": ["an unresolved assumption that would make this change unsafe to apply, or an empty list"],
       "values": {
         "name": "ensure_person",
         "roleHint": "job title only. Distinct from scope",
@@ -33,7 +34,7 @@ export const PROJECT_CHANGE_FORM_SCHEMA = `{
         "label": "milestone label",
         "dateIntent": "set_explicit | move_relative | historical | uncertain",
         "date": "ISO YYYY-MM-DD only for set_explicit. Omit for move_relative",
-        "direction": "earlier | later",
+        "direction": "earlier | later | unresolved",
         "amount": 2,
         "unit": "days | weeks",
         "status": "open | watch | resolved | accepted | complete",
@@ -56,6 +57,7 @@ const RULES = `Rules:
 - ensure_person creates a person. It does not edit someone already on this project. If the input changes the role of an existing person, outcome=needs_you for that role. Still propose any responsibility the input states, as its own change.
 - A generic or unresolved reference is not a Person. Do not create or bind a person from someone, somebody, they, or a description such as someone on site or one of the engineers. If the input asserts a task whose owner is unresolved, propose that to-do and leave the owner unset. Do not invent a second task whose purpose is to discover the owner.
 - If the input does not safely identify which existing person or record is meant, outcome=needs_you. Do not guess an id. Do not create a second person to avoid the ambiguity. Do not record that assertion as write_knowledge.
+- Do not choose a plausible interpretation merely to complete the form. If a material assumption is required to produce a safe project change, name that assumption in materialUncertainty and use outcome=needs_you. materialUncertainty lists only unresolved assumptions that would make the operation unsafe to apply automatically, such as an explicitly hedged identity, a relative date direction that is genuinely ambiguous, or a target that cannot safely be distinguished. Leave it empty when no such assumption remains. It is not a reasoning trace.
 - ownershipSemantics is share, replace, continue, or ambiguous. Use ambiguous when share versus replace cannot be decided. Do not manufacture replace. Name the current owner only when the input names that person.
 - Restating current truth with no change is outcome=no_change and operation=none.
 - Creating a record whose title or name already exists on THIS project is not a new record. Update it, or use needs_you if the change is unclear.
@@ -65,7 +67,9 @@ const RULES = `Rules:
 - If the wording does not identify a supported operation, outcome=left_untouched. Say what is unclear in reason. Do not invent a home for it.
 - A milestone date change sets values.dateIntent to set_explicit, move_relative, historical, or uncertain.
 - set_explicit means the input sets the current milestone date to a stated civil date. Put that date in values.date as ISO YYYY-MM-DD. If the input states the year, use that year. If it states the month and day but not the year, use the next occurrence of that month and day on or after the reference date. If the calendar day is not stated, use uncertain. Do not invent a different day.
-- move_relative means the input moves an existing milestone by a stated number of days or weeks from its canonical date. Do not calculate the resulting date and do not put an ISO date on that change. Set direction to earlier or later, amount to the integer, and unit to days or weeks. earlier means before the canonical date. later means after the canonical date. Direction is the meaning of the sentence, not a particular word. If the amount, unit, or direction is not explicit, use uncertain.
+- move_relative means the input moves an existing milestone by a stated number of days or weeks from its canonical date. Do not calculate the resulting date and do not put an ISO date on that change. Set amount to the integer and unit to days or weeks. Set direction to earlier, later, or unresolved. earlier means before the canonical date. later means after the canonical date. Direction is the meaning of the sentence, not a particular word. If the direction is clear, use earlier or later. If the wording reasonably permits different interpretations, use unresolved. If the amount or unit is not explicit, use dateIntent uncertain.
+- Clear relative direction includes "make practical completion two weeks later", "make practical completion two weeks earlier", and "delay practical completion by two weeks".
+- Potentially ambiguous relative direction includes "move practical completion forward two weeks" and "move practical completion back two weeks".
 - historical means the input describes a former date and is not changing the current milestone date. Use outcome=no_change for that part. Do not emit a current milestone-date write for it.
 - uncertain means a milestone or date is mentioned but the current change is not safe to make. Use outcome=needs_you.
 - One sentence may contain a former date and a separate current date. Propose those as separate changes.

@@ -16,6 +16,7 @@ function change(partial: Partial<ProjectChange> & Pick<ProjectChange, "operation
     reason: null,
     values: {},
     ...partial,
+    materialUncertainty: partial.materialUncertainty ?? [],
   };
 }
 
@@ -385,6 +386,97 @@ export function runSharedOrganiseSelfCheck(): void {
   });
   assert.equal(noBaseline[0]?.label, "Needs You");
   assert.equal(noBaseline[0]?.operation, null);
+
+  const unresolvedDirection = reviewProjectChangeForm({
+    context: dated,
+    source: "Move practical completion back two weeks.",
+    form: {
+      changes: [
+        change({
+          operation: "update_milestone",
+          targetId: "ms-pc",
+          evidence: "Move practical completion back two weeks.",
+          values: {
+            dateIntent: "move_relative",
+            direction: "unresolved",
+            amount: 2,
+            unit: "weeks",
+            date: "2026-12-26",
+          },
+        }),
+      ],
+    },
+  });
+  assert.equal(unresolvedDirection[0]?.label, "Needs You");
+  assert.equal(unresolvedDirection[0]?.operation, null);
+
+  const uncertainButClear = reviewProjectChangeForm({
+    context: dated,
+    source: "Make practical completion two weeks later.",
+    form: {
+      changes: [
+        change({
+          operation: "update_milestone",
+          targetId: "ms-pc",
+          evidence: "Make practical completion two weeks later.",
+          materialUncertainty: ["direction might still be read the other way"],
+          values: { dateIntent: "move_relative", direction: "later", amount: 2, unit: "weeks" },
+        }),
+      ],
+    },
+  });
+  assert.equal(uncertainButClear[0]?.label, "Needs You");
+  assert.equal(uncertainButClear[0]?.operation, null);
+
+  const openSarah = buildSharedOrganiseContext({
+    world: {
+      projectIds: new Set(["proj-sarah"]),
+      projects: [
+        {
+          id: "proj-sarah",
+          name: "UAT trial",
+          code: "UAT",
+          stakeholders: [{ id: "person-sarah-kim", name: "Sarah Kim", role: "QA lead" }],
+        },
+      ],
+      risks: [],
+      todos: [],
+      timeline: [],
+      knowledge: [],
+    },
+    projectId: "proj-sarah",
+  });
+  const hedgeIgnored = reviewProjectChangeForm({
+    context: openSarah,
+    source: "Sarah Kim, or maybe Sarah K, will own UAT.",
+    form: {
+      changes: [
+        change({
+          operation: "confirm_responsibility",
+          evidence: "Sarah Kim, or maybe Sarah K, will own UAT.",
+          values: { personName: "Sarah Kim", personId: "person-sarah-kim", scope: "UAT" },
+        }),
+      ],
+    },
+  });
+  assert.equal(hedgeIgnored[0]?.label, "Ready");
+
+  const hedgeExposed = reviewProjectChangeForm({
+    context: openSarah,
+    source: "Sarah Kim, or maybe Sarah K, will own UAT.",
+    form: {
+      changes: [
+        change({
+          operation: "confirm_responsibility",
+          evidence: "Sarah Kim, or maybe Sarah K, will own UAT.",
+          materialUncertainty: ["identity is explicitly hedged"],
+          values: { personName: "Sarah Kim", personId: "person-sarah-kim", scope: "UAT" },
+        }),
+      ],
+    },
+  });
+  assert.equal(hedgeExposed[0]?.label, "Needs You");
+  assert.equal(hedgeExposed[0]?.operation, null);
 
   console.log("shared-organise self-check: OK");
 }

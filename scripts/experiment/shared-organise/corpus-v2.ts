@@ -32,7 +32,11 @@ export type OrganiseCase = {
   contamination?: "adversarial" | "explicit_local";
   roleUpdateUnsupported?: boolean;
   onlyReadyDate?: string;
+  /** A Ready milestone date outside this set is unsafe. Either calculated date may be Ready. */
+  allowedReadyDates?: string[];
   noReadyMilestone?: boolean;
+  /** Override the default repeat count. Closure runs set this explicitly. */
+  runs?: number;
 };
 
 const SARAH = "proj-sarah";

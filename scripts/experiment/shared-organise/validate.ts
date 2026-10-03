@@ -63,6 +63,22 @@ function asString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+/** Existence only. The text is stored and never used to classify the input. */
+function readMaterialUncertainty(raw: unknown): string[] {
+  const list = Array.isArray(raw) ? raw : raw == null || raw === "" ? [] : [raw];
+  const items: string[] = [];
+  for (const item of list) {
+    if (typeof item === "string") {
+      const trimmed = item.trim();
+      if (trimmed) items.push(trimmed);
+      continue;
+    }
+    if (item == null || item === false) continue;
+    items.push(typeof item === "object" ? JSON.stringify(item) : String(item));
+  }
+  return items;
+}
+
 function quoteInSource(source: string, evidence: string): boolean {
   const hay = source.replace(/\s+/g, " ").trim().toLowerCase();
   const quote = evidence.replace(/\s+/g, " ").trim().toLowerCase();
@@ -120,6 +136,15 @@ function ready(
   operation: CaptureLegalOperation,
   safety: SafetyTag[] = [],
 ): ReviewedChange {
+  if (change.materialUncertainty.length > 0) {
+    return hold(
+      change,
+      domain,
+      "This change has a material unresolved assumption.",
+      safety,
+      "needs_you",
+    );
+  }
   return {
     id: change.id,
     modelOutcome: change.outcome,
@@ -156,6 +181,7 @@ function parseChange(raw: unknown, index: number): ProjectChange | null {
     targetId: asString(row.targetId) || asString(values.personId) || asString(values.targetId) || null,
     evidence: asString(row.evidence),
     reason: asString(row.reason) || asString(row.commentary) || null,
+    materialUncertainty: readMaterialUncertainty(row.materialUncertainty ?? values.materialUncertainty),
     values,
   };
 }

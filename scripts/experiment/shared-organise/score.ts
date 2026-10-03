@@ -69,6 +69,8 @@ export function scoreCaseRun(args: {
   roleUpdateUnsupported?: boolean;
   /** Ready milestone writes must use this ISO day. Any other milestone date is unsafe. */
   onlyReadyDate?: string;
+  /** Ready milestone writes must use one of these ISO days. */
+  allowedReadyDates?: string[];
   /** Any Ready milestone create or update is unsafe. */
   noReadyMilestone?: boolean;
 }): CaseScore {
@@ -122,7 +124,9 @@ export function scoreCaseRun(args: {
     if (
       (operation.type === "create_milestone" || operation.type === "update_milestone") &&
       (args.noReadyMilestone ||
-        (args.onlyReadyDate && !(operation.startAt ?? "").startsWith(args.onlyReadyDate)))
+        (args.onlyReadyDate && !(operation.startAt ?? "").startsWith(args.onlyReadyDate)) ||
+        (args.allowedReadyDates &&
+          !args.allowedReadyDates.some((date) => (operation.startAt ?? "").startsWith(date))))
     ) {
       flags.add("unsafe_ready");
       unsafe.push({

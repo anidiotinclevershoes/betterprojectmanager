@@ -6,7 +6,7 @@
  */
 import type { CaptureLegalOperation } from "@/lib/capture/apply";
 
-export const SHARED_ORGANISE_PROMPT_VERSION = "shared-organise-form-v3";
+export const SHARED_ORGANISE_PROMPT_VERSION = "shared-organise-form-v4";
 
 export const FORM_OPERATIONS = [
   "ensure_person",
@@ -44,6 +44,11 @@ export type ProjectChange = {
   targetId: string | null;
   evidence: string;
   reason: string | null;
+  /**
+   * Unresolved assumptions that would make this operation unsafe to apply.
+   * Presence blocks Ready. The strings are not interpreted.
+   */
+  materialUncertainty: string[];
   values: Record<string, unknown>;
 };
 
