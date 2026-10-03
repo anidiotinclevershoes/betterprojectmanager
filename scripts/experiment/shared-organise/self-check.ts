@@ -67,10 +67,10 @@ export function runSharedOrganiseSelfCheck(): void {
   assert.equal(sarah.targetable.has("resp-1"), false);
   assert.ok(sarah.prompt.includes("NEVER return contextOnlyId as targetId"));
 
-  const blocked = reviewProjectChangeForm({
+  const allowedSibling = reviewProjectChangeForm({
     context: candy,
     source:
-      "Resolve the Console certification slip risk. Pixel Ramos should own UAT. Helen can sign the variation for the extra containment.",
+      "Resolve the Console certification slip risk. Pixel Ramos should own UAT. Helen can sign the variation for the extra containment. Pixel Ramos is not on this project.",
     form: {
       changes: [
         change({
@@ -82,7 +82,7 @@ export function runSharedOrganiseSelfCheck(): void {
           id: "chg-2",
           operation: "ensure_person",
           evidence: "Pixel Ramos should own UAT.",
-          values: { name: "Pixel Ramos" },
+          values: { name: "Pixel Ramos", roleHint: "Producer" },
         }),
         change({
           id: "chg-3",
@@ -90,15 +90,95 @@ export function runSharedOrganiseSelfCheck(): void {
           evidence: "Helen can sign the variation for the extra containment.",
           values: { text: "Helen can sign the variation for the extra containment." },
         }),
+        change({
+          id: "chg-4",
+          operation: "ensure_person",
+          evidence: "Pixel Ramos is not on this project.",
+          values: { name: "Pixel Ramos" },
+        }),
+        change({
+          id: "chg-5",
+          operation: "update_risk_status",
+          targetId: "risk-console",
+          evidence: "Resolve the Console certification slip risk.",
+          values: { status: "resolved" },
+        }),
       ],
     },
   });
-  assert.equal(blocked[0]?.label, "Needs You");
-  assert.ok(blocked[0]?.safety.includes("cross_project_create"));
-  assert.equal(blocked[1]?.label, "Needs You");
-  assert.ok(blocked[1]?.safety.includes("cross_project_create"));
-  assert.equal(blocked[2]?.label, "Needs You");
-  assert.ok(blocked[2]?.safety.includes("knowledge_bypass"));
+  assert.equal(allowedSibling[0]?.label, "Ready");
+  assert.equal(allowedSibling[0]?.safety.includes("cross_project_create"), false);
+  assert.equal(allowedSibling[1]?.label, "Ready");
+  assert.equal(allowedSibling[1]?.operation?.type, "ensure_person");
+  assert.equal(allowedSibling[2]?.label, "Needs You");
+  assert.ok(allowedSibling[2]?.safety.includes("knowledge_bypass"));
+  assert.equal(allowedSibling[3]?.label, "No change");
+  assert.ok(allowedSibling[3]?.safety.includes("not_on_this_project"));
+  assert.equal(allowedSibling[4]?.label, "Needs You");
+  assert.ok(allowedSibling[4]?.safety.includes("invented_stable_id"));
+
+  const generic = reviewProjectChangeForm({
+    context: candy,
+    source: "Someone needs to sort the fire cert. One of the engineers should look later.",
+    form: {
+      changes: [
+        change({
+          operation: "ensure_person",
+          evidence: "Someone needs to sort the fire cert.",
+          values: { name: "Someone" },
+        }),
+        change({
+          id: "chg-2",
+          operation: "create_todo",
+          evidence: "Someone needs to sort the fire cert.",
+          values: { title: "Sort the fire cert" },
+        }),
+        change({
+          id: "chg-3",
+          operation: "confirm_responsibility",
+          evidence: "One of the engineers should look later.",
+          values: { personName: "one of the engineers", scope: "look later" },
+        }),
+      ],
+    },
+  });
+  assert.equal(generic[0]?.label, "Needs You");
+  assert.ok(generic[0]?.safety.includes("unresolved_person"));
+  assert.equal(generic[0]?.operation, null);
+  assert.equal(generic[1]?.label, "Ready");
+  assert.equal(generic[1]?.operation?.type, "create_todo");
+  assert.equal(generic[2]?.label, "Needs You");
+  assert.ok(generic[2]?.safety.includes("unresolved_person"));
+
+  const roleChange = reviewProjectChangeForm({
+    context: sarah,
+    source: "Sarah Kim is the QS and handles valuations.",
+    form: {
+      changes: [
+        change({
+          operation: "ensure_person",
+          evidence: "Sarah Kim is the QS and handles valuations.",
+          values: { name: "Sarah Kim", roleHint: "QS" },
+        }),
+        change({
+          id: "chg-2",
+          operation: "confirm_responsibility",
+          evidence: "Sarah Kim is the QS and handles valuations.",
+          values: {
+            personName: "Sarah Kim",
+            personId: "person-sarah-kim",
+            scope: "valuations",
+            ownershipSemantics: "ambiguous",
+          },
+        }),
+      ],
+    },
+  });
+  assert.equal(roleChange[0]?.label, "Needs You");
+  assert.ok(roleChange[0]?.safety.includes("role_update_unsupported"));
+  assert.equal(roleChange[0]?.operation, null);
+  assert.equal(roleChange[1]?.label, "Ready");
+  assert.equal(roleChange[1]?.operation?.type, "confirm_responsibility");
 
   const sarahK = reviewProjectChangeForm({
     context: sarah,

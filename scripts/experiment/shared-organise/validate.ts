@@ -40,7 +40,9 @@ export type SafetyTag =
   | "knowledge_bypass"
   | "destructive"
   | "foreign_project_named"
-  | "not_on_this_project";
+  | "not_on_this_project"
+  | "unresolved_person"
+  | "role_update_unsupported";
 
 export type ReviewedChange = {
   id: string;
@@ -185,6 +187,19 @@ function knowledgeBypass(evidence: string): boolean {
   return PERSON_AUTHORITY.test(evidence);
 }
 
+/**
+ * Closed referents that do not identify a Person.
+ * This is not a responsibility-language parser.
+ */
+export function isUnresolvedPersonReference(name: string): boolean {
+  const normalized = name.trim().replace(/\s+/g, " ").toLowerCase();
+  if (!normalized) return false;
+  if (/^(someone|somebody|they|them|he|she|anyone|anybody)$/.test(normalized)) return true;
+  if (/^(someone|somebody)\b/.test(normalized)) return true;
+  if (/^one of the\b/.test(normalized)) return true;
+  return false;
+}
+
 export function reviewProjectChangeForm(args: {
   form: ProjectChangeForm;
   context: SharedOrganiseContext;
@@ -285,10 +300,32 @@ function checkOperation(
 
   if (change.operation === "ensure_person") {
     const name = asString(values.name) || asString(values.personName);
+    if (isUnresolvedPersonReference(name)) {
+      safety.push("unresolved_person");
+      return hold(
+        change,
+        "person",
+        "This does not identify a person. Lume will not create a Person from a generic reference.",
+        safety,
+        "needs_you",
+      );
+    }
     if (!name || !recordedPersonNameAppearsInText(quoted, name)) {
       return hold(change, "person", "This Person identity is not established in the input.", safety, "needs_you");
     }
-    if (context.people.some((person) => namesMatchExact(person.name, name))) {
+    const existingPerson = context.people.find((person) => namesMatchExact(person.name, name));
+    if (existingPerson) {
+      const roleHint = asString(values.roleHint) || asString(values.role);
+      if (roleHint && norm(existingPerson.role) !== norm(roleHint)) {
+        safety.push("role_update_unsupported");
+        return hold(
+          change,
+          "person",
+          "This person is already on the project. A role change is not a supported write, so Lume will not pretend the role was updated.",
+          safety,
+          "needs_you",
+        );
+      }
       safety.push("duplicate_person");
       return hold(change, "person", `${name} is already on this project.`, safety, "no_change");
     }
@@ -305,16 +342,6 @@ function checkOperation(
           "needs_you",
         );
       }
-    }
-    if (context.otherProjectPersonNames.has(norm(name))) {
-      safety.push("cross_project_create");
-      return hold(
-        change,
-        "person",
-        `${name} is an existing person on another project. Lume will not copy that person here.`,
-        safety,
-        "needs_you",
-      );
     }
     const operation: CaptureLegalOperation = {
       type: "ensure_person",
@@ -336,10 +363,6 @@ function checkOperation(
     }
     if ([...context.targetable.values()].some((row) => row.domain === "todo" && norm(row.title) === norm(title))) {
       return hold(change, "todo", "A to-do with this title already exists.", safety, "needs_you");
-    }
-    if (context.otherProjectTodoTitles.has(norm(title))) {
-      safety.push("cross_project_create");
-      return hold(change, "todo", "This to-do title already exists on another project.", safety, "needs_you");
     }
     const due = firstUsableIsoDate(values.dueAt, values.date);
     return ready(change, "todo", {
@@ -395,16 +418,6 @@ function checkOperation(
     if ([...context.targetable.values()].some((row) => row.domain === "risk" && norm(row.title) === norm(title))) {
       return hold(change, "risk", "A risk with this title already exists.", safety, "needs_you");
     }
-    if (context.otherProjectRiskTitles.has(norm(title))) {
-      safety.push("cross_project_create");
-      return hold(
-        change,
-        "risk",
-        "This title is an existing risk on another project. Lume will not copy it here.",
-        safety,
-        "needs_you",
-      );
-    }
     return ready(change, "risk", { type: "create_risk", projectId, title }, safety);
   }
 
@@ -444,10 +457,6 @@ function checkOperation(
     }
     if (!date) {
       return hold(change, "milestone", "This milestone needs a resolved ISO date.", safety, "needs_you");
-    }
-    if (context.otherProjectMilestoneTitles.has(norm(label))) {
-      safety.push("cross_project_create");
-      return hold(change, "milestone", "This milestone title already exists on another project.", safety, "needs_you");
     }
     return ready(change, "milestone", { type: "create_milestone", projectId, label, startAt: date }, safety);
   }
@@ -545,6 +554,16 @@ function checkResponsibility(
   const personName = asString(change.values.personName) || asString(change.values.name);
   const scope = asString(change.values.scope);
   const semantics = asString(change.values.ownershipSemantics).toLowerCase();
+  if (isUnresolvedPersonReference(personName)) {
+    safety.push("unresolved_person");
+    return hold(
+      change,
+      "responsibility",
+      "This does not identify a person. Lume will not attach a responsibility to a generic reference.",
+      safety,
+      "needs_you",
+    );
+  }
   if (!personName || !recordedPersonNameAppearsInText(quoted, personName)) {
     safety.push("wrong_existing_person");
     return hold(
@@ -578,16 +597,6 @@ function checkResponsibility(
         "needs_you",
       );
     }
-  }
-  if (context.otherProjectPersonNames.has(norm(personName)) && existing.length === 0) {
-    safety.push("cross_project_create");
-    return hold(
-      change,
-      "responsibility",
-      `${personName} is an existing person on another project. Lume will not copy that responsibility here.`,
-      safety,
-      "needs_you",
-    );
   }
   const requestedId = asString(change.values.personId) || change.targetId || "";
   if (requestedId && context.contextOnlyIds.has(requestedId)) {

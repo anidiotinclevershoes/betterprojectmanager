@@ -4,7 +4,7 @@
  * Responsibility row ids are context-only: confirm_responsibility
  * targets a person and a scope, not the knowledge row id.
  */
-import type { CaptureApplyWorld } from "@/lib/capture/apply";
+import type { CaptureApplyWorld, CaptureLegalOperation } from "@/lib/capture/apply";
 import { namesMatchExact } from "@/lib/people/identity";
 
 export const SHARED_ORGANISE_REFERENCE_DATE = "2026-10-03";
@@ -217,4 +217,36 @@ export function buildSharedOrganiseContext(args: {
     otherProjectMilestoneTitles,
     otherProjectPersonNames,
   };
+}
+
+/**
+ * Classification only. Does not block a create.
+ * A person or title may legitimately exist on more than one project.
+ */
+export function siblingCollision(
+  context: SharedOrganiseContext,
+  operation: CaptureLegalOperation,
+): string | null {
+  if (operation.type === "ensure_person" && context.otherProjectPersonNames.has(norm(operation.name))) {
+    return "person_name_exists_on_another_project";
+  }
+  if (
+    operation.type === "confirm_responsibility" &&
+    context.otherProjectPersonNames.has(norm(operation.personName))
+  ) {
+    return "person_name_exists_on_another_project";
+  }
+  if (operation.type === "create_risk" && context.otherProjectRiskTitles.has(norm(operation.title))) {
+    return "risk_title_exists_on_another_project";
+  }
+  if (operation.type === "create_todo" && context.otherProjectTodoTitles.has(norm(operation.title))) {
+    return "todo_title_exists_on_another_project";
+  }
+  if (
+    operation.type === "create_milestone" &&
+    context.otherProjectMilestoneTitles.has(norm(operation.label))
+  ) {
+    return "milestone_title_exists_on_another_project";
+  }
+  return null;
 }
