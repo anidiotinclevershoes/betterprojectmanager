@@ -1,7 +1,7 @@
 # Lume constitution
 
 **Status:** Durable product / architecture constitution  
-**Date:** 12 September 2026  
+**Date:** 21 September 2026 (§11 Assigned to · Waiting on · Responsibility)  
 **Docs entry:** [`docs/README.md`](./README.md)
 
 This file owns Lume’s **high-order rules**. It is not an implementation map and not a living defect list.
@@ -14,6 +14,7 @@ This file owns Lume’s **high-order rules**. It is not an implementation map an
 | Current Capture position | [`docs/LUME_CAPTURE_STATUS.md`](./LUME_CAPTURE_STATUS.md) |
 | What shipped in v0.9 / leftovers / isolation evidence | [`docs/LUME_V09_TO_V1_HANDOFF.md`](./LUME_V09_TO_V1_HANDOFF.md) |
 | Open vs resolved debt | [`docs/LUME_V1_KNOWN_DISCOVERIES.md`](./LUME_V1_KNOWN_DISCOVERIES.md) |
+| Deferred / accepted product semantics | [`docs/LUME_PRODUCT_DECISIONS.md`](./LUME_PRODUCT_DECISIONS.md) |
 | What the code does now | current `main` |
 
 If a historical handoff disagrees with this file, **this file wins** for durable rules. If this file and current code disagree on *implementation*, the code wins and this file should be updated.
@@ -200,3 +201,17 @@ If a proposed change could destroy existing project truth, require project recre
 > **STOP. Do not autonomously implement the destructive path. Escalate to Product Owner review.**
 
 A genuinely necessary destructive migration requires the evidence listed in the Durable Project Truth contract.
+
+---
+
+## 11. Assigned to · Waiting on · Responsibility
+
+These are different concepts. Do not conflate them.
+
+| Concept | Meaning |
+| --- | --- |
+| **Assigned to** | Who is responsible for doing a To Do. Canonical project People (`stakeholders`). Zero, one, or many. |
+| **Waiting on** | Who/person/team the PM is waiting on or blocked by (`todos.waiting_on`). |
+| **Responsibility** | Durable project-scope ownership in Knowledge (`kind=responsibility`). |
+
+v0.9 has **no** To Do assignee model. `waiting_on` is not assignment. Multi-assignee To Dos are **required before V1** and must not be implemented during v0.9 UI completion. Detail and v0.9 boundary: [`docs/LUME_PRODUCT_DECISIONS.md`](./LUME_PRODUCT_DECISIONS.md) CD-007.

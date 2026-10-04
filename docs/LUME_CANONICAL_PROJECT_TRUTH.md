@@ -1,7 +1,7 @@
 # Canonical Project Truth
 
 **Status:** Specialist architectural contract  
-**Date:** 12 September 2026  
+**Date:** 21 September 2026 (To Do assignment is not current canonical; CD-007)  
 **Peer invariant:** [`docs/LUME_DURABLE_PROJECT_TRUTH.md`](./LUME_DURABLE_PROJECT_TRUTH.md)  
 **Owned by:** [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md) §3  
 **Docs entry:** [`docs/README.md`](./README.md)
@@ -58,6 +58,8 @@ Use the **then-current** established canonical architecture. Do not freeze futur
 A new surface is a view, workflow, or entry point into canonical truth **unless** an explicit architecture decision establishes a new canonical domain model. New UX must not automatically imply new storage.
 
 If a requested item does not map safely to an existing canonical domain, use Review / Needs You / the then-current canonical creation workflow. Do not invent a feature-specific type merely because the click started in that feature.
+
+**To Do assignment is not a current canonical field.** v0.9 To Dos have no assignee / owner relationship. `todos.waiting_on` is wait/block free text, not “Assigned to”. Knowledge `kind=responsibility` is project-scope ownership, not To Do assignment. A structured To Do ↔ many People assignee relationship is a **pre-V1** additive requirement (CD-007 / D-057). Do not implement it in v0.9. Do not document or paint it as already shipped.
 
 ---
 

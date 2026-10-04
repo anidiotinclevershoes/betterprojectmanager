@@ -1,7 +1,7 @@
 # Lume product decisions register
 
 **Status:** Living register of semantics engineering must **not** invent  
-**Date:** 12 September 2026  
+**Date:** 21 September 2026 (CD-007 To Do assignees recorded)  
 **Owned by:** Product Owner  
 **Docs entry:** [`docs/README.md`](./README.md)
 
@@ -43,3 +43,50 @@ Engineering may record a gap here and keep current safe behaviour. Do not block 
 | CD-004 | Responsibilities are optional; multiple supported | Constitution §7 |
 | CD-005 | Tags are retrieval metadata only | Constitution §6 |
 | CD-006 | Ready means the same production Apply path can execute; Apply still revalidates | Canonical contract |
+| CD-007 | To Do **Assigned to** is a pre-V1 requirement (0 / 1 / many project People). It is not `waiting_on` and not Knowledge responsibility. Not implemented in v0.9. | This file § Required before V1; D-057 |
+
+---
+
+## Required before V1 (accepted, not implemented in v0.9)
+
+These are Product Owner decisions. They are **not** current product behaviour. Do not treat Figma, Ocean Person bubbles, or this register as proof that the capability already exists.
+
+### CD-007 — To Do assignees (0 / 1 / many project People)
+
+**Must-do before V1.** Not a v0.9 implementation task. Current work remains v0.9 UI completion.
+
+Before V1 is complete, a To Do must be assignable to:
+
+- zero project People;
+- one project Person; or
+- multiple project People simultaneously.
+
+Those People are existing canonical project **stakeholders**. This is not authenticated multi-user collaboration, workspace sharing, invitations, or teams.
+
+Keep these three concepts separate. Do not conflate them in schema, Capture, UI, or copy:
+
+| Concept | Meaning | Current v0.9 authority |
+| --- | --- | --- |
+| **Assigned to** | Who is responsible for *doing* the To Do | **None.** No assignee / owner model on To Dos. |
+| **Waiting on** | Who/person/team the PM is waiting on or blocked by | `todos.waiting_on` — single nullable free text. Existing stored values must survive unchanged and must **not** be reinterpreted as assignment. |
+| **Responsibility** | Durable project-scope ownership | Knowledge / `kind=responsibility` truth. Must **not** be reused as To Do assignment. |
+
+**v0.9 boundary — do not:**
+
+- add schema or migrations;
+- change persistence, Capture Apply, or `waiting_on`;
+- implement multi-assignee controls;
+- add speculative local / client-only assignee logic.
+
+Figma / Ocean may keep the established Person-bubble visual grammar. The actual multiple-assignee interaction is deferred until this pre-V1 capability is implemented.
+
+**Intended pre-V1 architecture (directional, not a frozen schema):**
+
+- Additive. Preserve existing canonical truth.
+- Structured many-to-many: To Do ↔ canonical project People (for example a dedicated `todo_assignees` relation, or an equivalently explicit model).
+- Durable Person IDs (`stakeholders.id`). Do not assign by free-text name as identity.
+- No deterministic migration may turn `waiting_on` / block relationships into assignees.
+
+**Pre-V1 completion must cover:** additive schema/domain support; durable Person IDs; load/persistence; Manual Add/Edit; display of one or several assigned People; Capture/Review when assignment is explicitly stated; deterministic tests; old-project compatibility; clear separation from `waiting_on` and Knowledge responsibility.
+
+Living backlog entry: [`docs/LUME_V1_KNOWN_DISCOVERIES.md`](./LUME_V1_KNOWN_DISCOVERIES.md) **D-057**. V1 roadmap placement: [`docs/LUME_V09_TO_V1_HANDOFF.md`](./LUME_V09_TO_V1_HANDOFF.md) §8.
