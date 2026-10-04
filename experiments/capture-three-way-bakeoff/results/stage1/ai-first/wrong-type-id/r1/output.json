@@ -1,0 +1,68 @@
+{
+  "caseId": "wrong-type-id",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8516,
+  "usage": {
+    "prompt_tokens": 878,
+    "completion_tokens": 287,
+    "total_tokens": 1165,
+    "reasoning_tokens": 103
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "milestone",
+          "targetCanonicalId": null,
+          "subject": "Parade day",
+          "proposedValues": {
+            "name": "Parade day",
+            "personName": null,
+            "title": null,
+            "date": "2026-10-22",
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Update person-gumdrop: Parade day moved to 22 October 2026.",
+          "understood": "The Capture gives a new date for Parade day but explicitly targets person-gumdrop, which identifies Pippa Gumdrop rather than the milestone.",
+          "question": "Should this update target the Parade day milestone (ms-parade) instead of person-gumdrop?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Parade day",
+        "personName": null,
+        "title": null,
+        "date": "2026-10-22",
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Update person-gumdrop: Parade day moved to 22 October 2026.",
+      "ambiguity": "Should this update target the Parade day milestone (ms-parade) instead of person-gumdrop?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,67 @@
+{
+  "caseId": "similar-name-ambiguous-brick",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1558,
+  "usage": {
+    "prompt_tokens": 1151,
+    "completion_tokens": 127,
+    "total_tokens": 1278,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick called about the track map.",
+          "evidence": "Brick called about the track map.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "projectId": "proj-toy",
+          "candidateTargetId": "person-brick",
+          "candidateTargetTitle": "Brick Oakley",
+          "commentary": "The statement does not indicate any specific action or change related to the project."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "commentary",
+        "statement": "Brick called about the track map.",
+        "evidence": "Brick called about the track map.",
+        "candidateTargetId": "person-brick",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "Brick Oakley",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": "omitted",
+      "evidence": "Brick called about the track map.",
+      "ambiguity": "The statement does not indicate any specific action or change related to the project.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

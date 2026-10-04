@@ -1,0 +1,57 @@
+{
+  "caseId": "irrelevant-commentary",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4658,
+  "usage": {
+    "prompt_tokens": 808,
+    "completion_tokens": 148,
+    "total_tokens": 956,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Lobby cabinet chatter",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+          "understood": "The Capture contains unrelated chatter and no explicit project change.",
+          "question": null,
+          "leftUntouchedReason": "Irrelevant chatter; no project operation is stated."
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Lobby cabinet chatter",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+      "ambiguity": "Irrelevant chatter; no project operation is stated.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

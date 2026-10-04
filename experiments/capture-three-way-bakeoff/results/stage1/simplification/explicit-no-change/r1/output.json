@@ -1,0 +1,93 @@
+{
+  "caseId": "explicit-no-change",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1342,
+  "usage": {
+    "prompt_tokens": 1126,
+    "completion_tokens": 135,
+    "total_tokens": 1261,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Nothing has changed on Toyworld this week.",
+          "evidence": "Nothing has changed on Toyworld this week.",
+          "domain": "commentary",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {},
+          "commentary": "The statement indicates that the current project state remains unchanged.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "no_change",
+        "statement": "Nothing has changed on Toyworld this week.",
+        "evidence": "Nothing has changed on Toyworld this week.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      },
+      {
+        "id": "coverage-left-1",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "Leave the records as they are.",
+        "evidence": "Leave the records as they are.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Lume couldn't safely interpret this part of your capture."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "Nothing has changed on Toyworld this week.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Nothing has changed on Toyworld this week.",
+      "ambiguity": "The statement indicates that the current project state remains unchanged.",
+      "disposition": "no_change",
+      "writeProposed": false
+    },
+    {
+      "domain": "unknown",
+      "subject": "Leave the records as they are.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "leftUntouched": true,
+        "leftUntouchedSource": "coverage"
+      },
+      "evidence": "Leave the records as they are.",
+      "ambiguity": "Lume couldn't safely interpret this part of your capture.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

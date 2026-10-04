@@ -1,0 +1,73 @@
+{
+  "caseId": "person-rename-unsupported",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1769,
+  "usage": {
+    "prompt_tokens": 1132,
+    "completion_tokens": 152,
+    "total_tokens": 1284,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Pippa Gumdrop is now called Pippa Sugarplum.",
+          "evidence": "Pippa Gumdrop is now called Pippa Sugarplum.",
+          "domain": "person",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-gumdrop",
+          "candidateTargetTitle": "Pippa Gumdrop",
+          "proposedValues": {
+            "name": "Pippa Sugarplum"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "update_existing",
+        "statement": "Pippa Gumdrop is now called Pippa Sugarplum.",
+        "evidence": "Pippa Gumdrop is now called Pippa Sugarplum.",
+        "candidateTargetId": "person-gumdrop",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "Pippa Sugarplum is mentioned, but Lume cannot represent this as a stakeholder change.\n\nLume needs clarification about what that means for this stakeholder."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Pippa Gumdrop",
+      "referencedCanonicalId": "person-gumdrop",
+      "assertedValue": {
+        "name": "Pippa Sugarplum"
+      },
+      "evidence": "Pippa Gumdrop is now called Pippa Sugarplum.",
+      "ambiguity": "Pippa Sugarplum is mentioned, but Lume cannot represent this as a stakeholder change.\n\nLume needs clarification about what that means for this stakeholder.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

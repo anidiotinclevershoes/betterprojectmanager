@@ -1,0 +1,131 @@
+{
+  "caseId": "share-vs-replace-ambiguous",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 3005,
+  "usage": {
+    "prompt_tokens": 1144,
+    "completion_tokens": 273,
+    "total_tokens": 1417,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+          "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-fizz",
+          "candidateTargetTitle": "Fizz Caramel",
+          "proposedValues": {
+            "personName": "Pippa Gumdrop",
+            "scope": "UAT",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "It's unclear whether Fizz Caramel will take UAT or share it with Pippa Gumdrop."
+        },
+        {
+          "id": "obs-2",
+          "statement": "The parade committee was unclear about UAT responsibility.",
+          "evidence": "the parade committee was unclear.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "projectId": "proj-candy",
+          "commentary": "This statement reflects uncertainty from the parade committee."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+        "candidateTargetId": "person-fizz",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It's unclear whether Fizz Caramel will take UAT or share it with Pippa Gumdrop."
+      },
+      {
+        "id": "obs-2",
+        "domain": "commentary",
+        "disposition": "commentary",
+        "statement": "The parade committee was unclear about UAT responsibility.",
+        "evidence": "the parade committee was unclear.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      },
+      {
+        "id": "coverage-left-1",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it —",
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it —",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Lume couldn't safely interpret this part of your capture."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Fizz Caramel",
+      "referencedCanonicalId": "person-fizz",
+      "assertedValue": {
+        "personName": "Pippa Gumdrop",
+        "scope": "UAT",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+      "ambiguity": "It's unclear whether Fizz Caramel will take UAT or share it with Pippa Gumdrop.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "commentary",
+      "subject": "The parade committee was unclear about UAT responsibility.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "the parade committee was unclear.",
+      "ambiguity": "This statement reflects uncertainty from the parade committee.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    },
+    {
+      "domain": "unknown",
+      "subject": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it —",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "leftUntouched": true,
+        "leftUntouchedSource": "coverage"
+      },
+      "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it —",
+      "ambiguity": "Lume couldn't safely interpret this part of your capture.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

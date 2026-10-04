@@ -1,0 +1,75 @@
+{
+  "caseId": "unchanged-date",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2281,
+  "usage": {
+    "prompt_tokens": 1123,
+    "completion_tokens": 165,
+    "total_tokens": 1288,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Track freeze remains 1 September 2026.",
+          "evidence": "Just confirming: Track freeze remains 1 September 2026.",
+          "domain": "milestone",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "ms-freeze",
+          "candidateTargetTitle": "Track freeze",
+          "proposedValues": {
+            "label": "Track freeze",
+            "date": "2026-09-01"
+          },
+          "commentary": "Restating existing current truth without a change.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "no_change",
+        "statement": "Track freeze remains 1 September 2026.",
+        "evidence": "Just confirming: Track freeze remains 1 September 2026.",
+        "candidateTargetId": "ms-freeze",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Already known — no mutation."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Track freeze",
+      "referencedCanonicalId": "ms-freeze",
+      "assertedValue": {
+        "label": "Track freeze",
+        "date": "2026-09-01"
+      },
+      "evidence": "Just confirming: Track freeze remains 1 September 2026.",
+      "ambiguity": "Restating existing current truth without a change.",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

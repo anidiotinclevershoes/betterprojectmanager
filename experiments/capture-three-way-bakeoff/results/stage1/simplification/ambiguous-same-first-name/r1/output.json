@@ -1,0 +1,97 @@
+{
+  "caseId": "ambiguous-same-first-name",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1925,
+  "usage": {
+    "prompt_tokens": 1123,
+    "completion_tokens": 137,
+    "total_tokens": 1260,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick wants to help with assembly.",
+          "evidence": "he wants to help with assembly.",
+          "domain": "availability",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "person-brick",
+          "candidateTargetTitle": "Brick Oakley",
+          "proposedValues": {
+            "personName": "Brick Oakley"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "availability",
+        "disposition": "update_existing",
+        "statement": "Brick wants to help with assembly.",
+        "evidence": "he wants to help with assembly.",
+        "candidateTargetId": "person-brick",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This availability cannot be saved — the dates are not clear."
+      },
+      {
+        "id": "coverage-left-1",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "Brick from the warehouse called",
+        "evidence": "Brick from the warehouse called",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Lume couldn't safely interpret this part of your capture."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "availability",
+      "subject": "Brick Oakley",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": {
+        "personName": "Brick Oakley"
+      },
+      "evidence": "he wants to help with assembly.",
+      "ambiguity": "This availability cannot be saved — the dates are not clear.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "unknown",
+      "subject": "Brick from the warehouse called",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "leftUntouched": true,
+        "leftUntouchedSource": "coverage"
+      },
+      "evidence": "Brick from the warehouse called",
+      "ambiguity": "Lume couldn't safely interpret this part of your capture.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

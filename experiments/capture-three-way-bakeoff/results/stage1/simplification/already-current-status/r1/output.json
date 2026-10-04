@@ -1,0 +1,75 @@
+{
+  "caseId": "already-current-status",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2345,
+  "usage": {
+    "prompt_tokens": 1130,
+    "completion_tokens": 164,
+    "total_tokens": 1294,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Gumdrop Bridge icing is still an open risk.",
+          "evidence": "Gumdrop Bridge icing is still an open risk.",
+          "domain": "risk",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "risk-bridge",
+          "candidateTargetTitle": "Gumdrop Bridge icing",
+          "proposedValues": {
+            "title": "Gumdrop Bridge icing",
+            "status": "open"
+          },
+          "commentary": "Restating existing current truth without a change.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "no_change",
+        "statement": "Gumdrop Bridge icing is still an open risk.",
+        "evidence": "Gumdrop Bridge icing is still an open risk.",
+        "candidateTargetId": "risk-bridge",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Already known — no mutation."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Gumdrop Bridge icing",
+      "referencedCanonicalId": "risk-bridge",
+      "assertedValue": {
+        "title": "Gumdrop Bridge icing",
+        "status": "open"
+      },
+      "evidence": "Gumdrop Bridge icing is still an open risk.",
+      "ambiguity": "Restating existing current truth without a change.",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

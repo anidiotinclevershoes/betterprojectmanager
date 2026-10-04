@@ -1,0 +1,24 @@
+{
+  "caseId": "ownership-competing-owner",
+  "contender": "current",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "fizz-uat",
+      "meaning": "Fizz owning UAT is a competing-owner statement against Pippa's confirmed UAT lead — do not silently replace.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": true,
+      "clearAutomationOk": null,
+      "justifiedIntervention": true,
+      "unnecessaryIntervention": false,
+      "note": "needs_you write=no id=person-fizz"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

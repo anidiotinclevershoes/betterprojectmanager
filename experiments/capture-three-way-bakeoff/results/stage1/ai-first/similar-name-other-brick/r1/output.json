@@ -1,0 +1,68 @@
+{
+  "caseId": "similar-name-other-brick",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7607,
+  "usage": {
+    "prompt_tokens": 852,
+    "completion_tokens": 219,
+    "total_tokens": 1071,
+    "reasoning_tokens": 68
+  },
+  "raw": {
+    "snapshotChars": 612,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Brick Willow helping with warehouse packing",
+          "proposedValues": {
+            "name": null,
+            "personName": "Brick Willow",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "warehouse packing",
+            "ownershipSemantics": "helping",
+            "text": "Brick Willow will help with warehouse packing this week.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Brick Willow will help with warehouse packing this week.",
+          "understood": "Brick Willow will help with warehouse packing this week; ownership is not assigned.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Brick Willow helping with warehouse packing",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Brick Willow",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "warehouse packing",
+        "ownershipSemantics": "helping",
+        "text": "Brick Willow will help with warehouse packing this week.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Brick Willow will help with warehouse packing this week.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

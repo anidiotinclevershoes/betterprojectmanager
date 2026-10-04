@@ -1,0 +1,130 @@
+{
+  "caseId": "c5-timber-floor",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2598,
+  "usage": {
+    "prompt_tokens": 1299,
+    "completion_tokens": 241,
+    "total_tokens": 1540,
+    "prompt_tokens_details": {
+      "cached_tokens": 1152,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The asbestos survey addendum came back clean.",
+          "evidence": "The asbestos survey addendum came back clean.",
+          "domain": "todo",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-riverside-c5",
+          "candidateTargetId": "todo-asbestos",
+          "candidateTargetTitle": "Chase the asbestos survey addendum",
+          "proposedValues": {
+            "status": "resolved"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Raise a risk that the hall timber floor may still hide services.",
+          "evidence": "Raise a risk that the hall timber floor may still hide services.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "uncertain",
+          "projectId": "proj-riverside-c5",
+          "proposedValues": {
+            "title": "Hall timber floor may still hide services"
+          }
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "todo",
+        "disposition": "update_existing",
+        "statement": "The asbestos survey addendum came back clean.",
+        "evidence": "The asbestos survey addendum came back clean.",
+        "candidateTargetId": "todo-asbestos",
+        "decisionKind": "write",
+        "writeType": "complete_todo",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "create_new",
+        "statement": "Raise a risk that the hall timber floor may still hide services.",
+        "evidence": "Raise a risk that the hall timber floor may still hide services.",
+        "candidateTargetId": null,
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It is unclear whether this should change current project truth."
+      },
+      {
+        "id": "coverage-left-1",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "Close that chase.",
+        "evidence": "Close that chase.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Lume couldn't safely interpret this part of your capture."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Chase the asbestos survey addendum",
+      "referencedCanonicalId": "todo-asbestos",
+      "assertedValue": {
+        "status": "resolved"
+      },
+      "evidence": "The asbestos survey addendum came back clean.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "risk",
+      "subject": "Raise a risk that the hall timber floor may still hide services.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Hall timber floor may still hide services"
+      },
+      "evidence": "Raise a risk that the hall timber floor may still hide services.",
+      "ambiguity": "It is unclear whether this should change current project truth.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "unknown",
+      "subject": "Close that chase.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "leftUntouched": true,
+        "leftUntouchedSource": "coverage"
+      },
+      "evidence": "Close that chase.",
+      "ambiguity": "Lume couldn't safely interpret this part of your capture.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

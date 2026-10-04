@@ -1,0 +1,104 @@
+{
+  "caseId": "duplicate-observation",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2267,
+  "usage": {
+    "prompt_tokens": 1124,
+    "completion_tokens": 222,
+    "total_tokens": 1346,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The packaging delay is resolved.",
+          "evidence": "Packaging delay is resolved.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "risk-packaging",
+          "candidateTargetTitle": "Packaging delay",
+          "proposedValues": {
+            "status": "resolved"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The packaging delay issue is resolved.",
+          "evidence": "Also, the packaging delay issue is resolved.",
+          "domain": "risk",
+          "disposition": "merge",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "risk-packaging",
+          "candidateTargetTitle": "Packaging delay",
+          "mergeWithObservationId": "obs-1"
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "update_existing",
+        "statement": "The packaging delay is resolved.",
+        "evidence": "Packaging delay is resolved.",
+        "candidateTargetId": "risk-packaging",
+        "decisionKind": "write",
+        "writeType": "update_risk_status",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "merge",
+        "statement": "The packaging delay issue is resolved.",
+        "evidence": "Also, the packaging delay issue is resolved.",
+        "candidateTargetId": "risk-packaging",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Merged with obs-1."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": {
+        "status": "resolved"
+      },
+      "evidence": "Packaging delay is resolved.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": "omitted",
+      "evidence": "Also, the packaging delay issue is resolved.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

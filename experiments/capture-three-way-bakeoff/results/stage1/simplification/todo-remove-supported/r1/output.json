@@ -1,0 +1,72 @@
+{
+  "caseId": "todo-remove-supported",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2280,
+  "usage": {
+    "prompt_tokens": 1130,
+    "completion_tokens": 150,
+    "total_tokens": 1280,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The To Do titled Prepare the jelly pack should be deleted.",
+          "evidence": "Please delete the To Do titled Prepare the jelly pack.",
+          "domain": "todo",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "todo-pack",
+          "candidateTargetTitle": "Prepare the jelly pack",
+          "proposedValues": {
+            "title": "Prepare the jelly pack"
+          },
+          "commentary": "The request to delete the To Do indicates a current change."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "todo",
+        "disposition": "update_existing",
+        "statement": "The To Do titled Prepare the jelly pack should be deleted.",
+        "evidence": "Please delete the To Do titled Prepare the jelly pack.",
+        "candidateTargetId": "todo-pack",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This To Do update is not specific enough to apply automatically."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Prepare the jelly pack",
+      "referencedCanonicalId": "todo-pack",
+      "assertedValue": {
+        "title": "Prepare the jelly pack"
+      },
+      "evidence": "Please delete the To Do titled Prepare the jelly pack.",
+      "ambiguity": "The request to delete the To Do indicates a current change.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

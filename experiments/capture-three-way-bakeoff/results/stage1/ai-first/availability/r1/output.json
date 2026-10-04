@@ -1,0 +1,68 @@
+{
+  "caseId": "availability",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4105,
+  "usage": {
+    "prompt_tokens": 881,
+    "completion_tokens": 161,
+    "total_tokens": 1042,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "availability",
+          "targetCanonicalId": null,
+          "subject": "Fizz Caramel availability",
+          "proposedValues": {
+            "name": null,
+            "personName": "Fizz Caramel",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": "2026-10-05",
+            "awayToIso": "2026-10-12"
+          },
+          "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+          "understood": "Fizz Caramel is away from 2026-10-05 until 2026-10-12.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "availability",
+      "subject": "Fizz Caramel availability",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Fizz Caramel",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": "2026-10-05",
+        "awayToIso": "2026-10-12"
+      },
+      "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

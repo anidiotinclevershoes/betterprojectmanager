@@ -1,0 +1,77 @@
+{
+  "caseId": "ownership-competing-owner",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1731,
+  "usage": {
+    "prompt_tokens": 1127,
+    "completion_tokens": 158,
+    "total_tokens": 1285,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Fizz Caramel owns UAT lead.",
+          "evidence": "Fizz Caramel owns UAT lead.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-fizz",
+          "candidateTargetTitle": "Fizz Caramel",
+          "proposedValues": {
+            "personName": "Fizz Caramel",
+            "scope": "UAT lead",
+            "ownershipSemantics": "replace"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "update_existing",
+        "statement": "Fizz Caramel owns UAT lead.",
+        "evidence": "Fizz Caramel owns UAT lead.",
+        "candidateTargetId": "person-fizz",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "Replacement needs a confirmed current owner. Confirm before Lume changes ownership."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Fizz Caramel",
+      "referencedCanonicalId": "person-fizz",
+      "assertedValue": {
+        "personName": "Fizz Caramel",
+        "scope": "UAT lead",
+        "ownershipSemantics": "replace"
+      },
+      "evidence": "Fizz Caramel owns UAT lead.",
+      "ambiguity": "Replacement needs a confirmed current owner. Confirm before Lume changes ownership.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

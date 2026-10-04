@@ -1,0 +1,77 @@
+{
+  "caseId": "might-ownership",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1680,
+  "usage": {
+    "prompt_tokens": 1128,
+    "completion_tokens": 181,
+    "total_tokens": 1309,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Fizz Caramel might own float lighting now.",
+          "evidence": "Fizz Caramel might own float lighting now.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-fizz",
+          "candidateTargetTitle": "Fizz Caramel",
+          "proposedValues": {
+            "personName": "Fizz Caramel",
+            "scope": "float lighting",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "It isn't clear if Fizz Caramel officially owns float lighting or if this is just a possibility.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Fizz Caramel might own float lighting now.",
+        "evidence": "Fizz Caramel might own float lighting now.",
+        "candidateTargetId": "person-fizz",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It isn't clear if Fizz Caramel officially owns float lighting or if this is just a possibility."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Fizz Caramel",
+      "referencedCanonicalId": "person-fizz",
+      "assertedValue": {
+        "personName": "Fizz Caramel",
+        "scope": "float lighting",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Fizz Caramel might own float lighting now.",
+      "ambiguity": "It isn't clear if Fizz Caramel officially owns float lighting or if this is just a possibility.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

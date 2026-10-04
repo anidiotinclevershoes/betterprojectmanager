@@ -1,0 +1,68 @@
+{
+  "caseId": "availability-relative",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6861,
+  "usage": {
+    "prompt_tokens": 867,
+    "completion_tokens": 217,
+    "total_tokens": 1084,
+    "reasoning_tokens": 59
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "availability",
+          "targetCanonicalId": null,
+          "subject": "Fizz Caramel’s absence",
+          "proposedValues": {
+            "name": null,
+            "personName": "Fizz Caramel",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "Fizz is off next week.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Fizz is off next week.",
+          "understood": "Fizz Caramel will be away, but the exact date range is not specified.",
+          "question": "What start and end dates does “next week” mean for Fizz’s absence?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "availability",
+      "subject": "Fizz Caramel’s absence",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Fizz Caramel",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "Fizz is off next week.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Fizz is off next week.",
+      "ambiguity": "What start and end dates does “next week” mean for Fizz’s absence?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

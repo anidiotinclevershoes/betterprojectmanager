@@ -1,0 +1,68 @@
+{
+  "caseId": "pronoun-ambiguity",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8197,
+  "usage": {
+    "prompt_tokens": 804,
+    "completion_tokens": 263,
+    "total_tokens": 1067,
+    "reasoning_tokens": 103
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Ownership of the boss balancing pass",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Boss balancing pass",
+            "date": null,
+            "status": null,
+            "scope": "Boss balancing pass",
+            "ownershipSemantics": "owner",
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "She said she will own the boss balancing pass from now on.",
+          "understood": "Someone will own the existing boss balancing pass from now on, but the Capture does not identify who.",
+          "question": "Who does “she” refer to?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Ownership of the boss balancing pass",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Boss balancing pass",
+        "date": null,
+        "status": null,
+        "scope": "Boss balancing pass",
+        "ownershipSemantics": "owner",
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "She said she will own the boss balancing pass from now on.",
+      "ambiguity": "Who does “she” refer to?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

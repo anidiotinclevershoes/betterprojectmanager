@@ -1,0 +1,68 @@
+{
+  "caseId": "milestone-move",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5466,
+  "usage": {
+    "prompt_tokens": 873,
+    "completion_tokens": 146,
+    "total_tokens": 1019,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "update",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-parade",
+          "subject": "Parade day",
+          "proposedValues": {
+            "name": "Parade day",
+            "personName": null,
+            "title": null,
+            "date": "2026-10-29",
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Parade day is now 29 October 2026.",
+          "understood": "Parade day moves from 15 October 2026 to 29 October 2026.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "name": "Parade day",
+        "personName": null,
+        "title": null,
+        "date": "2026-10-29",
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Parade day is now 29 October 2026.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

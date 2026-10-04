@@ -1,0 +1,104 @@
+{
+  "caseId": "correction-of-wording",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2006,
+  "usage": {
+    "prompt_tokens": 1120,
+    "completion_tokens": 206,
+    "total_tokens": 1326,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The shader compile is stalling the cert build.",
+          "evidence": "The shader compile is stalling the cert build.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "proposedValues": {
+            "title": "Shader compile stalling cert build"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The audio bus mixer is causing an issue.",
+          "evidence": "Wait — I meant the audio bus mixer, not the shader.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "proposedValues": {
+            "title": "Audio bus mixer issue"
+          }
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "create_new",
+        "statement": "The shader compile is stalling the cert build.",
+        "evidence": "The shader compile is stalling the cert build.",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_risk",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "create_new",
+        "statement": "The audio bus mixer is causing an issue.",
+        "evidence": "Wait — I meant the audio bus mixer, not the shader.",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_risk",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "The shader compile is stalling the cert build.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Shader compile stalling cert build"
+      },
+      "evidence": "The shader compile is stalling the cert build.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "risk",
+      "subject": "The audio bus mixer is causing an issue.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Audio bus mixer issue"
+      },
+      "evidence": "Wait — I meant the audio bus mixer, not the shader.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

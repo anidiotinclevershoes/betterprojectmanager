@@ -1,0 +1,73 @@
+{
+  "caseId": "similar-name-exact",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1588,
+  "usage": {
+    "prompt_tokens": 1153,
+    "completion_tokens": 149,
+    "total_tokens": 1302,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Brick Oakley remains the Toyworld sponsor.",
+          "evidence": "Brick Oakley remains the Toyworld sponsor.",
+          "domain": "person",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "person-brick",
+          "candidateTargetTitle": "Brick Oakley",
+          "proposedValues": {
+            "name": "Brick Oakley"
+          },
+          "commentary": "Restating existing current truth without a change.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "no_change",
+        "statement": "Brick Oakley remains the Toyworld sponsor.",
+        "evidence": "Brick Oakley remains the Toyworld sponsor.",
+        "candidateTargetId": "person-brick",
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Already known — no mutation."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Brick Oakley",
+      "referencedCanonicalId": "person-brick",
+      "assertedValue": {
+        "name": "Brick Oakley"
+      },
+      "evidence": "Brick Oakley remains the Toyworld sponsor.",
+      "ambiguity": "Restating existing current truth without a change.",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

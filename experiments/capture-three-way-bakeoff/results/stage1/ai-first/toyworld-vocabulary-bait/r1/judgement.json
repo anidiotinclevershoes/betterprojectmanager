@@ -1,0 +1,24 @@
+{
+  "caseId": "toyworld-vocabulary-bait",
+  "contender": "ai-first",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "packaging-bait",
+      "meaning": "A Toyworld person and risk were offered as Candyland writes.",
+      "recalled": true,
+      "falseMaterialFact": true,
+      "falseUnsafeWrite": true,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": false,
+      "clearAutomationOk": null,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "create write=yes id=omitted"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

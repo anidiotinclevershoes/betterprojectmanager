@@ -1,0 +1,26 @@
+{
+  "caseId": "new-risk",
+  "contender": "current",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "shader-compile",
+      "meaning": "A new risk about the shader compile stalling the cert build.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "create write=yes id=omitted"
+    }
+  ],
+  "extraWrites": [
+    "create:risk:The cert build could miss the nightlies.:omitted"
+  ],
+  "malformed": false
+}

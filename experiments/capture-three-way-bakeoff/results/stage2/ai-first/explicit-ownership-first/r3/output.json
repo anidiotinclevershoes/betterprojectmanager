@@ -1,0 +1,111 @@
+{
+  "caseId": "explicit-ownership-first",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8671,
+  "usage": {
+    "prompt_tokens": 867,
+    "completion_tokens": 323,
+    "total_tokens": 1190,
+    "reasoning_tokens": 33
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "person",
+          "targetCanonicalId": null,
+          "subject": "Sarah Kim",
+          "proposedValues": {
+            "name": "Sarah Kim OUTERSPACE FUNTIME BANANA BOAT 1234Z!",
+            "personName": "Sarah Kim OUTERSPACE FUNTIME BANANA BOAT 1234Z!",
+            "title": "Sarah Kim OUTERSPACE FUNTIME BANANA BOAT 1234Z!",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Sarah Kim owns float safety.",
+          "understood": "Sarah Kim is a named person not present in the current snapshot.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "create",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Float safety ownership",
+          "proposedValues": {
+            "name": null,
+            "personName": "Sarah Kim",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "float safety",
+            "ownershipSemantics": "owner",
+            "text": "Sarah Kim owns float safety.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Sarah Kim owns float safety.",
+          "understood": "Sarah Kim owns float safety, a responsibility not present in the current snapshot.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Sarah Kim",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Sarah Kim OUTERSPACE FUNTIME BANANA BOAT 1234Z!",
+        "personName": "Sarah Kim OUTERSPACE FUNTIME BANANA BOAT 1234Z!",
+        "title": "Sarah Kim OUTERSPACE FUNTIME BANANA BOAT 1234Z!",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Sarah Kim owns float safety.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Float safety ownership",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": "Sarah Kim",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "float safety",
+        "ownershipSemantics": "owner",
+        "text": "Sarah Kim owns float safety.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Sarah Kim owns float safety.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

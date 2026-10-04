@@ -1,0 +1,100 @@
+{
+  "caseId": "correction-of-wording",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1822,
+  "usage": {
+    "prompt_tokens": 1120,
+    "completion_tokens": 215,
+    "total_tokens": 1335,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The shader compile is stalling the cert build.",
+          "evidence": "The shader compile is stalling the cert build.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "proposedValues": {
+            "title": "Shader compile stalling cert build"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "The audio bus mixer is involved in the certification process.",
+          "evidence": "Wait — I meant the audio bus mixer, not the shader.",
+          "domain": "unknown",
+          "disposition": "left_untouched",
+          "truthIntent": "uncertain",
+          "projectId": "proj-game",
+          "commentary": "It's unclear how the audio bus mixer affects the project or if it introduces a risk."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "create_new",
+        "statement": "The shader compile is stalling the cert build.",
+        "evidence": "The shader compile is stalling the cert build.",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_risk",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "unknown",
+        "disposition": "left_untouched",
+        "statement": "The audio bus mixer is involved in the certification process.",
+        "evidence": "Wait — I meant the audio bus mixer, not the shader.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "It's unclear how the audio bus mixer affects the project or if it introduces a risk."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "The shader compile is stalling the cert build.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Shader compile stalling cert build"
+      },
+      "evidence": "The shader compile is stalling the cert build.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "unknown",
+      "subject": "The audio bus mixer is involved in the certification process.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Wait — I meant the audio bus mixer, not the shader.",
+      "ambiguity": "It's unclear how the audio bus mixer affects the project or if it introduces a risk.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

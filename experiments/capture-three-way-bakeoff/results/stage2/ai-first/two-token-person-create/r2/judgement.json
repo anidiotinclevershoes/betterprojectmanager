@@ -1,0 +1,26 @@
+{
+  "caseId": "two-token-person-create",
+  "contender": "ai-first",
+  "repeatIndex": 2,
+  "facts": [
+    {
+      "factId": "jordan-hale",
+      "meaning": "Jordan Hale is a new lighting lead.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "create write=yes id=omitted"
+    }
+  ],
+  "extraWrites": [
+    "create:responsibility:Jordan Hale — lighting lead:omitted"
+  ],
+  "malformed": false
+}

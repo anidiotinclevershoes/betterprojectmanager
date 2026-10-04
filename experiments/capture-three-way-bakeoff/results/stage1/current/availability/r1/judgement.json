@@ -1,0 +1,24 @@
+{
+  "caseId": "availability",
+  "contender": "current",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "fizz-away",
+      "meaning": "Fizz Caramel availability 5–12 October 2026.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "update write=yes id=person-fizz"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

@@ -1,0 +1,68 @@
+{
+  "caseId": "contradict-parade",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5494,
+  "usage": {
+    "prompt_tokens": 886,
+    "completion_tokens": 170,
+    "total_tokens": 1056,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-parade",
+          "subject": "Parade day",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Parade day",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Parade day is now 29 October 2026. Also, keep Parade day on 15 October 2026.",
+          "understood": "The Capture gives contradictory dates for the existing Parade day milestone.",
+          "question": "Should Parade day be on 29 October 2026 or remain on 15 October 2026?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Parade day",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Parade day is now 29 October 2026. Also, keep Parade day on 15 October 2026.",
+      "ambiguity": "Should Parade day be on 29 October 2026 or remain on 15 October 2026?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

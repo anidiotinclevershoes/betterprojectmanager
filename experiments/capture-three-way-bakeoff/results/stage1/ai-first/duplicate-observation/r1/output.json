@@ -1,0 +1,68 @@
+{
+  "caseId": "duplicate-observation",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4009,
+  "usage": {
+    "prompt_tokens": 820,
+    "completion_tokens": 136,
+    "total_tokens": 956,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "update",
+          "domain": "risk",
+          "targetCanonicalId": "risk-packaging",
+          "subject": "Packaging delay",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Packaging delay",
+            "date": null,
+            "status": "resolved",
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Packaging delay is resolved. Also, the packaging delay issue is resolved.",
+          "understood": "The existing Packaging delay issue is resolved; both statements describe the same update.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Packaging delay",
+        "date": null,
+        "status": "resolved",
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Packaging delay is resolved. Also, the packaging delay issue is resolved.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

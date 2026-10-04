@@ -1,0 +1,24 @@
+{
+  "caseId": "historic-parade",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "historic-why",
+      "meaning": "Historic account of Parade day — no date write.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": null,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "no_change write=no id=ms-parade"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

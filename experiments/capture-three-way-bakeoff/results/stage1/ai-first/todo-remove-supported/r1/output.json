@@ -1,0 +1,68 @@
+{
+  "caseId": "todo-remove-supported",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4027,
+  "usage": {
+    "prompt_tokens": 872,
+    "completion_tokens": 133,
+    "total_tokens": 1005,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "remove",
+          "domain": "todo",
+          "targetCanonicalId": "todo-pack",
+          "subject": "Prepare the jelly pack",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Prepare the jelly pack",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please delete the To Do titled Prepare the jelly pack.",
+          "understood": "Delete the existing To Do titled Prepare the jelly pack.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Prepare the jelly pack",
+      "referencedCanonicalId": "todo-pack",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Prepare the jelly pack",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Please delete the To Do titled Prepare the jelly pack.",
+      "ambiguity": "omitted",
+      "disposition": "remove",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

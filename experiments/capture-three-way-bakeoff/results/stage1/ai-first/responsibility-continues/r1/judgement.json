@@ -1,0 +1,24 @@
+{
+  "caseId": "responsibility-continues",
+  "contender": "ai-first",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "pixel-continues",
+      "meaning": "Pixel Ramos still holds Producer; this is continuity, not replacement.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "no_change write=no id=person-pixel"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

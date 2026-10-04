@@ -1,0 +1,68 @@
+{
+  "caseId": "repeated-fact-wording",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6410,
+  "usage": {
+    "prompt_tokens": 889,
+    "completion_tokens": 225,
+    "total_tokens": 1114,
+    "reasoning_tokens": 54
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "no_change",
+          "domain": "responsibility",
+          "targetCanonicalId": "resp-uat",
+          "subject": "Pippa Gumdrop — UAT lead",
+          "proposedValues": {
+            "name": null,
+            "personName": "Pippa Gumdrop",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "UAT lead",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Just to restate what we already know: Pippa Gumdrop continues to be the person leading UAT on the licorice stands.",
+          "understood": "Restates Pippa Gumdrop's existing UAT lead responsibility; no change is requested.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Pippa Gumdrop — UAT lead",
+      "referencedCanonicalId": "resp-uat",
+      "assertedValue": {
+        "name": null,
+        "personName": "Pippa Gumdrop",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "UAT lead",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Just to restate what we already know: Pippa Gumdrop continues to be the person leading UAT on the licorice stands.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}
