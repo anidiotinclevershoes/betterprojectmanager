@@ -440,8 +440,19 @@ function buildSuggestionsFromProposedOps(
     const conflictingAvailability = availabilityHint && !availabilityCompatible;
     // Availability may refine Person/Knowledge. It must not retarget Risk,
     // To Do, milestone, or an unknown entity into an Away write.
+    const sectionRaw = op.proposedValues?.section;
+    const explicitSection =
+      sectionRaw === "now" ||
+      sectionRaw === "decisions" ||
+      sectionRaw === "risks" ||
+      sectionRaw === "people" ||
+      sectionRaw === "openLoops"
+        ? sectionRaw
+        : undefined;
     const kind: SuggestionKind =
-      availabilityHint && availabilityCompatible
+      explicitSection === "decisions"
+        ? "decision"
+        : availabilityHint && availabilityCompatible
         ? "availability"
         : op.entityType === "todo"
           ? "action"
@@ -585,11 +596,13 @@ function buildSuggestionsFromProposedOps(
       targetTodoId,
       targetEntityId: durableId,
       recommendation: rec,
-      knowledgeSection: isRemember
-        ? "now"
-        : kind === "risk"
-          ? "risks"
-          : undefined,
+      knowledgeSection: explicitSection
+        ? explicitSection
+        : isRemember
+          ? "now"
+          : kind === "risk"
+            ? "risks"
+            : undefined,
       knowledgeBullet:
         isRemember || kind === "risk" ? proposedText : undefined,
       isKnowledgeRemember:
@@ -604,6 +617,12 @@ function buildSuggestionsFromProposedOps(
       replacePersonId,
       proposedValues: op.proposedValues,
       expectedTarget,
+      truthIntent:
+        op.proposedValues?.truthIntent === "current" ||
+        op.proposedValues?.truthIntent === "non_current" ||
+        op.proposedValues?.truthIntent === "uncertain"
+          ? op.proposedValues.truthIntent
+          : undefined,
     });
   }
 

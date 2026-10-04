@@ -47,6 +47,11 @@ import {
   CAPTURE_V2_PROMPT_ID,
   CAPTURE_V2_PROMPT_VERSION,
 } from "@/lib/capture-v2/prompt";
+import { isSharedOrganiseEnabled } from "@/lib/shared-organise/flag";
+import { extractProjectChangesWithLuna } from "@/lib/shared-organise/extract";
+import { SHARED_ORGANISE_PROMPT_VERSION } from "@/lib/shared-organise/prompt";
+import { runSharedOrganiseFromModelJson } from "@/lib/shared-organise/run";
+import { buildSharedOrganiseContext, civilDateIso } from "@/lib/shared-organise/context";
 import { DurableWorkspaceError } from "@/lib/data/durable-workspace";
 
 export const runtime = "nodejs";
@@ -88,6 +93,7 @@ export async function GET() {
     keyLength: diagnostics.length,
     reason: diagnostics.reason,
     captureV2Enabled: true,
+    sharedOrganiseEnabled: isSharedOrganiseEnabled(),
     promptId: CAPTURE_V2_PROMPT_ID,
     promptVersion: CAPTURE_V2_PROMPT_VERSION,
     extractPath: CAPTURE_V2_EXTRACT_PATH,
@@ -216,6 +222,13 @@ async function postCaptureV2(args: {
   );
   logCaptureContextDiagnostic(contextManifest);
 
+  if (isSharedOrganiseEnabled() && !isOpenAIConfigured()) {
+    return NextResponse.json(
+      { error: "AI is not configured for this environment." },
+      { status: 503 },
+    );
+  }
+
   if (!isOpenAIConfigured()) {
     const result = localCaptureFallback(
       input,
@@ -272,6 +285,19 @@ async function postCaptureV2(args: {
       },
       notice:
         "OPENAI_API_KEY not set — used local coaching. Add your OpenAI key to enable tidy-up.",
+    });
+  }
+
+  if (isSharedOrganiseEnabled()) {
+    return postSharedOrganise({
+      gateUserId: args.gateUserId,
+      content,
+      startedAt,
+      analysisRequestId,
+      loaded,
+      ignoredClientTruth,
+      captureContext,
+      contextManifest,
     });
   }
 
@@ -376,6 +402,76 @@ async function postCaptureV2(args: {
       responseModel: extraction.responseModel,
       promptId: extraction.promptId,
       promptVersion: extraction.promptVersion,
+      path: extraction.path,
+      fallback: false,
+    },
+  });
+}
+
+async function postSharedOrganise(args: {
+  gateUserId: string;
+  content: string;
+  startedAt: number;
+  analysisRequestId: string;
+  loaded: Awaited<ReturnType<typeof loadServerCaptureWorld>>;
+  ignoredClientTruth: ReturnType<typeof clientPostedTruthFields>;
+  captureContext: ReturnType<typeof buildCaptureContext>;
+  contextManifest: ReturnType<typeof buildCaptureContextManifest>;
+}) {
+  const { content, startedAt, analysisRequestId, loaded } = args;
+  const referenceDate = civilDateIso();
+  const organiseContext = buildSharedOrganiseContext({
+    world: loaded.world,
+    projectId: loaded.projectId,
+    referenceDate,
+  });
+  const extraction = await extractProjectChangesWithLuna({
+    transcript: content,
+    projectBlock: organiseContext.prompt,
+  });
+  const organised = runSharedOrganiseFromModelJson({
+    transcript: content,
+    rawModelJson: extraction.rawModelJson,
+    world: loaded.world,
+    projectId: loaded.projectId,
+    referenceDate,
+  });
+  const reliability = assessCaptureReliability({
+    captureText: content,
+    result: organised.result,
+    contextManifest: args.contextManifest,
+  });
+  logIntelligenceProvenance("capture.shared_organise_analysed", {
+    ...extractProvenanceBase(),
+    userId: args.gateUserId,
+    projectId: loaded.projectId,
+    ignoredClientTruth: args.ignoredClientTruth,
+    provider: extraction.provider,
+    requestedModel: extraction.requestedModel,
+    responseModel: extraction.responseModel,
+    fallback: false,
+    fallbackReason: null,
+    elapsedMs: Date.now() - startedAt,
+    observationCount: extraction.changeCount,
+    usagePrompt: extraction.providerUsage?.prompt_tokens ?? null,
+    usageCompletion: extraction.providerUsage?.completion_tokens ?? null,
+    usageTotal: extraction.providerUsage?.total_tokens ?? null,
+  });
+  return NextResponse.json({
+    result: organised.result,
+    openaiConfigured: true,
+    requestId: analysisRequestId,
+    contextManifest: args.contextManifest,
+    captureContextDiagnostics: args.captureContext.diagnostics,
+    reliability,
+    capturePipeline: "v2",
+    sharedOrganise: true,
+    provenance: {
+      provider: extraction.provider,
+      requestedModel: extraction.requestedModel,
+      responseModel: extraction.responseModel,
+      promptId: extraction.promptId,
+      promptVersion: SHARED_ORGANISE_PROMPT_VERSION,
       path: extraction.path,
       fallback: false,
     },
