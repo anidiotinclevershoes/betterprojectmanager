@@ -33,6 +33,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "apply-authoritative-first-paint", script: "scripts/verify-apply-authoritative-first-paint.ts" },
   { name: "phase0-capture-baseline", script: "scripts/verify-phase0-capture-baseline.ts" },
   { name: "capture-v2", script: "scripts/verify-capture-v2.ts" },
+  { name: "shared-organise", script: "scripts/verify-shared-organise.ts" },
   { name: "capture-intelligence-diagnostic", script: "scripts/verify-capture-intelligence-diagnostic.ts" },
   { name: "eval-capture-v2-foundation", script: "scripts/verify-eval-capture-v2.ts" },
   { name: "eval-capture-v2-scorer-v2", script: "scripts/verify-eval-scorer-v2.ts" },

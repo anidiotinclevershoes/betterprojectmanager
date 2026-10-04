@@ -494,11 +494,13 @@ function planPerson(
     );
   }
   if (resolved.status === "new_named") {
+    const roleHint = asString(values.roleHint) || asString(values.role);
     return write("person", {
       type: "ensure_person",
       projectId,
       name: resolved.name,
       personId: resolved.personId,
+      ...(roleHint ? { roleHint } : {}),
       applyOperationId: item.id.trim() || undefined,
     });
   }
