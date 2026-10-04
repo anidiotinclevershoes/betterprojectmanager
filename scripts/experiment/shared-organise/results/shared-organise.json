@@ -1,0 +1,4620 @@
+{
+  "branch": "cursor/shared-organise-engine-5508",
+  "startingSha": "0777ba851ca5e1fa907de3470ce6dc666a02838e",
+  "model": "gpt-6-luna",
+  "promptVersion": "shared-organise-form-v1",
+  "observationPromptVersion": "capture-v2-eval-baseline-v2",
+  "referenceDate": "2026-10-03",
+  "elapsedMs": 147053,
+  "note": "Experiment only. Production Capture and New Project were not modified. No canonical writes.",
+  "capture": [
+    {
+      "caseId": "existing-person",
+      "title": "Existing Person mentioned again",
+      "category": "person-existing",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 7522,
+        "usage": {
+          "prompt_tokens": 1183,
+          "completion_tokens": 370,
+          "total_tokens": 1553,
+          "reasoning_tokens": 251
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "no_change",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands.",
+              "reason": "This restates Pippa Gumdrop's current UAT lead role. It does not use an explicit ownership phrase to establish a responsibility scope change.",
+              "values": {}
+            }
+          ]
+        }
+      },
+      "contextChars": 730,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 1
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "No change",
+            "domain": "unsupported",
+            "modelOutcome": "no_change",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "This restates Pippa Gumdrop's current UAT lead role. It does not use an explicit ownership phrase to establish a responsibility scope change.",
+            "safety": [],
+            "evidence": "Pippa Gumdrop is still the UAT lead for the licorice stands."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "No change"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "new-person",
+      "title": "Genuinely new Person",
+      "category": "person-new",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 5593,
+        "usage": {
+          "prompt_tokens": 1142,
+          "completion_tokens": 219,
+          "total_tokens": 1361,
+          "reasoning_tokens": 95
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+              "reason": "The input identifies a person joining the project and gives their role.",
+              "values": {
+                "name": "Velvet Sprocket",
+                "roleHint": "paint lead"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 624,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "person",
+            "modelOutcome": "ready",
+            "modelOperation": "ensure_person",
+            "operationType": "ensure_person",
+            "reason": "",
+            "safety": [],
+            "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready ensure_person",
+          "Ready confirm_responsibility"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "ambiguous-same-first-name",
+      "title": "Same first name / ambiguous Person",
+      "category": "person-ambiguous",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 9367,
+        "usage": {
+          "prompt_tokens": 1139,
+          "completion_tokens": 538,
+          "total_tokens": 1677,
+          "reasoning_tokens": 418
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "Brick from the warehouse called; he wants to help with assembly.",
+              "reason": "The input does not safely identify whether Brick is the existing person Brick Oakley or someone else. It also expresses willingness to help, not an explicit ownership change, so no responsibility can be confirmed."
+            }
+          ]
+        }
+      },
+      "contextChars": 624,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 1,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "unsupported",
+            "modelOutcome": "needs_you",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "The input does not safely identify whether Brick is the existing person Brick Oakley or someone else. It also expresses willingness to help, not an explicit ownership change, so no responsibility can be confirmed.",
+            "safety": [],
+            "evidence": "Brick from the warehouse called; he wants to help with assembly."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "responsibility-continues",
+      "title": "Responsibility continues",
+      "category": "responsibility-continue",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 4993,
+        "usage": {
+          "prompt_tokens": 1125,
+          "completion_tokens": 185,
+          "total_tokens": 1310,
+          "reasoning_tokens": 81
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "no_change",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there.",
+              "reason": "This restates Pixel Ramos's current Producer role and explicitly says there is no change.",
+              "values": {}
+            }
+          ]
+        }
+      },
+      "contextChars": 588,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 1
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "No change",
+            "domain": "unsupported",
+            "modelOutcome": "no_change",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "This restates Pixel Ramos's current Producer role and explicitly says there is no change.",
+            "safety": [],
+            "evidence": "Pixel Ramos continues as Producer on the console sprint. No change there."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "responsibility-replacement",
+      "title": "Responsibility replacement",
+      "category": "responsibility-replace",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 16974,
+        "usage": {
+          "prompt_tokens": 1124,
+          "completion_tokens": 1233,
+          "total_tokens": 2357,
+          "reasoning_tokens": 1024
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+              "reason": "The input identifies Nova Quill by name and gives the role Producer.",
+              "values": {
+                "name": "Nova Quill",
+                "roleHint": "Producer"
+              }
+            },
+            {
+              "id": "chg-2",
+              "outcome": "left_untouched",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week.",
+              "reason": "Producer is a role title, not a responsibility scope, so the input does not specify a supported responsibility change."
+            }
+          ]
+        }
+      },
+      "contextChars": 588,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 1,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "person",
+            "modelOutcome": "ready",
+            "modelOperation": "ensure_person",
+            "operationType": "ensure_person",
+            "reason": "",
+            "safety": [],
+            "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week."
+          },
+          {
+            "id": "chg-2",
+            "label": "Left untouched",
+            "domain": "unsupported",
+            "modelOutcome": "left_untouched",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "Producer is a role title, not a responsibility scope, so the input does not specify a supported responsibility change.",
+            "safety": [],
+            "evidence": "Nova Quill will replace Pixel Ramos as Producer from next week."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready ensure_person",
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "share-vs-replace-ambiguous",
+      "title": "Share vs replace ambiguity",
+      "category": "responsibility-ambiguous",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 6880,
+        "usage": {
+          "prompt_tokens": 1191,
+          "completion_tokens": 511,
+          "total_tokens": 1702,
+          "reasoning_tokens": 341
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": "person-fizz",
+              "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear.",
+              "reason": "The input identifies Fizz and the UAT responsibility, but it is unclear whether Fizz would replace Pippa or share ownership.",
+              "values": {
+                "personName": "Fizz Caramel",
+                "personId": "person-fizz",
+                "scope": "UAT",
+                "ownershipSemantics": "ambiguous"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 730,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 1,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "The input identifies Fizz and the UAT responsibility, but it is unclear whether Fizz would replace Pippa or share ownership.",
+            "safety": [],
+            "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop, or they might share it — the parade committee was unclear."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "existing-risk-update",
+      "title": "Existing Risk update",
+      "category": "risk-update",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 12170,
+        "usage": {
+          "prompt_tokens": 1137,
+          "completion_tokens": 843,
+          "total_tokens": 1980,
+          "reasoning_tokens": 734
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "left_untouched",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "Packaging delay is getting worse after the cardboard mill flooded.",
+              "reason": "This describes worsening and gives a cause, but does not specify a supported change to the existing risk's status."
+            }
+          ]
+        }
+      },
+      "contextChars": 624,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 0,
+          "Left untouched": 1,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Left untouched",
+            "domain": "unsupported",
+            "modelOutcome": "left_untouched",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "This describes worsening and gives a cause, but does not specify a supported change to the existing risk's status.",
+            "safety": [],
+            "evidence": "Packaging delay is getting worse after the cardboard mill flooded."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "new-risk",
+      "title": "New Risk",
+      "category": "risk-new",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 8222,
+        "usage": {
+          "prompt_tokens": 1127,
+          "completion_tokens": 544,
+          "total_tokens": 1671,
+          "reasoning_tokens": 393
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "create_risk",
+              "targetId": null,
+              "evidence": "The shader compile is stalling the cert build and could miss the nightlies.",
+              "reason": "This describes a current project issue with a possible schedule impact, so it supports creating a risk.",
+              "values": {
+                "title": "Shader compile stalling cert build",
+                "detail": "The shader compile is stalling the cert build and could miss the nightlies.",
+                "status": "open"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 588,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "risk",
+            "modelOutcome": "ready",
+            "modelOperation": "create_risk",
+            "operationType": "create_risk",
+            "reason": "",
+            "safety": [],
+            "evidence": "The shader compile is stalling the cert build and could miss the nightlies."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "risk-resolution",
+      "title": "Risk resolution",
+      "category": "risk-resolve",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 3991,
+        "usage": {
+          "prompt_tokens": 1180,
+          "completion_tokens": 177,
+          "total_tokens": 1357,
+          "reasoning_tokens": 60
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "update_risk_status",
+              "targetId": "risk-bridge",
+              "evidence": "The icing on Gumdrop Bridge has melted; that risk is closed.",
+              "reason": "The existing Gumdrop Bridge risk is identified and the input says it is closed.",
+              "values": {
+                "status": "resolved"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 730,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "risk",
+            "modelOutcome": "ready",
+            "modelOperation": "update_risk_status",
+            "operationType": "update_risk_status",
+            "reason": "",
+            "safety": [],
+            "evidence": "The icing on Gumdrop Bridge has melted; that risk is closed."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready update_risk_status"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "milestone-move",
+      "title": "Existing milestone / date move",
+      "category": "milestone-move",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 3451,
+        "usage": {
+          "prompt_tokens": 1178,
+          "completion_tokens": 155,
+          "total_tokens": 1333,
+          "reasoning_tokens": 39
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "update_milestone",
+              "targetId": "ms-parade",
+              "evidence": "Parade day is now 29 October 2026.",
+              "reason": "Updates the existing Parade day milestone to the explicitly stated date.",
+              "values": {
+                "date": "2026-10-29"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 730,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "milestone",
+            "modelOutcome": "ready",
+            "modelOperation": "update_milestone",
+            "operationType": "update_milestone",
+            "reason": "",
+            "safety": [],
+            "evidence": "Parade day is now 29 October 2026."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready update_milestone"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "unchanged-date",
+      "title": "Unchanged date confirmation",
+      "category": "milestone-unchanged",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 3823,
+        "usage": {
+          "prompt_tokens": 1139,
+          "completion_tokens": 157,
+          "total_tokens": 1296,
+          "reasoning_tokens": 58
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "no_change",
+              "operation": "none",
+              "targetId": "ms-freeze",
+              "evidence": "Track freeze remains 1 September 2026.",
+              "reason": "This restates the current milestone date; no change is proposed.",
+              "values": {}
+            }
+          ]
+        }
+      },
+      "contextChars": 624,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 1
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "No change",
+            "domain": "unsupported",
+            "modelOutcome": "no_change",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "This restates the current milestone date; no change is proposed.",
+            "safety": [],
+            "evidence": "Track freeze remains 1 September 2026."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "No change"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "todo-create",
+      "title": "Genuine To Do",
+      "category": "todo",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 4234,
+        "usage": {
+          "prompt_tokens": 1183,
+          "completion_tokens": 230,
+          "total_tokens": 1413,
+          "reasoning_tokens": 100
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "create_todo",
+              "targetId": null,
+              "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+              "reason": "The new to-do is explicit. No calendar due date is specified.",
+              "values": {
+                "title": "Polish the candy-cane banners",
+                "detail": "Before the float leaves"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 730,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "todo",
+            "modelOutcome": "ready",
+            "modelOperation": "create_todo",
+            "operationType": "create_todo",
+            "reason": "",
+            "safety": [],
+            "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready create_todo"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "availability",
+      "title": "Availability on existing Person",
+      "category": "availability",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 3069,
+        "usage": {
+          "prompt_tokens": 1186,
+          "completion_tokens": 193,
+          "total_tokens": 1379,
+          "reasoning_tokens": 46
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "write_availability",
+              "targetId": "person-fizz",
+              "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+              "reason": "",
+              "values": {
+                "personName": "Fizz Caramel",
+                "personId": "person-fizz",
+                "awayFromIso": "2026-10-05",
+                "awayToIso": "2026-10-12"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 730,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "availability",
+            "modelOutcome": "ready",
+            "modelOperation": "write_availability",
+            "operationType": "write_availability",
+            "reason": "",
+            "safety": [],
+            "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready write_availability"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "duplicate-observation",
+      "title": "Duplicate / repeated observation",
+      "category": "duplicate",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 3257,
+        "usage": {
+          "prompt_tokens": 1140,
+          "completion_tokens": 169,
+          "total_tokens": 1309,
+          "reasoning_tokens": 67
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "update_risk_status",
+              "targetId": "risk-packaging",
+              "evidence": "Packaging delay is resolved.",
+              "reason": "The input explicitly resolves the existing Packaging delay risk.",
+              "values": {
+                "status": "resolved"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 624,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "risk",
+            "modelOutcome": "ready",
+            "modelOperation": "update_risk_status",
+            "operationType": "update_risk_status",
+            "reason": "",
+            "safety": [],
+            "evidence": "Packaging delay is resolved."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready update_risk_status",
+          "No change"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "correction-of-wording",
+      "title": "Correction of earlier wording",
+      "category": "correction",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 16087,
+        "usage": {
+          "prompt_tokens": 1134,
+          "completion_tokens": 1139,
+          "total_tokens": 2273,
+          "reasoning_tokens": 988
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "left_untouched",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader.",
+              "reason": "The correction identifies the audio bus mixer as the cause of the certification-build stall, but the project already has an open certification-slip risk. The input does not clarify whether to add a separate risk or update that existing risk, and no supported operation updates its details."
+            }
+          ]
+        }
+      },
+      "contextChars": 588,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 0,
+          "Left untouched": 1,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Left untouched",
+            "domain": "unsupported",
+            "modelOutcome": "left_untouched",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "The correction identifies the audio bus mixer as the cause of the certification-build stall, but the project already has an open certification-slip risk. The input does not clarify whether to add a separate risk or update that existing risk, and no supported operation updates its details.",
+            "safety": [],
+            "evidence": "The shader compile is stalling the cert build. Wait — I meant the audio bus mixer, not the shader."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You",
+          "Left untouched"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "mixed-domains",
+      "title": "Mixed domains in one transcript",
+      "category": "mixed",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 7546,
+        "usage": {
+          "prompt_tokens": 1193,
+          "completion_tokens": 544,
+          "total_tokens": 1737,
+          "reasoning_tokens": 264
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "no_change",
+              "operation": "none",
+              "targetId": "person-gumdrop",
+              "evidence": "Pippa Gumdrop remains UAT lead.",
+              "reason": "This restates Pippa Gumdrop’s current role without asserting a change.",
+              "values": {}
+            },
+            {
+              "id": "chg-2",
+              "outcome": "ready",
+              "operation": "update_milestone",
+              "targetId": "ms-parade",
+              "evidence": "Parade day moved to 22 October 2026.",
+              "reason": "Updates the existing Parade day milestone to the stated date.",
+              "values": {
+                "date": "2026-10-22"
+              }
+            },
+            {
+              "id": "chg-3",
+              "outcome": "ready",
+              "operation": "create_risk",
+              "targetId": null,
+              "evidence": "The chocolate fountain pump is overheating.",
+              "reason": "Reports an overheating issue that can be recorded as a new risk.",
+              "values": {
+                "title": "Chocolate fountain pump overheating"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 730,
+      "review": {
+        "counts": {
+          "Ready": 2,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 1
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "No change",
+            "domain": "unsupported",
+            "modelOutcome": "no_change",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "This restates Pippa Gumdrop’s current role without asserting a change.",
+            "safety": [],
+            "evidence": "Pippa Gumdrop remains UAT lead."
+          },
+          {
+            "id": "chg-2",
+            "label": "Ready",
+            "domain": "milestone",
+            "modelOutcome": "ready",
+            "modelOperation": "update_milestone",
+            "operationType": "update_milestone",
+            "reason": "",
+            "safety": [],
+            "evidence": "Parade day moved to 22 October 2026."
+          },
+          {
+            "id": "chg-3",
+            "label": "Ready",
+            "domain": "risk",
+            "modelOutcome": "ready",
+            "modelOperation": "create_risk",
+            "operationType": "create_risk",
+            "reason": "",
+            "safety": [],
+            "evidence": "The chocolate fountain pump is overheating."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "No change",
+          "Ready update_milestone",
+          "Ready create_risk"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "pronoun-ambiguity",
+      "title": "Pronoun / reference ambiguity",
+      "category": "pronoun",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 5842,
+        "usage": {
+          "prompt_tokens": 1124,
+          "completion_tokens": 350,
+          "total_tokens": 1474,
+          "reasoning_tokens": 215
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "She said she will own the boss balancing pass from now on.",
+              "reason": "The input does not identify who “she” refers to, so the person cannot be safely matched to a targetable record.",
+              "values": {
+                "scope": "boss balancing pass",
+                "ownershipSemantics": "ambiguous"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 588,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 1,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "The input does not identify who “she” refers to, so the person cannot be safely matched to a targetable record.",
+            "safety": [],
+            "evidence": "She said she will own the boss balancing pass from now on."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Left untouched"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "irrelevant-commentary",
+      "title": "Irrelevant commentary",
+      "category": "commentary",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 2561,
+        "usage": {
+          "prompt_tokens": 1128,
+          "completion_tokens": 126,
+          "total_tokens": 1254,
+          "reasoning_tokens": 24
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "commentary",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+              "reason": "This is irrelevant chatter and does not assert a project change.",
+              "values": {}
+            }
+          ]
+        }
+      },
+      "contextChars": 588,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 1
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "No change",
+            "domain": "unsupported",
+            "modelOutcome": "commentary",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "This is irrelevant chatter and does not assert a project change.",
+            "safety": [],
+            "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "No change"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "explicit-no-change",
+      "title": "Explicit no-change",
+      "category": "no-change",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 2789,
+        "usage": {
+          "prompt_tokens": 1142,
+          "completion_tokens": 140,
+          "total_tokens": 1282,
+          "reasoning_tokens": 35
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "no_change",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "Nothing has changed on Toyworld this week. Leave the records as they are.",
+              "reason": "The input explicitly says there are no changes and asks to leave the records unchanged.",
+              "values": {}
+            }
+          ]
+        }
+      },
+      "contextChars": 624,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 1
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "No change",
+            "domain": "unsupported",
+            "modelOutcome": "no_change",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "The input explicitly says there are no changes and asks to leave the records unchanged.",
+            "safety": [],
+            "evidence": "Nothing has changed on Toyworld this week. Leave the records as they are."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "No change"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "cross-project-bait",
+      "title": "Cross-project bait",
+      "category": "isolation",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 14134,
+        "usage": {
+          "prompt_tokens": 1192,
+          "completion_tokens": 1189,
+          "total_tokens": 2381,
+          "reasoning_tokens": 926
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT",
+              "reason": "Pixel Ramos is not a targetable person, so I cannot safely identify the person record. The input also does not clarify whether this ownership should be shared with or replace the current UAT ownership.",
+              "values": {
+                "personName": "Pixel Ramos",
+                "scope": "UAT",
+                "ownershipSemantics": "ambiguous"
+              }
+            },
+            {
+              "id": "chg-2",
+              "outcome": "needs_you",
+              "operation": "update_risk_status",
+              "targetId": null,
+              "evidence": "resolve the Console certification slip risk",
+              "reason": "No targetable risk matches Console certification slip, so I cannot safely identify which risk record to resolve.",
+              "values": {
+                "title": "Console certification slip",
+                "status": "resolved"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 730,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 2,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "Pixel Ramos is not a targetable person, so I cannot safely identify the person record. The input also does not clarify whether this ownership should be shared with or replace the current UAT ownership.",
+            "safety": [],
+            "evidence": "Pixel Ramos from GamingStudio5000 should own our UAT"
+          },
+          {
+            "id": "chg-2",
+            "label": "Needs You",
+            "domain": "risk",
+            "modelOutcome": "needs_you",
+            "modelOperation": "update_risk_status",
+            "operationType": null,
+            "reason": "No targetable risk matches Console certification slip, so I cannot safely identify which risk record to resolve.",
+            "safety": [],
+            "evidence": "resolve the Console certification slip risk"
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready ensure_person",
+          "Needs You",
+          "Left untouched",
+          "Left untouched"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "toyworld-vocabulary-bait",
+      "title": "Toyworld vocabulary bait on Candyland",
+      "category": "isolation",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 10920,
+        "usage": {
+          "prompt_tokens": 1184,
+          "completion_tokens": 812,
+          "total_tokens": 1996,
+          "reasoning_tokens": 702
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "commentary",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "Toyworld's packaging delay should be copied onto Candyland as well.",
+              "reason": "The packaging delay is identified as belonging to another project, so it is not proposed as a Candyland record."
+            }
+          ]
+        }
+      },
+      "contextChars": 730,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 1
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "No change",
+            "domain": "unsupported",
+            "modelOutcome": "commentary",
+            "modelOperation": "none",
+            "operationType": null,
+            "reason": "The packaging delay is identified as belonging to another project, so it is not proposed as a Candyland record.",
+            "safety": [],
+            "evidence": "Toyworld's packaging delay should be copied onto Candyland as well."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "No change"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "sarah-1-two-first-name",
+      "title": "Two Sarahs, first name will own UAT",
+      "category": "sarah-identity",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 4035,
+        "usage": {
+          "prompt_tokens": 1099,
+          "completion_tokens": 236,
+          "total_tokens": 1335,
+          "reasoning_tokens": 110
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Sarah will own UAT.",
+              "reason": "The input does not identify which of the two existing people named Sarah is meant.",
+              "values": {
+                "personName": "Sarah",
+                "scope": "UAT",
+                "ownershipSemantics": "ambiguous"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 479,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 1,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "The input does not identify which of the two existing people named Sarah is meant.",
+            "safety": [],
+            "evidence": "Sarah will own UAT."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "sarah-2-one-first-name",
+      "title": "One Sarah Kim, first name will own UAT",
+      "category": "sarah-identity",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 11228,
+        "usage": {
+          "prompt_tokens": 1078,
+          "completion_tokens": 809,
+          "total_tokens": 1887,
+          "reasoning_tokens": 652
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Sarah will own UAT.",
+              "reason": "The input gives only the first name “Sarah,” not the full recorded name needed to safely identify the person. The ownership phrase is explicit, but whether this is shared or replaces another owner is not stated.",
+              "values": {
+                "personName": "Sarah",
+                "scope": "UAT",
+                "ownershipSemantics": "ambiguous"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 411,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 1,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "The input gives only the first name “Sarah,” not the full recorded name needed to safely identify the person. The ownership phrase is explicit, but whether this is shared or replaces another owner is not stated.",
+            "safety": [],
+            "evidence": "Sarah will own UAT."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "sarah-3-no-sarah",
+      "title": "No Sarah, first name will own UAT",
+      "category": "sarah-identity",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 5446,
+        "usage": {
+          "prompt_tokens": 1075,
+          "completion_tokens": 312,
+          "total_tokens": 1387,
+          "reasoning_tokens": 184
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Sarah will own UAT.",
+              "reason": "The input names Sarah, but no targetable person can be safely matched to that name.",
+              "values": {
+                "personName": "Sarah",
+                "scope": "UAT",
+                "ownershipSemantics": "ambiguous"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 403,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 1,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "The input names Sarah, but no targetable person can be safely matched to that name.",
+            "safety": [],
+            "evidence": "Sarah will own UAT."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "sarah-4-full-name",
+      "title": "Sarah Kim full name will own UAT",
+      "category": "sarah-identity",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 5367,
+        "usage": {
+          "prompt_tokens": 1079,
+          "completion_tokens": 313,
+          "total_tokens": 1392,
+          "reasoning_tokens": 185
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "confirm_responsibility",
+              "targetId": "person-sarah-kim",
+              "evidence": "Sarah Kim will own UAT.",
+              "reason": "",
+              "values": {
+                "personName": "Sarah Kim",
+                "personId": "person-sarah-kim",
+                "scope": "UAT",
+                "ownershipSemantics": "ambiguous"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 411,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "responsibility",
+            "modelOutcome": "ready",
+            "modelOperation": "confirm_responsibility",
+            "operationType": "confirm_responsibility",
+            "reason": "",
+            "safety": [],
+            "evidence": "Sarah Kim will own UAT."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "sarah-5-initial",
+      "title": "Sarah K near-name will own UAT",
+      "category": "sarah-identity",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 8752,
+        "usage": {
+          "prompt_tokens": 1079,
+          "completion_tokens": 617,
+          "total_tokens": 1696,
+          "reasoning_tokens": 480
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Sarah K will own UAT.",
+              "reason": "The input identifies the owner only as “Sarah K,” so I can’t safely resolve that person to the recorded Sarah Kim.",
+              "values": {
+                "personName": "Sarah K",
+                "scope": "UAT",
+                "ownershipSemantics": "ambiguous"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 411,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 1,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "The input identifies the owner only as “Sarah K,” so I can’t safely resolve that person to the recorded Sarah Kim.",
+            "safety": [],
+            "evidence": "Sarah K will own UAT."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "sarah-6-takeover-full",
+      "title": "Sarah Kim taking over UAT from James",
+      "category": "sarah-identity",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 11264,
+        "usage": {
+          "prompt_tokens": 1130,
+          "completion_tokens": 938,
+          "total_tokens": 2068,
+          "reasoning_tokens": 773
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "confirm_responsibility",
+              "targetId": "person-sarah-kim",
+              "evidence": "Sarah Kim is taking over UAT from James.",
+              "reason": "Sarah is taking over the existing UAT responsibility from the uniquely matching current owner, James Murphy.",
+              "values": {
+                "personName": "Sarah Kim",
+                "personId": "person-sarah-kim",
+                "scope": "UAT",
+                "ownershipSemantics": "replace",
+                "replacePersonName": "James Murphy"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 579,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 1,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "ready",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "Replacement needs the current owner to be named in the input.",
+            "safety": [],
+            "evidence": "Sarah Kim is taking over UAT from James."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "sarah-7-takeover-first",
+      "title": "Sarah taking over UAT from James",
+      "category": "sarah-identity",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 9977,
+        "usage": {
+          "prompt_tokens": 1129,
+          "completion_tokens": 775,
+          "total_tokens": 1904,
+          "reasoning_tokens": 617
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Sarah is taking over UAT from James.",
+              "reason": "The input explicitly describes a replacement of responsibility for UAT, but it gives only first names, not the full recorded names needed to safely resolve the people.",
+              "values": {
+                "personName": "Sarah",
+                "scope": "UAT",
+                "ownershipSemantics": "replace",
+                "replacePersonName": "James"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 579,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 1,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "The input explicitly describes a replacement of responsibility for UAT, but it gives only first names, not the full recorded names needed to safely resolve the people.",
+            "safety": [],
+            "evidence": "Sarah is taking over UAT from James."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "lr-02-cadence-todo",
+      "title": "Weekly dashboard cadence to-do",
+      "category": "cadence",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 4803,
+        "usage": {
+          "prompt_tokens": 1230,
+          "completion_tokens": 279,
+          "total_tokens": 1509,
+          "reasoning_tokens": 142
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "create_todo",
+              "targetId": null,
+              "evidence": "Add a to-do to send Helen Ward the weekly dashboard every Friday.",
+              "reason": "The input clearly requests a new to-do; the weekly Friday recurrence is captured in the detail because no specific due date is given.",
+              "values": {
+                "title": "Send Helen Ward the weekly dashboard",
+                "detail": "Send every Friday."
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 844,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "todo",
+            "modelOutcome": "ready",
+            "modelOperation": "create_todo",
+            "operationType": "create_todo",
+            "reason": "",
+            "safety": [],
+            "evidence": "Add a to-do to send Helen Ward the weekly dashboard every Friday."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready create_todo"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "lr-03-pc-date",
+      "title": "Practical completion date move",
+      "category": "date",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 3369,
+        "usage": {
+          "prompt_tokens": 1229,
+          "completion_tokens": 158,
+          "total_tokens": 1387,
+          "reasoning_tokens": 44
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "update_milestone",
+              "targetId": "ms-pc",
+              "evidence": "Practical completion has moved to 18 December 2026.",
+              "reason": "",
+              "values": {
+                "label": "Practical completion",
+                "date": "2026-12-18"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 844,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "milestone",
+            "modelOutcome": "ready",
+            "modelOperation": "update_milestone",
+            "operationType": "update_milestone",
+            "reason": "",
+            "safety": [],
+            "evidence": "Practical completion has moved to 18 December 2026."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready update_milestone"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "lr-05-asbestos-timber",
+      "title": "Close asbestos chase and raise timber-floor risk",
+      "category": "todo-and-risk",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 4865,
+        "usage": {
+          "prompt_tokens": 1242,
+          "completion_tokens": 314,
+          "total_tokens": 1556,
+          "reasoning_tokens": 99
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "complete_todo",
+              "targetId": "todo-asbestos",
+              "evidence": "The asbestos survey addendum came back clean. Close that chase.",
+              "reason": "The input says the addendum came back clean and explicitly asks to close the matching chase.",
+              "values": {}
+            },
+            {
+              "id": "chg-2",
+              "outcome": "ready",
+              "operation": "create_risk",
+              "targetId": null,
+              "evidence": "Raise a risk that the hall timber floor may still hide services.",
+              "reason": "The input explicitly proposes a new risk, and no existing targetable risk has the same title.",
+              "values": {
+                "title": "Hall timber floor may still hide services",
+                "status": "open"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 844,
+      "review": {
+        "counts": {
+          "Ready": 2,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "todo",
+            "modelOutcome": "ready",
+            "modelOperation": "complete_todo",
+            "operationType": "complete_todo",
+            "reason": "",
+            "safety": [],
+            "evidence": "The asbestos survey addendum came back clean. Close that chase."
+          },
+          {
+            "id": "chg-2",
+            "label": "Ready",
+            "domain": "risk",
+            "modelOutcome": "ready",
+            "modelOperation": "create_risk",
+            "operationType": "create_risk",
+            "reason": "",
+            "safety": [],
+            "evidence": "Raise a risk that the hall timber floor may still hide services."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready write_knowledge",
+          "Needs You",
+          "Ready create_risk"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "lr-11-chris-firstname",
+      "title": "First name Chris joining",
+      "category": "identity",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 12504,
+        "usage": {
+          "prompt_tokens": 1226,
+          "completion_tokens": 831,
+          "total_tokens": 2057,
+          "reasoning_tokens": 700
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Chris is joining next month as client comms.",
+              "reason": "The input identifies a joining person and gives a role hint; it does not provide a calendar date for the joining.",
+              "values": {
+                "name": "Chris",
+                "roleHint": "client comms"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 844,
+      "review": {
+        "counts": {
+          "Ready": 1,
+          "Needs You": 0,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "person",
+            "modelOutcome": "ready",
+            "modelOperation": "ensure_person",
+            "operationType": "ensure_person",
+            "reason": "",
+            "safety": [],
+            "evidence": "Chris is joining next month as client comms."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready ensure_person",
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "lr-29-helen-firstname",
+      "title": "First-name Helen variation sign-off",
+      "category": "identity",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 7681,
+        "usage": {
+          "prompt_tokens": 1226,
+          "completion_tokens": 276,
+          "total_tokens": 1502,
+          "reasoning_tokens": 168
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "Helen can sign the variation for the extra containment.",
+              "reason": "",
+              "values": {
+                "text": "Helen can sign the variation for the extra containment.",
+                "section": "now"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 844,
+      "review": {
+        "counts": {
+          "Ready": 0,
+          "Needs You": 1,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "ready",
+            "modelOperation": "write_knowledge",
+            "operationType": null,
+            "reason": "This assertion names a person and a responsibility or authority. Knowledge cannot carry it.",
+            "safety": [
+              "knowledge_bypass"
+            ],
+            "evidence": "Helen can sign the variation for the extra containment."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Needs You"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    },
+    {
+      "caseId": "np-mobilisation-notes",
+      "title": "New Project mobilisation notes",
+      "category": "new-project",
+      "call": {
+        "requestedModel": "gpt-6-luna",
+        "responseModel": "gpt-6-luna",
+        "latencyMs": 38882,
+        "usage": {
+          "prompt_tokens": 1298,
+          "completion_tokens": 3582,
+          "total_tokens": 4880,
+          "reasoning_tokens": 1536
+        },
+        "error": null,
+        "rawJson": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Helen Ward is the client project manager",
+              "reason": "",
+              "values": {
+                "name": "Helen Ward",
+                "roleHint": "client project manager"
+              }
+            },
+            {
+              "id": "chg-2",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "James Okonkwo is the principal contractor",
+              "reason": "",
+              "values": {
+                "name": "James Okonkwo",
+                "roleHint": "principal contractor"
+              }
+            },
+            {
+              "id": "chg-3",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Nadia Rahman is the interior designer",
+              "reason": "",
+              "values": {
+                "name": "Nadia Rahman",
+                "roleHint": "interior designer"
+              }
+            },
+            {
+              "id": "chg-4",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Tomos Ellis covers building control.",
+              "reason": "",
+              "values": {
+                "name": "Tomos Ellis"
+              }
+            },
+            {
+              "id": "chg-5",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Mei Chen is on the team.",
+              "reason": "",
+              "values": {
+                "name": "Mei Chen"
+              }
+            },
+            {
+              "id": "chg-6",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Helen Ward is the client project manager and is responsible for client decisions.",
+              "reason": "Helen Ward is clearly named, but there is no targetable person record to attach this responsibility to.",
+              "values": {
+                "personName": "Helen Ward",
+                "scope": "client decisions",
+                "ownershipSemantics": "ambiguous"
+              }
+            },
+            {
+              "id": "chg-7",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "James Okonkwo is the principal contractor and is responsible for the site programme.",
+              "reason": "James Okonkwo is clearly named, but there is no targetable person record to attach this responsibility to.",
+              "values": {
+                "personName": "James Okonkwo",
+                "scope": "the site programme",
+                "ownershipSemantics": "ambiguous"
+              }
+            },
+            {
+              "id": "chg-8",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Nadia Rahman is the interior designer and is responsible for FF&E specification.",
+              "reason": "Nadia Rahman is clearly named, but there is no targetable person record to attach this responsibility to.",
+              "values": {
+                "personName": "Nadia Rahman",
+                "scope": "FF&E specification",
+                "ownershipSemantics": "ambiguous"
+              }
+            },
+            {
+              "id": "chg-9",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Tomos Ellis covers building control.",
+              "reason": "Tomos Ellis is clearly named, but there is no targetable person record to attach this responsibility to.",
+              "values": {
+                "personName": "Tomos Ellis",
+                "scope": "building control",
+                "ownershipSemantics": "ambiguous"
+              }
+            },
+            {
+              "id": "chg-10",
+              "outcome": "ready",
+              "operation": "create_todo",
+              "targetId": null,
+              "evidence": "The DDA access ramp detail is still outstanding and is blocking building control.",
+              "reason": "",
+              "values": {
+                "title": "DDA access ramp detail",
+                "detail": "Still outstanding and blocking building control."
+              }
+            },
+            {
+              "id": "chg-11",
+              "outcome": "ready",
+              "operation": "create_risk",
+              "targetId": null,
+              "evidence": "M&E first-fix coordination with the hall ceiling void is a risk.",
+              "reason": "",
+              "values": {
+                "title": "M&E first-fix coordination with the hall ceiling void",
+                "status": "watch"
+              }
+            },
+            {
+              "id": "chg-12",
+              "outcome": "ready",
+              "operation": "create_todo",
+              "targetId": null,
+              "evidence": "Issue the RIBA Stage 4 drawing pack to James.",
+              "reason": "",
+              "values": {
+                "title": "Issue the RIBA Stage 4 drawing pack to James."
+              }
+            },
+            {
+              "id": "chg-13",
+              "outcome": "ready",
+              "operation": "create_todo",
+              "targetId": null,
+              "evidence": "Book the FF&E sample review with Nadia.",
+              "reason": "",
+              "values": {
+                "title": "Book the FF&E sample review with Nadia."
+              }
+            },
+            {
+              "id": "chg-14",
+              "outcome": "ready",
+              "operation": "create_todo",
+              "targetId": null,
+              "evidence": "Chase the asbestos survey addendum.",
+              "reason": "",
+              "values": {
+                "title": "Chase the asbestos survey addendum."
+              }
+            },
+            {
+              "id": "chg-15",
+              "outcome": "ready",
+              "operation": "create_milestone",
+              "targetId": null,
+              "evidence": "Site mobilisation is 6 October 2026.",
+              "reason": "",
+              "values": {
+                "label": "Site mobilisation",
+                "date": "2026-10-06"
+              }
+            },
+            {
+              "id": "chg-16",
+              "outcome": "ready",
+              "operation": "create_milestone",
+              "targetId": null,
+              "evidence": "Client walk-through is 20 October 2026.",
+              "reason": "",
+              "values": {
+                "label": "Client walk-through",
+                "date": "2026-10-20"
+              }
+            },
+            {
+              "id": "chg-17",
+              "outcome": "ready",
+              "operation": "create_milestone",
+              "targetId": null,
+              "evidence": "Practical completion is targeted for 12 December 2026.",
+              "reason": "",
+              "values": {
+                "label": "Practical completion",
+                "date": "2026-12-12"
+              }
+            },
+            {
+              "id": "chg-18",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "FF&E means furniture, fixtures and equipment.",
+              "reason": "",
+              "values": {
+                "text": "FF&E means furniture, fixtures and equipment.",
+                "section": "now"
+              }
+            },
+            {
+              "id": "chg-19",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "PC in this project means practical completion, not a personal computer.",
+              "reason": "",
+              "values": {
+                "text": "PC in this project means practical completion, not a personal computer.",
+                "section": "now"
+              }
+            },
+            {
+              "id": "chg-20",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "The hall and the cafe are separate workfaces and must not share snag lists.",
+              "reason": "",
+              "values": {
+                "text": "The hall and the cafe are separate workfaces and must not share snag lists.",
+                "section": "now"
+              }
+            },
+            {
+              "id": "chg-21",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "Working assumption: the existing timber floor in the hall stays.",
+              "reason": "",
+              "values": {
+                "text": "Working assumption: the existing timber floor in the hall stays.",
+                "section": "now"
+              }
+            },
+            {
+              "id": "chg-22",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "RAMS must be approved before any ceiling void work.",
+              "reason": "",
+              "values": {
+                "text": "RAMS must be approved before any ceiling void work.",
+                "section": "now"
+              }
+            }
+          ]
+        }
+      },
+      "contextChars": 381,
+      "review": {
+        "counts": {
+          "Ready": 18,
+          "Needs You": 4,
+          "Left untouched": 0,
+          "No change": 0
+        },
+        "cards": [
+          {
+            "id": "chg-1",
+            "label": "Ready",
+            "domain": "person",
+            "modelOutcome": "ready",
+            "modelOperation": "ensure_person",
+            "operationType": "ensure_person",
+            "reason": "",
+            "safety": [],
+            "evidence": "Helen Ward is the client project manager"
+          },
+          {
+            "id": "chg-2",
+            "label": "Ready",
+            "domain": "person",
+            "modelOutcome": "ready",
+            "modelOperation": "ensure_person",
+            "operationType": "ensure_person",
+            "reason": "",
+            "safety": [],
+            "evidence": "James Okonkwo is the principal contractor"
+          },
+          {
+            "id": "chg-3",
+            "label": "Ready",
+            "domain": "person",
+            "modelOutcome": "ready",
+            "modelOperation": "ensure_person",
+            "operationType": "ensure_person",
+            "reason": "",
+            "safety": [],
+            "evidence": "Nadia Rahman is the interior designer"
+          },
+          {
+            "id": "chg-4",
+            "label": "Ready",
+            "domain": "person",
+            "modelOutcome": "ready",
+            "modelOperation": "ensure_person",
+            "operationType": "ensure_person",
+            "reason": "",
+            "safety": [],
+            "evidence": "Tomos Ellis covers building control."
+          },
+          {
+            "id": "chg-5",
+            "label": "Ready",
+            "domain": "person",
+            "modelOutcome": "ready",
+            "modelOperation": "ensure_person",
+            "operationType": "ensure_person",
+            "reason": "",
+            "safety": [],
+            "evidence": "Mei Chen is on the team."
+          },
+          {
+            "id": "chg-6",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "Helen Ward is clearly named, but there is no targetable person record to attach this responsibility to.",
+            "safety": [],
+            "evidence": "Helen Ward is the client project manager and is responsible for client decisions."
+          },
+          {
+            "id": "chg-7",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "James Okonkwo is clearly named, but there is no targetable person record to attach this responsibility to.",
+            "safety": [],
+            "evidence": "James Okonkwo is the principal contractor and is responsible for the site programme."
+          },
+          {
+            "id": "chg-8",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "Nadia Rahman is clearly named, but there is no targetable person record to attach this responsibility to.",
+            "safety": [],
+            "evidence": "Nadia Rahman is the interior designer and is responsible for FF&E specification."
+          },
+          {
+            "id": "chg-9",
+            "label": "Needs You",
+            "domain": "responsibility",
+            "modelOutcome": "needs_you",
+            "modelOperation": "confirm_responsibility",
+            "operationType": null,
+            "reason": "Tomos Ellis is clearly named, but there is no targetable person record to attach this responsibility to.",
+            "safety": [],
+            "evidence": "Tomos Ellis covers building control."
+          },
+          {
+            "id": "chg-10",
+            "label": "Ready",
+            "domain": "todo",
+            "modelOutcome": "ready",
+            "modelOperation": "create_todo",
+            "operationType": "create_todo",
+            "reason": "",
+            "safety": [],
+            "evidence": "The DDA access ramp detail is still outstanding and is blocking building control."
+          },
+          {
+            "id": "chg-11",
+            "label": "Ready",
+            "domain": "risk",
+            "modelOutcome": "ready",
+            "modelOperation": "create_risk",
+            "operationType": "create_risk",
+            "reason": "",
+            "safety": [],
+            "evidence": "M&E first-fix coordination with the hall ceiling void is a risk."
+          },
+          {
+            "id": "chg-12",
+            "label": "Ready",
+            "domain": "todo",
+            "modelOutcome": "ready",
+            "modelOperation": "create_todo",
+            "operationType": "create_todo",
+            "reason": "",
+            "safety": [],
+            "evidence": "Issue the RIBA Stage 4 drawing pack to James."
+          },
+          {
+            "id": "chg-13",
+            "label": "Ready",
+            "domain": "todo",
+            "modelOutcome": "ready",
+            "modelOperation": "create_todo",
+            "operationType": "create_todo",
+            "reason": "",
+            "safety": [],
+            "evidence": "Book the FF&E sample review with Nadia."
+          },
+          {
+            "id": "chg-14",
+            "label": "Ready",
+            "domain": "todo",
+            "modelOutcome": "ready",
+            "modelOperation": "create_todo",
+            "operationType": "create_todo",
+            "reason": "",
+            "safety": [],
+            "evidence": "Chase the asbestos survey addendum."
+          },
+          {
+            "id": "chg-15",
+            "label": "Ready",
+            "domain": "milestone",
+            "modelOutcome": "ready",
+            "modelOperation": "create_milestone",
+            "operationType": "create_milestone",
+            "reason": "",
+            "safety": [],
+            "evidence": "Site mobilisation is 6 October 2026."
+          },
+          {
+            "id": "chg-16",
+            "label": "Ready",
+            "domain": "milestone",
+            "modelOutcome": "ready",
+            "modelOperation": "create_milestone",
+            "operationType": "create_milestone",
+            "reason": "",
+            "safety": [],
+            "evidence": "Client walk-through is 20 October 2026."
+          },
+          {
+            "id": "chg-17",
+            "label": "Ready",
+            "domain": "milestone",
+            "modelOutcome": "ready",
+            "modelOperation": "create_milestone",
+            "operationType": "create_milestone",
+            "reason": "",
+            "safety": [],
+            "evidence": "Practical completion is targeted for 12 December 2026."
+          },
+          {
+            "id": "chg-18",
+            "label": "Ready",
+            "domain": "knowledge",
+            "modelOutcome": "ready",
+            "modelOperation": "write_knowledge",
+            "operationType": "write_knowledge",
+            "reason": "",
+            "safety": [],
+            "evidence": "FF&E means furniture, fixtures and equipment."
+          },
+          {
+            "id": "chg-19",
+            "label": "Ready",
+            "domain": "knowledge",
+            "modelOutcome": "ready",
+            "modelOperation": "write_knowledge",
+            "operationType": "write_knowledge",
+            "reason": "",
+            "safety": [],
+            "evidence": "PC in this project means practical completion, not a personal computer."
+          },
+          {
+            "id": "chg-20",
+            "label": "Ready",
+            "domain": "knowledge",
+            "modelOutcome": "ready",
+            "modelOperation": "write_knowledge",
+            "operationType": "write_knowledge",
+            "reason": "",
+            "safety": [],
+            "evidence": "The hall and the cafe are separate workfaces and must not share snag lists."
+          },
+          {
+            "id": "chg-21",
+            "label": "Ready",
+            "domain": "knowledge",
+            "modelOutcome": "ready",
+            "modelOperation": "write_knowledge",
+            "operationType": "write_knowledge",
+            "reason": "",
+            "safety": [],
+            "evidence": "Working assumption: the existing timber floor in the hall stays."
+          },
+          {
+            "id": "chg-22",
+            "label": "Ready",
+            "domain": "knowledge",
+            "modelOutcome": "ready",
+            "modelOperation": "write_knowledge",
+            "operationType": "write_knowledge",
+            "reason": "",
+            "safety": [],
+            "evidence": "RAMS must be approved before any ceiling void work."
+          }
+        ],
+        "survivingSafety": []
+      },
+      "observationPath": {
+        "outcomes": [
+          "Ready ensure_person",
+          "Needs You",
+          "Ready ensure_person",
+          "Needs You",
+          "Ready ensure_person",
+          "Needs You",
+          "Ready ensure_person",
+          "Ready confirm_responsibility",
+          "Ready ensure_person",
+          "Ready create_risk",
+          "Ready create_risk",
+          "Ready create_todo",
+          "Ready create_todo",
+          "Ready create_todo",
+          "Ready create_milestone",
+          "Ready create_milestone",
+          "Ready create_milestone",
+          "Ready write_knowledge",
+          "Ready write_knowledge",
+          "Ready write_knowledge",
+          "Needs You",
+          "Ready write_knowledge",
+          "Left untouched"
+        ],
+        "safety": [],
+        "validationIssues": []
+      }
+    }
+  ],
+  "newProject": [
+    {
+      "caseId": "np-mobilisation-notes",
+      "title": "Riverside mobilisation notes",
+      "current": {
+        "call": {
+          "requestedModel": "gpt-4o-mini-2024-07-18",
+          "responseModel": "gpt-4o-mini-2024-07-18",
+          "latencyMs": 19617,
+          "usage": {
+            "prompt_tokens": 1265,
+            "completion_tokens": 1865,
+            "total_tokens": 3130,
+            "reasoning_tokens": 0
+          },
+          "error": null
+        },
+        "error": null,
+        "people": [
+          {
+            "name": "Helen Ward",
+            "responsibilities": [
+              "client decisions"
+            ],
+            "needsReview": false
+          },
+          {
+            "name": "James Okonkwo",
+            "responsibilities": [
+              "the site programme"
+            ],
+            "needsReview": false
+          },
+          {
+            "name": "Nadia Rahman",
+            "responsibilities": [
+              "FF&E specification"
+            ],
+            "needsReview": false
+          },
+          {
+            "name": "Tomos Ellis",
+            "responsibilities": [
+              "building control"
+            ],
+            "needsReview": false
+          },
+          {
+            "name": "Mei Chen",
+            "responsibilities": [],
+            "needsReview": false
+          }
+        ],
+        "risks": [
+          {
+            "clientKey": "e55f8e94-44ab-464c-ace3-8f9ca391ecf5",
+            "title": "Outstanding DDA access ramp detail",
+            "needsReview": false
+          },
+          {
+            "clientKey": "689c52c4-f24c-4ed3-bca5-b8903c186ae4",
+            "title": "M&E first-fix coordination risk",
+            "needsReview": false
+          }
+        ],
+        "todos": [
+          {
+            "clientKey": "1035e92b-e5a3-4808-9ece-c977f81565b8",
+            "title": "Issue RIBA Stage 4 drawing pack to James",
+            "needsReview": false
+          },
+          {
+            "clientKey": "e66609b4-d45e-4a0b-be95-badc02a14df6",
+            "title": "Book FF&E sample review with Nadia",
+            "needsReview": false
+          },
+          {
+            "clientKey": "11b18249-a9c9-440a-8283-203e7be071a0",
+            "title": "Chase asbestos survey addendum",
+            "needsReview": false
+          }
+        ],
+        "dates": [
+          {
+            "clientKey": "cbc72d89-b9ec-4491-b8be-398d486feba7",
+            "label": "Site mobilisation",
+            "date": "2026-10-06",
+            "needsReview": false
+          },
+          {
+            "clientKey": "1a1ccc43-ce93-4980-9f8a-62c2512a98ab",
+            "label": "Client walk-through",
+            "date": "2026-10-20",
+            "needsReview": false
+          },
+          {
+            "clientKey": "65ec7c3f-da2d-40cf-9d71-bf87c93e1bc0",
+            "label": "Practical completion",
+            "date": "2026-12-12",
+            "needsReview": false
+          }
+        ],
+        "knowledge": [
+          {
+            "clientKey": "15673766-2785-4556-87a0-78675289be91",
+            "text": "FF&E means furniture, fixtures and equipment.",
+            "remember": true
+          },
+          {
+            "clientKey": "38c234ed-a466-42c2-b171-8d7e7a5cb3af",
+            "text": "PC in this project means practical completion.",
+            "remember": true
+          },
+          {
+            "clientKey": "dc238505-1d2b-4c17-9016-f204e9b9a52d",
+            "text": "The hall and the cafe are separate workfaces.",
+            "remember": true
+          },
+          {
+            "clientKey": "10f9a88a-12e0-42ed-b94c-c583a6e9a26b",
+            "text": "Working assumption: the existing timber floor in the hall stays.",
+            "remember": true
+          },
+          {
+            "clientKey": "8cc7a935-8f59-4b2c-9963-b240ea96429e",
+            "text": "RAMS must be approved before any ceiling void work.",
+            "remember": true
+          }
+        ],
+        "notMentioned": [],
+        "rawModel": {
+          "observations": [
+            {
+              "id": "obs-1",
+              "statement": "Helen Ward is the client project manager.",
+              "evidence": "Helen Ward is the client project manager and is responsible for client decisions.",
+              "domain": "person",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "name": "Helen Ward"
+              }
+            },
+            {
+              "id": "obs-2",
+              "statement": "James Okonkwo is the principal contractor.",
+              "evidence": "James Okonkwo is the principal contractor and is responsible for the site programme.",
+              "domain": "person",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "name": "James Okonkwo"
+              }
+            },
+            {
+              "id": "obs-3",
+              "statement": "Nadia Rahman is the interior designer.",
+              "evidence": "Nadia Rahman is the interior designer and is responsible for FF&E specification.",
+              "domain": "person",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "name": "Nadia Rahman"
+              }
+            },
+            {
+              "id": "obs-4",
+              "statement": "Tomos Ellis covers building control.",
+              "evidence": "Tomos Ellis covers building control.",
+              "domain": "person",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "name": "Tomos Ellis"
+              }
+            },
+            {
+              "id": "obs-5",
+              "statement": "Mei Chen is on the team.",
+              "evidence": "Mei Chen is on the team.",
+              "domain": "person",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "name": "Mei Chen"
+              }
+            },
+            {
+              "id": "obs-6",
+              "statement": "The DDA access ramp detail is still outstanding.",
+              "evidence": "The DDA access ramp detail is still outstanding and is blocking building control.",
+              "domain": "risk",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "title": "Outstanding DDA access ramp detail"
+              }
+            },
+            {
+              "id": "obs-7",
+              "statement": "M&E first-fix coordination with the hall ceiling void is a risk.",
+              "evidence": "M&E first-fix coordination with the hall ceiling void is a risk.",
+              "domain": "risk",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "title": "M&E first-fix coordination risk"
+              }
+            },
+            {
+              "id": "obs-8",
+              "statement": "Issue the RIBA Stage 4 drawing pack to James.",
+              "evidence": "To dos: Issue the RIBA Stage 4 drawing pack to James.",
+              "domain": "todo",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "title": "Issue RIBA Stage 4 drawing pack to James"
+              }
+            },
+            {
+              "id": "obs-9",
+              "statement": "Book the FF&E sample review with Nadia.",
+              "evidence": "Book the FF&E sample review with Nadia.",
+              "domain": "todo",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "title": "Book FF&E sample review with Nadia"
+              }
+            },
+            {
+              "id": "obs-10",
+              "statement": "Chase the asbestos survey addendum.",
+              "evidence": "Chase the asbestos survey addendum.",
+              "domain": "todo",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "title": "Chase asbestos survey addendum"
+              }
+            },
+            {
+              "id": "obs-11",
+              "statement": "Site mobilisation is 6 October 2026.",
+              "evidence": "Site mobilisation is 6 October 2026.",
+              "domain": "milestone",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "label": "Site mobilisation",
+                "date": "2026-10-06"
+              }
+            },
+            {
+              "id": "obs-12",
+              "statement": "Client walk-through is 20 October 2026.",
+              "evidence": "Client walk-through is 20 October 2026.",
+              "domain": "milestone",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "label": "Client walk-through",
+                "date": "2026-10-20"
+              }
+            },
+            {
+              "id": "obs-13",
+              "statement": "Practical completion is targeted for 12 December 2026.",
+              "evidence": "Practical completion is targeted for 12 December 2026.",
+              "domain": "milestone",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "label": "Practical completion",
+                "date": "2026-12-12"
+              }
+            },
+            {
+              "id": "obs-14",
+              "statement": "FF&E means furniture, fixtures and equipment.",
+              "evidence": "FF&E means furniture, fixtures and equipment.",
+              "domain": "knowledge",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "text": "FF&E means furniture, fixtures and equipment."
+              }
+            },
+            {
+              "id": "obs-15",
+              "statement": "PC in this project means practical completion.",
+              "evidence": "PC in this project means practical completion, not a personal computer.",
+              "domain": "knowledge",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "text": "PC in this project means practical completion."
+              }
+            },
+            {
+              "id": "obs-16",
+              "statement": "The hall and the cafe are separate workfaces.",
+              "evidence": "The hall and the cafe are separate workfaces and must not share snag lists.",
+              "domain": "knowledge",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "text": "The hall and the cafe are separate workfaces."
+              }
+            },
+            {
+              "id": "obs-17",
+              "statement": "Working assumption: the existing timber floor in the hall stays.",
+              "evidence": "Working assumption: the existing timber floor in the hall stays.",
+              "domain": "knowledge",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "text": "Working assumption: the existing timber floor in the hall stays."
+              }
+            },
+            {
+              "id": "obs-18",
+              "statement": "RAMS must be approved before any ceiling void work.",
+              "evidence": "RAMS must be approved before any ceiling void work.",
+              "domain": "knowledge",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "proposedValues": {
+                "text": "RAMS must be approved before any ceiling void work."
+              }
+            }
+          ]
+        }
+      },
+      "form": {
+        "call": {
+          "requestedModel": "gpt-6-luna",
+          "responseModel": "gpt-6-luna",
+          "latencyMs": 32743,
+          "usage": {
+            "prompt_tokens": 1294,
+            "completion_tokens": 3515,
+            "total_tokens": 4809,
+            "reasoning_tokens": 1523
+          },
+          "error": null
+        },
+        "error": null,
+        "rawModel": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Helen Ward is the client project manager",
+              "reason": "",
+              "values": {
+                "name": "Helen Ward",
+                "roleHint": "client project manager"
+              }
+            },
+            {
+              "id": "chg-2",
+              "outcome": "ready",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Helen Ward is the client project manager and is responsible for client decisions.",
+              "reason": "",
+              "values": {
+                "personName": "Helen Ward",
+                "scope": "client decisions",
+                "ownershipSemantics": "ambiguous"
+              }
+            },
+            {
+              "id": "chg-3",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "James Okonkwo is the principal contractor",
+              "reason": "",
+              "values": {
+                "name": "James Okonkwo",
+                "roleHint": "principal contractor"
+              }
+            },
+            {
+              "id": "chg-4",
+              "outcome": "ready",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "James Okonkwo is the principal contractor and is responsible for the site programme.",
+              "reason": "",
+              "values": {
+                "personName": "James Okonkwo",
+                "scope": "the site programme",
+                "ownershipSemantics": "ambiguous"
+              }
+            },
+            {
+              "id": "chg-5",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Nadia Rahman is the interior designer",
+              "reason": "",
+              "values": {
+                "name": "Nadia Rahman",
+                "roleHint": "interior designer"
+              }
+            },
+            {
+              "id": "chg-6",
+              "outcome": "ready",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Nadia Rahman is the interior designer and is responsible for FF&E specification.",
+              "reason": "",
+              "values": {
+                "personName": "Nadia Rahman",
+                "scope": "FF&E specification",
+                "ownershipSemantics": "ambiguous"
+              }
+            },
+            {
+              "id": "chg-7",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Tomos Ellis covers building control.",
+              "reason": "",
+              "values": {
+                "name": "Tomos Ellis"
+              }
+            },
+            {
+              "id": "chg-8",
+              "outcome": "ready",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Tomos Ellis covers building control.",
+              "reason": "",
+              "values": {
+                "personName": "Tomos Ellis",
+                "scope": "building control",
+                "ownershipSemantics": "ambiguous"
+              }
+            },
+            {
+              "id": "chg-9",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Mei Chen is on the team.",
+              "reason": "",
+              "values": {
+                "name": "Mei Chen"
+              }
+            },
+            {
+              "id": "chg-10",
+              "outcome": "left_untouched",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "The DDA access ramp detail is still outstanding and is blocking building control.",
+              "reason": "This is described as an open issue, but the input does not specify a supported operation for recording an issue, and it does not explicitly identify it as a risk or a to-do.",
+              "values": {}
+            },
+            {
+              "id": "chg-11",
+              "outcome": "ready",
+              "operation": "create_risk",
+              "targetId": null,
+              "evidence": "M&E first-fix coordination with the hall ceiling void is a risk.",
+              "reason": "",
+              "values": {
+                "title": "M&E first-fix coordination with the hall ceiling void",
+                "detail": "M&E first-fix coordination with the hall ceiling void is a risk.",
+                "status": "open"
+              }
+            },
+            {
+              "id": "chg-12",
+              "outcome": "ready",
+              "operation": "create_todo",
+              "targetId": null,
+              "evidence": "Issue the RIBA Stage 4 drawing pack to James.",
+              "reason": "",
+              "values": {
+                "title": "Issue the RIBA Stage 4 drawing pack to James"
+              }
+            },
+            {
+              "id": "chg-13",
+              "outcome": "ready",
+              "operation": "create_todo",
+              "targetId": null,
+              "evidence": "Book the FF&E sample review with Nadia.",
+              "reason": "",
+              "values": {
+                "title": "Book the FF&E sample review with Nadia"
+              }
+            },
+            {
+              "id": "chg-14",
+              "outcome": "ready",
+              "operation": "create_todo",
+              "targetId": null,
+              "evidence": "Chase the asbestos survey addendum.",
+              "reason": "",
+              "values": {
+                "title": "Chase the asbestos survey addendum"
+              }
+            },
+            {
+              "id": "chg-15",
+              "outcome": "ready",
+              "operation": "create_milestone",
+              "targetId": null,
+              "evidence": "Site mobilisation is 6 October 2026.",
+              "reason": "",
+              "values": {
+                "label": "Site mobilisation",
+                "date": "2026-10-06"
+              }
+            },
+            {
+              "id": "chg-16",
+              "outcome": "ready",
+              "operation": "create_milestone",
+              "targetId": null,
+              "evidence": "Client walk-through is 20 October 2026.",
+              "reason": "",
+              "values": {
+                "label": "Client walk-through",
+                "date": "2026-10-20"
+              }
+            },
+            {
+              "id": "chg-17",
+              "outcome": "ready",
+              "operation": "create_milestone",
+              "targetId": null,
+              "evidence": "Practical completion is targeted for 12 December 2026.",
+              "reason": "",
+              "values": {
+                "label": "Practical completion",
+                "date": "2026-12-12"
+              }
+            },
+            {
+              "id": "chg-18",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "FF&E means furniture, fixtures and equipment.",
+              "reason": "",
+              "values": {
+                "text": "FF&E means furniture, fixtures and equipment.",
+                "section": "now"
+              }
+            },
+            {
+              "id": "chg-19",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "PC in this project means practical completion, not a personal computer.",
+              "reason": "",
+              "values": {
+                "text": "PC in this project means practical completion, not a personal computer.",
+                "section": "now"
+              }
+            },
+            {
+              "id": "chg-20",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "The hall and the cafe are separate workfaces and must not share snag lists.",
+              "reason": "",
+              "values": {
+                "text": "The hall and the cafe are separate workfaces and must not share snag lists.",
+                "section": "decisions"
+              }
+            },
+            {
+              "id": "chg-21",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "Working assumption: the existing timber floor in the hall stays.",
+              "reason": "",
+              "values": {
+                "text": "Working assumption: the existing timber floor in the hall stays.",
+                "section": "now"
+              }
+            },
+            {
+              "id": "chg-22",
+              "outcome": "ready",
+              "operation": "write_knowledge",
+              "targetId": null,
+              "evidence": "RAMS must be approved before any ceiling void work.",
+              "reason": "",
+              "values": {
+                "text": "RAMS must be approved before any ceiling void work.",
+                "section": "decisions"
+              }
+            }
+          ]
+        },
+        "review": {
+          "counts": {
+            "Ready": 21,
+            "Needs You": 0,
+            "Left untouched": 1,
+            "No change": 0
+          },
+          "cards": [
+            {
+              "id": "chg-1",
+              "label": "Ready",
+              "domain": "person",
+              "modelOutcome": "ready",
+              "modelOperation": "ensure_person",
+              "operationType": "ensure_person",
+              "reason": "",
+              "safety": [],
+              "evidence": "Helen Ward is the client project manager"
+            },
+            {
+              "id": "chg-2",
+              "label": "Ready",
+              "domain": "responsibility",
+              "modelOutcome": "ready",
+              "modelOperation": "confirm_responsibility",
+              "operationType": "confirm_responsibility",
+              "reason": "",
+              "safety": [],
+              "evidence": "Helen Ward is the client project manager and is responsible for client decisions."
+            },
+            {
+              "id": "chg-3",
+              "label": "Ready",
+              "domain": "person",
+              "modelOutcome": "ready",
+              "modelOperation": "ensure_person",
+              "operationType": "ensure_person",
+              "reason": "",
+              "safety": [],
+              "evidence": "James Okonkwo is the principal contractor"
+            },
+            {
+              "id": "chg-4",
+              "label": "Ready",
+              "domain": "responsibility",
+              "modelOutcome": "ready",
+              "modelOperation": "confirm_responsibility",
+              "operationType": "confirm_responsibility",
+              "reason": "",
+              "safety": [],
+              "evidence": "James Okonkwo is the principal contractor and is responsible for the site programme."
+            },
+            {
+              "id": "chg-5",
+              "label": "Ready",
+              "domain": "person",
+              "modelOutcome": "ready",
+              "modelOperation": "ensure_person",
+              "operationType": "ensure_person",
+              "reason": "",
+              "safety": [],
+              "evidence": "Nadia Rahman is the interior designer"
+            },
+            {
+              "id": "chg-6",
+              "label": "Ready",
+              "domain": "responsibility",
+              "modelOutcome": "ready",
+              "modelOperation": "confirm_responsibility",
+              "operationType": "confirm_responsibility",
+              "reason": "",
+              "safety": [],
+              "evidence": "Nadia Rahman is the interior designer and is responsible for FF&E specification."
+            },
+            {
+              "id": "chg-7",
+              "label": "Ready",
+              "domain": "person",
+              "modelOutcome": "ready",
+              "modelOperation": "ensure_person",
+              "operationType": "ensure_person",
+              "reason": "",
+              "safety": [],
+              "evidence": "Tomos Ellis covers building control."
+            },
+            {
+              "id": "chg-8",
+              "label": "Ready",
+              "domain": "responsibility",
+              "modelOutcome": "ready",
+              "modelOperation": "confirm_responsibility",
+              "operationType": "confirm_responsibility",
+              "reason": "",
+              "safety": [],
+              "evidence": "Tomos Ellis covers building control."
+            },
+            {
+              "id": "chg-9",
+              "label": "Ready",
+              "domain": "person",
+              "modelOutcome": "ready",
+              "modelOperation": "ensure_person",
+              "operationType": "ensure_person",
+              "reason": "",
+              "safety": [],
+              "evidence": "Mei Chen is on the team."
+            },
+            {
+              "id": "chg-10",
+              "label": "Left untouched",
+              "domain": "unsupported",
+              "modelOutcome": "left_untouched",
+              "modelOperation": "none",
+              "operationType": null,
+              "reason": "This is described as an open issue, but the input does not specify a supported operation for recording an issue, and it does not explicitly identify it as a risk or a to-do.",
+              "safety": [],
+              "evidence": "The DDA access ramp detail is still outstanding and is blocking building control."
+            },
+            {
+              "id": "chg-11",
+              "label": "Ready",
+              "domain": "risk",
+              "modelOutcome": "ready",
+              "modelOperation": "create_risk",
+              "operationType": "create_risk",
+              "reason": "",
+              "safety": [],
+              "evidence": "M&E first-fix coordination with the hall ceiling void is a risk."
+            },
+            {
+              "id": "chg-12",
+              "label": "Ready",
+              "domain": "todo",
+              "modelOutcome": "ready",
+              "modelOperation": "create_todo",
+              "operationType": "create_todo",
+              "reason": "",
+              "safety": [],
+              "evidence": "Issue the RIBA Stage 4 drawing pack to James."
+            },
+            {
+              "id": "chg-13",
+              "label": "Ready",
+              "domain": "todo",
+              "modelOutcome": "ready",
+              "modelOperation": "create_todo",
+              "operationType": "create_todo",
+              "reason": "",
+              "safety": [],
+              "evidence": "Book the FF&E sample review with Nadia."
+            },
+            {
+              "id": "chg-14",
+              "label": "Ready",
+              "domain": "todo",
+              "modelOutcome": "ready",
+              "modelOperation": "create_todo",
+              "operationType": "create_todo",
+              "reason": "",
+              "safety": [],
+              "evidence": "Chase the asbestos survey addendum."
+            },
+            {
+              "id": "chg-15",
+              "label": "Ready",
+              "domain": "milestone",
+              "modelOutcome": "ready",
+              "modelOperation": "create_milestone",
+              "operationType": "create_milestone",
+              "reason": "",
+              "safety": [],
+              "evidence": "Site mobilisation is 6 October 2026."
+            },
+            {
+              "id": "chg-16",
+              "label": "Ready",
+              "domain": "milestone",
+              "modelOutcome": "ready",
+              "modelOperation": "create_milestone",
+              "operationType": "create_milestone",
+              "reason": "",
+              "safety": [],
+              "evidence": "Client walk-through is 20 October 2026."
+            },
+            {
+              "id": "chg-17",
+              "label": "Ready",
+              "domain": "milestone",
+              "modelOutcome": "ready",
+              "modelOperation": "create_milestone",
+              "operationType": "create_milestone",
+              "reason": "",
+              "safety": [],
+              "evidence": "Practical completion is targeted for 12 December 2026."
+            },
+            {
+              "id": "chg-18",
+              "label": "Ready",
+              "domain": "knowledge",
+              "modelOutcome": "ready",
+              "modelOperation": "write_knowledge",
+              "operationType": "write_knowledge",
+              "reason": "",
+              "safety": [],
+              "evidence": "FF&E means furniture, fixtures and equipment."
+            },
+            {
+              "id": "chg-19",
+              "label": "Ready",
+              "domain": "knowledge",
+              "modelOutcome": "ready",
+              "modelOperation": "write_knowledge",
+              "operationType": "write_knowledge",
+              "reason": "",
+              "safety": [],
+              "evidence": "PC in this project means practical completion, not a personal computer."
+            },
+            {
+              "id": "chg-20",
+              "label": "Ready",
+              "domain": "knowledge",
+              "modelOutcome": "ready",
+              "modelOperation": "write_knowledge",
+              "operationType": "write_knowledge",
+              "reason": "",
+              "safety": [],
+              "evidence": "The hall and the cafe are separate workfaces and must not share snag lists."
+            },
+            {
+              "id": "chg-21",
+              "label": "Ready",
+              "domain": "knowledge",
+              "modelOutcome": "ready",
+              "modelOperation": "write_knowledge",
+              "operationType": "write_knowledge",
+              "reason": "",
+              "safety": [],
+              "evidence": "Working assumption: the existing timber floor in the hall stays."
+            },
+            {
+              "id": "chg-22",
+              "label": "Ready",
+              "domain": "knowledge",
+              "modelOutcome": "ready",
+              "modelOperation": "write_knowledge",
+              "operationType": "write_knowledge",
+              "reason": "",
+              "safety": [],
+              "evidence": "RAMS must be approved before any ceiling void work."
+            }
+          ],
+          "survivingSafety": []
+        }
+      }
+    },
+    {
+      "caseId": "np-messy-candyland",
+      "title": "Messy Candyland parade dump",
+      "current": {
+        "call": {
+          "requestedModel": "gpt-4o-mini-2024-07-18",
+          "responseModel": "gpt-4o-mini-2024-07-18",
+          "latencyMs": 12839,
+          "usage": {
+            "prompt_tokens": 1106,
+            "completion_tokens": 1163,
+            "total_tokens": 2269,
+            "reasoning_tokens": 0
+          },
+          "error": null
+        },
+        "error": null,
+        "people": [
+          {
+            "name": "Pippa Gumdrop",
+            "responsibilities": [],
+            "needsReview": false
+          },
+          {
+            "name": "Fizz Caramel",
+            "responsibilities": [],
+            "needsReview": false
+          }
+        ],
+        "risks": [
+          {
+            "clientKey": "430b1f65-4351-44f6-8b40-08c62fca1b68",
+            "title": "Gumdrop Bridge icing risk",
+            "needsReview": false
+          }
+        ],
+        "todos": [
+          {
+            "clientKey": "631f399d-c5db-4a4c-bc06-7c7c97f6e0f9",
+            "title": "Order extra sprinkles",
+            "needsReview": false
+          },
+          {
+            "clientKey": "bfbfc643-f186-496d-87bd-d07ad9c74cfb",
+            "title": "Prepare CAB pack",
+            "needsReview": false
+          }
+        ],
+        "dates": [
+          {
+            "clientKey": "8e57d279-efd1-444b-90b9-87fb3724851c",
+            "label": "Parade Day",
+            "date": "2026-10-15",
+            "needsReview": false
+          }
+        ],
+        "knowledge": [],
+        "notMentioned": [],
+        "rawModel": {
+          "observations": [
+            {
+              "id": "obs-1",
+              "statement": "This is the Candyland parade rebuild.",
+              "evidence": "This is the Candyland parade rebuild.",
+              "domain": "commentary",
+              "disposition": "commentary",
+              "truthIntent": "current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "omit",
+              "candidateTargetTitle": "omit",
+              "proposedValues": {},
+              "commentary": "This is an introductory statement about the project.",
+              "modelConfidence": 0
+            },
+            {
+              "id": "obs-2",
+              "statement": "Pippa Gumdrop is UAT lead.",
+              "evidence": "Pippa Gumdrop is UAT lead.",
+              "domain": "person",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "omit",
+              "candidateTargetTitle": "omit",
+              "proposedValues": {
+                "name": "Pippa Gumdrop"
+              },
+              "commentary": "Pippa Gumdrop is identified as the UAT lead.",
+              "modelConfidence": 0
+            },
+            {
+              "id": "obs-3",
+              "statement": "Fizz Caramel is doing the float design.",
+              "evidence": "Fizz Caramel is doing the float design.",
+              "domain": "person",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "omit",
+              "candidateTargetTitle": "omit",
+              "proposedValues": {
+                "name": "Fizz Caramel"
+              },
+              "commentary": "Fizz Caramel is responsible for the float design.",
+              "modelConfidence": 0
+            },
+            {
+              "id": "obs-4",
+              "statement": "We're worried the Gumdrop Bridge icing will slip.",
+              "evidence": "We're worried the Gumdrop Bridge icing will slip.",
+              "domain": "risk",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "omit",
+              "candidateTargetTitle": "omit",
+              "proposedValues": {
+                "title": "Gumdrop Bridge icing risk"
+              },
+              "commentary": "There is a concern about the Gumdrop Bridge icing slipping.",
+              "modelConfidence": 0
+            },
+            {
+              "id": "obs-5",
+              "statement": "Parade day is 15 October 2026.",
+              "evidence": "Parade day is 15 October 2026.",
+              "domain": "milestone",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "omit",
+              "candidateTargetTitle": "omit",
+              "proposedValues": {
+                "label": "Parade Day",
+                "date": "2026-10-15"
+              },
+              "commentary": "The date for the parade is explicitly stated.",
+              "modelConfidence": 0
+            },
+            {
+              "id": "obs-6",
+              "statement": "Need to order extra sprinkles.",
+              "evidence": "Need to order extra sprinkles.",
+              "domain": "todo",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "omit",
+              "candidateTargetTitle": "omit",
+              "proposedValues": {
+                "title": "Order extra sprinkles"
+              },
+              "commentary": "There is a task to order extra sprinkles.",
+              "modelConfidence": 0
+            },
+            {
+              "id": "obs-7",
+              "statement": "CAB pack must be ready 24 hours before the parade.",
+              "evidence": "CAB pack must be ready 24 hours before the parade.",
+              "domain": "todo",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "omit",
+              "candidateTargetTitle": "omit",
+              "proposedValues": {
+                "title": "Prepare CAB pack"
+              },
+              "commentary": "There is a requirement for the CAB pack to be ready before the parade.",
+              "modelConfidence": 0
+            },
+            {
+              "id": "obs-8",
+              "statement": "Pixel Ramos is not on this project — she's on GamingStudio5000.",
+              "evidence": "Pixel Ramos is not on this project — she's on GamingStudio5000.",
+              "domain": "commentary",
+              "disposition": "commentary",
+              "truthIntent": "current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "omit",
+              "candidateTargetTitle": "omit",
+              "proposedValues": {},
+              "commentary": "Pixel Ramos is confirmed to be working on a different project.",
+              "modelConfidence": 0
+            }
+          ]
+        }
+      },
+      "form": {
+        "call": {
+          "requestedModel": "gpt-6-luna",
+          "responseModel": "gpt-6-luna",
+          "latencyMs": 23105,
+          "usage": {
+            "prompt_tokens": 1135,
+            "completion_tokens": 2059,
+            "total_tokens": 3194,
+            "reasoning_tokens": 1368
+          },
+          "error": null
+        },
+        "error": null,
+        "rawModel": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "left_untouched",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "This is the Candyland parade rebuild.",
+              "reason": "The input identifies the project, but no supported operation changes the project name or identity.",
+              "values": {}
+            },
+            {
+              "id": "chg-2",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Pippa Gumdrop is UAT lead.",
+              "reason": "The person is named and the stated role can be recorded as a role hint.",
+              "values": {
+                "name": "Pippa Gumdrop",
+                "roleHint": "UAT lead"
+              }
+            },
+            {
+              "id": "chg-3",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "Fizz Caramel is doing the float design.",
+              "reason": "The named person can be added without inferring a responsibility scope or job title.",
+              "values": {
+                "name": "Fizz Caramel"
+              }
+            },
+            {
+              "id": "chg-4",
+              "outcome": "ready",
+              "operation": "create_risk",
+              "targetId": null,
+              "evidence": "We're worried the Gumdrop Bridge icing will slip.",
+              "reason": "The input explicitly raises a schedule-slip concern that can be recorded as a risk to watch.",
+              "values": {
+                "title": "Gumdrop Bridge icing may slip",
+                "status": "watch"
+              }
+            },
+            {
+              "id": "chg-5",
+              "outcome": "ready",
+              "operation": "create_milestone",
+              "targetId": null,
+              "evidence": "CAB pack must be ready 24 hours before the parade.",
+              "reason": "The parade date is stated as 2026-10-15, so the CAB pack readiness date is 2026-10-14.",
+              "values": {
+                "label": "CAB pack ready",
+                "date": "2026-10-14"
+              }
+            },
+            {
+              "id": "chg-6",
+              "outcome": "ready",
+              "operation": "create_todo",
+              "targetId": null,
+              "evidence": "Need to order extra sprinkles.",
+              "reason": "The input explicitly states an actionable task, with no due date specified.",
+              "values": {
+                "title": "Order extra sprinkles"
+              }
+            },
+            {
+              "id": "chg-7",
+              "outcome": "commentary",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "Pixel Ramos is not on this project — she's on GamingStudio5000.",
+              "reason": "The input explicitly says Pixel Ramos belongs to another project, so no record is proposed here.",
+              "values": {}
+            }
+          ]
+        },
+        "review": {
+          "counts": {
+            "Ready": 5,
+            "Needs You": 0,
+            "Left untouched": 1,
+            "No change": 1
+          },
+          "cards": [
+            {
+              "id": "chg-1",
+              "label": "Left untouched",
+              "domain": "unsupported",
+              "modelOutcome": "left_untouched",
+              "modelOperation": "none",
+              "operationType": null,
+              "reason": "The input identifies the project, but no supported operation changes the project name or identity.",
+              "safety": [],
+              "evidence": "This is the Candyland parade rebuild."
+            },
+            {
+              "id": "chg-2",
+              "label": "Ready",
+              "domain": "person",
+              "modelOutcome": "ready",
+              "modelOperation": "ensure_person",
+              "operationType": "ensure_person",
+              "reason": "",
+              "safety": [],
+              "evidence": "Pippa Gumdrop is UAT lead."
+            },
+            {
+              "id": "chg-3",
+              "label": "Ready",
+              "domain": "person",
+              "modelOutcome": "ready",
+              "modelOperation": "ensure_person",
+              "operationType": "ensure_person",
+              "reason": "",
+              "safety": [],
+              "evidence": "Fizz Caramel is doing the float design."
+            },
+            {
+              "id": "chg-4",
+              "label": "Ready",
+              "domain": "risk",
+              "modelOutcome": "ready",
+              "modelOperation": "create_risk",
+              "operationType": "create_risk",
+              "reason": "",
+              "safety": [],
+              "evidence": "We're worried the Gumdrop Bridge icing will slip."
+            },
+            {
+              "id": "chg-5",
+              "label": "Ready",
+              "domain": "milestone",
+              "modelOutcome": "ready",
+              "modelOperation": "create_milestone",
+              "operationType": "create_milestone",
+              "reason": "",
+              "safety": [],
+              "evidence": "CAB pack must be ready 24 hours before the parade."
+            },
+            {
+              "id": "chg-6",
+              "label": "Ready",
+              "domain": "todo",
+              "modelOutcome": "ready",
+              "modelOperation": "create_todo",
+              "operationType": "create_todo",
+              "reason": "",
+              "safety": [],
+              "evidence": "Need to order extra sprinkles."
+            },
+            {
+              "id": "chg-7",
+              "label": "No change",
+              "domain": "unsupported",
+              "modelOutcome": "commentary",
+              "modelOperation": "none",
+              "operationType": null,
+              "reason": "The input explicitly says Pixel Ramos belongs to another project, so no record is proposed here.",
+              "safety": [],
+              "evidence": "Pixel Ramos is not on this project — she's on GamingStudio5000."
+            }
+          ],
+          "survivingSafety": []
+        }
+      }
+    },
+    {
+      "caseId": "np-bob-mike",
+      "title": "Bob and Mike organise fixture",
+      "current": {
+        "call": {
+          "requestedModel": "gpt-4o-mini-2024-07-18",
+          "responseModel": "gpt-4o-mini-2024-07-18",
+          "latencyMs": 4232,
+          "usage": {
+            "prompt_tokens": 1037,
+            "completion_tokens": 306,
+            "total_tokens": 1343,
+            "reasoning_tokens": 0
+          },
+          "error": null
+        },
+        "error": null,
+        "people": [
+          {
+            "name": "Bob",
+            "responsibilities": [],
+            "needsReview": false
+          },
+          {
+            "name": "Mike",
+            "responsibilities": [
+              "legacy builds"
+            ],
+            "needsReview": false
+          }
+        ],
+        "risks": [],
+        "todos": [],
+        "dates": [],
+        "knowledge": [],
+        "notMentioned": [],
+        "rawModel": {
+          "observations": [
+            {
+              "id": "obs-1",
+              "statement": "Bob is the BA.",
+              "evidence": "bob is the ba",
+              "domain": "person",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "only an id supplied in current project state, or omit",
+              "candidateTargetTitle": "current title if targeting an existing record",
+              "proposedValues": {
+                "name": "Bob"
+              },
+              "commentary": "",
+              "modelConfidence": 0
+            },
+            {
+              "id": "obs-2",
+              "statement": "Mike handles the legacy builds.",
+              "evidence": "mike handles the legacy builds",
+              "domain": "responsibility",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "only an id supplied in current project state, or omit",
+              "candidateTargetTitle": "current title if targeting an existing record",
+              "proposedValues": {
+                "personName": "Mike",
+                "scope": "legacy builds",
+                "ownershipSemantics": "replace"
+              },
+              "commentary": "",
+              "modelConfidence": 0
+            }
+          ]
+        }
+      },
+      "form": {
+        "call": {
+          "requestedModel": "gpt-6-luna",
+          "responseModel": "gpt-6-luna",
+          "latencyMs": 15386,
+          "usage": {
+            "prompt_tokens": 1066,
+            "completion_tokens": 1281,
+            "total_tokens": 2347,
+            "reasoning_tokens": 998
+          },
+          "error": null
+        },
+        "error": null,
+        "rawModel": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "bob is the ba",
+              "reason": "The input identifies Bob and gives a role title; no matching person exists in the project.",
+              "values": {
+                "name": "bob",
+                "roleHint": "ba"
+              }
+            },
+            {
+              "id": "chg-2",
+              "outcome": "ready",
+              "operation": "ensure_person",
+              "targetId": null,
+              "evidence": "mike handles the legacy builds",
+              "reason": "The input identifies Mike as a person involved with the project; no matching person exists.",
+              "values": {
+                "name": "mike"
+              }
+            },
+            {
+              "id": "chg-3",
+              "outcome": "left_untouched",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "mike handles the legacy builds",
+              "reason": "“Handles” does not meet the required explicit ownership phrasing for confirming a responsibility.",
+              "values": {}
+            }
+          ]
+        },
+        "review": {
+          "counts": {
+            "Ready": 2,
+            "Needs You": 0,
+            "Left untouched": 1,
+            "No change": 0
+          },
+          "cards": [
+            {
+              "id": "chg-1",
+              "label": "Ready",
+              "domain": "person",
+              "modelOutcome": "ready",
+              "modelOperation": "ensure_person",
+              "operationType": "ensure_person",
+              "reason": "",
+              "safety": [],
+              "evidence": "bob is the ba"
+            },
+            {
+              "id": "chg-2",
+              "label": "Ready",
+              "domain": "person",
+              "modelOutcome": "ready",
+              "modelOperation": "ensure_person",
+              "operationType": "ensure_person",
+              "reason": "",
+              "safety": [],
+              "evidence": "mike handles the legacy builds"
+            },
+            {
+              "id": "chg-3",
+              "label": "Left untouched",
+              "domain": "unsupported",
+              "modelOutcome": "left_untouched",
+              "modelOperation": "none",
+              "operationType": null,
+              "reason": "“Handles” does not meet the required explicit ownership phrasing for confirming a responsibility.",
+              "safety": [],
+              "evidence": "mike handles the legacy builds"
+            }
+          ],
+          "survivingSafety": []
+        }
+      }
+    },
+    {
+      "caseId": "np-maybe-owns",
+      "title": "Ambiguous ownership",
+      "current": {
+        "call": {
+          "requestedModel": "gpt-4o-mini-2024-07-18",
+          "responseModel": "gpt-4o-mini-2024-07-18",
+          "latencyMs": 2910,
+          "usage": {
+            "prompt_tokens": 1032,
+            "completion_tokens": 194,
+            "total_tokens": 1226,
+            "reasoning_tokens": 0
+          },
+          "error": null
+        },
+        "error": null,
+        "people": [],
+        "risks": [],
+        "todos": [],
+        "dates": [],
+        "knowledge": [],
+        "notMentioned": [],
+        "rawModel": {
+          "observations": [
+            {
+              "id": "obs-1",
+              "statement": "Priya maybe owns UAT",
+              "evidence": "Priya maybe owns UAT",
+              "domain": "responsibility",
+              "disposition": "left_untouched",
+              "truthIntent": "uncertain",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "only an id supplied in current project state, or omit",
+              "candidateTargetTitle": "current title if targeting an existing record",
+              "proposedValues": {
+                "personName": "Priya",
+                "scope": "UAT",
+                "ownershipSemantics": "ambiguous"
+              },
+              "commentary": "It isn't clear if Priya definitively owns UAT or if this is just a suggestion.",
+              "modelConfidence": 0
+            }
+          ]
+        }
+      },
+      "form": {
+        "call": {
+          "requestedModel": "gpt-6-luna",
+          "responseModel": "gpt-6-luna",
+          "latencyMs": 7934,
+          "usage": {
+            "prompt_tokens": 1061,
+            "completion_tokens": 669,
+            "total_tokens": 1730,
+            "reasoning_tokens": 525
+          },
+          "error": null
+        },
+        "error": null,
+        "rawModel": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "Priya maybe owns UAT",
+              "reason": "The input is tentative about whether Priya owns UAT, and there are no targetable people to safely resolve Priya to.",
+              "values": {
+                "personName": "Priya",
+                "scope": "UAT",
+                "ownershipSemantics": "ambiguous"
+              }
+            }
+          ]
+        },
+        "review": {
+          "counts": {
+            "Ready": 0,
+            "Needs You": 1,
+            "Left untouched": 0,
+            "No change": 0
+          },
+          "cards": [
+            {
+              "id": "chg-1",
+              "label": "Needs You",
+              "domain": "responsibility",
+              "modelOutcome": "needs_you",
+              "modelOperation": "confirm_responsibility",
+              "operationType": null,
+              "reason": "The input is tentative about whether Priya owns UAT, and there are no targetable people to safely resolve Priya to.",
+              "safety": [],
+              "evidence": "Priya maybe owns UAT"
+            }
+          ],
+          "survivingSafety": []
+        }
+      }
+    },
+    {
+      "caseId": "np-used-to-own",
+      "title": "Historical ownership",
+      "current": {
+        "call": {
+          "requestedModel": "gpt-4o-mini-2024-07-18",
+          "responseModel": "gpt-4o-mini-2024-07-18",
+          "latencyMs": 1879,
+          "usage": {
+            "prompt_tokens": 1035,
+            "completion_tokens": 183,
+            "total_tokens": 1218,
+            "reasoning_tokens": 0
+          },
+          "error": null
+        },
+        "error": null,
+        "people": [
+          {
+            "name": "Sarah Kim",
+            "responsibilities": [],
+            "needsReview": false
+          }
+        ],
+        "risks": [],
+        "todos": [],
+        "dates": [],
+        "knowledge": [],
+        "notMentioned": [],
+        "rawModel": {
+          "observations": [
+            {
+              "id": "obs-1",
+              "statement": "Sarah Kim used to own UAT.",
+              "evidence": "Sarah Kim used to own UAT last year",
+              "domain": "responsibility",
+              "disposition": "no_change",
+              "truthIntent": "non_current",
+              "projectId": "only an id supplied in current project state",
+              "candidateTargetId": "only an id supplied in current project state, or omit",
+              "candidateTargetTitle": "current title if targeting an existing record",
+              "proposedValues": {
+                "name": "Sarah Kim",
+                "scope": "UAT",
+                "ownershipSemantics": "replace"
+              },
+              "commentary": "This is a historical fact about ownership.",
+              "modelConfidence": 0
+            }
+          ]
+        }
+      },
+      "form": {
+        "call": {
+          "requestedModel": "gpt-6-luna",
+          "responseModel": "gpt-6-luna",
+          "latencyMs": 2585,
+          "usage": {
+            "prompt_tokens": 1064,
+            "completion_tokens": 176,
+            "total_tokens": 1240,
+            "reasoning_tokens": 80
+          },
+          "error": null
+        },
+        "error": null,
+        "rawModel": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "no_change",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "Sarah Kim used to own UAT last year",
+              "reason": "This describes past ownership and does not assert a current project change.",
+              "values": {}
+            }
+          ]
+        },
+        "review": {
+          "counts": {
+            "Ready": 0,
+            "Needs You": 0,
+            "Left untouched": 0,
+            "No change": 1
+          },
+          "cards": [
+            {
+              "id": "chg-1",
+              "label": "No change",
+              "domain": "unsupported",
+              "modelOutcome": "no_change",
+              "modelOperation": "none",
+              "operationType": null,
+              "reason": "This describes past ownership and does not assert a current project change.",
+              "safety": [],
+              "evidence": "Sarah Kim used to own UAT last year"
+            }
+          ],
+          "survivingSafety": []
+        }
+      }
+    },
+    {
+      "caseId": "np-someone-owns",
+      "title": "Unnamed owner",
+      "current": {
+        "call": {
+          "requestedModel": "gpt-4o-mini-2024-07-18",
+          "responseModel": "gpt-4o-mini-2024-07-18",
+          "latencyMs": 1708,
+          "usage": {
+            "prompt_tokens": 1031,
+            "completion_tokens": 143,
+            "total_tokens": 1174,
+            "reasoning_tokens": 0
+          },
+          "error": null
+        },
+        "error": null,
+        "people": [
+          {
+            "name": "someone",
+            "responsibilities": [
+              "scan spec"
+            ],
+            "needsReview": false
+          }
+        ],
+        "risks": [],
+        "todos": [],
+        "dates": [],
+        "knowledge": [],
+        "notMentioned": [],
+        "rawModel": {
+          "observations": [
+            {
+              "id": "obs-1",
+              "statement": "Someone owns the scan spec.",
+              "evidence": "someone owns the scan spec",
+              "domain": "responsibility",
+              "disposition": "create_new",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "candidateTargetId": "",
+              "candidateTargetTitle": "",
+              "proposedValues": {
+                "scope": "scan spec",
+                "ownershipSemantics": "replace",
+                "personName": "someone"
+              },
+              "commentary": "",
+              "modelConfidence": 0
+            }
+          ]
+        }
+      },
+      "form": {
+        "call": {
+          "requestedModel": "gpt-6-luna",
+          "responseModel": "gpt-6-luna",
+          "latencyMs": 3508,
+          "usage": {
+            "prompt_tokens": 1060,
+            "completion_tokens": 221,
+            "total_tokens": 1281,
+            "reasoning_tokens": 99
+          },
+          "error": null
+        },
+        "error": null,
+        "rawModel": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "needs_you",
+              "operation": "confirm_responsibility",
+              "targetId": null,
+              "evidence": "someone owns the scan spec",
+              "reason": "The responsibility is explicit, but the owner is not identified, so the person cannot be safely resolved.",
+              "values": {
+                "scope": "scan spec",
+                "ownershipSemantics": "ambiguous"
+              }
+            }
+          ]
+        },
+        "review": {
+          "counts": {
+            "Ready": 0,
+            "Needs You": 1,
+            "Left untouched": 0,
+            "No change": 0
+          },
+          "cards": [
+            {
+              "id": "chg-1",
+              "label": "Needs You",
+              "domain": "responsibility",
+              "modelOutcome": "needs_you",
+              "modelOperation": "confirm_responsibility",
+              "operationType": null,
+              "reason": "The responsibility is explicit, but the owner is not identified, so the person cannot be safely resolved.",
+              "safety": [],
+              "evidence": "someone owns the scan spec"
+            }
+          ],
+          "survivingSafety": []
+        }
+      }
+    },
+    {
+      "caseId": "np-not-on-project",
+      "title": "Explicit exclusion plus chatter",
+      "current": {
+        "call": {
+          "requestedModel": "gpt-4o-mini-2024-07-18",
+          "responseModel": "gpt-4o-mini-2024-07-18",
+          "latencyMs": 4158,
+          "usage": {
+            "prompt_tokens": 1051,
+            "completion_tokens": 304,
+            "total_tokens": 1355,
+            "reasoning_tokens": 0
+          },
+          "error": null
+        },
+        "error": null,
+        "people": [
+          {
+            "name": "Pixel Ramos",
+            "responsibilities": [],
+            "needsReview": false
+          }
+        ],
+        "risks": [],
+        "todos": [],
+        "dates": [],
+        "knowledge": [],
+        "notMentioned": [],
+        "rawModel": {
+          "observations": [
+            {
+              "id": "obs-1",
+              "statement": "Pixel Ramos is not on this project.",
+              "evidence": "Pixel Ramos is not on this project — she's on GamingStudio5000.",
+              "domain": "person",
+              "disposition": "no_change",
+              "truthIntent": "current",
+              "projectId": "unscoped",
+              "candidateTargetId": "omit",
+              "candidateTargetTitle": "omit",
+              "mergeWithObservationId": "omit",
+              "proposedValues": {
+                "name": "Pixel Ramos"
+              },
+              "commentary": "This is a restatement of the current truth regarding Pixel Ramos's involvement.",
+              "modelConfidence": 0
+            },
+            {
+              "id": "obs-2",
+              "statement": "The lobby cabinets were blasting chiptunes all morning.",
+              "evidence": "The lobby cabinets were blasting chiptunes all morning.",
+              "domain": "commentary",
+              "disposition": "commentary",
+              "truthIntent": "non_current",
+              "projectId": "unscoped",
+              "candidateTargetId": "omit",
+              "candidateTargetTitle": "omit",
+              "mergeWithObservationId": "omit",
+              "proposedValues": {},
+              "commentary": "This statement is irrelevant to the project.",
+              "modelConfidence": 0
+            }
+          ]
+        }
+      },
+      "form": {
+        "call": {
+          "requestedModel": "gpt-6-luna",
+          "responseModel": "gpt-6-luna",
+          "latencyMs": 3225,
+          "usage": {
+            "prompt_tokens": 1080,
+            "completion_tokens": 215,
+            "total_tokens": 1295,
+            "reasoning_tokens": 91
+          },
+          "error": null
+        },
+        "error": null,
+        "rawModel": {
+          "changes": [
+            {
+              "id": "chg-1",
+              "outcome": "commentary",
+              "operation": "none",
+              "targetId": null,
+              "evidence": "Pixel Ramos is not on this project — she's on GamingStudio5000. The lobby cabinets were blasting chiptunes all morning.",
+              "reason": "Pixel Ramos is explicitly said to belong to another project, and the lobby-cabinet statement does not propose a project change.",
+              "values": {}
+            }
+          ]
+        },
+        "review": {
+          "counts": {
+            "Ready": 0,
+            "Needs You": 0,
+            "Left untouched": 0,
+            "No change": 1
+          },
+          "cards": [
+            {
+              "id": "chg-1",
+              "label": "No change",
+              "domain": "unsupported",
+              "modelOutcome": "commentary",
+              "modelOperation": "none",
+              "operationType": null,
+              "reason": "Pixel Ramos is explicitly said to belong to another project, and the lobby-cabinet statement does not propose a project change.",
+              "safety": [],
+              "evidence": "Pixel Ramos is not on this project — she's on GamingStudio5000. The lobby cabinets were blasting chiptunes all morning."
+            }
+          ],
+          "survivingSafety": []
+        }
+      }
+    }
+  ],
+  "reviewReplay": "Stored model JSON re-validated after the needs_you + operation none label fix. No new model calls."
+}
