@@ -102,7 +102,9 @@ Capture N writes
   → Capture N+1 context contains that truth
 ```
 
-`scripts/verify-shared-organise.ts` proves this through `applyApprovedCaptureSuggestion`, the production planner, the in-memory canonical executor, and `confirmAuthoritativeWrites`. This environment has no Supabase project keys, so the proof does not open a connection to the live Lume database. The operation types and the reload check are the same ones HTTP Apply uses.
+`scripts/verify-shared-organise.ts` proves the same planner and Apply seam with the in-memory executor.
+
+`scripts/verify-shared-organise-supabase.ts` proves the production loader, `supabaseCaptureApplyHooks`, and a fresh database read against Supabase. It creates two throwaway users on the configured project and deletes them afterwards. It is not part of `npm test`. Missing URL, anon key, or service role key exits 2.
 
 Supported round trips in that script: person create with role, responsibility then share, responsibility replace of the named current owner, to-do create and complete, risk create and resolve, explicit milestone date, relative milestone date, availability, knowledge, decision.
 
