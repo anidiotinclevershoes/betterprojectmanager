@@ -133,6 +133,22 @@ function gitDiffAgainstMain(rel: string): string {
   });
 }
 
+/** Shared Organise passes roleHint on a new person. The rest of the planner stays frozen. */
+function assertDispatchDiffIsRoleHintOnly(diff: string) {
+  const changed = diff
+    .split("\n")
+    .filter(
+      (line) =>
+        (line.startsWith("+") || line.startsWith("-")) &&
+        !line.startsWith("+++") &&
+        !line.startsWith("---"),
+    );
+  assert.deepEqual(changed, [
+    "+    const roleHint = asString(values.roleHint) || asString(values.role);",
+    "+      ...(roleHint ? { roleHint } : {}),",
+  ]);
+}
+
 async function main() {
   const records = contextRecordsFromWorld(world(), CANDYLAND_ID);
 
@@ -629,7 +645,7 @@ async function main() {
   await check("Prompt A / rematerialise / hydrate / Apply spine stay in place", () => {
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/prompt.ts"), "");
     assert.equal(gitDiffAgainstMain("src/lib/capture-v2/source-coverage.ts"), "");
-    assert.equal(gitDiffAgainstMain("src/lib/capture/apply/dispatch.ts"), "");
+    assertDispatchDiffIsRoleHintOnly(gitDiffAgainstMain("src/lib/capture/apply/dispatch.ts"));
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
     assert.doesNotMatch(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /applyContradictorySiblingNeedsYou/);

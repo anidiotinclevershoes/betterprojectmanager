@@ -45,7 +45,6 @@ const ROOT = process.cwd();
 const UNCHANGED_VS_MAIN = [
   "src/lib/capture-v2/run.ts",
   "src/lib/capture-v2/source-coverage.ts",
-  "src/lib/capture/apply/dispatch.ts",
   "src/lib/capture/apply/apply-approved.ts",
   "src/lib/capture/apply/expected-target.ts",
 ];
@@ -55,6 +54,22 @@ function gitDiffAgainstMain(rel: string): string {
     cwd: ROOT,
     encoding: "utf8",
   });
+}
+
+/** Shared Organise passes roleHint on a new person. The rest of the planner stays frozen. */
+function assertDispatchDiffIsRoleHintOnly(diff: string) {
+  const changed = diff
+    .split("\n")
+    .filter(
+      (line) =>
+        (line.startsWith("+") || line.startsWith("-")) &&
+        !line.startsWith("+++") &&
+        !line.startsWith("---"),
+    );
+  assert.deepEqual(changed, [
+    "+    const roleHint = asString(values.roleHint) || asString(values.role);",
+    "+      ...(roleHint ? { roleHint } : {}),",
+  ]);
 }
 
 function read(rel: string): string {
@@ -143,6 +158,9 @@ function main() {
     for (const rel of UNCHANGED_VS_MAIN) {
       assert.equal(gitDiffAgainstMain(rel), "", `${rel} must not change in Phase 1`);
     }
+    assertDispatchDiffIsRoleHintOnly(
+      gitDiffAgainstMain("src/lib/capture/apply/dispatch.ts"),
+    );
     const resolve = read("src/lib/capture-v2/resolve.ts");
     assert.doesNotMatch(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /observation\.disposition === "left_untouched"/);
