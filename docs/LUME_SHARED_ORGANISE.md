@@ -104,7 +104,7 @@ Capture N writes
 
 `scripts/verify-shared-organise.ts` proves this through `applyApprovedCaptureSuggestion`, the production planner, the in-memory canonical executor, and `confirmAuthoritativeWrites`. This environment has no Supabase project keys, so the proof does not open a connection to the live Lume database. The operation types and the reload check are the same ones HTTP Apply uses.
 
-Supported round trips in that script: person create with role, responsibility then share, to-do create and complete, risk create and resolve, explicit milestone date, relative milestone date, availability, knowledge, decision.
+Supported round trips in that script: person create with role, responsibility then share, responsibility replace of the named current owner, to-do create and complete, risk create and resolve, explicit milestone date, relative milestone date, availability, knowledge, decision.
 
 Not a write: existing role edit, historical date, unresolved direction, generic person, foreign id, material uncertainty, delete without an explicit remove, missing milestone baseline, stale target, replayed duplicate to-do.
 

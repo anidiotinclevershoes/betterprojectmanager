@@ -334,6 +334,40 @@ async function main() {
     assert.ok(owners.some((row) => row.personName === "James Murphy"));
   });
 
+  await check("responsibility replace supersedes the named owner", async () => {
+    const transcript = "James Murphy replaces Pippa Gumdrop as UAT lead.";
+    const replaced = await applyReady(
+      experimentalMissionState(),
+      transcript,
+      form([
+        change({
+          operation: "ensure_person",
+          evidence: transcript,
+          values: { name: "James Murphy" },
+        }),
+        change({
+          id: "chg-2",
+          operation: "confirm_responsibility",
+          evidence: transcript,
+          values: {
+            personName: "James Murphy",
+            scope: "UAT lead",
+            ownershipSemantics: "replace",
+          },
+        }),
+      ]),
+    );
+    const owners = buildSharedOrganiseContext({
+      world: captureApplyWorldFromState(replaced.state),
+      projectId: PROJECT,
+      referenceDate: REF,
+    }).responsibilities.filter((row) => row.scope === "UAT lead" && row.ownerConfirmed);
+    assert.deepEqual(
+      owners.map((row) => row.personName),
+      ["James Murphy"],
+    );
+  });
+
   await check("to do create complete reload", async () => {
     const created = await applyReady(
       experimentalMissionState(),
