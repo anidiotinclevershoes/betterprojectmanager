@@ -14,6 +14,7 @@ const ROOT = process.cwd();
 const SUITE: Array<{ name: string; script: string }> = [
   { name: "git-preflight", script: "scripts/verify-git-preflight.ts" },
   { name: "project-tags", script: "scripts/verify-project-tags.ts" },
+  { name: "figma-make-home-todo", script: "scripts/verify-figma-make-home-todo.tsx" },
   { name: "timeline-projection", script: "scripts/verify-timeline-visual-polish.ts" },
   { name: "knowledge-centre-four-bucket", script: "scripts/verify-knowledge-centre-four-bucket.ts" },
   { name: "knowledge-reconcile", script: "scripts/verify-knowledge-reconcile.ts" },
