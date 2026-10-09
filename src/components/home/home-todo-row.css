@@ -87,7 +87,7 @@
   padding: 13px 12px 13px 14px;
   border-top: 1px solid var(--lume-border-card);
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
 }
