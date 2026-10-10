@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { CatchMeUpPanel } from "@/components/catch-me-up/CatchMeUpPanel";
+import { useSearchParams } from "next/navigation";
 import { CaptureWorkspace } from "@/components/capture/CaptureWorkspace";
+import { HomeWorkspace } from "@/components/home/HomeWorkspace";
+import { ProjectScanPanel } from "@/components/home/ProjectScanPanel";
 import { DeleteProjectButton } from "@/components/knowledge-centre/DeleteProjectButton";
 import { KnowledgeSearchAskBar } from "@/components/knowledge-centre/KnowledgeSearchAskBar";
 import { OceanKnowledgeFrames } from "@/components/knowledge-centre/OceanKnowledgeFrames";
@@ -12,13 +14,27 @@ import {
   type OceanProjectMode,
 } from "@/components/knowledge-centre/ProjectModeSelector";
 import type { Project } from "@/lib/types";
+import "@/components/home/home-workspace.css";
+
+const MODES: OceanProjectMode[] = ["home", "capture", "knowledge", "scan"];
+
+function initialMode(raw: string | null): OceanProjectMode {
+  if (raw && MODES.includes(raw as OceanProjectMode)) {
+    return raw as OceanProjectMode;
+  }
+  return "home";
+}
 
 /**
- * Ocean V1 selected-project workspace.
- * Capture, Knowledge Centre, and Catch Me Up are modes of one shell.
+ * Selected-project workspace.
+ * Home is the resting mode. Capture, Knowledge Centre, and Project Scan
+ * replace it in the same shell. The component remounts per project id.
  */
 export function OceanProjectWorkspace({ project }: { project: Project }) {
-  const [mode, setMode] = useState<OceanProjectMode>("knowledge");
+  const search = useSearchParams();
+  const [mode, setMode] = useState<OceanProjectMode>(() =>
+    initialMode(search.get("mode")),
+  );
   const [kcQuery, setKcQuery] = useState("");
 
   return (
@@ -43,6 +59,10 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
       </header>
 
       <ProjectModeSelector mode={mode} onChange={setMode} />
+
+      {mode === "home" ? (
+        <HomeWorkspace projectId={project.id} />
+      ) : null}
 
       {mode === "knowledge" ? (
         <div
@@ -75,23 +95,8 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
         </div>
       ) : null}
 
-      {mode === "catch-me-up" ? (
-        <div
-          className="ocean-catch-me-up-mode"
-          data-testid="ocean-catch-me-up-mode"
-          data-mode="catch-me-up"
-        >
-          <CatchMeUpPanel projectId={project.id} />
-        </div>
-      ) : null}
-
-      {mode === "advise" ? (
-        <div
-          className="ocean-advise-soon"
-          data-testid="ocean-advise-soon"
-        >
-          <p>Advise is coming soon.</p>
-        </div>
+      {mode === "scan" ? (
+        <ProjectScanPanel projectId={project.id} />
       ) : null}
     </div>
   );

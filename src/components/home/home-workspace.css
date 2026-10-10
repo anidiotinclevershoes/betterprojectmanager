@@ -1,0 +1,341 @@
+/* Home workspace. Scoped under .lume-home / .lume-scan.
+   Colours come from the locked Lume tokens. */
+
+.lume-home-modes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lume-home-modes .ocean-mode-tab {
+  justify-content: center;
+  min-width: 0;
+}
+
+.lume-home-mode-icon {
+  flex: 0 0 auto;
+}
+
+.ocean-mode-narrow-label {
+  display: none;
+}
+
+.lume-home {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  margin-top: 16px;
+  color: var(--lume-text-value);
+}
+
+.lume-home-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lume-home-toolbar-label,
+.lume-home-toolbar button {
+  font-size: 12px;
+}
+
+.lume-home-toolbar button,
+.lume-home-add button,
+.lume-home-suggestions button,
+.lume-home-dialog button,
+.lume-scan button {
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--lume-border-card);
+  border-radius: var(--lume-control-radius);
+  background: var(--lume-field-surface);
+  color: var(--lume-text-value);
+  cursor: pointer;
+}
+
+.lume-home-toolbar button.is-selected {
+  border-color: var(--lume-primary);
+  color: var(--lume-text-value);
+}
+
+.lume-home-alert {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--lume-domain-issues);
+  border-radius: 8px;
+  color: var(--lume-domain-issues);
+}
+
+.lume-home-top {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(220px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.lume-home-primary,
+.lume-home-band,
+.lume-home-suggestions,
+.lume-scan section {
+  min-width: 0;
+}
+
+.lume-home-band,
+.lume-home-suggestions,
+.lume-scan section {
+  border: 1px solid var(--lume-border-card);
+  border-radius: 8px;
+  background: var(--lume-surface-card);
+  overflow: hidden;
+}
+
+.lume-home-band.is-people {
+  border-color: color-mix(in srgb, var(--lume-domain-people) 34%, transparent);
+}
+
+.lume-home-band.is-issues {
+  border-color: color-mix(in srgb, var(--lume-domain-issues) 34%, transparent);
+}
+
+.lume-home-band.is-knowledge,
+.lume-home-suggestions {
+  border-color: color-mix(in srgb, var(--lume-domain-knowledge) 34%, transparent);
+}
+
+.lume-home-band header,
+.lume-home-suggestions header,
+.lume-scan section header {
+  min-height: 44px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lume-home-band.is-people header {
+  background: color-mix(in srgb, var(--lume-domain-people) 8%, transparent);
+}
+
+.lume-home-band.is-issues header {
+  background: color-mix(in srgb, var(--lume-domain-issues) 8%, transparent);
+}
+
+.lume-home-band.is-knowledge header,
+.lume-home-suggestions header {
+  background: color-mix(in srgb, var(--lume-domain-knowledge) 8%, transparent);
+}
+
+.lume-home-band header button,
+.lume-home-suggestions header button {
+  margin-left: auto;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--lume-text-value);
+}
+
+.lume-home-band[data-collapsed="true"] header button svg,
+.lume-home-suggestions[data-collapsed="true"] header button svg {
+  transform: rotate(-90deg);
+}
+
+.lume-home-attention {
+  border: 1px solid var(--lume-border-card);
+  border-radius: 8px;
+  background: var(--lume-surface-card);
+  overflow: hidden;
+}
+
+.lume-home-band ul,
+.lume-home-suggestions ul,
+.lume-home-attention,
+.lume-scan ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lume-home-band li + li,
+.lume-home-suggestions li + li,
+.lume-home-attention li + li,
+.lume-scan li + li {
+  border-top: 1px solid var(--lume-border-card);
+}
+
+.lume-home-band li button,
+.lume-home-attention button,
+.lume-scan li button {
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lume-home.is-compact .lume-home-band li button,
+.lume-home-band.is-compact li button {
+  min-height: 48px;
+}
+
+.lume-home-band li button strong,
+.lume-scan li button strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 560;
+}
+
+.lume-home-band li button em,
+.lume-scan li button em,
+.lume-home-suggestions p,
+.lume-home-empty,
+.lume-scan p {
+  display: block;
+  margin: 2px 0 0;
+  color: var(--lume-meta-label);
+  font-size: 11.5px;
+  font-style: normal;
+}
+
+.lume-home-avatar {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--lume-domain-people) 18%, transparent);
+  color: var(--lume-domain-people);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.lume-home-kind {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lume-home-kind.is-issue {
+  color: var(--lume-domain-issues);
+}
+
+.lume-home-kind.is-date {
+  color: var(--lume-domain-knowledge);
+}
+
+.lume-home-bulb {
+  color: var(--lume-primary);
+}
+
+.lume-home-suggestions li {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lume-home-suggestions li strong {
+  display: block;
+  font-size: 13px;
+}
+
+.lume-home-empty,
+.lume-home-suggestions > p,
+.lume-scan section > p {
+  padding: 22px 12px;
+  text-align: center;
+}
+
+.lume-home-add {
+  margin-top: 10px;
+}
+
+.lume-home-add form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+}
+
+.lume-home-add label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+  flex: 1;
+  color: var(--lume-meta-label);
+  font-size: 11.5px;
+}
+
+.lume-home-add input {
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--lume-border-field);
+  border-radius: var(--lume-control-radius);
+  background: var(--lume-field-surface);
+  color: var(--lume-text-value);
+}
+
+.lume-home-dialog {
+  position: fixed;
+  z-index: 40;
+  top: 50%;
+  left: 50%;
+  width: min(440px, calc(100vw - 32px));
+  margin: 0;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--lume-primary) 45%, transparent);
+  border-radius: 8px;
+  background: var(--lume-surface-card);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 45%);
+}
+
+.lume-home-dialog h2 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.lume-home-dialog footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lume-scan {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.lume-scan-summary {
+  margin: 0;
+  color: var(--lume-meta-label);
+}
+
+@media (max-width: 820px) {
+  .lume-home-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ocean-mode-label {
+    display: none;
+  }
+
+  .lume-home-modes .ocean-mode-tab.is-home .ocean-mode-label,
+  .ocean-mode-narrow-label {
+    display: inline;
+  }
+}

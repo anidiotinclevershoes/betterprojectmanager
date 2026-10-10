@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { CatchMeUpPanel } from "@/components/catch-me-up/CatchMeUpPanel";
 import {
   MeetingCatchUpPanel,
   NextMeetingCue,
@@ -160,6 +161,7 @@ export function OceanKnowledgeFrames({
   const [bucket, setBucket] = useState<KcBucket>("all");
   const [subtype, setSubtype] = useState<KcKnowledgeSubtype>("all");
   const [catchUpId, setCatchUpId] = useState<string | null>(null);
+  const [projectBriefing, setProjectBriefing] = useState(false);
 
   // Keep these symbols in this module — item-detail / people UI contracts.
   void refForTodo;
@@ -233,6 +235,17 @@ export function OceanKnowledgeFrames({
           );
         })}
       </nav>
+
+      <button
+        type="button"
+        className="ghost-btn"
+        data-testid="kc-project-briefing"
+        aria-expanded={projectBriefing}
+        onClick={() => setProjectBriefing((open) => !open)}
+      >
+        Catch Me Up
+      </button>
+      {projectBriefing ? <CatchMeUpPanel projectId={projectId} /> : null}
 
       <NextMeetingCue projectId={projectId} onOpen={setCatchUpId} />
 

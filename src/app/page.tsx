@@ -6,8 +6,8 @@ import { NewProjectExperience } from "@/components/onboarding/NewProjectExperien
 import { useMission } from "@/lib/store";
 
 /**
- * V1: no Overview dashboard. With projects, land on the first project's
- * Knowledge Centre. Zero projects keeps New Project onboarding.
+ * With projects, land on the first project's Home workspace.
+ * Zero projects keeps New Project onboarding.
  */
 export default function HomePage() {
   const router = useRouter();
@@ -68,7 +68,7 @@ export default function HomePage() {
 
   return (
     <div className="workspace-page">
-      <p className="empty-copy">Opening Knowledge Centre…</p>
+      <p className="empty-copy">Opening Home…</p>
     </div>
   );
 }

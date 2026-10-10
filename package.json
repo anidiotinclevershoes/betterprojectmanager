@@ -117,6 +117,8 @@
     "verify:first-run-journey": "npx --yes tsx scripts/verify-first-run-journey.ts",
     "verify:desert-theme": "npx --yes tsx scripts/verify-desert-theme.ts",
     "verify:project-tags": "npx --yes tsx scripts/verify-project-tags.ts",
+    "verify:figma-make-home-todo": "npx --yes tsx scripts/verify-figma-make-home-todo.tsx",
+    "verify:home-workspace": "npx --yes tsx scripts/verify-home-workspace.ts",
     "verify:timeline-projection": "npx --yes tsx scripts/verify-timeline-visual-polish.ts",
     "verify:knowledge-centre-four-bucket": "npx --yes tsx scripts/verify-knowledge-centre-four-bucket.ts",
     "verify:new-project-four-frame": "npx --yes tsx scripts/verify-new-project-four-frame.ts",
