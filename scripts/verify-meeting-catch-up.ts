@@ -151,13 +151,18 @@ check("thin brief when meeting has almost no project context", () => {
   );
 });
 
-check("project AI Catch Me Up mode is unchanged", () => {
+check("project Catch Me Up briefing stays inside Knowledge Centre", () => {
+  const frames = readFileSync(
+    join(ROOT, "src/components/knowledge-centre/OceanKnowledgeFrames.tsx"),
+    "utf8",
+  );
+  assert.match(frames, /CatchMeUpPanel/);
+  assert.match(frames, /kc-project-briefing/);
   const workspace = readFileSync(
     join(ROOT, "src/components/knowledge-centre/OceanProjectWorkspace.tsx"),
     "utf8",
   );
-  assert.match(workspace, /CatchMeUpPanel/);
-  assert.match(workspace, /mode === "catch-me-up"/);
+  assert.doesNotMatch(workspace, /mode === "catch-me-up"/);
   assert.equal(existsSync(join(ROOT, "src/app/api/catch-me-up/route.ts")), true);
 });
 

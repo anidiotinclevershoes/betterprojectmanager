@@ -19,7 +19,9 @@ export default function RetiredMeetingDetailRoute() {
     if (!hydrated) return;
     const meeting = state.meetings.find((m) => m.id === params.id);
     const projectId = meeting?.projectId ?? state.projects[0]?.id;
-    router.replace(projectId ? `/projects/${projectId}` : "/");
+    router.replace(
+      projectId ? `/projects/${projectId}?mode=knowledge` : "/",
+    );
   }, [hydrated, params.id, router, state.meetings, state.projects]);
 
   return (

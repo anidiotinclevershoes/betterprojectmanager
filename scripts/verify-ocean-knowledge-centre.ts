@@ -95,21 +95,27 @@ function testModeSelectorContract() {
   const mode = readSrc(
     "src/components/knowledge-centre/ProjectModeSelector.tsx",
   );
+  assert.match(mode, /ocean-mode-home/);
   assert.match(mode, /ocean-mode-capture/);
   assert.match(mode, /ocean-mode-knowledge/);
-  assert.match(mode, /ocean-mode-catch-me-up/);
-  assert.match(mode, /ocean-mode-advise/);
-  assert.match(mode, /Coming soon/);
+  assert.match(mode, /ocean-mode-scan/);
+  assert.doesNotMatch(mode, /ocean-mode-catch-me-up/);
+  assert.doesNotMatch(mode, /ocean-mode-advise/);
   assert.match(mode, /ocean-ai-glyph/);
-  assert.match(mode, /disabled/);
-  assert.match(mode, /id: "capture"[\s\S]*ai: true|ai: true[\s\S]*Capture/);
-  assert.match(mode, /ocean-ai-glyph/);
+  assert.match(mode, /id: "capture"[\s\S]*ai: true/);
   const workspace = readSrc(
     "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
   );
-  assert.match(workspace, /ocean-catch-me-up-mode/);
-  assert.match(workspace, /CatchMeUpPanel/);
+  assert.match(workspace, /data-project-mode/);
+  assert.match(workspace, /HomeWorkspace/);
+  assert.match(workspace, /ProjectScanPanel/);
+  assert.match(workspace, /CaptureWorkspace/);
+  assert.match(workspace, /OceanKnowledgeFrames/);
   assert.doesNotMatch(workspace, /CoachDrawer|CoachResultsCard/);
+  const frames = readSrc(
+    "src/components/knowledge-centre/OceanKnowledgeFrames.tsx",
+  );
+  assert.match(frames, /NextMeetingCue/);
 }
 
 function testSearchAskContract() {
@@ -399,8 +405,9 @@ function testDefaultModeKnowledge() {
   const workspace = readSrc(
     "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
   );
-  assert.match(workspace, /useState<OceanProjectMode>\("knowledge"\)/);
+  assert.match(workspace, /return "home"/);
   assert.match(workspace, /ocean-knowledge-centre/);
+  assert.match(workspace, /mode === "knowledge"/);
 }
 
 function testOceanSaveFailureVisible() {
@@ -427,10 +434,14 @@ function testCatchMeUpSeamHasNoAiRoute() {
   assert.match(panel, /data-testid="catch-me-up-panel"/);
   assert.match(panel, /data-catch-me-up-slot="panel"/);
   assert.doesNotMatch(panel, /\/api\/catch-me-up|\/api\/tell-me|fetch\(/);
+  const frames = readSrc(
+    "src/components/knowledge-centre/OceanKnowledgeFrames.tsx",
+  );
+  assert.match(frames, /CatchMeUpPanel/);
   const workspace = readSrc(
     "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
   );
-  assert.match(workspace, /mode === "catch-me-up"/);
+  assert.doesNotMatch(workspace, /mode === "catch-me-up"/);
 }
 
 function testInspectorOverlayContract() {
@@ -465,7 +476,7 @@ async function main() {
   testSidebarContract();
   console.log("✓ sidebar omits removed V1 items; keeps Projects/utility");
   testModeSelectorContract();
-  console.log("✓ mode selector Capture/KC/Catch Me Up + Advise Coming soon");
+  console.log("✓ mode selector Home/Capture/Knowledge Centre/Project Scan");
   testSearchAskContract();
   console.log("✓ Search non-AI; Ask AI; quiet suggestions");
   testFramesLayoutContract();

@@ -432,7 +432,12 @@ check("UI is four-bucket chrome, not the old taxonomy grid", () => {
     "utf8",
   );
   assert.match(workspace, /ProjectIntelligenceStrip/);
-  assert.match(workspace, /CatchMeUpPanel/);
+  assert.match(workspace, /HomeWorkspace/);
+  const briefing = readFileSync(
+    join(ROOT, "src/components/knowledge-centre/OceanKnowledgeFrames.tsx"),
+    "utf8",
+  );
+  assert.match(briefing, /CatchMeUpPanel/);
 });
 
 console.log(`\n${passed} Knowledge Centre four-bucket checks passed.`);

@@ -663,12 +663,17 @@ async function main() {
     assert.equal(CATCH_ME_UP_INTEGRATION.apiPath, "/api/catch-me-up");
     assert.match(CATCH_ME_UP_INTEGRATION.mountExample, /CatchMeUpSurface/);
     const mode = readSrc("src/components/knowledge-centre/ProjectModeSelector.tsx");
-    assert.match(mode, /catch-me-up/);
-    assert.match(mode, /Catch Me Up/);
+    assert.match(mode, /ocean-mode-home/);
+    assert.match(mode, /ocean-mode-scan/);
+    assert.doesNotMatch(mode, /id: "catch-me-up"/);
+    const frames = readSrc(
+      "src/components/knowledge-centre/OceanKnowledgeFrames.tsx",
+    );
+    assert.match(frames, /CatchMeUpPanel/);
+    assert.doesNotMatch(frames, /CatchMeUpSurface/);
     const workspace = readSrc(
       "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
     );
-    assert.match(workspace, /CatchMeUpPanel/);
     assert.doesNotMatch(workspace, /CatchMeUpSurface/);
     const panel = readSrc("src/components/catch-me-up/CatchMeUpPanel.tsx");
     assert.match(panel, /<CatchMeUpSurface projectId=\{projectId\} \/>/);
