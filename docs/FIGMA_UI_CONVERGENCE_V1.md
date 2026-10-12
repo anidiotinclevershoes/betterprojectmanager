@@ -73,7 +73,48 @@ If Figma appears to require behaviour that conflicts with production architectur
 
 ## 3. Branch / baseline
 
-Recorded 17 September 2026 after Part 2 implementation (`npm run git:preflight`).
+Recorded 12 October 2026 after merging current `origin/main` (`npm run git:preflight`).
+
+```text
+Working branch: integration/figma-ui-convergence-v1
+Branch HEAD:    af9b715c31ca21e8158fb3864e1b736354290c92
+origin/main HEAD: 3b1e1c977be849b979d755242ea067826b164f9f
+Merge-base:     3b1e1c977be849b979d755242ea067826b164f9f
+Ahead: 51
+Behind: 0
+Contains current main?: YES
+Working tree clean?: YES
+PR base: main
+Dependencies: Shared Organise PR #194, already on main
+Shared/global files expected: Capture Apply roleHint passthrough; suggestions explicit section and truthIntent; shared-organise module. No schema change.
+Branch classification: CURRENT
+```
+
+Backup of the pre-merge integration tip: tag `backup/figma-ui-convergence-v1-bb17a46` → `bb17a46ae50232658f9fbc704bf8cf8466e5a1a0`.
+
+This documentation commit follows merge `af9b715`. The merge is the reconciliation. Do not merge draft PR #186.
+
+### 3.1 Conflict resolutions (main → integration)
+
+| File | Resolution |
+| --- | --- |
+| `src/lib/capture/apply/dispatch.ts` | Both. `values.roleHint` passes through for Shared Organise. `values.role` still goes through `statedField`, so an observation role is kept only when the source text states it. |
+| `src/lib/capture/suggestions.ts` | Main. Explicit knowledge section and `truthIntent` are kept. This branch had not changed the file. |
+| `src/app/api/capture/route.ts` | Both. Shared Organise returns early when `LUME_SHARED_ORGANISE=1`. The observation path still passes `captureReferenceDate()`. |
+| `scripts/run-regression-suite.ts` | Both. `capture-semantic-seams` and `shared-organise` both run. |
+| `package.json`, `docs/README.md`, `docs/LUME_CAPTURE_STATUS.md` | Both. Shared Organise scripts and the contract link were added. Existing convergence scripts stay. |
+| `scripts/verify-prompt-a-left-untouched.ts`, `scripts/verify-needs-you-vs-left-untouched.ts` | Content locks for both behaviours. The main byte-freeze against `origin/main` for `run.ts`, `source-coverage.ts`, and the whole of `dispatch.ts` does not apply here: semantic-seam repairs already changed those files. `apply-approved.ts` and `expected-target.ts` still match `origin/main`. |
+
+No persistence semantics, schema, or Apply policy were changed. Ready items can still be applied while other items need you. Review-wide Discard is still not a production action.
+
+### 3.2 Outstanding after this reconciliation
+
+1. Draft PR #186 stays draft. It is not a merge to `main`.
+2. `npm run verify:shared-organise-supabase` was not run. This environment has no Supabase credentials. `verify:shared-organise` passed in `npm test`.
+3. Playwright `e2e/stacked-capture.spec.ts` toyworld and gamingstudio5000 still fail on `Nothing to apply.` Those steps also render Left untouched leftovers from source coverage. That coverage and the Review list were not changed by this merge. The deterministic `stacked-capture` suite passed. Do not treat the Playwright mismatch as a licence to hide leftovers or rewrite Review.
+4. Make Review convergence (Needs You as a filter, Apply disabled while anything is unresolved, Discard review) is still open. Apply-disabled and Discard are product-policy conflicts, not part of this merge.
+
+Historical baseline, 17 September 2026, before this reconciliation:
 
 ```text
 Working branch: integration/figma-ui-convergence-v1
@@ -83,19 +124,16 @@ Merge-base:     71219584972d8d65a11296187a090ecef56a5db0
 Ahead: 6
 Behind: 0
 Contains current main?: YES
-Working tree clean?: YES
-PR base: main
-Dependencies: none
-Shared/global files expected: store.tsx persist helpers (additive); no Capture Apply ownership
 Branch classification: CURRENT
 ```
 
 Historical Capture Simplification SHAs (reference only, **not** current tip):
 
 - architecture baseline: `29acea5149c1c56dcb18375fd22025c072931a24` (PR #184)
-- later docs-only main tip, now **current** `origin/main`: `71219584972d8d65a11296187a090ecef56a5db0` (PR #185)
+- docs-only main tip at programme start: `71219584972d8d65a11296187a090ecef56a5db0` (PR #185)
+- Shared Organise production merge now contained: `3b1e1c977be849b979d755242ea067826b164f9f` (PR #194)
 
-`integration/figma-ui-convergence-v1` was created clean from current `origin/main`. It did not exist before this programme.
+`integration/figma-ui-convergence-v1` was created clean from `7121958`. It did not exist before this programme.
 
 ---
 
@@ -560,7 +598,8 @@ If a phase needs schema / RPC / RLS / new canonical kind: **stop and update §11
 | Baseline `npm test` / typecheck / build | done | 99/99; tsc 0; build 0 |
 | Code inspection: shell, writes, tags, ownership, history | done | §7–§11 |
 | Figma frame inspection | **done** | Figma MCP authenticated this thread; §9 evidence 17 Sep 2026 |
-| Part 2 UI implementation | in progress | Phases 1–9 landed on integration branch. `npm test` 100/100. Honour §17. Do not merge to `main`. |
+| Part 2 UI implementation | in progress | Phases 1–9 landed on integration branch. Honour §17. Do not merge to `main`. |
+| Reconcile with `main` after Shared Organise #194 | done | Merge `af9b715`. Backup tag `backup/figma-ui-convergence-v1-bb17a46`. `npm test` 114/114. Typecheck and build passed. See §3.1–§3.2. |
 
 ---
 
