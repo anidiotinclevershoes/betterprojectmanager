@@ -218,7 +218,7 @@ test.describe("Harbourline deep stress slices", () => {
 
     await startNewCapture(page);
     await analyseFrozenTranscript(page, slice.steps[1].transcript);
-    await expect(page.locator(".capture-apply-ready-btn")).toHaveCount(0);
+    await expect(page.locator(".capture-apply-ready-btn")).toBeDisabled();
 
     await startNewCapture(page);
     await analyseFrozenTranscript(page, slice.steps[2].transcript);
@@ -253,7 +253,7 @@ test.describe("Harbourline deep stress slices", () => {
 
     await startNewCapture(page);
     await analyseFrozenTranscript(page, slice.steps[2].transcript);
-    await expect(page.locator(".capture-apply-ready-btn")).toHaveCount(0);
+    await expect(page.locator(".capture-apply-ready-btn")).toBeDisabled();
 
     await openKnowledgeCentre(page);
     await expect(page.getByTestId("ocean-frame-people").getByText("Quinn Adler")).toBeVisible();

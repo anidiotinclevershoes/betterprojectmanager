@@ -19,8 +19,11 @@ import {
 import {
   buildReviewChangeViewModels,
   computeReviewCounts,
-  pendingReadyModels,
 } from "@/lib/capture/review/viewModel";
+import {
+  reviewApplyAnnouncement,
+  reviewApplyGate,
+} from "@/lib/capture/review/reviewBatch";
 import { applyPendingReadyQueue } from "@/lib/capture/review/applyReadyQueue";
 import { confirmAuthoritativeWrites } from "@/lib/capture/apply/confirm-writes";
 import {
@@ -130,8 +133,11 @@ export function CaptureWorkspace({
     cancelAnalyse,
     applyOne,
     dismissOne,
+    includeOne,
+    stageProposalEdit,
     markOneApplied,
     clearSession,
+    discardUnappliedReview,
     bindOpenProject,
     expandAnalysis,
     editCapture,
@@ -300,6 +306,7 @@ export function CaptureWorkspace({
 
   const reviewOpen = Boolean(result) && !collapsed;
   const [capturedOpen, setCapturedOpen] = useState(true);
+  const [applyingReview, setApplyingReview] = useState(false);
   const isDev = process.env.NODE_ENV === "development";
   const showSessionActions = Boolean(result);
 
@@ -457,47 +464,66 @@ export function CaptureWorkspace({
   }
 
   async function approveReady() {
+    if (applyingReview) return;
+    const gate = reviewApplyGate(reviewModels, added, dismissed);
+    if (gate.blocked) {
+      announce(
+        gate.unresolvedNeedsYou === 1
+          ? "1 item still needs you before Apply"
+          : `${gate.unresolvedNeedsYou} items still need you before Apply`,
+      );
+      return;
+    }
+    if (gate.ready.length === 0) return;
     const durableBatch = persistenceMode === "supabase";
-    const { confirmOwner, failures, reconcileFailed, succeededWrites } =
-      await applyPendingReadyQueue({
-      models: pendingReadyModels(reviewModels, added, dismissed),
-      applyOne: (item) =>
-        applyOne(item, defaultProjectId, {
-          settle: durableBatch ? "defer" : "now",
-        }),
-      confirmWrites: durableBatch
-        ? async (operations) => {
-            try {
-              const confirmed = await confirmAuthoritativeWrites({
-                operations,
-                reloadWorkspace: async () => {
-                  const peeked = await peekDurableWorkspace();
-                  if (!peeked) {
-                    throw new Error("Could not reload saved project information.");
-                  }
-                  return peeked;
-                },
-              });
-              if (confirmed.state) {
-                adoptAppliedState(confirmed.state);
+    setApplyingReview(true);
+    try {
+      const { confirmOwner, failures, reconcileFailed, succeededWrites } =
+        await applyPendingReadyQueue({
+        models: gate.ready,
+        applyOne: (item) =>
+          applyOne(item, defaultProjectId, {
+            settle: durableBatch ? "defer" : "now",
+          }),
+        confirmWrites: durableBatch
+          ? async (operations) => {
+              try {
+                const confirmed = await confirmAuthoritativeWrites({
+                  operations,
+                  reloadWorkspace: async () => {
+                    const peeked = await peekDurableWorkspace();
+                    if (!peeked) {
+                      throw new Error("Could not reload saved project information.");
+                    }
+                    return peeked;
+                  },
+                });
+                if (confirmed.state) {
+                  adoptAppliedState(confirmed.state);
+                }
+                return confirmed;
+              } catch {
+                return { reconcileFailed: true as const };
               }
-              return confirmed;
-            } catch {
-              return { reconcileFailed: true as const };
             }
-          }
-        : undefined,
-    });
-    if (reconcileFailed) {
-      announce("Applied — refreshing saved project information…");
-    } else if (succeededWrites.length > 0) {
-      announce("Applied");
-    }
-    if (confirmOwner) {
-      setConfirmOwner(confirmOwner);
-    }
-    if (failures.length) {
-      setError(failures[0] ?? "Could not apply these changes.");
+          : undefined,
+      });
+      announce(
+        reviewApplyAnnouncement({
+          requested: gate.ready.length,
+          succeeded: succeededWrites.length,
+          failed: failures.length,
+          reconcileFailed,
+        }),
+      );
+      if (confirmOwner) {
+        setConfirmOwner(confirmOwner);
+      }
+      if (failures.length) {
+        setError(failures[0] ?? "Could not apply these changes.");
+      }
+    } finally {
+      setApplyingReview(false);
     }
   }
 
@@ -1386,6 +1412,10 @@ export function CaptureWorkspace({
             highlightedId={highlightedCardId}
             onApprove={approveById}
             onDismiss={dismissOne}
+            onInclude={includeOne}
+            onEditProposal={stageProposalEdit}
+            onDiscardReview={discardUnappliedReview}
+            applying={applyingReview}
             onApproveReady={approveReady}
             onUseThis={onUseThis}
             onChooseTarget={onChooseTarget}

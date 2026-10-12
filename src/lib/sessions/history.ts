@@ -12,7 +12,8 @@ export type CaptureSessionStatus =
   | "in_review"
   | "completed"
   | "dismissed"
-  | "partially_accepted";
+  | "partially_accepted"
+  | "abandoned";
 
 export type CaptureSource = "typed" | "recorded" | "uploaded";
 
@@ -95,6 +96,20 @@ export function computeCaptureStatus(
   if (accepted > 0 && dismissedCount > 0) return "partially_accepted";
   if (accepted > 0) return "completed";
   return "dismissed";
+}
+
+/**
+ * Status written when the user discards a review.
+ * Applied items stay applied. Unapplied proposals are not marked
+ * dismissed, so this must not call computeCaptureStatus.
+ */
+export function statusForDiscardedReview(
+  suggestions: Array<{ id: string }>,
+  added: Record<string, boolean>,
+): "abandoned" | "partially_accepted" {
+  return suggestions.some((item) => added[item.id])
+    ? "partially_accepted"
+    : "abandoned";
 }
 
 export function listCaptureSessions(): CaptureSessionRecord[] {
@@ -244,5 +259,7 @@ export function statusLabel(status: CaptureSessionStatus) {
       return "Dismissed";
     case "partially_accepted":
       return "Partially accepted";
+    case "abandoned":
+      return "Abandoned";
   }
 }

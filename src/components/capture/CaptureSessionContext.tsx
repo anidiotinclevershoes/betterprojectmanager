@@ -26,9 +26,11 @@ import {
   type PendingSuggestion,
 } from "@/lib/capture/suggestions";
 import type { CaptureResult } from "@/lib/types";
+import { stageProposalText } from "@/lib/capture/review/reviewBatch";
 import {
   computeCaptureStatus,
   createCaptureSessionId,
+  statusForDiscardedReview,
   upsertCaptureSession,
   type CaptureSource,
 } from "@/lib/sessions/history";
@@ -106,8 +108,17 @@ type CaptureSessionValue = {
     options?: { settle?: "now" | "defer" },
   ) => Promise<CaptureApplyDecision>;
   dismissOne: (id: string) => void;
+  /** Put an excluded proposal back into the review. Does not Apply. */
+  includeOne: (id: string) => void;
+  /** Stage reviewed text for a later Apply. Does not write the project. */
+  stageProposalEdit: (id: string, text: string, displayedTo?: string) => void;
   markOneApplied: (id: string) => void;
   clearSession: () => void;
+  /**
+   * Abandon unapplied proposals. Already applied items, receipts and
+   * history stay. This is not clearSession and it does not reject every card.
+   */
+  discardUnappliedReview: () => void;
   /** Park the current project's Capture and load the open project's session. */
   bindOpenProject: (projectId: string) => void;
   expandAnalysis: () => void;
@@ -820,6 +831,76 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
     [announce],
   );
 
+  const includeOne = useCallback(
+    (id: string) => {
+      setSlice((prev) => {
+        if (!prev.dismissed[id] || prev.added[id]) return prev;
+        const dismissed = { ...prev.dismissed };
+        delete dismissed[id];
+        const next = { ...prev, dismissed };
+        persistHistory(next);
+        return next;
+      });
+      announce("Proposal included again");
+    },
+    [announce],
+  );
+
+  const stageProposalEdit = useCallback(
+    (id: string, text: string, displayedTo?: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      setSlice((prev) => {
+        const current = prev.suggestions.find((item) => item.id === id);
+        if (!current || prev.added[id]) return prev;
+        const nextItem = stageProposalText(current, trimmed, displayedTo);
+        if (nextItem === current) return prev;
+        return {
+          ...prev,
+          suggestions: prev.suggestions.map((item) =>
+            item.id === id ? nextItem : item,
+          ),
+          editing: { ...prev.editing, [id]: trimmed },
+        };
+      });
+    },
+    [],
+  );
+
+  const discardUnappliedReview = useCallback(() => {
+    setSlice((prev) => {
+      if (prev.result && prev.historyId && prev.analysedAt) {
+        upsertCaptureSession({
+          id: prev.historyId,
+          createdAt: prev.analysedAt,
+          analysedAt: prev.analysedAt,
+          projectId: prev.projectId || null,
+          source: prev.source,
+          transcript: prev.content,
+          result: prev.result,
+          suggestions: prev.suggestions,
+          dismissed: prev.dismissed,
+          added: prev.added,
+          status: statusForDiscardedReview(prev.suggestions, prev.added),
+          contextManifest: prev.contextManifest ?? null,
+        });
+      }
+      return emptySlice();
+    });
+    setBusy("idle");
+    try {
+      window.sessionStorage.removeItem(CAPTURE_SESSION_KEY);
+      if (slice.projectId) {
+        window.sessionStorage.removeItem(
+          captureSessionStorageKey(slice.projectId),
+        );
+      }
+    } catch {
+      /* ignore */
+    }
+    announce("Review discarded. Saved project data was not changed.");
+  }, [announce, slice.projectId]);
+
   const markOneApplied = useCallback((id: string) => {
     setSlice((prev) => {
       const next = {
@@ -878,8 +959,11 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       applyOne,
       bindOpenProject,
       dismissOne,
+      includeOne,
+      stageProposalEdit,
       markOneApplied,
       clearSession,
+      discardUnappliedReview,
       expandAnalysis,
       editCapture,
       dismissPreReliabilityWarn,
@@ -903,8 +987,11 @@ export function CaptureSessionProvider({ children }: { children: ReactNode }) {
       bindOpenProject,
       busy,
       clearSession,
+      discardUnappliedReview,
       dismissOne,
+      includeOne,
       markOneApplied,
+      stageProposalEdit,
       dismissPreReliabilityWarn,
       editCapture,
       expandAnalysis,

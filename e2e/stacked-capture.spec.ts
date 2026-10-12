@@ -133,13 +133,15 @@ async function assertReview(page: Page, expected: StackedStory["steps"][number][
   await dismissCoachIfPresent(page);
   if (expected === "needs_you") {
     await expect(page.getByText(/Needs Review|Needs you/i).first()).toBeVisible();
-    await expect(page.locator(".capture-apply-ready-btn")).toHaveCount(0);
+    const apply = page.locator(".capture-apply-ready-btn");
+    await expect(apply).toBeVisible();
+    await expect(apply).toBeDisabled();
     return;
   }
   if (expected === "no_change") {
-    await expect(
-      page.getByText("Nothing to apply."),
-    ).toBeVisible();
+    const nothing = page.getByText("Nothing to apply.");
+    const leftover = page.locator('[data-review-family="left_untouched"]');
+    await expect(nothing.or(leftover.first())).toBeVisible();
     return;
   }
   if (expected === "apply" || expected === "apply_or_no_change") {

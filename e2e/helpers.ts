@@ -192,8 +192,8 @@ export async function analyseFrozenTranscript(page: Page, transcript: string) {
 export async function applyReadyIfPresent(page: Page) {
   await dismissCoachIfPresent(page);
   const applyReady = page.getByRole("button", { name: /Apply Ready/i });
-  if ((await applyReady.count()) > 0) {
-    await applyReady.click();
+  if ((await applyReady.count()) > 0 && (await applyReady.first().isEnabled())) {
+    await applyReady.first().click();
     await expect(page.getByText("Applied").first()).toBeVisible();
     return;
   }
@@ -204,7 +204,7 @@ export async function applyReadyIfPresent(page: Page) {
     return;
   }
   const applyVisible = page.getByRole("button", { name: /Apply Ready/i });
-  if ((await applyVisible.count()) > 0) {
+  if ((await applyVisible.count()) > 0 && (await applyVisible.first().isEnabled())) {
     await applyVisible.first().click();
     await expect(page.getByText("Applied").first()).toBeVisible();
   }

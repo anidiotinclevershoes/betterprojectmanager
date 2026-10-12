@@ -55,6 +55,7 @@ export function CorrectionActions({
   handlers,
   currentOwners = [],
   hidePrompt = false,
+  excludeLabel = "Exclude change",
 }: {
   model: ReviewChangeViewModel;
   targetOptions: TargetOption[];
@@ -62,6 +63,7 @@ export function CorrectionActions({
   currentOwners?: ReviewOwnerHit[];
   /** Card already shows the Needs You question. */
   hidePrompt?: boolean;
+  excludeLabel?: string;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dateValue, setDateValue] = useState("");
@@ -163,9 +165,9 @@ export function CorrectionActions({
   if (!reason && model.readiness === "ready" && canApprove) {
     return (
       <div className="compact-change-action-row">
-        <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
-          Exclude change
-        </button>
+          <button type="button" className="ghost-btn p09-review-exclude" onClick={handlers.onDismiss}>
+            {excludeLabel}
+          </button>
       </div>
     );
   }

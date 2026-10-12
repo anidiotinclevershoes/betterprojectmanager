@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import {
   analyseFrozenTranscript,
   applyReadyIfPresent,
@@ -133,7 +133,9 @@ test.describe("Capture V2 frozen journeys", () => {
     await expect(page.getByTestId("review-ownership-share")).toBeVisible();
     await expect(page.getByTestId("review-ownership-replace")).toBeVisible();
     await expect(page.getByTestId("review-ownership-keep")).toBeVisible();
-    await expect(page.locator(".capture-apply-ready-btn")).toHaveCount(0);
+    const apply = page.locator(".capture-apply-ready-btn");
+    await expect(apply).toBeVisible();
+    await expect(apply).toBeDisabled();
     await page.getByTestId("review-ownership-keep").click();
     await openKnowledgeCentre(page);
     await expect(
@@ -228,16 +230,16 @@ test.describe("Capture Review Needs-you interactions", () => {
     await openCapture(page);
     await analyseFrozenTranscript(page, frozen.transcript);
     await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /Apply Ready \(1\)/i }),
-    ).toBeVisible();
-    await applyReadyIfPresent(page);
+    const blocked = page.getByRole("button", { name: /Apply blocked/i });
+    await expect(blocked).toBeVisible();
+    await expect(blocked).toBeDisabled();
     await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
     await expect(
       page.getByText(/Fizz Caramel|Share with Fizz/i).first(),
     ).toBeVisible();
     await page.getByTestId("review-ownership-share").click();
     await expect(page.getByText("Applied").first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /Apply Ready \(1\)/i })).toBeEnabled();
   });
 
   test("missing milestone date asks for a date and does not invent today", async ({
@@ -325,9 +327,9 @@ test.describe("Capture experience — annotated transcript", () => {
     );
     await expect(page.getByText("Needs you").first()).toBeVisible();
     await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /Apply Ready \(1\)/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /Apply blocked/i })).toBeDisabled();
+    await notes.locator('[data-category="people"]').click();
+    await expect(page.locator(".suggested-change-item.is-highlighted")).toBeVisible();
     const annotatedShot = walkthroughPath("capture_experience_annotated.png");
     if (annotatedShot) await page.screenshot({ path: annotatedShot, fullPage: true });
   });
@@ -351,8 +353,41 @@ test.describe("Capture experience — annotated transcript", () => {
     await expect(page.getByTestId("annotated-transcript")).toBeVisible();
     const mobileShot = walkthroughPath("capture_experience_mobile_needs_you.png");
     if (mobileShot) await page.screenshot({ path: mobileShot, fullPage: true });
+    await expectReviewFits(page, 390);
+  });
+
+  test("review filters and actions fit at 320px", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 720 });
+    const frozen = await mockLocalAuthAndFrozenCapture(
+      page,
+      "share-vs-replace-ambiguous",
+    );
+    await openCapture(page);
+    await analyseFrozenTranscript(page, frozen.transcript);
+    await expectReviewFits(page, 320);
   });
 });
+
+async function expectReviewFits(page: Page, width: number) {
+  await expect(page.getByRole("tab", { name: /Needs You/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Discard" })).toBeVisible();
+  const apply = page.locator(".capture-apply-ready-btn");
+  await expect(apply).toBeVisible();
+  const frame = page.locator(".lume-review-frame");
+  const overflow = await frame.evaluate((el) => el.scrollWidth - el.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+  const applyBox = await apply.boundingBox();
+  expect(applyBox).toBeTruthy();
+  expect(applyBox!.height).toBeGreaterThanOrEqual(40);
+  expect(applyBox!.x + applyBox!.width).toBeLessThanOrEqual(width + 1);
+  await page.getByRole("button", { name: "Discard" }).click();
+  const dialog = page.getByTestId("discard-review-dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText("Nothing already saved to the project is removed.")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(page.getByTestId("ocean-capture-review")).toBeVisible();
+}
 
 test.describe("optional live-model smoke (isolated from CI)", () => {
   test.skip(

@@ -37,20 +37,36 @@ function testNoFalseUnsavedWarning() {
 function testApplyStillUsesExistingPath() {
   const workspace = readSrc("src/components/capture/CaptureWorkspace.tsx");
   const list = readSrc("src/components/capture/review/SuggestedChangesList.tsx");
+  const session = readSrc("src/components/capture/CaptureSessionContext.tsx");
   assert.match(workspace, /onApproveReady=\{approveReady\}/);
+  assert.match(workspace, /reviewApplyGate\(reviewModels, added, dismissed\)/);
+  assert.match(workspace, /if \(gate\.blocked\)/);
+  const gateAt = workspace.indexOf("reviewApplyGate(reviewModels, added, dismissed)");
+  const queueAt = workspace.indexOf("applyPendingReadyQueue", gateAt);
+  assert.ok(gateAt > 0 && queueAt > gateAt);
   assert.match(workspace, /applyPendingReadyQueue/);
-  assert.match(workspace, /pendingReadyModels\(reviewModels, added, dismissed\)/);
+  assert.match(workspace, /models: gate\.ready/);
   assert.match(workspace, /confirmAuthoritativeWrites/);
   assert.match(list, /onClick=\{onApproveReady\}/);
-  assert.match(list, /aria-label=\{`Apply Ready \(\$\{readyCount\}\)`\}/);
+  assert.match(list, /aria-label=\{applyName\}/);
+  assert.match(list, /Apply Ready \(\$\{readyCount\}\)/);
   assert.match(list, /Apply \{readyCount\} changes/);
-  assert.match(list, /readyCount > 0/);
-  assert.doesNotMatch(list, /Discard review/);
+  assert.match(list, /disabled=\{applyDisabled\}/);
+  assert.match(list, /Discard this review\?/);
+  assert.match(list, /Discard review/);
+  assert.match(list, /onClick=\{confirmDiscard\}/);
+  assert.match(session, /statusForDiscardedReview/);
+  assert.doesNotMatch(
+    session.slice(session.indexOf("const discardUnappliedReview")),
+    /dismissed:\s*\{[^}]*true/,
+  );
+  assert.match(session, /const clearSession = useCallback/);
 }
 
-function testNeedsYouStaysAGroupNotAFilter() {
+function testNeedsYouFilterKeepsTheAllGroup() {
   const list = readSrc("src/components/capture/review/SuggestedChangesList.tsx");
   assert.match(list, /id: "all"/);
+  assert.match(list, /id: "needs_you"/);
   assert.match(list, /id: "create"/);
   assert.match(list, /id: "update"/);
   assert.match(list, /id: "remove"/);
@@ -59,16 +75,21 @@ function testNeedsYouStaysAGroupNotAFilter() {
   const proposedAt = list.indexOf('id="group-proposed"');
   assert.ok(needsAt > 0 && proposedAt > needsAt);
   assert.match(list, />\s*Needs You\s*</);
+  assert.match(list, /showLeftUntouched = filter === "all"/);
 }
 
 function testExcludeDoesNotBecomeApply() {
   const card = readSrc("src/components/capture/review/SuggestedChangeCard.tsx");
   const actions = readSrc("src/components/capture/review/CorrectionActions.tsx");
   assert.match(card, /Exclude change/);
+  assert.match(card, /Undo removal/);
   assert.match(card, /onClick=\{onDismiss\}/);
+  assert.match(card, /Re-include/);
+  assert.match(card, /onClick=\{onInclude\}/);
+  assert.doesNotMatch(card, /Re-include[\s\S]{0,80}onApprove/);
   assert.match(actions, /Exclude change/);
   assert.match(actions, /onClick=\{handlers\.onDismiss\}/);
-  assert.doesNotMatch(card, /Exclude change[\s\S]{0,80}onApprove/);
+  assert.doesNotMatch(card, /Exclude change[\s\S]{0,120}onApprove/);
 }
 
 function testUpdateRetainsFromTo() {
@@ -97,7 +118,8 @@ function testSpanFocusAndDidntUnderstand() {
   const transcript = readSrc("src/components/capture/review/AnnotatedTranscript.tsx");
   const workspace = readSrc("src/components/capture/CaptureWorkspace.tsx");
   const didnt = readSrc("src/components/capture/review/DidntUnderstand.tsx");
-  assert.match(transcript, /onFocusReviewCard\?\.\(segment\.reviewCardId!\)/);
+  assert.match(transcript, /onClick=\{\(\) => onFocusReviewCard\?\.\(segment\.reviewCardId!\)\}/);
+  assert.match(transcript, /onFocus=\{\(\) => onFocusReviewCard\?\.\(segment\.reviewCardId!\)\}/);
   assert.match(workspace, /getElementById\(`review-card-\$\{reviewCardId\}`\)/);
   assert.match(workspace, /<DidntUnderstand observations=\{observations\} \/>/);
   assert.match(didnt, /actionStatus === "no_change"/);
@@ -158,8 +180,8 @@ function main() {
   console.log("✓ no false unsaved-loss warning");
   testApplyStillUsesExistingPath();
   console.log("✓ Apply still uses onApproveReady");
-  testNeedsYouStaysAGroupNotAFilter();
-  console.log("✓ Needs You stays a group above Proposed");
+  testNeedsYouFilterKeepsTheAllGroup();
+  console.log("✓ Needs You is a filter and stays grouped in All");
   testExcludeDoesNotBecomeApply();
   console.log("✓ Exclude still dismisses and does not apply");
   testUpdateRetainsFromTo();

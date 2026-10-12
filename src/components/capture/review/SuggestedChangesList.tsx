@@ -1,32 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReviewChangeViewModel } from "@/lib/capture/review/viewModel";
 import type { ReviewOwnerHit } from "@/lib/capture/review/reviewReason";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
-import { reviewOpFamily } from "@/lib/capture/review/reviewLanguage";
+import {
+  countQueueFilters,
+  reviewApplyGate,
+  reviewFamily,
+} from "@/lib/capture/review/reviewBatch";
 import { SuggestedChangeCard } from "./SuggestedChangeCard";
 import { KnowledgeRememberList } from "./KnowledgeRememberList";
 import type { TargetOption } from "./TargetPicker";
 
-type QueueFilter = "all" | "create" | "update" | "remove";
+type QueueFilter = "all" | "needs_you" | "create" | "update" | "remove";
 
 const FILTERS: { id: QueueFilter; label: string }[] = [
   { id: "all", label: "All" },
+  { id: "needs_you", label: "Needs You" },
   { id: "create", label: "Create" },
   { id: "update", label: "Update" },
   { id: "remove", label: "Remove" },
 ];
-
-function familyOf(model: ReviewChangeViewModel) {
-  const attention =
-    model.readiness === "needs_review" ||
-    model.readiness === "unmatched" ||
-    model.readiness === "left_untouched"
-      ? model.readiness
-      : undefined;
-  return reviewOpFamily(model.operation, attention, model.reviewReason);
-}
 
 function isKnowledgeRemember(model: ReviewChangeViewModel) {
   return (
@@ -41,14 +36,14 @@ export function SuggestedChangesList({
   added,
   dismissed,
   readyCount,
-  needsReviewCount,
-  unmatchedCount,
-  reviewedCount,
-  totalCount,
   targetOptions,
   highlightedId,
   onApprove,
   onDismiss,
+  onInclude,
+  onEditProposal,
+  onDiscardReview,
+  applying = false,
   onApproveReady,
   onUseThis,
   onChooseTarget,
@@ -73,6 +68,10 @@ export function SuggestedChangesList({
   highlightedId?: string | null;
   onApprove: (id: string) => void;
   onDismiss: (id: string) => void;
+  onInclude?: (id: string) => void;
+  onEditProposal?: (id: string, value: string, displayedTo?: string) => void;
+  onDiscardReview?: () => void;
+  applying?: boolean;
   onApproveReady: () => void;
   onUseThis: (id: string) => void;
   onChooseTarget: (id: string, option: TargetOption) => void;
@@ -94,6 +93,8 @@ export function SuggestedChangesList({
 }) {
   const [filter, setFilter] = useState<QueueFilter>("all");
   const [queueCollapsed, setQueueCollapsed] = useState(false);
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const keepReviewingRef = useRef<HTMLButtonElement>(null);
   const rememberModels = models.filter(isKnowledgeRemember);
   const leftUntouchedModels = models.filter(
     (m) => m.readiness === "left_untouched" && !isKnowledgeRemember(m),
@@ -108,27 +109,54 @@ export function SuggestedChangesList({
     (m) => added[m.id] || dismissed[m.id],
   );
 
-  const filterCounts = useMemo(() => {
-    const families = pending.map(familyOf);
-    return {
-      all: pending.length,
-      create: families.filter((f) => f === "create").length,
-      update: families.filter((f) => f === "update").length,
-      remove: families.filter((f) => f === "remove").length,
-    };
-  }, [pending]);
+  const filterCounts = useMemo(() => countQueueFilters(pending), [pending]);
+  const gate = useMemo(
+    () => reviewApplyGate(models, added, dismissed),
+    [models, added, dismissed],
+  );
+  const excludedCount = operationModels.filter(
+    (model) => dismissed[model.id] && !added[model.id],
+  ).length;
+  const appliedCount = operationModels.filter((model) => added[model.id]).length;
 
   const visiblePending = pending.filter((model) => {
     if (filter === "all") return true;
-    return familyOf(model) === filter;
+    return reviewFamily(model) === filter;
   });
-  const needsYou = visiblePending.filter((m) => familyOf(m) === "needs_you");
-  const proposed = visiblePending.filter((m) => familyOf(m) !== "needs_you");
+  const needsYou = visiblePending.filter((m) => reviewFamily(m) === "needs_you");
+  const proposed = visiblePending.filter((m) => reviewFamily(m) !== "needs_you");
   const visibleReviewed = filter === "all" ? reviewed : [];
+  const showLeftUntouched = filter === "all";
 
   const opTotal = operationModels.length;
   const opReviewed = reviewed.length;
-  const blockedCount = needsReviewCount + unmatchedCount;
+  const applyBlocked = gate.blocked;
+  const applyDisabled = applyBlocked || readyCount === 0 || applying;
+  const applyName = applyBlocked
+    ? `Apply blocked (${gate.unresolvedNeedsYou} need you)`
+    : `Apply Ready (${readyCount})`;
+  const leftoverCards = leftUntouchedModels.filter(
+    (model) => !added[model.id] && !dismissed[model.id],
+  );
+  const leftoverVisible = showLeftUntouched && leftoverCards.length > 0;
+
+  useEffect(() => {
+    if (!discardOpen) return;
+    keepReviewingRef.current?.focus();
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setDiscardOpen(false);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [discardOpen]);
+
+  function confirmDiscard() {
+    setDiscardOpen(false);
+    onDiscardReview?.();
+  }
 
   function renderCard(model: ReviewChangeViewModel) {
     return (
@@ -147,6 +175,13 @@ export function SuggestedChangesList({
         forceCollapsed={queueCollapsed}
         onApprove={() => onApprove(model.id)}
         onDismiss={() => onDismiss(model.id)}
+        onInclude={onInclude ? () => onInclude(model.id) : undefined}
+        onEdit={
+          onEditProposal
+            ? (value, displayedTo) =>
+                onEditProposal(model.id, value, displayedTo)
+            : undefined
+        }
         onUseThis={() => onUseThis(model.id)}
         onChooseTarget={(option) => onChooseTarget(model.id, option)}
         onChooseProject={(project) => onChooseProject(model.id, project)}
@@ -221,12 +256,14 @@ export function SuggestedChangesList({
           </button>
         </div>
 
-        {opTotal === 0 && leftUntouchedModels.length === 0 ? (
-          <p className="empty-copy">Nothing to apply.</p>
-        ) : visiblePending.length === 0 &&
-          visibleReviewed.length === 0 &&
-          leftUntouchedModels.length === 0 ? (
-          <p className="empty-copy">Nothing of this kind in this capture.</p>
+        {visiblePending.length === 0 &&
+        visibleReviewed.length === 0 &&
+        !leftoverVisible ? (
+          <p className="empty-copy">
+            {opTotal === 0 && filter === "all"
+              ? "Nothing to apply."
+              : "Nothing of this kind in this capture."}
+          </p>
         ) : (
           <div className="lume-queue-groups">
             {needsYou.length > 0 ? (
@@ -257,7 +294,7 @@ export function SuggestedChangesList({
                 </ul>
               </section>
             ) : null}
-            {leftUntouchedModels.some((m) => !added[m.id] && !dismissed[m.id]) ? (
+            {leftoverVisible ? (
               <section
                 className="lume-queue-group"
                 aria-labelledby="group-left-untouched"
@@ -267,18 +304,10 @@ export function SuggestedChangesList({
                   <h4 id="group-left-untouched" className="lume-queue-heading">
                     Left untouched
                   </h4>
-                  <span className="lume-queue-count">
-                    {
-                      leftUntouchedModels.filter(
-                        (m) => !added[m.id] && !dismissed[m.id],
-                      ).length
-                    }
-                  </span>
+                  <span className="lume-queue-count">{leftoverCards.length}</span>
                 </div>
                 <ul className="suggested-change-list">
-                  {leftUntouchedModels
-                    .filter((m) => !added[m.id] && !dismissed[m.id])
-                    .map(renderCard)}
+                  {leftoverCards.map(renderCard)}
                 </ul>
               </section>
             ) : null}
@@ -292,25 +321,78 @@ export function SuggestedChangesList({
                 {readyCount} {readyCount === 1 ? "change" : "changes"} ready
               </strong>
             </span>
-            {blockedCount > 0 ? (
+            {applyBlocked ? (
               <span className="lume-commit-blocked">
-                {blockedCount === 1
+                {gate.unresolvedNeedsYou === 1
                   ? "1 item still needs you before Apply"
-                  : `${blockedCount} items still need you before Apply`}
+                  : `${gate.unresolvedNeedsYou} items still need you before Apply`}
+              </span>
+            ) : null}
+            {excludedCount > 0 ? (
+              <span className="lume-commit-blocked">
+                {excludedCount === 1
+                  ? "1 excluded item will not be applied"
+                  : `${excludedCount} excluded items will not be applied`}
               </span>
             ) : null}
           </p>
-          {readyCount > 0 ? (
+          <div className="p09-review-actions">
+            <button
+              type="button"
+              className="ghost-btn lume-hit capture-discard-review-btn"
+              onClick={() => setDiscardOpen(true)}
+            >
+              Discard
+            </button>
             <button
               type="button"
               className="primary-btn lume-hit capture-apply-ready-btn"
               onClick={onApproveReady}
-              aria-label={`Apply Ready (${readyCount})`}
+              disabled={applyDisabled}
+              aria-label={applyName}
             >
               Apply {readyCount} changes
             </button>
-          ) : null}
+          </div>
         </div>
+        {discardOpen ? (
+          <div className="p09-discard-backdrop" role="presentation">
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="discard-review-title"
+              className="p09-discard-dialog"
+              data-testid="discard-review-dialog"
+            >
+              <h4 id="discard-review-title">Discard this review?</h4>
+              <p>
+                Unapplied proposals from this review will be dropped. Your
+                existing project will not change.
+              </p>
+              <p>Nothing already saved to the project is removed.</p>
+              {appliedCount > 0 ? (
+                <p>Changes already saved stay in the project, with their history.</p>
+              ) : null}
+              <div className="p09-discard-actions">
+                <button
+                  ref={keepReviewingRef}
+                  type="button"
+                  className="ghost-btn"
+                  onClick={() => setDiscardOpen(false)}
+                >
+                  Keep reviewing
+                </button>
+                <button
+                  type="button"
+                  className="primary-btn"
+                  onClick={confirmDiscard}
+                >
+                  Discard review
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <KnowledgeRememberList
