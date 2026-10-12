@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ItemTagsEditor } from "@/components/knowledge-centre/ItemTagsEditor";
 import { useMission } from "@/lib/store";
 import type { ManualItemType } from "@/lib/store";
@@ -16,18 +16,34 @@ export function AddItemDrawer({
   projectId,
   open,
   onClose,
+  initialType = "todo",
 }: {
   projectId: string;
   open: boolean;
   onClose: () => void;
+  initialType?: ManualItemType;
 }) {
   const { state, addManualItem, saveItemTags } = useMission();
-  const [type, setType] = useState<ManualItemType>("todo");
+  const [type, setType] = useState<ManualItemType>(initialType);
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [wasOpen, setWasOpen] = useState(false);
+  const titleRef = useRef<HTMLInputElement>(null);
+  const knowledgeRef = useRef<HTMLTextAreaElement>(null);
+
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setType(initialType);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    const field = type === "knowledge" ? knowledgeRef.current : titleRef.current;
+    field?.focus();
+  }, [open, type]);
 
   useEffect(() => {
     if (!open) return;
@@ -38,12 +54,12 @@ export function AddItemDrawer({
       setDetail("");
       setTags([]);
       setError(null);
-      setType("todo");
+      setType(initialType);
       onClose();
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, busy, onClose]);
+  }, [open, busy, onClose, initialType]);
 
   if (!open) return null;
 
@@ -52,7 +68,7 @@ export function AddItemDrawer({
     setDetail("");
     setTags([]);
     setError(null);
-    setType("todo");
+    setType(initialType);
   }
 
   async function onSave() {
@@ -168,6 +184,7 @@ export function AddItemDrawer({
             <label className="ocean-item-detail-edit">
               <span>Knowledge</span>
               <textarea
+                ref={knowledgeRef}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 rows={6}
@@ -178,6 +195,7 @@ export function AddItemDrawer({
             <label className="ocean-item-detail-edit">
               <span>{type === "person" ? "Name" : "Title"}</span>
               <input
+                ref={titleRef}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 data-testid="ocean-add-title"

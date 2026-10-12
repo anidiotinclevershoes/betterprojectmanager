@@ -323,7 +323,16 @@ check("Home suggestions and collapse stay presentation-only", () => {
   assert.match(home, /composeHomeProjection/);
   assert.match(home, />\s*Discard\s*</);
   assert.match(home, />\s*Add\s*</);
-  assert.match(workspace, /onAddTodo=\{\(\) => setAddOpen\(true\)\}/);
+  assert.match(workspace, /onAddTodo=\{\(\) => openAdd\("todo"\)\}/);
+  assert.match(workspace, /onAddDomain=\{openAdd\}/);
+  assert.match(workspace, /initialType=\{addType\}/);
+  assert.match(home, /ocean-home-timeline-collapse/);
+  assert.match(home, /composeTimelineProjection/);
+  assert.match(home, /ocean-home-empty-add-issue/);
+  assert.match(
+    readSrc("src/components/intelligence/ConfirmOwnerDialog.tsx"),
+    /stopImmediatePropagation/,
+  );
   assert.doesNotMatch(home, /Open scan|Open Scan/);
 });
 

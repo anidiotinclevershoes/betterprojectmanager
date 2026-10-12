@@ -135,6 +135,9 @@ function BucketGroup({
         </h3>
       </header>
       <div className="kc-bucket-group-body lume-domain-section-body">
+        {items.length ? null : (
+          <p className="kc-zero">No {label.toLowerCase()} information yet.</p>
+        )}
         {items.map((item) => (
           <KcItemCard
             key={item.id}
@@ -405,6 +408,16 @@ export function OceanKnowledgeFrames({
               <p className="kc-zero">
                 {searching ? "No matches in this project." : "Nothing recorded yet."}
               </p>
+              {!searching && onAddItem ? (
+                <button
+                  type="button"
+                  className="kc-add-item"
+                  data-testid="kc-empty-add"
+                  onClick={onAddItem}
+                >
+                  + Add Item
+                </button>
+              ) : null}
             </>
           )
         ) : view.items.length ? (

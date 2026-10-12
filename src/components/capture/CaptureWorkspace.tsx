@@ -762,6 +762,7 @@ export function CaptureWorkspace({
       }
     >
       {page09Composer ? (
+        <>
         <form onSubmit={onSubmit} className="p09-capture">
           {collapsed ? (
             <div className="p09-capture-minimised">
@@ -997,6 +998,7 @@ export function CaptureWorkspace({
           )}
         </form>
         <RecentProjectCaptures projectId={defaultProjectId || projectId} />
+        </>
       ) : null}
 
       {page09Composer ? null : (

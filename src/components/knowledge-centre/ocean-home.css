@@ -431,14 +431,34 @@
   overflow: hidden;
 }
 
+.ocean-home-empty-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 14px 16px;
+}
+
+.ocean-home-timeline-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid #2a2e35;
+}
+
 .ocean-home-timeline-label {
   margin: 0;
   padding: 12px 14px;
-  border-bottom: 1px solid #2a2e35;
+  border-bottom: 0;
   color: #f1f4f8;
   font-size: 13px;
   font-weight: 600;
   line-height: 16px;
+}
+
+.ocean-home-timeline-head .ocean-home-collapse-inline {
+  margin-right: 8px;
 }
 
 .ocean-home-timeline-body {

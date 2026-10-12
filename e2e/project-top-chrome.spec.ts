@@ -243,6 +243,71 @@ test("narrow project chrome stays near 160px and keeps Capture usage", async ({
   await expect(page.getByTestId("ocean-sidebar")).not.toHaveClass(/is-mobile-open/);
 });
 
+test("empty Home adds through the existing drawer and collapses Timeline", async ({
+  page,
+}, testInfo) => {
+  await boot(page, testInfo.testId, 1280, 900);
+  await page.goto(`/projects/${ACTIVE}`);
+  const home = page.getByTestId("ocean-home");
+  await expect(home).toHaveAttribute("data-density", "comfortable");
+  await expect(page.getByTestId("ocean-home-suggestions-toggle")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.getByTestId("ocean-home-density-compact").click();
+  await expect(home).toHaveAttribute("data-density", "compact");
+
+  await page.getByTestId("ocean-home-todo-collapse").click();
+  await expect(page.getByTestId("ocean-home-empty-add-todo")).toHaveCount(0);
+  await page.getByTestId("ocean-home-todo-collapse").click();
+  await page.getByTestId("ocean-home-empty-add-todo").click();
+  await expect(page.getByTestId("ocean-add-item-drawer")).toBeVisible();
+  await expect(page.getByTestId("ocean-add-type-todo")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("ocean-add-item-drawer")).toHaveCount(0);
+
+  await page.getByTestId("ocean-home-empty-add-issue").click();
+  await expect(page.getByTestId("ocean-add-type-issue")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.getByTestId("ocean-add-title").fill("UAT access");
+  await page.getByTestId("ocean-add-save").click();
+  await expect(page.getByTestId("ocean-add-item-drawer")).toHaveCount(0);
+  await expect(page.getByText("UAT access")).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("UAT access")).toBeVisible();
+
+  await page.getByTestId("ocean-home-timeline-collapse").click();
+  await expect(page.getByText("No timeline information yet.")).toHaveCount(0);
+
+  await page.getByTestId("ocean-mode-capture").click();
+  await expect(page.getByTestId("recent-project-captures")).toContainText(
+    "No captures for this project yet.",
+  );
+});
+
+test("home and knowledge stay within a 320px viewport", async ({
+  page,
+}, testInfo) => {
+  await boot(page, testInfo.testId, 320, 700);
+  await page.goto(`/projects/${ACTIVE}`);
+  await expect(page.getByTestId("ocean-home")).toBeVisible();
+  const homeFits = await page.evaluate(
+    () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+  );
+  expect(homeFits).toBe(true);
+  await page.getByTestId("ocean-mode-knowledge").click();
+  await expect(page.getByTestId("ocean-knowledge-centre")).toBeVisible();
+  const knowledgeFits = await page.evaluate(
+    () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+  );
+  expect(knowledgeFits).toBe(true);
+});
+
 test("non-project routes keep the normal TopHeader", async ({ page }, testInfo) => {
   await boot(page, testInfo.testId, 1440, 900);
   await page.goto("/todos");

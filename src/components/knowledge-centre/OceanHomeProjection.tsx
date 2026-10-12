@@ -17,7 +17,8 @@ import {
 import type { KnowledgeItemRef } from "@/lib/knowledge-centre/knowledge-item-detail";
 import type { KcComposedItem } from "@/lib/knowledge-centre/four-bucket";
 import type { LumeDomain } from "@/lib/domain/lume-domain";
-import { useMission } from "@/lib/store";
+import { composeTimelineProjection } from "@/lib/knowledge-centre/timeline-projection";
+import { useMission, type ManualItemType } from "@/lib/store";
 import "./ocean-home.css";
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
@@ -76,17 +77,20 @@ export function OceanHomeProjection({
   onOpenDetails,
   onAddSuggestion,
   onAddTodo,
+  onAddDomain,
 }: {
   projectId: string;
   onOpenDetails: (ref: KnowledgeItemRef) => void;
   onAddSuggestion: (recommendationId: string) => void;
   onAddTodo?: () => void;
+  onAddDomain?: (type: ManualItemType) => void;
 }) {
   const { state, toggleTodo, dismissSuggestionDurable } = useMission();
   const [issuesOpen, setIssuesOpen] = useState(true);
   const [knowledgeOpen, setKnowledgeOpen] = useState(true);
   const [todoOpen, setTodoOpen] = useState(true);
   const [peopleOpen, setPeopleOpen] = useState(true);
+  const [timelineOpen, setTimelineOpen] = useState(true);
   // Newest Make leaves Suggestions checked. The toggle stays so they can be hidden.
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
@@ -94,6 +98,10 @@ export function OceanHomeProjection({
   const [actionError, setActionError] = useState<string | null>(null);
   const home = useMemo(
     () => composeHomeProjection(state, projectId),
+    [state, projectId],
+  );
+  const timelineEmpty = useMemo(
+    () => composeTimelineProjection(state, projectId).empty,
     [state, projectId],
   );
   const now = Date.now();
@@ -318,9 +326,12 @@ export function OceanHomeProjection({
                 {bands.next.length ? <QueueRows items={bands.next} /> : null}
               </>
             ) : (
-              <p className="ocean-home-empty">
-                No to do information yet. Add a To Do when it becomes useful.
-              </p>
+              <EmptyDomain
+                copy="No to do information yet. Add a To Do when it becomes useful."
+                actionLabel="Add To Do"
+                testId="ocean-home-empty-add-todo"
+                onAdd={onAddTodo}
+              />
             )}
             {actionError ? (
               <p className="ocean-home-action-error" role="alert">
@@ -369,7 +380,12 @@ export function OceanHomeProjection({
                 ))}
               </ul>
             ) : (
-              <p className="ocean-home-empty">No people information yet.</p>
+              <EmptyDomain
+                copy="No people information yet. Add people information when it becomes useful."
+                actionLabel="Add People"
+                testId="ocean-home-empty-add-person"
+                onAdd={onAddDomain ? () => onAddDomain("person") : undefined}
+              />
             )}
           </div>
           ) : null}
@@ -413,7 +429,12 @@ export function OceanHomeProjection({
                 ))}
               </ul>
             ) : (
-              <p className="ocean-home-empty">No issues information yet.</p>
+              <EmptyDomain
+                copy="No issues information yet. Add issues information when it becomes useful."
+                actionLabel="Add Issues"
+                testId="ocean-home-empty-add-issue"
+                onAdd={onAddDomain ? () => onAddDomain("issue") : undefined}
+              />
             )}
           </div>
         ) : null}
@@ -456,18 +477,78 @@ export function OceanHomeProjection({
                 ))}
               </ul>
             ) : (
-              <p className="ocean-home-empty">No knowledge information yet.</p>
+              <EmptyDomain
+                copy="No knowledge information yet. Add knowledge information when it becomes useful."
+                actionLabel="Add Knowledge"
+                testId="ocean-home-empty-add-knowledge"
+                onAdd={onAddDomain ? () => onAddDomain("knowledge") : undefined}
+              />
             )}
           </div>
         ) : null}
       </section>
 
       <section className="ocean-home-timeline" data-testid="ocean-home-timeline">
-        <p className="ocean-home-timeline-label">Timeline</p>
-        <div className="ocean-home-timeline-body">
-          <TimelineFrame projectId={projectId} size="tall" />
+        <div className="ocean-home-timeline-head">
+          <p className="ocean-home-timeline-label">Timeline</p>
+          <button
+            type="button"
+            className="ocean-home-collapse-inline"
+            aria-expanded={timelineOpen}
+            aria-label={timelineOpen ? "Collapse Timeline" : "Expand Timeline"}
+            data-testid="ocean-home-timeline-collapse"
+            onClick={() => setTimelineOpen((open) => !open)}
+          >
+            <span
+              className="ocean-home-chevron"
+              data-open={timelineOpen ? "true" : "false"}
+              aria-hidden
+            >
+              ⌄
+            </span>
+          </button>
         </div>
+        {timelineOpen ? (
+          <div className="ocean-home-timeline-body">
+            {timelineEmpty ? (
+              <p className="ocean-home-empty">
+                No timeline information yet. Dates and availability will appear
+                from project data.
+              </p>
+            ) : (
+              <TimelineFrame projectId={projectId} size="tall" />
+            )}
+          </div>
+        ) : null}
       </section>
+    </div>
+  );
+}
+
+function EmptyDomain({
+  copy,
+  actionLabel,
+  testId,
+  onAdd,
+}: {
+  copy: string;
+  actionLabel: string;
+  testId: string;
+  onAdd?: () => void;
+}) {
+  return (
+    <div className="ocean-home-empty-block">
+      <p className="ocean-home-empty">{copy}</p>
+      {onAdd ? (
+        <button
+          type="button"
+          className="ocean-home-action is-primary"
+          data-testid={testId}
+          onClick={onAdd}
+        >
+          {actionLabel}
+        </button>
+      ) : null}
     </div>
   );
 }

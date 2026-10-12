@@ -19,6 +19,7 @@ import {
 import { ProjectWorkspaceHeader } from "@/components/knowledge-centre/ProjectWorkspaceHeader";
 import { SuggestionAddModal } from "@/components/knowledge-centre/SuggestionAddModal";
 import type { KnowledgeItemRef } from "@/lib/knowledge-centre/knowledge-item-detail";
+import type { ManualItemType } from "@/lib/store";
 import type { Project } from "@/lib/types";
 
 /**
@@ -30,7 +31,13 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
   const [kcQuery, setKcQuery] = useState("");
   const [selected, setSelected] = useState<KnowledgeItemRef | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [addType, setAddType] = useState<ManualItemType>("todo");
   const [suggestionId, setSuggestionId] = useState<string | null>(null);
+
+  function openAdd(type: ManualItemType) {
+    setAddType(type);
+    setAddOpen(true);
+  }
 
   function selectMode(next: OceanProjectMode) {
     setMode(next);
@@ -63,7 +70,7 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
             searchQuery={kcQuery}
             selected={selected}
             onSelect={setSelected}
-            onAddItem={() => setAddOpen(true)}
+            onAddItem={() => openAdd("todo")}
           />
         </div>
       ) : null}
@@ -94,7 +101,8 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
         projectId={project.id}
         onOpenDetails={setSelected}
         onAddSuggestion={setSuggestionId}
-        onAddTodo={() => setAddOpen(true)}
+        onAddTodo={() => openAdd("todo")}
+        onAddDomain={openAdd}
       />
 
       <KnowledgeItemDetailDrawer
@@ -105,6 +113,7 @@ export function OceanProjectWorkspace({ project }: { project: Project }) {
       <AddItemDrawer
         projectId={project.id}
         open={addOpen}
+        initialType={addType}
         onClose={() => setAddOpen(false)}
       />
       <SuggestionAddModal

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMission } from "@/lib/store";
 
 export function SuggestionAddModal({
@@ -12,16 +12,23 @@ export function SuggestionAddModal({
 }) {
   const { state, saveSuggestedTodo, dismissSuggestionDurable } = useMission();
   const rec = (state.recommendations ?? []).find((r) => r.id === recommendationId);
+  const recId = rec?.id ?? null;
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setTitle(rec?.title ?? "");
     setDetail(rec?.action ?? "");
     setError(null);
   }, [rec?.id, rec?.title, rec?.action]);
+
+  useEffect(() => {
+    if (!recommendationId || !recId) return;
+    titleRef.current?.focus();
+  }, [recommendationId, recId]);
 
   useEffect(() => {
     if (!recommendationId) return;
@@ -94,6 +101,7 @@ export function SuggestionAddModal({
         <label className="ocean-item-detail-edit">
           <span>Title</span>
           <input
+            ref={titleRef}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             data-testid="ocean-suggestion-title"
