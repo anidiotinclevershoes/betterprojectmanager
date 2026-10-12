@@ -104,14 +104,24 @@ The reconciliation is merge `af9b715`. This documentation commit sits on top of 
 | `package.json`, `docs/README.md`, `docs/LUME_CAPTURE_STATUS.md` | Both. Shared Organise scripts and the contract link were added. Existing convergence scripts stay. |
 | `scripts/verify-prompt-a-left-untouched.ts`, `scripts/verify-needs-you-vs-left-untouched.ts` | Content locks for both behaviours. The main byte-freeze against `origin/main` for `run.ts`, `source-coverage.ts`, and the whole of `dispatch.ts` does not apply here: semantic-seam repairs already changed those files. `apply-approved.ts` and `expected-target.ts` still match `origin/main`. |
 
-No persistence semantics, schema, or Apply policy were changed. Ready items can still be applied while other items need you. Review-wide Discard is still not a production action.
+That reconciliation did not change persistence semantics, schema, or Apply policy. Review convergence landed afterwards. See §3.3.
 
 ### 3.2 Outstanding after this reconciliation
 
 1. Draft PR #186 stays draft. It is not a merge to `main`.
 2. `npm run verify:shared-organise-supabase` was not run. This environment has no Supabase credentials. `verify:shared-organise` passed in `npm test`.
-3. Playwright `e2e/stacked-capture.spec.ts` toyworld and gamingstudio5000 still fail on `Nothing to apply.` Those steps also render Left untouched leftovers from source coverage. That coverage and the Review list were not changed by this merge. The deterministic `stacked-capture` suite passed. Do not treat the Playwright mismatch as a licence to hide leftovers or rewrite Review.
-4. Make Review convergence (Needs You as a filter, Apply disabled while anything is unresolved, Discard review) is still open. Apply-disabled and Discard are product-policy conflicts, not part of this merge.
+3. At reconciliation time, Playwright `e2e/stacked-capture.spec.ts` toyworld and gamingstudio5000 failed on an exact `Nothing to apply.` string while Left untouched cards were on screen. §3.3 corrects the assertion and keeps those cards visible.
+4. At reconciliation time, Make Review convergence was still open. §3.3 is that implementation.
+
+### 3.3 Review convergence
+
+Approved Apply policy: an unresolved, included Needs You item blocks review-wide Apply. Excluded items do not. Left untouched does not. Resolving an item uses the existing readiness override, and the same `pendingReadyModels` set is what `applyPendingReadyQueue` receives once the gate is open. The button stays on screen and is disabled while the review is blocked or nothing is ready. A partial save is not announced as a clean Apply. Successful writes are not rolled back. `confirmAuthoritativeWrites` is still the Supabase confirmation step. There is no second Apply path.
+
+Approved Discard policy: Discard opens a confirmation dialog, then `discardUnappliedReview` stores the current Capture session and clears the working review. Applied suggestions stay in `added`. Unapplied suggestions are not marked dismissed. A review with no applied items is stored as localStorage status `abandoned`. A review that already applied something is stored as the existing `partially_accepted`. `clearSession` remains New Capture and still uses `computeCaptureStatus`. Discard does not delete canonical rows, receipts, or history. `abandoned` is additive. Older session records are not rewritten.
+
+No Supabase migration was added. Undo removal excludes a proposed Remove. Re-include only clears that exclusion. Edit stages proposal text for a later Apply and is offered only when that text is a field Apply already reads.
+
+Filters are All, Needs You, Create, Update, Remove. All still groups Needs You above Proposed, and shows Left untouched. A resolved Needs You item is counted by its operation family. Captured Information, the extracted rail, collapse, and Show details are the existing components. Transcript marks focus the linked card on click and keyboard focus.
 
 Historical baseline, 17 September 2026, before this reconciliation:
 
