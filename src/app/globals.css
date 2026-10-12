@@ -8605,6 +8605,21 @@ body {
   flex-shrink: 0;
 }
 
+.ocean-sidebar-close {
+  margin-left: auto;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: #c5ccd6;
+  font: inherit;
+}
+
+.ocean-sidebar .sidebar-top {
+  display: flex;
+  align-items: center;
+}
+
 .ocean-sidebar .ocean-brand-name {
   color: #f1f4f8;
   font-size: 28px;

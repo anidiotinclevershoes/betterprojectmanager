@@ -298,13 +298,28 @@ check("Home suggestions and collapse stay presentation-only", () => {
   const workspace = readSrc(
     "src/components/knowledge-centre/OceanProjectWorkspace.tsx",
   );
-  assert.match(home, /useState\(false\)/);
+  assert.match(home, /\[showSuggestions, setShowSuggestions\] = useState\(true\)/);
   assert.match(home, /setShowSuggestions\(\(on\) => !on\)/);
   assert.match(home, /dismissSuggestionDurable/);
   assert.doesNotMatch(home, /dismissSuggestion(?!Durable)/);
   assert.match(home, /onAddSuggestion/);
   assert.match(home, /toggleTodo/);
-  assert.doesNotMatch(home, /removeTodo|updateTodoDueDate|Compact|Comfortable/);
+  assert.match(home, /aria-label="Comfortable"/);
+  assert.match(home, /aria-label="Compact"/);
+  assert.match(home, /setDensity\("comfortable"\)/);
+  assert.doesNotMatch(home, /removeTodo|updateTodoDueDate/);
+  assert.match(
+    readSrc("src/components/knowledge-centre/AddItemDrawer.tsx"),
+    /event\.key !== "Escape"/,
+  );
+  assert.match(
+    readSrc("src/components/knowledge-centre/SuggestionAddModal.tsx"),
+    /event\.key !== "Escape"/,
+  );
+  assert.match(
+    readSrc("src/components/app-shell/Sidebar.tsx"),
+    /data-testid="ocean-sidebar-close"/,
+  );
   assert.match(home, /composeHomeProjection/);
   assert.match(home, />\s*Discard\s*</);
   assert.match(home, />\s*Add\s*</);
@@ -462,8 +477,15 @@ check("Page 09 Knowledge Centre browse keeps Ask and Search distinct", () => {
   assert.match(bar, /data-ai="true"/);
   assert.match(bar, /MeMark/);
   assert.match(bar, /Ask a project question/);
-  assert.match(bar, /Search Knowledge/);
-  assert.match(bar, /Search knowledge/);
+  assert.match(bar, /Search decisions, people, issues, and to dos/);
+  assert.match(bar, /Search project information/);
+  assert.match(bar, /No matches in this project\./);
+  const recent = readSrc("src/components/capture/RecentProjectCaptures.tsx");
+  const capture = readSrc("src/components/capture/CaptureWorkspace.tsx");
+  assert.match(recent, /listCaptureSessions/);
+  assert.match(recent, /statusLabel/);
+  assert.doesNotMatch(recent, /clearSession|upsertCaptureSession|applyPendingReadyQueue/);
+  assert.match(capture, /<RecentProjectCaptures /);
   assert.doesNotMatch(bar, /ocean-search-or/);
   assert.match(frames, /DOMAIN/);
   assert.match(frames, /kc-browse-card/);

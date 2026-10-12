@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ItemTagsEditor } from "@/components/knowledge-centre/ItemTagsEditor";
 import { useMission } from "@/lib/store";
 import type { ManualItemType } from "@/lib/store";
@@ -28,6 +28,22 @@ export function AddItemDrawer({
   const [tags, setTags] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== "Escape" || busy) return;
+      event.preventDefault();
+      setTitle("");
+      setDetail("");
+      setTags([]);
+      setError(null);
+      setType("todo");
+      onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, busy, onClose]);
 
   if (!open) return null;
 

@@ -27,14 +27,14 @@ export function PublicLanding() {
         <p className="eyebrow">Project memory</p>
         <h1>You can&apos;t keep an entire project in your head. Lume can.</h1>
         <p className="lede">
-          Tell Lume what changed. It proposes updates. Nothing becomes project
-          truth until you review it.
+          Tell Lume what changed. It proposes updates. Nothing is saved until
+          you review it.
         </p>
 
         <ul className="public-landing-points">
           <li>Capture meeting notes, updates, or a few sentences.</li>
           <li>Review what Lume understood. Needs You is success when it is unsure.</li>
-          <li>Apply writes the canonical project. Knowledge Centre stays current.</li>
+          <li>Apply saves the project. Knowledge Centre stays current.</li>
         </ul>
 
         <div className="public-landing-actions">

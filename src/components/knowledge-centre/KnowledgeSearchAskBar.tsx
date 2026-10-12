@@ -89,12 +89,12 @@ export function KnowledgeSearchAskBar({
         </button>
       </form>
       <label className="kc-search-row">
-        <span className="sr-only">Search knowledge</span>
+        <span className="sr-only">Search project information</span>
         <input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search Knowledge…"
+          placeholder="Search decisions, people, issues, and to dos"
           autoComplete="off"
           data-testid="ocean-search-input"
           data-ai="false"
@@ -111,7 +111,7 @@ export function KnowledgeSearchAskBar({
           aria-live="polite"
         >
           {hits.length === 0 ? (
-            <p className="ocean-search-empty">No matches in Knowledge.</p>
+            <p className="ocean-search-empty">No matches in this project.</p>
           ) : (
             <ul>
               {hits.slice(0, 12).map((hit) => (

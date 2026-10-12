@@ -85,8 +85,11 @@ export function OceanHomeProjection({
   const { state, toggleTodo, dismissSuggestionDurable } = useMission();
   const [issuesOpen, setIssuesOpen] = useState(true);
   const [knowledgeOpen, setKnowledgeOpen] = useState(true);
-  // Page 09 populated Home shows Suggestions off. Toggle is presentation only.
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [todoOpen, setTodoOpen] = useState(true);
+  const [peopleOpen, setPeopleOpen] = useState(true);
+  // Newest Make leaves Suggestions checked. The toggle stays so they can be hidden.
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
   const [discardingId, setDiscardingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const home = useMemo(
@@ -224,7 +227,11 @@ export function OceanHomeProjection({
   }
 
   return (
-    <div className="ocean-home" data-testid="ocean-home">
+    <div
+      className={`ocean-home is-${density}`}
+      data-testid="ocean-home"
+      data-density={density}
+    >
       <WorkspacePageHeading {...WORKSPACE_PAGE_HEADINGS.home} />
       <div className="ocean-home-top">
         <section
@@ -238,6 +245,22 @@ export function OceanHomeProjection({
             <DomainIcon domain="todo" />
             <h2>To Do</h2>
             <span className="ocean-home-count">{visibleQueue.length}</span>
+            <button
+              type="button"
+              className="ocean-home-collapse-inline"
+              aria-expanded={todoOpen}
+              aria-label={todoOpen ? "Collapse To Do" : "Expand To Do"}
+              data-testid="ocean-home-todo-collapse"
+              onClick={() => setTodoOpen((open) => !open)}
+            >
+              <span
+                className="ocean-home-chevron"
+                data-open={todoOpen ? "true" : "false"}
+                aria-hidden
+              >
+                ⌄
+              </span>
+            </button>
             <span className="ocean-home-head-spacer" />
             <button
               type="button"
@@ -249,8 +272,31 @@ export function OceanHomeProjection({
               <span>Suggestions</span>
               <span className="ocean-home-switch" aria-hidden />
             </button>
+            <div className="ocean-home-density" role="group" aria-label="Display density">
+              <button
+                type="button"
+                aria-label="Comfortable"
+                aria-pressed={density === "comfortable"}
+                className={density === "comfortable" ? "is-selected" : ""}
+                data-testid="ocean-home-density-comfortable"
+                onClick={() => setDensity("comfortable")}
+              >
+                Comfortable
+              </button>
+              <button
+                type="button"
+                aria-label="Compact"
+                aria-pressed={density === "compact"}
+                className={density === "compact" ? "is-selected" : ""}
+                data-testid="ocean-home-density-compact"
+                onClick={() => setDensity("compact")}
+              >
+                Compact
+              </button>
+            </div>
             {bands.today.length === 0 ? <AddTodoButton /> : null}
           </header>
+          {todoOpen ? (
           <div className="lume-domain-section-body">
             {visibleQueue.length ? (
               <>
@@ -272,7 +318,9 @@ export function OceanHomeProjection({
                 {bands.next.length ? <QueueRows items={bands.next} /> : null}
               </>
             ) : (
-              <p className="ocean-home-empty">Nothing in the working queue.</p>
+              <p className="ocean-home-empty">
+                No to do information yet. Add a To Do when it becomes useful.
+              </p>
             )}
             {actionError ? (
               <p className="ocean-home-action-error" role="alert">
@@ -280,6 +328,7 @@ export function OceanHomeProjection({
               </p>
             ) : null}
           </div>
+          ) : null}
         </section>
 
         <section
@@ -292,7 +341,24 @@ export function OceanHomeProjection({
             <DomainIcon domain="people" />
             <h2>People</h2>
             <span className="ocean-home-count">{home.people.length}</span>
+            <button
+              type="button"
+              className="ocean-home-collapse-inline"
+              aria-expanded={peopleOpen}
+              aria-label={peopleOpen ? "Collapse People" : "Expand People"}
+              data-testid="ocean-home-people-collapse"
+              onClick={() => setPeopleOpen((open) => !open)}
+            >
+              <span
+                className="ocean-home-chevron"
+                data-open={peopleOpen ? "true" : "false"}
+                aria-hidden
+              >
+                ⌄
+              </span>
+            </button>
           </header>
+          {peopleOpen ? (
           <div className="lume-domain-section-body">
             {home.people.length ? (
               <ul>
@@ -303,9 +369,10 @@ export function OceanHomeProjection({
                 ))}
               </ul>
             ) : (
-              <p className="ocean-home-empty">No people recorded yet.</p>
+              <p className="ocean-home-empty">No people information yet.</p>
             )}
           </div>
+          ) : null}
         </section>
       </div>
 
@@ -346,7 +413,7 @@ export function OceanHomeProjection({
                 ))}
               </ul>
             ) : (
-              <p className="ocean-home-empty">No open issues.</p>
+              <p className="ocean-home-empty">No issues information yet.</p>
             )}
           </div>
         ) : null}
@@ -389,7 +456,7 @@ export function OceanHomeProjection({
                 ))}
               </ul>
             ) : (
-              <p className="ocean-home-empty">No knowledge recorded yet.</p>
+              <p className="ocean-home-empty">No knowledge information yet.</p>
             )}
           </div>
         ) : null}

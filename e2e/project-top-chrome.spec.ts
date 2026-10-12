@@ -230,6 +230,10 @@ test("narrow project chrome stays near 160px and keeps Capture usage", async ({
 
   await page.getByRole("button", { name: "Open navigation" }).click();
   await expect(page.getByTestId("ocean-sidebar")).toHaveClass(/is-mobile-open/);
+  await page.getByTestId("ocean-sidebar-close").click();
+  await expect(page.getByTestId("ocean-sidebar")).not.toHaveClass(/is-mobile-open/);
+  await page.getByRole("button", { name: "Open navigation" }).click();
+  await expect(page.getByTestId("ocean-sidebar")).toHaveClass(/is-mobile-open/);
   await page.getByTestId("ocean-sidebar-backdrop").click({ position: { x: 300, y: 200 } });
   await expect(page.getByTestId("ocean-sidebar")).not.toHaveClass(/is-mobile-open/);
 

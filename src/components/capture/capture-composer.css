@@ -451,6 +451,78 @@
   }
 }
 
+.p09-recent-captures {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.p09-recent-captures-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.p09-recent-captures h3 {
+  margin: 0;
+  color: #f1f4f8;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.p09-recent-captures a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #8e98a6;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.p09-recent-captures ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.p09-recent-captures li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 0;
+  border-top: 1px solid #2e333a;
+}
+
+.p09-recent-captures li span {
+  color: #f1f4f8;
+  font-size: 13px;
+  line-height: 18px;
+  overflow-wrap: anywhere;
+}
+
+.p09-recent-captures small,
+.p09-recent-captures p {
+  margin: 0;
+  color: #8e98a6;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+@media (max-width: 390px) {
+  .p09-recent-captures-head {
+    flex-wrap: wrap;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .p09-capture-rec-dot {
     animation: none;

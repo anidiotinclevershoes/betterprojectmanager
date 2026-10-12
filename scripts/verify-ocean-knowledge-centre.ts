@@ -459,6 +459,8 @@ function testInspectorOverlayContract() {
   assert.match(frames, /\[projectId\]/);
   const page = readSrc("src/app/projects/[id]/page.tsx");
   assert.match(page, /key=\{project\.id\}/);
+  assert.match(page, /if \(!hydrated\)/);
+  assert.match(page, /Loading workspace…/);
 }
 
 function testResponsiveShellCss() {

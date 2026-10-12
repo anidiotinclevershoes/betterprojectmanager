@@ -23,6 +23,17 @@ export function SuggestionAddModal({
     setError(null);
   }, [rec?.id, rec?.title, rec?.action]);
 
+  useEffect(() => {
+    if (!recommendationId) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== "Escape" || busy) return;
+      event.preventDefault();
+      onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [recommendationId, busy, onClose]);
+
   if (!recommendationId || !rec) return null;
   const current = rec;
 

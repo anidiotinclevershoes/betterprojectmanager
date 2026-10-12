@@ -32,6 +32,7 @@ import {
   AnnotatedTranscript,
 } from "@/components/capture/review";
 import { DidntUnderstand } from "@/components/capture/review/DidntUnderstand";
+import { RecentProjectCaptures } from "@/components/capture/RecentProjectCaptures";
 import { annotationSourcesFromResult } from "@/lib/capture/review/annotateTranscript";
 import type { TargetOption } from "@/components/capture/review/TargetPicker";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
@@ -995,6 +996,7 @@ export function CaptureWorkspace({
             </>
           )}
         </form>
+        <RecentProjectCaptures projectId={defaultProjectId || projectId} />
       ) : null}
 
       {page09Composer ? null : (

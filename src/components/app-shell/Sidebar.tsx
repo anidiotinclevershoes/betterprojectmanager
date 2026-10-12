@@ -58,6 +58,17 @@ export function Sidebar({
             <LumeLogo size={18} className="lume-logo ocean-brand-bulb" />
             <span className="ocean-brand-name">Lume</span>
           </Link>
+          {mobileOpen ? (
+            <button
+              type="button"
+              className="ocean-sidebar-close"
+              aria-label="Close navigation"
+              data-testid="ocean-sidebar-close"
+              onClick={onCloseMobile}
+            >
+              Close
+            </button>
+          ) : null}
         </div>
 
         <Link
