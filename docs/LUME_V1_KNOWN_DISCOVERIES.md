@@ -105,7 +105,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Selected mutations emit durable history rows in plan/fake client |
 | **Target resolution / validation point** | V1 product hardening |
 | **Related docs** | Architecture audit; philosophy (History = evidence/chronology) |
-| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. **Phase 3A create-path decision:** New Project History is **secondary evidence after authoritative bundle success**. A failed/rolled-back create must not write `project_created`. Failure of the History insert must not roll back the project bundle. Broader `pushHistory` without `persistHistoryEvent` remains open. **Figma UI Convergence Part 2:** Item drawers show a D-004 bounded limitation instead of title/detail matching. **29 Sep 2026 — exact target identity, not a full close:** new `history_events` rows may carry nullable `target_kind` (`risk`) and `target_id` (`risks.id`). `historyEventsForItem` attributes a genuine Risk only when the project, target kind, and exact id all match. Old rows with NULL target stay unattributed forever. Title, detail, substring, and fuzzy matching remain prohibited. D-004 is not solved for history that was never stored with a target, and many `pushHistory` paths still do not persist. **29 Sep 2026 — Person detail:** `OPEN — HISTORY ATTRIBUTION: Person-targeted History identity is not yet implemented.` Person detail does not title-match History and does not expand `history_events.target_kind`. **29 Sep 2026 — To Do detail:** `OPEN — HISTORY ATTRIBUTION: To Do-targeted History identity is not yet implemented.` To Do detail shows the D-004 notice and does not title-match project History onto the selected To Do. |
+| **Notes** | Prefer sparse, high-signal events over logging everything. Not required to block People/Capture domain slices. Slice 2C item detail **does not invent** missing History — UI honesty notes reference this gap when provenance is empty. **Phase 3A create-path decision:** New Project History is **secondary evidence after authoritative bundle success**. A failed/rolled-back create must not write `project_created`. Failure of the History insert must not roll back the project bundle. Broader `pushHistory` without `persistHistoryEvent` remains open. **Figma UI Convergence Part 2:** Item drawers show a D-004 bounded limitation instead of title/detail matching. **29 Sep 2026 — exact target identity, not a full close:** new `history_events` rows may carry nullable `target_kind` (`risk`) and `target_id` (`risks.id`). `historyEventsForItem` attributes a genuine Risk only when the project, target kind, and exact id all match. Old rows with NULL target stay unattributed forever. Title, detail, substring, and fuzzy matching remain prohibited. D-004 is not solved for history that was never stored with a target, and many `pushHistory` paths still do not persist. **29 Sep 2026 — Person detail:** `OPEN — HISTORY ATTRIBUTION: Person-targeted History identity is not yet implemented.` Person detail does not title-match History and does not expand `history_events.target_kind`. **12 Oct 2026:** confirmed To Do and Person edits write exact `target_kind` / `target_id`. NULL-target rows and other `pushHistory` paths that never persist remain open. |
 
 ---
 
@@ -358,7 +358,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | implemented on `integration/figma-ui-convergence-v1`. Hosted migration `20261012214638_v1_todo_person_history_usage.sql` is not applied. |
 | **Severity** | medium |
 | **Domain** | Todos / People |
 | **Found in** | UI convergence semantics lock, 25 September 2026 |
@@ -370,7 +370,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | When the relationship exists: a To Do can reference two existing People by id, reload preserves both ids, and a string-only legacy `waiting_on` is not silently rewritten into those links |
 | **Target resolution / validation point** | People slice, before treating the Page 09 Waiting-on control as implemented |
 | **Related docs** | CD-009 in `docs/LUME_PRODUCT_DECISIONS.md`; D-008 |
-| **Notes** | CD-009 is the product rule. This entry is the implementation gap. Keep the approved multi-person Waiting-on rule, record that `todos.waiting_on` cannot store it, and do not fake support or change the approved design to match the string. **29 Sep 2026 — To Do detail:** the Page 09 drawer shows at most that one stored string and does not mount Edit To Do. `BLOCKED — D-058: signed Waiting On is zero-or-more existing People; production still stores one legacy string.` |
+| **Notes** | CD-009 is the product rule. **12 Oct 2026:** `todo_waiting_people` stores zero or more existing stakeholder ids. `todos.waiting_on` stays the legacy note and is not derived from names. Edit To Do and Person name/role save through `save_todo_edit` and `save_person_identity`. Confirmed changes write `history_events` with `target_kind` `todo` or `person`. NULL targets stay unattributed. Settings is `/settings`. `record_workspace_analysis` counts a completed analysis. Paid allowance, price, and whether the count blocks analysis are still undecided. |
 
 ---
 
@@ -560,7 +560,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | open |
+| **Status** | partial — the count can be stored; price and allowance are not decided |
 | **Severity** | low |
 | **Domain** | Billing / UI |
 | **Found in** | Slice 2A |
@@ -572,7 +572,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | Entitlement display once server meter exists |
 | **Target resolution / validation point** | Billing / entitlement hardening |
 | **Related docs** | Ocean baseline §5; `docs/SLICE2A_OCEAN_KNOWLEDGE_CENTRE_HANDOVER.md` |
-| **Notes** | Documented rather than inventing a fake 36 |
+| **Notes** | **12 Oct 2026:** successful Supabase Capture analysis calls `record_workspace_analysis` and the client adopts that count. Local mode still uses the informational meter. The strip label of 50 is not a price, plan, or paid allowance. Blocked product decision: what the paid allowance is, and whether trial or subscription changes it or blocks further analysis. |
 
 ---
 
@@ -744,7 +744,7 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 | **Failure class** | Manual Add offered Detail for Issue and Knowledge, reported Save success, and dropped that text. Issue create wrote title only. Knowledge stored the title as the only body. |
 | **Fix summary** | Issue Detail maps to canonical `risks.notes` on create. Knowledge Manual Add offers one body and persists that string. No new column. The generic Close/Remove sentence is removed where those controls are absent. Ask “Lume noticed” uses the shared lightbulb. |
 | **Evidence** | `scripts/verify-manual-add-honesty.ts`; `e2e/manual-add-honesty.spec.ts` |
-| **Residual** | D-058, To Do edit, Person Name/Role edit, Settings, Person/To Do History, previous-item Back, To Do lifecycle/History atomicity, and durable billing usage stay open. Hosted deployment of `20260929120000` and `20260929140000` is still outstanding. |
+| **Residual** | Previous-item Back and To Do lifecycle/History atomicity stay open. Paid analysis allowance is undecided. Hosted deployment of `20260929120000`, `20260929140000`, and `20261012214638_v1_todo_person_history_usage.sql` is still outstanding. |
 | **Related docs** | `docs/FIGMA_UI_CONVERGENCE_V1.md` |
 
 ### D-R56 — Prompt A can emit Left untouched (D-056)
@@ -1075,7 +1075,7 @@ Canonical categories for the later large hardening pass. Details live in the aud
 ### HARDEN DURING V1
 
 - ~~D-049 / N-03 — one Knowledge cap (8 vs 24 vs unlimited) instead of silent hydrate truncation~~ **Closed as D-R44.** Hydrate is complete. Capture ranked-12 and Catch Me Up snapshot-6 remain presentation/prompt bounds.
-- N-04 / D-024 — durable analyses/usage meter
+- N-04 / D-024 — durable analysis count is stored. Paid allowance and charging rules are still undecided.
 - ~~N-10 — write paint cache after confirmed Apply~~ **Closed as D-R45.** `adoptAppliedState` writes confirmed Apply reload into the paint cache; `persistTimelineUpdate` rederives `projects.next_milestone_on` when that pointer names the updated row.
 - N-08 — `source_recommendation_id` if product still wants the link
 - N-13 — `supersedes_id` same-project check

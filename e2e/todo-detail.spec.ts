@@ -9,6 +9,7 @@ const TODO_RICH = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const TODO_SPARSE = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const TODO_JOINED = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 const OLGA = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
+const SARAH = "ffffffff-ffff-4fff-8fff-ffffffffffff";
 const TITLE = "Confirm UAT environment refresh";
 
 function todoState(): MissionState {
@@ -21,7 +22,10 @@ function todoState(): MissionState {
       summary: "",
       status: "healthy",
       currentFocus: "",
-      stakeholders: [{ id: OLGA, name: "Olga Petrov", role: "UAT lead" }],
+      stakeholders: [
+        { id: OLGA, name: "Olga Petrov", role: "UAT lead" },
+        { id: SARAH, name: "Sarah Kim", role: "Release manager" },
+      ],
     },
   ];
   state.knowledge = [emptyKnowledge(PROJECT)];
@@ -154,7 +158,7 @@ test("open To Do shows canonical fields and omits stale layers", async ({
   await expect(drawer.getByRole("heading", { name: "Type" })).toHaveCount(0);
   await expect(drawer.getByText("WAITING", { exact: true })).toHaveCount(0);
   await expect(drawer.getByRole("button", { name: "Edit item" })).toHaveCount(0);
-  await expect(drawer.getByRole("button", { name: "Edit To Do" })).toHaveCount(0);
+  await expect(drawer.getByRole("button", { name: "Edit To Do" })).toHaveCount(1);
   await expect(drawer.getByTestId("todo-detail-close")).toBeVisible();
   await expect(drawer.getByTestId("todo-detail-remove")).toBeVisible();
   await page.screenshot({
@@ -236,4 +240,43 @@ test("390px To Do detail does not overflow", async ({ page }, testInfo) => {
     path: "/opt/cursor/artifacts/todo-detail-narrow.png",
     fullPage: false,
   });
+});
+
+test("editing a To Do keeps the legacy note and stores two people", async ({
+  page,
+}, testInfo) => {
+  await boot(page, testInfo.testId);
+  const drawer = await openTodo(page, TODO_JOINED);
+  await drawer.getByTestId("todo-detail-edit").click();
+  await expect(drawer.getByTestId("todo-edit-waiting-note")).toHaveValue(
+    "Olga Petrov · Sarah Kim",
+  );
+  await drawer.getByTestId("todo-edit-title").fill("Chase both people");
+  await drawer.getByTestId(`todo-edit-person-${OLGA}`).check();
+  await drawer.getByTestId(`todo-edit-person-${SARAH}`).check();
+  await drawer.getByTestId("todo-edit-save").click();
+  await expect(drawer.getByTestId("todo-detail-title")).toHaveText("Chase both people");
+  await expect(drawer.getByTestId("todo-detail-waiting-value")).toHaveText(
+    "Olga Petrov · Sarah Kim",
+  );
+  await expect(drawer.getByTestId("todo-detail-waiting-people")).toContainText("Olga Petrov");
+  await expect(drawer.getByTestId("todo-detail-waiting-people")).toContainText("Sarah Kim");
+  await expect(drawer.getByText("You updated a To Do")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByTestId("ocean-project-workspace")).toBeVisible();
+  await openKnowledgeCentre(page);
+  const reopened = await openTodo(page, TODO_JOINED);
+  await expect(reopened.getByTestId("todo-detail-title")).toHaveText("Chase both people");
+  await expect(reopened.getByTestId("todo-detail-waiting-value")).toHaveText(
+    "Olga Petrov · Sarah Kim",
+  );
+  const stored = (await readMissionState(page)) as MissionState;
+  const saved = stored.todos.find((row) => row.id === TODO_JOINED);
+  expect(saved?.waitingOn).toBe("Olga Petrov · Sarah Kim");
+  expect([...(saved?.waitingOnPersonIds ?? [])].sort()).toEqual([OLGA, SARAH].sort());
+  const history = (stored.history ?? []).filter(
+    (event) => event.targetKind === "todo" && event.targetId === TODO_JOINED,
+  );
+  expect(history).toHaveLength(1);
 });

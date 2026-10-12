@@ -92,6 +92,9 @@ test("desktop sidebar follows Page 09 and keeps project content at x252", async 
   );
 
   const account = page.getByTestId("ocean-nav-account");
+  const settings = page.getByTestId("ocean-nav-settings");
+  await expect(settings).toHaveAttribute("href", "/settings");
+  await expect(settings).toHaveText(/Settings/);
   await expect(account).toHaveText(/Account/);
   await expect(account).not.toHaveText(/Settings/);
   const accountBox = await account.boundingBox();
@@ -104,7 +107,7 @@ test("desktop sidebar follows Page 09 and keeps project content at x252", async 
   await expect(sidebar.getByText("History")).toHaveCount(0);
   await expect(sidebar.getByText("Captures")).toHaveCount(0);
   await expect(sidebar.getByText("Help & support")).toHaveCount(0);
-  await expect(sidebar.getByText("Settings")).toHaveCount(0);
+  await expect(sidebar.getByText("Settings")).toHaveCount(1);
   await expect(sidebar.getByText("Golden Test")).toHaveCount(0);
   await expect(sidebar.getByText("AI Cockpit")).toHaveCount(0);
   await expect(sidebar.getByText("Reset demo data")).toHaveCount(0);
@@ -188,4 +191,13 @@ test("Account routes to /account", async ({ page }, testInfo) => {
   await boot(page, testInfo.testId);
   await page.getByTestId("ocean-nav-account").click();
   await expect(page).toHaveURL(/\/account$/);
+});
+
+test("Settings shows the informational analysis count", async ({ page }, testInfo) => {
+  await boot(page, testInfo.testId);
+  await page.getByTestId("ocean-nav-settings").click();
+  await expect(page).toHaveURL(/\/settings$/);
+  await expect(page.getByTestId("settings-page")).toBeVisible();
+  await expect(page.getByTestId("settings-usage")).toContainText("not a price, a plan");
+  await expect(page.getByTestId("settings-account-link")).toHaveAttribute("href", "/account");
 });

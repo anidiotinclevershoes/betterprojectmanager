@@ -51,6 +51,8 @@ export function KnowledgeItemDetailDrawer({
     setKnowledgeOnlyRiskResolved,
     saveItemTags,
     saveRiskEdit,
+    saveTodoEdit,
+    savePersonIdentity,
     saveStatus,
     saveError,
   } = useMission();
@@ -348,6 +350,9 @@ export function KnowledgeItemDetailDrawer({
     : [];
   const waitingPersonName =
     waitingMatches.length === 1 ? waitingMatches[0]!.name : null;
+  const projectPeople =
+    state.projects.find((project) => project.id === projectId)?.stakeholders ??
+    [];
   const detailShell = issueSurface
     ? " is-issue-detail"
     : personSurface
@@ -473,6 +478,14 @@ export function KnowledgeItemDetailDrawer({
             onHandover={(scope) =>
               openHandover(scope, detail.personBundle!.person.id)
             }
+            onSaveIdentity={(input) =>
+              savePersonIdentity({
+                projectId,
+                personId: detail.personBundle!.person.id,
+                name: input.name,
+                role: input.role,
+              })
+            }
             backRef={closeRef}
             ownerSlot={
               confirmOwnerOpen ? (
@@ -509,6 +522,8 @@ export function KnowledgeItemDetailDrawer({
             detail={todoItem.detail}
             waitingOn={todoItem.waitingOn}
             waitingPersonName={waitingPersonName}
+            waitingOnPersonIds={todoItem.waitingOnPersonIds ?? []}
+            people={projectPeople}
             tags={savedTagNames}
             history={historyRead.events}
             historyNotice={historyRead.notice}
@@ -519,6 +534,13 @@ export function KnowledgeItemDetailDrawer({
               removeTodo(todoItem.id);
               onClose();
             }}
+            onSave={(input) =>
+              saveTodoEdit({
+                projectId,
+                todoId: todoItem.id,
+                ...input,
+              })
+            }
             backRef={closeRef}
           />
         ) : (

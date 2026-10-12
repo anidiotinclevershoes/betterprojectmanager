@@ -343,7 +343,7 @@ check("item History does not title-match existing events", () => {
     todoId: TODO,
   });
   assert.equal(read.events.length, 0);
-  assert.equal(read.attributable, false);
+  assert.equal(read.attributable, true);
   assert.equal(read.limitation, "D-004");
   assert.match(read.notice, /D-004/);
 });

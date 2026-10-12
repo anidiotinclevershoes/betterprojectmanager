@@ -72,6 +72,7 @@
     "verify:people-context-ui": "npx --yes tsx scripts/verify-people-context-ui.ts",
     "verify:person-detail": "npx --yes tsx scripts/verify-person-detail.ts",
     "verify:todo-detail": "npx --yes tsx scripts/verify-todo-detail.ts",
+    "verify:v1-functional": "npx --yes tsx scripts/verify-v1-functional.ts",
     "verify:phase3b-capture-boundary": "npx --yes tsx scripts/verify-phase3b-capture-boundary.ts",
     "verify:apply-authoritative-first-paint": "npx --yes tsx scripts/verify-apply-authoritative-first-paint.ts",
     "verify:run3-production-envelope": "npx --yes tsx scripts/verify-run3-production-envelope.ts",

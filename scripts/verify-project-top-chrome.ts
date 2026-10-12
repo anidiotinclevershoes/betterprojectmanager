@@ -125,7 +125,8 @@ check("ProjectModeSelector and the sidebar stay the accepted shell", () => {
   const sidebar = read("src/components/app-shell/Sidebar.tsx");
   assert.match(sidebar, /\+ New project/);
   assert.doesNotMatch(sidebar, /Master To Do/);
-  assert.doesNotMatch(sidebar, /href="\/settings"/);
+  assert.match(sidebar, /href="\/settings"/);
+  assert.match(sidebar, /href="\/account"/);
 });
 
 console.log("\nproject top chrome checks passed");

@@ -345,10 +345,18 @@ check("14. share vs replace wiring is unchanged", () => {
   assert.match(drawer, /defaultReplacePersonId/);
 });
 
-check("15. Edit person is not mounted", () => {
+check("15. Edit person saves name and role on the same id", () => {
   const view = read("src/components/knowledge-centre/PersonDetailView.tsx");
-  assert.doesNotMatch(view, /Edit person/i);
+  const drawer = read(
+    "src/components/knowledge-centre/KnowledgeItemDetailDrawer.tsx",
+  );
+  assert.match(view, /Edit person/);
+  assert.match(view, /data-testid="person-edit-name"/);
+  assert.match(view, /data-testid="person-edit-role"/);
+  assert.match(view, /Responsibilities are left as they are/);
+  assert.match(drawer, /savePersonIdentity\(/);
   assert.doesNotMatch(view, /<textarea/);
+  assert.doesNotMatch(view, /confirmResponsibilityOwner/);
 });
 
 check("16. Remove person or item is not mounted", () => {
@@ -372,7 +380,8 @@ check("17. Person History is not fabricated from sample or title match", () => {
   assert.match(view, /data-testid="ocean-item-history-limited"/);
   assert.doesNotMatch(view, /Person added to the project|shared ownership change/i);
   const history = read("src/lib/knowledge-centre/item-history.ts");
-  assert.match(history, /if \(!ref \|\| ref\.kind !== "risk"\) return unattributed\(\)/);
+  assert.match(history, /ref\.kind === "person"/);
+  assert.match(history, /NULL-target rows never match/);
 });
 
 check("18. same display name stays distinguished by stable id", () => {

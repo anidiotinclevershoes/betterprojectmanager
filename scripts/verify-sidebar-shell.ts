@@ -42,15 +42,17 @@ check("New project stays on /projects/new with the purple action", () => {
   assert.doesNotMatch(css, /\.ocean-new-project\s*\{[^}]*var\(--success\)/);
 });
 
-check("projects and Account stay; Settings is not mounted", () => {
+check("projects, Settings, and Account stay mounted", () => {
   const sidebar = read("src/components/app-shell/Sidebar.tsx");
   assert.match(sidebar, /state\.projects\.map/);
   assert.match(sidebar, /\/projects\/\$\{project\.id\}/);
   assert.match(sidebar, /activeProjectId === project\.id/);
   assert.match(sidebar, /href="\/account"/);
   assert.match(sidebar, />Account</);
-  assert.doesNotMatch(sidebar, /href="\/settings"|Settings</);
-  assert.match(sidebar, /BLOCKED — PRODUCT SURFACE: signed sidebar requires Settings/);
+  assert.match(sidebar, /href="\/settings"/);
+  assert.match(sidebar, /data-testid="ocean-nav-settings"/);
+  assert.ok(sidebar.indexOf('href="/settings"') < sidebar.indexOf('href="/account"'));
+  assert.doesNotMatch(sidebar, /BLOCKED — PRODUCT SURFACE/);
   assert.match(sidebar, /ocean-sidebar-bottom/);
   assert.match(read("src/app/globals.css"), /margin-top:\s*auto/);
 });

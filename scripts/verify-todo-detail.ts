@@ -187,7 +187,7 @@ check("7. detail renders only from TodoItem.detail", () => {
   assert.match(rich.detail ?? "", /refreshed UAT window/);
   assert.equal(sparse.detail, undefined);
   const view = read("src/components/knowledge-centre/TodoDetailView.tsx");
-  assert.match(view, /detailText \?/);
+  assert.match(view, /detailText && !editing \?/);
   assert.match(view, /\{detailText\}/);
 });
 
@@ -201,7 +201,7 @@ check("9. one stored waitingOn value may render", () => {
   const todo = seeded().todos.find((row) => row.id === TODO_A)!;
   assert.equal(todo.waitingOn, "Olga Petrov");
   const view = read("src/components/knowledge-centre/TodoDetailView.tsx");
-  assert.match(view, /waiting \?/);
+  assert.match(view, /waiting && !editing \?/);
   assert.match(view, /data-testid="todo-detail-waiting-value"/);
   assert.match(view, /\{waiting\}/);
 });
@@ -249,7 +249,7 @@ check("12. project History is not attributed to the To Do", () => {
   const view = read("src/components/knowledge-centre/TodoDetailView.tsx");
   assert.doesNotMatch(view, /Due date moved|Added from Capture|Waiting on changed/);
   const history = read("src/lib/knowledge-centre/item-history.ts");
-  assert.match(history, /ref\.kind !== "risk"/);
+  assert.match(history, /ref\.kind === "todo"/);
 });
 
 check("13. an open To Do shows Close", () => {
@@ -300,9 +300,18 @@ check("18. Remove is a separate action from Close", () => {
   assert.match(view, /Remove deletes it/);
 });
 
-check("19. Edit To Do is not mounted", () => {
+check("19. Edit To Do saves through saveTodoEdit and does not remove", () => {
   const view = read("src/components/knowledge-centre/TodoDetailView.tsx");
-  assert.doesNotMatch(view, /Edit item|Edit To Do|<textarea/);
+  const drawer = read(
+    "src/components/knowledge-centre/KnowledgeItemDetailDrawer.tsx",
+  );
+  assert.match(view, /Edit To Do/);
+  assert.match(view, /data-testid="todo-edit-save"/);
+  assert.match(view, /Saved waiting note/);
+  assert.match(view, /does not rewrite this note/);
+  assert.match(drawer, /saveTodoEdit\(/);
+  assert.doesNotMatch(view, /removeTodo/);
+  assert.doesNotMatch(drawer, /waitingOn: linkedNames|waitingOn: people\.map/);
 });
 
 check("20. Issue and Person detail views stay mounted", () => {

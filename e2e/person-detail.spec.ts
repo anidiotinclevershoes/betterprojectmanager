@@ -209,7 +209,7 @@ test("Person detail shows bundle fields and omits stale actions", async ({
   await expect(drawer.getByText("Added", { exact: true })).toHaveCount(0);
   await expect(drawer.getByRole("heading", { name: "Tags" })).toHaveCount(0);
   await expect(drawer.getByText("Supplier", { exact: true })).toHaveCount(0);
-  await expect(drawer.getByRole("button", { name: "Edit person" })).toHaveCount(0);
+  await expect(drawer.getByRole("button", { name: "Edit person" })).toHaveCount(1);
   await expect(drawer.getByRole("button", { name: /Remove/ })).toHaveCount(0);
   await expect(drawer.getByText("Cut-over weekend")).toHaveCount(0);
   await expect(drawer.getByText("Morning calls")).toHaveCount(0);
@@ -332,4 +332,38 @@ test("390px Person detail and Confirm Owner do not overflow", async ({
     path: "/opt/cursor/artifacts/person-detail-narrow-add.png",
     fullPage: false,
   });
+});
+
+test("editing a person keeps the id and rejects a name collision", async ({
+  page,
+}, testInfo) => {
+  await boot(page, testInfo.testId);
+  const drawer = await openPerson(page, MARIA);
+  await drawer.getByTestId("person-detail-edit").click();
+  await drawer.getByTestId("person-edit-name").fill("Dan Roberts");
+  await drawer.getByTestId("person-edit-save").click();
+  await expect(drawer.getByTestId("person-edit-error")).toContainText(
+    "already uses that name",
+  );
+  await drawer.getByTestId("person-edit-discard").click();
+  await expect(drawer.getByTestId("person-detail-name")).toHaveText("Maria Chen");
+
+  await drawer.getByTestId("person-detail-edit").click();
+  await drawer.getByTestId("person-edit-role").fill("Cut-over lead");
+  await drawer.getByTestId("person-edit-save").click();
+  await expect(drawer.getByTestId("person-detail-role")).toHaveText("Cut-over lead");
+  await expect(drawer.getByTestId("person-detail-responsibility")).toContainText(
+    "Cut-over communications",
+  );
+  await expect(drawer.getByText("You updated a person")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByTestId("ocean-project-workspace")).toBeVisible();
+  await openKnowledgeCentre(page);
+  const reopened = await openPerson(page, MARIA);
+  await expect(reopened.getByTestId("person-detail-name")).toHaveText("Maria Chen");
+  await expect(reopened.getByTestId("person-detail-role")).toHaveText("Cut-over lead");
+  await expect(reopened.getByTestId("person-detail-responsibility")).toContainText(
+    "Cut-over communications",
+  );
 });

@@ -80,6 +80,7 @@ const SUITE: Array<{ name: string; script: string }> = [
   { name: "issue-editor-ui", script: "scripts/verify-issue-editor-ui.ts" },
   { name: "person-detail", script: "scripts/verify-person-detail.ts" },
   { name: "todo-detail", script: "scripts/verify-todo-detail.ts" },
+  { name: "v1-functional", script: "scripts/verify-v1-functional.ts" },
   { name: "risk-read-authority", script: "scripts/verify-risk-read-authority.ts" },
   { name: "catch-me-up", script: "scripts/verify-catch-me-up.ts" },
   { name: "capture-context", script: "scripts/verify-capture-context.ts" },

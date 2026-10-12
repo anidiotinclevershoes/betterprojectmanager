@@ -276,7 +276,7 @@ async function main() {
       todoId: RISK_A,
     });
     assert.equal(todo.events.length, 0);
-    assert.equal(todo.attributable, false);
+    assert.equal(todo.attributable, true);
     assert.equal(todo.limitation, "D-004");
   });
 

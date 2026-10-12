@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode, Ref } from "react";
+import { useEffect, useId, useState, type ReactNode, type Ref } from "react";
 import { DomainBadge } from "@/components/domain/DomainIcon";
 import { formatShortDayMonth } from "@/lib/knowledge-centre/format-date-label";
 import type {
@@ -12,7 +12,7 @@ import type { HistoryEvent } from "@/lib/types";
 /**
  * Page 09 Person — detail · working (798:9587).
  * Domain badge is the signed Person mark (824:9660).
- * Presentation over the existing Person bundle. This screen does not save.
+ * Presentation over the existing Person bundle. Name and role save through the parent.
  */
 export function PersonDetailView({
   name,
@@ -30,6 +30,7 @@ export function PersonDetailView({
   onClose,
   onAddResponsibility,
   onHandover,
+  onSaveIdentity,
   ownerSlot,
   backRef,
 }: {
@@ -48,9 +49,50 @@ export function PersonDetailView({
   onClose: () => void;
   onAddResponsibility: () => void;
   onHandover: (scope: string) => void;
+  onSaveIdentity: (input: {
+    name: string;
+    role: string;
+  }) => Promise<{ ok: boolean; error?: string }>;
   ownerSlot?: ReactNode;
   backRef?: Ref<HTMLButtonElement>;
 }) {
+  const nameId = useId();
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [draftName, setDraftName] = useState(name);
+  const [draftRole, setDraftRole] = useState(role);
+
+  useEffect(() => {
+    if (editing) return;
+    setDraftName(name);
+    setDraftRole(role);
+  }, [editing, name, role]);
+
+  useEffect(() => {
+    if (!editing) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || saving) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      setEditing(false);
+      setError(null);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [editing, saving]);
+
+  async function save() {
+    setSaving(true);
+    setError(null);
+    const saved = await onSaveIdentity({ name: draftName, role: draftRole });
+    setSaving(false);
+    if (!saved.ok) {
+      setError(saved.error ?? "Could not save the person");
+      return;
+    }
+    setEditing(false);
+  }
   const roleLabel = role.trim();
   const contactRaw = lastContactAt?.trim() ?? "";
   const lastContact = contactRaw
@@ -86,15 +128,57 @@ export function PersonDetailView({
 
       <div className="issue-detail-scroll" data-testid="person-detail">
         <DomainBadge domain="people" label="Person" />
-        <h2 className="issue-detail-title" data-testid="person-detail-name">
-          {name}
-        </h2>
-        <p
-          className={`person-detail-role${roleLabel ? "" : " is-absent"}`}
-          data-testid="person-detail-role"
-        >
-          {roleLabel || "No role recorded."}
-        </p>
+        {editing ? (
+          <form
+            data-testid="person-edit"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void save();
+            }}
+          >
+            <h2 className="issue-edit-heading">Edit person</h2>
+            <p className="issue-edit-helper">
+              Name and role stay on this person. Responsibilities are left as they are.
+            </p>
+            <label className="issue-edit-label" htmlFor={nameId}>
+              Name
+            </label>
+            <input
+              id={nameId}
+              className="issue-edit-input"
+              data-testid="person-edit-name"
+              value={draftName}
+              onChange={(event) => setDraftName(event.target.value)}
+            />
+            <label className="issue-edit-label" htmlFor={`${nameId}-role`}>
+              Role
+            </label>
+            <input
+              id={`${nameId}-role`}
+              className="issue-edit-input"
+              data-testid="person-edit-role"
+              value={draftRole}
+              onChange={(event) => setDraftRole(event.target.value)}
+            />
+            {error ? (
+              <p className="issue-edit-error" data-testid="person-edit-error" role="alert">
+                {error}
+              </p>
+            ) : null}
+          </form>
+        ) : (
+          <>
+            <h2 className="issue-detail-title" data-testid="person-detail-name">
+              {name}
+            </h2>
+            <p
+              className={`person-detail-role${roleLabel ? "" : " is-absent"}`}
+              data-testid="person-detail-role"
+            >
+              {roleLabel || "No role recorded."}
+            </p>
+          </>
+        )}
 
         <section className="issue-detail-section" data-testid="person-detail-details">
           <h3>Details</h3>
@@ -219,14 +303,53 @@ export function PersonDetailView({
       {ownerSlot ? <div className="person-detail-owner">{ownerSlot}</div> : null}
 
       <footer className="issue-detail-footer" data-testid="person-detail-actions">
-        <button
-          type="button"
-          className="issue-detail-action"
-          data-testid="person-detail-add"
-          onClick={onAddResponsibility}
-        >
-          Add responsibility
-        </button>
+        {editing ? (
+          <div className="issue-edit-actions">
+            <button
+              type="button"
+              className="issue-edit-discard"
+              data-testid="person-edit-discard"
+              disabled={saving}
+              onClick={() => {
+                setEditing(false);
+                setError(null);
+              }}
+            >
+              Discard
+            </button>
+            <button
+              type="button"
+              className="issue-edit-save"
+              data-testid="person-edit-save"
+              disabled={saving}
+              onClick={() => void save()}
+            >
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="issue-detail-action"
+            data-testid="person-detail-edit"
+            onClick={() => {
+              setError(null);
+              setEditing(true);
+            }}
+          >
+            Edit person
+          </button>
+        )}
+        {!editing ? (
+          <button
+            type="button"
+            className="issue-detail-action"
+            data-testid="person-detail-add"
+            onClick={onAddResponsibility}
+          >
+            Add responsibility
+          </button>
+        ) : null}
         <p className="issue-detail-hint">
           Responsibilities use the explicit share / replace flow.
         </p>

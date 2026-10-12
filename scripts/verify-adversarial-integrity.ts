@@ -418,9 +418,12 @@ await check("N-03 hydrate keeps complete knowledge section lists aligned with st
   assert.match(hydrate, /current\.structured = \[/);
 });
 
-await check("N-04 analysesThisMonth is always 0 on hydrate — meter is not durable", () => {
+await check("N-04 hydrate adopts workspace_usage and stays empty when the row is missing", () => {
   const hydrate = readSrc("src/lib/data/supabase/load-mission-state.ts");
-  assert.match(hydrate, /analysesThisMonth: 0/);
+  assert.match(hydrate, /workspace_usage/);
+  assert.match(hydrate, /analyses_this_month/);
+  assert.match(hydrate, /analysesThisMonth: usage\?\.used \?\? 0/);
+  assert.match(hydrate, /isMissingRelation\(res\.error\)/);
 });
 
 await check("N-05 planKnowledge / writeKnowledge carry applyOperationId (retry is receipted)", () => {

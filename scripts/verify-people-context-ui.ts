@@ -663,7 +663,8 @@ check("UI: person detail exposes assign + handover actions", () => {
   assert.match(drawer, /defaultPersonName/);
   assert.match(person, /Hand over/);
   assert.match(person, /Add responsibility/);
-  assert.doesNotMatch(person, /Edit person/i);
+  assert.match(person, /Edit person/);
+  assert.doesNotMatch(person, /confirmResponsibilityOwner|removeStakeholder/);
 });
 
 check("Capture / Ask boundaries untouched in this slice wiring", () => {

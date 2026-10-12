@@ -10,8 +10,7 @@ import { useMission } from "@/lib/store";
  * Brand is the signed lightbulb plus plain “Lume”. The stale Page 09 `me`
  * treatment is not recreated.
  *
- * BLOCKED — PRODUCT SURFACE: signed sidebar requires Settings, but no Settings
- * route/surface exists. Account is the last mounted row until that exists.
+ * Settings sits above Account. Account stays the last row.
  */
 export function Sidebar({
   mobileOpen,
@@ -100,6 +99,18 @@ export function Sidebar({
         </nav>
 
         <div className="sidebar-bottom ocean-sidebar-bottom">
+          <Link
+            href="/settings"
+            className="ocean-account-row"
+            onClick={onCloseMobile}
+            title="Settings"
+            data-testid="ocean-nav-settings"
+          >
+            <span className="ocean-account-mark" aria-hidden>
+              •
+            </span>
+            <span>Settings</span>
+          </Link>
           <Link
             href="/account"
             className="ocean-account-row"
