@@ -280,6 +280,10 @@ test("empty Home adds through the existing drawer and collapses Timeline", async
   await expect(page.getByText("UAT access")).toBeVisible();
   await page.reload();
   await expect(page.getByText("UAT access")).toBeVisible();
+  await page.screenshot({
+    path: "/opt/cursor/artifacts/home-empty-add-persisted.png",
+    fullPage: true,
+  });
 
   await page.getByTestId("ocean-home-timeline-collapse").click();
   await expect(page.getByText("No timeline information yet.")).toHaveCount(0);
@@ -306,6 +310,10 @@ test("home and knowledge stay within a 320px viewport", async ({
     () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
   );
   expect(knowledgeFits).toBe(true);
+  await page.screenshot({
+    path: "/opt/cursor/artifacts/knowledge-centre-320.png",
+    fullPage: false,
+  });
 });
 
 test("non-project routes keep the normal TopHeader", async ({ page }, testInfo) => {

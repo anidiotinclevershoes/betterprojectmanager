@@ -369,8 +369,10 @@ test.describe("Capture experience — annotated transcript", () => {
 });
 
 async function expectReviewFits(page: Page, width: number) {
-  await expect(page.getByRole("tab", { name: /Needs You/i })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Discard" })).toBeVisible();
+  const review = page.getByTestId("ocean-capture-review");
+  await expect(review.getByRole("tab", { name: /Needs You/i })).toBeVisible();
+  const discard = review.getByRole("button", { name: "Discard" });
+  await expect(discard).toBeVisible();
   const apply = page.locator(".capture-apply-ready-btn");
   await expect(apply).toBeVisible();
   const frame = page.locator(".lume-review-frame");
@@ -380,7 +382,7 @@ async function expectReviewFits(page: Page, width: number) {
   expect(applyBox).toBeTruthy();
   expect(applyBox!.height).toBeGreaterThanOrEqual(40);
   expect(applyBox!.x + applyBox!.width).toBeLessThanOrEqual(width + 1);
-  await page.getByRole("button", { name: "Discard" }).click();
+  await discard.click();
   const dialog = page.getByTestId("discard-review-dialog");
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText("Nothing already saved to the project is removed.")).toBeVisible();
