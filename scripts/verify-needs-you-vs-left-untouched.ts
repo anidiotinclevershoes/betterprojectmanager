@@ -627,7 +627,8 @@ async function main() {
     assert.match(coverage, /leftoverSourceSpans/);
     assert.match(coverage, /\["detail", "notes", "text"\]/);
     const dispatch = readFileSync(join(ROOT, "src/lib/capture/apply/dispatch.ts"), "utf8");
-    assert.match(dispatch, /roleHint: statedField/);
+    assert.match(dispatch, /asString\(values\.roleHint\)/);
+    assert.match(dispatch, /statedField\(asString\(values\.role\), item, text\)/);
     assert.match(dispatch, /unsupportedApplyReason/);
     const resolve = readFileSync(join(ROOT, "src/lib/capture-v2/resolve.ts"), "utf8");
     assert.doesNotMatch(resolve, /hydrateFromLocalEvidence/);

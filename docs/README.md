@@ -43,6 +43,7 @@ Longer product / trust / Ocean UI philosophy remains in [`docs/v1-reference-pack
 | Canonical Project Truth (write then project) | [`docs/LUME_CANONICAL_PROJECT_TRUTH.md`](./LUME_CANONICAL_PROJECT_TRUTH.md) |
 | Durable Project Truth (existing-project compatibility) | [`docs/LUME_DURABLE_PROJECT_TRUTH.md`](./LUME_DURABLE_PROJECT_TRUTH.md) |
 | Current Capture position | [`docs/LUME_CAPTURE_STATUS.md`](./LUME_CAPTURE_STATUS.md) |
+| Shared Organise (flagged, default off) | [`docs/LUME_SHARED_ORGANISE.md`](./LUME_SHARED_ORGANISE.md) |
 | V1 trust families (reconciled) | [`docs/LUME_V1_TRUST_ISSUE_MAP.md`](./LUME_V1_TRUST_ISSUE_MAP.md) |
 | Deferred product semantics | [`docs/LUME_PRODUCT_DECISIONS.md`](./LUME_PRODUCT_DECISIONS.md) |
 | Ask / eval scoring | [`docs/LUME_INTELLIGENCE_CONTRACT_V0.2.md`](./LUME_INTELLIGENCE_CONTRACT_V0.2.md) |

@@ -44,6 +44,8 @@ human language
 
 New Project Organise uses the **same extractor**, then a New Project adapter (`parse` + `draftFromProvisional`). It is not a second Capture engine.
 
+Shared Organise is a flagged alternative semantic path (`LUME_SHARED_ORGANISE=1`, default off). It does not replace this observation path. Contract: [`docs/LUME_SHARED_ORGANISE.md`](./LUME_SHARED_ORGANISE.md).
+
 ---
 
 ## 2. Deterministic routing — accepted convergence

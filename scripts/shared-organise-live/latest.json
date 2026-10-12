@@ -1,0 +1,321 @@
+{
+  "model": "gpt-6-luna",
+  "promptVersion": "shared-organise-form-v4",
+  "referenceDate": "2026-10-03",
+  "elapsedMs": 31922,
+  "calls": 9,
+  "errors": 0,
+  "unsafeReady": 0,
+  "usage": {
+    "prompt": 17283,
+    "completion": 2983,
+    "reasoning": 1638
+  },
+  "rows": [
+    {
+      "id": "join",
+      "responseModel": "gpt-6-luna",
+      "labels": [
+        "Ready"
+      ],
+      "operations": [
+        {
+          "type": "ensure_person",
+          "projectId": "proj-candy",
+          "name": "Sarah Kim"
+        }
+      ],
+      "uncertainty": {
+        "changes": [
+          {
+            "id": "chg-1",
+            "outcome": "ready",
+            "operation": "ensure_person",
+            "targetId": null,
+            "evidence": "Sarah Kim has joined the project.",
+            "reason": "",
+            "materialUncertainty": [],
+            "values": {
+              "name": "Sarah Kim"
+            }
+          }
+        ]
+      },
+      "unsafe": []
+    },
+    {
+      "id": "owns",
+      "responseModel": "gpt-6-luna",
+      "labels": [
+        "Ready",
+        "Needs You"
+      ],
+      "operations": [
+        {
+          "type": "ensure_person",
+          "projectId": "proj-candy",
+          "name": "Sarah Kim"
+        },
+        null
+      ],
+      "uncertainty": {
+        "changes": [
+          {
+            "id": "chg-1",
+            "outcome": "ready",
+            "operation": "ensure_person",
+            "targetId": null,
+            "evidence": "Sarah Kim owns UAT.",
+            "reason": "",
+            "materialUncertainty": [],
+            "values": {
+              "name": "Sarah Kim"
+            }
+          },
+          {
+            "id": "chg-2",
+            "outcome": "needs_you",
+            "operation": "confirm_responsibility",
+            "targetId": null,
+            "evidence": "Sarah Kim owns UAT.",
+            "reason": "The input asserts Sarah Kim is responsible for UAT, but it does not clarify whether this responsibility is shared with or replaces the existing UAT lead responsibility.",
+            "materialUncertainty": [
+              "Whether Sarah Kim's UAT responsibility is shared or replaces the existing responsibility."
+            ],
+            "values": {
+              "personName": "Sarah Kim",
+              "scope": "UAT",
+              "ownershipSemantics": "ambiguous"
+            }
+          }
+        ]
+      },
+      "unsafe": []
+    },
+    {
+      "id": "hedge",
+      "responseModel": "gpt-6-luna",
+      "labels": [
+        "Needs You"
+      ],
+      "operations": [
+        null
+      ],
+      "uncertainty": {
+        "changes": [
+          {
+            "id": "chg-1",
+            "outcome": "needs_you",
+            "operation": "confirm_responsibility",
+            "targetId": null,
+            "evidence": "Sarah Kim, or maybe Sarah K, will own UAT.",
+            "reason": "The responsibility is stated, but the person's identity is uncertain and it is unclear whether Sarah would share or replace Pippa Gumdrop's existing UAT responsibility.",
+            "materialUncertainty": [
+              "Whether Sarah Kim and Sarah K refer to the same person",
+              "Whether the responsibility would be shared with or replace Pippa Gumdrop's existing UAT responsibility"
+            ],
+            "values": {
+              "scope": "UAT",
+              "ownershipSemantics": "ambiguous"
+            }
+          }
+        ]
+      },
+      "unsafe": []
+    },
+    {
+      "id": "someone",
+      "responseModel": "gpt-6-luna",
+      "labels": [
+        "Ready"
+      ],
+      "operations": [
+        {
+          "type": "create_todo",
+          "projectId": "proj-candy",
+          "title": "Sort the fire cert"
+        }
+      ],
+      "uncertainty": {
+        "changes": [
+          {
+            "id": "chg-1",
+            "outcome": "ready",
+            "operation": "create_todo",
+            "targetId": null,
+            "evidence": "Someone needs to sort the fire cert.",
+            "reason": "The task is asserted, but its owner is unresolved.",
+            "materialUncertainty": [],
+            "values": {
+              "title": "Sort the fire cert"
+            }
+          }
+        ]
+      },
+      "unsafe": []
+    },
+    {
+      "id": "historical",
+      "responseModel": "gpt-6-luna",
+      "labels": [
+        "No change"
+      ],
+      "operations": [
+        null
+      ],
+      "uncertainty": {
+        "changes": [
+          {
+            "id": "chg-1",
+            "outcome": "no_change",
+            "operation": "none",
+            "targetId": "ms-parade",
+            "evidence": "Parade day was 1 September 2025.",
+            "reason": "This states a former date for Parade day, not a change to its current date.",
+            "materialUncertainty": [],
+            "values": {
+              "label": "Parade day",
+              "dateIntent": "historical"
+            }
+          }
+        ]
+      },
+      "unsafe": []
+    },
+    {
+      "id": "explicit",
+      "responseModel": "gpt-6-luna",
+      "labels": [
+        "Ready"
+      ],
+      "operations": [
+        {
+          "type": "update_milestone",
+          "projectId": "proj-candy",
+          "milestoneId": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-12-18"
+        }
+      ],
+      "uncertainty": {
+        "changes": [
+          {
+            "id": "chg-1",
+            "outcome": "ready",
+            "operation": "update_milestone",
+            "targetId": "ms-parade",
+            "evidence": "Parade day is 18 December 2026.",
+            "reason": "",
+            "materialUncertainty": [],
+            "values": {
+              "label": "Parade day",
+              "dateIntent": "set_explicit",
+              "date": "2026-12-18"
+            }
+          }
+        ]
+      },
+      "unsafe": []
+    },
+    {
+      "id": "relative-clear",
+      "responseModel": "gpt-6-luna",
+      "labels": [
+        "Ready"
+      ],
+      "operations": [
+        {
+          "type": "update_milestone",
+          "projectId": "proj-candy",
+          "milestoneId": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-29"
+        }
+      ],
+      "uncertainty": {
+        "changes": [
+          {
+            "id": "chg-1",
+            "outcome": "ready",
+            "operation": "update_milestone",
+            "targetId": "ms-parade",
+            "evidence": "Make parade day two weeks later.",
+            "reason": "",
+            "materialUncertainty": [],
+            "values": {
+              "label": "Parade day",
+              "dateIntent": "move_relative",
+              "direction": "later",
+              "amount": 2,
+              "unit": "weeks"
+            }
+          }
+        ]
+      },
+      "unsafe": []
+    },
+    {
+      "id": "relative-ambiguous",
+      "responseModel": "gpt-6-luna",
+      "labels": [
+        "Needs You"
+      ],
+      "operations": [
+        null
+      ],
+      "uncertainty": {
+        "changes": [
+          {
+            "id": "chg-1",
+            "outcome": "needs_you",
+            "operation": "update_milestone",
+            "targetId": "ms-parade",
+            "evidence": "Move parade day back two weeks.",
+            "reason": "“Back” can mean either earlier or later, so the direction of the date change needs clarification.",
+            "materialUncertainty": [
+              "Whether “back” means earlier or later."
+            ],
+            "values": {
+              "label": "Parade day",
+              "dateIntent": "move_relative",
+              "direction": "unresolved",
+              "amount": 2,
+              "unit": "weeks"
+            }
+          }
+        ]
+      },
+      "unsafe": []
+    },
+    {
+      "id": "foreign",
+      "responseModel": "gpt-6-luna",
+      "labels": [
+        "Needs You"
+      ],
+      "operations": [
+        null
+      ],
+      "uncertainty": {
+        "changes": [
+          {
+            "id": "chg-1",
+            "outcome": "needs_you",
+            "operation": "update_risk_status",
+            "targetId": null,
+            "evidence": "Mark risk-console resolved.",
+            "reason": "The project has no targetable risk identified as “risk-console,” so the intended risk cannot be safely updated.",
+            "materialUncertainty": [
+              "Which targetable risk “risk-console” refers to"
+            ],
+            "values": {
+              "title": "risk-console",
+              "status": "resolved"
+            }
+          }
+        ]
+      },
+      "unsafe": []
+    }
+  ]
+}

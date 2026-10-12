@@ -43,6 +43,9 @@ function check(name: string, fn: () => void) {
 
 const ROOT = process.cwd();
 const UNCHANGED_VS_MAIN = [
+  // Semantic-seam repairs already changed capture-v2/run.ts and
+  // source-coverage.ts on this branch. Content assertions below lock those.
+  // These Apply files still match main.
   "src/lib/capture/apply/apply-approved.ts",
   "src/lib/capture/apply/expected-target.ts",
 ];
@@ -149,7 +152,8 @@ function main() {
     const run = read("src/lib/capture-v2/run.ts");
     assert.match(run, /applyCaptureSemanticContract/);
     const dispatch = read("src/lib/capture/apply/dispatch.ts");
-    assert.match(dispatch, /roleHint: statedField/);
+    assert.match(dispatch, /asString\(values\.roleHint\)/);
+    assert.match(dispatch, /statedField\(asString\(values\.role\), item, text\)/);
     assert.match(dispatch, /unsupportedApplyReason/);
   });
 

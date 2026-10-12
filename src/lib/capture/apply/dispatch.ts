@@ -518,12 +518,17 @@ function planPerson(
     );
   }
   if (resolved.status === "new_named") {
+    // roleHint is Shared Organise's structured field. role is observation
+    // Capture and is kept only when the source text states it.
+    const roleHint =
+      asString(values.roleHint) ||
+      statedField(asString(values.role), item, text);
     return write("person", {
       type: "ensure_person",
       projectId,
       name: resolved.name,
       personId: resolved.personId,
-      roleHint: statedField(asString(values.role), item, text),
+      ...(roleHint ? { roleHint } : {}),
       applyOperationId: item.id.trim() || undefined,
     });
   }
