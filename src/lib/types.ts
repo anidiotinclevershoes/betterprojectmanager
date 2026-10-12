@@ -224,6 +224,11 @@ export interface TodoItem {
    * Do not join names into this string or treat it as that relationship.
    */
   waitingOn?: string;
+  /**
+   * Existing People this To Do is waiting on, by stable stakeholder id.
+   * Independent of `waitingOn`. Empty means no person links were stored.
+   */
+  waitingOnPersonIds?: string[];
 }
 
 /** AI-proposed meeting the user can later expand into agenda/script. */

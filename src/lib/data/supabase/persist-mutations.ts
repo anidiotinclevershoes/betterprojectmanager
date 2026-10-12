@@ -879,6 +879,102 @@ export async function persistTodoUpdate(
   }
 }
 
+export type DurableEditResult =
+  | { ok: false; error: string }
+  | { ok: true; changed: false }
+  | { ok: true; changed: true; historyId: string | null; name?: string; role?: string };
+
+function friendlyEditError(message: string, fallback: string): string {
+  const text = message.toLowerCase();
+  if (text.includes("another person")) {
+    return "Another person in this project already uses that name.";
+  }
+  if (text.includes("waiting on can only")) {
+    return "Waiting on can only use people already in this project.";
+  }
+  if (text.includes("title is required")) return "Enter a title before saving.";
+  if (text.includes("name is required")) return "Enter a name before saving.";
+  if (
+    text.includes("could not find the function") ||
+    text.includes("schema cache") ||
+    message.includes("PGRST202")
+  ) {
+    return "Saving needs the latest project database. The edit was not stored.";
+  }
+  return message || fallback;
+}
+
+function readDurableEdit(
+  data: unknown,
+  error: { message?: string } | null,
+  fallback: string,
+): DurableEditResult {
+  if (error) return { ok: false, error: friendlyEditError(error.message ?? "", fallback) };
+  const payload =
+    data && typeof data === "object" ? (data as Record<string, unknown>) : null;
+  if (!payload) return { ok: false, error: fallback };
+  if (!payload.changed) return { ok: true, changed: false };
+  return {
+    ok: true,
+    changed: true,
+    historyId: payload.historyId ? String(payload.historyId) : null,
+    name: payload.name == null ? undefined : String(payload.name),
+    role: payload.role == null ? undefined : String(payload.role),
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistTodoEdit(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  input: {
+    projectId: string;
+    todoId: string;
+    title: string;
+    detail: string | null;
+    dueAt: string | null;
+    waitingOn: string | null;
+    waitingOnPersonIds: string[];
+  },
+): Promise<DurableEditResult> {
+  const { data, error } = await client.rpc("save_todo_edit", {
+    p_workspace_id: workspaceId,
+    p_project_id: input.projectId,
+    p_todo_id: input.todoId,
+    p_title: input.title,
+    p_detail: input.detail,
+    p_due_on: isoToDateOnly(input.dueAt),
+    p_waiting_on: input.waitingOn,
+    p_waiting_person_ids: input.waitingOnPersonIds,
+    p_created_by: userId,
+  });
+  return readDurableEdit(data, error, "Could not save the To Do");
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function persistPersonIdentity(
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  userId: string | null,
+  input: {
+    projectId: string;
+    personId: string;
+    name: string;
+    role: string;
+  },
+): Promise<DurableEditResult> {
+  const { data, error } = await client.rpc("save_person_identity", {
+    p_workspace_id: workspaceId,
+    p_project_id: input.projectId,
+    p_person_id: input.personId,
+    p_name: input.name,
+    p_role: input.role,
+    p_created_by: userId,
+  });
+  return readDurableEdit(data, error, "Could not save the person");
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function persistTodoDelete(
   client: SupabaseClient<any>,

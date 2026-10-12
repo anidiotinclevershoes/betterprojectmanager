@@ -77,6 +77,12 @@ import {
   makeHistoryEvent,
   pushHistory,
 } from "./workspace/history";
+import {
+  adoptAnalysisLedger,
+  readAnalysisLedger,
+} from "./workspace/usage-ledger";
+import { applyPersonEdit } from "@/lib/people/person-edit";
+import { applyTodoEdit } from "@/lib/todos/todo-edit";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { waitForBrowserUser } from "@/lib/supabase/wait-for-browser-user";
 import {
@@ -96,8 +102,10 @@ import {
   persistRiskStatus,
   persistTimelineItem,
   persistTimelineUpdate,
+  persistPersonIdentity,
   persistTodoCreate,
   persistTodoDelete,
+  persistTodoEdit,
   persistTodoUpdate,
 } from "@/lib/data/supabase/persist-mutations";
 import {
@@ -393,6 +401,21 @@ type MissionContextValue = {
     notes: string | null;
     tagNames: string[];
   }) => Promise<RiskEditResult>;
+  saveTodoEdit: (input: {
+    projectId: string;
+    todoId: string;
+    title: string;
+    detail: string | null;
+    dueAt: string | null;
+    waitingOn: string | null;
+    waitingOnPersonIds: string[];
+  }) => Promise<ManualWriteResult>;
+  savePersonIdentity: (input: {
+    projectId: string;
+    personId: string;
+    name: string;
+    role: string;
+  }) => Promise<ManualWriteResult>;
   /**
    * Slice 1B: resolve/reopen a legacy Knowledge-only risk bullet (no risks row).
    * Does not fabricate a Risk-domain record.
@@ -999,6 +1022,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       contextManifest?: CaptureContextManifest | null;
       requestId?: string | null;
       reliability?: CaptureReliabilityAssessment | null;
+      usageLedger?: unknown;
     };
 
     if (typeof data.openaiConfigured === "boolean") {
@@ -1014,24 +1038,28 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       contextManifest: data.contextManifest ?? null,
       requestId: data.requestId ?? null,
       reliability: data.reliability ?? null,
+      usageLedger: readAnalysisLedger(data.usageLedger),
     };
   }, []);
 
   const analyzeCaptureWithAI = useCallback(
     async (input: CaptureInput, signal?: AbortSignal) => {
-      const { result, contextManifest, requestId, reliability } =
+      const { result, contextManifest, requestId, reliability, usageLedger } =
         await requestCaptureAnalysis(input, signal);
       if (signal?.aborted) {
         throw new DOMException("Aborted", "AbortError");
       }
       setState((prev) =>
-        pushHistory(bumpAnalysisUsage(prev), makeHistoryEvent({
-          type: "capture_analysed",
-          title: "Capture analysed",
-          detail: result.memory.title,
-          projectId: result.memory.projectId ?? input.projectId,
-          source: "ai",
-        })),
+        pushHistory(
+          usageLedger ? adoptAnalysisLedger(prev, usageLedger) : bumpAnalysisUsage(prev),
+          makeHistoryEvent({
+            type: "capture_analysed",
+            title: "Capture analysed",
+            detail: result.memory.title,
+            projectId: result.memory.projectId ?? input.projectId,
+            source: "ai",
+          }),
+        ),
       );
       return { result, contextManifest, requestId, reliability };
     },
@@ -2761,6 +2789,109 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     [markPersistSaved, reportPersistFailure],
   );
 
+  const saveTodoEdit = useCallback(
+    async (input: {
+      projectId: string;
+      todoId: string;
+      title: string;
+      detail: string | null;
+      dueAt: string | null;
+      waitingOn: string | null;
+      waitingOnPersonIds: string[];
+    }): Promise<ManualWriteResult> => {
+      const planned = applyTodoEdit(stateRef.current, input);
+      if (!planned.ok) return planned;
+      if (!planned.changed) return { ok: true };
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          const saved = await persistTodoEdit(
+            client,
+            meta.workspaceId,
+            meta.userId,
+            input,
+          );
+          if (!saved.ok) {
+            reportPersistFailure(new Error(saved.error), "Could not save the To Do");
+            return saved;
+          }
+          if (saved.changed) {
+            const painted = applyTodoEdit(stateRef.current, {
+              ...input,
+              historyId: saved.historyId ?? undefined,
+            });
+            if (painted.ok && painted.changed) setState(painted.state);
+          }
+          markPersistSaved();
+          return { ok: true, id: saved.changed ? saved.historyId ?? undefined : undefined };
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Could not save the To Do";
+          reportPersistFailure(err, "Could not save the To Do");
+          return { ok: false, error: message };
+        }
+      }
+
+      setState(planned.state);
+      return { ok: true };
+    },
+    [markPersistSaved, reportPersistFailure],
+  );
+
+  const savePersonIdentity = useCallback(
+    async (input: {
+      projectId: string;
+      personId: string;
+      name: string;
+      role: string;
+    }): Promise<ManualWriteResult> => {
+      const planned = applyPersonEdit(stateRef.current, input);
+      if (!planned.ok) return planned;
+      if (!planned.changed) return { ok: true };
+
+      const meta = persistMetaRef.current;
+      if (meta.mode === "supabase" && meta.workspaceId) {
+        setSaveStatus("saving");
+        setSaveError(null);
+        try {
+          const client = createBrowserSupabaseClient();
+          const saved = await persistPersonIdentity(
+            client,
+            meta.workspaceId,
+            meta.userId,
+            input,
+          );
+          if (!saved.ok) {
+            reportPersistFailure(new Error(saved.error), "Could not save the person");
+            return saved;
+          }
+          if (saved.changed) {
+            const painted = applyPersonEdit(stateRef.current, {
+              ...input,
+              name: saved.name ?? input.name,
+              role: saved.role ?? input.role,
+              historyId: saved.historyId ?? undefined,
+            });
+            if (painted.ok && painted.changed) setState(painted.state);
+          }
+          markPersistSaved();
+          return { ok: true, id: saved.changed ? saved.historyId ?? undefined : undefined };
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Could not save the person";
+          reportPersistFailure(err, "Could not save the person");
+          return { ok: false, error: message };
+        }
+      }
+
+      setState(planned.state);
+      return { ok: true };
+    },
+    [markPersistSaved, reportPersistFailure],
+  );
+
   const setKnowledgeOnlyRiskResolved = useCallback(
     (projectId: string, title: string, resolved: boolean) => {
       const prev = stateRef.current;
@@ -3608,6 +3739,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       setRiskStatus,
       setRiskNotes,
       saveRiskEdit,
+      saveTodoEdit,
+      savePersonIdentity,
       setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,
@@ -3661,6 +3794,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       setRiskStatus,
       setRiskNotes,
       saveRiskEdit,
+      saveTodoEdit,
+      savePersonIdentity,
       setKnowledgeOnlyRiskResolved,
       confirmResponsibilityOwner,
       addTimelineItem,
