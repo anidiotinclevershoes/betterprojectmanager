@@ -77,13 +77,12 @@ Recorded 12 October 2026 after merging current `origin/main` (`npm run git:prefl
 
 ```text
 Working branch: integration/figma-ui-convergence-v1
-Branch HEAD:    af9b715c31ca21e8158fb3864e1b736354290c92
+Reconciliation merge: af9b715c31ca21e8158fb3864e1b736354290c92
 origin/main HEAD: 3b1e1c977be849b979d755242ea067826b164f9f
-Merge-base:     3b1e1c977be849b979d755242ea067826b164f9f
-Ahead: 51
+Merge-base at reconciliation: 3b1e1c977be849b979d755242ea067826b164f9f
+Ahead of main at reconciliation: 51
 Behind: 0
 Contains current main?: YES
-Working tree clean?: YES
 PR base: main
 Dependencies: Shared Organise PR #194, already on main
 Shared/global files expected: Capture Apply roleHint passthrough; suggestions explicit section and truthIntent; shared-organise module. No schema change.
@@ -92,7 +91,7 @@ Branch classification: CURRENT
 
 Backup of the pre-merge integration tip: tag `backup/figma-ui-convergence-v1-bb17a46` → `bb17a46ae50232658f9fbc704bf8cf8466e5a1a0`.
 
-This documentation commit follows merge `af9b715`. The merge is the reconciliation. Do not merge draft PR #186.
+The reconciliation is merge `af9b715`. This documentation commit sits on top of it and does not change behaviour. Do not merge draft PR #186.
 
 ### 3.1 Conflict resolutions (main → integration)
 
