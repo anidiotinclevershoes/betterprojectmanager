@@ -358,7 +358,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 
 | Field | Value |
 | --- | --- |
-| **Status** | implemented on `integration/figma-ui-convergence-v1`. Hosted migration `20261012214638_v1_todo_person_history_usage.sql` is not applied. |
+| **Status** | implemented and applied on hosted Lume. Migration `20261012214638_v1_todo_person_history_usage` is in the ledger. Existing project, To Do, Person, and History identities were unchanged, legacy waiting notes were unchanged, and old To Dos started with no new person links. |
 | **Severity** | medium |
 | **Domain** | Todos / People |
 | **Found in** | UI convergence semantics lock, 25 September 2026 |
@@ -370,7 +370,7 @@ If timing is genuinely unclear, set **Target resolution / validation point** to 
 | **Regression test to add** | When the relationship exists: a To Do can reference two existing People by id, reload preserves both ids, and a string-only legacy `waiting_on` is not silently rewritten into those links |
 | **Target resolution / validation point** | People slice, before treating the Page 09 Waiting-on control as implemented |
 | **Related docs** | CD-009 in `docs/LUME_PRODUCT_DECISIONS.md`; D-008 |
-| **Notes** | CD-009 is the product rule. **12 Oct 2026:** `todo_waiting_people` stores zero or more existing stakeholder ids. `todos.waiting_on` stays the legacy note and is not derived from names. Edit To Do and Person name/role save through `save_todo_edit` and `save_person_identity`. Confirmed changes write `history_events` with `target_kind` `todo` or `person`. NULL targets stay unattributed. Settings is `/settings`. `record_workspace_analysis` counts a completed analysis. Paid allowance, price, and whether the count blocks analysis are still undecided. |
+| **Notes** | CD-009 is the product rule. **12 Oct 2026:** `todo_waiting_people` stores zero or more existing stakeholder ids. `todos.waiting_on` stays the legacy note and is not derived from names. Edit To Do and Person name/role save through `save_todo_edit` and `save_person_identity`. Confirmed changes write `history_events` with `target_kind` `todo` or `person`. NULL targets stay unattributed. Settings is `/settings`. `record_workspace_analysis` counts a completed analysis. Paid allowance, price, and whether the count blocks analysis are still undecided. **13 Oct 2026:** the migration was applied to hosted Lume with `supabase db push --skip-vault`. The three functions are security invoker. Execute is granted to `authenticated` and revoked from `public`. |
 
 ---
 
@@ -739,12 +739,12 @@ Move items here when fixed. Keep enough detail that regressions are recognizable
 
 | Field | Value |
 | --- | --- |
-| **Status** | CLOSED for the audit blocker. Hosted migrations are still not applied. |
+| **Status** | CLOSED for the audit blocker. The Issue migrations and `20261012214638_v1_todo_person_history_usage` are on the hosted Lume ledger. |
 | **Fixed in** | Final V1 convergence fix on `integration/figma-ui-convergence-v1` |
 | **Failure class** | Manual Add offered Detail for Issue and Knowledge, reported Save success, and dropped that text. Issue create wrote title only. Knowledge stored the title as the only body. |
 | **Fix summary** | Issue Detail maps to canonical `risks.notes` on create. Knowledge Manual Add offers one body and persists that string. No new column. The generic Close/Remove sentence is removed where those controls are absent. Ask “Lume noticed” uses the shared lightbulb. |
 | **Evidence** | `scripts/verify-manual-add-honesty.ts`; `e2e/manual-add-honesty.spec.ts` |
-| **Residual** | Previous-item Back and To Do lifecycle/History atomicity stay open. Paid analysis allowance is undecided. Hosted deployment of `20260929120000`, `20260929140000`, and `20261012214638_v1_todo_person_history_usage.sql` is still outstanding. |
+| **Residual** | Previous-item Back and To Do lifecycle/History atomicity stay open. Paid analysis allowance is undecided. Hosted Lume now includes `20260929120000`, `20260929140000`, and `20261012214638_v1_todo_person_history_usage`. |
 | **Related docs** | `docs/FIGMA_UI_CONVERGENCE_V1.md` |
 
 ### D-R56 — Prompt A can emit Left untouched (D-056)
