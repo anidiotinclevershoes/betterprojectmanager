@@ -77,13 +77,29 @@ const RULES = `Rules:
 - This same form is the first Review for a new project and a later Review for an existing project. The input may be collated onboarding notes plus the authoritative state. Propose creates only for truth the input establishes.
 - outcome=ready only when the operation, target, and values are safe to apply. Otherwise use needs_you, no_change, left_untouched, or commentary.`;
 
-export function buildProjectChangePrompt(args: {
-  source: string;
-  projectBlock: string;
-}): string {
+/**
+ * V5 adds a short completeness and intent addendum.
+ * V4's rules and builder stay the control. Production still calls V4 until a
+ * holdout comparison promotes V5.
+ */
+export const SHARED_ORGANISE_PROMPT_V5_VERSION = "shared-organise-form-v5";
+
+const V5_ADDENDUM = `Completeness and intent:
+- Every material clause in the input is its own change. If the input contains project content, changes must not be empty. When a clause is not safe to apply, emit needs_you or left_untouched for that clause. Do not drop it.
+- A material contradiction, where the input asserts a change and then withdraws or reverses it, is one needs_you change. Do not apply either side.
+- Confirmed facts and instructions may be ready. Suggestions, possibilities, questions, and hypothetical ownership are not confirmed participation. Do not ensure_person and do not confirm_responsibility for them. Use needs_you for an assignment that is not yet a fact.
+- ensure_person and confirm_responsibility stay separate. A responsibility about someone already on the project is confirm_responsibility only.
+- Two different full names are different people, even when they share a first name. Do not use needs_you only because of that shared first name.
+- A sentence with a former milestone date and a current date is a historical no_change plus a set_explicit update of the milestone the input names. Quote the words that name that milestone, and set targetId to that milestone.
+- Keep the distinguishing details the input states in a to-do title, including a stated month or qualifier.
+- An explicit delete or remove of a named existing record is that record's delete operation when its title appears in the evidence.
+- When the input says two named people share one scope, emit two confirm_responsibility changes with ownershipSemantics=share.
+- Restating a role, responsibility, or date that is already recorded is no_change, not an omitted change.`;
+
+function assembleProjectChangePrompt(rules: string, args: { source: string; projectBlock: string }): string {
   return `What project changes does this input propose, given the authoritative current project state?
 
-${RULES}
+${rules}
 
 Current authoritative project state:
 ${args.projectBlock}
@@ -95,6 +111,20 @@ ${args.source}
 
 Return JSON only, matching:
 ${PROJECT_CHANGE_FORM_SCHEMA}`;
+}
+
+export function buildProjectChangePrompt(args: {
+  source: string;
+  projectBlock: string;
+}): string {
+  return assembleProjectChangePrompt(RULES, args);
+}
+
+export function buildProjectChangePromptV5(args: {
+  source: string;
+  projectBlock: string;
+}): string {
+  return assembleProjectChangePrompt(`${RULES}\n${V5_ADDENDUM}`, args);
 }
 
 /** Production system message, recorded so the experiment can show it was not reused as the form prompt. */
