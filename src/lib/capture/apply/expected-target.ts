@@ -295,8 +295,19 @@ export function staleExpectedTargetReason(
         .filter((pid): pid is string => Boolean(pid))
         .sort()
         .join(",");
-      if (changed(expected.ownerIds, ownerIds)) {
-        return "That ownership target changed since Review. Capture again before applying.";
+      if (expected.replacePersonId) {
+        if (changed(expected.ownerIds, ownerIds)) {
+          return "That ownership target changed since Review. Capture again before applying.";
+        }
+      } else if (expected.ownerIds) {
+        const currentIds = new Set(ownerIds.split(",").filter(Boolean));
+        const reviewedOwnerMissing = expected.ownerIds
+          .split(",")
+          .filter(Boolean)
+          .some((id) => !currentIds.has(id));
+        if (reviewedOwnerMissing) {
+          return "That ownership target changed since Review. Capture again before applying.";
+        }
       }
     }
     if (expected.domain === "availability") {

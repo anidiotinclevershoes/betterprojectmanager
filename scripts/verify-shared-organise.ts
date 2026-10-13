@@ -334,6 +334,105 @@ async function main() {
     assert.ok(owners.some((row) => row.personName === "James Murphy"));
   });
 
+  await check("two owners named together both persist", async () => {
+    const joined = await applyReady(
+      experimentalMissionState(),
+      "Helen Ward has joined as county sponsor. Chris Ward has joined as facilities lead.",
+      form([
+        change({
+          operation: "ensure_person",
+          evidence: "Helen Ward has joined as county sponsor.",
+          values: { name: "Helen Ward", roleHint: "county sponsor" },
+        }),
+        change({
+          id: "chg-2",
+          operation: "ensure_person",
+          evidence: "Chris Ward has joined as facilities lead.",
+          values: { name: "Chris Ward", roleHint: "facilities lead" },
+        }),
+      ]),
+    );
+    const transcript = "Helen Ward and Chris Ward will share oversight of the loan agreement.";
+    const shared = await applyReady(
+      joined.state,
+      transcript,
+      form([
+        change({
+          operation: "confirm_responsibility",
+          evidence: transcript,
+          values: { personName: "Helen Ward", scope: "oversight of the loan agreement" },
+        }),
+        change({
+          id: "chg-2",
+          operation: "confirm_responsibility",
+          evidence: transcript,
+          values: { personName: "Chris Ward", scope: "oversight of the loan agreement" },
+        }),
+      ]),
+    );
+    const owners = buildSharedOrganiseContext({
+      world: captureApplyWorldFromState(shared.state),
+      projectId: PROJECT,
+      referenceDate: REF,
+    }).responsibilities.filter((row) => row.scope === "oversight of the loan agreement" && row.ownerConfirmed);
+    assert.deepEqual(owners.map((row) => row.personName).sort(), ["Chris Ward", "Helen Ward"]);
+
+    const mara = "Mara Ellison will share oversight of the loan agreement.";
+    const withMara = await applyReady(
+      shared.state,
+      "Mara Ellison has joined as lead archivist.",
+      form([
+        change({
+          operation: "ensure_person",
+          evidence: "Mara Ellison has joined as lead archivist.",
+          values: { name: "Mara Ellison", roleHint: "lead archivist" },
+        }),
+      ]),
+    );
+    const viewed = organise(
+      withMara.state,
+      mara,
+      form([
+        change({
+          operation: "confirm_responsibility",
+          evidence: mara,
+          values: {
+            personName: "Mara Ellison",
+            scope: "oversight of the loan agreement",
+            ownershipSemantics: "share",
+          },
+        }),
+      ]),
+    );
+    const card = viewed.cards.find((row) => row.readiness === "ready" && row.canApprove);
+    assert.ok(card);
+    const removed = structuredClone(withMara.state);
+    const knowledge = removed.knowledge?.find((row) => row.projectId === PROJECT);
+    const helen = knowledge?.structured?.find(
+      (item) =>
+        item.lifecycle === "current" &&
+        item.kind === "responsibility" &&
+        item.meta?.responsibility?.personName === "Helen Ward",
+    );
+    assert.ok(helen);
+    helen.lifecycle = "superseded";
+    const blocked = await applyApprovedCaptureSuggestion({
+      item: card.suggestion,
+      text: mara,
+      projectId: PROJECT,
+      expectedTarget: card.suggestion.expectedTarget,
+      loadWorkspace: async () => ({
+        workspaceId: "ws-shared-organise",
+        userId: "user-shared-organise",
+        state: removed,
+      }),
+      hooks: memoryCaptureApplyHooks({ state: structuredClone(removed) }),
+      reloadWorkspace: async () => removed,
+    });
+    assert.equal(blocked.executed.kind, "needs_you");
+    assert.match(blocked.executed.kind === "needs_you" ? blocked.executed.reason : "", /changed since Review/);
+  });
+
   await check("responsibility replace supersedes the named owner", async () => {
     const transcript = "James Murphy replaces Pippa Gumdrop as UAT lead.";
     const replaced = await applyReady(
