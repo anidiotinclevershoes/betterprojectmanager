@@ -13,6 +13,8 @@ import {
 
 export const SHARED_ORGANISE_MODEL = "gpt-6-luna";
 export const SHARED_ORGANISE_EXTRACT_PATH = "shared-organise/extractProjectChanges";
+/** Capture uses V5. Pass prompt: "v4" to call the preserved control. */
+export const DEFAULT_SHARED_ORGANISE_PROMPT = "v5" as const;
 
 export type SharedOrganiseExtraction = {
   rawModelJson: unknown;
@@ -53,12 +55,12 @@ function parseJsonObject(text: string): unknown {
 export async function extractProjectChangesWithLuna(args: {
   transcript: string;
   projectBlock: string;
-  /** Omitted calls stay on the V4 control. V5 is opt-in for the paired trial. */
+  /** Omit to use the selected prompt. Pass "v4" for the preserved control. */
   prompt?: "v4" | "v5";
 }): Promise<SharedOrganiseExtraction> {
   const key = getOpenAIKey();
   if (!key) throw new Error("OPENAI_API_KEY is not configured");
-  const useV5 = args.prompt === "v5";
+  const useV5 = (args.prompt ?? DEFAULT_SHARED_ORGANISE_PROMPT) === "v5";
   const prompt = (useV5 ? buildProjectChangePromptV5 : buildProjectChangePrompt)({
     source: args.transcript,
     projectBlock: args.projectBlock,

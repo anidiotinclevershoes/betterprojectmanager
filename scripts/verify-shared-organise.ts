@@ -28,6 +28,7 @@ import { buildSharedOrganiseContext } from "../src/lib/shared-organise/context";
 import { reviewProjectChangeForm, parseProjectChangeForm } from "../src/lib/shared-organise/validate";
 import { shiftIsoDate } from "../src/lib/shared-organise/date";
 import { sharedOrganiseTrialAllowed } from "../src/lib/shared-organise/trial-access";
+import { DEFAULT_SHARED_ORGANISE_PROMPT } from "../src/lib/shared-organise/extract";
 
 const PROJECT = CANDYLAND_ID;
 const REF = "2026-10-03";
@@ -764,6 +765,7 @@ async function main() {
     assert.equal(run.reviewed.filter((row) => row.operation?.type === "ensure_person").length, 1);
     assert.match(buildProjectChangePrompt({ source: collated, projectBlock: run.projectBlock }), /materialUncertainty/);
     assert.equal(SHARED_ORGANISE_PROMPT_VERSION, "shared-organise-form-v4");
+    assert.equal(DEFAULT_SHARED_ORGANISE_PROMPT, "v5");
     assert.equal(SHARED_ORGANISE_PROMPT_V5_VERSION, "shared-organise-form-v5");
     const sample = { source: "Mara owns the strongroom.", projectBlock: "Project: Archive" };
     const v4 = buildProjectChangePrompt(sample);
