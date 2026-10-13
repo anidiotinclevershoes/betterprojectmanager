@@ -16,7 +16,12 @@ import { experimentalMissionState } from "../src/lib/eval-capture-v2/mission-sta
 import { CANDYLAND_ID, experimentalApplyWorld } from "../src/lib/experiments/worlds";
 import type { MissionState } from "../src/lib/types";
 import { isSharedOrganiseEnabled } from "../src/lib/shared-organise/flag";
-import { SHARED_ORGANISE_PROMPT_VERSION, buildProjectChangePrompt } from "../src/lib/shared-organise/prompt";
+import {
+  SHARED_ORGANISE_PROMPT_VERSION,
+  SHARED_ORGANISE_PROMPT_V5_VERSION,
+  buildProjectChangePrompt,
+  buildProjectChangePromptV5,
+} from "../src/lib/shared-organise/prompt";
 import { organiseNewProjectPacket } from "../src/lib/shared-organise/new-project";
 import { runSharedOrganiseFromModelJson } from "../src/lib/shared-organise/run";
 import { buildSharedOrganiseContext } from "../src/lib/shared-organise/context";
@@ -758,6 +763,13 @@ async function main() {
     assert.equal(run.reviewed.filter((row) => row.operation?.type === "ensure_person").length, 1);
     assert.match(buildProjectChangePrompt({ source: collated, projectBlock: run.projectBlock }), /materialUncertainty/);
     assert.equal(SHARED_ORGANISE_PROMPT_VERSION, "shared-organise-form-v4");
+    assert.equal(SHARED_ORGANISE_PROMPT_V5_VERSION, "shared-organise-form-v5");
+    const sample = { source: "Mara owns the strongroom.", projectBlock: "Project: Archive" };
+    const v4 = buildProjectChangePrompt(sample);
+    const v5 = buildProjectChangePromptV5(sample);
+    assert.equal(v4.includes("material contradiction"), false);
+    assert.equal(v5.includes("material contradiction"), true);
+    assert.ok(v5.startsWith(v4.slice(0, 80)));
     const parsed = parseProjectChangeForm(form([]));
     assert.deepEqual(
       reviewProjectChangeForm({
