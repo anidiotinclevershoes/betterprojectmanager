@@ -6,7 +6,9 @@ import { getOpenAIKey, withOpenAiChatPrivacy } from "@/lib/openai";
 import {
   SHARED_ORGANISE_SYSTEM_MESSAGE,
   SHARED_ORGANISE_PROMPT_VERSION,
+  SHARED_ORGANISE_PROMPT_V5_VERSION,
   buildProjectChangePrompt,
+  buildProjectChangePromptV5,
 } from "./prompt";
 
 export const SHARED_ORGANISE_MODEL = "gpt-6-luna";
@@ -51,10 +53,13 @@ function parseJsonObject(text: string): unknown {
 export async function extractProjectChangesWithLuna(args: {
   transcript: string;
   projectBlock: string;
+  /** Omitted calls stay on the V4 control. V5 is opt-in for the paired trial. */
+  prompt?: "v4" | "v5";
 }): Promise<SharedOrganiseExtraction> {
   const key = getOpenAIKey();
   if (!key) throw new Error("OPENAI_API_KEY is not configured");
-  const prompt = buildProjectChangePrompt({
+  const useV5 = args.prompt === "v5";
+  const prompt = (useV5 ? buildProjectChangePromptV5 : buildProjectChangePrompt)({
     source: args.transcript,
     projectBlock: args.projectBlock,
   });
@@ -115,7 +120,7 @@ export async function extractProjectChangesWithLuna(args: {
           : SHARED_ORGANISE_MODEL,
       provider: "openai",
       promptId: "shared-organise-form",
-      promptVersion: SHARED_ORGANISE_PROMPT_VERSION,
+      promptVersion: useV5 ? SHARED_ORGANISE_PROMPT_V5_VERSION : SHARED_ORGANISE_PROMPT_VERSION,
       path: SHARED_ORGANISE_EXTRACT_PATH,
       fallback: false,
       changeCount: changes,

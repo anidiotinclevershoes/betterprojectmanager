@@ -27,6 +27,7 @@ import { runSharedOrganiseFromModelJson } from "../src/lib/shared-organise/run";
 import { buildSharedOrganiseContext } from "../src/lib/shared-organise/context";
 import { reviewProjectChangeForm, parseProjectChangeForm } from "../src/lib/shared-organise/validate";
 import { shiftIsoDate } from "../src/lib/shared-organise/date";
+import { sharedOrganiseTrialAllowed } from "../src/lib/shared-organise/trial-access";
 
 const PROJECT = CANDYLAND_ID;
 const REF = "2026-10-03";
@@ -770,6 +771,10 @@ async function main() {
     assert.equal(v4.includes("material contradiction"), false);
     assert.equal(v5.includes("material contradiction"), true);
     assert.ok(v5.startsWith(v4.slice(0, 80)));
+    assert.equal(sharedOrganiseTrialAllowed({ VERCEL_ENV: "production", NODE_ENV: "production" }), false);
+    assert.equal(sharedOrganiseTrialAllowed({ VERCEL_ENV: "preview", NODE_ENV: "production" }), true);
+    assert.equal(sharedOrganiseTrialAllowed({ NODE_ENV: "development" }), true);
+    assert.equal(sharedOrganiseTrialAllowed({ NODE_ENV: "production" }), false);
     const parsed = parseProjectChangeForm(form([]));
     assert.deepEqual(
       reviewProjectChangeForm({

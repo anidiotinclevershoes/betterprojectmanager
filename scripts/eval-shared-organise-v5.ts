@@ -8,6 +8,9 @@
  * is recorded as unknown rather than estimated.
  *
  * Run: npx tsx scripts/eval-shared-organise-v5.ts
+ * Simplified paired run through the preview key:
+ *   npx tsx scripts/eval-shared-organise-v5.ts --simple --via preview
+ *   LUME_V5_TRIAL_BASE must be the preview that contains this route.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { getOpenAIKey, withOpenAiChatPrivacy } from "../src/lib/openai";
@@ -25,6 +28,25 @@ import type { ReviewedChange } from "../src/lib/shared-organise/validate";
 import { V5_CASES, type CaseExpect, type V5Case } from "./shared-organise-v5-cases";
 
 const CEILING_USD = 8;
+const SIMPLE_IDS = [
+  "s20",
+  "s27",
+  "s29",
+  "s31",
+  "s44",
+  "s52",
+  "s53",
+  "s82",
+  "s95",
+  "s96",
+  "o-contradiction",
+  "o-hedge",
+  "o-distinct-name",
+  "o-former-date",
+  "o-share",
+  "o-back",
+  "s-share",
+];
 const USD_PER_TOKEN_IN = 0.1 / 1_000_000;
 const USD_PER_TOKEN_OUT = 0.5 / 1_000_000;
 const OUT = "/opt/cursor/artifacts";
@@ -106,12 +128,63 @@ type Trial = {
   error?: string;
 };
 
-async function callModel(prompt: string): Promise<{
+type CallResult = {
   json: unknown;
   promptTokens: number | null;
   completionTokens: number | null;
   elapsedMs: number;
-}> {
+  promptVersion?: string;
+};
+
+const previewJar = new Map<string, string>();
+
+function previewBase() {
+  const base = process.env.LUME_V5_TRIAL_BASE?.replace(/\/$/, "") ?? "";
+  if (!base) throw new Error("LUME_V5_TRIAL_BASE is not set");
+  return base;
+}
+
+function storeCookies(response: Response) {
+  const cookies = typeof response.headers.getSetCookie === "function" ? response.headers.getSetCookie() : [];
+  for (const cookie of cookies) {
+    const pair = cookie.split(";")[0] ?? "";
+    const eq = pair.indexOf("=");
+    if (eq > 0) previewJar.set(pair.slice(0, eq), pair.slice(eq + 1));
+  }
+}
+
+async function previewFetch(path: string, body?: unknown) {
+  const headers: Record<string, string> = {
+    "x-vercel-protection-bypass": process.env.LUME_E2E_VERCEL_BYPASS_SECRET ?? "",
+    "x-vercel-set-bypass-cookie": "true",
+  };
+  if (body) headers["content-type"] = "application/json";
+  const cookie = [...previewJar.entries()].map(([key, value]) => `${key}=${value}`).join("; ");
+  if (cookie) headers.cookie = cookie;
+  const response = await fetch(previewBase() + path, {
+    method: body ? "POST" : "GET",
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+    redirect: "manual",
+  });
+  storeCookies(response);
+  const text = await response.text();
+  return { status: response.status, text };
+}
+
+async function loginPreview() {
+  const warmup = await previewFetch("/");
+  if (warmup.status >= 400 && warmup.status !== 307) {
+    throw new Error(`preview warmup ${warmup.status}`);
+  }
+  const login = await previewFetch("/api/auth/login", {
+    email: process.env.LUME_E2E_EMAIL ?? "",
+    password: process.env.LUME_E2E_PASSWORD ?? "",
+  });
+  if (login.status !== 200) throw new Error(`preview login ${login.status} ${login.text.slice(0, 120)}`);
+}
+
+async function callDirect(prompt: string): Promise<CallResult> {
   const key = getOpenAIKey();
   if (!key) throw new Error("OPENAI_API_KEY is not configured");
   const started = Date.now();
@@ -131,7 +204,7 @@ async function callModel(prompt: string): Promise<{
   });
   const elapsedMs = Date.now() - started;
   const text = await response.text();
-  if (!response.ok) throw new Error(`OpenAI ${response.status}: ${text.slice(0, 240)}`);
+  if (!response.ok) throw new Error(`OpenAI ${response.status}: ${text.replace(/sk-[A-Za-z0-9_-]+/g, "sk-redacted").slice(0, 240)}`);
   const data = JSON.parse(text) as {
     choices?: Array<{ message?: { content?: string } }>;
     usage?: { prompt_tokens?: number; completion_tokens?: number };
@@ -142,6 +215,40 @@ async function callModel(prompt: string): Promise<{
     promptTokens: data.usage?.prompt_tokens ?? null,
     completionTokens: data.usage?.completion_tokens ?? null,
     elapsedMs,
+  };
+}
+
+async function callPreview(version: Version, source: string, projectBlock: string): Promise<CallResult> {
+  let last = { status: 0, text: "" };
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    last = await previewFetch("/api/dev/shared-organise-trial", { version, source, projectBlock });
+    if (last.status !== 429) break;
+    let retryAt = Number.NaN;
+    try {
+      retryAt = Date.parse((JSON.parse(last.text) as { retryAt?: string }).retryAt ?? "");
+    } catch {
+      retryAt = Number.NaN;
+    }
+    const wait = Math.min(70 * 60 * 1000, Math.max(1500, (Number.isFinite(retryAt) ? retryAt : Date.now() + 15_000) - Date.now() + 1000));
+    console.log(`rate limit, waiting ${Math.ceil(wait / 1000)}s`);
+    await new Promise((resolve) => setTimeout(resolve, wait));
+  }
+  if (last.status !== 200) {
+    throw new Error(`preview trial ${last.status}: ${last.text.replace(/sk-[A-Za-z0-9_-]+/g, "sk-redacted").slice(0, 240)}`);
+  }
+  const data = JSON.parse(last.text) as {
+    json?: unknown;
+    promptTokens?: number | null;
+    completionTokens?: number | null;
+    elapsedMs?: number;
+    promptVersion?: string;
+  };
+  return {
+    json: data.json ?? null,
+    promptTokens: data.promptTokens ?? null,
+    completionTokens: data.completionTokens ?? null,
+    elapsedMs: data.elapsedMs ?? 0,
+    promptVersion: data.promptVersion,
   };
 }
 
@@ -176,6 +283,9 @@ function summarise(trials: Trial[], version: Version, set?: V5Case["set"]) {
 
 async function main() {
   mkdirSync(OUT, { recursive: true });
+  const simple = process.argv.includes("--simple");
+  const viaPreview = process.argv.includes("--via") && process.argv[process.argv.indexOf("--via") + 1] === "preview";
+  if (viaPreview) await loginPreview();
   const trials: Trial[] = [];
   let spent = 0;
   let usageMissing = 0;
@@ -184,17 +294,27 @@ async function main() {
     v4: buildProjectChangePrompt,
     v5: buildProjectChangePromptV5,
   } as const;
+  const cases = simple ? V5_CASES.filter((item) => SIMPLE_IDS.includes(item.id)) : V5_CASES;
+  if (simple && cases.length !== SIMPLE_IDS.length) {
+    throw new Error(`simple set missing ${SIMPLE_IDS.filter((id) => !cases.some((item) => item.id === id)).join(",")}`);
+  }
 
-  for (const item of V5_CASES) {
+  for (const item of cases) {
     for (const version of ["v4", "v5"] as const) {
-      for (let trial = 1; trial <= item.trials; trial += 1) {
+      const trialCount = simple ? 1 : item.trials;
+      for (let trial = 1; trial <= trialCount; trial += 1) {
         if (spent >= CEILING_USD) {
           aborted = "ceiling";
           break;
         }
         const context = buildSharedOrganiseContext({ world: item.world, projectId: item.projectId, referenceDate: "2026-10-13" });
         try {
-          const called = await callModel(builders[version]({ source: item.transcript, projectBlock: context.prompt }));
+          const called = viaPreview
+            ? await callPreview(version, item.transcript, context.prompt)
+            : await callDirect(builders[version]({ source: item.transcript, projectBlock: context.prompt }));
+          if (called.promptVersion && called.promptVersion !== (version === "v5" ? SHARED_ORGANISE_PROMPT_V5_VERSION : SHARED_ORGANISE_PROMPT_VERSION)) {
+            throw new Error(`prompt version ${called.promptVersion} did not match ${version}`);
+          }
           if (called.promptTokens == null || called.completionTokens == null) usageMissing += 1;
           else spent += called.promptTokens * USD_PER_TOKEN_IN + called.completionTokens * USD_PER_TOKEN_OUT;
           const run = runSharedOrganiseFromModelJson({
@@ -250,6 +370,8 @@ async function main() {
     aborted,
     model: SHARED_ORGANISE_MODEL,
     versions: { v4: SHARED_ORGANISE_PROMPT_VERSION, v5: SHARED_ORGANISE_PROMPT_V5_VERSION },
+    simple,
+    via: viaPreview ? "preview" : "direct",
     note: "Replay scores are paired on reconstructed prefixes. They are not the sequential 84/100 live result.",
     bySet: (["replay", "historical", "holdout", "safety"] as const).map((set) => ({
       set,
