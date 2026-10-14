@@ -1,0 +1,108 @@
+{
+  "caseId": "new-person",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2316,
+  "usage": {
+    "prompt_tokens": 1126,
+    "completion_tokens": 253,
+    "total_tokens": 1379,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+          "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+          "domain": "person",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "proposedValues": {
+            "name": "Velvet Sprocket"
+          }
+        },
+        {
+          "id": "obs-2",
+          "statement": "Velvet Sprocket is the paint lead for the wooden-track refresh.",
+          "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+          "domain": "responsibility",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "proposedValues": {
+            "personName": "Velvet Sprocket",
+            "scope": "paint lead for the wooden-track refresh",
+            "ownershipSemantics": "replace"
+          }
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "person",
+        "disposition": "create_new",
+        "statement": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "ensure_person",
+        "reason": null
+      },
+      {
+        "id": "obs-2",
+        "domain": "responsibility",
+        "disposition": "create_new",
+        "statement": "Velvet Sprocket is the paint lead for the wooden-track refresh.",
+        "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+        "candidateTargetId": null,
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "Replacement needs a confirmed current owner. Confirm before Lume changes ownership."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Velvet Sprocket"
+      },
+      "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Velvet Sprocket is the paint lead for the wooden-track refresh.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "personName": "Velvet Sprocket",
+        "scope": "paint lead for the wooden-track refresh",
+        "ownershipSemantics": "replace"
+      },
+      "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+      "ambiguity": "Replacement needs a confirmed current owner. Confirm before Lume changes ownership.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

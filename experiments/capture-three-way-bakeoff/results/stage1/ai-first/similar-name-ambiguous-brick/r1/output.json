@@ -1,0 +1,57 @@
+{
+  "caseId": "similar-name-ambiguous-brick",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 7744,
+  "usage": {
+    "prompt_tokens": 849,
+    "completion_tokens": 226,
+    "total_tokens": 1075,
+    "reasoning_tokens": 72
+  },
+  "raw": {
+    "snapshotChars": 612,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Call about the track map",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Brick called about the track map.",
+          "understood": "A call about the track map is mentioned, but no project change is stated.",
+          "question": null,
+          "leftUntouchedReason": "No explicit action, outcome, or change to current truth is provided."
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Call about the track map",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Brick called about the track map.",
+      "ambiguity": "No explicit action, outcome, or change to current truth is provided.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

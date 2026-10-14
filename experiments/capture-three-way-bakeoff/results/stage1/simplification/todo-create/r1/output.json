@@ -1,0 +1,69 @@
+{
+  "caseId": "todo-create",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1971,
+  "usage": {
+    "prompt_tokens": 1136,
+    "completion_tokens": 122,
+    "total_tokens": 1258,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "A to-do needs to be added to polish the candy-cane banners.",
+          "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "title": "Polish the candy-cane banners"
+          }
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "todo",
+        "disposition": "create_new",
+        "statement": "A to-do needs to be added to polish the candy-cane banners.",
+        "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_todo",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "A to-do needs to be added to polish the candy-cane banners.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Polish the candy-cane banners"
+      },
+      "evidence": "Please add a to-do to polish the candy-cane banners before the float leaves.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

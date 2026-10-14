@@ -1,0 +1,24 @@
+{
+  "caseId": "similar-name-other-brick",
+  "contender": "ai-first",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "brick-willow",
+      "meaning": "Brick Willow is the named person.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": true,
+      "wrongIdentity": true,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": false,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "create write=yes id=omitted"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

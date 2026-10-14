@@ -1,0 +1,104 @@
+{
+  "caseId": "explicit-no-change",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2120,
+  "usage": {
+    "prompt_tokens": 1126,
+    "completion_tokens": 259,
+    "total_tokens": 1385,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Nothing has changed on Toyworld this week.",
+          "evidence": "Nothing has changed on Toyworld this week.",
+          "domain": "commentary",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {},
+          "commentary": "The statement indicates that the current state of the project remains unchanged.",
+          "modelConfidence": 0
+        },
+        {
+          "id": "obs-2",
+          "statement": "Leave the records as they are.",
+          "evidence": "Leave the records as they are.",
+          "domain": "commentary",
+          "disposition": "no_change",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {},
+          "commentary": "This reinforces that no updates are needed to the project records.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "no_change",
+        "statement": "Nothing has changed on Toyworld this week.",
+        "evidence": "Nothing has changed on Toyworld this week.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      },
+      {
+        "id": "obs-2",
+        "domain": "commentary",
+        "disposition": "no_change",
+        "statement": "Leave the records as they are.",
+        "evidence": "Leave the records as they are.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "Nothing has changed on Toyworld this week.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Nothing has changed on Toyworld this week.",
+      "ambiguity": "The statement indicates that the current state of the project remains unchanged.",
+      "disposition": "no_change",
+      "writeProposed": false
+    },
+    {
+      "domain": "commentary",
+      "subject": "Leave the records as they are.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Leave the records as they are.",
+      "ambiguity": "This reinforces that no updates are needed to the project records.",
+      "disposition": "no_change",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

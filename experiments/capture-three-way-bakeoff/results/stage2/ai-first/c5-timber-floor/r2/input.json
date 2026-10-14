@@ -1,0 +1,123 @@
+{
+  "caseId": "c5-timber-floor",
+  "captureText": "The asbestos survey addendum came back clean. Close that chase. Raise a risk that the hall timber floor may still hide services.",
+  "projectId": "proj-riverside-c5",
+  "world": {
+    "projectIds": [
+      "proj-riverside-c5"
+    ],
+    "projects": [
+      {
+        "id": "proj-riverside-c5",
+        "name": "Riverside Civic Hall Fit-Out",
+        "code": "RCH",
+        "stakeholders": [
+          {
+            "id": "person-helen",
+            "name": "Helen Ward",
+            "role": "client project manager"
+          },
+          {
+            "id": "person-james",
+            "name": "James Okonkwo",
+            "role": "principal contractor"
+          },
+          {
+            "id": "person-nadia",
+            "name": "Nadia Rahman",
+            "role": "interior designer"
+          },
+          {
+            "id": "person-tomos-ellis",
+            "name": "Tomos Ellis",
+            "role": "building control"
+          },
+          {
+            "id": "person-mei",
+            "name": "Mei Chen",
+            "role": ""
+          }
+        ]
+      }
+    ],
+    "risks": [
+      {
+        "id": "risk-dda",
+        "projectId": "proj-riverside-c5",
+        "title": "DDA access ramp detail outstanding",
+        "status": "open"
+      },
+      {
+        "id": "risk-me",
+        "projectId": "proj-riverside-c5",
+        "title": "M&E first-fix coordination with the hall ceiling void",
+        "status": "open"
+      }
+    ],
+    "todos": [
+      {
+        "id": "todo-riba",
+        "projectId": "proj-riverside-c5",
+        "title": "Issue the RIBA Stage 4 drawing pack to James",
+        "done": false
+      },
+      {
+        "id": "todo-ffe",
+        "projectId": "proj-riverside-c5",
+        "title": "Book the FF&E sample review with Nadia",
+        "done": false
+      },
+      {
+        "id": "todo-asbestos",
+        "projectId": "proj-riverside-c5",
+        "title": "Chase the asbestos survey addendum",
+        "done": false
+      }
+    ],
+    "timeline": [
+      {
+        "id": "ms-mobilisation",
+        "projectId": "proj-riverside-c5",
+        "label": "Site mobilisation",
+        "startAt": "2026-10-06T12:00:00.000Z"
+      },
+      {
+        "id": "ms-walkthrough",
+        "projectId": "proj-riverside-c5",
+        "label": "Client walk-through",
+        "startAt": "2026-10-20T12:00:00.000Z"
+      },
+      {
+        "id": "ms-pc",
+        "projectId": "proj-riverside-c5",
+        "label": "Practical completion",
+        "startAt": "2026-12-12T12:00:00.000Z"
+      }
+    ],
+    "knowledge": [
+      {
+        "projectId": "proj-riverside-c5",
+        "sections": {
+          "people": []
+        },
+        "structured": [
+          {
+            "id": "know-timber",
+            "kind": "fact",
+            "lifecycle": "current",
+            "body": "Working assumption: the existing timber floor in the hall stays.",
+            "meta": null
+          },
+          {
+            "id": "know-rams",
+            "kind": "fact",
+            "lifecycle": "current",
+            "body": "RAMS must be approved before any ceiling void work.",
+            "meta": null
+          }
+        ]
+      }
+    ]
+  },
+  "apply": false
+}

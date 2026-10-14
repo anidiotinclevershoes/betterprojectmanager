@@ -1,0 +1,39 @@
+{
+  "caseId": "responsibility-replacement",
+  "contender": "current",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "producer-replace",
+      "meaning": "Producer moves from Pixel Ramos to Nova Quill (replace, not share).",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": true,
+      "clearAutomationOk": null,
+      "justifiedIntervention": true,
+      "unnecessaryIntervention": false,
+      "note": "needs_you write=no id=person-pixel"
+    },
+    {
+      "factId": "nova-mentioned",
+      "meaning": "Nova Quill is introduced in this ownership change.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": null,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "needs_you write=no id=person-pixel"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

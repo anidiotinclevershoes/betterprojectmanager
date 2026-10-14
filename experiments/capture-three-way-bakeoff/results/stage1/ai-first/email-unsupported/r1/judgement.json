@@ -1,0 +1,24 @@
+{
+  "caseId": "email-unsupported",
+  "contender": "ai-first",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "email-committee",
+      "meaning": "Email request is unsupported capability.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": null,
+      "justifiedIntervention": true,
+      "unnecessaryIntervention": false,
+      "note": "left_untouched write=no id=omitted"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

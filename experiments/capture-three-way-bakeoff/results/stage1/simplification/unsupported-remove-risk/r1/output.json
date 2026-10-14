@@ -1,0 +1,73 @@
+{
+  "caseId": "unsupported-remove-risk",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1575,
+  "usage": {
+    "prompt_tokens": 1117,
+    "completion_tokens": 148,
+    "total_tokens": 1265,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Delete the Packaging delay risk.",
+          "evidence": "Please delete the Packaging delay risk.",
+          "domain": "risk",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-toy",
+          "candidateTargetId": "risk-packaging",
+          "candidateTargetTitle": "Packaging delay",
+          "proposedValues": {
+            "title": "Packaging delay"
+          },
+          "commentary": "The request to delete the risk indicates a change to the existing risk record.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "update_existing",
+        "statement": "Delete the Packaging delay risk.",
+        "evidence": "Please delete the Packaging delay risk.",
+        "candidateTargetId": "risk-packaging",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Risk update is not specific enough to apply automatically."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": {
+        "title": "Packaging delay"
+      },
+      "evidence": "Please delete the Packaging delay risk.",
+      "ambiguity": "The request to delete the risk indicates a change to the existing risk record.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

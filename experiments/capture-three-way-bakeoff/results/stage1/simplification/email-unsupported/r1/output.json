@@ -1,0 +1,70 @@
+{
+  "caseId": "email-unsupported",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1708,
+  "usage": {
+    "prompt_tokens": 1130,
+    "completion_tokens": 156,
+    "total_tokens": 1286,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The parade committee needs to be emailed about the new date.",
+          "evidence": "Please email the whole parade committee about the new date.",
+          "domain": "commentary",
+          "disposition": "left_untouched",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "candidateTargetId": "",
+          "candidateTargetTitle": "",
+          "mergeWithObservationId": "",
+          "proposedValues": {},
+          "commentary": "It isn't clear what the new date is or if any specific actions are required beyond emailing.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "left_untouched",
+        "statement": "The parade committee needs to be emailed about the new date.",
+        "evidence": "Please email the whole parade committee about the new date.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "It isn't clear what the new date is or if any specific actions are required beyond emailing."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "The parade committee needs to be emailed about the new date.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Please email the whole parade committee about the new date.",
+      "ambiguity": "It isn't clear what the new date is or if any specific actions are required beyond emailing.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

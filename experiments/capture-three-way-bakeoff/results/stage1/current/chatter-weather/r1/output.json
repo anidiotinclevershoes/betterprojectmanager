@@ -1,0 +1,69 @@
+{
+  "caseId": "chatter-weather",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1946,
+  "usage": {
+    "prompt_tokens": 1133,
+    "completion_tokens": 139,
+    "total_tokens": 1272,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The weather will be nice on Friday.",
+          "evidence": "I think the weather will be nice on Friday, nothing project related.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {},
+          "commentary": "The statement about the weather is not project-related.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "commentary",
+        "statement": "The weather will be nice on Friday.",
+        "evidence": "I think the weather will be nice on Friday, nothing project related.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "The weather will be nice on Friday.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "I think the weather will be nice on Friday, nothing project related.",
+      "ambiguity": "The statement about the weather is not project-related.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,68 @@
+{
+  "caseId": "new-person",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8924,
+  "usage": {
+    "prompt_tokens": 822,
+    "completion_tokens": 247,
+    "total_tokens": 1069,
+    "reasoning_tokens": 88
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "create",
+          "domain": "person",
+          "targetCanonicalId": null,
+          "subject": "Velvet Sprocket",
+          "proposedValues": {
+            "name": "Velvet Sprocket",
+            "personName": "Velvet Sprocket",
+            "title": "paint lead",
+            "date": null,
+            "status": null,
+            "scope": "wooden-track refresh",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+          "understood": "Velvet Sprocket is joining the project as paint lead for the wooden-track refresh.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "person",
+      "subject": "Velvet Sprocket",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Velvet Sprocket",
+        "personName": "Velvet Sprocket",
+        "title": "paint lead",
+        "date": null,
+        "status": null,
+        "scope": "wooden-track refresh",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Velvet Sprocket is joining as paint lead for the wooden-track refresh.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

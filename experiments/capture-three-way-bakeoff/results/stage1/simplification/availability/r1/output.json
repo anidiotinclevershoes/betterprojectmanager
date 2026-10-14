@@ -1,0 +1,77 @@
+{
+  "caseId": "availability",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2348,
+  "usage": {
+    "prompt_tokens": 1139,
+    "completion_tokens": 191,
+    "total_tokens": 1330,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+          "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+          "domain": "availability",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-fizz",
+          "candidateTargetTitle": "Fizz Caramel",
+          "proposedValues": {
+            "personName": "Fizz Caramel",
+            "awayFromIso": "2026-10-05",
+            "awayToIso": "2026-10-12"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "availability",
+        "disposition": "update_existing",
+        "statement": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+        "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+        "candidateTargetId": "person-fizz",
+        "decisionKind": "write",
+        "writeType": "write_availability",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "availability",
+      "subject": "Fizz Caramel",
+      "referencedCanonicalId": "person-fizz",
+      "assertedValue": {
+        "personName": "Fizz Caramel",
+        "awayFromIso": "2026-10-05",
+        "awayToIso": "2026-10-12"
+      },
+      "evidence": "Fizz Caramel is away from 5 October 2026 until 12 October 2026.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

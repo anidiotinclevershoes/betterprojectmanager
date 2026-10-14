@@ -1,0 +1,57 @@
+{
+  "caseId": "vague-parade",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4844,
+  "usage": {
+    "prompt_tokens": 869,
+    "completion_tokens": 147,
+    "total_tokens": 1016,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Worry about the parade",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "I'm a bit worried about the parade.",
+          "understood": "A vague concern was expressed without a named project change.",
+          "question": null,
+          "leftUntouchedReason": "Vague worry without a specific risk or named change cannot safely become a project operation."
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Worry about the parade",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "I'm a bit worried about the parade.",
+      "ambiguity": "Vague worry without a specific risk or named change cannot safely become a project operation.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

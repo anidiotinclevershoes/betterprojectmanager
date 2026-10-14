@@ -1,0 +1,73 @@
+{
+  "caseId": "todo-dated-canes",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1841,
+  "usage": {
+    "prompt_tokens": 1138,
+    "completion_tokens": 166,
+    "total_tokens": 1304,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "A to-do needs to be added to collect the candy canes.",
+          "evidence": "Please add a to-do to collect the candy canes on 18 October 2026.",
+          "domain": "todo",
+          "disposition": "create_new",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "proposedValues": {
+            "title": "Collect the candy canes",
+            "date": "2026-10-18"
+          },
+          "commentary": "The request to add a to-do is not an authoritative statement about the current project state.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "todo",
+        "disposition": "create_new",
+        "statement": "A to-do needs to be added to collect the candy canes.",
+        "evidence": "Please add a to-do to collect the candy canes on 18 October 2026.",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_todo",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "todo",
+      "subject": "Collect the candy canes",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Collect the candy canes",
+        "date": "2026-10-18"
+      },
+      "evidence": "Please add a to-do to collect the candy canes on 18 October 2026.",
+      "ambiguity": "The request to add a to-do is not an authoritative statement about the current project state.",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

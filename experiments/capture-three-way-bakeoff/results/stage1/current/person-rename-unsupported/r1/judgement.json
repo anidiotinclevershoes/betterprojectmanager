@@ -1,0 +1,24 @@
+{
+  "caseId": "person-rename-unsupported",
+  "contender": "current",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "rename-pippa",
+      "meaning": "Rename is unsupported. Do not create Sugarplum.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": null,
+      "justifiedIntervention": true,
+      "unnecessaryIntervention": false,
+      "note": "needs_you write=no id=person-gumdrop"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

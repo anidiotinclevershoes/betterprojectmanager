@@ -1,0 +1,75 @@
+{
+  "caseId": "valid-canonical-id",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1972,
+  "usage": {
+    "prompt_tokens": 1135,
+    "completion_tokens": 163,
+    "total_tokens": 1298,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Parade day moved to 22 October 2026.",
+          "evidence": "Update ms-parade: Parade day moved to 22 October 2026.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {
+            "label": "Parade day",
+            "date": "2026-10-22"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "update_existing",
+        "statement": "Parade day moved to 22 October 2026.",
+        "evidence": "Update ms-parade: Parade day moved to 22 October 2026.",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "write",
+        "writeType": "update_milestone",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "label": "Parade day",
+        "date": "2026-10-22"
+      },
+      "evidence": "Update ms-parade: Parade day moved to 22 October 2026.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

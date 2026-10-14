@@ -1,0 +1,205 @@
+{
+  "caseId": "share-vs-replace-ambiguous",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 3086,
+  "usage": {
+    "prompt_tokens": 1144,
+    "completion_tokens": 346,
+    "total_tokens": 1490,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+          "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-fizz",
+          "candidateTargetTitle": "Fizz Caramel",
+          "proposedValues": {
+            "personName": "Pippa Gumdrop",
+            "scope": "UAT",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "It's unclear whether Fizz Caramel will take UAT or share it with Pippa Gumdrop."
+        },
+        {
+          "id": "obs-2",
+          "statement": "They might share UAT.",
+          "evidence": "or they might share it — the parade committee was unclear.",
+          "domain": "responsibility",
+          "disposition": "ambiguous",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "candidateTargetId": "person-fizz",
+          "candidateTargetTitle": "Fizz Caramel",
+          "proposedValues": {
+            "personName": "Pippa Gumdrop",
+            "scope": "UAT",
+            "ownershipSemantics": "ambiguous"
+          },
+          "commentary": "It's unclear whether Fizz Caramel will take UAT or share it with Pippa Gumdrop."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+        "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+        "candidateTargetId": "person-fizz",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It's unclear whether Fizz Caramel will take UAT or share it with Pippa Gumdrop."
+      },
+      {
+        "id": "obs-2",
+        "domain": "responsibility",
+        "disposition": "ambiguous",
+        "statement": "They might share UAT.",
+        "evidence": "or they might share it — the parade committee was unclear.",
+        "candidateTargetId": "person-fizz",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "It's unclear whether Fizz Caramel will take UAT or share it with Pippa Gumdrop."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Fizz Caramel",
+      "referencedCanonicalId": "person-fizz",
+      "assertedValue": {
+        "personName": "Pippa Gumdrop",
+        "scope": "UAT",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "Fizz Caramel might take UAT from Pippa Gumdrop.",
+      "ambiguity": "It's unclear whether Fizz Caramel will take UAT or share it with Pippa Gumdrop.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "responsibility",
+      "subject": "Fizz Caramel",
+      "referencedCanonicalId": "person-fizz",
+      "assertedValue": {
+        "personName": "Pippa Gumdrop",
+        "scope": "UAT",
+        "ownershipSemantics": "ambiguous"
+      },
+      "evidence": "or they might share it — the parade committee was unclear.",
+      "ambiguity": "It's unclear whether Fizz Caramel will take UAT or share it with Pippa Gumdrop.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": {
+    "writesAttempted": 0,
+    "writesExecuted": 0,
+    "before": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    },
+    "after": {
+      "projectId": "proj-candy",
+      "people": [
+        {
+          "id": "person-gumdrop",
+          "name": "Pippa Gumdrop",
+          "role": "UAT lead"
+        },
+        {
+          "id": "person-fizz",
+          "name": "Fizz Caramel",
+          "role": "Designer"
+        }
+      ],
+      "peopleCount": 2,
+      "peopleNames": [
+        "Pippa Gumdrop",
+        "Fizz Caramel"
+      ],
+      "risks": [
+        {
+          "id": "risk-bridge",
+          "title": "Gumdrop Bridge icing",
+          "status": "open"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-pack",
+          "title": "Prepare the jelly pack",
+          "done": false
+        }
+      ],
+      "dates": [
+        {
+          "id": "ms-parade",
+          "label": "Parade day",
+          "startAt": "2026-10-15T12:00:00.000Z"
+        }
+      ],
+      "availability": []
+    }
+  }
+}

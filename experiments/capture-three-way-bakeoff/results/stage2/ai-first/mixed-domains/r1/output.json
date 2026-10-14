@@ -1,0 +1,154 @@
+{
+  "caseId": "mixed-domains",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 8154,
+  "usage": {
+    "prompt_tokens": 888,
+    "completion_tokens": 382,
+    "total_tokens": 1270,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 641,
+    "envelope": {
+      "items": [
+        {
+          "operation": "no_change",
+          "domain": "responsibility",
+          "targetCanonicalId": "resp-uat",
+          "subject": "Pippa Gumdrop — UAT lead",
+          "proposedValues": {
+            "name": null,
+            "personName": "Pippa Gumdrop",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "UAT lead",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Pippa Gumdrop remains UAT lead.",
+          "understood": "Pippa Gumdrop continues as UAT lead.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "update",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-parade",
+          "subject": "Parade day",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Parade day",
+            "date": "2026-10-22",
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Parade day moved to 22 October 2026.",
+          "understood": "Parade day moves from 15 October to 22 October 2026.",
+          "question": null,
+          "leftUntouchedReason": null
+        },
+        {
+          "operation": "create",
+          "domain": "risk",
+          "targetCanonicalId": null,
+          "subject": "Chocolate fountain pump overheating",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Chocolate fountain pump overheating",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": "The chocolate fountain pump is overheating.",
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "The chocolate fountain pump is overheating.",
+          "understood": "A new concrete issue is reported: the chocolate fountain pump is overheating.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Pippa Gumdrop — UAT lead",
+      "referencedCanonicalId": "resp-uat",
+      "assertedValue": {
+        "name": null,
+        "personName": "Pippa Gumdrop",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "UAT lead",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Pippa Gumdrop remains UAT lead.",
+      "ambiguity": "omitted",
+      "disposition": "no_change",
+      "writeProposed": false
+    },
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Parade day",
+        "date": "2026-10-22",
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Parade day moved to 22 October 2026.",
+      "ambiguity": "omitted",
+      "disposition": "update",
+      "writeProposed": true
+    },
+    {
+      "domain": "risk",
+      "subject": "Chocolate fountain pump overheating",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Chocolate fountain pump overheating",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": "The chocolate fountain pump is overheating.",
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "The chocolate fountain pump is overheating.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

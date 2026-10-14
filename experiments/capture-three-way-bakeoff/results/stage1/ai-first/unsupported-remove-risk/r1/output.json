@@ -1,0 +1,57 @@
+{
+  "caseId": "unsupported-remove-risk",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5668,
+  "usage": {
+    "prompt_tokens": 813,
+    "completion_tokens": 166,
+    "total_tokens": 979,
+    "reasoning_tokens": 38
+  },
+  "raw": {
+    "snapshotChars": 490,
+    "envelope": {
+      "items": [
+        {
+          "operation": "remove",
+          "domain": "risk",
+          "targetCanonicalId": "risk-packaging",
+          "subject": "Packaging delay",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Please delete the Packaging delay risk.",
+          "understood": "Delete the existing Packaging delay risk.",
+          "question": null,
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Packaging delay",
+      "referencedCanonicalId": "risk-packaging",
+      "assertedValue": "omitted",
+      "evidence": "Please delete the Packaging delay risk.",
+      "ambiguity": "omitted",
+      "disposition": "remove",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

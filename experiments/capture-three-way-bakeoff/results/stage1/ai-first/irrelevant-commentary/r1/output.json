@@ -1,0 +1,57 @@
+{
+  "caseId": "irrelevant-commentary",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 6834,
+  "usage": {
+    "prompt_tokens": 808,
+    "completion_tokens": 147,
+    "total_tokens": 955,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 454,
+    "envelope": {
+      "items": [
+        {
+          "operation": "left_untouched",
+          "domain": "unsupported",
+          "targetCanonicalId": null,
+          "subject": "Lobby chiptunes",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+          "understood": "The Capture contains unrelated chatter and no explicit project change.",
+          "question": null,
+          "leftUntouchedReason": "No actionable project information or change to current truth."
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "unsupported",
+      "subject": "Lobby chiptunes",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "The lobby cabinets were blasting chiptunes all morning, nothing about the certification sprint.",
+      "ambiguity": "No actionable project information or change to current truth.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

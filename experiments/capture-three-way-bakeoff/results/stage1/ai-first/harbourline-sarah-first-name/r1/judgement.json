@@ -1,0 +1,24 @@
+{
+  "caseId": "harbourline-sarah-first-name",
+  "contender": "ai-first",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "which-sarah",
+      "meaning": "First-name-only Sarah is not Hannah Wells and is not a write.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": true,
+      "clearAutomationOk": null,
+      "justifiedIntervention": true,
+      "unnecessaryIntervention": false,
+      "note": "needs_you write=no id=omitted"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

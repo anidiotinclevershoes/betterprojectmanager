@@ -1,0 +1,68 @@
+{
+  "caseId": "harbourline-sarah-first-name",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 4470,
+  "usage": {
+    "prompt_tokens": 1056,
+    "completion_tokens": 138,
+    "total_tokens": 1194,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 1204,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "responsibility",
+          "targetCanonicalId": null,
+          "subject": "Communications ownership",
+          "proposedValues": {
+            "name": "Sarah",
+            "personName": "Sarah",
+            "title": null,
+            "date": null,
+            "status": null,
+            "scope": "communications",
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "I think Sarah owns communications now? Not sure which Sarah.",
+          "understood": "Communications ownership is attributed to Sarah, but the person is not identified.",
+          "question": "Which Sarah owns communications?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Communications ownership",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "name": "Sarah",
+        "personName": "Sarah",
+        "title": null,
+        "date": null,
+        "status": null,
+        "scope": "communications",
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "I think Sarah owns communications now? Not sure which Sarah.",
+      "ambiguity": "Which Sarah owns communications?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

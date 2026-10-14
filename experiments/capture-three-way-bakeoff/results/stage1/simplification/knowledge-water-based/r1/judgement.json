@@ -1,0 +1,24 @@
+{
+  "caseId": "knowledge-water-based",
+  "contender": "simplification",
+  "repeatIndex": 1,
+  "facts": [
+    {
+      "factId": "water-based",
+      "meaning": "Remember water-based paint as knowledge.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "update write=yes id=omitted"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

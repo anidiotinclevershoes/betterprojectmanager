@@ -1,0 +1,68 @@
+{
+  "caseId": "harbourline-competing-launch",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-6-astra",
+  "responseModel": "gpt-6-astra",
+  "latencyMs": 5204,
+  "usage": {
+    "prompt_tokens": 1066,
+    "completion_tokens": 178,
+    "total_tokens": 1244,
+    "reasoning_tokens": 0
+  },
+  "raw": {
+    "snapshotChars": 1204,
+    "envelope": {
+      "items": [
+        {
+          "operation": "needs_you",
+          "domain": "milestone",
+          "targetCanonicalId": "ms-hca-launch",
+          "subject": "Public launch date",
+          "proposedValues": {
+            "name": null,
+            "personName": null,
+            "title": "Public launch",
+            "date": null,
+            "status": null,
+            "scope": null,
+            "ownershipSemantics": null,
+            "text": null,
+            "awayFromIso": null,
+            "awayToIso": null
+          },
+          "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+          "understood": "The Capture gives two possible launch dates without confirming either. The current date is 2027-04-09.",
+          "question": "Should the public launch be on 2027-03-12 or 2027-04-09?",
+          "leftUntouchedReason": null
+        }
+      ]
+    },
+    "inspect": []
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Public launch date",
+      "referencedCanonicalId": "ms-hca-launch",
+      "assertedValue": {
+        "name": null,
+        "personName": null,
+        "title": "Public launch",
+        "date": null,
+        "status": null,
+        "scope": null,
+        "ownershipSemantics": null,
+        "text": null,
+        "awayFromIso": null,
+        "awayToIso": null
+      },
+      "evidence": "Two possible public launch dates floating around: 12 March 2027 or 9 April 2027.",
+      "ambiguity": "Should the public launch be on 2027-03-12 or 2027-04-09?",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

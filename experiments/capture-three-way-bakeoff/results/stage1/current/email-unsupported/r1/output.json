@@ -1,0 +1,65 @@
+{
+  "caseId": "email-unsupported",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1228,
+  "usage": {
+    "prompt_tokens": 1130,
+    "completion_tokens": 117,
+    "total_tokens": 1247,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The parade committee needs to be emailed about the new date.",
+          "evidence": "Please email the whole parade committee about the new date.",
+          "domain": "commentary",
+          "disposition": "left_untouched",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "commentary": "It isn't clear who should email the parade committee or what the new date is."
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "left_untouched",
+        "statement": "The parade committee needs to be emailed about the new date.",
+        "evidence": "Please email the whole parade committee about the new date.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "It isn't clear who should email the parade committee or what the new date is."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "The parade committee needs to be emailed about the new date.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "Please email the whole parade committee about the new date.",
+      "ambiguity": "It isn't clear who should email the parade committee or what the new date is.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

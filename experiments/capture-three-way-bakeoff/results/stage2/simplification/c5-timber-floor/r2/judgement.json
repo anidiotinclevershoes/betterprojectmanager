@@ -1,0 +1,39 @@
+{
+  "caseId": "c5-timber-floor",
+  "contender": "simplification",
+  "repeatIndex": 2,
+  "facts": [
+    {
+      "factId": "asbestos-close",
+      "meaning": "Close the asbestos survey chase to-do.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": true,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": false,
+      "note": "update write=yes id=todo-asbestos"
+    },
+    {
+      "factId": "timber-risk",
+      "meaning": "New risk that the hall timber floor may still hide services.",
+      "recalled": true,
+      "falseMaterialFact": false,
+      "falseUnsafeWrite": false,
+      "wrongIdentity": false,
+      "silentOmission": false,
+      "evidenceGrounded": true,
+      "ambiguitySafe": null,
+      "clearAutomationOk": false,
+      "justifiedIntervention": false,
+      "unnecessaryIntervention": true,
+      "note": "needs_you write=no id=omitted"
+    }
+  ],
+  "extraWrites": [],
+  "malformed": false
+}

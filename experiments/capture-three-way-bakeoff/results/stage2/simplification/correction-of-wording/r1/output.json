@@ -1,0 +1,110 @@
+{
+  "caseId": "correction-of-wording",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2529,
+  "usage": {
+    "prompt_tokens": 1120,
+    "completion_tokens": 256,
+    "total_tokens": 1376,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The shader compile is stalling the cert build.",
+          "evidence": "The shader compile is stalling the cert build.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "candidateTargetId": "risk-console",
+          "candidateTargetTitle": "Console certification slip",
+          "proposedValues": {
+            "title": "Shader compile stalling cert build"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        },
+        {
+          "id": "obs-2",
+          "statement": "The audio bus mixer is causing an issue.",
+          "evidence": "Wait — I meant the audio bus mixer, not the shader.",
+          "domain": "risk",
+          "disposition": "create_new",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "proposedValues": {
+            "title": "Audio bus mixer causing issue"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "risk",
+        "disposition": "create_new",
+        "statement": "The shader compile is stalling the cert build.",
+        "evidence": "The shader compile is stalling the cert build.",
+        "candidateTargetId": "risk-console",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This does not identify that existing record. Lume will not apply the change to a different item."
+      },
+      {
+        "id": "obs-2",
+        "domain": "risk",
+        "disposition": "create_new",
+        "statement": "The audio bus mixer is causing an issue.",
+        "evidence": "Wait — I meant the audio bus mixer, not the shader.",
+        "candidateTargetId": null,
+        "decisionKind": "write",
+        "writeType": "create_risk",
+        "reason": null
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "risk",
+      "subject": "Console certification slip",
+      "referencedCanonicalId": "risk-console",
+      "assertedValue": {
+        "title": "Shader compile stalling cert build"
+      },
+      "evidence": "The shader compile is stalling the cert build.",
+      "ambiguity": "This does not identify that existing record. Lume will not apply the change to a different item.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    },
+    {
+      "domain": "risk",
+      "subject": "The audio bus mixer is causing an issue.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": {
+        "title": "Audio bus mixer causing issue"
+      },
+      "evidence": "Wait — I meant the audio bus mixer, not the shader.",
+      "ambiguity": "omitted",
+      "disposition": "create",
+      "writeProposed": true
+    }
+  ],
+  "apply": null
+}

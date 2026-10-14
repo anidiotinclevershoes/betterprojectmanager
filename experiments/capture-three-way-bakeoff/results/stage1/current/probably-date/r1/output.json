@@ -1,0 +1,75 @@
+{
+  "caseId": "probably-date",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1947,
+  "usage": {
+    "prompt_tokens": 1131,
+    "completion_tokens": 174,
+    "total_tokens": 1305,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Parade day is probably 30 October 2026.",
+          "evidence": "Parade day is probably 30 October 2026.",
+          "domain": "milestone",
+          "disposition": "update_existing",
+          "truthIntent": "uncertain",
+          "projectId": "proj-candy",
+          "candidateTargetId": "ms-parade",
+          "candidateTargetTitle": "Parade day",
+          "proposedValues": {
+            "label": "Parade day",
+            "date": "2026-10-30"
+          },
+          "commentary": "The date is stated as 'probably', indicating uncertainty about its accuracy.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "milestone",
+        "disposition": "update_existing",
+        "statement": "Parade day is probably 30 October 2026.",
+        "evidence": "Parade day is probably 30 October 2026.",
+        "candidateTargetId": "ms-parade",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "The date is stated as 'probably', indicating uncertainty about its accuracy."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "milestone",
+      "subject": "Parade day",
+      "referencedCanonicalId": "ms-parade",
+      "assertedValue": {
+        "label": "Parade day",
+        "date": "2026-10-30"
+      },
+      "evidence": "Parade day is probably 30 October 2026.",
+      "ambiguity": "The date is stated as 'probably', indicating uncertainty about its accuracy.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

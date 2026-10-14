@@ -1,0 +1,77 @@
+{
+  "caseId": "pronoun-ambiguity",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 1618,
+  "usage": {
+    "prompt_tokens": 1110,
+    "completion_tokens": 165,
+    "total_tokens": 1275,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "Pixel Ramos will own the boss balancing pass from now on.",
+          "evidence": "She said she will own the boss balancing pass from now on.",
+          "domain": "responsibility",
+          "disposition": "update_existing",
+          "truthIntent": "current",
+          "projectId": "proj-game",
+          "candidateTargetId": "todo-balance",
+          "candidateTargetTitle": "Boss balancing pass",
+          "proposedValues": {
+            "personName": "Pixel Ramos",
+            "scope": "boss balancing pass",
+            "ownershipSemantics": "replace"
+          },
+          "commentary": "",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "responsibility",
+        "disposition": "update_existing",
+        "statement": "Pixel Ramos will own the boss balancing pass from now on.",
+        "evidence": "She said she will own the boss balancing pass from now on.",
+        "candidateTargetId": "todo-balance",
+        "decisionKind": "needs_you",
+        "writeType": null,
+        "reason": "This Person identity is not established in the Capture. A supplied record id is not enough."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "responsibility",
+      "subject": "Boss balancing pass",
+      "referencedCanonicalId": "todo-balance",
+      "assertedValue": {
+        "personName": "Pixel Ramos",
+        "scope": "boss balancing pass",
+        "ownershipSemantics": "replace"
+      },
+      "evidence": "She said she will own the boss balancing pass from now on.",
+      "ambiguity": "This Person identity is not established in the Capture. A supplied record id is not enough.",
+      "disposition": "needs_you",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

@@ -1,0 +1,104 @@
+{
+  "caseId": "irrelevant-commentary",
+  "ok": true,
+  "error": null,
+  "requestedModel": "gpt-4o-mini-2024-07-18",
+  "responseModel": "gpt-4o-mini-2024-07-18",
+  "latencyMs": 2009,
+  "usage": {
+    "prompt_tokens": 1114,
+    "completion_tokens": 254,
+    "total_tokens": 1368,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "raw": {
+    "modelJson": {
+      "observations": [
+        {
+          "id": "obs-1",
+          "statement": "The lobby cabinets were blasting chiptunes all morning.",
+          "evidence": "The lobby cabinets were blasting chiptunes all morning.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "projectId": "proj-game",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {},
+          "commentary": "This statement does not provide relevant project information.",
+          "modelConfidence": 0
+        },
+        {
+          "id": "obs-2",
+          "statement": "Nothing about the certification sprint.",
+          "evidence": "nothing about the certification sprint.",
+          "domain": "commentary",
+          "disposition": "commentary",
+          "truthIntent": "non_current",
+          "projectId": "proj-game",
+          "candidateTargetId": null,
+          "candidateTargetTitle": null,
+          "proposedValues": {},
+          "commentary": "This statement does not provide relevant project information.",
+          "modelConfidence": 0
+        }
+      ]
+    },
+    "resolved": [
+      {
+        "id": "obs-1",
+        "domain": "commentary",
+        "disposition": "commentary",
+        "statement": "The lobby cabinets were blasting chiptunes all morning.",
+        "evidence": "The lobby cabinets were blasting chiptunes all morning.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      },
+      {
+        "id": "obs-2",
+        "domain": "commentary",
+        "disposition": "commentary",
+        "statement": "Nothing about the certification sprint.",
+        "evidence": "nothing about the certification sprint.",
+        "candidateTargetId": null,
+        "decisionKind": "no_change",
+        "writeType": null,
+        "reason": "Treated as commentary / non-project."
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "domain": "commentary",
+      "subject": "The lobby cabinets were blasting chiptunes all morning.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "The lobby cabinets were blasting chiptunes all morning.",
+      "ambiguity": "This statement does not provide relevant project information.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    },
+    {
+      "domain": "commentary",
+      "subject": "Nothing about the certification sprint.",
+      "referencedCanonicalId": "omitted",
+      "assertedValue": "omitted",
+      "evidence": "nothing about the certification sprint.",
+      "ambiguity": "This statement does not provide relevant project information.",
+      "disposition": "left_untouched",
+      "writeProposed": false
+    }
+  ],
+  "apply": null
+}

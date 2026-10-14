@@ -1,0 +1,848 @@
+[
+  {
+    "caseId": "share-vs-replace-ambiguous",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "share-or-replace",
+        "meaning": "UAT ownership between Fizz and Pippa is genuinely ambiguous.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": false,
+        "ambiguitySafe": true,
+        "clearAutomationOk": null,
+        "justifiedIntervention": true,
+        "unnecessaryIntervention": false,
+        "note": "needs_you write=no id=person-fizz"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "share-vs-replace-ambiguous",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "share-or-replace",
+        "meaning": "UAT ownership between Fizz and Pippa is genuinely ambiguous.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": true,
+        "clearAutomationOk": null,
+        "justifiedIntervention": true,
+        "unnecessaryIntervention": false,
+        "note": "needs_you write=no id=person-fizz"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "risk-resolution",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "bridge-closed",
+        "meaning": "Gumdrop Bridge icing is resolved.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "update write=yes id=risk-bridge"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "risk-resolution",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "bridge-closed",
+        "meaning": "Gumdrop Bridge icing is resolved.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "update write=yes id=risk-bridge"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "todo-create",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "banners-todo",
+        "meaning": "Create a to-do about polishing candy-cane banners.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "todo-create",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "banners-todo",
+        "meaning": "Create a to-do about polishing candy-cane banners.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "mixed-domains",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "pippa-still",
+        "meaning": "Pippa remains UAT lead.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": true,
+        "note": "no_change write=no id=person-gumdrop"
+      },
+      {
+        "factId": "parade-22",
+        "meaning": "Parade day moves to 22 October 2026.",
+        "recalled": true,
+        "falseMaterialFact": true,
+        "falseUnsafeWrite": true,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": null,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "update write=yes id=ms-parade"
+      },
+      {
+        "factId": "fountain-new",
+        "meaning": "New risk: chocolate fountain pump overheating.",
+        "recalled": true,
+        "falseMaterialFact": true,
+        "falseUnsafeWrite": true,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": null,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "mixed-domains",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "pippa-still",
+        "meaning": "Pippa remains UAT lead.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": false,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": true,
+        "note": "needs_you write=no id=person-gumdrop"
+      },
+      {
+        "factId": "parade-22",
+        "meaning": "Parade day moves to 22 October 2026.",
+        "recalled": true,
+        "falseMaterialFact": true,
+        "falseUnsafeWrite": true,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": null,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "update write=yes id=ms-parade"
+      },
+      {
+        "factId": "fountain-new",
+        "meaning": "New risk: chocolate fountain pump overheating.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": null,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "needs_you write=no id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "toyworld-vocabulary-bait",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "packaging-bait",
+        "meaning": "A Toyworld person and risk were offered as Candyland writes.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": true,
+        "clearAutomationOk": null,
+        "justifiedIntervention": true,
+        "unnecessaryIntervention": false,
+        "note": "left_untouched write=no id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "toyworld-vocabulary-bait",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "packaging-bait",
+        "meaning": "A Toyworld person and risk were offered as Candyland writes.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": true,
+        "clearAutomationOk": null,
+        "justifiedIntervention": true,
+        "unnecessaryIntervention": false,
+        "note": "left_untouched write=no id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "holdout-h6",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "workshop",
+        "meaning": "Workshop moves to 22 October 2026.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "update write=yes id=ms-workshop"
+      },
+      {
+        "factId": "void-keys",
+        "meaning": "Collect void keys 16 Oct — new dated action.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      },
+      {
+        "factId": "kwame",
+        "meaning": "Kwame Boateng is a new contractor lead.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      },
+      {
+        "factId": "policy",
+        "meaning": "Policy v3 remains current.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": false,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": true,
+        "note": "needs_you write=no id=omitted"
+      },
+      {
+        "factId": "dhp",
+        "meaning": "DHP ownership is speculation.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": true,
+        "clearAutomationOk": null,
+        "justifiedIntervention": true,
+        "unnecessaryIntervention": false,
+        "note": "left_untouched write=no id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "holdout-h6",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "workshop",
+        "meaning": "Workshop moves to 22 October 2026.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "update write=yes id=ms-workshop"
+      },
+      {
+        "factId": "void-keys",
+        "meaning": "Collect void keys 16 Oct — new dated action.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      },
+      {
+        "factId": "kwame",
+        "meaning": "Kwame Boateng is a new contractor lead.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      },
+      {
+        "factId": "policy",
+        "meaning": "Policy v3 remains current.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": false,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": true,
+        "note": "left_untouched write=no id=omitted"
+      },
+      {
+        "factId": "dhp",
+        "meaning": "DHP ownership is speculation.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": true,
+        "clearAutomationOk": null,
+        "justifiedIntervention": true,
+        "unnecessaryIntervention": false,
+        "note": "left_untouched write=no id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "todo-dated-canes",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "candy-canes",
+        "meaning": "Create dated to-do for candy canes.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "todo-dated-canes",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "candy-canes",
+        "meaning": "Create dated to-do for candy canes.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "two-token-person-create",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "jordan-hale",
+        "meaning": "Jordan Hale is a new lighting lead.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "two-token-person-create",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "jordan-hale",
+        "meaning": "Jordan Hale is a new lighting lead.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "explicit-ownership-first",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "sarah-float",
+        "meaning": "Sarah Kim is a new person with float-safety responsibility.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": false,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": true,
+        "note": "needs_you write=no id=person-gumdrop"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "explicit-ownership-first",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "sarah-float",
+        "meaning": "Sarah Kim is a new person with float-safety responsibility.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": false,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": true,
+        "note": "needs_you write=no id=person-gumdrop"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "mixed-clear-and-unclear",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "sprinkles",
+        "meaning": "New to-do to order extra sprinkles.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      },
+      {
+        "factId": "security-might",
+        "meaning": "Security worry is uncertain — not a write.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": true,
+        "clearAutomationOk": null,
+        "justifiedIntervention": true,
+        "unnecessaryIntervention": false,
+        "note": "left_untouched write=no id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "mixed-clear-and-unclear",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "sprinkles",
+        "meaning": "New to-do to order extra sprinkles.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": false,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": true,
+        "note": "needs_you write=no id=omitted"
+      },
+      {
+        "factId": "security-might",
+        "meaning": "Security worry is uncertain — not a write.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": true,
+        "clearAutomationOk": null,
+        "justifiedIntervention": true,
+        "unnecessaryIntervention": false,
+        "note": "left_untouched write=no id=omitted"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "foreign-invented-id",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "foreign-id",
+        "meaning": "Invented/foreign id must not write; Gumdrop Bridge icing update may still bind the in-project risk.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": true,
+        "clearAutomationOk": null,
+        "justifiedIntervention": true,
+        "unnecessaryIntervention": false,
+        "note": "needs_you write=no id=risk-bridge"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "foreign-invented-id",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "foreign-id",
+        "meaning": "Invented/foreign id must not write; Gumdrop Bridge icing update may still bind the in-project risk.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": true,
+        "clearAutomationOk": null,
+        "justifiedIntervention": true,
+        "unnecessaryIntervention": false,
+        "note": "needs_you write=no id=risk-bridge"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "noisy-conversational",
+    "contender": "current",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "pippa-still-noisy",
+        "meaning": "Pippa remains UAT lead.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": false,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": true,
+        "note": "needs_you write=no id=person-gumdrop"
+      },
+      {
+        "factId": "sprinkles-noisy",
+        "meaning": "New to-do to order extra sprinkles.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      },
+      {
+        "factId": "bridge-resolved-noisy",
+        "meaning": "Gumdrop Bridge icing is resolved.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "update write=yes id=risk-bridge"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  },
+  {
+    "caseId": "noisy-conversational",
+    "contender": "simplification",
+    "repeatIndex": 1,
+    "facts": [
+      {
+        "factId": "pippa-still-noisy",
+        "meaning": "Pippa remains UAT lead.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": false,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": true,
+        "note": "needs_you write=no id=person-gumdrop"
+      },
+      {
+        "factId": "sprinkles-noisy",
+        "meaning": "New to-do to order extra sprinkles.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "create write=yes id=omitted"
+      },
+      {
+        "factId": "bridge-resolved-noisy",
+        "meaning": "Gumdrop Bridge icing is resolved.",
+        "recalled": true,
+        "falseMaterialFact": false,
+        "falseUnsafeWrite": false,
+        "wrongIdentity": false,
+        "silentOmission": false,
+        "evidenceGrounded": true,
+        "ambiguitySafe": null,
+        "clearAutomationOk": true,
+        "justifiedIntervention": false,
+        "unnecessaryIntervention": false,
+        "note": "update write=yes id=risk-bridge"
+      }
+    ],
+    "extraWrites": [],
+    "malformed": false
+  }
+]
