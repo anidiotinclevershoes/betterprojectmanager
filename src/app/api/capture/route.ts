@@ -50,7 +50,6 @@ import {
 } from "@/lib/capture-v2/prompt";
 import { isSharedOrganiseEnabled } from "@/lib/shared-organise/flag";
 import { extractProjectChangesWithLuna } from "@/lib/shared-organise/extract";
-import { SHARED_ORGANISE_PROMPT_VERSION } from "@/lib/shared-organise/prompt";
 import { runSharedOrganiseFromModelJson } from "@/lib/shared-organise/run";
 import { buildSharedOrganiseContext, civilDateIso } from "@/lib/shared-organise/context";
 import { DurableWorkspaceError } from "@/lib/data/durable-workspace";
@@ -484,7 +483,7 @@ async function postSharedOrganise(args: {
       requestedModel: extraction.requestedModel,
       responseModel: extraction.responseModel,
       promptId: extraction.promptId,
-      promptVersion: SHARED_ORGANISE_PROMPT_VERSION,
+      promptVersion: extraction.promptVersion,
       path: extraction.path,
       fallback: false,
     },

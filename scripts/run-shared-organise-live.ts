@@ -9,7 +9,7 @@ import { captureApplyWorldFromState } from "../src/lib/capture/apply/world";
 import { experimentalMissionState } from "../src/lib/eval-capture-v2/mission-state";
 import { CANDYLAND_ID } from "../src/lib/experiments/worlds";
 import { extractProjectChangesWithLuna, SHARED_ORGANISE_MODEL } from "../src/lib/shared-organise/extract";
-import { SHARED_ORGANISE_PROMPT_VERSION } from "../src/lib/shared-organise/prompt";
+import { SHARED_ORGANISE_PROMPT_V5_VERSION } from "../src/lib/shared-organise/prompt";
 import { runSharedOrganiseFromModelJson } from "../src/lib/shared-organise/run";
 import { buildSharedOrganiseContext } from "../src/lib/shared-organise/context";
 import type { CaptureLegalOperation } from "../src/lib/capture/apply/types";
@@ -80,6 +80,7 @@ async function main() {
   const rows = [];
   let unsafe = 0;
   let errors = 0;
+  let selectedPromptVersion = SHARED_ORGANISE_PROMPT_V5_VERSION;
   const usage = { prompt: 0, completion: 0, reasoning: 0 };
   const started = Date.now();
   for (const testCase of CASES) {
@@ -88,6 +89,7 @@ async function main() {
         transcript: testCase.transcript,
         projectBlock: context.prompt,
       });
+      selectedPromptVersion = extraction.promptVersion;
       usage.prompt += extraction.providerUsage?.prompt_tokens ?? 0;
       usage.completion += extraction.providerUsage?.completion_tokens ?? 0;
       usage.reasoning += extraction.providerUsage?.reasoning_tokens ?? 0;
@@ -122,7 +124,7 @@ async function main() {
   }
   const payload = {
     model: SHARED_ORGANISE_MODEL,
-    promptVersion: SHARED_ORGANISE_PROMPT_VERSION,
+    promptVersion: selectedPromptVersion,
     referenceDate: REF,
     elapsedMs: Date.now() - started,
     calls: CASES.length,

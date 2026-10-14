@@ -16,12 +16,19 @@ import { experimentalMissionState } from "../src/lib/eval-capture-v2/mission-sta
 import { CANDYLAND_ID, experimentalApplyWorld } from "../src/lib/experiments/worlds";
 import type { MissionState } from "../src/lib/types";
 import { isSharedOrganiseEnabled } from "../src/lib/shared-organise/flag";
-import { SHARED_ORGANISE_PROMPT_VERSION, buildProjectChangePrompt } from "../src/lib/shared-organise/prompt";
+import {
+  SHARED_ORGANISE_PROMPT_VERSION,
+  SHARED_ORGANISE_PROMPT_V5_VERSION,
+  buildProjectChangePrompt,
+  buildProjectChangePromptV5,
+} from "../src/lib/shared-organise/prompt";
 import { organiseNewProjectPacket } from "../src/lib/shared-organise/new-project";
 import { runSharedOrganiseFromModelJson } from "../src/lib/shared-organise/run";
 import { buildSharedOrganiseContext } from "../src/lib/shared-organise/context";
 import { reviewProjectChangeForm, parseProjectChangeForm } from "../src/lib/shared-organise/validate";
 import { shiftIsoDate } from "../src/lib/shared-organise/date";
+import { sharedOrganiseTrialAllowed } from "../src/lib/shared-organise/trial-access";
+import { DEFAULT_SHARED_ORGANISE_PROMPT, extractProjectChangesWithLuna } from "../src/lib/shared-organise/extract";
 
 const PROJECT = CANDYLAND_ID;
 const REF = "2026-10-03";
@@ -715,7 +722,7 @@ async function main() {
     assert.equal(second.state.todos.filter((row) => row.title === "Chase the fire cert").length, 1);
   });
 
-  await check("new project adapter is the same engine", () => {
+  await check("new project adapter is the same engine", async () => {
     const world = experimentalApplyWorld();
     const collated = "Sarah Kim is the QS and handles valuations. Someone needs to sort the fire cert.";
     const run = organiseNewProjectPacket(
@@ -758,6 +765,54 @@ async function main() {
     assert.equal(run.reviewed.filter((row) => row.operation?.type === "ensure_person").length, 1);
     assert.match(buildProjectChangePrompt({ source: collated, projectBlock: run.projectBlock }), /materialUncertainty/);
     assert.equal(SHARED_ORGANISE_PROMPT_VERSION, "shared-organise-form-v4");
+    assert.equal(DEFAULT_SHARED_ORGANISE_PROMPT, "v5");
+    assert.equal(SHARED_ORGANISE_PROMPT_V5_VERSION, "shared-organise-form-v5");
+    const sample = { source: "Mara owns the strongroom.", projectBlock: "Project: Archive" };
+    const v4 = buildProjectChangePrompt(sample);
+    const v5 = buildProjectChangePromptV5(sample);
+    assert.equal(v4.includes("material contradiction"), false);
+    assert.equal(v5.includes("material contradiction"), true);
+    assert.ok(v5.startsWith(v4.slice(0, 80)));
+    assert.equal(sharedOrganiseTrialAllowed({ VERCEL_ENV: "production", NODE_ENV: "production" }), false);
+    assert.equal(sharedOrganiseTrialAllowed({ VERCEL_ENV: "preview", NODE_ENV: "production" }), true);
+    assert.equal(sharedOrganiseTrialAllowed({ NODE_ENV: "development" }), true);
+    assert.equal(sharedOrganiseTrialAllowed({ NODE_ENV: "production" }), false);
+    const previousKey = process.env.OPENAI_API_KEY;
+    const previousFetch = globalThis.fetch;
+    process.env.OPENAI_API_KEY = "sk-shared-organise-v5-selection-probe";
+    try {
+      const seen: string[] = [];
+      globalThis.fetch = (async (_url: unknown, init?: { body?: string }) => {
+        seen.push(String(init?.body ?? ""));
+        return new Response(
+          JSON.stringify({
+            model: "gpt-6-luna",
+            choices: [{ message: { content: JSON.stringify({ changes: [] }) } }],
+            usage: { prompt_tokens: 3, completion_tokens: 2, total_tokens: 5 },
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }) as typeof fetch;
+      const selected = await extractProjectChangesWithLuna({
+        transcript: "Mara owns the strongroom.",
+        projectBlock: "Project: Archive",
+      });
+      assert.equal(selected.promptVersion, "shared-organise-form-v5");
+      assert.equal(selected.promptId, "shared-organise-form");
+      assert.match(seen[0] ?? "", /material contradiction/);
+      const rollback = await extractProjectChangesWithLuna({
+        transcript: "Mara owns the strongroom.",
+        projectBlock: "Project: Archive",
+        prompt: "v4",
+      });
+      assert.equal(rollback.promptVersion, "shared-organise-form-v4");
+      assert.equal((seen[1] ?? "").includes("material contradiction"), false);
+      assert.match(seen[1] ?? "", /materialUncertainty/);
+    } finally {
+      globalThis.fetch = previousFetch;
+      if (previousKey === undefined) delete process.env.OPENAI_API_KEY;
+      else process.env.OPENAI_API_KEY = previousKey;
+    }
     const parsed = parseProjectChangeForm(form([]));
     assert.deepEqual(
       reviewProjectChangeForm({
