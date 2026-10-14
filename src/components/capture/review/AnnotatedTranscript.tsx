@@ -56,6 +56,7 @@ export function AnnotatedTranscript({
                 data-source-id={segment.sourceId}
                 aria-label={label}
                 onClick={() => onFocusReviewCard?.(segment.reviewCardId!)}
+                onFocus={() => onFocusReviewCard?.(segment.reviewCardId!)}
               >
                 {inner}
               </button>

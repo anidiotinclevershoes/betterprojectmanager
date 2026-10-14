@@ -1,0 +1,171 @@
+/* Page 09 Domain/Icon — 22px frame, 15px glyph, 12% icon tint. */
+.lume-domain-icon {
+  display: inline-flex;
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.lume-domain-icon img {
+  display: block;
+  position: absolute;
+  left: 3.5px;
+  top: 3.5px;
+  width: 15px;
+  height: 15px;
+  max-width: none;
+}
+
+.lume-domain-icon[data-domain="issue"] {
+  background: rgba(232, 137, 92, 0.12);
+}
+
+.lume-domain-icon[data-domain="people"] {
+  background: rgba(92, 200, 242, 0.12);
+}
+
+.lume-domain-icon[data-domain="todo"] {
+  background: rgba(166, 212, 95, 0.12);
+}
+
+.lume-domain-icon[data-domain="knowledge"] {
+  background: rgba(205, 135, 224, 0.12);
+}
+
+/* Page 09 section shell. Header tint and outer border are not the icon tint. */
+.lume-domain-section {
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 8px;
+  background: #191c21;
+  overflow: hidden;
+}
+
+.ocean-home-queue.lume-domain-section,
+.ocean-home-people.lume-domain-section,
+.ocean-home-collapsible.lume-domain-section,
+.kc-bucket-group.lume-domain-section {
+  padding: 0;
+}
+
+.lume-domain-section[data-domain="issue"] {
+  border-color: rgba(219, 99, 56, 0.34);
+}
+
+.lume-domain-section[data-domain="people"] {
+  border-color: rgba(46, 163, 199, 0.34);
+}
+
+.lume-domain-section[data-domain="todo"] {
+  border-color: rgba(120, 184, 51, 0.34);
+}
+
+.lume-domain-section[data-domain="knowledge"] {
+  border-color: rgba(173, 87, 194, 0.34);
+}
+
+.ocean-home-section-head.lume-domain-section-head,
+.ocean-home-collapse-btn.lume-domain-section-head,
+.lume-domain-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  margin: 0;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 7px;
+  color: #f1f4f8;
+  text-align: left;
+}
+
+.lume-domain-section[data-domain="issue"] > .lume-domain-section-head {
+  background: rgba(232, 137, 92, 0.05);
+}
+
+.lume-domain-section[data-domain="people"] > .lume-domain-section-head {
+  background: rgba(92, 200, 242, 0.05);
+}
+
+.lume-domain-section[data-domain="todo"] > .lume-domain-section-head {
+  background: rgba(166, 212, 95, 0.05);
+}
+
+.lume-domain-section[data-domain="knowledge"] > .lume-domain-section-head {
+  background: rgba(205, 135, 224, 0.05);
+}
+
+.lume-domain-section-head h2,
+.lume-domain-section-head h3 {
+  margin: 0;
+  color: #f1f4f8;
+  font-weight: 600;
+}
+
+.kc-bucket-group-head.lume-domain-section-head {
+  margin-bottom: 0;
+}
+
+.lume-domain-section-body {
+  padding: 0.35rem 1rem 0.85rem;
+}
+
+.ocean-home-queue-item.is-issue,
+.ocean-home-queue-item.is-todo {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.ocean-home-queue-copy.has-domain-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+/* Page 09 signed badges. Distinct from the section shell and not a flat tint. */
+.lume-domain-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  min-height: 28px;
+  padding: 0 8px 0 6px;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.lume-domain-badge[data-domain="issue"] {
+  background: rgba(240, 138, 106, 0.08);
+  border-color: rgba(240, 138, 106, 0.35);
+  color: #f08a6a;
+}
+
+.lume-domain-badge[data-domain="people"] {
+  background: rgba(92, 200, 242, 0.08);
+  border-color: rgba(92, 200, 242, 0.35);
+  color: #5cc8f2;
+}
+
+.lume-domain-badge[data-domain="todo"] {
+  background: rgba(166, 212, 95, 0.08);
+  border-color: rgba(166, 212, 95, 0.35);
+  color: #a6d45f;
+}
+
+.lume-domain-badge[data-domain="knowledge"] {
+  background: rgba(156, 123, 216, 0.08);
+  border-color: rgba(156, 123, 216, 0.35);
+  color: #9c7bd8;
+}

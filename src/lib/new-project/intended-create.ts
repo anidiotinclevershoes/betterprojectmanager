@@ -12,17 +12,9 @@ import {
   uncertainTodoQuestion,
 } from "./needs-you";
 
-function scopesOf(draft: {
-  role?: string;
-  responsibilities?: string[];
-}): string[] {
-  const listed = (draft.responsibilities ?? [])
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (listed.length) return listed;
-  const role = draft.role?.trim();
-  if (role && role.toLowerCase() !== "stakeholder") return [role];
-  return [];
+/** Explicit responsibility scopes only. Role is never a scope. */
+function scopesOf(draft: { responsibilities?: string[] }): string[] {
+  return (draft.responsibilities ?? []).map((s) => s.trim()).filter(Boolean);
 }
 
 export type IntendedCreateTruth = {

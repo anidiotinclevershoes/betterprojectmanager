@@ -1,6 +1,25 @@
 "use client";
 
+import { useState } from "react";
+import { DomainIcon } from "@/components/domain/DomainIcon";
+import type { LumeDomain } from "@/lib/domain/lume-domain";
 import type { CaptureObservation } from "@/lib/capture/review/observations";
+
+const GROUPS: { domain: LumeDomain; label: string }[] = [
+  { domain: "people", label: "People" },
+  { domain: "todo", label: "To Do" },
+  { domain: "issue", label: "Issues" },
+  { domain: "knowledge", label: "Knowledge" },
+];
+
+function domainOf(obs: CaptureObservation): LumeDomain | null {
+  const label = obs.actionLabel.toLowerCase();
+  if (/\b(person|people|stakeholder|availability)\b/.test(label)) return "people";
+  if (/\b(to do|todo|action)\b/.test(label)) return "todo";
+  if (/\b(issue|risk)\b/.test(label)) return "issue";
+  if (/\b(knowledge|memory)\b/.test(label)) return "knowledge";
+  return null;
+}
 
 export function CaptureSummary({
   observations,
@@ -17,76 +36,102 @@ export function CaptureSummary({
   needsAttentionCount: number;
   onSelectObservation?: (observation: CaptureObservation) => void;
 }) {
-  return (
-    <section className="capture-summary-panel lume-extracted-rail" aria-labelledby="capture-understood-title">
-      <h3 id="capture-understood-title" className="lume-rail-title">
-        Lume extracted
-      </h3>
+  const [open, setOpen] = useState(true);
+  const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
+  const uninterpreted = observations.filter(
+    (obs) => obs.actionStatus === "no_change" || obs.actionStatus === "ignored",
+  );
+  const needs = observations.filter(
+    (obs) =>
+      obs.actionStatus === "needs_review" || obs.actionStatus === "unmatched",
+  );
+  const grouped = GROUPS.map((group) => ({
+    ...group,
+    items: observations.filter((obs) => domainOf(obs) === group.domain),
+  })).filter((group) => group.items.length > 0);
+  const ungrouped = observations.filter(
+    (obs) =>
+      !domainOf(obs) &&
+      !uninterpreted.some((item) => item.id === obs.id) &&
+      obs.actionStatus !== "needs_review" &&
+      obs.actionStatus !== "unmatched",
+  );
 
-      {observations.length === 0 ? (
-        <p className="meta" data-testid="capture-empty-review">
-          Lume could not turn this Capture into a safe change. Nothing was
-          written. This is Needs You, not a silent skip.
-        </p>
-      ) : (
-        <ul className="capture-observation-list">
-          {observations.map((obs) => {
-            const clickable = Boolean(obs.reviewCardId && onSelectObservation);
-            const statusClass = `is-status-${obs.actionStatus}`;
-            const content = (
-              <>
-                <span className="capture-observation-main">
-                  <span
-                    className={`capture-observation-check ${statusClass}`}
-                    aria-hidden
-                  >
-                    {obs.actionStatus === "needs_review" ||
-                    obs.actionStatus === "unmatched"
-                      ? "⚠"
-                      : obs.actionStatus === "left_untouched"
-                        ? "○"
-                        : "✓"}
-                  </span>
-                  <span className="capture-observation-text">{obs.text}</span>
-                </span>
-                {obs.actionStatus === "no_change" ? null : (
-                <span
-                  className={`capture-observation-action ${statusClass}${
-                    obs.actionLabel.startsWith("Remember")
-                      ? " is-remember"
-                      : ""
-                  }${
-                    obs.actionLabel.includes("Which project")
-                      ? " is-project-uncertain"
-                      : ""
-                  }`}
-                  title={obs.actionLabel}
-                >
-                  {obs.actionLabel}
-                </span>
-                )}
-              </>
-            );
-            return (
-              <li key={obs.id} className="capture-observation-item">
-                {clickable ? (
+  return (
+    <section
+      className="capture-summary-panel lume-extracted-rail p09-extracted"
+      aria-labelledby="capture-understood-title"
+    >
+      <header className="p09-extracted-head">
+        <h3 id="capture-understood-title" className="p09-extracted-title">
+          Lume extracted
+        </h3>
+        <button
+          type="button"
+          className="p09-extracted-toggle"
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+        >
+          {open ? "Collapse" : "Expand"}
+        </button>
+      </header>
+
+      {open ? (
+        observations.length === 0 ? (
+          <p className="meta" data-testid="capture-empty-review">
+            Lume could not turn this Capture into a safe change. Nothing was
+            written. This is Needs You, not a silent skip.
+          </p>
+        ) : (
+          <div className="p09-extracted-body">
+            {needs.length > 0 ? (
+              <p className="p09-extracted-needs">
+                {needs.length === 1
+                  ? `1 reference Lume could not place — “${needs[0]!.text}”`
+                  : `${needs.length} references Lume could not place`}
+              </p>
+            ) : null}
+            {grouped.map((group) => {
+              const closed = closedGroups[group.domain];
+              return (
+                <section key={group.domain} className="p09-extracted-group">
                   <button
                     type="button"
-                    className="capture-observation-row is-clickable"
-                    onClick={() => onSelectObservation?.(obs)}
+                    className="p09-extracted-group-head"
+                    aria-expanded={!closed}
+                    onClick={() =>
+                      setClosedGroups((prev) => ({
+                        ...prev,
+                        [group.domain]: !prev[group.domain],
+                      }))
+                    }
                   >
-                    {content}
+                    <DomainIcon domain={group.domain} />
+                    <span>{group.label}</span>
+                    <span className="p09-extracted-count">{group.items.length}</span>
                   </button>
-                ) : (
-                  <div className="capture-observation-row">{content}</div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                  {closed ? null : (
+                    <ul className="p09-extracted-items">
+                      {group.items.map((obs) => (
+                        <li key={obs.id}>{observationLine(obs, onSelectObservation)}</li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              );
+            })}
+            {ungrouped.length > 0 ? (
+              <ul className="p09-extracted-items">
+                {ungrouped.map((obs) => (
+                  <li key={obs.id}>{observationLine(obs, onSelectObservation)}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        )
+      ) : null}
 
-      <p className="capture-summary-line" role="status">
+      <p className="capture-summary-line sr-only" role="status">
         <span>
           {changesDetected} change{changesDetected === 1 ? "" : "s"}
         </span>
@@ -98,5 +143,18 @@ export function CaptureSummary({
         </span>
       </p>
     </section>
+  );
+}
+
+function observationLine(
+  obs: CaptureObservation,
+  onSelectObservation?: (observation: CaptureObservation) => void,
+) {
+  const clickable = Boolean(obs.reviewCardId && onSelectObservation);
+  if (!clickable) return <span>{obs.text}</span>;
+  return (
+    <button type="button" onClick={() => onSelectObservation?.(obs)}>
+      {obs.text}
+    </button>
   );
 }

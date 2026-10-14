@@ -38,6 +38,7 @@ import {
   loadServerCaptureWorld,
 } from "@/lib/capture-v2/server-truth";
 import { extractObservationsWithOpenAI } from "@/lib/capture-v2/extract";
+import { captureReferenceDate } from "@/lib/capture-v2/semantic-fields";
 import {
   extractProvenanceBase,
   logIntelligenceProvenance,
@@ -49,10 +50,10 @@ import {
 } from "@/lib/capture-v2/prompt";
 import { isSharedOrganiseEnabled } from "@/lib/shared-organise/flag";
 import { extractProjectChangesWithLuna } from "@/lib/shared-organise/extract";
-import { SHARED_ORGANISE_PROMPT_VERSION } from "@/lib/shared-organise/prompt";
 import { runSharedOrganiseFromModelJson } from "@/lib/shared-organise/run";
 import { buildSharedOrganiseContext, civilDateIso } from "@/lib/shared-organise/context";
 import { DurableWorkspaceError } from "@/lib/data/durable-workspace";
+import { recordWorkspaceAnalysis } from "@/lib/workspace/record-analysis";
 
 export const runtime = "nodejs";
 
@@ -81,6 +82,14 @@ type Body = {
 
 function requestId() {
   return `capreq-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+async function analysisJson(
+  workspaceId: string | null | undefined,
+  body: Record<string, unknown>,
+) {
+  const usageLedger = await recordWorkspaceAnalysis(workspaceId);
+  return NextResponse.json(usageLedger ? { ...body, usageLedger } : body);
 }
 
 export async function GET() {
@@ -265,7 +274,7 @@ async function postCaptureV2(args: {
       usageCompletion: null,
       usageTotal: null,
     });
-    return NextResponse.json({
+    return analysisJson(loaded.workspaceId, {
       result,
       openaiConfigured: false,
       requestId: analysisRequestId,
@@ -310,15 +319,18 @@ async function postCaptureV2(args: {
         code: project.code,
       })
     : "Current project: (unscoped)\nAuthoritative current records:\n(none)";
+  const referenceDate = captureReferenceDate();
   const extraction = await extractObservationsWithOpenAI({
     transcript: content,
     projectBlock,
+    referenceDate,
   });
   const v2 = runCaptureV2FromModelJson({
     transcript: content,
     rawModelJson: extraction.rawModelJson,
     world: loaded.world,
     projectId: loaded.projectId,
+    referenceDate,
   });
   const existingKnowledge: ProjectKnowledge | null =
     knowledge.find((k) => k.projectId === loaded.projectId) ?? null;
@@ -388,7 +400,7 @@ async function postCaptureV2(args: {
     usageCompletion: extraction.providerUsage?.completion_tokens ?? null,
     usageTotal: extraction.providerUsage?.total_tokens ?? null,
   });
-  return NextResponse.json({
+  return analysisJson(loaded.workspaceId, {
     result: v2.result,
     openaiConfigured: true,
     requestId: analysisRequestId,
@@ -457,7 +469,7 @@ async function postSharedOrganise(args: {
     usageCompletion: extraction.providerUsage?.completion_tokens ?? null,
     usageTotal: extraction.providerUsage?.total_tokens ?? null,
   });
-  return NextResponse.json({
+  return analysisJson(loaded.workspaceId, {
     result: organised.result,
     openaiConfigured: true,
     requestId: analysisRequestId,
@@ -471,7 +483,7 @@ async function postSharedOrganise(args: {
       requestedModel: extraction.requestedModel,
       responseModel: extraction.responseModel,
       promptId: extraction.promptId,
-      promptVersion: SHARED_ORGANISE_PROMPT_VERSION,
+      promptVersion: extraction.promptVersion,
       path: extraction.path,
       fallback: false,
     },

@@ -153,7 +153,7 @@ export function whyDisclosureLabel(
   const hasWhy =
     Boolean(interpretation.trim()) && !isGenericInterpretation(interpretation);
   if (hasEvidence && !hasWhy) return "Evidence";
-  return "Why this";
+  return "Show details";
 }
 
 /** Extra Needs You detail that is not just the headline or record restated. */

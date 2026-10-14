@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { extractObservationsWithOpenAI } from "@/lib/capture-v2/extract";
+import { captureReferenceDate } from "@/lib/capture-v2/semantic-fields";
 import {
   extractProvenanceBase,
   logIntelligenceProvenance,
@@ -65,11 +66,15 @@ export async function POST(request: Request) {
     }
 
     const sourceMode = body.sourceMode === "talk" ? "talk" : "paste";
+    const referenceDate = captureReferenceDate();
     const extracted = await extractObservationsWithOpenAI({
       transcript: body.content,
       projectBlock: UNSCOPED_PROJECT_BLOCK,
+      referenceDate,
     });
-    const parsed = parseNewProjectV2Envelope(extracted.rawModelJson);
+    const parsed = parseNewProjectV2Envelope(extracted.rawModelJson, {
+      referenceDate,
+    });
     if (parsed.envelopeMalformed) {
       logIntelligenceProvenance("new-project.envelope_malformed", {
         ...extractProvenanceBase(),

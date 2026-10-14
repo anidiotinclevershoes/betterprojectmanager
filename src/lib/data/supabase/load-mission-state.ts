@@ -18,8 +18,10 @@ import type {
   TodoItem,
 } from "@/lib/types";
 import { emptyKnowledge } from "@/lib/knowledge";
+import { canonicalRiskNotes } from "@/lib/risks/issue-notes";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import { isTagTargetKind, type ItemTag, type ProjectTag } from "@/lib/tags";
+import { normalisePersonIds } from "@/lib/todos/todo-edit";
 
 export type LoadedWorkspace = {
   workspaceId: string;
@@ -175,6 +177,9 @@ export async function loadMissionStateFromSupabase(
     sourceRecommendationId: row.source_recommendation_id ?? undefined,
   }));
 
+  await attachWaitingPeople(client, workspaceId, todos);
+  const usage = await loadWorkspaceUsage(client, workspaceId);
+
   // Knowledge: fold every canonical row. Do not count-cap sections or
   // sectionItemIds — presentation/prompt bounds belong downstream.
   const knowledgeMap = new Map<string, ProjectKnowledge>();
@@ -253,6 +258,7 @@ export async function loadMissionStateFromSupabase(
       source: (row.source as "manual" | "capture" | "seed") || "manual",
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      notes: canonicalRiskNotes(row.notes),
     }),
   );
 
@@ -337,6 +343,8 @@ export async function loadMissionStateFromSupabase(
     projectId: row.project_id,
     createdAt: row.created_at,
     source: row.source ?? undefined,
+    targetKind: row.target_kind ?? null,
+    targetId: row.target_id ?? null,
   }));
 
   const { projectTags, itemTags } = await loadRetrievalTags(client, workspaceId);
@@ -355,6 +363,8 @@ export async function loadMissionStateFromSupabase(
     history,
     projectTags,
     itemTags,
+    analysesThisMonth: usage?.used ?? 0,
+    analysesMonthKey: usage?.monthKey,
   };
 
   return { workspaceId, userId: user.id, state };
@@ -399,6 +409,60 @@ async function loadRetrievalTags(
     });
   }
   return { projectTags, itemTags };
+}
+
+async function attachWaitingPeople(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  workspaceId: string,
+  todos: TodoItem[],
+) {
+  const res = await client
+    .from("todo_waiting_people")
+    .select("todo_id, person_id")
+    .eq("workspace_id", workspaceId);
+  if (isMissingRelation(res.error)) {
+    for (const todo of todos) todo.waitingOnPersonIds = [];
+    return;
+  }
+  if (res.error) {
+    throw new Error(`[supabase] load waiting on: ${res.error.message}`);
+  }
+  const byTodo = new Map<string, string[]>();
+  for (const row of res.data ?? []) {
+    const todoId = String(row.todo_id);
+    const list = byTodo.get(todoId) ?? [];
+    list.push(String(row.person_id));
+    byTodo.set(todoId, list);
+  }
+  for (const todo of todos) {
+    todo.waitingOnPersonIds = normalisePersonIds(byTodo.get(todo.id) ?? []);
+  }
+}
+
+async function loadWorkspaceUsage(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: SupabaseClient<any>,
+  workspaceId: string,
+): Promise<{ used: number; monthKey?: string } | null> {
+  const res = await client
+    .from("workspace_usage")
+    .select("analyses_this_month, analyses_month_key")
+    .eq("workspace_id", workspaceId)
+    .maybeSingle();
+  if (isMissingRelation(res.error)) return null;
+  if (res.error) {
+    throw new Error(`[supabase] load usage: ${res.error.message}`);
+  }
+  if (!res.data) return { used: 0 };
+  const monthKey =
+    typeof res.data.analyses_month_key === "string"
+      ? res.data.analyses_month_key
+      : undefined;
+  return {
+    used: Number(res.data.analyses_this_month ?? 0) || 0,
+    monthKey,
+  };
 }
 
 function isMissingRelation(error: { message?: string; code?: string } | null): boolean {

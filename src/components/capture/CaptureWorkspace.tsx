@@ -2,6 +2,9 @@
 
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
 import "@/components/capture/capture-experience.css";
+import "@/components/capture/capture-composer.css";
+import "@/components/capture/review-workspace.css";
+import { MeMark } from "@/components/brand/MeMark";
 import { CaptureContextInspector } from "@/components/capture/CaptureContextInspector";
 import { CaptureReliabilityNotice } from "@/components/capture/CaptureReliabilityNotice";
 import { useCaptureSession } from "@/components/capture/CaptureSessionContext";
@@ -16,8 +19,11 @@ import {
 import {
   buildReviewChangeViewModels,
   computeReviewCounts,
-  pendingReadyModels,
 } from "@/lib/capture/review/viewModel";
+import {
+  reviewApplyAnnouncement,
+  reviewApplyGate,
+} from "@/lib/capture/review/reviewBatch";
 import { applyPendingReadyQueue } from "@/lib/capture/review/applyReadyQueue";
 import { confirmAuthoritativeWrites } from "@/lib/capture/apply/confirm-writes";
 import {
@@ -25,6 +31,8 @@ import {
   SuggestedChangesList,
   AnnotatedTranscript,
 } from "@/components/capture/review";
+import { DidntUnderstand } from "@/components/capture/review/DidntUnderstand";
+import { RecentProjectCaptures } from "@/components/capture/RecentProjectCaptures";
 import { annotationSourcesFromResult } from "@/lib/capture/review/annotateTranscript";
 import type { TargetOption } from "@/components/capture/review/TargetPicker";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
@@ -57,6 +65,23 @@ function joinBlocks(blocks: CaptureBlock[]) {
     .map((b) => b.text.trim())
     .filter(Boolean)
     .join("\n\n");
+}
+
+function formatRecordingElapsed(seconds: number) {
+  const safe = Math.max(0, Math.floor(seconds));
+  const minutes = Math.floor(safe / 60);
+  const rest = safe % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+}
+
+function captureEntryFooter(blocks: CaptureBlock[]) {
+  const count = blocks.reduce(
+    (total, block) => total + (block.text.trim() ? 1 : 0),
+    0,
+  );
+  if (count === 0) return "Nothing added yet";
+  if (count === 1) return "1 entry · editable";
+  return `${count} entries · all editable`;
 }
 
 function formatAnalysedAt(iso: string | null) {
@@ -109,8 +134,11 @@ export function CaptureWorkspace({
     cancelAnalyse,
     applyOne,
     dismissOne,
+    includeOne,
+    stageProposalEdit,
     markOneApplied,
     clearSession,
+    discardUnappliedReview,
     bindOpenProject,
     expandAnalysis,
     editCapture,
@@ -278,6 +306,8 @@ export function CaptureWorkspace({
     preReliability.state !== "normal";
 
   const reviewOpen = Boolean(result) && !collapsed;
+  const [capturedOpen, setCapturedOpen] = useState(true);
+  const [applyingReview, setApplyingReview] = useState(false);
   const isDev = process.env.NODE_ENV === "development";
   const showSessionActions = Boolean(result);
 
@@ -435,47 +465,66 @@ export function CaptureWorkspace({
   }
 
   async function approveReady() {
+    if (applyingReview) return;
+    const gate = reviewApplyGate(reviewModels, added, dismissed);
+    if (gate.blocked) {
+      announce(
+        gate.unresolvedNeedsYou === 1
+          ? "1 item still needs you before Apply"
+          : `${gate.unresolvedNeedsYou} items still need you before Apply`,
+      );
+      return;
+    }
+    if (gate.ready.length === 0) return;
     const durableBatch = persistenceMode === "supabase";
-    const { confirmOwner, failures, reconcileFailed, succeededWrites } =
-      await applyPendingReadyQueue({
-      models: pendingReadyModels(reviewModels, added, dismissed),
-      applyOne: (item) =>
-        applyOne(item, defaultProjectId, {
-          settle: durableBatch ? "defer" : "now",
-        }),
-      confirmWrites: durableBatch
-        ? async (operations) => {
-            try {
-              const confirmed = await confirmAuthoritativeWrites({
-                operations,
-                reloadWorkspace: async () => {
-                  const peeked = await peekDurableWorkspace();
-                  if (!peeked) {
-                    throw new Error("Could not reload project truth.");
-                  }
-                  return peeked;
-                },
-              });
-              if (confirmed.state) {
-                adoptAppliedState(confirmed.state);
+    setApplyingReview(true);
+    try {
+      const { confirmOwner, failures, reconcileFailed, succeededWrites } =
+        await applyPendingReadyQueue({
+        models: gate.ready,
+        applyOne: (item) =>
+          applyOne(item, defaultProjectId, {
+            settle: durableBatch ? "defer" : "now",
+          }),
+        confirmWrites: durableBatch
+          ? async (operations) => {
+              try {
+                const confirmed = await confirmAuthoritativeWrites({
+                  operations,
+                  reloadWorkspace: async () => {
+                    const peeked = await peekDurableWorkspace();
+                    if (!peeked) {
+                      throw new Error("Could not reload saved project information.");
+                    }
+                    return peeked;
+                  },
+                });
+                if (confirmed.state) {
+                  adoptAppliedState(confirmed.state);
+                }
+                return confirmed;
+              } catch {
+                return { reconcileFailed: true as const };
               }
-              return confirmed;
-            } catch {
-              return { reconcileFailed: true as const };
             }
-          }
-        : undefined,
-    });
-    if (reconcileFailed) {
-      announce("Applied — refreshing project truth…");
-    } else if (succeededWrites.length > 0) {
-      announce("Applied");
-    }
-    if (confirmOwner) {
-      setConfirmOwner(confirmOwner);
-    }
-    if (failures.length) {
-      setError(failures[0] ?? "Could not apply these changes.");
+          : undefined,
+      });
+      announce(
+        reviewApplyAnnouncement({
+          requested: gate.ready.length,
+          succeeded: succeededWrites.length,
+          failed: failures.length,
+          reconcileFailed,
+        }),
+      );
+      if (confirmOwner) {
+        setConfirmOwner(confirmOwner);
+      }
+      if (failures.length) {
+        setError(failures[0] ?? "Could not apply these changes.");
+      }
+    } finally {
+      setApplyingReview(false);
     }
   }
 
@@ -683,12 +732,21 @@ export function CaptureWorkspace({
 
   const analysedLabel = formatAnalysedAt(analysedAt);
   const isOcean = variant === "ocean";
+  const page09Composer = isOcean && !isAnalysed;
+  const entryFooter = captureEntryFooter(blocks);
+  const recordingElapsed = formatRecordingElapsed(recording.seconds);
+  const recordingNote =
+    recording.hint && recording.hint !== "Live transcription"
+      ? recording.hint
+      : null;
+  const composerPlaceholder = blocks.every((block) => !block.text.trim());
   const panelClass = [
     "capture-workspace",
     "capture-compact",
     isOcean ? "ocean-capture-workspace" : "",
     maximized ? "is-maximized" : "",
     collapsed ? "is-minimised" : "",
+    reviewOpen && isOcean ? "is-review" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -703,6 +761,248 @@ export function CaptureWorkspace({
         reviewOpen ? "review" : busy === "analysing" ? "analysing" : "input"
       }
     >
+      {page09Composer ? (
+        <>
+        <form onSubmit={onSubmit} className="p09-capture">
+          {collapsed ? (
+            <div className="p09-capture-minimised">
+              <h2 id={titleId} className="sr-only">
+                Tell Lume what changed.
+              </h2>
+              <p className="capture-minimise-restore">
+                Capture minimised — click □ to restore your notes.
+              </p>
+              <button
+                type="button"
+                className="capture-window-btn"
+                onClick={restoreCapture}
+                aria-label="Restore Capture"
+                title="Restore Capture"
+                data-testid="ocean-capture-minimise"
+              >
+                Expand
+              </button>
+            </div>
+          ) : (
+            <>
+              <header className="p09-capture-heading">
+                <h2 id={titleId} className="p09-capture-title">
+                  Tell Lume what changed.
+                </h2>
+                <p className="p09-capture-helper">
+                  <span className="p09-capture-helper-wide">
+                    Type, paste or record what happened. Edit anything before you
+                    review it.
+                  </span>
+                  <span className="p09-capture-helper-narrow">
+                    Type, paste or record. Edit anything before you review it.
+                  </span>
+                </p>
+              </header>
+              <FirstCaptureCue
+                composeEmpty={!content.trim()}
+                analysing={busy === "analysing"}
+                reviewOpen={Boolean(reviewOpen)}
+              />
+              <div
+                className="p09-capture-composer"
+                data-testid="p09-capture-composer"
+              >
+                <div className="p09-capture-content">
+                  <label className="sr-only" htmlFor="capture-input">
+                    Capture notes
+                  </label>
+                  <div className="p09-capture-blocks" aria-label="Capture notes">
+                    {blocks.map((block, index) => (
+                      <div
+                        key={block.id}
+                        className={`p09-capture-block is-${block.source}`}
+                      >
+                        {index > 0 ? (
+                          <div className="p09-capture-sep" role="separator">
+                            <span className="p09-capture-sep-rule" aria-hidden />
+                            <button
+                              type="button"
+                              className="p09-capture-delete"
+                              onClick={() => deleteBlock(block.id)}
+                              aria-label="Delete this section"
+                              title="Delete this section"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        ) : blocks.length > 1 ? (
+                          <div className="p09-capture-sep is-leading">
+                            <button
+                              type="button"
+                              className="p09-capture-delete"
+                              onClick={() => deleteBlock(block.id)}
+                              aria-label="Delete this section"
+                              title="Delete this section"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        ) : null}
+                        <CaptureAutoTextarea
+                          id={
+                            index === blocks.length - 1
+                              ? "capture-input"
+                              : undefined
+                          }
+                          value={block.text}
+                          readOnly={false}
+                          disabled={busy === "analysing"}
+                          placeholder={
+                            composerPlaceholder && index === 0
+                              ? "Paste or type project notes…"
+                              : ""
+                          }
+                          onChange={(text) => updateBlockText(block.id, text)}
+                          testId={
+                            index === blocks.length - 1
+                              ? "ocean-capture-input"
+                              : undefined
+                          }
+                          layout="composer"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <p className="p09-capture-footer">{entryFooter}</p>
+              </div>
+              <div className="p09-capture-actions">
+                <div className="p09-capture-actions-main">
+                  {!defaultProjectId ? (
+                    <select
+                      value={effectiveProjectId}
+                      onChange={(e) => setProjectId(e.target.value)}
+                      disabled={busy !== "idle" || recording.active}
+                      aria-label="Project"
+                    >
+                      <option value="">All / unlinked</option>
+                      {state.projects.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.code}
+                        </option>
+                      ))}
+                    </select>
+                  ) : null}
+                  {!recording.active ? (
+                    <button
+                      type="button"
+                      className="p09-capture-record"
+                      onClick={() => void recording.start()}
+                      disabled={busy === "analysing" || busy === "transcribing"}
+                      data-testid="ocean-capture-record"
+                    >
+                      Record
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="p09-capture-stop"
+                      onClick={recording.stop}
+                      data-testid="ocean-capture-stop"
+                    >
+                      Stop recording
+                    </button>
+                  )}
+                  {recording.active ? (
+                    <span className="p09-capture-recording" role="status">
+                      <span className="p09-capture-rec-dot" aria-hidden />
+                      <span className="p09-capture-elapsed">
+                        {recordingElapsed}
+                      </span>
+                      <span className="sr-only">Recording</span>
+                      {recordingNote ? (
+                        <span className="p09-capture-rec-hint">
+                          {recordingNote}
+                        </span>
+                      ) : null}
+                    </span>
+                  ) : null}
+                </div>
+                {!showPreWarn ? (
+                  busy === "analysing" ? (
+                    <button
+                      type="button"
+                      className="p09-capture-cancel"
+                      onClick={cancelAnalyse}
+                    >
+                      Cancel
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="p09-capture-review"
+                      data-testid="ocean-capture-analyse"
+                      data-ai="true"
+                      disabled={
+                        busy !== "idle" ||
+                        recording.active ||
+                        !content.trim() ||
+                        usage.remaining <= 0
+                      }
+                    >
+                      <MeMark size="micro" />
+                      Review changes
+                    </button>
+                  )
+                ) : null}
+              </div>
+              {busy !== "idle" && !recording.active ? (
+                <p className="p09-capture-status" role="status">
+                  {busy === "transcribing"
+                    ? "Transcribing…"
+                    : "Analysing your update…"}
+                </p>
+              ) : null}
+              <div className="p09-capture-meta">
+                <p className="p09-capture-usage" title="Analyses this month">
+                  <span>
+                    {usage.remaining} analyses remaining
+                  </span>
+                  <span className="p09-capture-usage-bar" aria-hidden>
+                    <span
+                      style={{
+                        width: `${Math.min(100, (usage.used / usage.limit) * 100)}%`,
+                      }}
+                    />
+                  </span>
+                </p>
+                <div className="p09-capture-session">
+                  <button
+                    type="button"
+                    className="capture-new-btn"
+                    onClick={clearSession}
+                    title="New Capture"
+                    aria-label="New Capture"
+                  >
+                    New Capture
+                  </button>
+                  <button
+                    type="button"
+                    className="capture-window-btn"
+                    onClick={minimiseCapture}
+                    aria-label="Minimise Capture"
+                    title="Minimise Capture"
+                    data-testid="ocean-capture-minimise"
+                  >
+                    Minimise
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </form>
+        <RecentProjectCaptures projectId={defaultProjectId || projectId} />
+        </>
+      ) : null}
+
+      {page09Composer ? null : (
+      <>
       <div className="capture-workspace-head">
         <div className="capture-head-copy">
           <h2 id={titleId} className="capture-title">
@@ -771,14 +1071,33 @@ export function CaptureWorkspace({
           reviewOpen={Boolean(reviewOpen)}
         />
       ) : null}
+      </>
+      )}
 
       {/* Transcript stays visible after analysis (read-only), including when collapsed. */}
       <div className={reviewOpen ? "lume-review-frame" : undefined}>
+      {page09Composer ? null : (
       <section
         className={`capture-transcript-panel${isAnalysed ? " is-captured" : ""}`}
         aria-labelledby={isAnalysed ? "capture-transcript-title" : undefined}
       >
-        {isAnalysed ? (
+        {isAnalysed && isOcean ? (
+          <div className="p09-captured-head">
+            <h3 id="capture-transcript-title" className="p09-captured-label">
+              Captured information
+            </h3>
+            <span className="p09-captured-meta">Read-only</span>
+            <button
+              type="button"
+              className="p09-captured-toggle"
+              aria-expanded={capturedOpen}
+              aria-controls="p09-captured-body"
+              onClick={() => setCapturedOpen((value) => !value)}
+            >
+              {capturedOpen ? "Collapse captured information" : "Expand captured information"}
+            </button>
+          </div>
+        ) : isAnalysed ? (
           <div className="lume-captured-head">
             <h3 id="capture-transcript-title" className="lume-rail-title">
               Captured Information
@@ -792,7 +1111,11 @@ export function CaptureWorkspace({
             Capture notes
           </label>
         )}
-          <div className={!isAnalysed ? "capture-compose" : undefined}>
+          <div
+            id={isAnalysed && isOcean ? "p09-captured-body" : undefined}
+            className={!isAnalysed ? "capture-compose" : capturedOpen || !isOcean ? undefined : "p09-captured-collapsed"}
+            hidden={isAnalysed && isOcean && !capturedOpen ? true : undefined}
+          >
             {isAnalysed ? (
               <AnnotatedTranscript
                 transcript={content}
@@ -865,6 +1188,11 @@ export function CaptureWorkspace({
               </div>
             )}
           </div>
+          {isAnalysed && isOcean && capturedOpen ? (
+            <p className="p09-captured-hint">
+              Marked phrases are what Lume drew on. Hover or tap one to see what it proposed.
+            </p>
+          ) : null}
 
           <div className="capture-toolbar">
             <div className="capture-toolbar-left">
@@ -976,6 +1304,7 @@ export function CaptureWorkspace({
           </div>
         </form>
       </section>
+      )}
 
       {showPreWarn && preReliability ? (
         <CaptureReliabilityNotice
@@ -1034,6 +1363,7 @@ export function CaptureWorkspace({
             needsAttentionCount={counts.needsAttention}
             onSelectObservation={onSelectObservation}
           />
+          <DidntUnderstand observations={observations} />
           {result?.capturePipeline === "v2" && result.observationAccount ? (
             <p
               className="capture-summary-line capture-v2-account"
@@ -1086,6 +1416,10 @@ export function CaptureWorkspace({
             highlightedId={highlightedCardId}
             onApprove={approveById}
             onDismiss={dismissOne}
+            onInclude={includeOne}
+            onEditProposal={stageProposalEdit}
+            onDiscardReview={discardUnappliedReview}
+            applying={applyingReview}
             onApproveReady={approveReady}
             onUseThis={onUseThis}
             onChooseTarget={onChooseTarget}
@@ -1156,6 +1490,7 @@ function CaptureAutoTextarea({
   disabled,
   placeholder,
   testId,
+  layout = "legacy",
 }: {
   id?: string;
   value: string;
@@ -1164,17 +1499,21 @@ function CaptureAutoTextarea({
   disabled?: boolean;
   placeholder?: string;
   testId?: string;
+  /** Composer lines stay short. Legacy capture keeps the 168–320 field. */
+  layout?: "legacy" | "composer";
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    const min = layout === "composer" ? 22 : 168;
+    const max = layout === "composer" ? 480 : 320;
     el.style.height = "0px";
-    const next = Math.min(Math.max(el.scrollHeight, 168), 320);
+    const next = Math.min(Math.max(el.scrollHeight, min), max);
     el.style.height = `${next}px`;
-    el.style.overflowY = el.scrollHeight > 320 ? "auto" : "hidden";
-  }, [value]);
+    el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
+  }, [value, layout]);
 
   return (
     <textarea
@@ -1188,7 +1527,7 @@ function CaptureAutoTextarea({
       placeholder={placeholder}
       data-testid={testId}
       data-ai="false"
-      className={`capture-textarea capture-textarea-idle capture-textarea-auto ${readOnly ? "is-readonly" : ""}`}
+      className={`capture-textarea capture-textarea-idle capture-textarea-auto${layout === "composer" ? " p09-capture-field" : ""}${readOnly ? " is-readonly" : ""}`}
       aria-readonly={readOnly || undefined}
     />
   );
@@ -1345,7 +1684,7 @@ function useRecordingBridge({
     if (recordingTextRef.current.trim()) {
       setBusy("idle");
       finalizeRecordingBlock();
-      announce("Recording saved. Edit the transcript, then press Analyse.");
+      announce("Recording saved. Edit the transcript, then press Review changes.");
       return;
     }
     setBusy("transcribing");
@@ -1367,7 +1706,7 @@ function useRecordingBridge({
         recordingTextRef.current = data.text;
         setRecordingText(data.text);
       }
-      announce("Transcript ready. Edit if needed, then press Analyse.");
+      announce("Transcript ready. Edit if needed, then press Review changes.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Voice capture failed");
     } finally {

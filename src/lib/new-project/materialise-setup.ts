@@ -1,6 +1,7 @@
 import { newPeopleUuid } from "@/lib/people/identity";
 import type { CanonicalTruthItem } from "@/lib/canonical-truth/types";
 import type { CreateProjectInput } from "@/lib/create-project";
+import { canonicalRiskNotes } from "@/lib/risks/issue-notes";
 import type { ProjectRisk, Stakeholder } from "@/lib/types";
 import {
   personResponsibilityQuestion,
@@ -9,17 +10,9 @@ import {
   confirmedRiskDrafts,
 } from "./needs-you";
 
-function scopesOf(draft: {
-  role?: string;
-  responsibilities?: string[];
-}): string[] {
-  const listed = (draft.responsibilities ?? [])
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (listed.length) return listed;
-  const role = draft.role?.trim();
-  if (role && role.toLowerCase() !== "stakeholder") return [role];
-  return [];
+/** Explicit responsibility scopes only. Role is never a scope. */
+function scopesOf(draft: { responsibilities?: string[] }): string[] {
+  return (draft.responsibilities ?? []).map((s) => s.trim()).filter(Boolean);
 }
 
 /**
@@ -181,6 +174,9 @@ export function risksFromSetup(
     const key = title.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
+    const draft = confirmedRiskDrafts(input).find(
+      (risk) => risk.title.trim().toLowerCase() === key,
+    );
     risks.push({
       id: newPeopleUuid(),
       projectId,
@@ -188,6 +184,7 @@ export function risksFromSetup(
       status: "open",
       source: "manual",
       createdAt: now,
+      notes: canonicalRiskNotes(draft?.notes),
     });
   }
   return risks;

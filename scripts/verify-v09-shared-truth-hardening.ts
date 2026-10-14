@@ -1190,7 +1190,12 @@ async function main() {
     assert.equal(applied.executed.kind, "needs_you");
     assert.match(applied.executed.reason, /not in the current workspace/i);
     assert.equal(fake.tables.todos.length, 0);
-    assert.equal(JSON.stringify(fake.tables), before);
+    assert.deepEqual(fake.tables.todo_waiting_people ?? [], []);
+    assert.deepEqual(fake.tables.workspace_usage ?? [], []);
+    const after = { ...fake.tables };
+    delete after.todo_waiting_people;
+    delete after.workspace_usage;
+    assert.equal(JSON.stringify(after), before);
   });
 
   await check("Preserve.15 mixed-domain and 30 uniquely titled siblings persist", async () => {

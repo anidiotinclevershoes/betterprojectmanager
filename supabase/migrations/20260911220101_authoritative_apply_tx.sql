@@ -1,0 +1,11 @@
+-- Hosted history marker only. This file executes no schema or data statements.
+--
+-- On 11 Sep 2026, production Lume (exfftrxxinhduogcluce) deployed the logical
+-- contents of supabase/migrations/20260829200000_authoritative_apply_tx.sql
+-- through Supabase MCP apply_migration. The remote ledger therefore
+-- legitimately contains version 20260911220101, name authoritative_apply_tx.
+--
+-- The actual reproducible SQL remains in 20260829200000_authoritative_apply_tx.sql.
+-- Do not copy or re-execute the Apply RPC SQL here.
+-- This placeholder lets local and remote migration comparison represent that
+-- hosted history without running the same migration twice on a fresh database.

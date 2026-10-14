@@ -1,6 +1,8 @@
 "use client";
 
-import { DomainMark, OperationMark, ReviewPersonAvatar } from "./DomainMark";
+import { DomainBadge } from "@/components/domain/DomainIcon";
+import type { LumeDomain } from "@/lib/domain/lume-domain";
+import { DomainMark, OperationMark } from "./DomainMark";
 import type { SuggestionKind, SuggestionOp } from "@/lib/capture/suggestions";
 import {
   reviewDomainLabel,
@@ -15,6 +17,21 @@ function domainIdentity(kind: SuggestionKind): "issues" | "people" | "todo" | "k
   if (kind === "action") return "todo";
   if (kind === "knowledge" || kind === "memory") return "knowledge";
   return undefined;
+}
+
+/** Page 09 badge only when the kind maps to one of the four domains. */
+function page09Badge(
+  kind: SuggestionKind,
+): { domain: LumeDomain; label: string } | null {
+  if (kind === "risk") return { domain: "issue", label: "Issue" };
+  if (kind === "stakeholder" || kind === "availability") {
+    return { domain: "people", label: "Person" };
+  }
+  if (kind === "action") return { domain: "todo", label: "To Do" };
+  if (kind === "knowledge" || kind === "memory") {
+    return { domain: "knowledge", label: "Knowledge" };
+  }
+  return null;
 }
 
 export function OperationBar({
@@ -45,24 +62,28 @@ export function DomainRow({
   personName?: string;
   unknownIdentity?: boolean;
 }) {
-  const isPerson = entityKind === "stakeholder" || entityKind === "availability";
   const identity = domainIdentity(entityKind);
+  const badge = page09Badge(entityKind);
   return (
     <div
       className="lume-review-domain"
       data-lume-domain={identity}
     >
-      {isPerson ? (
-        <ReviewPersonAvatar
-          name={personName || entityLabel}
-          unknown={unknownIdentity}
-        />
+      {badge ? (
+        <DomainBadge domain={badge.domain} label={badge.label} />
       ) : (
-        <DomainMark kind={entityKind} title={entityLabel} size={30} />
+        <>
+          <DomainMark kind={entityKind} title={entityLabel} size={30} />
+          <span className="lume-review-domain-label">
+            {reviewDomainLabel(entityKind)}
+          </span>
+        </>
       )}
-      <span className="lume-review-domain-label">
-        {reviewDomainLabel(entityKind)}
-      </span>
+      {unknownIdentity ? (
+        <span className="sr-only">
+          Identity not confirmed{personName ? `: ${personName}` : ""}
+        </span>
+      ) : null}
       {projectLabel ? (
         <span className="lume-review-project">{projectLabel}</span>
       ) : null}

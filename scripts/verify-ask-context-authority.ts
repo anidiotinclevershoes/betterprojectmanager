@@ -217,6 +217,7 @@ function testResolvedRiskExcludedFromCurrent() {
   assert.match(bundle.promptBlock, /\(risk, resolved\) Old cab risk/);
   assert.doesNotMatch(bundle.promptBlock, /\(risk, open\) Old cab risk/);
   assert.doesNotMatch(bundle.promptBlock, /\[Resolved\] Old cab risk/);
+  assert.doesNotMatch(bundle.promptBlock, /Legacy open-looking string/);
 }
 
 function testNoFabricatedUnknownOwnerGap() {

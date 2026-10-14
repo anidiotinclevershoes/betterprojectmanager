@@ -7,6 +7,7 @@ import {
   type ReviewOwnerHit,
 } from "@/lib/capture/review/reviewReason";
 import type { SuggestionKind } from "@/lib/capture/suggestions";
+import { proposalEditTarget } from "@/lib/capture/review/reviewBatch";
 import {
   needsYouHeadline,
   needsYouSupporting,
@@ -28,6 +29,8 @@ export function SuggestedChangeCard({
   targetOptions = [],
   onApprove,
   onDismiss,
+  onInclude,
+  onEdit,
   onUseThis,
   onChooseTarget,
   onChooseProject,
@@ -39,12 +42,15 @@ export function SuggestedChangeCard({
   currentOwners = [],
   initialWhyOpen = false,
   highlighted = false,
+  forceCollapsed = false,
 }: {
   model: ReviewChangeViewModel;
   state?: "pending" | "approved" | "dismissed";
   targetOptions?: TargetOption[];
   onApprove: () => void;
   onDismiss: () => void;
+  onInclude?: () => void;
+  onEdit?: (value: string, displayedTo?: string) => void;
   /** @deprecated Keep Open only dismissed — no longer rendered. */
   onKeepOpen?: () => void;
   onUseThis?: () => void;
@@ -65,6 +71,7 @@ export function SuggestedChangeCard({
   currentOwners?: ReviewOwnerHit[];
   initialWhyOpen?: boolean;
   highlighted?: boolean;
+  forceCollapsed?: boolean;
 }) {
   const [whyOpen, setWhyOpen] = useState(initialWhyOpen);
   const whyId = useId();
@@ -162,6 +169,15 @@ export function SuggestedChangeCard({
           <p className="lume-review-resolved-copy">
             {resolvedLabel} · <strong>{model.recordName}</strong>
           </p>
+          {state === "dismissed" && onInclude ? (
+            <button
+              type="button"
+              className="ghost-btn p09-review-exclude"
+              onClick={onInclude}
+            >
+              Re-include
+            </button>
+          ) : null}
         </article>
       </li>
     );
@@ -194,6 +210,7 @@ export function SuggestedChangeCard({
         readiness={attentionReadiness}
         state={state}
         highlighted={highlighted}
+        forceCollapsed={forceCollapsed}
         needsYouHeadline={headline}
         needsYouDetail={detail}
         reviewReason={model.reviewReason}
@@ -215,16 +232,73 @@ export function SuggestedChangeCard({
               handlers={handlers}
               currentOwners={currentOwners}
               hidePrompt
+              excludeLabel={family === "remove" ? "Undo removal" : "Exclude change"}
             />
           ) : (
             <div className="compact-change-action-row">
-              <button type="button" className="ghost-btn" onClick={onDismiss}>
-                Exclude change
+              {proposalEditTarget(model.suggestion, model.diff?.to) && onEdit ? (
+                <ProposalEdit
+                  initial={model.diff?.to || model.suggestion.content}
+                  onSave={(value) => onEdit(value, model.diff?.to)}
+                />
+              ) : null}
+              <button type="button" className="ghost-btn p09-review-exclude" onClick={onDismiss}>
+                {family === "remove" ? "Undo removal" : "Exclude change"}
               </button>
             </div>
           )
         }
       />
     </li>
+  );
+}
+
+function ProposalEdit({
+  initial,
+  onSave,
+}: {
+  initial: string;
+  onSave: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(initial);
+  if (!open) {
+    return (
+      <button
+        type="button"
+        className="ghost-btn"
+        onClick={() => {
+          setValue(initial);
+          setOpen(true);
+        }}
+      >
+        Edit
+      </button>
+    );
+  }
+  return (
+    <div className="p09-review-edit">
+      <label>
+        <span className="sr-only">Edit proposed change</span>
+        <input
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+        />
+      </label>
+      <button
+        type="button"
+        className="ghost-btn"
+        onClick={() => {
+          const next = value.trim();
+          if (next) onSave(next);
+          setOpen(false);
+        }}
+      >
+        Save edit
+      </button>
+      <button type="button" className="ghost-btn" onClick={() => setOpen(false)}>
+        Cancel
+      </button>
+    </div>
   );
 }

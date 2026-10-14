@@ -16,12 +16,19 @@ import { experimentalMissionState } from "../src/lib/eval-capture-v2/mission-sta
 import { CANDYLAND_ID, experimentalApplyWorld } from "../src/lib/experiments/worlds";
 import type { MissionState } from "../src/lib/types";
 import { isSharedOrganiseEnabled } from "../src/lib/shared-organise/flag";
-import { SHARED_ORGANISE_PROMPT_VERSION, buildProjectChangePrompt } from "../src/lib/shared-organise/prompt";
+import {
+  SHARED_ORGANISE_PROMPT_VERSION,
+  SHARED_ORGANISE_PROMPT_V5_VERSION,
+  buildProjectChangePrompt,
+  buildProjectChangePromptV5,
+} from "../src/lib/shared-organise/prompt";
 import { organiseNewProjectPacket } from "../src/lib/shared-organise/new-project";
 import { runSharedOrganiseFromModelJson } from "../src/lib/shared-organise/run";
 import { buildSharedOrganiseContext } from "../src/lib/shared-organise/context";
 import { reviewProjectChangeForm, parseProjectChangeForm } from "../src/lib/shared-organise/validate";
 import { shiftIsoDate } from "../src/lib/shared-organise/date";
+import { sharedOrganiseTrialAllowed } from "../src/lib/shared-organise/trial-access";
+import { DEFAULT_SHARED_ORGANISE_PROMPT, extractProjectChangesWithLuna } from "../src/lib/shared-organise/extract";
 
 const PROJECT = CANDYLAND_ID;
 const REF = "2026-10-03";
@@ -334,6 +341,105 @@ async function main() {
     assert.ok(owners.some((row) => row.personName === "James Murphy"));
   });
 
+  await check("two owners named together both persist", async () => {
+    const joined = await applyReady(
+      experimentalMissionState(),
+      "Helen Ward has joined as county sponsor. Chris Ward has joined as facilities lead.",
+      form([
+        change({
+          operation: "ensure_person",
+          evidence: "Helen Ward has joined as county sponsor.",
+          values: { name: "Helen Ward", roleHint: "county sponsor" },
+        }),
+        change({
+          id: "chg-2",
+          operation: "ensure_person",
+          evidence: "Chris Ward has joined as facilities lead.",
+          values: { name: "Chris Ward", roleHint: "facilities lead" },
+        }),
+      ]),
+    );
+    const transcript = "Helen Ward and Chris Ward will share oversight of the loan agreement.";
+    const shared = await applyReady(
+      joined.state,
+      transcript,
+      form([
+        change({
+          operation: "confirm_responsibility",
+          evidence: transcript,
+          values: { personName: "Helen Ward", scope: "oversight of the loan agreement" },
+        }),
+        change({
+          id: "chg-2",
+          operation: "confirm_responsibility",
+          evidence: transcript,
+          values: { personName: "Chris Ward", scope: "oversight of the loan agreement" },
+        }),
+      ]),
+    );
+    const owners = buildSharedOrganiseContext({
+      world: captureApplyWorldFromState(shared.state),
+      projectId: PROJECT,
+      referenceDate: REF,
+    }).responsibilities.filter((row) => row.scope === "oversight of the loan agreement" && row.ownerConfirmed);
+    assert.deepEqual(owners.map((row) => row.personName).sort(), ["Chris Ward", "Helen Ward"]);
+
+    const mara = "Mara Ellison will share oversight of the loan agreement.";
+    const withMara = await applyReady(
+      shared.state,
+      "Mara Ellison has joined as lead archivist.",
+      form([
+        change({
+          operation: "ensure_person",
+          evidence: "Mara Ellison has joined as lead archivist.",
+          values: { name: "Mara Ellison", roleHint: "lead archivist" },
+        }),
+      ]),
+    );
+    const viewed = organise(
+      withMara.state,
+      mara,
+      form([
+        change({
+          operation: "confirm_responsibility",
+          evidence: mara,
+          values: {
+            personName: "Mara Ellison",
+            scope: "oversight of the loan agreement",
+            ownershipSemantics: "share",
+          },
+        }),
+      ]),
+    );
+    const card = viewed.cards.find((row) => row.readiness === "ready" && row.canApprove);
+    assert.ok(card);
+    const removed = structuredClone(withMara.state);
+    const knowledge = removed.knowledge?.find((row) => row.projectId === PROJECT);
+    const helen = knowledge?.structured?.find(
+      (item) =>
+        item.lifecycle === "current" &&
+        item.kind === "responsibility" &&
+        item.meta?.responsibility?.personName === "Helen Ward",
+    );
+    assert.ok(helen);
+    helen.lifecycle = "superseded";
+    const blocked = await applyApprovedCaptureSuggestion({
+      item: card.suggestion,
+      text: mara,
+      projectId: PROJECT,
+      expectedTarget: card.suggestion.expectedTarget,
+      loadWorkspace: async () => ({
+        workspaceId: "ws-shared-organise",
+        userId: "user-shared-organise",
+        state: removed,
+      }),
+      hooks: memoryCaptureApplyHooks({ state: structuredClone(removed) }),
+      reloadWorkspace: async () => removed,
+    });
+    assert.equal(blocked.executed.kind, "needs_you");
+    assert.match(blocked.executed.kind === "needs_you" ? blocked.executed.reason : "", /changed since Review/);
+  });
+
   await check("responsibility replace supersedes the named owner", async () => {
     const transcript = "James Murphy replaces Pippa Gumdrop as UAT lead.";
     const replaced = await applyReady(
@@ -616,7 +722,7 @@ async function main() {
     assert.equal(second.state.todos.filter((row) => row.title === "Chase the fire cert").length, 1);
   });
 
-  await check("new project adapter is the same engine", () => {
+  await check("new project adapter is the same engine", async () => {
     const world = experimentalApplyWorld();
     const collated = "Sarah Kim is the QS and handles valuations. Someone needs to sort the fire cert.";
     const run = organiseNewProjectPacket(
@@ -659,6 +765,54 @@ async function main() {
     assert.equal(run.reviewed.filter((row) => row.operation?.type === "ensure_person").length, 1);
     assert.match(buildProjectChangePrompt({ source: collated, projectBlock: run.projectBlock }), /materialUncertainty/);
     assert.equal(SHARED_ORGANISE_PROMPT_VERSION, "shared-organise-form-v4");
+    assert.equal(DEFAULT_SHARED_ORGANISE_PROMPT, "v5");
+    assert.equal(SHARED_ORGANISE_PROMPT_V5_VERSION, "shared-organise-form-v5");
+    const sample = { source: "Mara owns the strongroom.", projectBlock: "Project: Archive" };
+    const v4 = buildProjectChangePrompt(sample);
+    const v5 = buildProjectChangePromptV5(sample);
+    assert.equal(v4.includes("material contradiction"), false);
+    assert.equal(v5.includes("material contradiction"), true);
+    assert.ok(v5.startsWith(v4.slice(0, 80)));
+    assert.equal(sharedOrganiseTrialAllowed({ VERCEL_ENV: "production", NODE_ENV: "production" }), false);
+    assert.equal(sharedOrganiseTrialAllowed({ VERCEL_ENV: "preview", NODE_ENV: "production" }), true);
+    assert.equal(sharedOrganiseTrialAllowed({ NODE_ENV: "development" }), true);
+    assert.equal(sharedOrganiseTrialAllowed({ NODE_ENV: "production" }), false);
+    const previousKey = process.env.OPENAI_API_KEY;
+    const previousFetch = globalThis.fetch;
+    process.env.OPENAI_API_KEY = "sk-shared-organise-v5-selection-probe";
+    try {
+      const seen: string[] = [];
+      globalThis.fetch = (async (_url: unknown, init?: { body?: string }) => {
+        seen.push(String(init?.body ?? ""));
+        return new Response(
+          JSON.stringify({
+            model: "gpt-6-luna",
+            choices: [{ message: { content: JSON.stringify({ changes: [] }) } }],
+            usage: { prompt_tokens: 3, completion_tokens: 2, total_tokens: 5 },
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }) as typeof fetch;
+      const selected = await extractProjectChangesWithLuna({
+        transcript: "Mara owns the strongroom.",
+        projectBlock: "Project: Archive",
+      });
+      assert.equal(selected.promptVersion, "shared-organise-form-v5");
+      assert.equal(selected.promptId, "shared-organise-form");
+      assert.match(seen[0] ?? "", /material contradiction/);
+      const rollback = await extractProjectChangesWithLuna({
+        transcript: "Mara owns the strongroom.",
+        projectBlock: "Project: Archive",
+        prompt: "v4",
+      });
+      assert.equal(rollback.promptVersion, "shared-organise-form-v4");
+      assert.equal((seen[1] ?? "").includes("material contradiction"), false);
+      assert.match(seen[1] ?? "", /materialUncertainty/);
+    } finally {
+      globalThis.fetch = previousFetch;
+      if (previousKey === undefined) delete process.env.OPENAI_API_KEY;
+      else process.env.OPENAI_API_KEY = previousKey;
+    }
     const parsed = parseProjectChangeForm(form([]));
     assert.deepEqual(
       reviewProjectChangeForm({

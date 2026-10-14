@@ -3,6 +3,7 @@
  * Chronology/evidence only — not competing project truth, not a generic diff.
  */
 import type { HistoryEvent } from "@/lib/types";
+import { RISK_HISTORY_TARGET_KIND } from "@/lib/risks/issue-notes";
 import type { CaptureLegalOperation } from "./types";
 
 function clip(text: string, max = 240): string {
@@ -21,8 +22,10 @@ function withEvidence(summary: string, evidence?: string): string | undefined {
 export type CaptureApplyHistoryInput = Omit<HistoryEvent, "id" | "createdAt">;
 
 /**
- * Existing HistoryEvent fields only. Object ids and after-values go in
- * title/detail text — the table has no before/after columns.
+ * Existing HistoryEvent fields. Object ids and after-values stay in
+ * title/detail. update_risk_status also records target identity when the
+ * operation already carries a stable risk UUID. create_risk does not:
+ * that UUID is minted later inside persist, and this mapper must not invent one.
  */
 export function historyInputFromCaptureOperation(args: {
   operation: CaptureLegalOperation;
@@ -82,6 +85,8 @@ export function historyInputFromCaptureOperation(args: {
         detail: withEvidence(`${op.riskId} → ${op.status}`, evidence),
         projectId: op.projectId,
         source,
+        targetKind: RISK_HISTORY_TARGET_KIND,
+        targetId: op.riskId,
       };
     case "create_milestone":
       return {

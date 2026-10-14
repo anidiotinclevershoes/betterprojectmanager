@@ -485,6 +485,8 @@ function suggestionFromObservation(
   const date =
     asIso(values.date) ||
     asIso(values.startAt) ||
+    asIso(values.dueDate) ||
+    asIso(values.dueAt) ||
     asIso(values.awayFromIso);
   const ownership = values.ownershipSemantics;
   const scope =

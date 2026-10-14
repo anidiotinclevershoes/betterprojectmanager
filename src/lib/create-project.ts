@@ -13,6 +13,8 @@ export type SetupTodoDraft = {
   /** Stable React key for review editing — never persisted. */
   clientKey?: string;
   title: string;
+  /** Supplementary To Do detail. Not a second title. */
+  detail?: string;
   dueAt?: string;
   kind?: TodoKind;
   waitingOn?: string;
@@ -25,6 +27,8 @@ export type SetupDateDraft = {
   clientKey?: string;
   label: string;
   date?: string;
+  /** Extracted range end. Never derived. */
+  endAt?: string;
   needsReview?: boolean;
   tags?: string[];
 };
@@ -44,6 +48,8 @@ export type SetupStakeholderDraft = {
 export type SetupRiskDraft = {
   clientKey?: string;
   title: string;
+  /** Supplementary Issue notes. Not owner, score, or mitigation. */
+  notes?: string;
   needsReview?: boolean;
   tags?: string[];
 };
@@ -342,6 +348,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
           id: id("todo"),
           projectId,
           title: t.title.trim(),
+          detail: t.detail?.trim() || undefined,
           done: false,
           createdAt: now,
           dueAt: toIsoFromDateInput(t.dueAt),
@@ -385,6 +392,7 @@ export function buildNewProject(input: CreateProjectInput): BuiltProjectBundle {
         label,
         type,
         startAt: toIsoFromDateInput(d.date)!,
+        endAt: toIsoFromDateInput(d.endAt),
         source: "manual" as const,
       };
     });

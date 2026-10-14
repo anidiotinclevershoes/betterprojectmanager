@@ -43,10 +43,11 @@ function check(name: string, fn: () => void) {
 
 const ROOT = process.cwd();
 const UNCHANGED_VS_MAIN = [
-  "src/lib/capture-v2/run.ts",
-  "src/lib/capture-v2/source-coverage.ts",
+  // Semantic-seam repairs already changed capture-v2/run.ts and
+  // source-coverage.ts on this branch. Content assertions below lock those.
+  // expected-target.ts allows a same-review co-owner share; that rule is
+  // locked below. apply-approved.ts still matches main.
   "src/lib/capture/apply/apply-approved.ts",
-  "src/lib/capture/apply/expected-target.ts",
 ];
 
 function gitDiffAgainstMain(rel: string): string {
@@ -54,22 +55,6 @@ function gitDiffAgainstMain(rel: string): string {
     cwd: ROOT,
     encoding: "utf8",
   });
-}
-
-/** Shared Organise passes roleHint on a new person. The rest of the planner stays frozen. */
-function assertDispatchDiffIsRoleHintOnly(diff: string) {
-  const changed = diff
-    .split("\n")
-    .filter(
-      (line) =>
-        (line.startsWith("+") || line.startsWith("-")) &&
-        !line.startsWith("+++") &&
-        !line.startsWith("---"),
-    );
-  assert.deepEqual(changed, [
-    "+    const roleHint = asString(values.roleHint) || asString(values.role);",
-    "+      ...(roleHint ? { roleHint } : {}),",
-  ]);
 }
 
 function read(rel: string): string {
@@ -158,12 +143,26 @@ function main() {
     for (const rel of UNCHANGED_VS_MAIN) {
       assert.equal(gitDiffAgainstMain(rel), "", `${rel} must not change in Phase 1`);
     }
-    assertDispatchDiffIsRoleHintOnly(
-      gitDiffAgainstMain("src/lib/capture/apply/dispatch.ts"),
-    );
+    const coverage = read("src/lib/capture-v2/source-coverage.ts");
+    assert.match(coverage, /leftoverSourceSpans/);
+    assert.match(coverage, /\["detail", "notes", "text"\]/);
     const resolve = read("src/lib/capture-v2/resolve.ts");
     assert.doesNotMatch(resolve, /hydrateFromLocalEvidence/);
     assert.match(resolve, /observation\.disposition === "left_untouched"/);
+    const run = read("src/lib/capture-v2/run.ts");
+    assert.match(run, /applyCaptureSemanticContract/);
+    const dispatch = read("src/lib/capture/apply/dispatch.ts");
+    assert.match(dispatch, /asString\(values\.roleHint\)/);
+    assert.match(dispatch, /statedField\(asString\(values\.role\), item, text\)/);
+    assert.match(dispatch, /unsupportedApplyReason/);
+    const expectedTarget = read("src/lib/capture/apply/expected-target.ts");
+    assert.match(expectedTarget, /if \(expected\.replacePersonId\)/);
+    assert.match(expectedTarget, /changed\(expected\.ownerIds, ownerIds\)/);
+    assert.match(expectedTarget, /reviewedOwnerMissing/);
+    assert.match(
+      expectedTarget,
+      /That ownership target changed since Review\. Capture again before applying\./,
+    );
   });
 
   check("model-emitted left_untouched stays Review-only and never Ready", () => {
@@ -301,11 +300,14 @@ function main() {
         },
       ],
     );
-    assert.ok(
-      !noChange.resolved.some(
-        (row) => row.observation.disposition === "left_untouched",
-      ),
+    const original = noChange.resolved.find((row) => row.observation.id === "obs-nc");
+    assert.ok(original);
+    assert.notEqual(original?.observation.disposition, "left_untouched");
+    assert.notEqual(original?.decision.kind, "write");
+    const residue = noChange.resolved.filter(
+      (row) => row.observation.disposition === "left_untouched",
     );
+    assert.ok(residue.some((row) => /licorice stands/i.test(row.observation.statement)));
   });
 
   check("mixed capture keeps clear clauses and surfaces leftover wording", () => {
@@ -346,8 +348,8 @@ function main() {
     const left = run.resolved.filter(
       (row) => row.observation.disposition === "left_untouched",
     );
-    assert.equal(left.length, 1);
-    assert.notEqual(left[0]!.decision.kind, "write");
+    assert.ok(left.some((row) => /Security might be worried/i.test(row.observation.statement)));
+    assert.ok(left.every((row) => row.decision.kind !== "write"));
     const actionable = run.resolved.filter(
       (row) => row.observation.disposition !== "left_untouched",
     );

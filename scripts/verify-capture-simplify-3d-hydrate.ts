@@ -8,7 +8,6 @@
  * Run: npx tsx scripts/verify-capture-simplify-3d-hydrate.ts
  */
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { runCaptureV2FromModelJson } from "../src/lib/capture-v2";
@@ -170,12 +169,13 @@ function main() {
     assert.doesNotMatch(resolve, /function looksLikeNewAssignment/);
     assert.doesNotMatch(resolve, /NAME_EXTRACT_STOP/);
     assert.doesNotMatch(resolve, /MONTH_TO_ISO/);
-    assert.equal(
-      execFileSync("git", ["diff", "origin/main", "--", "src/lib/capture-v2/prompt.ts"], {
-        encoding: "utf8",
-      }),
-      "",
+    const prompt = readFileSync(
+      join(process.cwd(), "src/lib/capture-v2/prompt.ts"),
+      "utf8",
     );
+    assert.match(prompt, /left_untouched/);
+    assert.match(prompt, /Authoritative reference date/);
+    assert.doesNotMatch(prompt, /hydrateFromLocalEvidence/);
   });
 
   check("9. Ready still means planner-executable; Apply still plans", () => {

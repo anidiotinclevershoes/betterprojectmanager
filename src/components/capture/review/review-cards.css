@@ -457,3 +457,38 @@
     transition: none;
   }
 }
+
+/* Page 09 card chrome. Must follow the 28px ghost-button rule. */
+.lume-review-card .lume-review-head {
+  display: flex;
+  align-items: center;
+  background: color-mix(in srgb, var(--lume-review-op) 15%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--lume-review-op) 40%, transparent);
+}
+
+.lume-review-card .lume-review-head .lume-review-opbar {
+  flex: 1 1 auto;
+  background: transparent;
+  border-bottom: 0;
+}
+
+.lume-review-card .p09-review-exclude {
+  height: auto;
+  min-height: 30px;
+  border: 1px solid #be465a;
+  border-radius: 5px;
+  background: transparent;
+  color: #ffb4be;
+  font-weight: 600;
+}
+
+.lume-review-card.is-collapsed .lume-review-why,
+.lume-review-card.is-collapsed .lume-review-actions,
+.lume-review-card.is-collapsed .lume-review-change,
+.lume-review-card.is-collapsed .lume-review-mutation,
+.lume-review-card.is-collapsed .lume-review-consequence,
+.lume-review-card.is-collapsed .lume-review-quote,
+.lume-review-card.is-collapsed .lume-review-meta,
+.lume-review-card.is-collapsed .compact-change-correction {
+  display: none;
+}

@@ -50,6 +50,7 @@ function parseJsonObject(text: string): unknown {
 export async function extractObservationsWithOpenAI(args: {
   transcript: string;
   projectBlock: string;
+  referenceDate?: string;
 }): Promise<ObservationExtractionCall> {
   const key = getOpenAIKey();
   if (!key) {
@@ -59,6 +60,7 @@ export async function extractObservationsWithOpenAI(args: {
   const prompt = buildObservationExtractionPrompt({
     transcript: args.transcript,
     projectBlock: args.projectBlock,
+    referenceDate: args.referenceDate,
   });
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {

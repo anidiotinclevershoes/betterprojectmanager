@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import {
   analyseFrozenTranscript,
   applyReadyIfPresent,
@@ -52,9 +52,25 @@ test.describe("Capture V2 frozen journeys", () => {
     const todos = page.getByTestId("ocean-frame-todo");
     await expect(todos.getByText(/Gumdrop Bridge icing/)).toHaveCount(0);
     await page.reload();
-    await expect(
-      page.getByTestId("ocean-frame-risks").getByText("Gumdrop Bridge icing"),
-    ).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Candyland" })).toBeVisible();
+    await expect(page.getByTestId("ocean-project-workspace")).toHaveAttribute(
+      "data-project-mode",
+      "home",
+    );
+    await expect(page.getByTestId("ocean-mode-home")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.getByTestId("ocean-home")).toBeVisible();
+    await expect(page.getByTestId("ocean-knowledge-centre")).toHaveCount(0);
+
+    await openKnowledgeCentre(page);
+    const risksAfterReload = page.getByTestId("ocean-frame-risks");
+    const todosAfterReload = page.getByTestId("ocean-frame-todo");
+    await expect(risksAfterReload).toBeVisible();
+    await expect(todosAfterReload).toBeVisible();
+    await expect(risksAfterReload.getByText("Gumdrop Bridge icing")).toHaveCount(0);
+    await expect(todosAfterReload.getByText(/Gumdrop Bridge icing/)).toHaveCount(0);
   });
 
   test("milestone date move — Parade day updates, not a To Do", async ({
@@ -117,7 +133,9 @@ test.describe("Capture V2 frozen journeys", () => {
     await expect(page.getByTestId("review-ownership-share")).toBeVisible();
     await expect(page.getByTestId("review-ownership-replace")).toBeVisible();
     await expect(page.getByTestId("review-ownership-keep")).toBeVisible();
-    await expect(page.locator(".capture-apply-ready-btn")).toHaveCount(0);
+    const apply = page.locator(".capture-apply-ready-btn");
+    await expect(apply).toBeVisible();
+    await expect(apply).toBeDisabled();
     await page.getByTestId("review-ownership-keep").click();
     await openKnowledgeCentre(page);
     await expect(
@@ -154,10 +172,44 @@ test.describe("Capture V2 frozen journeys", () => {
 
     await page.reload();
     await expect(page.getByRole("heading", { name: "Toyworld" })).toBeVisible();
+    // Home is the resting workspace. Reload must not keep Knowledge Centre mounted.
+    await expect(page.getByTestId("ocean-project-workspace")).toHaveAttribute(
+      "data-project-mode",
+      "home",
+    );
+    await expect(page.getByTestId("ocean-mode-home")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    const home = page.getByTestId("ocean-home");
+    await expect(home).toBeVisible();
+    await expect(page.getByTestId("ocean-knowledge-centre")).toHaveCount(0);
+    await expect(
+      home.getByTestId("ocean-home-queue").getByText("Print the track map"),
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("ocean-home-people").getByText("Brick Oakley", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      home.getByText("Packaging delay", { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByText(/candy-cane banners/i)).toHaveCount(0);
+    await expect(page.getByText("Pippa Gumdrop")).toHaveCount(0);
+
+    await openKnowledgeCentre(page);
+    await expect(
+      page.getByTestId("ocean-frame-todo").getByText(/candy-cane banners/i),
+    ).toHaveCount(0);
     await expect(
       page.getByTestId("ocean-frame-todo").getByText("Print the track map"),
     ).toBeVisible();
-    await expect(page.getByText(/candy-cane banners/i)).toHaveCount(0);
+    await expect(
+      page.getByTestId("ocean-frame-risks").getByText("Packaging delay"),
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("ocean-frame-people").getByText("Brick Oakley"),
+    ).toBeVisible();
+    await expect(page.getByText("Pippa Gumdrop")).toHaveCount(0);
     const isoShot = walkthroughPath("capture_v2_toyworld_isolation.png");
     if (isoShot) await page.screenshot({ path: isoShot, fullPage: true });
   });
@@ -178,16 +230,16 @@ test.describe("Capture Review Needs-you interactions", () => {
     await openCapture(page);
     await analyseFrozenTranscript(page, frozen.transcript);
     await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /Apply Ready \(1\)/i }),
-    ).toBeVisible();
-    await applyReadyIfPresent(page);
+    const blocked = page.getByRole("button", { name: /Apply blocked/i });
+    await expect(blocked).toBeVisible();
+    await expect(blocked).toBeDisabled();
     await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
     await expect(
       page.getByText(/Fizz Caramel|Share with Fizz/i).first(),
     ).toBeVisible();
     await page.getByTestId("review-ownership-share").click();
     await expect(page.getByText("Applied").first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /Apply Ready \(1\)/i })).toBeEnabled();
   });
 
   test("missing milestone date asks for a date and does not invent today", async ({
@@ -251,7 +303,7 @@ test.describe("Capture experience — annotated transcript", () => {
       "sibling-ready-and-needs-you",
     );
     await openCapture(page);
-    await expect(page.getByPlaceholder("Tell Lume what changed…")).toBeVisible();
+    await expect(page.getByPlaceholder("Paste or type project notes…")).toBeVisible();
     const inputShot = walkthroughPath("capture_experience_input.png");
     if (inputShot) await page.screenshot({ path: inputShot, fullPage: true });
     await analyseFrozenTranscript(page, frozen.transcript);
@@ -275,9 +327,9 @@ test.describe("Capture experience — annotated transcript", () => {
     );
     await expect(page.getByText("Needs you").first()).toBeVisible();
     await expect(page.getByTestId("review-ownership-choice")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /Apply Ready \(1\)/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /Apply blocked/i })).toBeDisabled();
+    await notes.locator('[data-category="people"]').click();
+    await expect(page.locator(".suggested-change-item.is-highlighted")).toBeVisible();
     const annotatedShot = walkthroughPath("capture_experience_annotated.png");
     if (annotatedShot) await page.screenshot({ path: annotatedShot, fullPage: true });
   });
@@ -301,8 +353,43 @@ test.describe("Capture experience — annotated transcript", () => {
     await expect(page.getByTestId("annotated-transcript")).toBeVisible();
     const mobileShot = walkthroughPath("capture_experience_mobile_needs_you.png");
     if (mobileShot) await page.screenshot({ path: mobileShot, fullPage: true });
+    await expectReviewFits(page, 390);
+  });
+
+  test("review filters and actions fit at 320px", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 720 });
+    const frozen = await mockLocalAuthAndFrozenCapture(
+      page,
+      "share-vs-replace-ambiguous",
+    );
+    await openCapture(page);
+    await analyseFrozenTranscript(page, frozen.transcript);
+    await expectReviewFits(page, 320);
   });
 });
+
+async function expectReviewFits(page: Page, width: number) {
+  const review = page.getByTestId("ocean-capture-review");
+  await expect(review.getByRole("tab", { name: /Needs You/i })).toBeVisible();
+  const discard = review.getByRole("button", { name: "Discard" });
+  await expect(discard).toBeVisible();
+  const apply = page.locator(".capture-apply-ready-btn");
+  await expect(apply).toBeVisible();
+  const frame = page.locator(".lume-review-frame");
+  const overflow = await frame.evaluate((el) => el.scrollWidth - el.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+  const applyBox = await apply.boundingBox();
+  expect(applyBox).toBeTruthy();
+  expect(applyBox!.height).toBeGreaterThanOrEqual(40);
+  expect(applyBox!.x + applyBox!.width).toBeLessThanOrEqual(width + 1);
+  await discard.click();
+  const dialog = page.getByTestId("discard-review-dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText("Nothing already saved to the project is removed.")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(page.getByTestId("ocean-capture-review")).toBeVisible();
+}
 
 test.describe("optional live-model smoke (isolated from CI)", () => {
   test.skip(

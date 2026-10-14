@@ -97,8 +97,9 @@ function testCaptureModeInOceanWorkspace() {
   assert.match(workspace, /variant="ocean"/);
   assert.match(workspace, /CaptureWorkspace/);
   assert.match(mode, /ocean-mode-capture/);
-  assert.match(mode, /Coming soon/);
-  assert.match(mode, /disabled/);
+  assert.match(mode, /ocean-mode-home/);
+  assert.match(mode, /ocean-mode-scan/);
+  assert.doesNotMatch(mode, /Coming soon/);
   // Modes remain in workspace — not sidebar destinations
   const sidebar = readSrc("src/components/app-shell/Sidebar.tsx");
   assert.doesNotMatch(sidebar, /href="\/capture"/);
@@ -111,7 +112,14 @@ function testOceanCaptureAiAffordanceAndInputs() {
   assert.match(capture, /ocean-capture-analyse/);
   assert.match(capture, /✦/);
   assert.match(capture, /Analyse/);
+  assert.match(capture, /Review changes/);
+  assert.match(capture, /MeMark/);
+  assert.match(capture, /runAnalyse/);
+  assert.match(capture, /Paste or type project notes/);
+  assert.match(capture, /Nothing added yet/);
+  assert.match(capture, /Stop recording/);
   assert.match(capture, /data-ai="true"/);
+  assert.doesNotMatch(capture, /WorkspacePageHeading|lume-page-heading/);
   assert.match(capture, /ocean-capture-input/);
   assert.match(capture, /data-ai="false"/);
   assert.match(capture, /ocean-capture-record/);
@@ -177,9 +185,11 @@ function testOceanSidebarContractPreserved() {
   assert.doesNotMatch(sidebar, /Lume Overview/);
   assert.doesNotMatch(sidebar, /href="\/coaching"/);
   assert.doesNotMatch(sidebar, /href="\/memory"/);
-  assert.match(sidebar, /Master To Do/);
-  assert.match(sidebar, /History/);
-  assert.match(sidebar, /Captures/);
+  assert.doesNotMatch(sidebar, /Master To Do/);
+  assert.doesNotMatch(sidebar, /href="\/history"/);
+  assert.doesNotMatch(sidebar, /href="\/captures"/);
+  assert.match(sidebar, /href="\/projects\/new"/);
+  assert.match(sidebar, /href="\/account"/);
 }
 
 function testNoSecondNavModel() {
@@ -215,13 +225,13 @@ async function main() {
   testCaptureModeInOceanWorkspace();
   console.log("✓ Capture selectable in Ocean mode selector + embedded");
   testOceanCaptureAiAffordanceAndInputs();
-  console.log("✓ ✦ Analyse, typed input, Record, review boundary");
+  console.log("✓ Review changes, typed input, Record, review boundary");
   testAnalyseDoesNotWriteMaintainedTruth();
   console.log("✓ Analyse path yields proposals only (review-before-write)");
   testAppearanceThemes();
   console.log("✓ Ocean remains; Desert is selectable; no light toggle in project chrome");
   testOceanSidebarContractPreserved();
-  console.log("✓ Slice 2A sidebar contract preserved");
+  console.log("✓ Page 09 sidebar contract: projects and Account, no utility nav");
   testNoSecondNavModel();
   console.log("✓ Capture↔KC remains mode switch, not second nav");
   testImmediateMergeCapturePathDeleted();

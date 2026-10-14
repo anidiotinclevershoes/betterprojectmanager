@@ -24,6 +24,7 @@ import {
   isOpenRiskStatus,
   stripResolvedPrefix,
 } from "@/lib/risks/lifecycle";
+import { projectRiskNotesField } from "@/lib/risks/issue-notes";
 import type {
   KnowledgeSectionId,
   MissionState,
@@ -103,6 +104,8 @@ export type KnowledgeDetailModel = {
   honestyNotes: string[];
   domain: KnowledgeDetailDomain;
   riskStatus?: RiskStatus;
+  /** Current supplementary Notes for a genuine Risk. Absent means none. Not rendered in this slice. */
+  issueNotes?: string | null;
   todoDone?: boolean;
   personBundle?: PersonBundle;
 };
@@ -430,6 +433,7 @@ export function resolveKnowledgeItemDetail(
       honestyNotes,
       domain: "risk",
       riskStatus: risk.status,
+      issueNotes: projectRiskNotesField(risk),
     };
   }
 
@@ -538,16 +542,16 @@ export function resolveKnowledgeItemDetail(
       }),
     );
 
-    // Waiting: exact waitingOn name match only (no fuzzy inference).
+    // Waiting: exact waitingOn name match, plus explicit person-id links.
+    // A joined legacy string is not split into people.
     const waitingLines: string[] = [];
     for (const todo of state.todos ?? []) {
       if (todo.projectId !== projectId || todo.done) continue;
-      if (!todo.waitingOn?.trim()) continue;
-      if (
-        todo.waitingOn.trim().toLowerCase() !== person.name.trim().toLowerCase()
-      ) {
-        continue;
-      }
+      const linked = (todo.waitingOnPersonIds ?? []).includes(person.id);
+      const named =
+        Boolean(todo.waitingOn?.trim()) &&
+        todo.waitingOn!.trim().toLowerCase() === person.name.trim().toLowerCase();
+      if (!linked && !named) continue;
       waitingLines.push(todo.title);
       relations.push({
         kind: "todo",

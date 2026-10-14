@@ -23,6 +23,7 @@ import {
 } from "@/lib/knowledge-centre/ocean-frames";
 import { queryMatchesText } from "@/lib/tell-me/knowledge-search";
 import { itemVisibleForTagFilter, tagsForItem, type TagTargetKind } from "@/lib/tags";
+import { KC_ITEM_DOMAIN } from "@/lib/domain/lume-domain";
 import type { MissionState } from "@/lib/types";
 
 export const KC_BUCKETS = ["all", "issues", "people", "todo", "knowledge"] as const;
@@ -30,16 +31,6 @@ export type KcBucket = (typeof KC_BUCKETS)[number];
 export type KcBucketId = Exclude<KcBucket, "all">;
 
 export type KcKnowledgeSubtype = "all" | "dates" | "decisions" | "information";
-
-export const KC_BUCKET_ICON = {
-  issues: "⚠",
-  people: "◎",
-  todo: "☑",
-  knowledge: "☰",
-  dates: "◆",
-  decisions: "◇",
-  information: "☰",
-} as const;
 
 export type KcComposedItem = {
   id: string;
@@ -153,7 +144,7 @@ export function composeKnowledgeCentreItems(
         bucket: "issues",
         typeLabel: "Risk",
         title: row.title,
-        icon: KC_BUCKET_ICON.issues,
+        icon: KC_ITEM_DOMAIN.issues,
         tagKind,
         tagTargetId: row.id,
         ref: isRisk
@@ -200,7 +191,7 @@ export function composeKnowledgeCentreItems(
         title: row.title.replace(/^@/, ""),
         supporting: row.meta,
         needsYou: "Needs You — Who owns this?",
-        icon: KC_BUCKET_ICON.people,
+        icon: KC_ITEM_DOMAIN.people,
         tagKind: "stakeholder",
         tagTargetId: row.id,
         ref: isKnowledgeUuid(row.id) ? refForUnconfirmedOwner(row.id) : null,
@@ -222,7 +213,7 @@ export function composeKnowledgeCentreItems(
         needsYou: person.unconfirmed
           ? `Needs You — What is ${person.name} responsible for?`
           : null,
-        icon: KC_BUCKET_ICON.people,
+        icon: KC_ITEM_DOMAIN.people,
         tagKind: "stakeholder",
         tagTargetId: personId,
         ref: refForPerson(personId),
@@ -242,7 +233,7 @@ export function composeKnowledgeCentreItems(
         typeLabel: "To Do",
         title: row.title,
         supporting: row.meta,
-        icon: KC_BUCKET_ICON.todo,
+        icon: KC_ITEM_DOMAIN.todo,
         tagKind: "todo",
         tagTargetId: row.id,
         ref: refForTodo(row.id),
@@ -262,7 +253,7 @@ export function composeKnowledgeCentreItems(
         typeLabel: "To Do",
         title: todo.title,
         supporting: todo.waitingOn ? `Waiting on ${todo.waitingOn}` : "Waiting",
-        icon: KC_BUCKET_ICON.todo,
+        icon: KC_ITEM_DOMAIN.todo,
         tagKind: "todo",
         tagTargetId: todo.id,
         ref: refForTodo(todo.id),
@@ -286,7 +277,7 @@ export function composeKnowledgeCentreItems(
         knowledgeSubtype: "dates",
         title: row.title,
         needsYou: undated ? `Needs You — When is the ${row.title}?` : null,
-        icon: KC_BUCKET_ICON.dates,
+        icon: KC_ITEM_DOMAIN.dates,
         tagKind: "milestone",
         tagTargetId: row.id,
         ref: isTimeline ? refForTimeline(row.id) : refForStructuredItem(row.id),
@@ -317,7 +308,7 @@ export function composeKnowledgeCentreItems(
         needsYou: item.meta?.date?.dateIso
           ? null
           : `Needs You — When is the ${title}?`,
-        icon: KC_BUCKET_ICON.dates,
+        icon: KC_ITEM_DOMAIN.dates,
         tagKind: "knowledge_item",
         tagTargetId: item.id,
         ref: refForStructuredItem(item.id),
@@ -340,7 +331,7 @@ export function composeKnowledgeCentreItems(
         typeLabel: "Decision",
         knowledgeSubtype: "decisions",
         title: body,
-        icon: KC_BUCKET_ICON.decisions,
+        icon: KC_ITEM_DOMAIN.decisions,
         tagKind: "knowledge_item",
         tagTargetId: id,
         ref: refForSectionLine("decisions", body, itemId),
@@ -359,7 +350,7 @@ export function composeKnowledgeCentreItems(
           typeLabel: "Dependency",
           knowledgeSubtype: "information",
           title: item.body,
-          icon: KC_BUCKET_ICON.information,
+          icon: KC_ITEM_DOMAIN.information,
           tagKind: "knowledge_item",
           tagTargetId: item.id,
           ref: refForStructuredItem(item.id),
@@ -385,7 +376,7 @@ export function composeKnowledgeCentreItems(
             item.epistemic === "unknown" || item.epistemic === "conflicting"
               ? "Needs You — Lume noticed what's missing."
               : null,
-          icon: KC_BUCKET_ICON.information,
+          icon: KC_ITEM_DOMAIN.information,
           tagKind: "knowledge_item",
           tagTargetId: item.id,
           ref: refForStructuredItem(item.id),
@@ -408,7 +399,7 @@ export function composeKnowledgeCentreItems(
         typeLabel: "Information",
         knowledgeSubtype: "information",
         title: body,
-        icon: KC_BUCKET_ICON.information,
+        icon: KC_ITEM_DOMAIN.information,
         tagKind: "knowledge_item",
         tagTargetId: id,
         ref: refForSectionLine("now", body, itemId),
@@ -432,7 +423,7 @@ export function composeKnowledgeCentreItems(
         knowledgeSubtype: "information",
         title: body,
         supporting: "People context",
-        icon: KC_BUCKET_ICON.information,
+        icon: KC_ITEM_DOMAIN.information,
         tagKind: "knowledge_item",
         tagTargetId: id,
         ref: refForSectionLine("people", body, itemId),
@@ -454,7 +445,7 @@ export function composeKnowledgeCentreItems(
         knowledgeSubtype: "information",
         title: body,
         supporting: "Open loop",
-        icon: KC_BUCKET_ICON.information,
+        icon: KC_ITEM_DOMAIN.information,
         tagKind: "knowledge_item",
         tagTargetId: id,
         ref: refForSectionLine("openLoops", body, itemId),

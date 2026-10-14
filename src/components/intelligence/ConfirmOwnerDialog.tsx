@@ -64,6 +64,18 @@ export function ConfirmOwnerDialog({
     setScope(scopeProp.trim());
   }, [scopeProp]);
 
+  useEffect(() => {
+    if (!onCancel) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== "Escape" || busy) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      onCancel?.();
+    }
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [onCancel, busy]);
+
   const options = useMemo(
     () => stakeholders.map((s) => ({ id: s.id, name: s.name })),
     [stakeholders],

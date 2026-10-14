@@ -57,7 +57,7 @@ export function NewProjectCategorisation({
         <p className="np-kicker">Provisional project map</p>
         <h2 className="np-review-title">Here&apos;s how Lume organised what you know</h2>
         <p className="np-review-lead">
-          This is not maintained project truth yet. Correct any category, then
+          This is not saved project information yet. Correct any category, then
           approve the map. Creation still waits for the next review step.
         </p>
       </header>

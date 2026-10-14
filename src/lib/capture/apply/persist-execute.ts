@@ -115,6 +115,7 @@ export function supabaseCaptureApplyHooks(args: {
         userId,
         {
           riskId,
+          notes: op.notes,
           receipt: op.applyOperationId
             ? {
                 operationId: op.applyOperationId,

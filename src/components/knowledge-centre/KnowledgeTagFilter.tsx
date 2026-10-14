@@ -38,7 +38,7 @@ export function KnowledgeTagFilter({
 
   return (
     <div className="ocean-tag-filter" data-testid="ocean-tag-filter">
-      <p className="ocean-tag-filter-label">Quick filters</p>
+      <p className="ocean-tag-filter-label">TAGS</p>
       <div className="ocean-tag-filter-chips">
         {visible.map((tag) => (
           <button

@@ -702,12 +702,13 @@ async function main() {
     const left = run.resolved.filter(
       (row) => row.observation.disposition === "left_untouched",
     );
-    assert.equal(left.length, 1);
-    assert.notEqual(left[0]!.decision.kind, "write");
-    assert.ok("reason" in left[0]!.decision);
-    assert.equal(left[0]!.decision.reason, specific);
+    const classified = left.find((row) => row.observation.commentary === specific);
+    assert.ok(classified);
+    assert.notEqual(classified!.decision.kind, "write");
+    assert.ok("reason" in classified!.decision);
+    assert.equal(classified!.decision.reason, specific);
     const models = modelsFromRun(run);
-    const card = models.find((m) => m.readiness === "left_untouched");
+    const card = models.find((m) => m.needsReviewReason === specific);
     assert.ok(card);
     assert.equal(card!.needsReviewReason, specific);
     assert.notEqual(card!.needsReviewReason, LEFT_UNTOUCHED_GENERIC_REASON);

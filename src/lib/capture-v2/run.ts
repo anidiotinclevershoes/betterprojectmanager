@@ -12,6 +12,7 @@ import type {
   ObservationValidationResult,
 } from "./types";
 import { leftoverObservationsFromCoverage } from "./source-coverage";
+import { applyCaptureSemanticContract, captureReferenceDate } from "./semantic-fields";
 import { parseObservationEnvelope, validateObservations } from "./validate";
 
 export type CaptureV2Run = {
@@ -35,7 +36,10 @@ export function runCaptureV2FromModelJson(args: {
   rawModelJson: unknown;
   world: CaptureApplyWorld;
   projectId?: string | null;
+  /** ISO day used to anchor yearless and relative dates. Defaults to today UTC. */
+  referenceDate?: string;
 }): CaptureV2Run {
+  const referenceDate = args.referenceDate?.trim() || captureReferenceDate();
   const project = args.projectId
     ? args.world.projects.find((p) => p.id === args.projectId)
     : undefined;
@@ -50,12 +54,16 @@ export function runCaptureV2FromModelJson(args: {
     records,
     args.projectId,
   );
+  const observations = applyCaptureSemanticContract(
+    validation.observations,
+    referenceDate,
+  );
   const leftovers = leftoverObservationsFromCoverage({
     transcript: args.transcript,
-    observations: [...validation.observations, ...validation.rejected],
+    observations: [...observations, ...validation.rejected],
   });
   const resolved = resolveObservations({
-    observations: [...validation.observations, ...leftovers],
+    observations: [...observations, ...leftovers],
     world: args.world,
     transcript: args.transcript,
     captureEntryProjectId: args.projectId,

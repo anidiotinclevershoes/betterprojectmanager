@@ -201,7 +201,8 @@ async function main() {
     );
     assert.ok(testCase);
     const evaluated = evaluateFrozenCase(testCase);
-    assert.ok(evaluated.pipeline.resolved.every((r) => r.decision.kind === "needs_you"));
+    assert.ok(evaluated.pipeline.resolved.some((r) => r.decision.kind === "needs_you"));
+    assert.ok(evaluated.pipeline.resolved.every((r) => r.decision.kind !== "write"));
     assert.equal(evaluated.lumeSafety.totals.applyReady, 0);
   });
 

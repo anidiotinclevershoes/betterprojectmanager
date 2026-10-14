@@ -1,7 +1,9 @@
 /**
  * Deterministic source-coverage backstop.
  *
- * Uses existing observation evidence quotes as spans in the transcript.
+ * A span is covered only when a represented value — statement, when it is
+ * the persisted meaning, or a structured proposed field — actually occurs in
+ * the transcript. A broad evidence quote is not coverage.
  * No AI call, no parser, no persistence. Review-only leftovers.
  */
 
@@ -47,12 +49,71 @@ export function findEvidenceSpan(
   return { start, end: start + match[0].length };
 }
 
+const STRUCTURED_BODY_KEYS = ["detail", "notes", "text"] as const;
+const STRUCTURED_IDENTITY_KEYS = [
+  "name",
+  "role",
+  "title",
+  "label",
+  "personName",
+  "scope",
+] as const;
+
+function asTrimmed(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+/**
+ * Statement covers source text only when it is the persisted meaning.
+ * A longer statement must not hide source text that a shorter structured
+ * body did not represent.
+ */
+function statementRepresentsPersistedMeaning(
+  observation: CaptureObservationV2,
+): boolean {
+  const statement = observation.statement.trim();
+  if (!statement) return false;
+  const values = observation.proposedValues ?? {};
+  const bodies = ["text", "title", "label", "name"]
+    .map((key) => asTrimmed(values[key]))
+    .filter((value): value is string => Boolean(value))
+    .map((value) => value.toLowerCase());
+  if (bodies.length === 0) return true;
+  const normalized = statement.toLowerCase();
+  return bodies.some((body) => body === normalized || body.includes(normalized));
+}
+
+function representedSourceQuotes(observation: CaptureObservationV2): string[] {
+  const values = observation.proposedValues ?? {};
+  const quotes: string[] = [];
+  for (const key of [...STRUCTURED_BODY_KEYS, ...STRUCTURED_IDENTITY_KEYS]) {
+    const quote = asTrimmed(values[key]);
+    if (quote) quotes.push(quote);
+  }
+  if (statementRepresentsPersistedMeaning(observation)) {
+    quotes.push(observation.statement.trim());
+  }
+  return quotes;
+}
+
 function collectCoveredSpans(
   transcript: string,
   observations: CaptureObservationV2[],
 ): SourceCoverageSpan[] {
   const spans: SourceCoverageSpan[] = [];
   const used: Array<{ start: number; end: number }> = [];
+
+  const rangeCovered = (start: number, end: number) => {
+    for (let index = start; index < end; index += 1) {
+      const inside = used.some(
+        (existing) => index >= existing.start && index < existing.end,
+      );
+      if (!inside) return false;
+    }
+    return true;
+  };
 
   const takeQuote = (quote: string, observationId: string) => {
     const trimmed = quote.trim();
@@ -61,22 +122,19 @@ function collectCoveredSpans(
     while (from < transcript.length) {
       const hit = findEvidenceSpan(transcript, trimmed, from);
       if (!hit) return;
-      const overlap = used.some(
-        (existing) => hit.start < existing.end && hit.end > existing.start,
-      );
-      if (!overlap) {
+      // A shorter prefix must not hide the rest of a longer represented quote.
+      if (!rangeCovered(hit.start, hit.end)) {
         spans.push({ ...hit, observationId });
         used.push(hit);
         return;
       }
-      from = hit.start + 1;
+      from = hit.end;
     }
   };
 
   for (const observation of observations) {
-    takeQuote(observation.evidence, observation.id);
-    if (observation.statement !== observation.evidence) {
-      takeQuote(observation.statement, observation.id);
+    for (const quote of representedSourceQuotes(observation)) {
+      takeQuote(quote, observation.id);
     }
   }
 
@@ -113,15 +171,13 @@ function alreadyAccounted(
   const needle = trimLeftover(text).toLowerCase();
   if (!needle) return true;
   for (const observation of observations) {
-    const evidence = observation.evidence.replace(/\s+/g, " ").trim().toLowerCase();
-    const statement = observation.statement.replace(/\s+/g, " ").trim().toLowerCase();
-    // Subset / equality only. A leftover that merely contains an
-    // accounted clause must still surface — do not swallow the rest.
-    if (evidence && (evidence === needle || evidence.includes(needle))) {
-      return true;
-    }
-    if (statement && (statement === needle || statement.includes(needle))) {
-      return true;
+    // Evidence is not accounting. A quote can be broader than the value
+    // that will actually be written.
+    for (const quote of representedSourceQuotes(observation)) {
+      const accounted = quote.replace(/\s+/g, " ").trim().toLowerCase();
+      if (accounted && (accounted === needle || accounted.includes(needle))) {
+        return true;
+      }
     }
   }
   return false;

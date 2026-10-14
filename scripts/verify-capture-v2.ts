@@ -587,11 +587,13 @@ function main() {
       (run.result.proposedOperations ?? []).every((op) => op.operation === "NO_CHANGE"),
     );
     const suggestions = buildSuggestions(run.result);
-    assert.equal(suggestions.length, 1);
-    assert.notEqual(suggestions[0]!.op, "create");
-    assert.notEqual(
-      suggestions[0]!.legalDomain,
-      "unsupported",
+    const person = suggestions.find((item) => item.legalDomain !== "unsupported");
+    assert.ok(person);
+    assert.notEqual(person.op, "create");
+    assert.ok(
+      suggestions
+        .filter((item) => item !== person)
+        .every((item) => item.op !== "create"),
     );
   });
 
@@ -633,14 +635,17 @@ function main() {
     assert.equal(run.validation.observations.length, 0);
     assert.equal(run.validation.rejected.length, 1);
     assert.equal(run.validation.rejected[0]?.disposition, "ambiguous");
-    assert.equal(run.resolved.length, 0);
     assert.ok(
-      (run.result.proposedOperations ?? []).every(
-        (op) => op.operation === "NO_CHANGE" && op.requiresClarification,
-      ),
+      run.resolved.every((row) => row.observation.disposition === "left_untouched"),
     );
-    assert.equal(run.result.findings?.[0]?.invalidTarget, true);
-    assert.equal(run.result.findings?.[0]?.requiresClarification, true);
+    assert.ok(
+      (run.result.proposedOperations ?? [])
+        .filter((op) => op.proposedValues?.leftUntouched !== true)
+        .every((op) => op.operation === "NO_CHANGE" && op.requiresClarification),
+    );
+    const invalid = run.result.findings?.find((finding) => finding.invalidTarget);
+    assert.equal(invalid?.invalidTarget, true);
+    assert.equal(invalid?.requiresClarification, true);
     const created = buildSuggestions(run.result);
     assert.ok(created.every((item) => item.op !== "create"));
   });

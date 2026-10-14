@@ -4,7 +4,8 @@
 **Harvested from:** `cursor/shared-organise-engine-5508` form v4  
 **Contract commit:** `007e624121f8ada873937f4d0526358e63e19999`  
 **Validated experiment HEAD:** `cb1400a1a51ce4e946ca8aac585746195d73cf51`  
-**Prompt:** `shared-organise-form-v4`  
+**Prompt:** `shared-organise-form-v5` when the flag is on. `shared-organise-form-v4` stays the rollback builder (`prompt: "v4"`).  
+**V5 source:** `cursor/shared-organise-prompt-v5-41f2` at `b074d4f430a88e7a64f6e1b2905ff983a0f3e969`. Capture records that version on `provenance.promptVersion`.
 **Model when the flag is on:** `gpt-6-luna`  
 **Owned by:** [`docs/LUME_CONSTITUTION.md`](./LUME_CONSTITUTION.md) §4 and [`docs/LUME_CAPTURE_STATUS.md`](./LUME_CAPTURE_STATUS.md)
 
@@ -113,6 +114,8 @@ Not a write: existing role edit, historical date, unresolved direction, generic 
 ## Rollback
 
 Turn the flag off. Observation Capture, Prompt A, and the existing Apply path remain in the tree. Nothing in this module deletes them.
+
+Inside the flagged path, `buildProjectChangePrompt` is still `shared-organise-form-v4`. Capture selects V5 and does not pass that override. A caller can pass `prompt: "v4"` to `extractProjectChangesWithLuna`.
 
 ## Cleanup later
 

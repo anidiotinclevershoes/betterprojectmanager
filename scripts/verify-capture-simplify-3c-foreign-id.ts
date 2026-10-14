@@ -104,8 +104,9 @@ function main() {
     assert.equal(run.validation.rejected.length, 1);
     assert.equal(writes(run).length, 0);
     assert.equal(run.result.findingsValidation?.invalidTargetCount, 1);
-    assert.equal(run.result.findings?.[0]?.requiresClarification, true);
-    assert.equal(run.result.findings?.[0]?.invalidTarget, true);
+    const invalid = run.result.findings?.find((finding) => finding.invalidTarget);
+    assert.equal(invalid?.requiresClarification, true);
+    assert.equal(invalid?.invalidTarget, true);
   });
 
   check("4. Scoped foreign ID + title on Create is rejected, not rescued", () => {
@@ -125,7 +126,11 @@ function main() {
     assert.ok(run.validation.issues.some((issue) => issue.code === "foreign_id"));
     assert.equal(run.validation.observations.length, 0);
     assert.equal(writes(run).length, 0);
-    assert.equal(run.result.findings?.[0]?.requiresClarification, true);
+    assert.ok(
+      run.result.findings?.some(
+        (finding) => finding.requiresClarification && finding.invalidTarget,
+      ),
+    );
   });
 
   check("5. Unscoped New Project create_new still strips invented ids", () => {

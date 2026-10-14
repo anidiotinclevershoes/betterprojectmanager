@@ -245,7 +245,7 @@ function main() {
     assert.doesNotMatch(provenance, /OPENAI_API_KEY/);
     assert.doesNotMatch(provenance, /transcript/);
     const analysed = capture.slice(capture.indexOf('logIntelligenceProvenance("capture.v2_analysed"'));
-    const analysedBlock = analysed.slice(0, analysed.indexOf("return NextResponse.json"));
+    const analysedBlock = analysed.slice(0, analysed.indexOf("return analysisJson"));
     assert.doesNotMatch(analysedBlock, /transcript/);
     assert.doesNotMatch(analysedBlock, /content,/);
   });

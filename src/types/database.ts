@@ -178,6 +178,7 @@ export type Database = {
           title: string;
           status: RiskStatus;
           source: string;
+          notes: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -189,6 +190,7 @@ export type Database = {
           title: string;
           status?: RiskStatus;
           source?: string;
+          notes?: string | null;
           created_by?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["risks"]["Insert"]>;
@@ -301,6 +303,8 @@ export type Database = {
           title: string;
           detail: string | null;
           source: string | null;
+          target_kind: string | null;
+          target_id: string | null;
           created_by: string | null;
           created_at: string;
         };
@@ -312,6 +316,8 @@ export type Database = {
           title: string;
           detail?: string | null;
           source?: string | null;
+          target_kind?: string | null;
+          target_id?: string | null;
           created_by?: string | null;
           created_at?: string;
         };
