@@ -102,7 +102,7 @@ The reconciliation is merge `af9b715`. This documentation commit sits on top of 
 | `src/app/api/capture/route.ts` | Both. Shared Organise returns early when `LUME_SHARED_ORGANISE=1`. The observation path still passes `captureReferenceDate()`. |
 | `scripts/run-regression-suite.ts` | Both. `capture-semantic-seams` and `shared-organise` both run. |
 | `package.json`, `docs/README.md`, `docs/LUME_CAPTURE_STATUS.md` | Both. Shared Organise scripts and the contract link were added. Existing convergence scripts stay. |
-| `scripts/verify-prompt-a-left-untouched.ts`, `scripts/verify-needs-you-vs-left-untouched.ts` | Content locks for both behaviours. The main byte-freeze against `origin/main` for `run.ts`, `source-coverage.ts`, and the whole of `dispatch.ts` does not apply here: semantic-seam repairs already changed those files. `apply-approved.ts` and `expected-target.ts` still match `origin/main`. |
+| `scripts/verify-prompt-a-left-untouched.ts`, `scripts/verify-needs-you-vs-left-untouched.ts` | Content locks for both behaviours. The main byte-freeze against `origin/main` for `run.ts`, `source-coverage.ts`, and the whole of `dispatch.ts` does not apply here: semantic-seam repairs already changed those files. `apply-approved.ts` still matches `origin/main`. `expected-target.ts` keeps a same-review co-owner share applicable while every reviewed owner is still present, and still refuses a replace whose owner set changed. |
 
 That reconciliation did not change persistence semantics, schema, or Apply policy. Review convergence landed afterwards. See §3.3.
 

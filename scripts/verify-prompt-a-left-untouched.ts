@@ -45,9 +45,9 @@ const ROOT = process.cwd();
 const UNCHANGED_VS_MAIN = [
   // Semantic-seam repairs already changed capture-v2/run.ts and
   // source-coverage.ts on this branch. Content assertions below lock those.
-  // These Apply files still match main.
+  // expected-target.ts allows a same-review co-owner share; that rule is
+  // locked below. apply-approved.ts still matches main.
   "src/lib/capture/apply/apply-approved.ts",
-  "src/lib/capture/apply/expected-target.ts",
 ];
 
 function gitDiffAgainstMain(rel: string): string {
@@ -155,6 +155,14 @@ function main() {
     assert.match(dispatch, /asString\(values\.roleHint\)/);
     assert.match(dispatch, /statedField\(asString\(values\.role\), item, text\)/);
     assert.match(dispatch, /unsupportedApplyReason/);
+    const expectedTarget = read("src/lib/capture/apply/expected-target.ts");
+    assert.match(expectedTarget, /if \(expected\.replacePersonId\)/);
+    assert.match(expectedTarget, /changed\(expected\.ownerIds, ownerIds\)/);
+    assert.match(expectedTarget, /reviewedOwnerMissing/);
+    assert.match(
+      expectedTarget,
+      /That ownership target changed since Review\. Capture again before applying\./,
+    );
   });
 
   check("model-emitted left_untouched stays Review-only and never Ready", () => {
